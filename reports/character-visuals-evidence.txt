@@ -1,0 +1,98 @@
+==================================================================
+W-character-visuals -- captured output
+Everything below was produced by the commands shown, in this order.
+==================================================================
+
+### 1. ./run_tests.sh
+PASS  rng            1325 checks
+PASS  determinism    15 checks
+PASS  terrain        32 checks
+PASS  streaming      4695 checks
+PASS  biomes         212 checks
+PASS  water          6358 checks
+PASS  islands        103672 checks
+PASS  island cover   4907 checks
+PASS  settlements    11644 checks
+PASS  scatter        295 checks
+PASS  combat board   22343 checks
+PASS  layering       12 checks
+PASS  asset tags     1330 checks
+PASS  characters     1295 checks
+PASS  window glow    12188 checks
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+all 20 suites passed (171509 checks)
+
+### 2. ./run_tests.sh --layers-only
+layer check: OK -- res://sim references nothing in the render layer
+asset check: OK -- res://sim names asset tags and no asset
+
+### 3. ./run_headless.sh --assets   (fingerprint + resource cache)
+tick 100 chunks=41 islands=11 villages=1 roads=3 props=775 cover=54 biome=deep_forest water=243 on_island=0 on_path=0.00 a6aa8e5776ebfe8c
+done ticks=100 chunks=41 built=69 final=a6aa8e5776ebfe8c
+assets visual-files found=3338 loaded=0
+assets render-scripts found=11 loaded=0
+assets sim-scripts found=31 loaded=31 -> res://sim/water_sheet_builder.gd,res://sim/water_field.gd,res://sim/path_network.gd,res://sim/terrain_chunk_geometry.gd,+27 more
+
+### 4. ./run_assets.sh   (the two new categories)
+[characters]
+  barbarian        scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Barbarian.glb rig Rig_Medium
+  knight           scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb rig Rig_Medium
+  mage             scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb rig Rig_Medium
+  ranger           scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb rig Rig_Medium
+  rogue            scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb rig Rig_Medium
+  hooded_rogue     scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue_Hooded.glb rig Rig_Medium
+
+[creatures]
+  minion_toadstool scene res://assets/kaykit_board_game_bits/KayKit_BoardGameBits_1.0_FREE/Assets/gltf/pawn_A_blue.gltf
+  minion_cat       scene res://assets/kaykit_board_game_bits/KayKit_BoardGameBits_1.0_FREE/Assets/gltf/pawn_B_blue.gltf
+  minion_ent       scene res://assets/kaykit_board_game_bits/KayKit_BoardGameBits_1.0_FREE/Assets/gltf/building_blue.gltf
+  minion_frog      scene res://assets/kaykit_board_game_bits/KayKit_BoardGameBits_1.0_FREE/Assets/gltf/meeple_blue.gltf
+  skeleton_warrior scene res://assets/kaykit_skeletons/KayKit_Skeletons_1.1_FREE/characters/gltf/Skeleton_Warrior.glb rig Rig_Medium
+  skeleton_rogue   scene res://assets/kaykit_skeletons/KayKit_Skeletons_1.1_FREE/characters/gltf/Skeleton_Rogue.glb rig Rig_Medium
+  skeleton_mage    scene res://assets/kaykit_skeletons/KayKit_Skeletons_1.1_FREE/characters/gltf/Skeleton_Mage.glb rig Rig_Medium
+  skeleton_minion  scene res://assets/kaykit_skeletons/KayKit_Skeletons_1.1_FREE/characters/gltf/Skeleton_Minion.glb rig Rig_Medium
+
+tags=58 resolved=58 missing=0 unknown-rows=0 dropped-tints=0
+
+### 5. ./tools/measure_motion.sh --seed 1234 --ticks 4000
+motion seed=1234 ticks=4000 speed<=0.900 rise=[-1.595,+1.686] hop>=0.60
+  Idle_A                1    0.0%
+  Walking_A          3993   99.8%
+  Running_A             0    0.0%
+  Jump_Full_Short       7    0.2%
+  Hit_A                 0    0.0%
+  Death_A               0    0.0%
+
+### 6. the same, at a second seed
+motion seed=7 ticks=4000 speed<=0.900 rise=[-0.830,+1.356] hop>=0.60
+  Idle_A                1    0.0%
+  Walking_A          3988   99.7%
+  Running_A             0    0.0%
+  Jump_Full_Short      12    0.3%
+  Hit_A                 0    0.0%
+  Death_A               0    0.0%
+
+### 7. the clip test demonstrated to fail
+clip_for() was edited to stop reading the state's speed and always answer
+"standing still"; ./run_tests.sh was re-run; the edit was then reverted.
+
+FAIL  characters     1295 checks, 507 failed
+        - an observer walking at 0.90 units a tick should be walking
+      expected: Walking_A
+      actual:   Idle_A
+        - the real rule disagreed with itself on the walking snapshot
+      expected: Walking_A
+      actual:   Idle_A
+        - a character walking should play Walking_A
+      expected: Walking_A
+      actual:   Idle_A
+        - a character running should play Running_A
+      expected: Running_A
+      actual:   Idle_A
+        ... 503 more, all of the same shape.
+
+The full run reported: 1 of 20 suites failed (507 failed checks of 171509).

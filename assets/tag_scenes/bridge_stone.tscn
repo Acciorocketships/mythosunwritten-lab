@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/kaykit_medieval_hexagon/KayKit_Medieval_Hexagon_Pack_1.0_FREE/Assets/gltf/buildings/neutral/building_bridge_A.gltf" id="1_model"]
+
+[node name="bridge_stone" type="Node3D"]
+
+[node name="model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(4.678, 0, 0, 0, 4.678, 0, 0, 0, 4.678, 0, 0, 0)

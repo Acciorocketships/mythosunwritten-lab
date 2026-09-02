@@ -1,0 +1,13 @@
+--- run 1 ---
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+--- run 2 (separate process) ---
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+--- seed 7 twice ---
+done ticks=100 chunks=39 built=66 final=c8dbaa726e4d09b3
+done ticks=100 chunks=39 built=66 final=c8dbaa726e4d09b3
+--- assets loaded by a headless run ---
+assets visual-files found=3338 loaded=0
+assets render-scripts found=13 loaded=0
+assets sim-scripts found=53 loaded=51 -> res://sim/water_sheet_builder.gd,res://sim/water_field.gd,res://sim/path_network.gd,res://sim/combat_snap.gd,+47 more
+--- uplift neutralised (uplift_at returns 0.0) ---
+done ticks=100 chunks=41 built=69 final=dcb993567a2874b0

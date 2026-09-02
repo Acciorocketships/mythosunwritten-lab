@@ -1,0 +1,47 @@
+# Godot's import cache and per-project scratch. Regenerated on first run.
+.godot/
+*.import
+
+# Editor scratch
+.cursor/
+
+# Python's own scratch, written beside tools/fbx_texture_map.py when another
+# script imports it as a module.
+__pycache__/
+
+# The third-party asset packs themselves. 111 MB of CC0 models across eight
+# KayKit packs, fetched rather than committed: ./tools/fetch_kaykit.sh pulls
+# exactly these files from itch.io with no account and no sign-in, so carrying
+# them in every clone forever buys nothing. The project's own files under
+# assets/ -- the per-tag wrapper scenes in assets/tag_scenes/ and the example
+# model -- are committed, because those are the part the table points at that
+# nobody else can reproduce. README, "Where the art comes from".
+/assets/kaykit_*/
+
+# The user's own purchased archives, and what gets unpacked out of them. These
+# are not fetchable by any script -- they are files the user bought and dropped
+# into assets/ -- so they stay exactly where they were put and out of git, which
+# is neither a place to store 294 MB of binaries nor a place to redistribute
+# paid art. tools/extract_justcreate.sh and tools/extract_mistage.sh unpack the
+# three this project draws from, reproducibly, from the archives beside them, and
+# tools/bake_mistage.sh writes assets/mistage_baked/ out of two of them -- which
+# is derived from the same paid art and just as reproducible.
+/assets/*.rar
+/assets/*.zip
+/assets/justcreate_village/
+/assets/mistage_village/
+/assets/mistage_market/
+/assets/mistage_baked/
+
+# The Sprout Lands UI pack, and what tools/extract_sprout_lands.sh unpacks out of
+# it. Same rule as the three above and one reason more: this pack's licence is
+# stricter than paid art's usual terms -- "You can not redistribute or resale,
+# even if modified" -- so neither the zip nor the unpacked copy nor any file
+# derived from one may be committed here, and there is deliberately no fetch
+# script for it the way there is for the CC0 KayKit packs. README, "Where the art
+# comes from".
+/assets/sprout_lands_ui/
+
+# Windows "downloaded from the internet" marks, written by WSL next to every
+# file the user copied across. Not ours and not content.
+*:Zone.Identifier

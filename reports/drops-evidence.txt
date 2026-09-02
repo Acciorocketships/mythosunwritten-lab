@@ -1,0 +1,95 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+# the distribution over 1200 rolls of each kind, at source level 8
+## rarity mix, over all 2400 rolls
+tier         rolled   share   intended    P at L=8
+common         1213   50.54%   50.00%          32
+uncommon        584   24.33%   25.00%          48
+rare            313   13.04%   13.00%          72
+legendary       174    7.25%    7.00%         112
+mythic           97    4.04%    4.00%         168
+eternal          19    0.79%    1.00%         256
+
+## mean budget and where it is spent
+rolls        n     mean P   mean mov   mean def   mean eff    mov%    def%    eff%
+worn          1200   54.000     23.047     22.523      8.431   42.68   41.71   15.61
+held          1200   54.360      7.295      8.002     39.063   13.42   14.72   71.86
+both          2400   54.180     15.171     15.262     23.747   28.00   28.17   43.83
+exact: 2400 of 2400 rolls spend their budget to the point
+
+# the per-item drop rate, over 2000 kills carrying 5 items each
+intended 0.2000   realised 0.2000   difference +0.0000   (2000 of 10000 rolls fell)
+wide sample, one fixed carry over 40000 further kills:
+intended 0.2000   realised 0.20052   difference +0.00052   (40104 of 200000 rolls fell)
+
+## by place in what was carried
+place    rolls   fell   rate
+    0     2000    403 0.2015
+    1     2000    398 0.1990
+    2     2000    402 0.2010
+    3     2000    389 0.1945
+    4     2000    408 0.2040
+
+## how many items one kill leaves
+dropped   kills    share   binomial(5, 0.20)
+      0     638   0.3190             0.3277
+      1     845   0.4225             0.4096
+      2     403   0.2015             0.2048
+      3     107   0.0535             0.0512
+      4       7   0.0035             0.0064
+      5       0   0.0000             0.0003
+
+# one kill: goblin-42, 128 from spawn, ring 2, level 3
+## what it carried, and the stream each verdict was drawn from
+  #  fell  roll  stream                          item
+  0   yes    19  drop:goblin-42#0:common staff  common weapon hand L3 P=12 mov=0 def=1 eff=11 dex [blink:11] common staff
+  1    no    84  drop:goblin-42#1:uncommon legg uncommon armour leggings L3 P=18 mov=0 def=13 eff=5 int [blink:3|homing:2] uncommon leggings
+  2    no    70  drop:goblin-42#2:common boots  common armour boots L3 P=12 mov=2 def=10 eff=0 dex [] common boots
+  3    no    63  drop:goblin-42#3:common boots  common armour boots L3 P=12 mov=6 def=3 eff=3 int [warding:3] common boots
+  4    no    95  drop:goblin-42#4:mythic boots  mythic armour boots L3 P=63 mov=26 def=26 eff=11 con [shock:9|splitting:2] mythic boots
+
+## what it left on the ground
+goblin-42: 1 of 5 dropped [common weapon hand L3 P=12 mov=0 def=1 eff=11 dex [blink:11] common staff]
+
+# the frontier: what a ring can hand you against the ring beyond it
+# ground for 400 kills a ring, 5 items a kill
+      d  ring   L(d)  ceiling  ground best  ground mean   next L  next ceiling  next ground best  ahead
+      0     0      1       32           32        6.782        2            64                64    yes
+     64     1      2       64           64       13.800        3            96                96    yes
+    128     2      3       96           96       20.398        4           128               128    yes
+    256     4      5      160          160       34.195        6           192               192    yes
+    512     8      9      288          288       60.898       10           320               320    yes
+   1024    16     17      544          544      114.588       18           576               576    yes
+rings where the grind stayed under its own ceiling, that ceiling stayed under the next, and the ring beyond was carrying more: 6 of 6
+
+## grinding saturates: best budget found after N kills at ring 2, against ring 3
+  kills   best budget   own ceiling   next ceiling
+      1            42            96            128
+     10            42            96            128
+    100            96            96            128
+   1000            96            96            128
+   2000            96            96            128
+
+# what rarity buys: the chance one item from ring d beats one from ring d+k
+# exact, from the tier weights and the two levels -- no sampling
+ring d  L(d)    k=1     k=2     k=4     k=8
+     0     1 0.1622 0.0738 0.0275 0.0000
+     1     2 0.1717 0.1622 0.0738 0.0275
+     2     3 0.3320 0.1622 0.0738 0.0275
+     4     5 0.3320 0.3320 0.1622 0.0738
+     8     9 0.3320 0.3320 0.3320 0.1622
+    16    17 0.3320 0.3320 0.3320 0.3320
+
+# the item stream against the world-generation stream
+streams the item layer opens:  item:<source>   drop:<kill>#<index>:<item>
+each is forked from the world seed into a fresh generator and dropped after the roll; nothing is held between calls
+
+fresh world digest:                  b963fd807b8c432d
+same digest on the second world:     yes
+after 5000 item rolls (975 fell):        b963fd807b8c432d
+unchanged by the rolls:              yes
+
+after 50 ticks, world with no rolls:  eb2d8c9369212120
+after 50 ticks, world with rolls:     eb2d8c9369212120
+the two worlds agree:                yes
+

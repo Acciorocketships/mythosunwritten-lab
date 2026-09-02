@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== reviewer re-derivation, seed 1234 ===
+limits read off the code: HOP_HEIGHT=3.0000 DROP_REACH=2.0000 lattice=3.0000
+CombatBoard.STEP_UP=3.0000 STEP_DOWN=2.0000 CLIFF_DROP=2.0000
+PathNetwork.ROUTE_GRADE_LIMIT=1.0000  SettlementField.PAD_RELIEF_LIMIT=5.6000
+MountainField: period=600.0 amp=44.0 octaves=4 range_period=1500.0
+render/distant_ground.gd cached before this process touches it: true
+
+--- roads: how often the new choice of line changes a road ---
+  seed 1234: 120 roads, 0 whose easy line climbs something too steep, 0 that a detour improved (worst gain 0.00)
+  seed 7: 120 roads, 1 whose easy line climbs something too steep, 1 that a detour improved (worst gain 0.09)
+  seed 3: 113 roads, 0 whose easy line climbs something too steep, 0 that a detour improved (worst gain 0.00)
+  seed 19: 116 roads, 0 whose easy line climbs something too steep, 0 that a detour improved (worst gain 0.00)
+  seed 42: 100 roads, 0 whose easy line climbs something too steep, 0 that a detour improved (worst gain 0.00)
+  seed 101: 117 roads, 1 whose easy line climbs something too steep, 1 that a detour improved (worst gain 0.05)

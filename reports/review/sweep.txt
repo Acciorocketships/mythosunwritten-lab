@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== reviewer re-derivation, seed 1234 ===
+limits read off the code: HOP_HEIGHT=3.0000 DROP_REACH=2.0000 lattice=3.0000
+CombatBoard.STEP_UP=3.0000 STEP_DOWN=2.0000 CLIFF_DROP=2.0000
+PathNetwork.ROUTE_GRADE_LIMIT=1.0000  SettlementField.PAD_RELIEF_LIMIT=5.6000
+MountainField: period=600.0 amp=44.0 octaves=4 range_period=1500.0
+render/distant_ground.gd cached before this process touches it: true
+
+--- sweep: the highest ground of squares nobody has looked at ---
+seed 1234, square at (5000, 5000): highest ground 84.16 at (4616.0, 5576.0)
+  ROUTE to (4613.0, 5576.0) at 84.56: 80 steps from (4613.0, 5336.0) at 1.00
+    worst rise 2.3434 of 3.00 allowed; worst fall 0.0000 of 2.00 allowed; climbed 93.49 from the lowest rim cell at -8.94
+    re-check: every step inside the limits
+    straight cardinal walks from the rim that work: 1 of 4
+    face: 4590 of 100184 steps refused (4.6%), 0 of 25331 standable cells cut off (0.0%)
+seed 1234, square at (-9000, 2000): highest ground 53.13 at (-8688.0, 1592.0)
+  ROUTE to (-8688.0, 1595.0) at 53.15: 79 steps from (-8688.0, 1832.0) at 0.36
+    worst rise 1.8252 of 3.00 allowed; worst fall 0.6533 of 2.00 allowed; climbed 61.34 from the lowest rim cell at -8.19
+    re-check: every step inside the limits
+    straight cardinal walks from the rim that work: 4 of 4
+    face: 884 of 101594 steps refused (0.9%), 0 of 25599 standable cells cut off (0.0%)
+seed 1234, square at (12000, -12000): highest ground 16.67 at (11400.0, -12432.0)
+  no mountain in this square -- nothing to climb
+seed 7, square at (0, 0): highest ground 13.75 at (-576.0, 312.0)
+  no mountain in this square -- nothing to climb
+seed 7, square at (4000, 1000): highest ground 57.86 at (3400.0, 1600.0)
+  ROUTE to (3424.0, 1840.0) at 69.98: 0 steps from (3424.0, 1840.0) at 69.98
+    worst rise 0.0000 of 3.00 allowed; worst fall 0.0000 of 2.00 allowed; climbed 77.81 from the lowest rim cell at -7.83
+    re-check: every step inside the limits
+    straight cardinal walks from the rim that work: 3 of 4
+    face: 2431 of 102024 steps refused (2.4%), 0 of 25713 standable cells cut off (0.0%)
+seed 101, square at (-2500, -2500): highest ground 19.56 at (-2884.0, -3076.0)
+  no mountain in this square -- nothing to climb

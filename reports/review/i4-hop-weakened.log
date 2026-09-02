@@ -1,0 +1,97 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS  rng            1325 checks
+PASS  determinism    15 checks
+PASS  terrain        32 checks
+PASS  streaming      4695 checks
+PASS  terrain_lod    59 checks
+FAIL  mountains      3030 checks, 1 failed
+        - the routing's grade limit (1.0000) is no longer the step up over one cell
+PASS  biomes         212 checks
+PASS  water          6358 checks
+        islands: candidate bound ruled out 515 of 968 asks, 213 had an island
+        islands: cell gate matched the ungated scan on 10800 asks, 1958 with an island, building 317 cells against 1984
+PASS  islands        105292 checks
+        island cover: 11 overlapping storey pairs, 33 things in the laps, 0 coincidences
+        island cover: 4509 placements over 4 seeds -- 0 hovering, 0 past the lip, 0 in water, 0 on a face
+        island cover: 194 islands over 4 seeds -- 58 with a basin, 58 overflowing, 58 dipping below their own rim, 0 boundary samples below it
+PASS  island cover   4922 checks
+        settlements: 20 of 110 villages (18.2%) sited by the shore rule over 8 seeds
+        settlements: 36 wide upper storeys swept, 4 spots the old padded rule let through
+PASS  settlements    19830 checks
+PASS  scatter        295 checks
+PASS  combat board   25504 checks
+FAIL  combat pieces  352 checks, 11 failed
+        - the fixture's wall of earth must be higher than a piece can climb
+        - a climb higher than the board's reach is not a legal step
+        - a Cat rides its diagonals: stopped by the building north-west, by the hole north-east and by the unclimbable face south-west, and running to the board's corner south-east across the step at (8,8)
+      expected: (5,5) (7,5) (5,7) (7,7) (8,8) (9,9) (10,10) (11,11) (12,12)
+      actual:   (5,5) (7,5) (5,7) (7,7) (4,8) (8,8) (9,9) (10,10) (11,11) (12,12)
+        - a Cat's ride ends before an enemy, not on it
+      expected: (5,5) (7,5) (5,7) (7,7) (8,8)
+      actual:   (5,5) (7,5) (5,7) (7,7) (4,8) (8,8)
+        - an Ent rides its cardinals: one cell north to the building, one south to the face it cannot climb, and out to both edges east and west
+      expected: (4,5) (0,6) (1,6) (2,6) (3,6) (5,6) (6,6) (7,6) (8,6) (9,6) (10,6) (11,6) (12,6) (4,7)
+      actual:   (4,5) (0,6) (1,6) (2,6) (3,6) (5,6) (6,6) (7,6) (8,6) (9,6) (10,6) (11,6) (12,6) (4,7) (4,8)
+        - a Toadstool against the wall of earth walks the other three ways and not up it
+      expected: (4,6) (3,7) (5,7)
+      actual:   (4,6) (3,7) (5,7) (4,8)
+        - a Frog reaches seven of its eight L-hops from (6,7): the eighth lands on top of the wall of earth, which it cannot climb even by leaping
+      expected: (5,5) (7,5) (4,6) (8,6) (8,8) (5,9) (7,9)
+      actual:   (5,5) (7,5) (4,6) (8,6) (4,8) (8,8) (5,9) (7,9)
+        - no grant a commander wears reaches ground it cannot climb
+      both values were: (4, 8)
+        - a high-tier chestplate is a queen of two cells, stopped by the building, the hole and the face it cannot climb
+      expected: (6,4) (5,5) (6,5) (7,5) (4,6) (5,6) (7,6) (8,6) (5,7) (6,7) (7,7) (6,8) (8,8)
+      actual:   (6,4) (5,5) (6,5) (7,5) (4,6) (5,6) (7,6) (8,6) (5,7) (6,7) (7,7) (4,8) (6,8) (8,8)
+        - boots, leggings and a high-tier chestplate union into a twenty-one cell piece
+      expected: (5,4) (6,4) (7,4) (4,5) (5,5) (6,5) (7,5) (8,5) (4,6) (5,6) (7,6) (8,6) (4,7) (5,7) (6,7) (7,7) (8,7) (5,8) (6,8) (7,8) (8,8)
+      actual:   (5,4) (6,4) (7,4) (4,5) (5,5) (6,5) (7,5) (8,5) (4,6) (5,6) (7,6) (8,6) (4,7) (5,7) (6,7) (7,7) (8,7) (4,8) (5,8) (6,8) (7,8) (8,8)
+        - the fullest loadout reaches twenty-one cells
+      expected: 21
+      actual:   22
+PASS  combat resolution 314 checks
+PASS  combat snap    858 checks
+PASS  layering       24 checks
+PASS  asset tags     1330 checks
+ERROR: String formatting error: not all arguments converted during string formatting.
+   at: validated_evaluate (core/variant/variant_op.h:770)
+   GDScript backtrace (most recent call first):
+       [0] _the_minions_are_named_as_uncovered (res://tests/test_characters.gd:499)
+       [1] run (res://tests/test_characters.gd:60)
+       [2] _initialize (res://bin/test_main.gd:43)
+ERROR: String formatting error: not all arguments converted during string formatting.
+   at: validated_evaluate (core/variant/variant_op.h:770)
+   GDScript backtrace (most recent call first):
+       [0] _the_minions_are_named_as_uncovered (res://tests/test_characters.gd:499)
+       [1] run (res://tests/test_characters.gd:60)
+       [2] _initialize (res://bin/test_main.gd:43)
+ERROR: String formatting error: not all arguments converted during string formatting.
+   at: validated_evaluate (core/variant/variant_op.h:770)
+   GDScript backtrace (most recent call first):
+       [0] _the_minions_are_named_as_uncovered (res://tests/test_characters.gd:499)
+       [1] run (res://tests/test_characters.gd:60)
+       [2] _initialize (res://bin/test_main.gd:43)
+ERROR: String formatting error: not all arguments converted during string formatting.
+   at: validated_evaluate (core/variant/variant_op.h:770)
+   GDScript backtrace (most recent call first):
+       [0] _the_minions_are_named_as_uncovered (res://tests/test_characters.gd:499)
+       [1] run (res://tests/test_characters.gd:60)
+       [2] _initialize (res://bin/test_main.gd:43)
+PASS  characters     1295 checks
+        window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
+        window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
+PASS  window glow    11225 checks
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+
+2 of 25 suites failed (12 failed checks of 188153)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+asset check: OK -- res://sim names asset tags and no asset

@@ -1,0 +1,23 @@
+rule broken                                      file                     the suite
+------------------------------------------------ ------------------------ ---------
+a slide is not stopped by a piece                sim/legal_moves.gd       failed, as it must
+a slide ignores the climb limit                  sim/legal_moves.gd       failed, as it must
+a landing ignores the climb limit                sim/legal_moves.gd       failed, as it must
+a landing is ridden to, not arrived on           sim/legal_moves.gd       failed, as it must
+a piece may take its own side                    sim/legal_moves.gd       failed, as it must
+the Toadstool captures the way it moves          sim/minion.gd            failed, as it must
+the Cat rides cardinally                         sim/minion.gd            failed, as it must
+the Ent rides diagonally                         sim/minion.gd            failed, as it must
+the Frog's L is one cell shorter                 sim/minion.gd            failed, as it must
+a commander's base step is more than one cell    sim/commander.gd         failed, as it must
+an attack does not turn with its wielder         sim/attack.gd            failed, as it must
+turning spends the attack it was aimed with      sim/commander.gd         failed, as it must
+a cooldown is not counted                        sim/commander.gd         failed, as it must
+a chestplate grants a slide it did not pay for   sim/armour.gd            failed, as it must
+leggings grant the hop they did not pay for      sim/armour.gd            failed, as it must
+a chestplate is unbounded                        sim/armour.gd            failed, as it must
+a grant costs one point however far it reaches   sim/armour.gd            failed, as it must
+a commander's death spares its minions           sim/piece_map.gd         failed, as it must
+a pattern is not put in one order                sim/piece_geometry.gd    failed, as it must
+
+all 19 broken rules were caught

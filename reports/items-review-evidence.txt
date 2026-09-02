@@ -1,0 +1,167 @@
+# Items-milestone review: deliberate attempts to break each structural guarantee
+#
+# Produced by tools/critic_items_probe.gd, run headless by the review at cycle 98.
+# HELD = the attempt failed to break anything. BROKE = it did.
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+=== A. every ability lives on an item
+  [HELD] A1 source scan for spell/skill/passive/learn/talent/perk in sim/ code -- 0 hits
+  [HELD] A2 a level-8 commander wearing and holding nothing -- defence=0 damage=0 grants=1 (base cardinal step only)
+  [BROKE] A3 a bare catalogue Weapon wielded with no Item behind it -- cut/cleave = 10/16 with no item, 3/5 on a common item forged at the same level 2 (budget 8); the bare shape is worth 26 points of effects axis, which a common item needs level 7 to buy
+  [BROKE] A4 wield() calls under sim/ that hand over a shape with no Item -- 6 of them
+      res://sim/commander.gd:236 func wield(held: Weapon) -> void:
+      res://sim/scripted_encounter.gd:101 (green.piece as Commander).wield(Weapon.sword())
+      res://sim/scripted_encounter.gd:110 (amber.piece as Commander).wield(Weapon.spear())
+      res://sim/scripted_encounter.gd:119 (distant.piece as Commander).wield(Weapon.dagger())
+      res://sim/scripted_encounter.gd:154 (green.piece as Commander).wield(Weapon.sword())
+      res://sim/scripted_encounter.gd:161 (amber.piece as Commander).wield(Weapon.spear())
+  [BROKE] A5 the same bare shape read by a commander with every score at 0 -- cut = 10 (an item-backed sword at score 0 reads 0)
+
+=== B. one budget, and it is spent exactly
+  [HELD] B1 20000 forged items, budget minus what they carry -- 0 off by anything, worst |gap| = 0
+  [HELD] B2 all weights negative -- budget 126, carries 126 (mov 126 def 0 eff 0), gap 0
+  [HELD] B2 all weights zero -- budget 126, carries 126 (mov 126 def 0 eff 0), gap 0
+  [HELD] B2 one enormous weight -- budget 126, carries 126 (mov 0 def 0 eff 126), gap 0
+  [HELD] B2 five effect names, no weights -- budget 126, carries 126 (mov 42 def 42 eff 42), gap 0
+  [BROKE] B2 the whole budget to effects, no effect names -- budget 126, carries 0 (mov 0 def 0 eff 0), gap 126
+  [BROKE] B2 most of the budget to effects, no effect names -- budget 126, carries 25 (mov 13 def 12 eff 0), gap 101
+  [note] B3 who calls the Item constructors at all -- res://sim/armour.gd Item.armour(, res://sim/item_forge.gd Item.weapon(, res://sim/item_forge.gd Item.armour(, res://sim/weapon.gd Item.weapon(
+  [HELD] B4 Armour.worn spending 100000 on moving out of 126 -- budget 126, carries 126 (mov 126 def 0 eff 0)
+  [HELD] B4 Armour.worn spending -50 on moving -- budget 126, carries 126 (mov 16 def 110 eff 0)
+  [HELD] B4 Weapon.held spending 100000 on each of moving and defending -- budget 45, carries 45 (mov 45 def 0 eff 0)
+  [HELD] B5 a rarity that is not one of the six -- budget 0, carries 0
+  [HELD] B5 a negative source level -- budget 0, carries 0, stored level 0
+  [BROKE] B6 writing to Item.movement after construction -- spends_budget() went true -> false, so the exactness is an invariant of the constructors and not of the class
+
+=== C. item randomness cannot reach world generation
+  [HELD] C1 351 item rolls in an uneven pattern between 24 world ticks -- quiet 0d0b3dddb7ee17d7 / noisy 0d0b3dddb7ee17d7
+  [HELD] C2 the same item forged before and after 200 world steps -- uncommon armour boots L7 P=42 mov=24 def=17 eff=1 str [frost:1] uncommon boots
+  [HELD] C3 control: one more step does move the fingerprint -- 0d0b3dddb7ee17d7 -> 20db3fec2461380d
+  [HELD] C4 world-generation files that name an item class -- 0
+  [note] C5 every .fork() call under sim/:
+      res://sim/item_drop.gd:63 var draw := SimRng.new(world_seed).fork(stream_label(kill, index, item))
+      res://sim/item_forge.gd:76 var draw := SimRng.new(world_seed).fork("item:%s" % source)
+      res://sim/world.gd:167 var placement := root.fork("observer-placement")
+      res://sim/world.gd:168 _motion_rng = root.fork("observer-motion")
+
+=== D. the minion-versus-minion layer is deterministic
+  [HELD] D1 the same capture over 1000 level/health combinations -- 1 distinct outcomes: ["capture|(3, 2)|[2]|true"]
+  [HELD] D2 minion_action taking a minion under 500 different fight seeds -- 1 distinct transcript lines: ["capture #1 takes #2 at (4,5)"]
+  [HELD] D3 control: the same minion striking a commander under 500 seeds -- 7 distinct damage values: [40, 42, 43, 39, 44, 41, 45]
+  [HELD] D4 the body of capture() naming a die, a seed or Damage -- 11 lines, names none of swing/fight_seed/Damage
+  [note] D5 every random draw named in the tactical files:
+      res://sim/damage.gd:189 var who := SimRng.hash_ints(fight_seed, attacker.id, target.id)
+      res://sim/damage.gd:190 var where := SimRng.hash_ints(
+      res://sim/damage.gd:193 var what := SimRng.hash_ints(target.cell.y, target.health, power)
+      res://sim/damage.gd:194 var first := _die(SimRng.hash_ints(who, where, what))
+      res://sim/damage.gd:195 var second := _die(SimRng.hash_ints(what, who, where))
+      res://sim/damage.gd:207 var folded := SimRng.hash_ints(world_seed, int(floor(at_x)), int(floor(at_z)))
+      res://sim/damage.gd:215 return ((word & SimRng.MASK) * SWING_FACES) >> 32
+
+=== E. the ability-score gate and the movement-against-defence trade
+  [HELD] E1 a level-8 WIS chestplate read at scores 0..9 -- defence axis 16, read as 0:0 1:2 2:4 3:6 4:8 5:10 6:12 7:14 8:16 9:16
+  [HELD] E2 a level-4 pair of boots (4 points of movement) read at scores 0..4 -- grant by score: 0:none 1:none 2:none 3:none 4:land
+  [HELD] E3 a commander in boots and leggings, cells reachable by DEX -- DEX 0: 4 cells | DEX 2: 4 cells | DEX 4: 8 cells | DEX 6: 8 cells | DEX 8: 16 cells
+  [HELD] E4 movement against defence at one budget (32), over 292 of 600 forged items -- r = -0.9449 (a fresh seed and a fresh sample, computed here)
+  [HELD] E5 control: the same correlation without the equal-budget filter -- r = 0.0410
+  [HELD] E6 grinding a ring against its own ceiling -- 
+      ring 0: 4000 kills, best 32, own ceiling 32, next ring's 64
+      ring 1: 4000 kills, best 64, own ceiling 64, next ring's 96
+      ring 2: 4000 kills, best 96, own ceiling 96, next ring's 128
+      ring 4: 4000 kills, best 160, own ceiling 160, next ring's 192
+
+# --- the two mutation harnesses, run sequentially with nothing else against the repo ---
+
+rule broken                                      file                     the suite
+------------------------------------------------ ------------------------ ---------
+a slide is not stopped by a piece                sim/legal_moves.gd       failed, as it must
+a slide ignores the climb limit                  sim/legal_moves.gd       failed, as it must
+a landing ignores the climb limit                sim/legal_moves.gd       failed, as it must
+a landing is ridden to, not arrived on           sim/legal_moves.gd       failed, as it must
+a piece may take its own side                    sim/legal_moves.gd       failed, as it must
+the Toadstool captures the way it moves          sim/minion.gd            failed, as it must
+the Cat rides cardinally                         sim/minion.gd            failed, as it must
+the Ent rides diagonally                         sim/minion.gd            failed, as it must
+the Frog's L is one cell shorter                 sim/minion.gd            failed, as it must
+a commander's base step is more than one cell    sim/commander.gd         failed, as it must
+an attack does not turn with its wielder         sim/attack.gd            failed, as it must
+turning spends the attack it was aimed with      sim/commander.gd         failed, as it must
+a cooldown is not counted                        sim/commander.gd         failed, as it must
+a chestplate grants a slide it did not pay for   sim/armour.gd            failed, as it must
+leggings grant the hop they did not pay for      sim/armour.gd            failed, as it must
+a chestplate is unbounded                        sim/armour.gd            failed, as it must
+a grant costs one point however far it reaches   sim/armour.gd            failed, as it must
+a commander's death spares its minions           sim/piece_map.gd         failed, as it must
+a pattern is not put in one order                sim/piece_geometry.gd    failed, as it must
+
+all 19 broken rules were caught
+PIECE EXIT 0
+
+rule broken                                          file                         the suite
+---------------------------------------------------- ---------------------------- ---------
+the modifier is applied after defence, not before    sim/damage.gd                failed, as it must
+defence does nothing at all                          sim/damage.gd                failed, as it must
+a blow can be reduced to nothing                     sim/damage.gd                failed, as it must
+the die is applied to the result, not to the blow    sim/damage.gd                failed, as it must
+the die rounds a blow down rather than to the nearest point sim/damage.gd                failed, as it must
+a blow that missed its roll deals nothing -- the to-hit model sim/damage.gd                failed, as it must
+the die is wider than the positional ladder can carry sim/damage.gd                failed, as it must
+the die is one die and not two                       sim/damage.gd                failed, as it must
+the die does not read the fight's seed               sim/damage.gd                failed, as it must
+the die does not read what it is being thrown at     sim/damage.gd                failed, as it must
+a fight with no seed rolls anyway                    sim/damage.gd                failed, as it must
+a fight's seed does not depend on where it is        sim/damage.gd                failed, as it must
+one face of the die is favoured by the fold          sim/damage.gd                failed, as it must
+the die reaches the minion capture layer             sim/combat_resolution.gd     failed, as it must
+a transcript hides which die was in play             sim/combat_resolution.gd     failed, as it must
+a fight is played with no die at all                 sim/combat_match.gd          failed, as it must
+high ground and facing add instead of multiplying    sim/damage.gd                failed, as it must
+a backstab is worth no more than a flank             sim/damage.gd                failed, as it must
+high ground is worth nothing                         sim/damage.gd                failed, as it must
+a flank is worth nothing                             sim/damage.gd                failed, as it must
+behind and in front are the same place               sim/damage.gd                failed, as it must
+a target with no facing can still be backstabbed     sim/damage.gd                failed, as it must
+a minion's health does not scale with its level      sim/damage.gd                failed, as it must
+a minion's defence does not scale with its level     sim/damage.gd                failed, as it must
+a minion's blow does not scale with its level        sim/damage.gd                failed, as it must
+a commander's health does not scale with its level   sim/damage.gd                failed, as it must
+a capture costs the taker its health                 sim/combat_resolution.gd     failed, as it must
+a capture is decided by level                        sim/combat_resolution.gd     failed, as it must
+a capturing minion does not take the cell            sim/combat_resolution.gd     failed, as it must
+a minion reaching a commander captures it            sim/combat_resolution.gd     failed, as it must
+a minion takes the commander's cell when it strikes  sim/combat_resolution.gd     failed, as it must
+a shove ignores what is under the cell it pushes into sim/combat_resolution.gd     failed, as it must
+a shove off a cliff is only a step                   sim/combat_resolution.gd     failed, as it must
+a shove pushes towards its attacker                  sim/combat_resolution.gd     failed, as it must
+a shove reads only the cell it lands on              sim/combat_resolution.gd     failed, as it must
+a shove's distance is clamped to one cell            sim/attack.gd                failed, as it must
+a shove's distance is tripled                        sim/attack.gd                failed, as it must
+an attack with no damage still reaches the seam      sim/combat_resolution.gd     failed, as it must
+an attack ignores its own cooldown                   sim/combat_resolution.gd     failed, as it must
+an attack spares the pieces standing in it           sim/combat_resolution.gd     failed, as it must
+a round never advances                               sim/combat_match.gd          failed, as it must
+a turn never passes to the next commander            sim/combat_match.gd          failed, as it must
+a commander may move as often as it likes            sim/combat_match.gd          failed, as it must
+a commander may act as often as it likes             sim/combat_match.gd          failed, as it must
+a commander may march every minion it owns           sim/combat_match.gd          failed, as it must
+a commander may command anybody's minions            sim/combat_match.gd          failed, as it must
+a minion may be sent anywhere on the board           sim/combat_match.gd          failed, as it must
+a cooldown is always measured from the first turn    sim/combat_match.gd          failed, as it must
+the area attack is not a cheap one                   sim/weapon.gd                failed, as it must
+a shove deals damage as well                         sim/weapon.gd                failed, as it must
+a shove pushes nobody                                sim/weapon.gd                failed, as it must
+a point of budget is a point of reduction            sim/armour.gd                failed, as it must
+what is in a commander's hands does not defend it    sim/commander.gd             failed, as it must
+every wearer reads every item in full                sim/commander.gd             failed, as it must
+a weapon deals the catalogue's damage whatever it is worth sim/weapon.gd                failed, as it must
+a weapon with no damage to divide still deals its budget sim/weapon.gd                failed, as it must
+a cooldown is bought down by the point, not by the cell sim/weapon.gd                failed, as it must
+a second file calls the damage seam                  sim/combat_policy.gd         failed, as it must
+a random source reaches the file that plays a turn   sim/combat_policy.gd         failed, as it must
+a second file rolls the die                          sim/combat_policy.gd         failed, as it must
+the die is drawn from a stream rather than hashed from the blow sim/damage.gd                failed, as it must
+
+all 61 broken rules were caught
+RES EXIT 0

@@ -1,0 +1,93 @@
+# Villages and water: the same enumeration, with the shore rule off and on
+
+Seed 1234, a 2200-unit square around the origin (span 1100), produced by
+./tools/measure_shore.sh --seed 1234 --span 1100. 'gap' is how far the
+nearest water is from the pad's rim; 'away' is how far it is from the middle
+of the village, which is the reading reports/atmosphere.md quoted as 46.
+
+## Before: the shore rule disabled (_build_shore returning null at once)
+
+```
+
+shore survey seed=1234 span=1100 (a 2200-unit square)
+village             x          z   radius       gap      away      kind  shore     biome
+s-4,2        -1035.08     519.79    31.11     29.39     60.50   running      0 deep_forest
+s-3,-1        -814.63    -229.32    30.48     27.02     57.50  standing      0 blossom_grove
+s-2,-3        -495.50    -771.99    34.43      6.07     40.50   running      0 deep_forest
+s-2,4         -533.13    1007.81    35.61     11.39     47.00   running      0    meadow
+s-1,-1        -221.77    -229.99    34.29     20.71     55.00   running      0    meadow
+s-1,3         -260.35     729.08    33.61     18.89     52.50  standing      0 blossom_grove
+s0,-4            6.39   -1035.36    31.85     79.15    111.00   running      0  highland
+s0,-3           47.45    -749.94    31.97     48.53     80.50  standing      0 blossom_grove
+s0,-2           10.57    -528.61    32.94     46.06     79.00  standing      0    meadow
+s0,0           -88.77       4.68    31.43     14.57     46.00   running      0 deep_forest
+s0,1           -18.51     269.78    33.89     56.61     90.50  standing      0 blossom_grove
+s0,4           -50.67    1045.23    32.93      none      none      none      0    meadow
+s1,-4          305.20   -1078.76    32.15     11.85     44.00  standing      0 deep_forest
+s1,2           244.09     516.03    32.32     32.68     65.00  standing      0 blossom_grove
+s2,-3          491.16    -718.74    31.96     33.54     65.50  standing      0    meadow
+s3,-4          775.25   -1011.27    35.46     34.54     70.00  standing      0 deep_forest
+s3,0           730.74      17.67    30.74     35.76     66.50   running      0  highland
+s4,-3         1006.68    -776.37    33.68     36.32     70.00   running      0 deep_forest
+
+villages           18
+nearest water, measured from the pad's rim:
+  closest          6.07
+  median           33.54
+  mean             37.95
+  furthest         140.00
+  within   0.0     0 (0.0%)
+  within   2.0     0 (0.0%)
+  within   5.0     0 (0.0%)
+  within  10.0     1 (5.6%)
+  within  20.0     5 (27.8%)
+  within  40.0     13 (72.2%)
+sited by the shore rule  0 (0.0%)
+water touching the pad   0 (0.0%)
+nearest water is standing 9 (50.0%)
+```
+
+## After: the shore rule as shipped
+
+```
+
+shore survey seed=1234 span=1100 (a 2200-unit square)
+village             x          z   radius       gap      away      kind  shore     biome
+s-4,2        -1035.08     519.79    31.11     29.39     60.50   running      0 deep_forest
+s-3,-1        -814.63    -229.32    30.48     27.02     57.50  standing      0 blossom_grove
+s-2,-3        -495.50    -771.99    34.43      6.07     40.50   running      0 deep_forest
+s-2,4         -533.13    1007.81    35.61     11.39     47.00   running      0    meadow
+s-1,-1        -221.77    -229.99    34.29     20.71     55.00   running      0    meadow
+s-1,3         -260.35     729.08    33.61     18.89     52.50  standing      0 blossom_grove
+s0,-4            6.39   -1035.36    31.85     79.15    111.00   running      0  highland
+s0,-3           47.45    -749.94    31.97     48.53     80.50  standing      0 blossom_grove
+s0,-2          -15.78    -467.72    23.06      0.00     21.50  standing      1    meadow
+           shore village: water at (-4.46, -449.44), bearing 58 deg
+s0,0           -88.77       4.68    31.43     14.57     46.00   running      0 deep_forest
+s0,1           -18.51     269.78    33.89     56.61     90.50  standing      0 blossom_grove
+s0,4           -50.67    1045.23    32.93      none      none      none      0    meadow
+s1,-4          305.20   -1078.76    32.15     11.85     44.00  standing      0 deep_forest
+s1,2           199.63     548.02    18.75      1.75     20.50  standing      1 blossom_grove
+           shore village: water at (203.84, 568.08), bearing 78 deg
+s2,-3          491.16    -718.74    31.96     33.54     65.50  standing      0    meadow
+s3,-4          759.08   -1067.64    35.46      0.00     32.00  standing      1 deep_forest
+           shore village: water at (762.56, -1099.45), bearing 276 deg
+s3,0           730.74      17.67    30.74     35.76     66.50   running      0  highland
+s4,-3         1006.68    -776.37    33.68     36.32     70.00   running      0 deep_forest
+
+villages           18
+nearest water, measured from the pad's rim:
+  closest          0.00
+  median           27.02
+  mean             31.75
+  furthest         140.00
+  within   0.0     2 (11.1%)
+  within   2.0     3 (16.7%)
+  within   5.0     3 (16.7%)
+  within  10.0     4 (22.2%)
+  within  20.0     8 (44.4%)
+  within  40.0     14 (77.8%)
+sited by the shore rule  3 (16.7%)
+water touching the pad   2 (11.1%)
+nearest water is standing 9 (50.0%)
+```

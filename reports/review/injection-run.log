@@ -1,0 +1,72 @@
+baseline shas:
+1c4710401691c715c7ee25e272513aa03775b4d70e4c07b2d1b436f5b69a275a  sim/mountain_field.gd
+13e9c1652d2c046e6bddfbc45861285df6f2035b3c7ccd2b413b8d7ed446c3ea  sim/terrain_query.gd
+a50966b421b4aef410079ea6336381f4e0874cae915190e2247ee0bc7b739b52  sim/settlement_field.gd
+9ef98886b4c7ba448472714572ffabd915894a5195fd6f0ab9318ac0dad7d0d5  render/distant_ground.gd
+4a017a0f754dfaf4f09994072e1577a4993502b7812803c02d6e4e05c6621d0a  tests/test_mountains.gd
+
+=== i1-lod-height (render/distant_ground.gd) ===
+exit=1
+FAIL  terrain_lod    59 checks, 2 failed
+1 of 25 suites failed (2 failed checks of 188145)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+restored: 9ef98886b4c7ba448472714572ffabd915894a5195fd6f0ab9318ac0dad7d0d5  render/distant_ground.gd
+
+=== i2-mask-floor (sim/mountain_field.gd) ===
+exit=1
+FAIL  mountains      436 checks, 5 failed
+FAIL  water          6338 checks, 1 failed
+FAIL  atmosphere     156 checks, 1 failed
+3 of 25 suites failed (7 failed checks of 185313)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+restored: 1c4710401691c715c7ee25e272513aa03775b4d70e4c07b2d1b436f5b69a275a  sim/mountain_field.gd
+
+=== i3-rocky-gate-off (sim/mountain_field.gd) ===
+exit=1
+FAIL  mountains      2484 checks, 1 failed
+FAIL  water          6358 checks, 1 failed
+2 of 25 suites failed (2 failed checks of 188594)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=d1963b4433d9b116
+restored: 1c4710401691c715c7ee25e272513aa03775b4d70e4c07b2d1b436f5b69a275a  sim/mountain_field.gd
+
+=== i4-hop-weakened (sim/terrain_query.gd) ===
+exit=1
+FAIL  mountains      3030 checks, 1 failed
+FAIL  combat pieces  352 checks, 11 failed
+2 of 25 suites failed (12 failed checks of 188153)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+restored: 13e9c1652d2c046e6bddfbc45861285df6f2035b3c7ccd2b413b8d7ed446c3ea  sim/terrain_query.gd
+
+=== i5-search-direction (tests/test_mountains.gd) ===
+exit=0
+all 25 suites passed (188145 checks)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=d4e31b0904ff45c0
+restored: 4a017a0f754dfaf4f09994072e1577a4993502b7812803c02d6e4e05c6621d0a  tests/test_mountains.gd
+
+=== i6-pad-limit (sim/settlement_field.gd) ===
+exit=1
+FAIL  terrain_lod    59 checks, 1 failed
+FAIL  settlements    30017 checks, 37 failed
+2 of 25 suites failed (38 failed checks of 205589)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=953fc59ed30e4c47
+restored: a50966b421b4aef410079ea6336381f4e0874cae915190e2247ee0bc7b739b52  sim/settlement_field.gd
+
+=== i7-amplitude (sim/mountain_field.gd) ===
+exit=1
+FAIL  terrain_lod    59 checks, 2 failed
+FAIL  mountains      3030 checks, 2 failed
+FAIL  settlements    19359 checks, 2 failed
+FAIL  scatter        295 checks, 5 failed
+FAIL  combat board   25496 checks, 1 failed
+5 of 25 suites failed (12 failed checks of 189824)
+layers-only exit=0
+done ticks=100 chunks=41 built=69 final=bce5411366a925bc
+restored: 1c4710401691c715c7ee25e272513aa03775b4d70e4c07b2d1b436f5b69a275a  sim/mountain_field.gd
+
+done

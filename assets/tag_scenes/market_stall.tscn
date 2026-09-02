@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/justcreate_village/Props/Market_Table_03.fbx" id="1_table"]
+[ext_resource type="PackedScene" path="res://assets/justcreate_village/Props/Market_Roof_01.fbx" id="2_roof"]
+
+[node name="market_stall" type="Node3D"]
+
+[node name="table" parent="." instance=ExtResource("1_table")]
+transform = Transform3D(1.029, 0, 0, 0, 1.029, 0, 0, 0, 1.029, 0, 0, 0)
+
+[node name="roof" parent="." instance=ExtResource("2_roof")]
+transform = Transform3D(1.029, 0, 0, 0, 1.029, 0, 0, 0, 1.029, 0, 0, 0)

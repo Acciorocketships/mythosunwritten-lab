@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234, observer at -8.0, -16.1, 20 ticks
+38 scatter chunks loaded
+
+                                 tint off      tint on
+instances built                       475          475
+mesh surfaces                         561          561
+unique materials                       20           85
+unique mesh+material pairs            180          226
+build ms total                     44.217       80.905
+build ms per chunk                  1.164        2.129

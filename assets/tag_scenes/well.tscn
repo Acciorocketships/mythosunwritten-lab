@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/justcreate_village/Props/Well.fbx" id="1_model"]
+
+[node name="well" type="Node3D"]
+
+[node name="model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(1.022, 0, 0, 0, 1.022, 0, 0, 0, 1.022, -0.038, 0, 0)

@@ -1,0 +1,186 @@
+Evidence for W-character-inventory (cycle 107).
+Every command below was run from the project root on this machine.
+
+=== ./run_inventory.sh ===
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+one inventory: what a character carries, and what it has on
+  Wren level=8 status=8 hp=68/68 [str - con - cha - dex - wis - int -]
+  inventory: 5 carried, 5 equipped, 50 money
+  carried:
+    * common armour boots L8 P=32 mov=4 def=28 eff=0 dex [] common boots
+    * common armour leggings L8 P=32 mov=8 def=24 eff=0 dex [] common leggings
+    * common armour chestplate L8 P=32 mov=16 def=16 eff=0 con [] common chestplate
+    * common armour helmet L8 P=32 mov=0 def=32 eff=0 con [] common helmet
+    * common weapon hand L8 P=32 mov=0 def=0 eff=32 str [sword:32] common sword
+  equipped, by slot (the starred rows above, and nothing else):
+    boots      common armour boots L8 P=32 mov=4 def=28 eff=0 dex [] common boots
+    leggings   common armour leggings L8 P=32 mov=8 def=24 eff=0 dex [] common leggings
+    chestplate common armour chestplate L8 P=32 mov=16 def=16 eff=0 con [] common chestplate
+    helmet     common armour helmet L8 P=32 mov=0 def=32 eff=0 con [] common helmet
+    hand       common weapon hand L8 P=32 mov=0 def=0 eff=32 str [sword:32] common sword
+  every equipped thing is carried: yes, all 5 of them
+  a legendary helmet nobody handed over: carried no, equipping it refused
+  and the helmet slot still holds: common armour helmet L8 P=32 mov=0 def=32 eff=0 con [] common helmet
+
+equipping and unequipping, read through the item budget and the gate
+  a level-8 suit and sword, put on one piece at a time
+  worn                     def  grants  move-cells  attacks  cut  cleave
+  nothing                    0       1           4        0    0       0
+  + boots                    1       2           8        0    0       0
+  + leggings                 3       3          16        0    0       0
+  + chestplate               4       4          24        0    0       0
+  + helmet                   6       4          24        0    0       0
+  + sword                    6       4          24        2   12      20
+  and back off again, one piece at a time -- the numbers return:
+  - sword                    6       4          24        0    0       0
+  - helmet                   4       4          24        0    0       0
+  - chestplate               3       3          16        0    0       0
+  - leggings                 1       2           8        0    0       0
+  - boots                    0       1           4        0    0       0
+  it still carries all five: 5 things, 0 equipped
+  everything put back on, and read by wearers of five ability scores:
+  score  def  cut  cleave  move-cells
+      8    6   12      20          24
+      6    4    9      15           8
+      4    3    6      10           8
+      2    1    3       5           4
+      0    0    0       0           4
+
+picking something up off the ground, and dropping it back
+  the ground: 1 carried, 0 equipped, 0 money
+    rare armour boots L8 P=72 mov=4 def=68 eff=0 dex [] rare boots
+  Wren takes them:      moved -- ground 0 carried, 0 equipped, 0 money, Wren 6 carried, 5 equipped, 50 money
+  and puts them on:     worn yes, and the boots slot now holds
+    rare armour boots L8 P=72 mov=4 def=68 eff=0 dex [] rare boots
+  Wren drops them back: moved -- ground 1 carried, 0 equipped, 0 money, Wren 5 carried, 4 equipped, 50 money
+  dropping took them off on the way out: worn no, carried no
+  and the boots slot is empty: yes -- Wren's own pair is carried still
+  and the ground has them again: rare armour boots L8 P=72 mov=4 def=68 eff=0 dex [] rare boots
+
+defeat drops loot where somebody else can take it
+  Bramble carried 5 things worth 160 points in all
+  the drop roll, one stream per item, at seed 1234 against goblin-42:
+    drop:goblin-42#0:common boots  roll   4  dropped
+    drop:goblin-42#1:common leggin roll  78  stayed on the body
+    drop:goblin-42#2:common chestp roll  95  stayed on the body
+    drop:goblin-42#3:common helmet roll  23  stayed on the body
+    drop:goblin-42#4:common sword  roll  28  stayed on the body
+  which is the drop layer's own verdict, unchanged:
+    goblin-42: 1 of 5 dropped
+  the loser now carries 4, the ground carries 1
+  Thistle walks up and takes everything on the ground:
+    took and wore common armour boots L8 P=32 mov=4 def=28 eff=0 dex [] common boots
+  the ground is empty: 0 carried, 0 equipped, 0 money
+  and on the board that loot is defence 1, 8 move-cells, 0 attacks
+
+money is a quantity the inventory owns, and a trade moves it either way
+    at the start       Wren 30 coins 1 items | Bramble 120 coins 0 items
+  a sale: the dagger out, 45 coins back
+    after the sale     Wren 75 coins 0 items | Bramble 75 coins 1 items
+    the dagger is the buyer's: yes
+  the other way: the buyer sells it back for 40
+    after the return   Wren 35 coins 1 items | Bramble 115 coins 0 items
+  a gift, which is a trade with nothing coming back:
+    after the gift     Wren 10 coins 0 items | Bramble 140 coins 1 items
+    the buyer gave back: 0 items, 0 coins
+  what cannot happen: paying more than is carried
+    a trade for 9999 coins was refused, and the purse is still 10
+
+two characters with the same things in different orders are the same
+  acquired and worn forwards:  boots leggings chestplate helmet hand
+  acquired and worn backwards: boots leggings chestplate helmet hand
+  the two fingerprints agree: yes
+  money=70 carried=[common armour boots L8 P=32 mov=4 def=28 eff=0 dex [] co
+  and on the board: def 6/6, move-cells 24/24, cut 12/12
+
+
+=== ./run_inventory_suite.sh ===
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS  inventory  90 checks
+
+=== ./run_tests.sh (tail) ===
+        islands: candidate bound ruled out 515 of 968 asks, 213 had an island
+        islands: cell gate matched the ungated scan on 10800 asks, 1958 with an island, building 317 cells against 1984
+PASS  islands        105292 checks
+        island cover: 11 overlapping storey pairs, 33 things in the laps, 0 coincidences
+        island cover: 4509 placements over 4 seeds -- 0 hovering, 0 past the lip, 0 in water, 0 on a face
+        island cover: 194 islands over 4 seeds -- 58 with a basin, 58 overflowing, 58 dipping below their own rim, 0 boundary samples below it
+PASS  island cover   4922 checks
+        settlements: 20 of 110 villages (18.2%) sited by the shore rule over 8 seeds
+        settlements: 36 wide upper storeys swept, 4 spots the old padded rule let through
+PASS  settlements    19829 checks
+PASS  scatter        295 checks
+PASS  combat board   25505 checks
+PASS  combat pieces  360 checks
+PASS  combat resolution 1745 checks
+PASS  combat snap    858 checks
+PASS  layering       24 checks
+PASS  asset tags     1330 checks
+PASS  characters     1295 checks
+PASS  character sheet 108 checks
+PASS  items          144 checks
+PASS  inventory      90 checks
+PASS  drops          65 checks
+PASS  effects        1474 checks
+        window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
+        window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
+PASS  window glow    11225 checks
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+
+all 30 suites passed (191473 checks)
+exit=0
+
+=== ./tools/inventory_mutations.sh ===
+rule broken                                          file                     the suite
+---------------------------------------------------- ------------------------ ---------
+anything may be worn, carried or not                 sim/inventory.gd         failed, as it must
+letting something go leaves it worn                  sim/inventory.gd         failed, as it must
+taking something off throws it away                  sim/inventory.gd         failed, as it must
+what is carried is not what is worn                  sim/inventory.gd         failed, as it must
+the hand is not read out of the inventory            sim/inventory.gd         failed, as it must
+armour is worn in the order it was put on            sim/inventory.gd         failed, as it must
+what you own depends on the order you got it         sim/inventory.gd         failed, as it must
+a trade takes without checking it can be paid        sim/inventory.gd         failed, as it must
+a transfer moves coins nobody had                    sim/inventory.gd         failed, as it must
+equipping does not carry what it puts on             sim/commander.gd         failed, as it must
+a weapon is wielded without being carried            sim/commander.gd         failed, as it must
+equipment is its own store                           sim/character.gd         failed, as it must
+
+all 12 broken rules were caught
+
+=== ./tools/piece_mutations.sh (tail) ===
+a commander's death spares its minions           sim/piece_map.gd         failed, as it must
+a pattern is not put in one order                sim/piece_geometry.gd    failed, as it must
+
+all 19 broken rules were caught
+
+=== ./tools/resolution_mutations.sh (tail) ===
+a second file rolls the die                          sim/combat_policy.gd         failed, as it must
+the die is drawn from a stream rather than hashed from the blow sim/damage.gd                failed, as it must
+
+all 61 broken rules were caught
+
+=== ./run_headless.sh (seed 1234) ===
+tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 biome=deep_forest water=0 on_island=0 on_path=0.00 b963fd807b8c432d
+tick 50 chunks=39 islands=10 villages=1 roads=5 props=758 cover=54 biome=deep_forest water=0 on_island=0 on_path=0.00 809a88491e407272
+done ticks=100 chunks=41 built=69 final=d178d38879097c1c
+(reports/character-sheet.md section 7 records these three as the current
+ triple: b963fd807b8c432d / 809a88491e407272 / d178d38879097c1c)
+
+=== ./run_loadout.sh -- the published gate table, unmoved ===
+one level-8 loadout, read by six wearers
+  score  reach  fraction  def  cut  cleave  cells
+      8      2     100%    6   12      20     21
+      6      1      75%    4    9      15      8
+      4      1      50%    3    6      10      8
+      3      0      37%    2    5       7      4
+      2      0      25%    1    3       5      4
+      0      0       0%    0    0       0      4
+

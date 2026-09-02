@@ -1,0 +1,197 @@
+Evidence for W-character-sheet -- one character sheet, shared by player and NPC
+Implementer run, cycle 106. Every block is a command run from the project root.
+
+==============================================================================
+1. ./run_sheet.sh -- the sheet, printed
+==============================================================================
+two characters, one type: res://sim/character.gd
+  Wren level=3 status=3 hp=38/38 [str 12 con 11 cha 9 dex 14 wis 8 int 10]
+      a marsh lantern-keeper's daughter, out of the reeds | goal: find the lantern her mother left on the far bank | traits: curious, stubborn | tendencies: cautious, friendly
+      decision function attached: no
+  Bramble level=3 status=12 hp=38/38 [str 7 con 8 cha 16 dex 9 wis 13 int 12]
+      third child of a blossom-grove house, never in a fight | goal: be owed a favour by everyone who matters | traits: charming, idle | tendencies: greedy, diplomatic
+      decision function attached: yes
+  fields on each sheet: 14, and the same 14
+  scores, level, assigned_status, health, character_name, inventory, equipment, backstory, goal, traits, tendencies, memory, sentiment, decide
+status is a separate attribute from level
+  who        level  status  assigned
+  Wren          3       3  -
+  Bramble       3      12  12
+  nobody assigned Wren a standing, so its status is its level; the
+  orchestrator assigned Bramble one, so the two numbers part.
+one level-up: one point on one score, and nothing else
+  when       level  health  str con cha dex wis int
+  before         3      38   12  11   9  14   8  10
+  after DEX      4      44   12  11   9  15   8  10
+  the level everything reads is that one level:
+    piece level 4, sheet level 4, health 44/44
+    a common helmet forged at that level: P=16, item level 4
+one level-8 loadout, read by six wearers -- through the sheet
+  score  def  cut  cleave
+      -    6   12      20
+      8    6   12      20
+      6    4    9      15
+      4    3    6      10
+      3    2    5       7
+      2    1    3       5
+      0    0    0       0
+  the first row is a sheet with no score recorded, which reads the
+  item at its own level -- in full, the same as a score of 8.
+
+==============================================================================
+2. Ten run scripts, before and after the move, diffed
+==============================================================================
+The baselines were captured from the tree as it stood before any edit; the
+'after' runs come from the tree with the sheet in it. diff reports nothing for
+any of them, so no combat or item number moved and the stop condition did not
+fire.
+
+  run_items.sh     identical (6373 bytes)
+  run_loadout.sh   identical (5330 bytes)
+  run_encounter.sh identical (10142 bytes)
+  run_match.sh     identical (3191 bytes)
+  run_headless.sh  identical (1625 bytes)
+  run_drops.sh     identical (5136 bytes)
+  run_effects.sh   identical (2002 bytes)
+  run_pieces.sh    identical (350 bytes)
+  run_resolution.sh identical (110 bytes)
+  run_snap.sh      identical (103 bytes)
+
+The world fingerprint, from ./run_headless.sh (seed 1234, 100 ticks), after:
+  tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 biome=deep_forest water=0 on_island=0 on_path=0.00 b963fd807b8c432d
+  tick 50 chunks=39 islands=10 villages=1 roads=5 props=758 cover=54 biome=deep_forest water=0 on_island=0 on_path=0.00 809a88491e407272
+  done ticks=100 chunks=41 built=69 final=d178d38879097c1c
+and before, the same three lines:
+  tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 biome=deep_forest water=0 on_island=0 on_path=0.00 b963fd807b8c432d
+  tick 50 chunks=39 islands=10 villages=1 roads=5 props=758 cover=54 biome=deep_forest water=0 on_island=0 on_path=0.00 809a88491e407272
+  done ticks=100 chunks=41 built=69 final=d178d38879097c1c
+
+==============================================================================
+3. The ability-score gate, before and after
+==============================================================================
+-- before: run_loadout.sh, read off Commander.scores --
+  one level-8 loadout, read by six wearers
+    score  reach  fraction  def  cut  cleave  cells
+        8      2     100%    6   12      20     21
+        6      1      75%    4    9      15      8
+        4      1      50%    3    6      10      8
+        3      0      37%    2    5       7      4
+        2      0      25%    1    3       5      4
+        0      0       0%    0    0       0      4
+  
+-- after: run_loadout.sh, the same table read off the sheet --
+  one level-8 loadout, read by six wearers
+    score  reach  fraction  def  cut  cleave  cells
+        8      2     100%    6   12      20     21
+        6      1      75%    4    9      15      8
+        4      1      50%    3    6      10      8
+        3      0      37%    2    5       7      4
+        2      0      25%    1    3       5      4
+        0      0       0%    0    0       0      4
+  
+
+==============================================================================
+4. The source scan, and the proof that it looks
+==============================================================================
+-- the suite as shipped --
+character sheet: 108 checks, 0 failed
+
+-- with 'func is_player() -> bool: return decide.is_null()' appended to sim/character.gd --
+character sheet: 108 checks, 1 failed
+  - sim/ asks which kind of character it holds: res://sim/character.gd names 'player'
+      expected: 0
+      actual:   1
+
+-- reverted --
+character sheet: 108 checks, 0 failed
+
+The scan is also run in-suite against a control line written to fail it:
+  CONTROL_LINE := "func is_player() -> bool:\n\treturn npc_brain == null\n"
+and is required to find exactly the two kind-words in it.
+
+==============================================================================
+5. The suites, before and after
+==============================================================================
+-- before --
+  PASS  rng            1325 checks
+  PASS  determinism    15 checks
+  PASS  terrain        32 checks
+  PASS  streaming      4695 checks
+  PASS  terrain_lod    59 checks
+  PASS  mountains      3030 checks
+  PASS  biomes         212 checks
+  PASS  water          6358 checks
+  PASS  islands        105292 checks
+  PASS  island cover   4922 checks
+  PASS  settlements    19829 checks
+  PASS  scatter        295 checks
+  PASS  combat board   25505 checks
+  PASS  combat pieces  360 checks
+  PASS  combat resolution 1745 checks
+  PASS  combat snap    858 checks
+  PASS  layering       24 checks
+  PASS  asset tags     1330 checks
+  PASS  characters     1295 checks
+  PASS  items          142 checks
+  PASS  drops          65 checks
+  PASS  effects        1474 checks
+  PASS  window glow    11225 checks
+  PASS  grass          886 checks
+  PASS  atmosphere     156 checks
+  PASS  reflection     31 checks
+  PASS  anti-alias     55 checks
+  PASS  render shell   58 checks
+  all 28 suites passed (191273 checks)
+-- after --
+  PASS  rng            1325 checks
+  PASS  determinism    15 checks
+  PASS  terrain        32 checks
+  PASS  streaming      4695 checks
+  PASS  terrain_lod    59 checks
+  PASS  mountains      3030 checks
+  PASS  biomes         212 checks
+  PASS  water          6358 checks
+  PASS  islands        105292 checks
+  PASS  island cover   4922 checks
+  PASS  settlements    19829 checks
+  PASS  scatter        295 checks
+  PASS  combat board   25505 checks
+  PASS  combat pieces  360 checks
+  PASS  combat resolution 1745 checks
+  PASS  combat snap    858 checks
+  PASS  layering       24 checks
+  PASS  asset tags     1330 checks
+  PASS  characters     1295 checks
+  PASS  character sheet 108 checks
+  PASS  items          143 checks
+  PASS  drops          65 checks
+  PASS  effects        1474 checks
+  PASS  window glow    11225 checks
+  PASS  grass          886 checks
+  PASS  atmosphere     156 checks
+  PASS  reflection     31 checks
+  PASS  anti-alias     55 checks
+  PASS  render shell   58 checks
+  all 29 suites passed (191382 checks)
+
+  Every suite's check count is unchanged except items, which gained the one
+  check that names sim/character.gd as a reader of the item layer's Ability
+  vocabulary, plus the 108 checks of the new suite: 191273 + 108 + 1 = 191382.
+
+==============================================================================
+6. The two mutation harnesses, run sequentially with nothing else running
+==============================================================================
+  ./tools/piece_mutations.sh        all 19 broken rules were caught
+  ./tools/resolution_mutations.sh   all 61 broken rules were caught
+
+  The resolution harness's mutation 'every wearer reads every item in full'
+  was repointed at score_for's new body:
+    return sheet.score(read.governing, read.level)  ->  return read.level
+  and still fails the suite, so the gate is still a checked rule.
+
+==============================================================================
+7. The layer check
+==============================================================================
+  layer check: OK -- res://sim references nothing in the render layer
+  combat check: OK -- res://render draws the fight and holds none of it
+  asset check: OK -- res://sim names asset tags and no asset

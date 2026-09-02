@@ -1,0 +1,28 @@
+=== before ===
+  well resolves to scene res://assets/tag_scenes/well.tscn tinted rock 0.35
+  sim/ sources     7c95c75096e1e289545dcb66d6222e1d3575f11c743792a0fc99f79aa789155e
+  world            a6aa8e5776ebfe8c
+
+=== repointing 'well' at res://assets/example_well.tscn ===
+  --- /tmp/lab-sbx-ebsaeogf/tmp/tmp.USiG8kMhup	2026-08-28 00:12:36.343511363 -0400
+  +++ render/asset_library.gd	2026-08-28 00:12:43.043534357 -0400
+  @@ -1665,7 +1665,7 @@
+   	# tiled roof, exactly the placeholder's four parts in geometry. It is the only
+   	# well in the pack and it needed no choosing; what it needed was measuring,
+   	# and at 1.022 it stands the height the placeholder did inside a plot it fits.
+  -	_row(rows, AssetTags.WELL, "res://assets/tag_scenes/well.tscn", [
+  +	_row(rows, AssetTags.WELL, "res://assets/example_well.tscn", [
+   		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(1.80, 0.90, 1.80), Vector3(0.0, 0.45, 0.0),
+   			STONE, AssetVisual.TINT_ROCK, 0.0, Vector3.ZERO, 0.35),
+   		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.14, 1.90, 0.14), Vector3(-0.75, 1.35, 0.0), WOOD),
+
+=== after ===
+  well resolves to scene res://assets/example_well.tscn tinted rock 0.35
+  sim/ sources     7c95c75096e1e289545dcb66d6222e1d3575f11c743792a0fc99f79aa789155e
+  world            a6aa8e5776ebfe8c
+
+OK    'well' now resolves to a different visual
+OK    every file under sim/ is unchanged
+OK    the headless world fingerprint is unchanged
+OK    the whole edit is 1 line(s) in render/asset_library.gd
+OK    the table is back as it was

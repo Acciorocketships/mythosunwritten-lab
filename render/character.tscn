@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://render/character_view.gd" id="1_character"]
+
+[node name="Character" type="Node3D"]
+script = ExtResource("1_character")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+
+[node name="HandLeft" type="BoneAttachment3D" parent="."]
+
+[node name="HandRight" type="BoneAttachment3D" parent="."]

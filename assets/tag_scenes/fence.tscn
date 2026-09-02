@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/justcreate_village/Props/Fence_01.fbx" id="1_model"]
+
+[node name="fence" type="Node3D"]
+
+[node name="model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(0, 0, -1.092, 0, 1.092, 0, 1.092, 0, 0, 0, 0, 0)

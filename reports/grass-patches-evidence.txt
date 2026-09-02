@@ -1,0 +1,262 @@
+Evidence for reports/grass.md section 5 -- grass in patches.
+Seed 1234 throughout. 'before' is the code as section 4 left it (patch of
+twelve tufts, foliage_density for coverage, no clearing mask); 'after' is as
+shipped. Every block is the output of tools/measure_grass.sh, trimmed of the
+engine's ALSA and Vulkan noise.
+
+======== before  228_m60
+render-shell boot seed=1234 chunks=31 islands=7 grass=8667 motes=570
+measured at         (228.0, -60.0) in Meadow, foliage density 0.441
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   7680 square units over 30 chunks
+coverage            1.13 instances, 13.5 tufts, 40.6 blades per square unit
+                          with grass       without
+chunks with grass               30             0
+instances loaded              8667             0
+instances drawn               6342             0
+tufts drawn                  76104             0
+blades drawn                228312             0
+triangles drawn            3196368             0
+draw calls per frame           867           837
+primitives per frame       3310894        114526
+frame ms mean              1169.81         81.13
+frame ms median            1169.14         80.86
+frame ms 95th              1185.23         83.76
+added by the grass: 1088.28 ms per frame at the median (228312 blades drawn)
+build: 30 chunks, 8667 instances, 69215 us total, 2307 us per chunk
+       the ground under them costs 10125 us per chunk to mesh (23% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=31 handles=91 islands=21 water=1 grass=8667 drawn=6342 patches=0 motes=570 lights=1 orbs=0 board=0/0 mirror=0 digest=105a515768e15bd7
+
+======== after  228_m60
+render-shell boot seed=1234 chunks=31 islands=7 grass=17504 motes=570
+measured at         (228.0, -60.0) in Meadow
+scatter density     0.441 (what the trees and ferns grow from)
+grass coverage      0.926 blended, mask 0.182 here, so 0.000 of the lattice
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   7680 square units over 30 chunks
+coverage            2.28 instances, 27.4 tufts, 82.0 blades per square unit
+lattice grown       0.744 of candidates over the chunks that grew any
+chunks left bare    0 of 30 inside the build radius
+                          with grass       without
+chunks with grass               30             0
+instances loaded             17504             0
+instances drawn              12649             0
+tufts drawn                 151788             0
+blades drawn                455364             0
+triangles drawn            6375096             0
+draw calls per frame           867           837
+primitives per frame       6489622        114526
+frame ms mean              2248.68         80.55
+frame ms median            2247.76         80.39
+frame ms 95th              2270.74         82.74
+added by the grass: 2167.38 ms per frame at the median (455364 blades drawn)
+build: 30 chunks, 17504 instances, 116415 us total, 3880 us per chunk
+       the ground under them costs 10412 us per chunk to mesh (37% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=31 handles=91 islands=21 water=1 grass=17504 drawn=12649 patches=0 motes=570 lights=1 orbs=0 board=0/0 mirror=0 digest=105a515768e15bd7
+
+======== before  m232_m224
+render-shell boot seed=1234 chunks=34 islands=8 grass=6662 motes=617
+measured at         (-232.0, -224.0) in Meadow, foliage density 0.452
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   6656 square units over 26 chunks
+coverage            1.00 instances, 12.0 tufts, 36.0 blades per square unit
+                          with grass       without
+chunks with grass               26             0
+instances loaded              6662             0
+instances drawn               5046             0
+tufts drawn                  60552             0
+blades drawn                181656             0
+triangles drawn            2543184             0
+draw calls per frame          2197          2145
+primitives per frame       5458425        372057
+frame ms mean              1848.49        156.32
+frame ms median            1848.37        156.15
+frame ms 95th              1865.52        159.10
+added by the grass: 1692.21 ms per frame at the median (181656 blades drawn)
+build: 26 chunks, 6662 instances, 90696 us total, 3488 us per chunk
+       the ground under them costs 10614 us per chunk to mesh (33% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=34 handles=86 islands=24 water=1 grass=6662 drawn=5046 patches=0 motes=617 lights=36 orbs=0 board=0/0 mirror=420 digest=4a1ceebdaf794247
+
+======== after  m232_m224
+render-shell boot seed=1234 chunks=34 islands=8 grass=11205 motes=617
+measured at         (-232.0, -224.0) in Meadow
+scatter density     0.452 (what the trees and ferns grow from)
+grass coverage      0.796 blended, mask 0.432 here, so 0.723 of the lattice
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   6656 square units over 26 chunks
+coverage            1.68 instances, 20.2 tufts, 60.6 blades per square unit
+lattice grown       0.550 of candidates over the chunks that grew any
+chunks left bare    0 of 26 inside the build radius
+                          with grass       without
+chunks with grass               26             0
+instances loaded             11205             0
+instances drawn               8307             0
+tufts drawn                  99684             0
+blades drawn                299052             0
+triangles drawn            4186728             0
+draw calls per frame          2197          2145
+primitives per frame       8745513        372057
+frame ms mean              2935.75        155.98
+frame ms median            2933.91        156.05
+frame ms 95th              2961.67        158.74
+added by the grass: 2777.87 ms per frame at the median (299052 blades drawn)
+build: 26 chunks, 11205 instances, 148963 us total, 5729 us per chunk
+       the ground under them costs 10602 us per chunk to mesh (54% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=34 handles=86 islands=24 water=1 grass=11205 drawn=8307 patches=0 motes=617 lights=36 orbs=0 board=0/0 mirror=420 digest=4a1ceebdaf794247
+
+======== before  96_m240
+render-shell boot seed=1234 chunks=32 islands=10 grass=5940 motes=514
+measured at         (96.0, -240.0) in Highland, foliage density 0.209
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   7424 square units over 29 chunks
+coverage            0.80 instances, 9.6 tufts, 28.8 blades per square unit
+                          with grass       without
+chunks with grass               29             0
+instances loaded              5940             0
+instances drawn               4300             0
+tufts drawn                  51600             0
+blades drawn                154800             0
+triangles drawn            2167200             0
+draw calls per frame          1227          1169
+primitives per frame       4513945        179545
+frame ms mean              1629.18        126.36
+frame ms median            1628.96        123.55
+frame ms 95th              1646.45        150.28
+added by the grass: 1505.41 ms per frame at the median (154800 blades drawn)
+build: 32 chunks, 5940 instances, 69509 us total, 2172 us per chunk
+       the ground under them costs 9184 us per chunk to mesh (24% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=32 handles=96 islands=30 water=1 grass=5940 drawn=4300 patches=0 motes=514 lights=0 orbs=0 board=0/0 mirror=420 digest=eef90a496204fa70
+                    1.058 units tall, reaching 1.20 units from its middle
+                          with grass       without
+frame ms mean              1640.71        123.50
+frame ms median            1620.76        121.93
+frame ms 95th              1898.92        138.56
+added by the grass: 1498.83 ms per frame at the median (154800 blades drawn)
+build: 32 chunks, 5940 instances, 68724 us total, 2148 us per chunk
+       the ground under them costs 9164 us per chunk to mesh (23% as much)
+
+======== after  96_m240
+render-shell boot seed=1234 chunks=32 islands=10 grass=5349 motes=514
+measured at         (96.0, -240.0) in Highland
+scatter density     0.209 (what the trees and ferns grow from)
+grass coverage      0.371 blended, mask 0.595 here, so 0.025 of the lattice
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   5888 square units over 23 chunks
+coverage            0.91 instances, 10.9 tufts, 32.7 blades per square unit
+lattice grown       0.297 of candidates over the chunks that grew any
+chunks left bare    9 of 32 inside the build radius
+                          with grass       without
+chunks with grass               23             0
+instances loaded              5349             0
+instances drawn               3723             0
+tufts drawn                  44676             0
+blades drawn                134028             0
+triangles drawn            1876392             0
+draw calls per frame          1215          1169
+primitives per frame       3932329        179545
+frame ms mean              1382.97        117.39
+frame ms median            1381.60        117.34
+frame ms 95th              1398.43        119.47
+added by the grass: 1264.26 ms per frame at the median (134028 blades drawn)
+build: 32 chunks, 5349 instances, 97688 us total, 3053 us per chunk
+       the ground under them costs 8786 us per chunk to mesh (35% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=32 handles=96 islands=30 water=1 grass=5349 drawn=3723 patches=0 motes=514 lights=0 orbs=0 board=0/0 mirror=420 digest=eef90a496204fa70
+
+======== before  m512_m640
+render-shell boot seed=1234 chunks=32 islands=7 grass=18782 motes=1090
+measured at         (-512.0, -640.0) in Deep forest, foliage density 0.931
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   8192 square units over 32 chunks
+coverage            2.29 instances, 27.5 tufts, 82.5 blades per square unit
+                          with grass       without
+chunks with grass               32             0
+instances loaded             18782             0
+instances drawn              13237             0
+tufts drawn                 158844             0
+blades drawn                476532             0
+triangles drawn            6671448             0
+draw calls per frame           869           837
+primitives per frame       7008206        336758
+frame ms mean              2579.10        134.36
+frame ms median            2581.87        129.77
+frame ms 95th              2605.40        164.69
+added by the grass: 2452.10 ms per frame at the median (476532 blades drawn)
+build: 32 chunks, 18782 instances, 99063 us total, 3096 us per chunk
+       the ground under them costs 11849 us per chunk to mesh (26% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=32 handles=96 islands=21 water=1 grass=18782 drawn=13237 patches=0 motes=1090 lights=1 orbs=0 board=0/0 mirror=0 digest=6ab557db99ddc59d
+                    1.058 units tall, reaching 1.20 units from its middle
+                          with grass       without
+frame ms mean              2614.29        138.37
+frame ms median            2586.35        133.25
+frame ms 95th              2999.82        167.25
+added by the grass: 2453.10 ms per frame at the median (476532 blades drawn)
+build: 32 chunks, 18782 instances, 101399 us total, 3169 us per chunk
+       the ground under them costs 11876 us per chunk to mesh (27% as much)
+                    1.058 units tall, reaching 1.20 units from its middle
+                          with grass       without
+
+======== after  m512_m640
+render-shell boot seed=1234 chunks=32 islands=7 grass=5106 motes=1090
+measured at         (-512.0, -640.0) in Deep forest
+scatter density     0.931 (what the trees and ferns grow from)
+grass coverage      0.320 blended, mask 0.688 here, so 0.023 of the lattice
+one instance        a patch of 12 tufts, 36 blades, 648 vertices, 504 triangles
+                    1.058 units tall, reaching 1.20 units from its middle
+build radius        38 units (ground streams to 40)
+ground with grass   5888 square units over 23 chunks
+coverage            0.87 instances, 10.4 tufts, 31.2 blades per square unit
+lattice grown       0.283 of candidates over the chunks that grew any
+chunks left bare    9 of 32 inside the build radius
+                          with grass       without
+chunks with grass               23             0
+instances loaded              5106             0
+instances drawn               3103             0
+tufts drawn                  37236             0
+blades drawn                111708             0
+triangles drawn            1563912             0
+draw calls per frame           860           837
+primitives per frame       1900670        336758
+frame ms mean               650.15        112.45
+frame ms median             649.19        112.26
+frame ms 95th               662.12        114.75
+added by the grass: 536.93 ms per frame at the median (111708 blades drawn)
+build: 32 chunks, 5106 instances, 95968 us total, 2999 us per chunk
+       the ground under them costs 10557 us per chunk to mesh (28% as much)
+(software rasterisation: the frame times are an upper bound, not a frame rate)
+render-shell stop tick=0 frames=420 views=32 handles=96 islands=21 water=1 grass=5106 drawn=3103 patches=0 motes=1090 lights=1 orbs=0 board=0/0 mirror=0 digest=6ab557db99ddc59d
+
+======== the clearing mask, drawn (tools/grass_mask_map.sh)
+seed 1234 at (228, -60), 240 units across, 640 px
+biome              meadow
+mask scales        clearing 76 (detail 28), boundary 48 bent at 62, path 5.0
+curve              0.20 to 0.42
+ground             25.0% bare, 26.6% ramp, 48.5% closed carpet
+wrote /home/ryko/proj/game/reports/assets/grass-mask-meadow.png
+
+seed 1234 at (0, 0), 900 units across, 640 px
+biome              deep_forest
+mask scales        clearing 76 (detail 28), boundary 48 bent at 62, path 5.0
+curve              0.20 to 0.42
+ground             31.6% bare, 32.5% ramp, 35.8% closed carpet
+wrote /home/ryko/proj/game/reports/assets/grass-mask-wide.png

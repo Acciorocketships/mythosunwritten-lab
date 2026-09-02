@@ -1,0 +1,171 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+dice: what the roll model costs, measured
+======================================================================
+
+1. the die
+----------------------------------------------------------------------
+  SWING=4  two dice of 9 faces each, summed
+  swing band [92, 108] hundredths, centred on 100
+
+  over 200000 fights: min=92 max=108 mean=99.9943 sd=3.6498
+  intended:      min=92 max=108 mean=100 sd=3.6515
+
+  swing  share    intended   histogram
+     92  0.0122  0.0123     ####
+     93  0.0250  0.0247     ########
+     94  0.0368  0.0370     ###########
+     95  0.0493  0.0494     ###############
+     96  0.0616  0.0617     ##################
+     97  0.0742  0.0741     ######################
+     98  0.0877  0.0864     ##########################
+     99  0.0991  0.0988     ##############################
+    100  0.1111  0.1111     #################################
+    101  0.0979  0.0988     #############################
+    102  0.0859  0.0864     ##########################
+    103  0.0740  0.0741     ######################
+    104  0.0616  0.0617     ##################
+    105  0.0492  0.0494     ###############
+    106  0.0373  0.0370     ###########
+    107  0.0249  0.0247     #######
+    108  0.0119  0.0123     ####
+
+2. what the die costs on average
+----------------------------------------------------------------------
+  The swing is centred and the second step rounds to nearest, so a
+  blow's mean is the deterministic number itself. Folding the swing in
+  beside the multiplier and flooring once gave ratios of 0.85 to 0.99
+  instead -- a quiet nerf on every attack in the game, which is what
+  this table was written to catch.
+
+  power   x    def | steady | mean over 20000 fights | ratio
+      3  100    0 |      3 |             3.0000 | 1.0000
+      8  100    2 |      6 |             6.0001 | 1.0000
+     16  100    2 |     14 |            14.0051 | 1.0004
+     16  150    2 |     22 |            22.0066 | 1.0003
+     16  200    8 |     24 |            24.0166 | 1.0007
+     16  300    8 |     40 |            40.0196 | 1.0005
+     40  100    8 |     32 |            32.0033 | 1.0001
+      3  100  100 |      1 |             1.0000 | 1.0000
+
+3. the positional ladder, at every roll
+----------------------------------------------------------------------
+  The die must be narrower than the narrowest rung, or a player who
+  manoeuvred round the back would sometimes be punished for it. The
+  worst roll on a rung is compared with the best roll on the one below.
+
+  A sweep over every die width, at every power from 1 to 128:
+
+  SWING  band        spread  inverts the ladder?  strictly ordered from
+      1  [ 98, 102]  1.0408  no                   power 2
+      2  [ 96, 104]  1.0833  no                   power 2
+      3  [ 94, 106]  1.1277  no                   power 2
+      4  [ 92, 108]  1.1739  no                   power 2   <-- shipped
+      5  [ 90, 110]  1.2222  no                   power 6
+      6  [ 88, 112]  1.2727  no                   power 6
+      7  [ 86, 114]  1.3256  no                   power 85
+      8  [ 84, 116]  1.3810  YES -- unusable      never
+
+  Rung by rung at the die that shipped, for a 16-point blow, no armour:
+
+  rung          worst roll | best roll of the rung below | margin
+  x100 -> x150          22 |                          17 | +5
+  x150 -> x200          29 |                          26 | +3
+  x200 -> x300          44 |                          35 | +9
+
+4. the same plan, played many times
+----------------------------------------------------------------------
+
+  4a. the scripted three-commander match, the same 44 decisions,
+      replayed under 400 fight seeds
+
+      conclusion                          fights   share
+      over rounds=6 survivors=1 winner=#1     400   1.0000
+
+      400 distinct transcripts over 400 seeds; 1 distinct conclusion(s).
+
+      against the same match with the die switched off:
+        2400 blows compared, 34 landed for a different number (1.4%)
+        0.014 points off per blow on average, worst single blow +1
+
+  4b. a deliberately planned two-move combination, 20000 fights
+
+      The plan: a level-8 commander has manoeuvred behind a level-8
+      one wearing a full armoured suit, and lands a cut and then a
+      cleave, both backstabs, over two turns. Nothing about the
+      positioning is in doubt; the only question is the size of the
+      two blows.
+
+      with the die switched off: 12 + 24 = 36 points
+
+      the two-blow total over 20000 fights:
+        min=31  max=41  mean=35.998  sd=1.460  (deterministic 36)
+        spread is -13.9% / +13.9% of the planned number
+
+      total  fights   share   histogram
+         31       1  0.0001   
+         32      89  0.0044   #
+         33     716  0.0358   ###########
+         34    2287  0.1143   ##################################
+         35    4331  0.2165   #################################################################
+         36    5154  0.2577   #############################################################################
+         37    4364  0.2182   #################################################################
+         38    2265  0.1133   ##################################
+         39     697  0.0348   ##########
+         40      93  0.0046   #
+         41       3  0.0001   
+
+      Does the plan work? A plan that kills is one whose two blows
+      come to at least the target's remaining health. `margin` is how
+      many points of slack the planner left: 0 means the plan was
+      exact to the point with the die switched off.
+
+      margin  target hp  plans that killed  share
+          -4         40                 85  0.0043
+          -3         39                781  0.0391
+          -2         38               3119  0.1560
+          -1         37               7400  0.3700
+           0         36              12598  0.6299   <-- exact to the point
+           1         35              16901  0.8450
+           2         34              19154  0.9577
+           3         33              19908  0.9954
+           4         32              19994  0.9997
+           5         31              20000  1.0000
+           6         30              20000  1.0000
+           7         29              20000  1.0000
+           8         28              20000  1.0000
+
+5. what the two options that were not chosen would have cost
+----------------------------------------------------------------------
+  Arithmetic, not simulation: a to-hit roll makes a planned sequence
+  of n blows land with probability (1-p)^n, for a single-blow miss
+  chance p. Nothing a planner can do changes that -- margin does not
+  help, because the blow that missed dealt nothing at all.
+
+  miss chance p |  1 blow  2 blows  3 blows  4 blows
+          0.050 |  0.9500   0.9025   0.8574   0.8145 
+          0.100 |  0.9000   0.8100   0.7290   0.6561 
+          0.200 |  0.8000   0.6400   0.5120   0.4096 
+          0.250 |  0.7500   0.5625   0.4219   0.3164 
+          0.293 |  0.7070   0.4998   0.3534   0.2498    <-- two blows fall to a coin toss
+          0.300 |  0.7000   0.4900   0.3430   0.2401 
+          0.350 |  0.6500   0.4225   0.2746   0.1785 
+          0.400 |  0.6000   0.3600   0.2160   0.1296 
+          0.450 |  0.5500   0.3025   0.1664   0.0915 
+          0.500 |  0.5000   0.2500   0.1250   0.0625 
+
+  A two-move combination fails more often than it succeeds as soon as
+  p > 1 - 1/sqrt(2) = 0.2929. A d20 attack roll needing 8 or more --
+  a generous target -- misses 35% of the time, so the two-move
+  combination the tactical layer exists to reward would land 42% of
+  the time. That is this task's stop condition, and it is why option
+  (a) was not taken.
+
+  Option (c), both a to-hit roll and armour as reduction, carries the
+  same (1-p)^n and adds the magnitude spread on top, so it is strictly
+  worse for planning than either of the other two.
+
+  Option (b) as shipped has no such term: every blow lands, so a plan
+  can only be off by how much. Section 4b above is the price of that,
+  and it is paid in points rather than in whole failed plans.
+

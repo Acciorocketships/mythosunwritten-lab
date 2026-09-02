@@ -1,0 +1,135 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+encounter seed=1234 ticks=60 where=(-480.0, 420.0) engage=9.0 join=24.0
+  #1 commander band=1 at (-494.000, -4.701, 420.000) hp=32/32 walking
+  #2 cat band=1 at (-498.000, -3.002, 415.000) hp=14/14 walking
+  #3 toadstool band=1 at (-498.000, -3.031, 425.000) hp=14/14 walking
+  #4 commander band=4 at (-466.000, -2.459, 420.000) hp=32/32 walking
+  #5 ent band=4 at (-462.000, -2.129, 415.000) hp=14/14 walking
+  #6 frog band=4 at (-462.000, -3.324, 425.000) hp=14/14 walking
+  #7 commander band=7 at (-480.000, 1.024, 490.000) hp=26/26 walking
+  #8 toadstool band=7 at (-476.000, 0.568, 490.000) hp=10/10 walking
+tick 0 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 01ae46f791c66609
+tick 1 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 ff76d8de6aada4b0
+tick 2 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 18421d093e2bebd0
+tick 3 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 2be6b0fbdbac3e4b
+tick 4 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 c22b1be654b5d6f4
+tick 5 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 1e02b02012ef662d
+tick 6 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 5df4ecb697c7a18e
+tick 7 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 1919f9b6e4f9a665
+tick 8 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 08a1987b4ad5d6ac
+tick 9 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 c4ee05e9c1278448
+tick 10 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 87b7b225567256c8
+tick 11 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 91c25ab71cf75a54
+tick 12 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 55db833c3143e9e0
+tick 13 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 dac54f4980651e1a
+tick 14 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 c9fb135763758772
+tick 15 real-time chunks=32 islands=10 props=402 begun=0 ended=0 standing=8 01fcf1c2f3123c38
+tick 16 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 a7fd5e36ac64c85f
+    snap-in around #1 at (-484.400, -2.816, 420.000) radius=24.0 span=30.0 storey=0 joined=6
+    snap-in board 3e76efeea93a2242 cells=441 standable=401 holes=40 cliffs=42
+    snap-in #1 (-484.400, 420.000) -> cell (-162,139) centre (-484.500, 418.500) moved 1.503 rings=1
+    snap-in #2 (-488.400, 415.000) -> cell (-163,138) centre (-487.500, 415.500) moved 1.030 rings=0
+    snap-in #3 (-488.400, 425.000) -> cell (-163,142) centre (-487.500, 427.500) moved 2.657 rings=1
+    snap-in #4 (-475.600, 420.000) -> cell (-159,140) centre (-475.500, 421.500) moved 1.503 rings=0
+    snap-in #5 (-471.600, 415.000) -> cell (-158,138) centre (-472.500, 415.500) moved 1.030 rings=0
+    snap-in #6 (-471.600, 425.000) -> cell (-158,141) centre (-472.500, 424.500) moved 1.030 rings=0
+    board 3e76efeea93a2242 cells=441 standable=401 holes=40 cliffs=42
+    dice seed=4244964848 swing=92..108
+    commanders 2
+      #1 commander owner=1 level=2 hp=32/32 def=0 power=0
+      #2 commander owner=2 level=2 hp=32/32 def=0 power=0
+      #3 cat owner=1 level=2 hp=14/14 def=3 power=6
+      #4 toadstool owner=1 level=2 hp=14/14 def=3 power=6
+      #5 ent owner=2 level=2 hp=14/14 def=3 power=6
+      #6 frog owner=2 level=2 hp=14/14 def=3 power=6
+    round 1 turn #1 at (-162,139) facing=north hp=32/32 def=0 sword + boots(4/4)
+tick 17 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 52475fb7d783c252
+      move #1 (-162,139)->(-161,138)
+      face #1 south
+      attack #1 cleave cells=6 hits=1
+        hit #1->#2 power=5 x100 swing=97 front def=0 dealt=5 hp=27/32
+      minion move #3 (-163,138)->(-160,141)
+    round 1 turn #2 at (-159,140) facing=north hp=27/32 def=0 spear + boots(4/4)
+tick 18 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 873bc4c55f300087
+      move #2 (-159,140)->(-160,139)
+      face #2 north
+      minion hit #5->#1 power=6 x150 swing=98 flank def=0 dealt=9 hp=23/32
+    round 2 turn #1 at (-161,138) facing=south hp=23/32 def=0 sword + boots(4/4)
+tick 19 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 04a26cafc35f172b
+      face #1 south
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=3 x100 swing=102 front def=0 dealt=3 hp=24/32
+      minion move #3 (-160,141)->(-161,140)
+    round 2 turn #2 at (-160,139) facing=north hp=24/32 def=0 spear + boots(4/4)
+tick 20 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 8aa3e3b4f4c2783a
+      face #2 north
+      minion hit #5->#1 power=6 x150 swing=105 flank def=0 dealt=9 hp=14/32
+    round 3 turn #1 at (-161,138) facing=south hp=14/32 def=0 sword + boots(4/4)
+tick 21 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 6dc7561318b8b690
+      face #1 south
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=3 x100 swing=106 front def=0 dealt=3 hp=21/32
+      minion hit #3->#2 power=6 x200 swing=100 back def=0 dealt=12 hp=9/32
+    round 3 turn #2 at (-160,139) facing=north hp=9/32 def=0 spear + boots(4/4)
+tick 22 fighting chunks=32 islands=10 props=402 begun=1 ended=0 standing=8 5d1728c981f3042a
+      face #2 north
+      minion hit #5->#1 power=6 x150 swing=105 flank def=0 dealt=9 hp=5/32
+    round 4 turn #1 at (-161,138) facing=south hp=5/32 def=0 sword + boots(4/4)
+tick 23 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 5e3e00c69c619b63
+      face #1 south
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=3 x100 swing=98 front def=0 dealt=3 hp=6/32
+      minion hit #3->#2 power=6 x200 swing=96 back def=0 dealt=12 hp=0/32 dead removed=3
+      commander #2 is out
+    over rounds=4 survivors=1 winner=#1
+    over turns=7 rounds=4 ending=decided survivors=3 fallen=3
+    snap-out #1 cell (-161,138) -> (-481.500, -2.404, 415.500) back to cell (-161,138) hp=5/32
+    snap-out #2 cell (-161,140) -> (-481.500, -2.720, 421.500) back to cell (-161,140) hp=14/14
+    snap-out #3 cell (-163,142) -> (-487.500, -3.661, 427.500) back to cell (-163,142) hp=14/14
+    snap-out #4 fell
+    snap-out #5 fell
+    snap-out #6 fell
+tick 24 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 395c866c3c7215d3
+tick 25 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 60a6e493155c74ce
+tick 26 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 11d3743553213feb
+tick 27 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 9aa9370a5c88d942
+tick 28 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 0ef517908ecd5465
+tick 29 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 25347f4323c04511
+tick 30 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 f8b486825b81b06a
+tick 31 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 19b1b638c0676200
+tick 32 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 28192fa10f330d76
+tick 33 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 c1732a4a4926c7af
+tick 34 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 fdae86665a930fcb
+tick 35 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 bbcf0fb3a21e1218
+tick 36 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 dc1fd58658089c39
+tick 37 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 4bf90b8d3bbf3432
+tick 38 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 1d07afa37da735b6
+tick 39 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 bd705f7fb233f65f
+tick 40 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 7fc451cd0cfc5a3f
+tick 41 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 b2e836b30487418f
+tick 42 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 483622308a1bd086
+tick 43 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 268f9a1c240872c5
+tick 44 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 03142ee19dd9b22a
+tick 45 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 87dd860115a23124
+tick 46 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 225bba0de5d673c7
+tick 47 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 50f8671e108fe48d
+tick 48 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 eae4a27b254d6b8e
+tick 49 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 b7071923981148df
+tick 50 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 49795e5190a2450c
+tick 51 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 48363d4d8c3ecd35
+tick 52 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 2f7fd674b08404f8
+tick 53 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 6ec79a7029dbadc4
+tick 54 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 31c2732f907899b4
+tick 55 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 fc389dab9a8efd43
+tick 56 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 18937e415169c001
+tick 57 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 330f75caeef2f54e
+tick 58 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 5470d7fd12940fbd
+tick 59 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 ba8c0efa0e478dd9
+tick 60 real-time chunks=32 islands=10 props=402 begun=1 ended=1 standing=5 210e0c87785566e3
+done ticks=60 begun=1 ended=1 standing=5 final=210e0c87785566e3
+  #1 commander band=1 at (-459.300, -2.369, 415.500) hp=5/32 walking
+  #2 cat band=1 at (-459.300, -3.224, 421.500) hp=14/14 walking
+  #3 toadstool band=1 at (-465.300, -3.653, 427.500) hp=14/14 walking
+  #7 commander band=7 at (-480.000, -1.349, 526.000) hp=26/26 walking
+  #8 toadstool band=7 at (-476.000, -1.431, 526.000) hp=10/10 walking

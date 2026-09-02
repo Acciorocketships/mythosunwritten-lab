@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/kaykit_medieval_hexagon/KayKit_Medieval_Hexagon_Pack_1.0_FREE/Assets/gltf/decoration/props/ladder.gltf" id="1_model"]
+
+[node name="rope_ladder" type="Node3D"]
+
+[node name="model_a" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(3.896, 0, 0, 0, 3.896, 0, 0, 0, 3.896, 0, 0.0, 0)
+
+[node name="model_b" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(3.896, 0, 0, 0, 3.896, 0, 0, 0, 3.896, 0, 3.0, 0)

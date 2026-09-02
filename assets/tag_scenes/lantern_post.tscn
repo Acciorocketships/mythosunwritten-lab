@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/justcreate_village/Props/Lantern_02.fbx" id="1_model"]
+
+[node name="lantern_post" type="Node3D"]
+
+[node name="model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(1.146, 0, 0, 0, 1.146, 0, 0, 0, 1.146, -0.549, 0, 0)

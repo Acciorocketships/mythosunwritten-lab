@@ -1,0 +1,45 @@
+tee: reports/review/rederivation-1234.txt: No such file or directory
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== reviewer re-derivation, seed 1234 ===
+limits read off the code: HOP_HEIGHT=3.0000 DROP_REACH=2.0000 lattice=3.0000
+CombatBoard.STEP_UP=3.0000 STEP_DOWN=2.0000 CLIFF_DROP=2.0000
+PathNetwork.ROUTE_GRADE_LIMIT=1.0000  SettlementField.PAD_RELIEF_LIMIT=5.6000
+MountainField: period=600.0 amp=44.0 octaves=4 range_period=1500.0
+render/distant_ground.gd cached before this process touches it: true
+
+--- climb: routes found by this file's own search ---
+reported summit-1 at (-28.0, 107.0)
+  ROUTE to (-28.0, 107.0) at 83.04: 80 steps from (-28.0, -133.0) at 35.87
+    worst rise 2.5061 of 3.00 allowed; worst fall 1.0258 of 2.00 allowed; climbed 90.00 from the lowest rim cell at -6.96
+    re-check: every step inside the limits
+    face: 4706 of 101958 steps refused (4.6%), 7 of 25722 standable cells cut off (0.0%)
+unreported: highest of the square at (3000, -2200): highest ground is only 13.89 -- no mountain here, skipped
+unreported: highest of the square at (-1800, 1600) -> summit at (-1560.0, 1636.0), 71.85 units up
+  ROUTE to (-1554.0, 1642.0) at 72.79: 78 steps from (-1320.0, 1642.0) at 23.54
+    worst rise 2.3623 of 3.00 allowed; worst fall 1.6575 of 2.00 allowed; climbed 79.70 from the lowest rim cell at -6.91
+    re-check: every step inside the limits
+    face: 778 of 102990 steps refused (0.8%), 0 of 25913 standable cells cut off (0.0%)
+
+--- level of detail: what the world reports, against what is drawn ---
+probes: 360 positions, including every level boundary around four observers
+  observer (0, 0): 124 tiles built, 8544 corners sampled, 1500 cached
+  observer (-28, 107): 123 tiles built, 8488 corners sampled, 1475 cached
+  observer (512, -384): 124 tiles built, 8544 corners sampled, 1500 cached
+  observer (133, 261): 124 tiles built, 8544 corners sampled, 1500 cached
+  351 of 360 probes were drawn by more than one level across the four observers
+  world height changed under a probe: 0 times (worst 0.000000)
+  emitted corner height against TerrainQuery.ground_height_at:
+    level 1 (cell 4 u): 2784 corners, 2784 exactly equal, worst gap 0.0000, skirt 3.20
+    level 2 (cell 8 u): 952 corners, 952 exactly equal, worst gap 0.0000, skirt 6.40
+    level 3 (cell 16 u): 1320 corners, 1320 exactly equal, worst gap 0.0000, skirt 12.80
+    level 4 (cell 32 u): 1320 corners, 1239 exactly equal, worst gap 1.2454, skirt 25.60
+    level 5 (cell 64 u): 1320 corners, 1254 exactly equal, worst gap 1.6329, skirt 51.20
+  levels past 3 drop the settlement and road layers from the drawn shape: 134 of 4000 swept positions differ, worst 1.0051 units
+render/distant_ground.gd cached after this process drew with it: true
+
+real	0m44.506s
+user	0m44.392s
+sys	0m0.040s
+
+[exited with code 0]

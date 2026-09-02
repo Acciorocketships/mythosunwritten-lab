@@ -1,0 +1,20 @@
+# ./run_headless.sh --seed 1234 --ticks 0 --board-sweep
+# 81 overlapping 60x60 rectangles across a 1100-unit square of seed 1234,
+# graded against TerrainQuery.is_passable_at on a 0.5-unit grid.
+
+seed 1234
+tick 0 chunks=32 islands=10 villages=1 roads=3 props=392 cover=23 biome=deep_forest water=1404 on_island=0 on_path=0.00 0cef1dc33e911f0f
+done ticks=0 chunks=32 built=32 final=0cef1dc33e911f0f
+board-sweep size=2.00 across=31 cells=77841 mixed=0.0244 lost=0.0527 phantom=0.0031 cliff=0.0198 obstacles=46 missed=0 missed_share=0.0000 widest_missed=0.00
+board-sweep size=2.50 across=25 cells=50625 mixed=0.0297 lost=0.0622 phantom=0.0039 cliff=0.0247 obstacles=46 missed=0 missed_share=0.0000 widest_missed=0.00
+board-sweep size=3.00 across=21 cells=35721 mixed=0.0351 lost=0.0726 phantom=0.0044 cliff=0.0302 obstacles=46 missed=1 missed_share=0.0217 widest_missed=9.50
+board-sweep size=4.00 across=16 cells=20736 mixed=0.0438 lost=0.0920 phantom=0.0060 cliff=0.0403 obstacles=46 missed=1 missed_share=0.0217 widest_missed=9.50
+board-sweep size=5.00 across=13 cells=13689 mixed=0.0514 lost=0.1073 phantom=0.0072 cliff=0.0621 obstacles=46 missed=1 missed_share=0.0217 widest_missed=9.50
+board-sweep size=6.00 across=11 cells=9801 mixed=0.0587 lost=0.1312 phantom=0.0080 cliff=0.1015 obstacles=46 missed=3 missed_share=0.0652 widest_missed=24.00
+board-sweep-built size=2.00 seen=161/162 share=0.9938 cottage=92/92 house=46/46 tavern=11/11 tower=2/2 well=10/11
+board-sweep-built size=2.50 seen=160/162 share=0.9877 cottage=92/92 house=46/46 tavern=11/11 tower=2/2 well=9/11
+board-sweep-built size=3.00 seen=157/162 share=0.9691 cottage=92/92 house=46/46 tavern=11/11 tower=2/2 well=6/11
+board-sweep-built size=4.00 seen=149/162 share=0.9198 cottage=85/92 house=46/46 tavern=11/11 tower=2/2 well=5/11
+board-sweep-built size=5.00 seen=124/162 share=0.7654 cottage=67/92 house=44/46 tavern=11/11 tower=2/2 well=0/11
+board-sweep-built size=6.00 seen=94/162 share=0.5802 cottage=40/92 house=39/46 tavern=11/11 tower=2/2 well=2/11
+board-sweep-regions count=81 span=30.0 truth_step=0.50

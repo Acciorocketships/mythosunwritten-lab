@@ -1,0 +1,91 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+mountain survey seed=1234 span=1000 (a 2000-unit square) lattice=3.00 up=3.00 down=2.00
+relief samples=251001 spacing=4.0 min=-15.06 max=83.06 mean=3.87 relief=98.12
+windows side=400 across=5 (each line is one square: its own relief)
+window x=-800 z=-800 min=-12.5433 max=10.7132 relief=23.2565
+window x=-400 z=-800 min=-11.6030 max=10.5244 relief=22.1274
+window x=0 z=-800 min=-13.8361 max=10.3203 relief=24.1564
+window x=400 z=-800 min=-14.7159 max=10.0307 relief=24.7466
+window x=800 z=-800 min=-15.0607 max=10.0224 relief=25.0831
+window x=-800 z=-400 min=-12.9071 max=13.5197 relief=26.4268
+window x=-400 z=-400 min=-11.6149 max=27.6339 relief=39.2488
+window x=0 z=-400 min=-11.8671 max=52.2784 relief=64.1455
+window x=400 z=-400 min=-13.7682 max=44.5134 relief=58.2816
+window x=800 z=-400 min=-13.6858 max=14.4520 relief=28.1378
+window x=-800 z=0 min=-11.6884 max=16.1595 relief=27.8479
+window x=-400 z=0 min=-12.9713 max=21.8229 relief=34.7942
+window x=0 z=0 min=-7.7121 max=83.0642 relief=90.7764
+window x=400 z=0 min=-12.4481 max=46.0343 relief=58.4824
+window x=800 z=0 min=-6.7331 max=29.6047 relief=36.3378
+window x=-800 z=400 min=-12.5019 max=12.1082 relief=24.6101
+window x=-400 z=400 min=-10.2578 max=12.2040 relief=22.4618
+window x=0 z=400 min=-12.0641 max=55.4487 relief=67.5127
+window x=400 z=400 min=-12.2807 max=21.0329 relief=33.3136
+window x=800 z=400 min=-9.2041 max=19.3930 relief=28.5971
+window x=-800 z=800 min=-13.4766 max=11.2040 relief=24.6806
+window x=-400 z=800 min=-14.3226 max=12.6843 relief=27.0069
+window x=0 z=800 min=-9.2145 max=10.1965 relief=19.4111
+window x=400 z=800 min=-12.0100 max=9.1504 relief=21.1605
+window x=800 z=800 min=-13.1451 max=9.7641 relief=22.9093
+uplift samples=251001 highest=74.05 mean_mask=0.0617 over_1=22.48% over_10=10.56% over_30=3.45% over_50=1.52%
+biomes samples=63001 spacing=8.0
+biome meadow         share=16.08% mean_uplift=  0.55 mean_height=  0.70 max_height= 27.36
+biome deep_forest    share=23.78% mean_uplift=  3.94 mean_height=  4.33 max_height= 81.87
+biome highland       share=34.46% mean_uplift=  5.63 mean_height=  5.84 max_height= 82.68
+biome blossom_grove  share=15.51% mean_uplift=  1.58 mean_height=  2.15 max_height= 54.45
+biome twilight_marsh share=10.17% mean_uplift=  3.26 mean_height=  3.58 max_height= 55.29
+lattice cells=444889 across=667 spacing=3.00 solid=429841
+summits floor=24.0 found=15 (a block top higher than all eight blocks round it)
+summit summit-1 x=-28.0 z=107.0 height=83.04
+summit summit-2 x=-97.0 z=47.0 height=73.05
+summit summit-3 x=-142.0 z=83.0 height=71.69
+summit summit-4 x=-103.0 z=-49.0 height=71.06
+summit summit-5 x=122.0 z=-157.0 height=55.38
+summit summit-6 x=53.0 z=-151.0 height=53.28
+summit summit-7 x=5.0 z=-187.0 height=41.96
+summit summit-8 x=-97.0 z=-178.0 height=36.24
+summit summit-9 x=-1.0 z=332.0 height=34.48
+summit summit-10 x=575.0 z=-37.0 height=32.91
+summit summit-11 x=515.0 z=-142.0 height=29.75
+summit summit-12 x=467.0 z=-157.0 height=29.61
+summit summit-13 x=656.0 z=-61.0 height=29.29
+summit summit-14 x=-292.0 z=-241.0 height=27.70
+summit summit-15 x=575.0 z=161.0 height=26.95
+climbs sample=8 reach=390 (breadth-first over the real height function)
+climb summit-1 x=-28.0 z=107.0 height=83.04 reached=yes steps=130 from=(-28.0, -283.0) foot=22.63 ascent=60.41 worst_rise=2.51 worst_fall=1.03
+climb trace reports/assets/climb-1234.txt points=131
+climb summit-2 x=-97.0 z=47.0 height=73.05 reached=yes steps=130 from=(-97.0, -343.0) foot=11.03 ascent=62.02 worst_rise=2.24 worst_fall=0.90
+climb summit-3 x=-142.0 z=83.0 height=71.69 reached=yes steps=130 from=(-142.0, 473.0) foot=4.91 ascent=66.77 worst_rise=2.38 worst_fall=1.10
+climb summit-4 x=-103.0 z=-49.0 height=71.06 reached=yes steps=130 from=(-103.0, -439.0) foot=2.17 ascent=68.89 worst_rise=2.33 worst_fall=0.83
+climb summit-5 x=122.0 z=-157.0 height=55.38 reached=yes steps=130 from=(122.0, -547.0) foot=4.41 ascent=50.97 worst_rise=2.07 worst_fall=0.85
+climb summit-6 x=53.0 z=-151.0 height=53.28 reached=yes steps=130 from=(443.0, -151.0) foot=25.46 ascent=27.82 worst_rise=2.07 worst_fall=1.14
+climb summit-7 x=5.0 z=-187.0 height=41.96 reached=yes steps=130 from=(395.0, -187.0) foot=18.64 ascent=23.32 worst_rise=1.89 worst_fall=1.33
+climb summit-8 x=-97.0 z=-178.0 height=36.24 reached=yes steps=130 from=(-97.0, -568.0) foot=13.01 ascent=23.23 worst_rise=1.59 worst_fall=1.42
+climbs walkable=8 of 8
+faces sample=8 reach=240
+face summit-1 cells=20008 steps=79927 refused=3900 (4.9%) cut_off=6 (0.0%)
+face summit-2 cells=19771 steps=78936 refused=3981 (5.0%) cut_off=21 (0.1%)
+face summit-3 cells=19527 steps=77851 refused=3020 (3.9%) cut_off=21 (0.1%)
+face summit-4 cells=19775 steps=78944 refused=2849 (3.6%) cut_off=15 (0.1%)
+face summit-5 cells=20081 steps=80324 refused=1633 (2.0%) cut_off=1 (0.0%)
+face summit-6 cells=20081 steps=80324 refused=2040 (2.5%) cut_off=1 (0.0%)
+face summit-7 cells=19910 steps=79559 refused=1965 (2.5%) cut_off=1 (0.0%)
+face summit-8 cells=20020 steps=79986 refused=1724 (2.2%) cut_off=0 (0.0%)
+boards sample=8 (cell=3.00, step up 3.00, step down 2.00)
+board summit-1 top cells=441 holes=0 cliff_edges=3 steps=1680 refused=10 (0.6%)
+board summit-1 flank at (149.0, -58.0) cells=441 holes=0 cliff_edges=178 steps=1680 refused=287 (17.1%)
+board summit-2 top cells=441 holes=0 cliff_edges=12 steps=1680 refused=6 (0.4%)
+board summit-2 flank at (140.0, -55.0) cells=441 holes=0 cliff_edges=149 steps=1680 refused=236 (14.0%)
+board summit-3 top cells=441 holes=0 cliff_edges=148 steps=1680 refused=145 (8.6%)
+board summit-3 flank at (98.0, 104.0) cells=441 holes=0 cliff_edges=345 steps=1680 refused=576 (34.3%)
+board summit-4 top cells=441 holes=0 cliff_edges=1 steps=1680 refused=0 (0.0%)
+board summit-4 flank at (101.0, 107.0) cells=441 holes=0 cliff_edges=345 steps=1680 refused=596 (35.5%)
+board summit-5 top cells=441 holes=0 cliff_edges=0 steps=1680 refused=0 (0.0%)
+board summit-5 flank at (149.0, -58.0) cells=441 holes=0 cliff_edges=178 steps=1680 refused=287 (17.1%)
+board summit-6 top cells=441 holes=0 cliff_edges=10 steps=1680 refused=10 (0.6%)
+board summit-6 flank at (149.0, -58.0) cells=441 holes=0 cliff_edges=178 steps=1680 refused=287 (17.1%)
+board summit-7 top cells=441 holes=0 cliff_edges=5 steps=1680 refused=5 (0.3%)
+board summit-7 flank at (149.0, -58.0) cells=441 holes=0 cliff_edges=178 steps=1680 refused=287 (17.1%)
+board summit-8 top cells=441 holes=0 cliff_edges=0 steps=1680 refused=0 (0.0%)
+board summit-8 flank at (140.0, -55.0) cells=441 holes=0 cliff_edges=149 steps=1680 refused=236 (14.0%)

@@ -1,0 +1,87 @@
+An item spends its whole budget for any caller (W-item-budget-invariant)
+========================================================================
+
+Probe: tools/item_budget_hole_probe.gd
+Run:   tools/godot/godot4 --headless --path . --script res://tools/item_budget_hole_probe.gd
+
+The two cases I-10f1e88bbc71 measured, reproduced on the unchanged code first,
+then the same probe on the changed code. Section B is the review's own sweep
+(40 levels x 250 sources x 2 kinds = 20,000 forged items) re-run around the
+change; section D is I-80a1d45e9bcb's mutability case, which is unchanged on
+purpose and documented rather than removed.
+
+
+BEFORE -- sim/item.gd as the review found it
+--------------------------------------------
+
+=== A -- legendary level-9 weapon, no effect names (I-10f1e88bbc71 B2)
+  weights [0, 0, 100], no names                  budget=126 carries=0 gap=126  mov=0 def=0 eff=0  eff=[]
+  weights [10, 10, 80], no names                 budget=126 carries=25 gap=101  mov=13 def=12 eff=0  eff=[]
+  weights [10, 10, 80], one name                 budget=126 carries=126 gap=0  mov=13 def=12 eff=101  eff=[cut:101]
+  weights [50, 50, 0], no names                  budget=126 carries=126 gap=0  mov=63 def=63 eff=0  eff=[]
+  level 0, weights [0, 0, 100], no names         budget=0 carries=0 gap=0  mov=0 def=0 eff=0  eff=[]
+
+  (the first two are the finding's numbers exactly: 0 of 126, and 25 of 126
+   spent 13 + 12 + 0 with the 101-point effects share lost)
+
+=== C -- hostile shapes            all eight gap=0, unchanged by this work
+=== D -- writing an axis after construction (I-80a1d45e9bcb B6)
+  before: spends_budget=true  budget=54 power=54
+  after movement += 1000: spends_budget=false  budget=54 power=1054
+
+
+AFTER -- the effects fallback in Item._spend_on_effects
+-------------------------------------------------------
+
+
+=== A -- legendary level-9 weapon, no effect names (I-10f1e88bbc71 B2)
+  weights [0, 0, 100], no names                  budget=126 carries=126 gap=0  mov=0 def=0 eff=126  eff=[probe:126]
+  weights [10, 10, 80], no names                 budget=126 carries=126 gap=0  mov=13 def=12 eff=101  eff=[probe:101]
+  weights [10, 10, 80], one name                 budget=126 carries=126 gap=0  mov=13 def=12 eff=101  eff=[cut:101]
+  weights [50, 50, 0], no names                  budget=126 carries=126 gap=0  mov=63 def=63 eff=0  eff=[]
+  level 0, weights [0, 0, 100], no names         budget=0 carries=0 gap=0  mov=0 def=0 eff=0  eff=[]
+
+=== B -- the review's sweep: levels 0-39, both kinds
+  20000 items forged over 6 tiers, 0 inexact, worst |gap| = 0
+
+=== C -- hostile shapes
+  all-negative weights                           budget=126 carries=126 gap=0  mov=126 def=0 eff=0  eff=[]
+  all-zero weights                               budget=126 carries=126 gap=0  mov=126 def=0 eff=0  eff=[]
+  one enormous weight                            budget=126 carries=126 gap=0  mov=0 def=126 eff=0  eff=[]
+  five names, no weights                         budget=126 carries=126 gap=0  mov=0 def=0 eff=126  eff=[a:26|b:25|c:25|d:25|e:25]
+  unknown rarity                                 budget=0 carries=0 gap=0  mov=0 def=0 eff=0  eff=[]
+  negative level                                 budget=0 carries=0 gap=0  mov=0 def=0 eff=0  eff=[]
+  Armour.worn spending 100000 on moving          budget=126 carries=126 gap=0  mov=126 def=0 eff=0  eff=[]
+  Weapon.held spending 100000 twice              budget=126 carries=126 gap=0  mov=126 def=0 eff=0  eff=[]
+
+=== D -- writing an axis after construction (I-80a1d45e9bcb B6)
+  before: spends_budget=true  budget=54 power=54
+  after movement += 1000: spends_budget=false  budget=54 power=1054
+
+Section D is identical before and after, and deliberately so: the axes stay
+writable, and sim/item.gd now states that exactness is a guarantee of the
+constructors and that anything writing an axis afterwards owns keeping the sum.
+tests/test_items.gd and tools/critic_items_probe.gd both write an axis on
+purpose, to show that spends_budget() is a live report; making the fields
+read-only would have had to edit both, outside sim/item.gd and its two callers.
+
+Cross-check, the review's own probe (tools/critic_items_probe.gd) after the
+change:
+
+  [HELD] B1 20000 forged items, budget minus what they carry -- 0 off by anything, worst |gap| = 0
+  [HELD] B2 all weights negative -- gap 0
+  [HELD] B2 all weights zero -- gap 0
+  [HELD] B2 one enormous weight -- gap 0
+  [HELD] B2 five effect names, no weights -- gap 0
+  [HELD] B2 the whole budget to effects, no effect names -- gap 0     (was BROKE, gap 126)
+  [HELD] B2 most of the budget to effects, no effect names -- gap 0   (was BROKE, gap 101)
+  [HELD] B4 Armour.worn spending 100000 on moving out of 126 -- gap 0
+  [HELD] B4 Armour.worn spending -50 on moving -- gap 0
+  [HELD] B4 Weapon.held spending 100000 on each of moving and defending -- gap 0
+  [HELD] B5 a rarity that is not one of the six -- budget 0, carries 0
+  [HELD] B5 a negative source level -- budget 0, carries 0
+  [BROKE] B6 writing to Item.movement after construction -- documented, see above
+
+Suite:        all 28 suites passed (191274 checks), up from 191250
+Structure:    layer check OK, combat check OK, asset check OK
+Fingerprint:  tick 0 b963fd807b8c432d, tick 50 eb2d8c9369212120, final d4e31b0904ff45c0

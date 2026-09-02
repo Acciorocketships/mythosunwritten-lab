@@ -1,0 +1,57 @@
+report tables vs reports/mountain-survey-1234.txt
+
+OK   S2 relief row (after): min -15.06 / max 83.06 / mean 3.87 / relief 98.12
+OK   S3 climb row summit-1
+OK   S3 climb row summit-2
+OK   S3 climb row summit-3
+OK   S3 climb row summit-4
+OK   S3 climb row summit-5
+OK   S3 climb row summit-6
+OK   S3 climb row summit-7
+OK   S3 climb row summit-8
+OK   S4 face row summit-1
+OK   S4 face row summit-2
+OK   S4 face row summit-3
+OK   S4 face row summit-4
+OK   S4 face row summit-5
+OK   S4 face row summit-6
+OK   S4 face row summit-7
+OK   S4 face row summit-8
+OK   S5 window (-800,-800) after = 23.2565
+OK   S5 window (-400,-800) after = 22.1274
+OK   S5 window (0,-800) after = 24.1564
+OK   S5 window (400,-800) after = 24.7466
+OK   S5 window (800,-800) after = 25.0831
+OK   S5 window (-800,400) after = 24.6101
+OK   S5 window (-800,800) after = 24.6806
+OK   S5 window (-400,800) after = 27.0069
+OK   S5 window (0,-400) after = 64.1455
+OK   S5 window (0,0) after = 90.7764
+OK   S5 window (0,400) after = 67.5127
+OK   S5 window (400,0) after = 58.4824
+OK   S5 window (400,-400) after = 58.2816
+OK   S5 uplift shares and mask mean
+OK   S6 biome row meadow
+OK   S6 biome row deep_forest
+OK   S6 biome row highland
+OK   S6 biome row blossom_grove
+OK   S6 biome row twilight_marsh
+OK   S8.4 board row summit-1 top
+OK   S8.4 board row summit-3 top
+OK   S8.4 board row summit-8 top
+OK   S8.4 board row summit-1 flank at (149.0, -58.0)
+OK   S8.4 board row summit-3 flank at (98.0, 104.0)
+OK   S8.4 board row summit-8 flank at (140.0, -55.0)
+OK   every board line in the survey has holes=0 (16 of them)
+OK   stale board figure gone from the report: | 158 |
+OK   stale board figure gone from the report: | 339 |
+OK   stale board figure gone from the report: | 281 |
+OK   stale board figure gone from the report: 587 (34.9%)
+OK   stale board figure gone from the report: 417 (24.9%)
+OK   stale board figure gone from the report: 252 (15.0%)
+OK   stale board figure gone from the report: 11 (0.7%)
+OK   caption and its command name (98, 104)
+OK   no capture command still starts at 103 106
+OK   the old summit sentence is gone
+
+53 checks, 53 pass, 0 fail

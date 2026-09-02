@@ -1,0 +1,6 @@
+# The engine binary and the project-local home it writes its cache into. 140 MB
+# and machine-specific; see the README's Requirements section for how to install
+# one. Everything else here is a project script and belongs in git -- a fresh
+# clone needs fetch_kaykit.sh to have a world that renders as art at all.
+godot/
+godot-home/

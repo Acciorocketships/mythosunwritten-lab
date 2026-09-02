@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/kaykit_medieval_builder/Models/objects/gltf/bridge_roofed.gltf.glb" id="1_model"]
+
+[node name="bridge_wood" type="Node3D"]
+
+[node name="model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(0, 0, -3.826, 0, 3.826, 0, 3.826, 0, 0, 0, 0, 0)

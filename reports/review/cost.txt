@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+=== reviewer re-derivation, seed 1234 ===
+limits read off the code: HOP_HEIGHT=3.0000 DROP_REACH=2.0000 lattice=3.0000
+CombatBoard.STEP_UP=3.0000 STEP_DOWN=2.0000 CLIFF_DROP=2.0000
+PathNetwork.ROUTE_GRADE_LIMIT=1.0000  SettlementField.PAD_RELIEF_LIMIT=5.6000
+MountainField: period=600.0 amp=44.0 octaves=4 range_period=1500.0
+render/distant_ground.gd cached before this process touches it: true
+
+--- cost: microseconds per sample of the height function ---
+  inside a range: hills alone 8.690 us, with the uplift 39.448 us (4.54x), mask alone 25.562 us
+    (sums kept so the loops cannot be optimised away: -141806.8 2404449.9 40134.3)
+    one chunk meshed: 30907 us; ground_height_at through the whole stack: 136.980 us (sum 407361.0)
+  far from any range: hills alone 8.786 us, with the uplift 13.662 us (1.55x), mask alone 4.818 us
+    (sums kept so the loops cannot be optimised away: 213255.3 213255.3 0.0)
+    one chunk meshed: 15545 us; ground_height_at through the whole stack: 68.915 us (sum 33505.0)

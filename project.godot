@@ -1,0 +1,43 @@
+; Engine configuration file.
+; Hand-written and kept minimal on purpose: the simulation core must stay
+; runnable without any of this, and the render shell is the only consumer.
+
+config_version=5
+
+[application]
+
+config/name="Cute Fantasy World Sim"
+config/description="2.5D cute fantasy RPG whose world is a simulation. Simulation core lives in sim/ and never touches the render layer."
+run/main_scene="res://render/main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+
+; Anti-aliasing on the main viewport: 4x multi-sampling (msaa_3d=2) with FXAA
+; over the finished picture (screen_space_aa=1). The project shipped with
+; neither, and a meadow is the worst case for that -- a field of blades thinner
+; than a pixel is sampled once each and the result is the noise the grass was
+; reported for. Measured on that meadow with tools/measure_aa.sh: the pair takes
+; the high-frequency energy from 0.2775 to 0.0946, twice what either half does
+; alone, because multi-sampling resolves the blade edges and FXAA flattens the
+; sub-pixel speckle between them that no number of coverage samples can reach.
+; The full table, the cost, and why not temporal anti-aliasing are in
+; reports/grass.md section 9.
+;
+; A headless run has no viewport and these cost it nothing; the water's mirror
+; deliberately keeps none of it (render/water_reflection.gd).
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/screen_space_aa=1
+
+; Nearest-neighbour filtering for every 2D texture the project draws. The world
+; is 3D low-poly and the interface is 16-pixel pixel art, which is a deliberate
+; pair and only holds if the pixels stay square: a bilinear filter would smear
+; every frame, slot and glyph of it. This key covers CanvasItem textures only, so
+; the 3D stack -- terrain, models, grass, water -- is untouched by it.
+;
+; See render/ui/sprout_theme.gd, which turns off antialiasing and hinting on the
+; pack's own font for the same reason, and tools/measure_ui.sh, which measures
+; whether the drawn result is actually crisp rather than assuming it.
+textures/canvas_textures/default_texture_filter=0

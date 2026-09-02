@@ -1,0 +1,31 @@
+Every headless suite and every documented entry point, run one at a time
+(nothing else running against the repository), after W-item-drops landed.
+
+Command: bash over ./run_tests.sh, ./run_tests.sh --layers-only, and every
+other run_*.sh that does not need a display.
+
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+all 28 suites passed (189844 checks)
+--> exit=0 for ./run_tests.sh
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+asset check: OK -- res://sim names asset tags and no asset
+--> exit=0 for ./run_tests.sh --layers-only
+PASS  combat pieces  360 checks
+--> exit=0 for ./run_pieces.sh
+PASS  combat resolution  339 checks
+--> exit=0 for ./run_resolution.sh
+PASS  combat snap  858 checks
+--> exit=0 for ./run_snap.sh
+PASS  effects  1468 checks
+--> exit=0 for ./run_effect_suite.sh
+--> exit=0 for ./run_items.sh
+--> exit=0 for ./run_drops.sh
+--> exit=0 for ./run_loadout.sh
+--> exit=0 for ./run_match.sh
+--> exit=0 for ./run_encounter.sh
+--> exit=0 for ./run_effects.sh
+--> exit=0 for ./run_headless.sh

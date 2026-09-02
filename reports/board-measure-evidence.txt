@@ -1,0 +1,8 @@
+# ./tools/measure_board.sh
+
+board-measure seed=1234 cell=3.00 span=30.0
+board-measure cells=441 across=21 deep=21
+board-measure cold_ms min=566.10 median=1000.40 max=1667.90
+board-measure warm_ms min=68.67 median=78.76 max=96.40
+board-measure arena fight=20 village_green=20..24 road=1.5 building=0.9..2.6
+board-measure islands count=97 across_cells min=4.53 median=10.80 max=19.12 standable_cells min=13.00 median=64.00 max=193.00
