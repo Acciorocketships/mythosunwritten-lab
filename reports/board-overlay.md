@@ -182,31 +182,44 @@ grass stands in the gutters and the lattice reads.*
 
 ### Shortening or fading: decided by looking
 
-Both were built and photographed on the same seed, the same place and the same
-camera.
+Both were built and photographed, on the same seed and the same place, at two
+cameras: the close working camera the frames above use, and the diorama camera
+the game actually plays at (42 units up, 52 behind, no `--camera` flag).
+
+Close in, the difference is plain:
 
 | shortening the blades (kept) | fading them out |
 | --- | --- |
 | ![blades over a square standing short](assets/board-grass-after.png) | ![blades over a square dithered away](assets/board-grass-fade.png) |
 
-Shortening won. A shortened blade is still a blade: it catches the light, it
-still reads as grass, and the square underneath is clean. A faded one keeps its
-full height and loses a share of its pixels, so under the diorama camera — which
-sits far enough back that a blade is a few pixels wide — it crumbles into
-speckle, and the full-height silhouettes still stand across the square. The two
-frames differ by only 2.1 levels per channel on average over the board, which is
-itself the point: the fade spends its budget on speckling blades that are still
-in the way, where the shortening spends it on getting them out of the way.
+A shortened blade is still a blade: it catches the light, still reads as grass,
+and the square underneath is clean. A faded one keeps its full height and loses a
+share of its pixels, so full-height silhouettes still stand across the square and
+what is left of them is speckle. The two frames differ by only 2.1 levels per
+channel over the board, which is itself the point: the fade spends its budget
+speckling blades that are still in the way, where the shortening spends it on
+getting them out of the way.
 
-There is an engineering reason pointing the same way. The grass is drawn in the
-opaque pass as tens of thousands of instances; giving it a real alpha would move
-all of it into the sorted transparent pass for the sake of one debug overlay. The
-fade that was tested is therefore a screen-space dither with `discard`, which
-keeps the opaque pass but gives up early-z. Shortening costs nothing at all — it
-is a multiply into a number the shader was already computing.
+At the diorama camera the two are much closer — 3.1 levels apart over the board,
+with the same luminance spread to two decimals (18.51 against 18.53) — because a
+blade there is a couple of pixels tall and neither treatment has much left to
+work with. The fade still reads slightly noisier over the squares and its lattice
+lines slightly softer, but this pair on its own would not have decided it:
+
+| shortening, diorama camera | fading, diorama camera |
+| --- | --- |
+| ![the board at diorama scale with shortened grass](assets/board-grass-diorama-short.png) | ![the board at diorama scale with faded grass](assets/board-grass-diorama-fade.png) |
+
+So the decision rests on the close camera, where the difference is real, plus an
+engineering reason pointing the same way. The grass is drawn in the opaque pass
+as tens of thousands of instances; giving it a real alpha would move all of it
+into the sorted transparent pass for the sake of one debug overlay. The fade that
+was tested is therefore a screen-space dither with `discard`, which keeps the
+opaque pass but gives up early-z. Shortening costs nothing at all — it is a
+multiply into a number the shader was already computing.
 
 Both live behind one uniform each (`board_thin`, `board_fade`), so the choice is
-a one-line change and the losing pair is the frame above.
+a one-line change and the losing frames are the ones above.
 
 ### The ground alpha, revisited in the same pass
 
@@ -259,5 +272,6 @@ xvfb-run -a ./run_render.sh --seed 1234 --start 196 182 --paused --board \
 ```
 
 The `-before` frames are the same three commands run on the commit before this
-one; the `board-grass-fade.png` frame is the third one with
+one. The diorama-camera pair is the third command with the `--camera`, `--aim`
+and `--focus` flags dropped. Either fade frame is its command with
 `GrassLayer.BOARD_THIN` at 0.0 and `BOARD_FADE` at 0.85.
