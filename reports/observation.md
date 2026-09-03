@@ -158,7 +158,11 @@ not be perceived; what is asserted is that something is there.
 
 * **A name** appears only when the looking character knows it, and knowing is a
   fact about the *looker*: either the two share a band (you know the people you
-  stand with) or the looker's own `Character.sentiment` has an entry for the
+  stand with) or -- as of the relationship graph, which superseded the empty
+  per-sheet map this line described; see
+  [reports/relationships.md](relationships.md) -- the world's own edge between
+  the two exists. Before that it was the looker's own `Character.sentiment`
+  having an entry for the
   target, which is that sheet's record of everyone it knows of. Knowing is not
   mutual — the suite checks that Wren knowing Mott leaves Mott still not knowing
   Wren.

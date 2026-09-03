@@ -478,10 +478,10 @@ t=144  Bram   began go_to(target=(-460.000, 406.500)), 20 ticks
     round 1 turn #2 at (-145,135) facing=west hp=38/38 def=0 spear + boots(4/4)
       face #2 west
     round 2 turn #1 at (-146,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=146  Pell   began go_to(target=2), 20 ticks
+t=146  Pell   began go_to(target=3), 20 ticks
       face #1 east
     round 2 turn #2 at (-145,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=147  Sable  began go_to(target=3), 20 ticks
+t=147  Sable  began go_to(target=2), 20 ticks
 t=147  Odo    thought again at 5/20t, wanted the same thing
       face #2 west
     round 3 turn #1 at (-146,135) facing=east hp=38/38 def=0 sword + boots(4/4)
@@ -532,23 +532,23 @@ the model cast's turns -- 59 questions across 5 characters, 50 chose an action
   Odo    1        1        4  0cb1af14149ac60d  go_to target=(-460.0, 472.0)   go_to(target=(-460.000, 472… go_to ok at=(-460.000, 472.000) walked=24.0 steps=27
   Pell   1        1        4  da01965695421602  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
   Bram   2        9       12  30a1877368266ee5  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=16
-  Sable  2        9       12  c8f5642c01102c8f  say target=#3 text="Well met,… say(text="Well met, Bram. Y… say ok shout=false heard_by=1
+  Sable  2        9       12  af6ecdd2c13b5429  say target=#3 text="Well met,… say(text="Well met, Bram. Y… say ok shout=false heard_by=1
   Rook   2       10       13  73fe1196623f4cff  say text=good morning, Wren t… say(text=good morning, Wren… say ok shout=false heard_by=1
-  Bram   3       14       17  921efd7a761a1c29  learn text=#4 is a commander … learn about=#4 is a command… (a tool, not an action: one lesson kept)
-  Sable  3       17       20  eb1de90c37228857  learn text=#3 is Bram, a fell… learn about=#3 is Bram, a f… (a tool, not an action: one lesson kept)
+  Bram   3       14       17  dd517b3ab4127f19  learn text=#4 is a commander … learn about=#4 is a command… (a tool, not an action: one lesson kept)
+  Sable  3       17       20  4f6723da3c7be455  learn text=#3 is Bram, a fell… learn about=#3 is Bram, a f… (a tool, not an action: one lesson kept)
   Rook   3       18       21  97be51ebc1442ed1  say text=morning, Pell — what… say(text=morning, Pell — wh… say ok shout=false heard_by=1
-  Bram   4       18       21  b3499e5e7d255abf  say target=#4 text="I'm scout… say(text="I'm scouting thes… say ok shout=false heard_by=1
-  Sable  4       21       24  1f81815e7994ddaa  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=36  (chosen again after 1 interruption)
+  Bram   4       18       21  7d1a4ca26b7ddf4a  say target=#4 text="I'm scout… say(text="I'm scouting thes… say ok shout=false heard_by=1
+  Sable  4       21       24  8a8835cd344244ed  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=36  (chosen again after 1 interruption)
   Odo    2       24       27  bc584cae8471aeaa  go_to target=(-460.0, 493.0)   go_to(target=(-460.000, 493… go_to ok at=(-460.000, 492.700) walked=20.7 steps=23
   Pell   2       24       27  55d9565a53d2e4ce  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=0.0 steps=0
   Rook   4       26       29  6bb4999389e9bbd7  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=35
-  Bram   5       26       29  5f63ab39d8f2abfd  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=39
-  Sable  5       31       34  71553de7fdb251f2  say target=#3 text="A pile of… say(text="A pile of goods, … say ok shout=false heard_by=1
+  Bram   5       26       29  80dffd222f5bae22  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=39
+  Sable  5       31       34  c62bc7431393bfb6  say target=#3 text="A pile of… say(text="A pile of goods, … say ok shout=false heard_by=1
   Rook   5       32       35  b5392172f30f81b7  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=41
-  Bram   6       34       37  dc6cfe3e596441be  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=41
+  Bram   6       34       37  ee897b3d2ed5013d  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=41
   Rook   6       38       41  7fb06a65425cd184  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=45
-  Bram   7       39       42  0040f21d3b981b58  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
-  Sable  6       39       42  fd5fb4d31d855360  go_to target=#3                go_to(target=3)              go_to ok at=(-433.900, 407.000) walked=9.9 steps=11
+  Bram   7       39       42  67f31cc7215f18a1  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
+  Sable  6       39       42  8d8229ef184e372a  go_to target=#3                go_to(target=3)              go_to ok at=(-433.900, 407.000) walked=9.9 steps=11
   Rook   7       43       46  3bc18ee34460b846  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=50
   Odo    3       47       50  7943520536886e3b  go_to target=(-436.0, 492.7)   go_to(target=(-436.000, 492… go_to ok at=(-436.000, 492.700) walked=24.0 steps=27
   Pell   3       47       50  217183828c4cb7c7  say target=#2 text=Morning, R… say(text=Morning, Rook! I'm… say ok shout=false heard_by=1
@@ -557,19 +557,19 @@ the model cast's turns -- 59 questions across 5 characters, 50 chose an action
   Pell   4       55       58  ce5c2ff998f80569  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=62
   Rook   10      58       61  60d1a54f6003ac43  say text=No lantern on me, Pe… say(text=No lantern on me, … say ok shout=false heard_by=1
   Pell   5       60       63  ce5c2ff998f80569  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=69
-  Bram   8       62       65  c7c79ab266ba98b8  go_to target=#6                go_to(target=6)              go_to refused: the board decides where a fighter goes
-  Sable  7       62       66  4056198e94991761  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
+  Bram   8       62       65  ec4109ee25529e65  go_to target=#6                go_to(target=6)              go_to refused: the board decides where a fighter goes
+  Sable  7       62       66  513f7f513aa2a8ca  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
   Rook   11      66       69  83e53fbcf33e59fd  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Pell   6       66       69  5bdd1726461170fb  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Odo    4       70       73  f35dad1ebefc3646  go_to target=(-412.0, 468.0)   go_to(target=(-412.000, 468… go_to refused: the way to the position is blocked
-  Bram   9       85       89  484464c1ef8e06ca  go_to target=(-466.5, 406.5)   go_to(target=(-466.500, 406… go_to refused: the board decides where a fighter goes
-  Sable  8       86       90  a17cc4021aebbae5  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
+  Bram   9       85       89  2a50fd0df93d40ce  go_to target=(-466.5, 406.5)   go_to(target=(-466.500, 406… go_to refused: the board decides where a fighter goes
+  Sable  8       86       90  1a4e872ecf7bd31e  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
   Rook   12      89       92  120a94982e303a86  recall about=pile              recall about=pile            (a tool, not an action: 2 things came back)
   Pell   7       89       92  0074ecf46a3e7fcc  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Rook   13      93       96  120a94982e303a86  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Odo    5       93       96  0c29875df4a31fe5  go_to target=(-414.676, 476.7… go_to(target=(-414.676, 476… go_to ok at=(-414.676, 476.754) walked=6.0 steps=7
-  Bram   10     109      113  484464c1ef8e06ca  go_to target=(-460.0, 406.5)   go_to(target=(-460.000, 406… go_to refused: the board decides where a fighter goes
-  Sable  9      110      114  a17cc4021aebbae5  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
+  Bram   10     109      113  2a50fd0df93d40ce  go_to target=(-460.0, 406.5)   go_to(target=(-460.000, 406… go_to refused: the board decides where a fighter goes
+  Sable  9      110      114  1a4e872ecf7bd31e  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes
   Pell   8      112      115  a5ea7698eda70b8f  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Rook   14     116      119  fbdfd149a67c2c25                                 -- nothing readable --       (nothing was chosen)
   Odo    6      116      119  e2493a975b7d72fb  go_to target=(-424.7, 470.8)   go_to(target=(-424.700, 470… go_to ok at=(-424.700, 470.800) walked=11.659 steps=13
@@ -577,14 +577,14 @@ the model cast's turns -- 59 questions across 5 characters, 50 chose an action
   Rook   16     124      127  fbdfd149a67c2c25                                 -- nothing readable --       (nothing was chosen)
   Rook   17     128      131  fbdfd149a67c2c25                                 -- nothing readable --       (nothing was chosen)
   Rook   18     132      135  fbdfd149a67c2c25                                 -- nothing readable --       (nothing was chosen)
-  Bram   11     133      137  484464c1ef8e06ca  go_to target=(-460.0, 406.5)   go_to(target=(-460.000, 406… still running when the run ended
-  Sable  10     134      138  a17cc4021aebbae5  say text="Which way from here… say(text="Which way from he… say ok shout=false heard_by=1
+  Bram   11     133      137  2a50fd0df93d40ce  go_to target=(-460.0, 406.5)   go_to(target=(-460.000, 406… still running when the run ended
+  Sable  10     134      138  1a4e872ecf7bd31e  say text="Which way from here… say(text="Which way from he… say ok shout=false heard_by=1
   Pell   9      135      138  c0f4efa85034f88c  say text=Lead the way to that… say(text=Lead the way to th… say ok shout=false heard_by=1
   Rook   19     136      139  44469d52aab0c7f9  recall about=pile              recall about=pile            (a tool, not an action: 2 things came back)
   Odo    7      139      142  f2ef700e0a18b1fd  go_to target=(-415.700, 461.8… go_to(target=(-415.700, 461… still running when the run ended
   Rook   20     140      143  5b026a2e826c67ae  go_to target=#6                go_to(target=6)              still running when the run ended
-  Pell   10     143      146  801d3d6dcfc2535a  go_to target=#2                go_to(target=2)              still running when the run ended
-  Sable  11     143      147  111c0b03aefc75a4  go_to target=#3                go_to(target=3)              still running when the run ended
+  Pell   10     143      146  801d3d6dcfc2535a  go_to target=#3                go_to(target=3)              still running when the run ended
+  Sable  11     143      147  b319acadcb073d97  go_to target=#2                go_to(target=2)              still running when the run ended
 
 nobody waits on anybody
   who    turn asked answered waited alongside  ticks each of the others was serviced for      actions
@@ -696,10 +696,29 @@ what each of them came to remember
   who    driven by  entries   events   lessons  characters  recalls lessons written
   Wren   a person       17       17         0         648        -               -
   Rook   a model        13       13         0         740        2               0
-  Bram   a model        12       11         1         779        0               1
-  Sable  a model        13       12         1         775        0               1
+  Bram   a model        13       12         1         858        0               1
+  Sable  a model        14       13         1         842        0               1
   Odo    a model        10       10         0         193        0               0
   Pell   a model        15       15         0         883        0               0
+
+what the world recorded between them
+  4 edges, made of 16 happenings, and not one of them on anybody's sheet
+  sentiment is familiarity x (trust - fear), which is the one number section 6 reads
+  who    driven by with     trust    fear   respect   familiarity  sentiment
+  Wren   a person  Rook      0.00    0.00      0.00          0.68      +0.00
+  Wren   a person  Pell      0.00    0.00      0.00          0.44      +0.00
+  Rook   a model   Wren      0.00    0.00      0.00          0.68      +0.00
+  Rook   a model   Pell      0.00    0.00      0.00          0.68      +0.00
+  Bram   a model   Sable     0.00    0.00      0.00          0.82      +0.00
+  Sable  a model   Bram      0.00    0.00      0.00          0.82      +0.00
+  Odo    a model   nothing has passed between it and anybody
+  Pell   a model   Rook      0.00    0.00      0.00          0.68      +0.00
+  Pell   a model   Wren      0.00    0.00      0.00          0.44      +0.00
+  and what each edge is made of, in the world's own words
+    #1 <-> #2 4 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.68 | #2 trust 0.00 fear 0.00 respect 0.00 familiarity 0.68
+    #3 <-> #4 6 happenings | #3 trust 0.00 fear 0.00 respect 0.00 familiarity 0.82 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.82
+    #2 <-> #7 4 happenings | #2 trust 0.00 fear 0.00 respect 0.00 familiarity 0.68 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.68
+    #1 <-> #7 2 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.44 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.44
 
 what Pell came to remember
   entries                    15 (15 events, 0 lessons)
@@ -772,7 +791,7 @@ after 160 ticks
       said #4 to #3 ""Which way from here, Bram? I don't see the goods yet—point me to them."" heard by [3]
       said #7 to #2 "Lead the way to that pile, Rook — I'll follow you." heard by [2]
   reviews=90 changes=0 finished=55 attacked=0 combat began=1 spoken to=5
-  fingerprint d506019b20bd1ce8
+  fingerprint bcd16fab0ee99f47
 
 the first question in full -- 3111 characters, digest 16dcbdfe447a1187
 

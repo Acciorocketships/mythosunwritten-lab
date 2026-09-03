@@ -184,6 +184,37 @@ static func both_blows_land() -> PackedStringArray:
 	return written
 
 
+## What the blows made of what the two of them are to each other.
+##
+## This is where the fear a blow causes can be read as a number on a shipped run.
+## The run above is two commanders both choosing `attack`; every blow that lands
+## is written into the world's own record by the engine, and `CharacterUpkeep`
+## folds it into the relationship graph on the path both of them pass. Fear rises
+## by the share of full health the blow took, trust falls by half of what was
+## there, and respect rises -- a blow shows what somebody can do, whatever else
+## it does.
+static func relationship_lines() -> PackedStringArray:
+	var run := played()
+	var scene: ActionScene = run["scene"]
+	var graph := scene.relationships
+	var written := PackedStringArray()
+	written.append("what the blows made of them (%d blow%s landed, %d edge%s)" % [
+		scene.blows.size(), "" if scene.blows.size() == 1 else "s",
+		graph.size(), "" if graph.size() == 1 else "s",
+	])
+	for blow in scene.blows:
+		written.append("  #%d struck #%d for %d of %d on tick %d" % [
+			blow["from"], blow["to"], blow["dealt"], blow["out_of"], blow["tick"],
+		])
+	# Both ends of every edge, whether or not the character is still standing:
+	# the graph is the world's record of what happened and a character falling
+	# does not unmake it.
+	for edge in graph.all():
+		written.append("  " + edge.line_toward(edge.low))
+		written.append("  " + edge.line_toward(edge.high))
+	return written
+
+
 ## A turn nobody answered: the same duel, with one of the two unable to answer
 ## for `THINKING_TICKS` ticks. Its turns come up and pass, and the fight carries
 ## on without it.

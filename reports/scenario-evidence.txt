@@ -320,6 +320,15 @@ t=158  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=162
 t=158  Rook   began wait(ticks=4), 4 ticks
 t=159  Sable  thought again at 25/30t, wanted the same thing
 
+what the world recorded between them (2 edges, 13 happenings)
+  sentiment is familiarity x (trust - fear), the one number section 6 reads
+  #1 -> #2 trust 0.20 fear 0.00 respect 0.10 familiarity 0.76 sentiment +0.15
+  #2 -> #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.76 sentiment +0.15
+    made of #2 said to #1 "what will it be?" ; #1 gave 12 coins to #2 for 1 thing ; #1 shouted where #2 "a fair bargain" ; #1 shouted where #2 "what was that noise?"
+  #3 -> #4 trust 0.00 fear 0.77 respect 0.68 familiarity 0.90 sentiment -0.70
+  #4 -> #3 trust 0.00 fear 0.47 respect 0.68 familiarity 0.90 sentiment -0.42
+    made of #3 struck #4 for 5 of 38 ; #4 struck #3 for 12 of 38 ; #3 struck #4 for 5 of 38 ; #4 struck #3 for 11 of 38
+
 after 160 ticks
     tick 160 actors=4 objects=0 offers=0
       #1 commander band=1 at (-476.100, -2.373, 416.000) hp=32/32 walking
@@ -335,4 +344,4 @@ after 160 ticks
       said #1 aloud "a fair bargain" heard by [2]
       said #1 aloud "what was that noise?" heard by [2]
   reviews=57 changes=0 finished=92 attacked=0 combat began=2 spoken to=2
-  fingerprint 7efa1a16f912e51d
+  fingerprint 2810e3d79c9c7ece

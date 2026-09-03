@@ -52,6 +52,11 @@ two characters, one type: res://sim/character.gd
 | persistent memory | `memory` — an empty handle | the agent milestones |
 | sentiment map | `sentiment` — an empty handle | §6 and §13 |
 
+> **Superseded.** The `sentiment` handle in the two lists above is retired. §10
+> puts relationships on edges between entities rather than inside a sheet, and
+> the world now keeps one `RelationshipGraph`; the field is gone from
+> `sim/character.gd`. See [reports/relationships.md](relationships.md).
+
 The two handles that are empty are named now, and deliberately: the alternative
 is one type today and an amendment to it later, and then for a while the project
 has two answers to "what is a character".

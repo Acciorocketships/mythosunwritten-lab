@@ -191,6 +191,16 @@ func sentiment(from_id: int, to_id: int) -> float:
 	return 0.0 if edge == null else edge.sentiment_of(from_id)
 
 
+## Every edge in the world, in the order the pairs first had anything to do with
+## each other. What a report walks; a *character* never gets this, and reaches
+## the graph through `edges_of()` and `knows()` alone.
+func all() -> Array[RelationshipEdge]:
+	var found: Array[RelationshipEdge] = []
+	for key in _edges:
+		found.append(_edges[key])
+	return found
+
+
 ## How many edges there are.
 func size() -> int:
 	return _edges.size()

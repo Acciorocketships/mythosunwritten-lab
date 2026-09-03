@@ -111,7 +111,7 @@ after 140 ticks
     check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
     check #3 interact:hazel crate:whittling knife -- failed: dex 4 + roll 6 = 10 vs dc 12
     check #4 interact:hazel crate:whittling knife -- failed, remembered: dex 4 + roll 6 = 10 vs dc 12 (no roll, no call)
-  fingerprint 11725229a9e8314a
+  fingerprint 305f10e2de31025f
 
 the two questions in full
 

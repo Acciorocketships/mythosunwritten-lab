@@ -422,11 +422,10 @@ static func relationship_lines(scene: ActionScene) -> PackedStringArray:
 		])
 	written.append("  sentiment is familiarity x (trust - fear), the one number"
 		+ " section 6 reads")
-	for one in scene.actors:
-		for edge in graph.edges_of(one.id):
-			written.append("  " + edge.line_toward(one.id))
-	for line in graph.lines():
-		written.append("    " + line)
+	for edge in graph.all():
+		written.append("  " + edge.line_toward(edge.low))
+		written.append("  " + edge.line_toward(edge.high))
+		written.append("    made of " + " ; ".join(edge.notes))
 	return written
 
 

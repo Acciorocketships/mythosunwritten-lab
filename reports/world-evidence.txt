@@ -114,6 +114,14 @@ the operations, every one of them the engine's
   did       open target=#3                             the hazel crate came open
   did       spawn role=scholar at=(-478.0, 412.0)      a scholar was rolled for ground of difficulty 10 and stands at (-478.000, 412.000) as #6, with no one written into it yet
 
+the relationships, which are the world's record and not a model's
+  #1 <-> #4 1 happening | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25
+  and an answer that tried to write one:
+    the line          relate target=#2 trust=1.0 fear=0.0
+    read as           0 operations -- there is none of that name in the table
+    through the engine would not -- there is no such operation
+    and the graph     unmoved
+
 the spawns, rolls first
   #4  a scout at (-470.0, 415.0)
       1. rolled on tick 4, level 10 for this region
@@ -196,7 +204,7 @@ after 150 ticks
     #2 oak chest at (-474.000, -2.256, 420.000) open [0 carried, 0 equipped, 9 money]
     #3 hazel crate at (-485.000, -4.658, 424.000) open [0 carried, 0 equipped, 0 money]
     said #1 aloud "anyone about? I have rope and a lantern to trade" heard by [4]
-  fingerprint 939f85ef6e27b820
+  fingerprint e667d199e628967b
 
 the questions in full
 

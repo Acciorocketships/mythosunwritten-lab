@@ -15,9 +15,15 @@ extends RefCounted
 ## it wants that the engine holds no state for: being thought well of, having
 ## learned what happened somewhere, having seen enough of a place. There is no
 ## field anywhere in the simulation that is any of those, and inventing a proxy
-## for one -- calling "thought well of" a sentiment number that does not exist
-## yet, calling "seen enough" a distance from a spawn point -- would be this file
-## making up the answer rather than reading it.
+## for one -- calling "seen enough" a distance from a spawn point -- would be this
+## file making up the answer rather than reading it.
+##
+## There is a sentiment number now -- `RelationshipGraph.sentiment`, one per
+## ordered pair -- and "be thought well of here" is still not it. It names no
+## target and no threshold: well thought of by whom, and how well. Picking either
+## would be this file inventing the answer exactly as a proxy would, and the
+## threshold in particular is section 6's, which is the ownership item's business
+## and not a goal check's.
 ##
 ## So it does not answer those, and `answers()` says which kind is which. A goal
 ## the engine answers is closed here and nowhere else; a goal it does not is

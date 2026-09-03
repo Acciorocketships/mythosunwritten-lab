@@ -44,10 +44,12 @@ extends RefCounted
 ##   * **have traded with the other trader** -- a short goal about an exchange,
 ##     which the world answers out of the trades the engine has honoured;
 ##   * **be thought well of here** -- a long goal in the character's own words.
-##     Nothing in the simulation is being thought well of; there is no sentiment
-##     number yet and inventing one would be this file answering its own
-##     question. So the world does not answer it, the prompt says so beside it,
-##     and the character is the only thing that can close it.
+##     Nothing in the simulation is being thought well of *here*: there is a
+##     sentiment number now, one per ordered pair of characters, but this goal
+##     names neither a target nor a threshold and picking either would be this
+##     file answering its own question. So the world does not answer it, the
+##     prompt says so beside it, and the character is the only thing that can
+##     close it.
 ##
 ## None of them says what to do. Every one is a state the world could be in, and
 ## the run measures whether being after a state changes which verb comes back.
