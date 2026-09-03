@@ -358,6 +358,17 @@ const SWAY_GUST := 0.24
 ## the root of the copy it belongs to in its second texture-coordinate channel,
 ## written when the patch was baked, and the shader puts that through the model
 ## matrix to get where that blade is standing in the world.
+## How much shorter a blade stands where a board square is painted under it, and
+## what share of its pixels a fade would throw away instead.
+##
+## 0.80 and 0.0: the blades over a square stand at a fifth of their height, which
+## is enough for the square to read through them without the ground going bare,
+## and the fade is off because shortening won the comparison. Both are one
+## uniform each, so turning the choice round is a one-line change and the losing
+## pair is still in reports/board-overlay.md.
+const BOARD_THIN := 0.80
+const BOARD_FADE := 0.0
+
 const GRASS_SHADER := """
 shader_type spatial;
 render_mode world_vertex_coords, cull_disabled, specular_disabled;
@@ -395,6 +406,24 @@ uniform vec4 walkers[8];
 uniform float walker_band = 2.5;
 uniform float walker_push = 0.55;
 uniform float walker_flatten = 0.72;
+
+// The tactical lattice, when one is being drawn under the grass: xy is where the
+// board is centred and zw how far it reaches in world x and z, with a reach of
+// zero meaning there is no board. board_level is the height the board's middle
+// sits at and half its own relief, which is how a blade tells a board it is
+// standing on from one twenty units below it on the ground. The last three are
+// the lattice itself, so a blade can tell a painted square from the gutter
+// between two of them, and how much a blade over a square gives way.
+uniform vec4 board_rect = vec4(0.0);
+uniform vec2 board_level = vec2(0.0);
+uniform float board_cell = 3.0;
+uniform float board_fill = 0.86;
+uniform float board_thin = 0.0;
+uniform float board_fade = 0.0;
+
+// How much of this blade is standing over a painted square, carried to the
+// fragment stage so a fade can be judged against the same number a thinning is.
+varying float board_share;
 
 void vertex() {
 	// Where this blade is rooted: UV2 is the root of this vertex's own copy in
@@ -446,8 +475,34 @@ void vertex() {
 		flattened = max(flattened, near);
 	}
 
+	// Whether this blade is standing on a square of the board. Same shape as the
+	// walkers above and on the same per-frame uniforms: the board is a rectangle
+	// and a lattice inside it, and both are pure functions of where the blade is
+	// standing, so one write covers every chunk on screen.
+	board_share = 0.0;
+	if (board_rect.z > 0.0) {
+		vec2 reach = board_rect.zw - abs(root.xz - board_rect.xy);
+		float inside = min(
+			smoothstep(0.0, board_cell, reach.x), smoothstep(0.0, board_cell, reach.y)
+		);
+		// Only the storey the board is on. A board follows the ground, so its
+		// own relief is the band; a blade on an island over a board on the
+		// ground below is not standing on it.
+		inside *= 1.0 - smoothstep(
+			board_level.y, board_level.y + 4.0, abs(root.y - board_level.x)
+		);
+		// And only over a painted square, not the gutter between two of them, so
+		// the lattice reads through the grass as a lattice rather than as a
+		// mown rectangle.
+		vec2 within = abs(fract(root.xz / board_cell) - 0.5) * 2.0;
+		board_share = inside * (1.0 - smoothstep(
+			board_fill - 0.18, board_fill + 0.18, max(within.x, within.y)
+		));
+	}
+
 	float shrink = 1.0 - smoothstep(fade_start, fade_end, distance(root.xz, focus));
 	shrink *= 1.0 - flattened * walker_flatten;
+	shrink *= 1.0 - board_thin * board_share;
 
 	VERTEX.y = root.y + (VERTEX.y - root.y) * shrink;
 	VERTEX.xz += push * lean * shrink;
@@ -489,6 +544,21 @@ void fragment() {
 	// to 1.00 buys a further 0.002 of noise for the last of the blade's form.
 	vec3 up = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
 	NORMAL = normalize(mix(NORMAL, up, 0.85));
+
+	// The other way of letting a board square read through its grass: throw away
+	// a share of the blade's pixels rather than shortening the blade. It is a
+	// dither and not a blend on purpose -- the grass is drawn in the opaque pass
+	// as tens of thousands of instances, and giving it an alpha to fade would
+	// move all of it into the sorted transparent pass for the sake of one debug
+	// overlay. A fixed screen-space pattern reads as a fade and stays opaque.
+	if (board_fade * board_share > 0.0) {
+		float dither = fract(
+			sin(dot(floor(FRAGCOORD.xy), vec2(12.9898, 78.233))) * 43758.5453
+		);
+		if (dither < board_fade * board_share) {
+			discard;
+		}
+	}
 
 	// COLOR is the tuft's own palette colour multiplied by the instance's,
 	// which carries the biome tint at this tuft as a share of max_gain so the
@@ -565,6 +635,8 @@ func _init(terrain: TerrainQuery, world_seed: int) -> void:
 	_material.set_shader_parameter("fade_start", FADE_START)
 	_material.set_shader_parameter("fade_end", FADE_END)
 	_material.set_shader_parameter("walker_band", WALKER_BAND)
+	give_way(BOARD_THIN, BOARD_FADE)
+	stand_clear()
 	_clear_walkers()
 
 
@@ -1401,6 +1473,41 @@ static func _island_order(count: int) -> PackedInt32Array:
 		order[pick] = swap
 	_island_orders[count] = order
 	return order
+
+
+## Tell the shader that a board is being drawn under the grass, so the grass over
+## its squares gives way and the lattice reads through.
+##
+## Four writes for the whole world, however many chunks are on screen, because
+## every chunk shares the one material -- the same path and the same cost as the
+## walkers who part the grass. `relief` is how far the board's own surface rises
+## and falls about `level`, which is what lets a blade tell a board it is
+## standing on from one on the ground far below an island.
+func stand_over_board(
+	centre: Vector2, half: Vector2, level: float, relief: float, cell: float, fill: float
+) -> void:
+	_material.set_shader_parameter("board_rect", Plane(centre.x, centre.y, half.x, half.y))
+	_material.set_shader_parameter("board_level", Vector2(level, relief * 0.5 + 2.0))
+	_material.set_shader_parameter("board_cell", cell)
+	_material.set_shader_parameter("board_fill", fill)
+
+
+## No board is being drawn: the grass stands up everywhere.
+func stand_clear() -> void:
+	_material.set_shader_parameter("board_rect", Plane(0.0, 0.0, 0.0, 0.0))
+
+
+## How a blade over a board square gives way: how much shorter it stands, and
+## what share of its pixels are thrown away.
+##
+## Two ways of saying the same thing, and which one is used was decided by
+## looking at both under the diorama camera rather than by argument -- see
+## reports/board-overlay.md. Shortening won: a shortened blade still catches the
+## light and still reads as grass, where a dithered one crumbles into speckle at
+## the distance the camera actually sits at.
+func give_way(thin: float, fade: float) -> void:
+	_material.set_shader_parameter("board_thin", thin)
+	_material.set_shader_parameter("board_fade", fade)
 
 
 ## Tell the shader where the view is centred and who is walking through the

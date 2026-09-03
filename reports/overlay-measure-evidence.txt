@@ -1,0 +1,30 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+overlay-measure seed=1234 cell=3.00 span=30.0 fill=0.86 ground_mesh_cell=2.00
+
+overlay-measure site=(-216.0, -36.0) biome=blossom_grove village=no cells=441 relief=40.17
+overlay-measure  flat (one height per cell, as it was drawn before): vertices=2646 samples=0 worst=1.929 mean=0.340
+overlay-measure  n | vertices | samples | exact: cold_ms step_ms worst mean | land: cold_ms step_ms worst mean
+overlay-measure  1 |     6174 |    1748 |      368    17.9  0.288 0.0177 |      177     8.2  0.508 0.0174
+overlay-measure  2 |    17640 |    3933 |      780    34.0  0.250 0.0045 |      346    16.7  0.508 0.0047
+overlay-measure  3 |    34398 |    6992 |     1451    65.5  0.225 0.0020 |      626    29.1  0.508 0.0023
+overlay-measure  4 |    56448 |   10925 |     2378   100.6  0.200 0.0011 |      925    39.9  0.508 0.0015
+overlay-measure  6 |   116424 |   21413 |     4571   201.4  0.150 0.0005 |     1706    87.7  0.508 0.0009
+overlay-measure  8 |   197568 |   35397 |     7227   372.1  0.184 0.0003 |     2841   133.2  0.508 0.0007
+overlay-measure  ground mesh above the sampled field: worst=0.0723 mean=0.0083 -- what the lift has to clear
+overlay-measure  painted area the ground would still poke through, by lift: 0.00:67.991% 0.02:13.437% 0.03:4.256% 0.04:0.540% 0.06:0.055% 0.09:0.000%
+overlay-measure  (cold_ms builds every cell; step_ms is the 21 cells one step of walking exposes, which is all a cached board rebuilds)
+
+overlay-measure site=(-96.0, -18.0) biome=highland village=yes cells=441 relief=16.62
+overlay-measure  flat (one height per cell, as it was drawn before): vertices=2646 samples=0 worst=1.985 mean=0.211
+overlay-measure  n | vertices | samples | exact: cold_ms step_ms worst mean | land: cold_ms step_ms worst mean
+overlay-measure  1 |     6174 |    1764 |      463    17.2  2.043 0.0269 |      179     7.4  1.655 0.0658
+overlay-measure  2 |    17640 |    3969 |      986    42.5  1.985 0.0076 |      351    18.2  1.650 0.0573
+overlay-measure  3 |    34398 |    7056 |     1732    69.2  1.878 0.0035 |      653    33.6  1.648 0.0559
+overlay-measure  4 |    56448 |   11025 |     2786   119.9  1.696 0.0019 |      950    56.2  1.647 0.0553
+overlay-measure  6 |   116424 |   21609 |     5350   244.0  1.271 0.0008 |     1757    81.4  1.647 0.0549
+overlay-measure  8 |   197568 |   35721 |     8925   348.1  1.351 0.0005 |     2947   126.7  1.647 0.0548
+overlay-measure  ground mesh above the sampled field: worst=0.6336 mean=0.0063 -- what the lift has to clear
+overlay-measure  painted area the ground would still poke through, by lift: 0.00:30.512% 0.02:7.057% 0.03:4.889% 0.04:3.438% 0.06:2.612% 0.09:1.533%
+overlay-measure  (cold_ms builds every cell; step_ms is the 21 cells one step of walking exposes, which is all a cached board rebuilds)
+overlay-measure walk ticks=400 moved=360.0 rebuilds=151 every=2.6_ticks=0.13_s

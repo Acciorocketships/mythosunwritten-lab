@@ -1,0 +1,60 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS  rng            1325 checks
+PASS  determinism    15 checks
+PASS  terrain        32 checks
+PASS  streaming      4695 checks
+PASS  terrain_lod    59 checks
+PASS  mountains      3030 checks
+PASS  biomes         212 checks
+PASS  water          6358 checks
+        islands: candidate bound ruled out 515 of 968 asks, 213 had an island
+        islands: cell gate matched the ungated scan on 10800 asks, 1958 with an island, building 317 cells against 1984
+PASS  islands        105292 checks
+        island cover: 11 overlapping storey pairs, 33 things in the laps, 0 coincidences
+        island cover: 4509 placements over 4 seeds -- 0 hovering, 0 past the lip, 0 in water, 0 on a face
+        island cover: 194 islands over 4 seeds -- 58 with a basin, 58 overflowing, 58 dipping below their own rim, 0 boundary samples below it
+PASS  island cover   4922 checks
+        settlements: 20 of 110 villages (18.2%) sited by the shore rule over 8 seeds
+        settlements: 36 wide upper storeys swept, 4 spots the old padded rule let through
+PASS  settlements    19829 checks
+PASS  scatter        295 checks
+PASS  combat board   25505 checks
+PASS  combat pieces  360 checks
+PASS  combat resolution 1750 checks
+PASS  combat snap    858 checks
+PASS  layering       34 checks
+PASS  asset tags     1330 checks
+PASS  characters     1295 checks
+PASS  character sheet 109 checks
+PASS  items          159 checks
+PASS  inventory      90 checks
+PASS  drops          65 checks
+PASS  effects        1474 checks
+PASS  actions        235 checks
+PASS  control loop   78 checks
+PASS  observation    218 checks
+PASS  scenario       148 checks
+PASS  agent          935 checks
+PASS  memory         94 checks
+PASS  goals          132 checks
+PASS  upkeep         95 checks
+PASS  relationships  137 checks
+PASS  checks         118 checks
+PASS  orchestrator   282 checks
+PASS  fight driver   51 checks
+PASS  turn seam      23 checks
+        window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
+        window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
+PASS  window glow    11225 checks
+PASS  board overlay  21 checks
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+PASS  ui panel       157 checks
+PASS  ui readout     1523 checks
+
+all 46 suites passed (195751 checks)

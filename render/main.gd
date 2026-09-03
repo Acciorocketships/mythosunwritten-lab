@@ -85,7 +85,35 @@ const CAMERA_FAR := 900.0
 
 ## How far the board overlay is lifted off the ground it describes, in world
 ## units, so its quads do not fight the terrain for the same pixels.
-const BOARD_LIFT := 0.09
+##
+## Re-chosen now that a square follows the surface instead of lying flat across
+## it. When a cell was one flat quad the lift was fighting the cell's own relief
+## -- 0.34 units of it on average over a hillside board, 1.93 at worst -- which
+## no lift that small was ever going to win, and 0.09 was a compromise between
+## hovering and sinking. All that is left to clear now is the ground *mesh's*
+## own faceting: the overlay samples the height function, the ground is that
+## function read on a 2-unit lattice and joined by flat triangles, and where the
+## ground is convex the triangle cuts the corner and stands above the function by
+## 0.008 units on average. 0.045 clears all but 0.54% of the painted area of a
+## hillside board; going on to 0.09 buys the last half a percent and costs twice
+## as much hover. See reports/board-overlay.md and tools/measure_overlay.sh.
+const BOARD_LIFT := 0.045
+
+## How many times a cell is cut in each direction before it is drawn: a cell
+## comes out as this many quads across and this many deep, with the terrain
+## sampled afresh at every one of their corners.
+##
+## Chosen against the ground it lies on rather than by taste. A painted square is
+## 2.58 units across, and the ground under it is meshed at 2.0-unit cells, so at
+## 2 the square's own steps are 1.29 units -- already finer than the ground it is
+## lying on, and there is no detail below that for a finer square to find. The
+## measured gap between the drawn square and the ground agrees: one flat quad per
+## cell sits 0.340 units off the surface on average, cutting in uphill and
+## floating downhill; 2 brings that to 0.0045, and 3 to 0.0020 for 1.95x the
+## vertices. A board is 17 640 vertices at 2 against 2 646 flat, and rebuilding
+## the 21 cells one step of walking exposes costs 34-43 ms against the 68-96 ms
+## the board read itself already costs. See tools/measure_overlay.sh.
+const BOARD_CUTS := 2
 
 ## How much of a cell the filled quad covers, leaving a gutter between cells so
 ## the lattice reads as squares rather than as one sheet.
@@ -102,7 +130,7 @@ const PIECE_LIFT := 0.0
 ## shoved off, dull red for something built on, and a dark plate at the anchor's
 ## own height for a hole -- water, or the void off an island's rim -- so a hole
 ## reads as a missing square rather than as nothing at all.
-const BOARD_GROUND := Color(0.86, 0.94, 1.0, 0.30)
+const BOARD_GROUND := Color(0.86, 0.94, 1.0, 0.20)
 const BOARD_AERIAL := Color(0.62, 0.92, 0.86, 0.34)
 const BOARD_CLIFF := Color(1.0, 0.66, 0.26, 0.52)
 const BOARD_BUILT := Color(0.92, 0.36, 0.36, 0.5)
@@ -482,6 +510,21 @@ var _board_view: MeshInstance3D = null
 var _board_material: StandardMaterial3D = null
 var _board_cell := Vector2i(2147483647, 2147483647)
 var _board_lifted := false
+## The sampled surface under each cell of the drawn board, keyed by the cell and
+## the storey it was read on, so that walking one cell along re-samples the one
+## new column rather than the whole board.
+##
+## Sound because the lattice is fixed to the world and the terrain does not move:
+## a cell's sub-vertex heights are a function of the cell, the storey and the
+## seed, so a height once read is a height for good. Bounded because every
+## rebuild keeps only what the board it just drew asked for.
+var _board_surface := {}
+## Where the drawn board reaches in world x and z, and the middle and the spread
+## of the heights it lies at. Handed to the grass every frame so the grass over
+## its squares gives way; an empty rectangle means there is no board.
+var _board_reach := Rect2()
+var _board_level := 0.0
+var _board_relief := 0.0
 ## How many cells the drawn board last had, and how many of them were holes.
 ## Printed on the stop line so a capture can be told apart from a run without
 ## the overlay without needing a screen to look at.
@@ -1232,6 +1275,20 @@ func _sync_grass(snapshot: Dictionary) -> void:
 		_grass_drawn += counts.y
 
 	_grass.look_from(observer, _walkers(snapshot))
+	# One write for the whole world however many chunks are drawn, exactly as the
+	# walkers above are: the grass over the board's squares stands shorter so the
+	# lattice reads through it.
+	if _board_view != null and _board_reach.size.x > 0.0:
+		_grass.stand_over_board(
+			_board_reach.get_center(),
+			_board_reach.size * 0.5,
+			_board_level,
+			_board_relief,
+			CombatBoard.CELL_SIZE,
+			BOARD_FILL,
+		)
+	else:
+		_grass.stand_clear()
 
 
 ## An empty stand-in for a chunk nothing grows on, so that the answer is
@@ -1410,46 +1467,93 @@ func _sync_board(snapshot: Dictionary) -> void:
 	var lines := PackedVector3Array()
 	var line_colors := PackedColorArray()
 	var holes := 0
+	var kept := {}
+	var wide := BOARD_CUTS + 1
+	var half := board.cell_size * BOARD_FILL * 0.5
 	for row in board.cells_deep:
 		for column in board.cells_across:
 			var cell := board.min_cell + Vector2i(column, row)
 			var middle := board.centre(cell)
 			var tint := BOARD_GROUND
-			var height := board.height_at(cell)
 			if board.is_hole(cell):
 				holes += 1
 				tint = BOARD_HOLE
-				# A hole has no surface, so its plate is drawn at the height of
-				# the storey the board is on: the level a piece would have been
-				# standing at had there been anything there.
-				height = board.anchor_height
 			elif board.blocks_move(cell):
 				tint = BOARD_BUILT
 			elif board.is_cliff_edge(cell):
 				tint = BOARD_CLIFF
 			elif board.storey_at(cell) > CombatBoard.GROUND_STOREY:
 				tint = BOARD_AERIAL
-			var half := board.cell_size * BOARD_FILL * 0.5
-			var lift := height + BOARD_LIFT
-			var corners := [
-				Vector3(middle.x - half, lift, middle.y - half),
-				Vector3(middle.x + half, lift, middle.y - half),
-				Vector3(middle.x + half, lift, middle.y + half),
-				Vector3(middle.x - half, lift, middle.y + half),
-			]
-			for at in [0, 1, 2, 0, 2, 3]:
-				vertices.append(corners[at])
-				colors.append(tint)
+			var surface := _cell_surface(board, cell, kept)
+
+			# The square, as BOARD_CUTS x BOARD_CUTS quads bounded in x and z by
+			# the cell exactly as one quad was, each corner standing at the
+			# height the terrain has there. Same winding as before.
+			for down in BOARD_CUTS:
+				for across in BOARD_CUTS:
+					var at := down * wide + across
+					var quad := [
+						_board_point(middle, half, surface, at, across, down),
+						_board_point(middle, half, surface, at + 1, across + 1, down),
+						_board_point(
+							middle, half, surface, at + wide + 1, across + 1, down + 1
+						),
+						_board_point(middle, half, surface, at + wide, across, down + 1),
+					]
+					for corner in [0, 1, 2, 0, 2, 3]:
+						vertices.append(quad[corner])
+						colors.append(tint)
+
 			# The outline, in the same colour at full strength, so a cliff edge
-			# reads as an edge and not only as a shade.
+			# reads as an edge and not only as a shade. It walks the same
+			# sub-vertices the fill is built from, so the edge of a square is the
+			# edge of the square and never floats off it.
 			var edge := Color(tint.r, tint.g, tint.b, minf(1.0, tint.a * 2.4))
-			for at in 4:
-				lines.append(corners[at])
-				lines.append(corners[(at + 1) % 4])
+			var ring := PackedInt32Array()
+			for step in BOARD_CUTS:
+				ring.append(step)
+			for step in BOARD_CUTS:
+				ring.append(step * wide + BOARD_CUTS)
+			for step in BOARD_CUTS:
+				ring.append(BOARD_CUTS * wide + BOARD_CUTS - step)
+			for step in BOARD_CUTS:
+				ring.append((BOARD_CUTS - step) * wide)
+			for step in ring.size():
+				var from_at := ring[step]
+				var to_at := ring[(step + 1) % ring.size()]
+				lines.append(_board_point(
+					middle, half, surface, from_at, from_at % wide, from_at / wide
+				))
+				lines.append(_board_point(
+					middle, half, surface, to_at, to_at % wide, to_at / wide
+				))
 				line_colors.append(edge)
 				line_colors.append(edge)
+	# Only what this board asked for is kept, so the store cannot grow without
+	# bound as the observer walks across the world.
+	_board_surface = kept
 	_board_cells = board.cell_count()
 	_board_holes = holes
+	# What the grass needs to know about the board, worked out here because this
+	# is where the board is already in hand: how far it reaches, and the middle
+	# and the spread of the heights it lies at.
+	var low := board.centre(board.min_cell) - Vector2(board.cell_size, board.cell_size) * 0.5
+	var high := low + Vector2(
+		float(board.cells_across) * board.cell_size,
+		float(board.cells_deep) * board.cell_size,
+	)
+	_board_reach = Rect2(low, high - low)
+	var lowest := INF
+	var highest := -INF
+	for surface in kept.values():
+		for height in (surface as PackedFloat64Array):
+			lowest = minf(lowest, height)
+			highest = maxf(highest, height)
+	if lowest > highest:
+		lowest = board.anchor_height
+		highest = board.anchor_height
+	_board_level = (lowest + highest) * 0.5
+	_board_relief = highest - lowest
 
 	var mesh := ArrayMesh.new()
 	var fills := []
@@ -1463,6 +1567,59 @@ func _sync_board(snapshot: Dictionary) -> void:
 	outlines[Mesh.ARRAY_COLOR] = line_colors
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, outlines)
 	_board_view.mesh = mesh
+
+
+## Where one sub-vertex of a square stands: bounded in x and z by its cell, and
+## at whatever height the terrain was found to have there.
+func _board_point(
+	middle: Vector2, half: float, surface: PackedFloat64Array, at: int, across: int, down: int
+) -> Vector3:
+	return Vector3(
+		middle.x - half + 2.0 * half * float(across) / float(BOARD_CUTS),
+		surface[at] + BOARD_LIFT,
+		middle.y - half + 2.0 * half * float(down) / float(BOARD_CUTS),
+	)
+
+
+## The surface under one cell of the board, as one height per sub-vertex.
+##
+## The terrain is asked the same question the board builder asked it -- what
+## would you be standing on here, coming from this height -- so a square lies on
+## the surface the simulation says its cell is, rather than on a second opinion
+## about it. Where there is nothing within reach of the cell's own height, which
+## is a sub-vertex out over a cliff face or off an island's rim, the cell's
+## height stands: better a square that stops following than one that stretches
+## down a wall.
+##
+## A hole is the exception, and it is the same exception the flat version made:
+## there is no surface under a hole to follow, so its plate stays flat at the
+## anchor height -- the level a piece would have been standing at had there been
+## anything there.
+func _cell_surface(board: CombatBoard, cell: Vector2i, kept: Dictionary) -> PackedFloat64Array:
+	var wide := BOARD_CUTS + 1
+	var key := Vector3i(cell.x, cell.y, board.storey_at(cell))
+	if _board_surface.has(key):
+		var known: PackedFloat64Array = _board_surface[key]
+		kept[key] = known
+		return known
+	var surface := PackedFloat64Array()
+	surface.resize(wide * wide)
+	if board.is_hole(cell):
+		surface.fill(board.anchor_height)
+		kept[key] = surface
+		return surface
+	var middle := board.centre(cell)
+	var height := board.height_at(cell)
+	var half := board.cell_size * BOARD_FILL * 0.5
+	var terrain := _sim.world.terrain
+	for down in wide:
+		for across in wide:
+			var x := middle.x - half + 2.0 * half * float(across) / float(BOARD_CUTS)
+			var z := middle.y - half + 2.0 * half * float(down) / float(BOARD_CUTS)
+			var found := terrain.support_at(x, z, height)
+			surface[down * wide + across] = height if found == -INF else found
+	kept[key] = surface
+	return surface
 
 
 ## Put the fight on screen, as a diorama standing on the generated ground.
@@ -1606,8 +1763,10 @@ func _clear_chunk_views() -> void:
 		(_road_views[key] as Node3D).queue_free()
 	_road_views.clear()
 	# The board belongs to a place, so a restart in a different world has to
-	# forget which cell it was drawn for or it will never be redrawn.
+	# forget which cell it was drawn for or it will never be redrawn -- and the
+	# surface it sampled is a fact about the old world's seed, not this one's.
 	_board_cell = Vector2i(2147483647, 2147483647)
+	_board_surface.clear()
 	_board_lifted = false
 
 

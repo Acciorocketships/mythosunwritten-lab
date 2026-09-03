@@ -572,6 +572,25 @@ the same fact as what a walker may climb.
 The reasoning, the cell-size sweep and a board read on a floating island's top
 are in [reports/combat-board.md](reports/combat-board.md).
 
+**The overlay is painted on the ground, not laid over it.** A square is bounded
+in $x$ and $z$ by its cell exactly as the lattice says, and its height is read
+from the terrain at every one of its corners: a cell comes out as $2 \times 2$
+quads whose nine corners are nine `support_at` answers, so a square on a hillside
+neither cuts into the hill nor floats off it, and its outline is walked round the
+same sub-vertices the fill is built from. Two cuts because the ground under a
+square is meshed at 2.0 units and a square is 2.58 across, so 1.29-unit steps
+already resolve everything the ground has; the flat plate it replaced sat 0.340
+units off the surface on average and this sits 0.0045. A hole keeps the anchor
+height, because there is no surface under water to follow. The sampled surface of
+a cell is kept between rebuilds — the lattice is fixed to the world, so a height
+once read is a height for good — which is what turns a 780 ms board into a 34 ms
+step. And the grass gives way over it: the board's rectangle and lattice are four
+more per-frame uniforms on the material every grass chunk already shares, so a
+blade standing on a painted square stands short and the lattice reads through the
+meadow. See [reports/board-overlay.md](reports/board-overlay.md).
+
+![Grid squares painted on a meadow hillside, with the grass standing in the gutters between them](reports/assets/board-grass-after.png)
+
 ## The two-tier army
 
 What stands on that board. Ten files under `sim/` — from `piece_geometry.gd` to
@@ -1206,6 +1225,91 @@ no quest, no giver, no chain, no reward and no step anywhere in it.
 
 The whole of it is in [reports/goals.md](reports/goals.md).
 
+## What the world records between characters
+
+Section 10 asks for relationships to live *"on edges between entities, not inside
+any single NPC's memory"*. They do. One `RelationshipGraph` per world, one edge
+per pair of entity ids, and `graph.between(a, b)` and `graph.between(b, a)` hand
+back the same object rather than two equal ones. The character sheet's empty
+`sentiment` handle is retired: a pair of per-sheet dictionaries would be two
+accounts of one history, and two accounts of one thing drift.
+
+An edge carries **trust**, **fear**, **respect** and **familiarity** — once per
+*end*, because a blow has a striker and a struck — and a short summary of the
+interactions that made it, written in the world's voice.
+
+**Nothing moves an edge but something the engine carried out.** Three writers,
+each folded from one of the world's own records: a line heard (`ActionScene.said`),
+a trade honoured (`.trades`), a blow struck (`.blows`). A proposed trade moves
+nothing, a denied one moves nothing, a refused action moves nothing. Every rule
+is one of two shapes — raise closes a share of what is left to 1, lower gives up
+a share of what is there — so none can leave $[0, 1]$ and each is worth most the
+first time it applies.
+
+| happening | end | field | rule |
+|---|---|---|---|
+| any of the three | both | familiarity | +0.25 of what is left |
+| words heard | either | trust, fear, respect | **unmoved** — section 6 makes talk an ability check, and that is the next item |
+| trade honoured | both | trust / respect | +0.20 / +0.10 of what is left |
+| gift (nothing came back) | receiver | trust | a further +0.35 of what is left |
+| blow struck | the struck one | fear / respect | + the share of its full health taken / +0.25 |
+| blow struck | the struck one | trust | − half of what is there |
+
+**Section 13's first open question is closed.** The raw sentiment term the
+ownership maths will read is
+
+$$s(A \to B) = \mathrm{familiarity} \times (\mathrm{trust} - \mathrm{fear}) \in [-1, 1]$$
+
+and it is the only number the graph offers — the suite reads the class's method
+list and requires `sentiment` to be the sole public method returning a float.
+Respect is left out because it reads capability rather than welcome, and section
+6 already weighs capability twice, by status and by level. Familiarity multiplies
+rather than adds, so an opinion about somebody barely met cannot decide who owns
+ground.
+
+**The world maintains them, whoever is deciding.** The three writers are called
+from `sim/character_upkeep.gd` and from no other file under `sim/` — the same
+shared servicing path that already witnesses memory and settles goals, which
+names no decision function and so has nothing to branch on. What is folded is the
+world's records rather than each character's share of them, and the mark saying
+how far the graph has read lives on the graph, so one thing that happened is one
+move of one edge however many upkeeps a run makes. On the shipped six-character
+run the character a person drives sits in the same table as the five whose minds
+are models, with numbers of the same order:
+
+```
+who    driven by with     trust    fear   respect   familiarity  sentiment
+Wren   a person  Rook      0.00    0.00      0.00          0.68      +0.00
+Wren   a person  Pell      0.00    0.00      0.00          0.44      +0.00
+Rook   a model   Wren      0.00    0.00      0.00          0.68      +0.00
+Bram   a model   Sable     0.00    0.00      0.00          0.82      +0.00
+Odo    a model   nothing has passed between it and anybody
+```
+
+That run is all talk, so only familiarity moves. `./run_scenario.sh` shows a
+trade (`+0.15` both ways) beside a quarrel (`−0.70` and `−0.42`, asymmetric
+because one of the two took more damage than it dealt), and `./run_turn.sh` shows
+five blows and the fear and respect they leave.
+
+**A model may not write one.** There is no operation in the orchestrator's table
+that names a relationship, so a line naming one reads as no operation at all and,
+put through the engine anyway, is refused as `there is no such operation` — shown
+on `./run_world.sh`. A source scan requires that no file of the model-facing
+layers contains `RelationshipGraph`, `RelationshipEdge` or `relationships`.
+
+**What a character may see is its own edges only.** The observation packet
+reaches the graph through `knows(self_id, …)` and `edges_of(self_id)`, both keyed
+by the looking character's own id, so what two other people are to each other is
+not addressable from where it stands. The four numbers are not in the packet
+today: they are what the ownership maths reads and what the diplomacy check will
+move, and neither exists yet.
+
+```
+./run_relationships_suite.sh    # just this suite
+```
+
+The whole of it is in [reports/relationships.md](reports/relationships.md).
+
 ## Ability checks: the difficulty-class agent
 
 The second shape of language-model call in this game, and the opposite of a
@@ -1347,8 +1451,8 @@ where the ground would not carry a character. A source scan requires that no
 `quest`, `story`, `plot`, `narrative`, `ending`, `villain` or `hero` appears
 anywhere in the layer -- in code or in a string literal, because a quest written
 into a prompt is a quest -- and another requires that nothing in it names
-`.decide`, `.goals`, `.memory`, `.sentiment` or an `Action`: it changes the
-world, never a mind.
+`.decide`, `.goals`, `.memory`, `relationships`, `RelationshipGraph` or an
+`Action`: it changes the world, never a mind.
 
 **Nothing waits for it.** Handed a channel that never answers, a world steps all
 60 of its ticks and the character acts throughout. On the shipped run the
@@ -2216,5 +2320,6 @@ filter, measured crisp rather than assumed so.
 Everything a village, a road or the scatter puts down is named by tag, so the
 art drop is an edit to one table. Still to come: the rest of the language-model
 layer — every non-player character deciding through a model at once, the
-difficulty-class agent and the orchestrator — and the world they will be measured
-on: territory and sentiment.
+difficulty-class agent and the orchestrator — and the relationship graph the
+world keeps between its characters, which is the first half of the world they
+will be measured on. Still to come: the other half, territory and who owns it.
