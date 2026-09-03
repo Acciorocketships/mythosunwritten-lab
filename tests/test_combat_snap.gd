@@ -29,6 +29,11 @@ class_name TestCombatSnap
 
 const SEED := ScriptedEncounter.SEED
 
+## How far the hand-walked view moves each tick while a fight is on, in world
+## units. The rate the placeholder observer used to wander at, so the streaming
+## the claim measures is the streaming it always measured.
+const WATCHER_STEP := 0.9
+
 ## Ticks enough for the ground scenario to walk in, fight and walk on again.
 const TICKS := 45
 
@@ -348,15 +353,19 @@ func _combat_is_local() -> void:
 func _the_world_goes_on_while_a_fight_is_on() -> void:
 	var world := SimWorld.new(SEED)
 	ScriptedEncounter.muster(world)
-	# The scenario stands the observer still so a camera can watch; here it walks,
-	# because what is being checked is that the streaming carries on regardless.
-	world.observer_walks = true
+	# The scenario stands the view beside the meeting so a camera can watch it,
+	# and the view no longer walks on its own -- it follows a character, and this
+	# scenario's camera follows nobody. So it is walked by hand here, because
+	# what is being checked is that the streaming carries on regardless.
+	var watching := Vector2(world.observer_x, world.observer_z)
 	var fingerprints := {}
 	var fighting_ticks := 0
 	var built_at_the_snap := -1
 	var built_at_the_end := -1
 	var chunks := PackedInt32Array()
 	for _step in TICKS:
+		watching.x += WATCHER_STEP
+		world.place_observer(watching.x, watching.y)
 		world.step()
 		fingerprints[world.digest()] = true
 		if world.combat.fight != null:
@@ -461,6 +470,10 @@ func _a_combatant_that_cannot_be_seated_refuses_the_fight() -> void:
 ## A world with nobody in it is the world it was before this layer existed.
 func _an_empty_roster_is_nothing_at_all() -> void:
 	var world := SimWorld.new(SEED)
+	# An ordinary world stands its own cast up, so it has to be emptied before
+	# the claim can be made at all. What is being checked is unchanged: a world
+	# with nobody in it is the world it was before this layer existed.
+	world.clear_cast()
 	equal(world.combat.digest(), "", "an empty roster fingerprints as nothing")
 	equal(world.combat.phase(), CombatantRoster.REAL_TIME, "and is in real time")
 	for _step in 5:

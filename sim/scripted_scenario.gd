@@ -218,7 +218,17 @@ const QUARREL_FRAME := 80
 ## transcript is read by id, so it is fixed here and nowhere else: the cast in
 ## `CAST` order, then the stall.
 static func stage() -> ActionScene:
-	var scene := ActionScene.on(TerrainQuery.for_seed(SEED))
+	return populate(ActionScene.on(TerrainQuery.for_seed(SEED)))
+
+
+## Put the cast and the stall into a scene that already exists.
+##
+## The same five characters, the same sides, the same gear and the same stall,
+## added in the same order -- so a scene staged here is the scene `stage()`
+## returns. It is split out so that the world's own scene can be filled with this
+## cast and then *lived in*, rather than a separate scene being played out and
+## the result stood still (`muster_live` below).
+static func populate(scene: ActionScene) -> ActionScene:
 	var bands := {}
 	for row in CAST:
 		var one := scene.add_actor(Combatant.commander_at(
@@ -501,6 +511,7 @@ static func _fight_step(scene: ActionScene) -> PackedStringArray:
 ##
 ## Returns how many of the cast were placed.
 static func muster(world: SimWorld, at_tick: int, watch_from: Vector2) -> int:
+	world.clear_cast()
 	var scene := played_to(at_tick, world.world_seed)
 	var bands := {}
 	var placed := 0
@@ -532,8 +543,38 @@ static func muster(world: SimWorld, at_tick: int, watch_from: Vector2) -> int:
 		stood.settle(world.terrain)
 		placed += 1
 	world.place_observer(watch_from.x, watch_from.y)
-	world.observer_walks = false
 	return placed
+
+
+## Set the same five characters out in a world and leave them living in it.
+##
+## This is the scenario as a *scenario* rather than as a photograph: the cast and
+## the stall are put into the world's own action scene, every sheet is given the
+## decision function it is driven by, and then nothing else happens here. The
+## world's own `ControlLoop` asks them what they are doing on every tick from now
+## on, so the greeting, the walk, the pick-up, the trade and the quarrel all
+## happen in the running game rather than being played elsewhere and stood still.
+##
+## It is *this world's* run of the scenario and not a replay of the checked-in
+## transcript: the loop the world keeps hashes its continue-bias draws from the
+## world's seed rather than from `LOOP_SEED`, so a beat can land a few ticks
+## either side of where `./run_scenario.sh` has it. What the two share is the
+## cast, the sides, the gear, the choices and the order they come in.
+##
+## The camera is put on one of them by name. That is the only thing the named
+## character gets: it is asked the same question on the same tick as the other
+## four, through the same loop, and its answer goes to the same engine.
+##
+## Returns how many characters are in the world.
+static func muster_live(world: SimWorld, follow_name: String = WREN) -> int:
+	world.clear_cast()
+	var scene := world.combat.scene
+	populate(scene)
+	drive(scene)
+	var watched := _named(scene, follow_name)
+	if watched != null:
+		world.follow(watched.id)
+	return scene.actors.size()
 
 
 ## Where the camera stands for the market frame and for the quarrel frame: beside

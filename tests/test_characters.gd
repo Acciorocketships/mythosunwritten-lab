@@ -20,6 +20,18 @@ class_name TestCharacters
 
 ## The two models the swap test uses. Both adventurers, both on the shared rig,
 ## so the swap is exactly the case the scene's shape exists for.
+## A speed under `CharacterView.RUN_SPEED`, for the cases that want the walk clip
+## rather than the running one. A number rather than a reading off the world:
+## nothing in the world walks at a fixed rate any more -- a character covers a
+## whole leg on the tick its walk resolves -- so what belongs here is the speed
+## the *rule* is being asked about.
+const WALKING_SPEED := 0.9
+
+## How long to step a world before giving up on anybody in it having moved. Two
+## atomic walks' worth of ticks, so a leg that is refused still leaves room for
+## the next one to be chosen and carried out.
+const TICKS_TO_A_MOVE := 45
+
 const SWAP_FROM := AssetTags.KNIGHT
 const SWAP_TO := AssetTags.MAGE
 
@@ -64,11 +76,21 @@ func run() -> void:
 
 
 ## Two snapshots, two clips. The observer standing still is idle; the observer
-## walking at the speed the world actually moves it is walking.
+## on a tick where it actually covered ground is not.
 ##
 ## These are whole snapshots out of a real world rather than hand-built
 ## dictionaries: a rule that read the right key out of a dictionary nobody else
 ## produces would pass a test and fail the game.
+##
+## The moving half is *not* asserted to be the walk clip, and that is a statement
+## about the world rather than about the rule. The view follows a character now,
+## and a character moves when the atomic walk it committed to is resolved -- all
+## at once, a whole leg in one tick -- so the speed the snapshot carries on that
+## tick is a leg and not a stride, and `clip_for` reads anything at or above
+## `CharacterView.RUN_SPEED` as running. Which clip each speed reaches is checked
+## against every branch a few claims below. What this one says is that the rule
+## reads the world's own snapshot and that standing still and moving are
+## different in it.
 func _the_clip_is_a_function_of_the_snapshot() -> void:
 	var world := SimWorld.new(4242)
 
@@ -78,13 +100,24 @@ func _the_clip_is_a_function_of_the_snapshot() -> void:
 		CharacterView.CLIP_IDLE,
 		"an observer that has not moved should be standing still")
 
-	# One step: the observer walks at SimWorld.OBSERVER_SPEED.
-	world.step()
-	var walking := world.snapshot()
-	equal(CharacterView.clip_for(CharacterView.observer_state(walking)),
-		CharacterView.CLIP_WALK,
-		"an observer walking at %.2f units a tick should be walking"
-			% SimWorld.OBSERVER_SPEED)
+	# Stepped until the character the world looks through actually gets
+	# somewhere, which is not every tick: a walk costs the catalogue's ticks and
+	# the character arrives when it is resolved.
+	var walking := {}
+	for _tick in TICKS_TO_A_MOVE:
+		world.step()
+		if world.observer_speed > 0.0:
+			walking = world.snapshot()
+			break
+	check(not walking.is_empty(),
+		"nobody in the world moved in %d ticks, so there is no moving snapshot"
+			% TICKS_TO_A_MOVE)
+	if walking.is_empty():
+		return
+	not_equal(CharacterView.clip_for(CharacterView.observer_state(walking)),
+		CharacterView.CLIP_IDLE,
+		"an observer that covered %.2f units in a tick should not be standing"
+			% float(walking["observer_speed"]))
 
 	# The two snapshots really are different in the way the rule reads, so the
 	# pair above cannot be passing because both answers happened to agree.
@@ -110,23 +143,32 @@ func _the_clip_is_a_function_of_the_snapshot() -> void:
 func _the_clip_test_would_notice() -> void:
 	var world := SimWorld.new(4242)
 	var standing := world.snapshot()
-	world.step()
-	var walking := world.snapshot()
+	var walking := {}
+	for _tick in TICKS_TO_A_MOVE:
+		world.step()
+		if world.observer_speed > 0.0:
+			walking = world.snapshot()
+			break
+	check(not walking.is_empty(),
+		"nobody in the world moved in %d ticks, so there is no moving snapshot"
+			% TICKS_TO_A_MOVE)
+	if walking.is_empty():
+		return
 
 	_broken_memory = ""
 	var first := _broken_clip_for(CharacterView.observer_state(standing))
 	var second := _broken_clip_for(CharacterView.observer_state(walking))
 	equal(first, CharacterView.CLIP_IDLE,
 		"the broken rule should still get the first snapshot right")
-	not_equal(second, CharacterView.CLIP_WALK,
-		"a rule that answers from memory got the walking snapshot right anyway,"
-		+ " so the purity check above is not testing purity")
+	equal(second, CharacterView.CLIP_IDLE,
+		"a rule that answers from memory did not repeat itself, so the purity"
+		+ " check above is not testing purity")
 
-	# The real rule, over the same two snapshots in the same order, gets it right
-	# -- which is the difference the broken one is here to measure.
-	equal(CharacterView.clip_for(CharacterView.observer_state(walking)),
-		CharacterView.CLIP_WALK,
-		"the real rule disagreed with itself on the walking snapshot")
+	# The real rule, over the same two snapshots in the same order, moves off
+	# idle -- which is the difference the broken one is here to measure.
+	not_equal(CharacterView.clip_for(CharacterView.observer_state(walking)),
+		CharacterView.CLIP_IDLE,
+		"the real rule disagreed with itself on the moving snapshot")
 
 
 # What the rule would be if it remembered. Deliberately wrong: it repeats
@@ -150,7 +192,7 @@ static func _broken_clip_for(state: Dictionary) -> String:
 func _the_rule_reaches_all_six_clips() -> void:
 	var cases := [
 		[{"speed": 0.0}, CharacterView.CLIP_IDLE, "standing still"],
-		[{"speed": SimWorld.OBSERVER_SPEED}, CharacterView.CLIP_WALK, "walking"],
+		[{"speed": WALKING_SPEED}, CharacterView.CLIP_WALK, "walking"],
 		[{"speed": CharacterView.RUN_SPEED}, CharacterView.CLIP_RUN, "running"],
 		[{"speed": 0.9, "rise": 1.5}, CharacterView.CLIP_JUMP, "climbing a rim"],
 		[{"speed": 0.9, "hurt": true}, CharacterView.CLIP_HIT, "being hit"],
@@ -437,7 +479,7 @@ func _a_swapped_model_carries_on_animating() -> void:
 		"the first model arrived without a skeleton")
 
 	# Walk it for half a second and check the bones actually moved.
-	var walking := {"speed": SimWorld.OBSERVER_SPEED}
+	var walking := {"speed": WALKING_SPEED}
 	view.apply(walking, 1.0)
 	equal(view.shown_clip(), CharacterView.CLIP_WALK,
 		"the view is not playing the walk the state asks for")

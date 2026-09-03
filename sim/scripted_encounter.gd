@@ -143,8 +143,11 @@ const ISLAND_SPAN := 400.0
 ## Put the scenario's combatants into a world and stand the observer where it
 ## can watch. Nothing steps; the caller does that.
 static func muster(world: SimWorld) -> void:
+	# The world stands its own people up when it is made; this scenario is a
+	# different cast, so the ordinary one goes first. `place_observer` then stops
+	# the view following anybody, which is what a camera beside a fight wants.
+	world.clear_cast()
 	world.place_observer(WHERE.x + WATCH_FROM.x, WHERE.y + WATCH_FROM.y)
-	world.observer_walks = false
 	var roster := world.combat
 
 	var green := roster.add(Combatant.commander_at(
@@ -204,8 +207,8 @@ static func muster_on_island(world: SimWorld) -> FloatingIsland:
 		return null
 	var middle_x := island.centre_x
 	var middle_z := island.centre_z
+	world.clear_cast()
 	world.place_observer(middle_x, middle_z + WATCH_FROM.y)
-	world.observer_walks = false
 	var roster := world.combat
 
 	var green := roster.add(Combatant.commander_at(

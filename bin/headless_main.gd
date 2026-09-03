@@ -3,6 +3,11 @@ extends SceneTree
 ## the report, exit 0. No window, no renderer, no main scene.
 ##
 ## Run it with:  ./run_headless.sh --seed 1234 --ticks 100 [--chunks] [--biomes]
+##
+## An ordinary run reports the world and the handful of characters living in it,
+## with everything they chose and everything the engine answered written into the
+## report at the tick it happened on. `--scenario NAME` stands a named cast up in
+## place of that one and lives it forward; `--frozen` photographs it instead.
 
 const DEFAULT_SEED := 1234
 const DEFAULT_TICKS := 100
@@ -30,13 +35,23 @@ func _initialize() -> void:
 		printerr(options["error"])
 		printerr(
 			"usage: run_headless.sh [--seed N] [--ticks N] [--start X Z]"
+			+ " [--scenario NAME] [--frozen]"
 			+ " [--chunks] [--biomes] [--water] [--islands] [--settlements]"
 			+ " [--scatter] [--board] [--snap] [--board-sweep] [--assets]"
+			+ "\nscenarios: " + " ".join(Simulation.SCENARIOS)
 		)
 		quit(2)
 		return
 
 	var sim := Simulation.new(options["seed"])
+	# The scenario first, because it stands up a cast of its own in place of the
+	# world's and puts the view where that cast is; --start then has the last word
+	# on where the view goes, which is what somebody typing both means.
+	var scenario := String(options["scenario"])
+	if not sim.begin_scenario(scenario, options["frozen"]):
+		printerr("headless unknown or unavailable --scenario %s" % scenario)
+		quit(2)
+		return
 	if options["start"]:
 		sim.world.place_observer(options["start_x"], options["start_z"])
 	for line in sim.run(options["ticks"]):
@@ -184,6 +199,11 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 		"board_sweep": false,
 		"snap": false,
 		"assets": false,
+		# Which named scenario to set out, and whether to photograph it rather
+		# than live it. Empty means the ordinary world and the cast that lives
+		# in it.
+		"scenario": Simulation.SCENARIO_NONE,
+		"frozen": false,
 		# Where the observer starts. Off by default, so the world an ordinary
 		# run reports is the world the origin gets; with it, a run can be aimed
 		# at a particular place -- an island, for instance.
@@ -225,6 +245,14 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 			"--assets":
 				options["assets"] = true
 				i += 1
+			"--frozen":
+				options["frozen"] = true
+				i += 1
+			"--scenario":
+				if i + 1 >= args.size():
+					return {"error": "--scenario needs a name"}
+				options["scenario"] = args[i + 1]
+				i += 2
 			"--start":
 				if i + 2 >= args.size():
 					return {"error": "--start needs two values"}

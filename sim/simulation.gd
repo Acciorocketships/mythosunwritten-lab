@@ -53,7 +53,15 @@ func _init(seed_value: int = 0) -> void:
 ## -- a seed with no walkable floating island anywhere near the origin has
 ## nowhere for the aerial fight to happen, and saying so is the answer rather
 ## than putting it on the ground instead.
-func begin_scenario(named: String) -> bool:
+## `frozen` asks for the old behaviour of the two character scenarios: the run is
+## played out headless to a stated tick and the cast is stood where that run left
+## it, which is a photograph and not a game. It is off by default, because a
+## scenario is a thing that happens: set out live, the same five characters are
+## driven by the world's own control loop from the tick they are set out on, and
+## the greeting, the trade and the quarrel happen in front of the camera.
+##
+## The two encounter scenarios were always live and take no notice of it.
+func begin_scenario(named: String, frozen: bool = false) -> bool:
 	match named:
 		SCENARIO_NONE:
 			return true
@@ -63,17 +71,27 @@ func begin_scenario(named: String) -> bool:
 		SCENARIO_ENCOUNTER_ISLAND:
 			return ScriptedEncounter.muster_on_island(world) != null
 		SCENARIO_MARKET:
-			# The character scenario, played headless to the tick the trade is
-			# done on, and everybody stood where that run left them. The picture
-			# is of the run: nothing about the cast is typed a second time here.
-			return ScriptedScenario.muster(
-				world, ScriptedScenario.MARKET_FRAME,
-				ScriptedScenario.watch_market()) > 0
+			if frozen:
+				# Played headless to the tick the trade is done on, and
+				# everybody stood where that run left them.
+				return ScriptedScenario.muster(
+					world, ScriptedScenario.MARKET_FRAME,
+					ScriptedScenario.watch_market()) > 0
+			# Set out where it starts and lived forward, with the camera on the
+			# one who does the trading.
+			return ScriptedScenario.muster_live(
+				world, ScriptedScenario.WREN) > 0
 		SCENARIO_QUARREL:
-			# The same run, played to a tick while the quarrel is on the board.
-			return ScriptedScenario.muster(
-				world, ScriptedScenario.QUARREL_FRAME,
-				ScriptedScenario.watch_quarrel()) > 0
+			if frozen:
+				# The same run, photographed at a tick while the quarrel is on
+				# the board.
+				return ScriptedScenario.muster(
+					world, ScriptedScenario.QUARREL_FRAME,
+					ScriptedScenario.watch_quarrel()) > 0
+			# The same cast again, with the camera on one of the two who
+			# quarrel: live, the quarrel is something you watch happen.
+			return ScriptedScenario.muster_live(
+				world, ScriptedScenario.BRAM) > 0
 	return false
 
 
@@ -90,9 +108,18 @@ func step() -> void:
 func run(ticks: int) -> PackedStringArray:
 	var lines := PackedStringArray()
 	lines.append("seed %d" % world.world_seed)
+	lines.append_array(cast_report())
 	lines.append(_trace_line())
+	# Everything the world's cast did, as the control loop wrote it down, put
+	# into the report at the tick it happened on. This is the run saying who
+	# chose what and what the engine answered, rather than only where the ground
+	# got to.
+	var said := world.loop.journal.size()
 	for i in ticks:
 		step()
+		for at in range(said, world.loop.journal.size()):
+			lines.append("  " + world.loop.journal[at])
+		said = world.loop.journal.size()
 		var is_last := i == ticks - 1
 		if is_last or world.tick % TRACE_EVERY == 0:
 			lines.append(_trace_line())
@@ -102,6 +129,23 @@ func run(ticks: int) -> PackedStringArray:
 		world.terrain_streamer.chunks_built,
 		world.digest(),
 	])
+	return lines
+
+
+## Who is in the world, one line each, and which of them the world is looking
+## through.
+##
+## Being followed is the whole of what the followed character gets: it is asked
+## the same question on the same tick as the rest, through the same loop, and its
+## answer goes to the same engine. The line says so where a reader can check it.
+func cast_report() -> PackedStringArray:
+	var lines := PackedStringArray()
+	lines.append("cast %d following #%d" % [world.combat.size(), world.follow_id])
+	for one in world.combat.members:
+		lines.append("  %-7s %s%s" % [
+			ActionScene.name_of(one), one.line(),
+			"  <- followed" if one.id == world.follow_id else "",
+		])
 	return lines
 
 
@@ -541,7 +585,7 @@ func biome_report(span: int = 10, spacing: float = 24.0) -> PackedStringArray:
 func _trace_line() -> String:
 	var sheet := world.live_water_sheet()
 	return ("tick %d chunks=%d islands=%d villages=%d roads=%d props=%d cover=%d "
-		+ "biome=%s water=%d on_island=%d on_path=%.2f %s") % [
+		+ "cast=%d biome=%s water=%d on_island=%d on_path=%.2f %s") % [
 		world.tick,
 		world.terrain_streamer.loaded_count(),
 		world.island_streamer.loaded_count(),
@@ -549,6 +593,7 @@ func _trace_line() -> String:
 		world.settlement_streamer.road_count(),
 		world.scatter_streamer.item_count(),
 		world.island_streamer.cover_count(),
+		world.combat.size(),
 		world.observer_biome(),
 		sheet.wet_cells if sheet != null else 0,
 		1 if world.observer_on_island() else 0,

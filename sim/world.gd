@@ -10,17 +10,26 @@ extends RefCounted
 ## keeps the chunks near the observer built, one sheet of water lying over all
 ## of it, a sparse layer of floating islands above it, a sparse layer of villages
 ## and the roads between them cut into it, the flora and props scattered over the
-## lot, and one observer walking across all of that. The observer is a placeholder for a character -- it has no gameplay
-## meaning yet; it exists so that something moves and the streaming has someone
-## to follow.
+## lot, and a cast of characters living on top of all of it.
+##
+## ## The world holds a cast, and asks it
+##
+## `step()` services every character in the world through one `ControlLoop` over
+## the world's own `ActionScene` -- the same loop, over the same class of scene,
+## that the headless character runs are played on. So there is one path: the
+## render shell and the headless runner both call this `step()`, and what happens
+## in it is that everybody is asked what they are doing and `ActionEngine`
+## answers. Nothing in this file decides anything for anybody; the deciding is on
+## `Character.decide`, and who put it there is `sim/world_cast.gd`'s business or a
+## scenario's.
+##
+## The observer is no longer a walker of its own. It is the world's *view*: the
+## position the terrain streams around and the camera is put behind, and it is
+## read off whichever character `follow_id` names. Being followed is the whole of
+## what that character gets -- it is asked the same question on the same tick as
+## everybody else. With nobody followed the observer stands where it was put,
+## which is what a scenario wanting a fixed camera beside a fight asks for.
 class_name SimWorld
-
-## World units the observer covers in one tick.
-const OBSERVER_SPEED := 0.9
-
-## The most the observer's heading can change in one tick, in radians, so its
-## path wanders instead of running straight.
-const OBSERVER_TURN := 0.06
 
 ## The seed every random decision in this world descends from.
 var world_seed: int = 0
@@ -82,13 +91,32 @@ var water_sheet_builder: WaterSheetBuilder = null
 ## the world.
 var combat_board_builder: CombatBoardBuilder = null
 
-## Everyone in the world who can fight, and whichever fight is under way.
+## Everyone in the world who can fight, and whichever fight is under way. Its
+## `scene` is the world's action scene: where everybody stands, what is lying
+## about, what has been said and what has been offered.
 ##
-## Empty in an ordinary world -- there is no character layer yet to fill it --
-## and an empty roster is stepped, fingerprinted and snapshotted as nothing at
-## all, so a world with nobody in it is exactly the world it was before combat
-## existed. A scenario puts combatants in it; see sim/scripted_encounter.gd.
+## An ordinary world fills it with `WorldCast.muster`; a scenario clears it and
+## fills it with its own cast (see sim/scripted_encounter.gd and
+## sim/scripted_scenario.gd). An empty roster is still stepped, fingerprinted and
+## snapshotted as nothing at all, so a world somebody has emptied is exactly the
+## world it was before combat existed.
 var combat: CombatantRoster = null
+
+## What asks the cast what it is doing: section 2.2's control loop, over the
+## roster's scene. Rebuilt whenever the cast is, because a loop remembers what
+## each character is part-way through and a new cast is part-way through nothing.
+##
+## Its bias draws are hashed from the world seed, so two worlds of one seed ask
+## and answer identically.
+var loop: ControlLoop = null
+
+## Which member of the cast the world looks through, or 0 for nobody.
+##
+## The camera follows the observer and the terrain streams around it, so this is
+## the one thing a character can be given that the others are not. It is given by
+## `follow()` and taken away by `place_observer()`, which stands the view
+## somewhere and leaves it there.
+var follow_id: int = 0
 
 ## Whatever the fights in this world have written down, in order. The world
 ## carries it rather than the entry point, because a fight is something that
@@ -138,18 +166,6 @@ var observer_heading: float = 0.0
 var observer_speed: float = 0.0
 var observer_rise: float = 0.0
 
-## Whether the observer walks when the world steps.
-##
-## True in every ordinary world. A scenario that wants the camera to stay
-## pointed at one place -- a fight, for a screenshot -- stands the observer still
-## by clearing this, and everything else in the world goes on exactly as before:
-## the streaming, the water, the combatants and the fight all step. The random
-## turn is still drawn either way, so standing still cannot change what a walking
-## observer would have done later.
-var observer_walks := true
-
-var _motion_rng: SimRng = null
-
 
 func _init(seed_value: int = 0) -> void:
 	reset(seed_value)
@@ -160,13 +176,6 @@ func _init(seed_value: int = 0) -> void:
 func reset(seed_value: int) -> void:
 	world_seed = seed_value
 	tick = 0
-	var root := SimRng.new(seed_value)
-	# Separate streams, so that changing how the observer starts out cannot
-	# change how it later moves. The ground itself uses neither: it is hashed
-	# per position, not drawn from a stream.
-	var placement := root.fork("observer-placement")
-	_motion_rng = root.fork("observer-motion")
-
 	terrain = TerrainQuery.for_seed(seed_value)
 	surface_field = terrain.surface_field
 	biome_field = terrain.biome_field
@@ -181,56 +190,119 @@ func reset(seed_value: int) -> void:
 	scatter_streamer = ScatterStreamer.new(scatter_field)
 	water_sheet_builder = WaterSheetBuilder.new(terrain)
 	combat_board_builder = CombatBoardBuilder.new(terrain)
-	combat = CombatantRoster.new()
-	combat_lines = PackedStringArray()
+	_empty_the_cast()
 
 	observer_x = 0.0
 	observer_z = 0.0
 	observer_y = terrain.ground_height_at(0.0, 0.0)
-	observer_heading = placement.next_range(0.0, TAU)
+	observer_heading = 0.0
 	observer_speed = 0.0
 	observer_rise = 0.0
 	_water_sheet = null
 	water_sheet_version = 0
 	water_sheets_handed_out = 0
 	_settle_observer()
-	terrain_streamer.update(observers())
-	island_streamer.update(observers())
-	settlement_streamer.update(observers())
-	scatter_streamer.update(observers())
-	_refresh_water_sheet()
+	# The people who live here, and the one the world looks through. A scenario
+	# that wants a different cast clears this one and stands up its own.
+	follow_id = WorldCast.muster(self)
+	_look_through_the_followed()
+	_restream()
 
 
 ## Advance the world by one tick.
+##
+## The order is the whole of what this file says about a living world, and it is
+## the order every character run under sim/ already keeps:
+##
+##   1. **everybody is asked** -- the control loop services every character in
+##      the world: what it is part-way through runs on, what has run out is
+##      resolved by `ActionEngine`, and whoever is free is asked again. Nothing
+##      here knows whether the answer came from a rule, a model or a person.
+##   2. **the combatants walk and the fight takes its turn** -- the roster's own
+##      step, unchanged, which is also where a fight begins when two commanders
+##      of different bands have met.
+##   3. **the world is built around them** -- the view moves to whoever is being
+##      followed, and the ground, the islands, the villages, the dressing and the
+##      water are streamed to it.
+##
+## Streaming last rather than first is deliberate: the ground is built around
+## where the cast actually got to on this tick, not around where it was on the
+## last one.
 func step() -> void:
-	var turn := _motion_rng.next_range(-OBSERVER_TURN, OBSERVER_TURN)
-	var heading := observer_heading + turn
-	if heading >= TAU:
-		heading -= TAU
-	elif heading < 0.0:
-		heading += TAU
-	observer_heading = heading
+	loop.step()
+	combat_lines.append_array(combat.step(terrain))
 
+	# What the view came to. The distance across is how far the character being
+	# followed actually got; the rise is whatever settling on the surface added,
+	# which is a hop onto an island rim or a drop off one. With nobody followed
+	# the view stands still and both are zero.
+	var was_x := observer_x
 	var was_y := observer_y
-	if observer_walks:
-		observer_x += cos(heading) * OBSERVER_SPEED
-		observer_z += sin(heading) * OBSERVER_SPEED
-		_settle_observer()
-	# What the walk came to, after the ground had its say. The distance across
-	# is the step it asked for; the rise is whatever settling on the surface
-	# added, which is a hop onto an island rim or a drop off one.
-	observer_speed = OBSERVER_SPEED if observer_walks else 0.0
+	var was_z := observer_z
+	_look_through_the_followed()
+	observer_speed = Vector2(observer_x - was_x, observer_z - was_z).length()
 	observer_rise = observer_y - was_y
+	_restream()
+	tick += 1
+
+
+## Take everybody out of the world, so that a cast can be stood up in an empty
+## one. What every scenario's muster calls before it puts its own people in.
+##
+## The loop goes with them: it remembers what each character was part-way
+## through, and a new cast is part-way through nothing.
+func clear_cast() -> void:
+	_empty_the_cast()
+	follow_id = 0
+
+
+## Look through a character in the cast: the terrain streams around it and the
+## camera is put behind it. Being followed is the whole of what it gets.
+##
+## Zero, or an id nobody has, means nobody is followed and the view stays where
+## it is.
+func follow(id: int) -> void:
+	follow_id = id
+	_look_through_the_followed()
+	_restream()
+
+
+## The character the world is looking through, or null.
+func followed() -> Combatant:
+	return null if follow_id == 0 else combat.member_of(follow_id)
+
+
+# A fresh roster, its scene standing on this world's ground, and a fresh loop
+# over it.
+func _empty_the_cast() -> void:
+	combat = CombatantRoster.new()
+	combat.scene.terrain = terrain
+	loop = ControlLoop.on(combat.scene, world_seed)
+	combat_lines = PackedStringArray()
+
+
+# Put the view where the followed character is standing, facing the way it just
+# moved. Nothing happens when nobody is followed.
+func _look_through_the_followed() -> void:
+	var one := followed()
+	if one == null:
+		return
+	var moved := Vector2(one.x - observer_x, one.z - observer_z)
+	observer_x = one.x
+	observer_z = one.z
+	observer_y = one.y
+	if moved.length() > 0.0001:
+		observer_heading = fposmod(atan2(moved.y, moved.x), TAU)
+
+
+# Build the ground, the islands, the villages and the dressing around the view,
+# and refresh the water under it.
+func _restream() -> void:
 	terrain_streamer.update(observers())
 	island_streamer.update(observers())
 	settlement_streamer.update(observers())
 	scatter_streamer.update(observers())
 	_refresh_water_sheet()
-	# The combatants walk, and whichever fight is on takes one turn -- after the
-	# streaming, not instead of it. A fight is one more thing happening in a
-	# world that is still being built around it.
-	combat_lines.append_array(combat.step(terrain))
-	tick += 1
 
 
 ## Everyone the streamer keeps ground under. One for now.
@@ -267,18 +339,19 @@ func observer_on_island() -> bool:
 ## if there is one, on the ground if there is not. It is what a test that wants
 ## an observer standing on an island uses, and what the entry points' --start
 ## option goes through.
+##
+## It also stops the view following anybody: standing it somewhere and having it
+## snap back to a character on the next tick would not be standing it anywhere.
+## That is what a scenario wanting a camera beside a fight asks for.
 func place_observer(x: float, z: float) -> void:
+	follow_id = 0
 	observer_x = x
 	observer_z = z
 	observer_y = terrain.surface_height_at(x, z)
 	# Put down, not walked: nothing moved, so nothing is moving.
 	observer_speed = 0.0
 	observer_rise = 0.0
-	terrain_streamer.update(observers())
-	island_streamer.update(observers())
-	settlement_streamer.update(observers())
-	scatter_streamer.update(observers())
-	_refresh_water_sheet()
+	_restream()
 
 
 ## Put the observer down on whatever is under it.
@@ -424,6 +497,10 @@ func snapshot() -> Dictionary:
 		"observer_in_water": observer_in_water(),
 		"observer_on_bank": observer_on_bank(),
 		"observer_on_island": observer_on_island(),
+		# Which member of the cast the view is reading, or 0. A viewer that draws
+		# an observer of its own needs to know when the observer it would draw is
+		# already on screen as one of the characters.
+		"observer_follows": follow_id,
 		"loaded_chunks": terrain_streamer.loaded_keys(),
 		"loaded_islands": island_streamer.loaded_keys(),
 		"loaded_settlements": settlement_streamer.loaded_keys(),

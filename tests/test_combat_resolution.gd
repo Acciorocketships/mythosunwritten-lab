@@ -661,8 +661,19 @@ const DIE_ROOT := "res://sim/damage.gd"
 ## and which the stream ban below applies to it unchanged.
 const LOOP_ROOT := "res://sim/control_loop.gd"
 
-## Every file excused from the random-source scan. Two, and both hash.
-const HASH_ROOTS := [DIE_ROOT, LOOP_ROOT]
+## The third file of the combat vocabulary that may name a random source, and it
+## is in exactly `LOOP_ROOT`'s position.
+##
+## `sim/world_cast.gd` is swept into the scan because the people who live in an
+## ordinary world are `Commander`s standing as `Combatant`s, not because it runs
+## any rule of a fight. What it draws is which way a wanderer turns at the end of
+## a leg, and it draws it by *hashing* the seed, the character and the leg, which
+## is the discipline the die keeps. It is excused the same way and checked the
+## same way: it must contain none of `RULE_CALLS`.
+const CAST_ROOT := "res://sim/world_cast.gd"
+
+## Every file excused from the random-source scan. Three, and all three hash.
+const HASH_ROOTS := [DIE_ROOT, LOOP_ROOT, CAST_ROOT]
 
 ## What a *stream* is called, as opposed to a stateless hash.
 ##
@@ -768,17 +779,18 @@ func _all_player_facing_damage_goes_through_one_seam() -> void:
 		check(text.contains("SimRng.hash_"),
 			"and reaches for it by hashing rather than by a stream")
 
-	# And the second exception is excused for a reason that is checked rather
-	# than stated: the control loop names the combat vocabulary because every
-	# character is a combatant, and it runs no rule of a turn -- the same test
+	# And the two exceptions beside the die are excused for a reason that is
+	# checked rather than stated: each names the combat vocabulary because every
+	# character is a combatant, and each runs no rule of a turn -- the same test
 	# `WORLD_ROOT` has to pass below.
-	var loop_text := _read(LOOP_ROOT)
-	var loop_rules := PackedStringArray()
-	for call_name in RULE_CALLS:
-		if loop_text.contains(call_name):
-			loop_rules.append(call_name)
-	equal(loop_rules, PackedStringArray(),
-		"and %s runs no rule of a turn" % LOOP_ROOT)
+	for excused in [LOOP_ROOT, CAST_ROOT]:
+		var excused_text := _read(excused)
+		var excused_rules := PackedStringArray()
+		for call_name in RULE_CALLS:
+			if excused_text.contains(call_name):
+				excused_rules.append(call_name)
+		equal(excused_rules, PackedStringArray(),
+			"and %s runs no rule of a turn" % excused)
 
 	# And what it names is a stateless hash, never a stream. This is the property
 	# that makes a blow's roll a function of the blow rather than of how many

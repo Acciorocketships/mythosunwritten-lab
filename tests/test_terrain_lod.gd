@@ -10,6 +10,11 @@ extends TestSuite
 
 
 const SEED := 1234
+
+## How far the hand-walked view moves each tick, in world units: the rate a
+## walker in this world covers ground at. The walk below goes at a slight angle
+## so it crosses the boundaries of every ring rather than running along one.
+const WALK_STEP := 0.9
 const FIXED_FPS := 30
 const FRAMES := 90
 
@@ -488,7 +493,15 @@ func _the_ground_never_opens_up_while_it_is_walked_across() -> void:
 	var checked := 0
 	var boundaries_moved := 0
 	var previous := {}
+	# The view is walked by hand, a step at a time, rather than left to whichever
+	# way the world's own characters happen to wander: what is being checked is
+	# that the rings hold together under a moving centre, and where a character
+	# chooses to go is not this suite's business. The step is the rate the world
+	# has always moved a walker at, so the walk covers the ground it always did.
+	var walked := Vector2(world.observer_x, world.observer_z)
 	for tick in 200:
+		walked += Vector2(WALK_STEP, WALK_STEP * 0.31)
+		world.place_observer(walked.x, walked.y)
 		world.step()
 		var loaded := {}
 		for key in world.terrain_streamer.loaded_keys():

@@ -1,0 +1,274 @@
+The world is running: what a seeded headless run of the ordinary world prints.
+
+Command:  ./run_headless.sh --ticks 60
+Reproduces byte for byte in any process on this seed; a different seed differs.
+Taken at cycle 147, on the commit that put the control loop inside SimWorld.step.
+
+----------------------------------------------------------------------
+
+
+seed 1234
+cast 3 following #1
+  Pip     #1 commander band=1 at (0.000, 22.792, 0.000) hp=26/26 walking  <- followed
+  Nettle  #2 commander band=1 at (-7.000, 23.752, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 23.483, -5.000) hp=26/26 walking
+tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f60b62ef97420caa
+  t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+  t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+  t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+  t=  6  Pip    thought again at 5/20t, wanted the same thing
+  t=  6  Nettle thought again at 5/20t, wanted the same thing
+  t=  6  Corin  thought again at 5/20t, wanted the same thing
+tick 10 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f05ad5c7da17a0bc
+  t= 11  Pip    thought again at 10/20t, wanted the same thing
+  t= 11  Nettle thought again at 10/20t, wanted the same thing
+  t= 11  Corin  thought again at 10/20t, wanted the same thing
+  t= 16  Pip    thought again at 15/20t, wanted the same thing
+  t= 16  Nettle thought again at 15/20t, wanted the same thing
+  t= 16  Corin  thought again at 15/20t, wanted the same thing
+tick 20 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 b2c63975b76f7cd7
+  t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
+  t= 21  Pip    began go_to(target=(34.154, 10.917)), 20 ticks
+  t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
+  t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
+  t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
+  t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
+  t= 26  Pip    thought again at 5/20t, wanted the same thing
+  t= 26  Nettle thought again at 5/20t, wanted the same thing
+  t= 26  Corin  thought again at 5/20t, wanted the same thing
+tick 30 chunks=38 islands=10 villages=1 roads=5 props=727 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 1a67b116a59f8c40
+  t= 31  Pip    thought again at 10/20t, wanted the same thing
+  t= 31  Nettle thought again at 10/20t, wanted the same thing
+  t= 31  Corin  thought again at 10/20t, wanted the same thing
+  t= 36  Pip    thought again at 15/20t, wanted the same thing
+  t= 36  Nettle thought again at 15/20t, wanted the same thing
+  t= 36  Corin  thought again at 15/20t, wanted the same thing
+tick 40 chunks=38 islands=10 villages=1 roads=5 props=727 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 1adf00919b82160c
+  t= 41  Pip    finished go_to(target=(34.154, 10.917)) -> go_to ok at=(34.154, 10.917) walked=18.0 steps=20
+  t= 41  Pip    began go_to(target=(51.020, 17.205)), 20 ticks
+  t= 41  Nettle finished go_to(target=(-31.155, 30.384)) -> go_to ok at=(-31.155, 30.384) walked=18.0 steps=20
+  t= 41  Nettle began go_to(target=(-38.152, 46.968)), 20 ticks
+  t= 41  Corin  finished go_to(target=(-11.335, -36.548)) -> go_to ok at=(-11.335, -36.548) walked=18.0 steps=20
+  t= 41  Corin  began go_to(target=(-22.891, -50.349)), 20 ticks
+  t= 46  Pip    thought again at 5/20t, wanted the same thing
+  t= 46  Nettle thought again at 5/20t, wanted the same thing
+  t= 46  Corin  thought again at 5/20t, wanted the same thing
+tick 50 chunks=40 islands=11 villages=1 roads=4 props=811 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 208b145a3eb915e5
+  t= 51  Pip    thought again at 10/20t, wanted the same thing
+  t= 51  Nettle thought again at 10/20t, wanted the same thing
+  t= 51  Corin  thought again at 10/20t, wanted the same thing
+  t= 56  Pip    thought again at 15/20t, wanted the same thing
+  t= 56  Nettle thought again at 15/20t, wanted the same thing
+  t= 56  Corin  thought again at 15/20t, wanted the same thing
+tick 60 chunks=40 islands=11 villages=1 roads=4 props=811 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 0aa2d5118f06084a
+done ticks=60 chunks=40 built=46 final=0aa2d5118f06084a
+
+----------------------------------------------------------------------
+
+The same world, with the character scenario set out live instead of the
+ordinary cast: the greeting, the trade and the quarrel all happen in the
+running game rather than being played elsewhere and stood still.
+
+Command:  ./run_headless.sh --scenario market --ticks 120
+Only the lines naming a choice or an answer are kept here; the run itself
+prints the world's trace between them.
+
+cast 5 following #1
+  Wren    #1 commander band=1 at (-486.000, -2.460, 416.000) hp=32/32 walking  <- followed
+  Rook    #2 commander band=1 at (-478.000, -2.352, 416.000) hp=32/32 walking
+  Bram    #3 commander band=3 at (-436.000, 0.952, 407.000) hp=38/38 walking
+  Sable   #4 commander band=4 at (-424.000, 2.169, 407.000) hp=38/38 walking
+  Odo     #5 commander band=5 at (-484.000, 0.568, 472.000) hp=26/26 walking
+  t=  1  Wren   began say(text=good morning target=2), 5 ticks
+  t=  1  Rook   began wait(ticks=4), 4 ticks
+  t=  1  Bram   began wait(ticks=4), 4 ticks
+  t=  1  Sable  began wait(ticks=4), 4 ticks
+  t=  1  Odo    began go_to(target=(-484.000, 514.000)), 20 ticks
+  t=  5  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Rook   began wait(ticks=4), 4 ticks
+  t=  5  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Bram   began wait(ticks=4), 4 ticks
+  t=  5  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Sable  began wait(ticks=4), 4 ticks
+  t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1
+  t=  6  Wren   began go_to(target=6), 20 ticks
+  t=  6  Rook   interrupted (spoken to), abandoned wait(ticks=4) 1/4t
+  t=  6  Rook   began say(text=what will it be? target=1), 5 ticks
+  t=  9  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=13
+  t=  9  Bram   began wait(ticks=4), 4 ticks
+  t=  9  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=13
+  t=  9  Sable  began wait(ticks=4), 4 ticks
+  t= 11  Rook   finished say(text=what will it be? target=1) -> say ok shout=false heard_by=1
+  t= 11  Rook   began wait(ticks=4), 4 ticks
+  t= 11  Wren   interrupted (spoken to), abandoned go_to(target=6) 5/20t
+  t= 11  Wren   began go_to(target=6), 20 ticks
+  t= 13  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=17
+  t= 13  Bram   began wait(ticks=4), 4 ticks
+  t= 13  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=17
+  t= 13  Sable  began wait(ticks=4), 4 ticks
+  t= 15  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=19
+  t= 15  Rook   began wait(ticks=4), 4 ticks
+  t= 17  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=21
+  t= 17  Bram   began wait(ticks=4), 4 ticks
+  t= 17  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=21
+  t= 17  Sable  began wait(ticks=4), 4 ticks
+  t= 19  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=23
+  t= 19  Rook   began wait(ticks=4), 4 ticks
+  t= 21  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=25
+  t= 21  Bram   began wait(ticks=4), 4 ticks
+  t= 21  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=25
+  t= 21  Sable  began wait(ticks=4), 4 ticks
+  t= 21  Odo    finished go_to(target=(-484.000, 514.000)) -> go_to ok at=(-484.000, 514.000) walked=42.0 steps=47
+  t= 21  Odo    began wait(ticks=30), 30 ticks
+  t= 23  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=27
+  t= 23  Rook   began wait(ticks=4), 4 ticks
+  t= 25  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=29
+  t= 25  Bram   began wait(ticks=4), 4 ticks
+  t= 25  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=29
+  t= 25  Sable  began wait(ticks=4), 4 ticks
+  t= 27  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=31
+  t= 27  Rook   began wait(ticks=4), 4 ticks
+  t= 29  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=33
+  t= 29  Bram   began wait(ticks=4), 4 ticks
+  t= 29  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=33
+  t= 29  Sable  began wait(ticks=4), 4 ticks
+  t= 31  Wren   finished go_to(target=6) -> go_to ok at=(-473.400, 416.000) walked=12.6 steps=14
+  t= 31  Wren   began pick_up(item=brass lantern), 3 ticks
+  t= 31  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=35
+  t= 31  Rook   began wait(ticks=4), 4 ticks
+  t= 33  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=37
+  t= 33  Bram   began wait(ticks=4), 4 ticks
+  t= 33  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=37
+  t= 33  Sable  began wait(ticks=4), 4 ticks
+  t= 34  Wren   finished pick_up(item=brass lantern) -> pick_up ok item=brass lantern from=6
+  t= 34  Wren   began go_to(target=2), 20 ticks
+  t= 35  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=39
+  t= 35  Rook   began wait(ticks=4), 4 ticks
+  t= 37  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=41
+  t= 37  Bram   began wait(ticks=4), 4 ticks
+  t= 37  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=41
+  t= 37  Sable  began wait(ticks=4), 4 ticks
+  t= 39  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=43
+  t= 39  Rook   began wait(ticks=4), 4 ticks
+  t= 41  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=45
+  t= 41  Bram   began wait(ticks=4), 4 ticks
+  t= 41  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=45
+  t= 41  Sable  began wait(ticks=4), 4 ticks
+  t= 43  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=47
+  t= 43  Rook   began wait(ticks=4), 4 ticks
+  t= 45  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=49
+  t= 45  Bram   began wait(ticks=4), 4 ticks
+  t= 45  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=49
+  t= 45  Sable  began wait(ticks=4), 4 ticks
+  t= 47  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=51
+  t= 47  Rook   began wait(ticks=4), 4 ticks
+  t= 49  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=53
+  t= 49  Bram   began wait(ticks=4), 4 ticks
+  t= 49  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=53
+  t= 49  Sable  began wait(ticks=4), 4 ticks
+  t= 51  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=55
+  t= 51  Rook   began wait(ticks=4), 4 ticks
+  t= 51  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=81
+  t= 51  Odo    began wait(ticks=30), 30 ticks
+  t= 53  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=57
+  t= 53  Bram   began wait(ticks=4), 4 ticks
+  t= 53  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=57
+  t= 53  Sable  began wait(ticks=4), 4 ticks
+  t= 54  Wren   finished go_to(target=2) -> go_to ok at=(-476.100, 416.000) walked=2.7 steps=3
+  t= 54  Wren   began trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0), 4 ticks
+  t= 55  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=59
+  t= 55  Rook   began wait(ticks=4), 4 ticks
+  t= 57  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=61
+  t= 57  Bram   began go_to(target=4), 20 ticks
+  t= 57  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=61
+  t= 57  Sable  began go_to(target=3), 20 ticks
+  t= 58  Wren   finished trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0) -> trade_propose ok to=2 give=0 give_money=12 want=1 want_money=0
+  t= 58  Wren   began wait(ticks=8), 8 ticks
+  t= 59  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=63
+  t= 59  Rook   began trade_accept(target=1), 3 ticks
+  t= 62  Rook   finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
+  t= 62  Rook   began wait(ticks=4), 4 ticks
+  t= 66  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=74
+  t= 66  Wren   began examine(target=silk cloak), 4 ticks
+  t= 66  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=70
+  t= 66  Rook   began wait(ticks=4), 4 ticks
+  t= 70  Wren   finished examine(target=silk cloak) -> examine ok item=silk cloak seen=common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak
+  t= 70  Wren   began say(text=a fair bargain), 5 ticks
+  t= 70  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=74
+  t= 70  Rook   began wait(ticks=4), 4 ticks
+  t= 74  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=78
+  t= 74  Rook   began wait(ticks=4), 4 ticks
+  t= 75  Wren   finished say(text=a fair bargain) -> say ok shout=true heard_by=1
+  t= 75  Wren   began wait(ticks=24), 24 ticks
+  t= 77  Bram   finished go_to(target=4) -> go_to ok at=(-426.100, 407.000) walked=9.9 steps=11
+  t= 77  Bram   began wait(ticks=4), 4 ticks
+  t= 77  Sable  finished go_to(target=3) -> go_to ok at=(-424.000, 407.000) walked=0.0 steps=0
+  t= 77  Sable  began wait(ticks=4), 4 ticks
+  t= 78  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=82
+  t= 78  Rook   began wait(ticks=4), 4 ticks
+  t= 78  Bram   interrupted (combat began), abandoned wait(ticks=4) 1/4t
+  t= 78  Bram   began attack(target=4 item=common sword), 6 ticks
+  t= 78  Sable  interrupted (combat began), abandoned wait(ticks=4) 1/4t
+  t= 81  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=111
+  t= 81  Odo    began wait(ticks=30), 30 ticks
+  t= 82  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=86
+  t= 82  Rook   began wait(ticks=4), 4 ticks
+  t= 84  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=7
+  t= 85  Sable  began attack(target=3 item=common spear), 6 ticks
+  t= 86  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=90
+  t= 86  Rook   began wait(ticks=4), 4 ticks
+  t= 90  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=94
+  t= 90  Rook   began wait(ticks=4), 4 ticks
+  t= 91  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+  t= 92  Bram   began attack(target=4 item=common sword), 6 ticks
+  t= 94  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=98
+  t= 94  Rook   began wait(ticks=4), 4 ticks
+  t= 98  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=102
+  t= 98  Rook   began wait(ticks=4), 4 ticks
+  t= 98  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=5
+  t= 99  Wren   finished wait(ticks=24) -> wait ok ticks=24 until=123
+  t= 99  Wren   began say(text=what was that noise?), 5 ticks
+  t= 99  Sable  began attack(target=3 item=common spear), 6 ticks
+  t=102  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=106
+  t=102  Rook   began wait(ticks=4), 4 ticks
+  t=104  Wren   finished say(text=what was that noise?) -> say ok shout=true heard_by=1
+  t=105  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+  t=106  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=110
+  t=106  Rook   began wait(ticks=4), 4 ticks
+  t=106  Bram   began attack(target=4 item=common sword), 6 ticks
+  t=110  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=114
+  t=110  Rook   began wait(ticks=4), 4 ticks
+  t=111  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=141
+  t=111  Odo    began wait(ticks=30), 30 ticks
+  t=112  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=5
+  t=113  Sable  began attack(target=3 item=common spear), 6 ticks
+  t=114  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=118
+  t=114  Rook   began wait(ticks=4), 4 ticks
+  t=118  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=122
+  t=118  Rook   began wait(ticks=4), 4 ticks
+  t=119  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+  t=120  Bram   began attack(target=4 item=common sword), 6 ticks
+
+----------------------------------------------------------------------
+
+A seed whose origin is under a river, where a character written down at
+the origin would stand in the water and be refused every walk it ever
+chose. It is stood on the nearest ground it can walk from instead, and a
+walk the world does refuse turns the walker away rather than pinning it.
+
+Command:  ./run_headless.sh --seed 19 --ticks 120
+
+cast 3 following #1
+  Pip     #1 commander band=1 at (9.000, -7.150, 0.000) hp=26/26 walking  <- followed
+  t= 21  Pip    finished go_to(target=(26.994, 0.462)) -> go_to ok at=(26.994, 0.462) walked=18.0 steps=20
+  t= 21  Nettle finished go_to(target=(-19.192, 17.242)) -> go_to ok at=(-19.192, 17.242) walked=18.0 steps=20
+  t= 21  Corin  finished go_to(target=(6.711, -22.854)) -> go_to refused: the way to the position is blocked
+  t= 41  Pip    finished go_to(target=(44.577, -3.393)) -> go_to ok at=(44.577, -3.393) walked=18.0 steps=20
+  t= 41  Nettle finished go_to(target=(-30.526, 31.225)) -> go_to ok at=(-30.526, 31.225) walked=18.0 steps=20
+  t= 41  Corin  finished go_to(target=(25.734, -3.239)) -> go_to ok at=(25.734, -3.239) walked=18.0 steps=20
+  t= 61  Pip    finished go_to(target=(62.558, -4.203)) -> go_to ok at=(62.558, -4.203) walked=18.0 steps=20
+  t= 61  Nettle finished go_to(target=(-43.698, 43.494)) -> go_to ok at=(-43.698, 43.494) walked=18.0 steps=20
+  t= 61  Corin  finished go_to(target=(43.268, 0.832)) -> go_to ok at=(43.268, 0.832) walked=18.0 steps=20
+  t= 81  Pip    finished go_to(target=(80.378, -1.664)) -> go_to ok at=(80.378, -1.664) walked=18.0 steps=20
+  t= 81  Nettle finished go_to(target=(-56.832, 55.802)) -> go_to ok at=(-56.832, 55.802) walked=18.0 steps=20
+  t= 81  Corin  finished go_to(target=(61.266, 1.072)) -> go_to ok at=(61.266, 1.072) walked=18.0 steps=20

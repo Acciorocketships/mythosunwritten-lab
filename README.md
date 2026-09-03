@@ -1869,6 +1869,8 @@ project, which takes a few seconds, and later runs do not.
 ./run_headless.sh --islands              # ...and every island in a square of the world
 ./run_headless.sh --settlements          # ...and every village, road and bridge in one
 ./run_headless.sh --scatter              # ...and everything grown or stood on the ground
+./run_headless.sh --scenario market      # ...with a named cast set out and lived forward
+./run_headless.sh --scenario market --frozen   # ...or photographed at a stated tick
 ./run_headless.sh --board                # ...and the tactical lattice, cell by cell
 ./run_headless.sh --snap                 # ...and where in the world a fight can be held
 ./run_headless.sh --board-sweep          # ...and what each candidate cell size costs
@@ -2003,9 +2005,27 @@ xvfb-run -a ./run_render.sh --seed 1234 --start -379.5 331.5 --paused --board \
 	--screenshot "$PWD/reports/assets/combat-board-island.png" --screenshot-frame 120
 ```
 
+An ordinary run reports the world *and the people living in it*: a `cast` header
+naming everybody and which of them the world is looking through, then everything
+the control loop asked and everything the engine answered, at the tick it
+happened on.
+
+```
+cast 3 following #1
+  Pip     #1 commander band=1 at (0.000, 22.792, 0.000) hp=26/26 walking  <- followed
+  ...
+  t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+  t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
+```
+
 `--scenario encounter` sets a whole fight out in the world before the first
 frame, and `--scenario encounter-island` puts the same cycle on a floating
-island's top. The name goes straight to the simulation, which is what keeps every
+island's top. `--scenario market` and `--scenario quarrel` set the five
+characters of the character walkthrough out *where the run starts* and let the
+world's own control loop live them forward in front of the camera; `--frozen`
+asks for the old behaviour instead -- the run is played headless to a stated tick
+and the cast is stood where it left them, which is what a still of one particular
+moment wants. The name goes straight to the simulation, which is what keeps every
 combat class on that side of the layer line. The three images in
 [reports/combat-snap.md](reports/combat-snap.md) came from one command with three
 different ticks:

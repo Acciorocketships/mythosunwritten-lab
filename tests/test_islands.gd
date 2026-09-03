@@ -735,15 +735,26 @@ func _walking_off_an_island_puts_the_observer_back_on_the_ground(
 ) -> void:
 	var island := _widest_dry(islands)
 	var world := SimWorld.new(SEED)
-	world.place_observer(island.centre_x, island.centre_z)
+	# The thing that walks off an island is a character: the observer is the
+	# world's view on one, and the one-hop settle that carries a walker up onto a
+	# rim and drops it back off is `Combatant.settle`. So the character the world
+	# looks through is stood on the island, and the view follows it there.
+	var walker := world.followed()
+	check(walker != null, "the world should be looking through somebody")
+	if walker == null:
+		return
+	walker.x = island.centre_x
+	walker.z = island.centre_z
+	walker.y = island.top_height_at(island.centre_x, island.centre_z)
+	world.follow(walker.id)
 	check(world.observer_on_island(), "the observer should start on the island")
 
-	# Step off the edge by hand, well past the outline.
-	var outside_x := island.centre_x + island.max_reach() * 2.5
-	var outside_z := island.centre_z
-	world.observer_x = outside_x
-	world.observer_z = outside_z
-	world.step()
+	# Step off the edge by hand, well past the outline, and let the world's own
+	# settle rule say where that lands.
+	walker.x = island.centre_x + island.max_reach() * 2.5
+	walker.z = island.centre_z
+	walker.settle(world.terrain)
+	world.follow(walker.id)
 	check(not world.observer_on_island(),
 		"the observer is still on an island after stepping off the edge")
 	check(absf(world.observer_surface_height() - world.observer_ground_height()) < 0.5,

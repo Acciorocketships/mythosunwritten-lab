@@ -54,9 +54,16 @@ const CLIPS := [CLIP_IDLE, CLIP_WALK, CLIP_RUN, CLIP_JUMP, CLIP_HIT, CLIP_DEATH]
 
 # --- Where the rule's thresholds sit -------------------------------------
 # All three are in world units per simulation tick, because that is the unit the
-# snapshot's motion is in. The observer walks at 0.9 (SimWorld.OBSERVER_SPEED),
-# which is deliberately between the two speed thresholds: it is unmistakably
-# moving and it is not sprinting, so the world as it stands draws a walk.
+# snapshot's motion is in. They were chosen against a placeholder observer that
+# walked a steady 0.9 units a tick, between the two speed thresholds.
+#
+# The world no longer moves anything at a steady rate: the view follows a
+# character, and a character covers a whole walk on the one tick that walk is
+# resolved, so the speed a snapshot carries is a leg on one tick in twenty and
+# zero on the rest. Nothing here compensates for that, because a threshold that
+# tried to would be this layer holding an opinion about how the world moves.
+# What the world needs is for a walk to happen over the ticks it costs; until it
+# does, the thresholds stand where they are and read what they are given.
 
 ## Below this a character is standing still. Not zero, because a character
 ## shuffling a hair per tick is standing, and because a threshold at exactly zero

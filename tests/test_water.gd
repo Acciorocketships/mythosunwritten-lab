@@ -26,6 +26,10 @@ const OTHER_SEED := 41
 ## merely a consistent answer about its absence use this one.
 const RIVER_SEED := 19
 
+## How far the hand-walked view moves each step, in world units: the rate a
+## walker in this world covers ground at.
+const WALK_STEP := 0.9
+
 
 func _init() -> void:
 	suite_name = "water"
@@ -357,14 +361,22 @@ func _the_sheet_handed_to_a_viewer_cannot_reach_the_world() -> void:
 
 	# The sheet is rebuilt when the window moves and not before, so a viewer
 	# that watches the version number is not copying it every tick.
+	#
+	# The view is walked by hand rather than left to whichever way the world's
+	# own characters wander: this seed has a river across its origin, so a walker
+	# there spends its time being refused by the water, and what is being checked
+	# is the window and not anybody's choice of direction.
 	var version := world.water_sheet_version
-	world.step()
+	var walked := Vector2(world.observer_x, world.observer_z)
+	walked.x += WALK_STEP
+	world.place_observer(walked.x, walked.y)
 	equal(world.water_sheet_version, version,
-		"one tick of walking rebuilt the water sheet")
+		"one step of walking rebuilt the water sheet")
 	for i in 200:
-		world.step()
+		walked.x += WALK_STEP
+		world.place_observer(walked.x, walked.y)
 	check(world.water_sheet_version > version,
-		"two hundred ticks of walking never rebuilt the water sheet")
+		"two hundred steps of walking never rebuilt the water sheet")
 
 
 func _water_matches_across_processes() -> void:

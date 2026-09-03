@@ -285,8 +285,8 @@ func _the_panel_reads_the_character_and_keeps_no_copy() -> void:
 
 func _the_source_hands_over_the_world_s_own_objects() -> void:
 	var sim := Simulation.new(SEED)
-	equal(SheetSource.sheets_in(sim.world).size(), 0,
-		"a world with nobody in it should hand over no character sheets")
+	equal(SheetSource.sheets_in(sim.world).size(), WorldCast.CAST.size(),
+		"an ordinary world should hand over the sheets of the cast living in it")
 	check(sim.begin_scenario(Simulation.SCENARIO_ENCOUNTER),
 		"the encounter scenario should have been set out")
 	var sheets := SheetSource.sheets_in(sim.world)

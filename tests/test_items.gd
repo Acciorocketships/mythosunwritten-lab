@@ -827,6 +827,9 @@ func _the_layer_stands_on_its_own() -> void:
 	# difficulty-class run forges the two tools its attempts are made with.
 	# `sim/scripted_world.gd` is the ninth: the orchestrator run forges the
 	# lantern and the rope its one written-down character carries about.
+	# `sim/world_cast.gd` is the tenth and is `sim/scripted_encounter.gd`'s kind:
+	# it names an ability to roll the six scores of the handful of characters who
+	# live in an ordinary world, and forges nothing at all.
 	equal(readers, PackedStringArray([
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
 		"res://sim/check_prompt.gd", "res://sim/commander.gd",
@@ -837,6 +840,7 @@ func _the_layer_stands_on_its_own() -> void:
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
 		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
 		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",
+		"res://sim/world_cast.gd",
 	]), "and these files are the ones that read the item layer")
 	for path in readers:
 		if _is_excused(path):

@@ -440,8 +440,12 @@ func _the_world_carries_the_sheet_the_run_played() -> void:
 	var played := ScriptedScenario.played_to(
 		ScriptedScenario.MARKET_FRAME, ScriptedScenario.SEED)
 	var sim := Simulation.new(ScriptedScenario.SEED)
-	check(sim.begin_scenario(Simulation.SCENARIO_MARKET),
-		"the market scenario could not be set out")
+	# The frozen frame, by name: it is the muster that plays the run headless and
+	# adopts the sheets that run finished with, and so it is the one this claim
+	# is about. Set out live, the same cast starts where the run starts and has
+	# not traded anything yet.
+	check(sim.begin_scenario(Simulation.SCENARIO_MARKET, true),
+		"the market scenario could not be photographed")
 
 	var stood := _sheets_in(sim.world)
 	equal(stood.size(), played.actors.size(),

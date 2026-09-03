@@ -5,6 +5,8 @@
 #   ./run_headless.sh --seed 7 --ticks 500
 #   ./run_headless.sh --chunks --biomes
 #   ./run_headless.sh --scatter           # everything grown or stood on the ground
+#   ./run_headless.sh --scenario market   # set a named scenario out and live it
+#   ./run_headless.sh --scenario market --frozen   # ...or photograph it instead
 #   ./run_headless.sh --assets            # what visual material the run loaded
 #
 # Prints one line per traced tick and exits 0.

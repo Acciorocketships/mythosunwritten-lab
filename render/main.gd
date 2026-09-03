@@ -596,11 +596,15 @@ func _ready() -> void:
 			aa, AntiAliasing.from_project_settings(),
 		])
 	_sim = Simulation.new(options["seed"])
+	# The scenario first, because it stands up a cast of its own in place of the
+	# world's and puts the view where that cast is; --start then has the last
+	# word on where the camera goes, which is what somebody typing both means and
+	# what the headless entry point does with the same pair.
+	var scenario := String(options["scenario"])
+	if not _sim.begin_scenario(scenario, options["frozen"]):
+		printerr("render-shell unknown or unavailable --scenario %s" % scenario)
 	if options["start"]:
 		_sim.world.place_observer(options["start_x"], options["start_z"])
-	var scenario := String(options["scenario"])
-	if not _sim.begin_scenario(scenario):
-		printerr("render-shell unknown or unavailable --scenario %s" % scenario)
 	_paused = options["paused"]
 	AssetLibrary.model_tint_enabled = options["model_tint"]
 	if options["grass"]:
@@ -835,6 +839,12 @@ func _sync_views() -> void:
 	# feet at their own origin -- and turns to face the way the world says it is
 	# walking. Which clip that becomes is CharacterView's business and is decided
 	# out of the snapshot; this only hands the snapshot over.
+	#
+	# When the world is looking through one of its own characters, that character
+	# is already on screen -- _sync_combat drew it, wearing its own model -- so
+	# the shell's own observer would be a second body standing inside the first.
+	# The simulation says which case this is; the shell only reads it.
+	_observer_view.visible = int(snapshot["observer_follows"]) == 0
 	_observer_view.position = observer
 	_observer_view.rotation.y = CharacterView.yaw_for_heading(
 		float(snapshot["observer_heading"])
@@ -1777,7 +1787,8 @@ func _parse_args() -> Dictionary:
 		"model_tint": true, "grass": true, "atmosphere": true, "board": false,
 		"distant": true, "lod_levels": false, "lod_centre": false,
 		"lod_centre_x": 0.0, "lod_centre_z": 0.0,
-		"scenario": Simulation.SCENARIO_NONE, "sheet": false, "readout": false,
+		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
+		"sheet": false, "readout": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 	}
@@ -1850,6 +1861,13 @@ func _parse_args() -> Dictionary:
 				# names a string and nothing else.
 				if has_value:
 					options["scenario"] = args[i + 1]
+			"--frozen":
+				# Photograph a scenario instead of playing it: the simulation
+				# plays the run headless to a stated tick and stands the cast
+				# where that run left them, which is what a still of one
+				# particular moment wants. Without it the scenario is set out
+				# where it starts and lived forward in front of the camera.
+				options["frozen"] = true
 			"--trace":
 				# Draw a route read from a file of "x z height" lines: what
 				# tools/measure_mountains.sh writes when it finds a way to the

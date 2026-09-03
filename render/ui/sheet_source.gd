@@ -26,11 +26,13 @@ extends RefCounted
 ##
 ## ## Which characters there are
 ##
-## The world holds a roster of everyone who can fight, and it is empty in an
-## ordinary run -- there is no character layer populating the open world yet. A
-## named scenario puts characters in it: `./run_render.sh --scenario market` sets
-## out the five of the character walkthrough, and that is what the panel has to
-## show. With none in the world there is nothing to show and the shell says so.
+## The world holds a roster of everyone who can fight, and an ordinary run fills
+## it with the handful of characters who live there (sim/world_cast.gd). A named
+## scenario clears that and puts its own cast in instead:
+## `./run_render.sh --scenario market` sets out the five of the character
+## walkthrough. Either way the panel shows what is in the world; with nobody in
+## it -- a world something has emptied -- there is nothing to show and the shell
+## says so.
 class_name SheetSource
 
 ## Every character sheet the world is holding, in the simulation's own id order.

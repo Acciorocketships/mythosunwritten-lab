@@ -21,6 +21,7 @@ const SUITES := [
 	preload("res://tests/test_combat_pieces.gd"),
 	preload("res://tests/test_combat_resolution.gd"),
 	preload("res://tests/test_combat_snap.gd"),
+	preload("res://tests/test_live_world.gd"),
 	preload("res://tests/test_layering.gd"),
 	preload("res://tests/test_asset_tags.gd"),
 	preload("res://tests/test_characters.gd"),
