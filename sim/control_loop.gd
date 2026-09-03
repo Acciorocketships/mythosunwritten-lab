@@ -136,6 +136,7 @@ var _reviews: int = 0
 var _changes: int = 0
 var _interruptions: Dictionary = {}
 var _chosen_on: Dictionary = {}
+var _answers: Dictionary = {}
 
 
 ## A loop over a scene, with a seed for the bias draws.
@@ -252,6 +253,13 @@ func _complete(one: Combatant, doing: Activity) -> void:
 	_busy.erase(one.id)
 	var outcome := ActionEngine.resolve(scene, one, doing.action)
 	_resolved[one.id] = actions_of(one.id) + 1
+	_answers[one.id] = {
+		"tick": scene.tick,
+		"action": doing.action.line(),
+		"line": outcome.line(),
+		"reason": outcome.reason,
+		"ok": outcome.ok,
+	}
 	_count(FINISHED)
 	_note(one, "%s %s -> %s" % [FINISHED, doing.action.line(), outcome.line()])
 	if _can_act(one) and _may_choose(one):
@@ -374,6 +382,24 @@ func doing_of(id: int) -> Activity:
 ## Whether a character has been asked and had no answer.
 func is_thinking(id: int) -> bool:
 	return bool(_thinking.get(id, false))
+
+
+## What the engine last answered a character, or an empty dictionary for one it
+## has never answered: `{tick, action, line, reason, ok}`.
+##
+## Every string in it is the engine's, verbatim -- `Action.line()` for what was
+## chosen and `ActionOutcome.line()` for what came of it, which for a refusal
+## carries `ActionOutcome.reason` and so carries section 2.1's "returned reason"
+## in the words the resolver wrote it in. The loop copies; it does not phrase.
+##
+## It exists because a refusal is addressed to whoever chose, and whoever chose
+## may be a person who needs to be told. The journal has always carried the same
+## sentence, and reading a sentence back out of a line of prose is not reading
+## it: this is the same fact with the parsing taken away. A copy comes back, so
+## a caller cannot write into the loop's record of what happened.
+func answer_of(id: int) -> Dictionary:
+	var answer: Variant = _answers.get(id, null)
+	return {} if answer == null else (answer as Dictionary).duplicate()
 
 
 ## Every count the loop keeps: how many mid-action re-evaluations happened, how

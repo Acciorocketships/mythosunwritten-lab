@@ -15,13 +15,14 @@ extends CanvasLayer
 ## one at 3, and a window too small for even that draws at 1 and lets the panel
 ## run off the bottom rather than shrinking it to a fraction.
 ##
-## ## Two panels, one theme
+## ## Three panels, one theme
 ##
-## The character sheet sits in the top-left corner and the combat readout in the
-## top-right, and both are asked for separately -- a run may have either, both or
-## neither. What they may not have is two ideas of what the interface looks like,
-## so the theme is built once here and carried by the frame both panels sit in;
-## neither panel builds a style of its own and neither names a file on disk.
+## The character sheet sits in the top-left corner, the combat readout in the
+## top-right and the answer panel along the bottom left, and all three are asked
+## for separately -- a run may have any of them, all of them or none. What they
+## may not have is three ideas of what the interface looks like, so the theme is
+## built once here and carried by the frame the panels sit in; no panel builds a
+## style of its own and none names a file on disk.
 ##
 ## Nothing here belongs to the simulation. This layer, the panels under it, the
 ## theme and the pack are all render-side; a headless run loads not one of them,
@@ -41,6 +42,10 @@ var panel: CharacterPanel = null
 ## The combat readout, or null in a run that did not ask for one.
 var readout: CombatPanel = null
 
+## What the person driving chose and what the world answered, or null in a run
+## with nobody driving.
+var answer: AnswerPanel = null
+
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
 var art_scale := 1
@@ -54,7 +59,10 @@ var _frame: MarginContainer = null
 ##
 ## The defaults are the character sheet alone, which is what `--sheet` has always
 ## meant and what every existing caller asks for.
-static func build(with_sheet: bool = true, with_readout: bool = false) -> PixelUi:
+static func build(
+	with_sheet: bool = true, with_readout: bool = false,
+	with_answer: bool = false,
+) -> PixelUi:
 	var theme := SproutTheme.build()
 	if theme == null:
 		return null
@@ -74,7 +82,7 @@ static func build(with_sheet: bool = true, with_readout: bool = false) -> PixelU
 	var across := HBoxContainer.new()
 	across.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	across.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	across.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	across.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	across.alignment = BoxContainer.ALIGNMENT_BEGIN
 	if with_sheet:
 		layer.panel = CharacterPanel.new()
@@ -88,7 +96,24 @@ static func build(with_sheet: bool = true, with_readout: bool = false) -> PixelU
 	if with_readout:
 		layer.readout = CombatPanel.new()
 		across.add_child(layer.readout)
-	layer._frame.add_child(across)
+
+	# One column down the window: the two top panels in their row, whatever space
+	# is left, and the answer panel at the bottom. The row is what holds the two
+	# corners apart and the space is what holds the bottom down, so a run with
+	# only some of the three still puts each where it belongs.
+	var down := VBoxContainer.new()
+	down.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	down.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	down.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	down.add_child(across)
+	var below := Control.new()
+	below.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	below.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	down.add_child(below)
+	if with_answer:
+		layer.answer = AnswerPanel.new()
+		down.add_child(layer.answer)
+	layer._frame.add_child(down)
 	layer.add_child(layer._frame)
 	return layer
 

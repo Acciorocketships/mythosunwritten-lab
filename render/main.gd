@@ -558,6 +558,39 @@ var _pieces_drawn := 0
 ## bin/check_layers.gd covers it.
 var _sheet_ui: PixelUi = null
 
+## Whether a person is driving one of the world's characters this run, and which
+## way that character was last sent.
+##
+## `--play` hands the character the world is looking through over to whoever is
+## at the keyboard -- see `Simulation.hand_over_followed` -- and from then on
+## every key below goes into that character's `LiveChoice` and nowhere else. The
+## shell chooses nothing and resolves nothing: it builds an action out of the
+## catalogue and puts it in a holder, and the world's own control loop picks it
+## up on its next tick exactly as it picks up a wandering rule's choice.
+##
+## Off by default, so a run nobody asked to play is the world walking itself and
+## every capture ever taken of it still reproduces.
+var _playing := false
+var _facing := PlayerControls.FACING_AT_REST
+
+## Whether to print the world's own journal as it is written. What makes a run
+## driven from a script a trace rather than only a picture: it is the control
+## loop's account of who chose what on which tick, printed unchanged.
+var _journalling := false
+var _journal_said := 0
+
+## Which tick of the answer to the driven character has already been printed, so
+## one answer is said once.
+var _answer_said := -1
+
+## Key presses to make on behalf of a person who is not there: `{tick, keycode}`
+## rows out of `--input`, fed through the engine's own input queue on the tick
+## they name. This machine has no display, so a run that shows a person playing
+## has to press the keys from inside; they arrive at `_unhandled_input` by the
+## same path a real press does, which is the whole point of doing it this way
+## rather than calling the handler directly.
+var _synthetic: Array = []
+
 var _screenshot_path := ""
 var _screenshot_frame := 0
 var _screenshot_tick := 0
@@ -633,8 +666,23 @@ func _ready() -> void:
 		_board_view.material_override = _board_material
 		_board_view.extra_cull_margin = 100.0
 		add_child(_board_view)
-	if options["sheet"] or options["readout"]:
-		_sheet_ui = PixelUi.build(options["sheet"], options["readout"])
+	# Who is driving. After the scenario and --start, because it hands over
+	# whichever character the world ended up looking through.
+	_journalling = options["journal"]
+	if options["play"]:
+		_playing = _sim.hand_over_followed()
+		if not _playing:
+			printerr(
+				"render-shell --play: the world is looking through nobody, so"
+				+ " there is no character to hand over"
+			)
+		else:
+			print("render-shell play driving=#%d" % _sim.driven_id)
+			for line in PlayerControls.bindings():
+				print("render-shell keys %s" % line)
+	_synthetic = _parse_input_script(String(options["input"]))
+	if options["sheet"] or options["readout"] or _playing:
+		_sheet_ui = PixelUi.build(options["sheet"], options["readout"], _playing)
 		if _sheet_ui == null:
 			printerr(
 				"render-shell --sheet/--readout: the Sprout Lands UI pack is not"
@@ -722,7 +770,11 @@ func _process(delta: float) -> void:
 		while _accumulator >= tick_seconds:
 			_accumulator -= tick_seconds
 			_sim.step()
+			# Pressed between one tick and the next, so a script that names a
+			# tick gets that tick whatever frame rate the machine managed.
+			_press_the_scripted_keys()
 		_sync_views()
+	_say_what_happened()
 	# Outside the pause check, for the same reason the drifting sky is: how much
 	# of the distance has been meshed yet is a property of the picture and not of
 	# the world, so a held frame goes on filling out to the far plane instead of
@@ -777,17 +829,133 @@ func _aim_reflection() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	match (event as InputEventKey).keycode:
+	var keycode := (event as InputEventKey).keycode
+	match keycode:
 		KEY_ESCAPE:
 			get_tree().quit(0)
+			return
 		KEY_SPACE:
 			_paused = not _paused
+			return
 		KEY_R:
 			# Restart from the next seed along, to show a different world.
 			_sim = Simulation.new(_sim.world.world_seed + 1)
+			_playing = false
 			_clear_chunk_views()
 			_water_sheet_version = -1
 			_sync_views()
+			return
+	if _playing:
+		_drive(keycode)
+
+
+## Turn a key press into what the person driving wants their character to do
+## next, and put it where that character's decision function will read it.
+##
+## The whole of the input half of a person being one of the minds, and it is four
+## lines of arithmetic and a hand-over. Which key means what is
+## `render/player_controls.gd`'s; where the choice goes is `LiveChoice`'s; what
+## becomes of it is `ActionEngine`'s. Nothing is decided here and nothing is
+## resolved here -- in particular there is no test that the step is walkable, no
+## measure of how far a character can jump and no second movement path: the
+## action goes into the holder and the world's control loop picks it up.
+##
+## Returns whether the key meant anything.
+func _drive(keycode: int) -> bool:
+	if _sim.driven == null:
+		return false
+	var here := Vector2(_sim.world.observer_x, _sim.world.observer_z)
+	var way := PlayerControls.direction_of(keycode)
+	var chosen: Action = null
+	if way != Vector2.ZERO:
+		_facing = way
+		chosen = PlayerControls.walk_from(here, way)
+	elif keycode == PlayerControls.KEY_HOP:
+		chosen = PlayerControls.jump_from(here, _facing, PlayerControls.HOP)
+	elif keycode == PlayerControls.KEY_LEAP:
+		chosen = PlayerControls.jump_from(here, _facing, PlayerControls.LEAP)
+	elif keycode == PlayerControls.KEY_PLACE:
+		var place := _sim.world.place_near_observer()
+		if place.is_empty():
+			print("render-shell play t=%d nowhere named within reach"
+				% _sim.world.tick)
+			return true
+		chosen = PlayerControls.go_to_place(place)
+		print("render-shell play t=%d place %s %s at %.1f away" % [
+			_sim.world.tick, String(place["kind"]), String(place["id"]),
+			float(place["distance"]),
+		])
+	else:
+		return false
+	_sim.driven.choose(chosen)
+	print("render-shell play t=%d chose %s" % [_sim.world.tick, chosen.line()])
+	return true
+
+
+## Press the keys a run was given instead of the keys a person would press.
+##
+## This machine has no display, so the only way to show somebody playing is to
+## play it from inside. The press goes through `Input.parse_input_event`, which
+## puts it on the engine's own input queue, so it reaches `_unhandled_input`
+## along the path a real key takes -- the binding under test is the binding a
+## person uses, not a copy of it called directly.
+func _press_the_scripted_keys() -> void:
+	while not _synthetic.is_empty() \
+			and int((_synthetic[0] as Dictionary)["tick"]) <= _sim.world.tick:
+		var press: Dictionary = _synthetic.pop_front()
+		var event := InputEventKey.new()
+		event.keycode = int(press["key"])
+		event.physical_keycode = int(press["key"])
+		event.pressed = true
+		Input.parse_input_event(event)
+
+
+## Print what the world wrote down since the last frame: its control loop's
+## journal when `--journal` asked for it, and the engine's answer to whoever is
+## being driven whenever there is a new one.
+##
+## Both are quoted rather than phrased. The journal lines are the loop's own and
+## the answer is `ActionOutcome.line()` carried through `ControlLoop.answer_of`
+## unchanged, which is the same sentence the answer panel puts on screen.
+func _say_what_happened() -> void:
+	if _journalling:
+		var journal := _sim.world.loop.journal
+		for at in range(_journal_said, journal.size()):
+			print("  %s" % journal[at])
+		_journal_said = journal.size()
+	if not _playing:
+		return
+	var answer := _sim.driven_answer()
+	if answer.is_empty() or int(answer["tick"]) == _answer_said:
+		return
+	_answer_said = int(answer["tick"])
+	print("render-shell play t=%d %s -> %s" % [
+		_answer_said, String(answer["action"]), String(answer["line"]),
+	])
+
+
+## The keys a run was told to press, as `{tick, key}` rows in tick order.
+##
+## The spelling is `tick:key`, comma-separated: `--input "20:w,60:g,120:k"`. A
+## key is named by the letter or arrow a person would press, and anything else in
+## the list is reported and skipped rather than silently dropped.
+func _parse_input_script(script: String) -> Array:
+	var pressed := []
+	if script.strip_edges() == "":
+		return pressed
+	for entry in script.split(",", false):
+		var parts := entry.strip_edges().split(":", false)
+		if parts.size() != 2 or not parts[0].is_valid_int():
+			printerr("render-shell --input: cannot read '%s'" % entry)
+			continue
+		var keycode := OS.find_keycode_from_string(parts[1].strip_edges())
+		if keycode == KEY_NONE:
+			printerr("render-shell --input: no such key '%s'" % parts[1])
+			continue
+		pressed.append({"tick": parts[0].to_int(), "key": keycode})
+	pressed.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		return int(left["tick"]) < int(right["tick"]))
+	return pressed
 
 
 ## Copy what the simulation says exists onto the visuals. This is the only place
@@ -1660,6 +1828,10 @@ func _sync_sheet() -> void:
 	# What is on the readout it reads through render/ui/fight_source.gd.
 	if _sheet_ui.readout != null:
 		_sheet_ui.readout.watch(_sim.world)
+	# And the answer panel, the same way: the world, who is being driven and
+	# where their choices go. It reads all three again on every frame.
+	if _sheet_ui.answer != null:
+		_sheet_ui.answer.watch(_sim.world, _sim.driven_id, _sim.driven)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:
@@ -1790,6 +1962,7 @@ func _parse_args() -> Dictionary:
 		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
 		"sheet": false, "readout": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
+		"play": false, "journal": false, "input": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 	}
 	var args := OS.get_cmdline_user_args()
@@ -1894,6 +2067,30 @@ func _parse_args() -> Dictionary:
 				# -- which is what tests/test_ui_readout.gd checks by running
 				# both.
 				options["readout"] = true
+			"--play":
+				# Hand the character the world is looking through over to
+				# whoever is at the keyboard: from here on its next action is
+				# whatever they choose, and on every tick they have not chosen
+				# anything it waits in the world while everybody else carries
+				# on. It replaces that character's decision function and
+				# nothing else -- same sheet, same roster, same loop, same
+				# engine -- which is section 1's no-preferential-treatment
+				# principle being one line rather than a promise.
+				options["play"] = true
+			"--journal":
+				# Print the world's own control-loop journal as it is written:
+				# who chose what on which tick and what the engine answered. It
+				# reads the simulation and changes nothing, so a run with it and
+				# a run without it have the same fingerprint.
+				options["journal"] = true
+			"--input":
+				# Press keys on behalf of a person who is not at the keyboard:
+				# "20:w,60:g,120:k", a tick and a key. This machine has no
+				# display, so it is how a run showing somebody playing gets
+				# taken at all; the presses go through the engine's own input
+				# queue, so they arrive at the same binding a person's would.
+				if has_value:
+					options["input"] = args[i + 1]
 			"--board":
 				# Draw the tactical lattice over the ground the observer is
 				# standing on. It reads the board out of the simulation and

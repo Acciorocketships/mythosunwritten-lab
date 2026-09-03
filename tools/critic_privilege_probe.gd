@@ -14,6 +14,14 @@ extends SceneTree
 ##        a program returning the same choices at the same index
 ##   D -- the combat numbers of a person-driven and a program-driven commander
 ##   E -- what a decision function is handed, and who reads it
+##   F -- a whole running world whose cast contains a person
+##
+## Section F was added when the live decision function landed (W-player-input),
+## because until then there was no person to put in a cast: every "person" above
+## is a written-down list standing in for one. It is the same attack as C, moved
+## from a staged scene to `SimWorld` -- the world the render shell steps -- and
+## it drives one of its characters through `DecisionSource.live` against a
+## program returning the identical choices at the identical index.
 ##
 ## Run:  tools/godot/godot4 --headless --path . --script res://tools/critic_privilege_probe.gd
 
@@ -27,6 +35,7 @@ func _initialize() -> void:
 	_attempt_c()
 	_attempt_d()
 	_attempt_e()
+	_attempt_f()
 	quit(0)
 
 
@@ -327,6 +336,143 @@ func _attempt_e() -> void:
 			readers.append(path.get_file())
 	_say("files under sim/ whose code reads `decide`", "%d" % readers.size(),
 		", ".join(readers))
+
+
+# --- F: a running world whose cast contains a person -----------------------
+
+
+## How many ticks of the ordinary world each half of F is played for. Long
+## enough for three walks each at 20 ticks a walk.
+const WORLD_TICKS := 70
+
+## The seed the ordinary world is stood up on: the one the headless run reports.
+const WORLD_SEED := 1234
+
+
+# Two runs of the ordinary world, identical in every respect except how the
+# followed character's decision function was built: once as a person choosing
+# through `LiveChoice`, once as a program's rule returning the same choice at
+# the same index. Every line of both control-loop journals is compared, and so
+# is the world's own fingerprint.
+#
+# ## Asking both the same question at the same moment
+#
+# A program's rule is *evaluated* when the question is put, so its answer is
+# always there. A person's answer is written down beforehand and read when the
+# question is put, so a comparison has to put the choice in the holder before
+# the tick the loop asks on, or it measures when the person pressed rather than
+# whether the world privileges them. `ControlLoop._complete` resolves an action
+# and asks again inside the same tick, so the moment to press is the tick
+# before each of the program's own starts.
+#
+# Those ticks are not typed in here: the program half is played first and asked
+# when it began each action, and the person half presses one tick before each.
+# That keeps the two halves asked the same question at the same tick however the
+# costs in the catalogue change.
+#
+# The second reading below is the same pair with the person pressing late
+# instead. It is reported because it is a real and wanted property rather than a
+# fault: a choice that arrives after the question was asked starts later, which
+# is a person being a slower mind, and the world holds it by having the
+# character wait. What it must not do is change the world -- so the fingerprints
+# are compared there too.
+func _attempt_f() -> void:
+	_rule("F -- the ordinary world with one of its cast driven by a person")
+	var as_program := _world_with(false, {})
+	var began: Array = as_program["began"]
+
+	# One tick before each of the program's own starts: see the note above.
+	var in_step := {}
+	for at in began.size():
+		in_step[maxi(0, int(began[at]) - 1)] = at
+	var as_person := _world_with(true, in_step)
+
+	_say("the program began on ticks", str(began),
+		"when the rule's answer was committed, which is when the person is asked")
+	_compare("asked at the same tick", as_person, as_program)
+
+	# And the same pair with the person pressing a tick late instead.
+	var late := {}
+	for at in began.size():
+		late[int(began[at])] = at
+	var as_latecomer := _world_with(true, late)
+	_compare("the person pressing late", as_latecomer, as_program)
+
+
+# One half of F against the other, line for line.
+func _compare(reading: String, left_run: Dictionary, right_run: Dictionary) -> void:
+	var differing := 0
+	var left: PackedStringArray = left_run["journal"]
+	var right: PackedStringArray = right_run["journal"]
+	for at in maxi(left.size(), right.size()):
+		var one := left[at] if at < left.size() else "<none>"
+		var two := right[at] if at < right.size() else "<none>"
+		if one != two:
+			differing += 1
+			if differing <= 3:
+				_say("%s: line %d" % [reading, at], "FOUND",
+					"%s | %s" % [one, two])
+	_say("%s: journal lines" % reading, "%d / %d" % [left.size(), right.size()],
+		"a person driving one of the cast against a program driving it")
+	_say("%s: actions resolved" % reading, "%d / %d" % [
+		left_run["actions"], right_run["actions"]],
+		"how many of the same choices each got through")
+	_say("%s: lines that differ" % reading, "%d" % differing,
+		"the world cannot tell a person from a program" if differing == 0
+		else "only in which tick each action started -- the person pressed after"
+			+ " the question, so their character waited a tick and then did the"
+			+ " same thing")
+	_say("%s: world fingerprints" % reading, "%s / %s" % [
+		left_run["digest"], right_run["digest"]],
+		"same world" if left_run["digest"] == right_run["digest"]
+		else "different world")
+
+
+# One run of the ordinary world with its followed character driven either way.
+#
+# The choices are the same three. A program is asked on every tick and answers
+# from how many its character has had carried out; a person's answers are put in
+# the holder on the ticks `in_step` names, keyed by tick and naming which choice.
+# Nothing else differs -- same seed, same cast, same loop, same engine.
+#
+# `began` comes back as well: the tick each action was committed on, which is
+# what the person half is timed against.
+func _world_with(as_a_person: bool, in_step: Dictionary) -> Dictionary:
+	var world := SimWorld.new(WORLD_SEED)
+	var id := world.follow_id
+	var driven := world.combat.member_of(id)
+	var choices := [
+		Action.go_to(Vector2(driven.x + 6.0, driven.z + 2.0)),
+		Action.jump(Vector2(driven.x + 6.0, driven.z + 4.0)),
+		Action.wait(5),
+	]
+	var choice: LiveChoice = null
+	if as_a_person:
+		choice = WorldCast.hand_over(world, id)
+	else:
+		var sheet := _sheet(driven)
+		sheet.decide = DecisionSource.scripted(
+			func(scene: ActionScene, actor: Combatant) -> Action:
+				var at := scene.actions_of(actor.id)
+				return choices[at] if at < choices.size() else null)
+
+	var began := []
+	var running: Action = null
+	for _step in WORLD_TICKS:
+		if as_a_person and in_step.has(world.tick):
+			choice.choose(choices[int(in_step[world.tick])])
+		world.step()
+		# What the loop committed to this tick, if it committed to anything new.
+		var now: Action = world.combat.scene.in_progress.call(id)
+		if now != null and now != running:
+			began.append(world.tick)
+		running = now
+	return {
+		"journal": world.loop.journal,
+		"digest": world.digest(),
+		"actions": world.loop.actions_of(id),
+		"began": began,
+	}
 
 
 func _sim_files() -> PackedStringArray:

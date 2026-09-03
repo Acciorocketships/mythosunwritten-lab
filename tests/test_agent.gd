@@ -55,11 +55,14 @@ extends TestSuite
 ##      the command rather than worked out by hand afterwards.
 class_name TestAgent
 
-## The file the decision functions live in, and the five it declares.
+## The file the decision functions live in, and the six it declares. `live` is
+## the person themselves, added when a person became one of the minds
+## (W-player-input); it is listed here in the order the file declares them,
+## which is what the check below reads.
 const DECISION_SOURCE := "res://sim/decision_source.gd"
-const FACTORIES := ["recorded", "plan", "scripted", "model", "deliberate"]
+const FACTORIES := ["recorded", "plan", "live", "scripted", "model", "deliberate"]
 
-## The one signature all five inner functions are declared with, once parameter
+## The one signature all six inner functions are declared with, once parameter
 ## names that only differ by a leading underscore are made the same.
 const ONE_SIGNATURE := "return func(scene: ActionScene, actor: Combatant) -> Action:"
 
@@ -172,7 +175,7 @@ func _one_callable_four_minds() -> void:
 		if code.begins_with("return func("):
 			inner.append(code.replace("_scene", "scene").replace("_actor", "actor"))
 	equal(declared, PackedStringArray(FACTORIES),
-		"the five decision functions are declared in one file, in one order")
+		"the six decision functions are declared in one file, in one order")
 	equal(inner.size(), FACTORIES.size(),
 		"every one of them returns a function")
 	for line in inner:

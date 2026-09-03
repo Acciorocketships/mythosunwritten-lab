@@ -1,0 +1,93 @@
+A person driving one of the cast: the shell trace, seed 1234.
+
+This machine has no display, so the built shell was driven under xvfb with
+the keys pressed from inside -- through Input.parse_input_event, which puts
+them on the engine's own queue, so they arrive at the same _unhandled_input
+binding a person's press does. The command:
+
+  xvfb-run -a tools/godot/godot4 --path . --resolution 1280x720 --fixed-fps 60 -- \
+      --seed 1234 --play --journal --sheet --input "2:w,24:g,46:j,52:k" \
+      --screenshot reports/assets/player-input-refusal.png --screenshot-tick 62
+
+W walks a step, G goes to the nearest named place, J hops 3.0 units, and K
+leaps 12.0 -- further than DEX 3 reaches, so the engine refuses it. Every one
+of the four is an action out of the same catalogue every other character
+chooses from; render/player_controls.gd builds nothing but Action.go_to and
+Action.jump, and the world's own ControlLoop commits them.
+
+=== What the person chose, and what the engine answered ===
+
+render-shell play driving=#1
+render-shell keys WASD/arrows  walk one step (3.6 units)
+render-shell keys G            go to the nearest named place
+render-shell keys J            hop (3.0 units)
+render-shell keys K            leap (12.0 units, further than an ordinary DEX reaches)
+render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 motes=1073 sheet=2/3 aa=msaa4+fxaa
+render-shell play t=2 chose go_to(target=(0.000, -3.600))
+render-shell play t=23 go_to(target=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+render-shell play t=24 place landmark l0,0 at 57.4 away
+render-shell play t=24 chose go_to(target=(38.136, 39.269))
+render-shell play t=45 go_to(target=(38.136, 39.269)) -> go_to ok at=(38.136, 39.269) walked=57.377 steps=64
+render-shell play t=46 chose jump(target=(38.136, 36.269))
+render-shell play t=51 jump(target=(38.136, 36.269)) -> jump ok at=(38.136, 36.269) gap=3.0 reach=3.75 dex=3
+render-shell play t=52 chose jump(target=(38.136, 24.269))
+render-shell play t=57 jump(target=(38.136, 24.269)) -> jump refused: 12.00 is further than DEX 3 jumps (3.75)
+
+=== The world's own journal: Pip is the person's, Nettle and Corin are not ===
+
+The lines to read are t=51 and t=57, where Pip has nothing chosen and waits
+in the world -- the same sentence a character waiting on a language model
+gets -- while Nettle and Corin go on being serviced, finishing actions and
+beginning new ones in the same ticks. The world does not block on a person.
+
+  t=  1  Pip    has not decided yet, and waits in the world
+  t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+  t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+  t=  3  Pip    began go_to(target=(0.000, -3.600)), 20 ticks
+  t=  6  Nettle thought again at 5/20t, wanted the same thing
+  t=  6  Corin  thought again at 5/20t, wanted the same thing
+  t=  8  Pip    thought again at 5/20t, wanted the same thing
+  t= 11  Nettle thought again at 10/20t, wanted the same thing
+  t= 11  Corin  thought again at 10/20t, wanted the same thing
+  t= 13  Pip    thought again at 10/20t, wanted the same thing
+  t= 16  Nettle thought again at 15/20t, wanted the same thing
+  t= 16  Corin  thought again at 15/20t, wanted the same thing
+  t= 18  Pip    thought again at 15/20t, wanted the same thing
+  t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
+  t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
+  t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
+  t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
+  t= 23  Pip    finished go_to(target=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+  t= 23  Pip    has not decided yet, and waits in the world
+  t= 25  Pip    began go_to(target=(38.136, 39.269)), 20 ticks
+  t= 26  Nettle thought again at 5/20t, wanted the same thing
+  t= 26  Corin  thought again at 5/20t, wanted the same thing
+  t= 30  Pip    thought again at 5/20t, wanted the same thing
+  t= 31  Nettle thought again at 10/20t, wanted the same thing
+  t= 31  Corin  thought again at 10/20t, wanted the same thing
+  t= 35  Pip    thought again at 10/20t, wanted the same thing
+  t= 36  Nettle thought again at 15/20t, wanted the same thing
+  t= 36  Corin  thought again at 15/20t, wanted the same thing
+  t= 40  Pip    thought again at 15/20t, wanted the same thing
+  t= 41  Nettle finished go_to(target=(-31.155, 30.384)) -> go_to ok at=(-31.155, 30.384) walked=18.0 steps=20
+  t= 41  Nettle began go_to(target=(-38.152, 46.968)), 20 ticks
+  t= 41  Corin  finished go_to(target=(-11.335, -36.548)) -> go_to ok at=(-11.335, -36.548) walked=18.0 steps=20
+  t= 41  Corin  began go_to(target=(-22.891, -50.349)), 20 ticks
+  t= 45  Pip    finished go_to(target=(38.136, 39.269)) -> go_to ok at=(38.136, 39.269) walked=57.377 steps=64
+  t= 45  Pip    has not decided yet, and waits in the world
+  t= 46  Nettle thought again at 5/20t, wanted the same thing
+  t= 46  Corin  thought again at 5/20t, wanted the same thing
+  t= 47  Pip    began jump(target=(38.136, 36.269)), 4 ticks
+  t= 51  Pip    finished jump(target=(38.136, 36.269)) -> jump ok at=(38.136, 36.269) gap=3.0 reach=3.75 dex=3
+  t= 51  Pip    has not decided yet, and waits in the world
+  t= 51  Nettle thought again at 10/20t, wanted the same thing
+  t= 51  Corin  thought again at 10/20t, wanted the same thing
+  t= 53  Pip    began jump(target=(38.136, 24.269)), 4 ticks
+  t= 56  Nettle thought again at 15/20t, wanted the same thing
+  t= 56  Corin  thought again at 15/20t, wanted the same thing
+  t= 57  Pip    finished jump(target=(38.136, 24.269)) -> jump refused: 12.00 is further than DEX 3 jumps (3.75)
+  t= 57  Pip    has not decided yet, and waits in the world
+  t= 61  Nettle finished go_to(target=(-38.152, 46.968)) -> go_to ok at=(-38.152, 46.968) walked=18.0 steps=20
+  t= 61  Nettle began go_to(target=(-43.259, 64.229)), 20 ticks
+  t= 61  Corin  finished go_to(target=(-22.891, -50.349)) -> go_to ok at=(-22.891, -50.349) walked=18.0 steps=20
+  t= 61  Corin  began go_to(target=(-36.419, -62.223)), 20 ticks

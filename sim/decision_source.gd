@@ -13,13 +13,17 @@ extends RefCounted
 ##
 ##     func(scene: ActionScene, actor: Combatant) -> Action
 ##
-## Five are built here. `recorded()` and `plan()` are both fed choices written
+## Six are built here. `recorded()` and `plan()` are both fed choices written
 ## down in advance -- what a person's turns look like once they have been taken,
 ## and what stands in for a person in a headless test, because a screen is not a
 ## thing a simulation can have. They differ in what *being asked* does to the
 ## list: a recorded list is a queue and hands over its next entry on every call,
 ## while a plan is read at the position its character has actually reached and so
-## cannot be spent by a question. `scripted()` wraps a rule that computes its
+## cannot be spent by a question. `live()` is the person themselves rather than a
+## stand-in for one: it reads a `LiveChoice` that whoever is driving writes into
+## while the world runs, and answers null on every tick they have not chosen
+## anything -- which is the same null a model mind returns while its call is
+## outstanding, read the same way. `scripted()` wraps a rule that computes its
 ## choice from the world it is handed -- what a program's turns look like.
 ## `model()` hands the question to a `ModelMind`, which assembles what the
 ## character can see, writes it out as a prompt, puts it to a language model and
@@ -116,6 +120,65 @@ static func plan(choices: Array) -> Callable:
 			return null
 		var next: Variant = choices[at]
 		return next if next is Action else null
+
+
+## A decision function whose answer is whatever the person driving has chosen.
+##
+## The seam this file has documented since it was written, filled. The same two
+## arguments and the same one return as every function above it: what makes it
+## the live one is not its shape -- its shape is the point -- but *when* its
+## answer is decided, which is while the world is running rather than before it
+## started. A `LiveChoice` is where the answer is put when it arrives; see
+## sim/live_choice.gd.
+##
+## **Nothing here knows how a person chooses.** There is no key, no button, no
+## pointer and no screen in this function or in the object it reads: whoever is
+## driving builds an `Action` out of `ActionCatalog`'s own constructors and calls
+## `LiveChoice.choose()`. That is the whole surface, and it is the same surface a
+## rule and a model reach the engine through.
+##
+## **The world does not wait for it.** On every tick nobody has chosen anything
+## it answers null -- exactly what `model()` answers while its call is
+## outstanding and what `recorded()` answers when its list runs out -- and every
+## driver already reads null as "nothing chosen": the character stands in the
+## world with nothing committed and everybody else carries on being serviced in
+## the same tick. So a person is simply a slower mind, and being slow is a thing
+## the world already knows how to hold.
+##
+## **Being asked spends nothing.** The choice is read at the position its
+## character has actually reached, exactly as `plan()` reads its list: the same
+## action is offered back for as long as the world has not resolved one for that
+## character, and it is only taken back once `ActionScene.actions_of` has moved
+## on. That is what makes it survive a `ControlLoop` review -- a person asked
+## what they want while their character is still walking has not thereby spent
+## their next turn -- and what makes an interrupted walk something the character
+## takes up again rather than something the person has to press twice.
+static func live(chosen: LiveChoice) -> Callable:
+	# Which choice was last read, and what its character had carried out at the
+	# moment it was read. Two numbers, kept beside the function for the same
+	# reason `recorded()`'s cursor is kept beside that one.
+	var reading := [0, 0]
+	return func(scene: ActionScene, actor: Combatant) -> Action:
+		if chosen == null or scene == null or actor == null:
+			return null
+		var standing := chosen.standing()
+		if standing == null:
+			return null
+		var done := scene.actions_of(actor.id)
+		if chosen.serial != reading[0]:
+			# A choice this function has not read before: note where its
+			# character stood when it arrived, and offer it.
+			reading[0] = chosen.serial
+			reading[1] = done
+		elif done > reading[1]:
+			# The world has carried an action out for this character since the
+			# choice was made, so the choice has been had. The person chooses
+			# again, and until they do their character waits.
+			chosen.carried_out += 1
+			chosen.withdraw()
+			return null
+		chosen.offered += 1
+		return standing
 
 
 ## A decision function that works its choice out from the world it is given.

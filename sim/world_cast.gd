@@ -201,6 +201,36 @@ static func wandering(seed_value: int) -> Callable:
 	)
 
 
+## Hand a character in a world over to whoever is driving, and give back the
+## place their choices go.
+##
+## This is the whole of what it takes for one of the cast to be a person's. Its
+## decision function is replaced -- `DecisionSource.live` in place of whatever
+## was there -- and nothing else about it changes: the same sheet, the same
+## roll, the same band, the same place in the same roster, serviced by the same
+## `ControlLoop` on the same tick as everybody else, and reached only through
+## `ActionEngine.resolve`. Section 1's "no preferential treatment" principle is
+## the one line of this function.
+##
+## What comes back is the `LiveChoice` the new decision function reads. Whoever
+## is driving writes an `Action` into it and the character does that next; on
+## every tick they have not, the character waits in the world and everybody else
+## carries on. Null comes back when the world has nobody with that id, which is
+## what asking to drive a character that is not there should say.
+static func hand_over(world: SimWorld, id: int) -> LiveChoice:
+	if world == null or world.combat == null:
+		return null
+	var one := world.combat.member_of(id)
+	if one == null or one.piece == null or not (one.piece is Commander):
+		return null
+	var sheet := (one.piece as Commander).sheet
+	if sheet == null:
+		return null
+	var choice := LiveChoice.new()
+	sheet.decide = DecisionSource.live(choice)
+	return choice
+
+
 ## The nearest position to a written-down spot that a character can actually be
 ## stood on, or the spot itself if there is nothing standable within
 ## `LANDING_REACH`.

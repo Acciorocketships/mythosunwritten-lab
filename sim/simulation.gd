@@ -41,9 +41,50 @@ const SCENARIOS := [
 
 var world: SimWorld = null
 
+## Where the choices of whoever is driving go, or null in a run nobody is
+## driving -- which is every headless run and every run of the shell that did
+## not ask to play. See `hand_over_followed()`.
+var driven: LiveChoice = null
+
+## Which character those choices are for, or 0.
+var driven_id: int = 0
+
 
 func _init(seed_value: int = 0) -> void:
 	world = SimWorld.new(seed_value)
+
+
+## Hand the character the world is looking through over to a person.
+##
+## The one call an entry point makes to turn a world being watched into a world
+## being played. It replaces that character's decision function and nothing else
+## -- see `WorldCast.hand_over` -- so what changes is who is answering, not what
+## the answer may be, who else is in the world, or what the engine does with any
+## of it.
+##
+## Returns whether there was somebody to hand over. There is not when the world
+## is looking through nobody, which is what `SimWorld.place_observer` leaves and
+## what a scenario wanting a fixed camera asks for.
+func hand_over_followed() -> bool:
+	driven = WorldCast.hand_over(world, world.follow_id)
+	driven_id = world.follow_id if driven != null else 0
+	return driven != null
+
+
+## What the person driving has chosen and not yet had carried out, in one line,
+## for a trace or a readout. "nobody is driving" in a run with no person in it.
+func driven_line() -> String:
+	return "nobody is driving" if driven == null else driven.line()
+
+
+## What the engine last answered the character being driven, or an empty
+## dictionary. The loop's own record, forwarded, so an entry point has one place
+## to ask; every string in it is the engine's own wording. See
+## `ControlLoop.answer_of`.
+func driven_answer() -> Dictionary:
+	if driven_id == 0 or world.loop == null:
+		return {}
+	return world.loop.answer_of(driven_id)
 
 
 ## Set a named scenario out in the world. Returns whether it was recognised and

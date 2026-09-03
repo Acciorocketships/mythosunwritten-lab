@@ -229,8 +229,21 @@ func reset(seed_value: int) -> void:
 ## where the cast actually got to on this tick, not around where it was on the
 ## last one.
 func step() -> void:
+	# Where everybody stood before anything was asked, so that after the tick the
+	# world can say how each of them actually moved. It is the same reading
+	# `observer_speed` and `observer_rise` are, taken for the whole cast rather
+	# than only for the one being looked through, and it is the world's to take
+	# because a viewer that worked it out for itself would be a viewer keeping a
+	# second copy of where everybody was.
+	var stood := {}
+	for one in combat.members:
+		stood[one.id] = Vector3(one.x, one.y, one.z)
+		# Last tick's jump belonged to last tick.
+		one.jumped = false
+
 	loop.step()
 	combat_lines.append_array(combat.step(terrain))
+	_note_how_the_cast_moved(stood)
 
 	# What the view came to. The distance across is how far the character being
 	# followed actually got; the rise is whatever settling on the surface added,
@@ -272,6 +285,13 @@ func followed() -> Combatant:
 	return null if follow_id == 0 else combat.member_of(follow_id)
 
 
+# Whether that character jumped on this tick. False with nobody followed, which
+# is what a view standing still did.
+func _followed_jumped() -> bool:
+	var one := followed()
+	return one != null and one.jumped
+
+
 # A fresh roster, its scene standing on this world's ground, and a fresh loop
 # over it.
 func _empty_the_cast() -> void:
@@ -279,6 +299,16 @@ func _empty_the_cast() -> void:
 	combat.scene.terrain = terrain
 	loop = ControlLoop.on(combat.scene, world_seed)
 	combat_lines = PackedStringArray()
+
+
+# How far each character got on this tick, written onto the character. Somebody
+# who was not in the world when the tick started reads as having stood still,
+# which is what arriving is: nothing moved it, it was put down.
+func _note_how_the_cast_moved(stood: Dictionary) -> void:
+	for one in combat.members:
+		var was: Vector3 = stood.get(one.id, Vector3(one.x, one.y, one.z))
+		one.moved = Vector2(one.x - was.x, one.z - was.z).length()
+		one.rose = one.y - was.y
 
 
 # Put the view where the followed character is standing, facing the way it just
@@ -401,6 +431,43 @@ func observer_on_path() -> float:
 	return terrain.path_strength_at(observer_x, observer_z)
 
 
+## How far out `place_near_observer()` looks for somewhere with a name, in world
+## units. The road network's own linking radius, read from it rather than typed
+## again: a place further away than that is not joined to where you are standing
+## by anything, so "the nearest named place" would be naming somewhere with no
+## way to it.
+const PLACE_REACH := PathNetwork.LINK_RADIUS
+
+
+## The nearest place the world has a name for, as plain data, or an empty
+## dictionary when there is none in reach.
+##
+## The world already names two kinds of place -- a village and a landmark -- and
+## the road network holds both under one description, `{id, x, z, kind, tag}`,
+## because a road to a stone circle is decided exactly as a road to a village is.
+## This is that description with how far away it is added, and it is a question
+## about the world rather than about anybody in it: a person asking their
+## character to walk somewhere named needs to know which place is meant, and so
+## does a rule.
+##
+## Nothing about walking there is decided here. The answer is a position, which
+## whoever asked turns into an ordinary `Action.go_to` for the engine to resolve
+## or refuse like any other.
+func place_near_observer(reach: float = PLACE_REACH) -> Dictionary:
+	var nearest := INF
+	var found := {}
+	for place in path_network.places_near(observer_x, observer_z, reach):
+		var gap := Vector2(
+			float(place["x"]) - observer_x, float(place["z"]) - observer_z
+		).length()
+		if gap >= nearest:
+			continue
+		nearest = gap
+		found = place.duplicate()
+		found["distance"] = gap
+	return found
+
+
 ## Which biome the observer is standing in.
 func observer_biome() -> String:
 	return biome_field.biome_at(observer_x, observer_z)
@@ -493,6 +560,10 @@ func snapshot() -> Dictionary:
 		"observer_heading": observer_heading,
 		"observer_speed": observer_speed,
 		"observer_rise": observer_rise,
+		# And whether what moved the character being looked through was a jump.
+		# Read off that character, so a shell drawing its own observer says the
+		# same thing about it as the diorama says about everybody else.
+		"observer_jumped": _followed_jumped(),
 		"observer_biome": observer_biome(),
 		"observer_in_water": observer_in_water(),
 		"observer_on_bank": observer_on_bank(),

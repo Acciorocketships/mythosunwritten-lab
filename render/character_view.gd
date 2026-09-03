@@ -145,6 +145,9 @@ var _blend := 0.0
 ##            walking, however fast it was going when it died.
 ##   hurt  -- true on the tick it takes damage. Beats motion, because being hit
 ##            interrupts what you were doing; that is what a hit reaction is.
+##   jumped -- true on the tick a jump was resolved for it. Beats motion for the
+##            same reason `rise` does, and is here beside it because a jump
+##            across level ground rises by nothing at all and is still a jump.
 ##   rise  -- how far it went up on the last tick, signed, in world units. A big
 ##            positive is a character off the ground.
 ##   speed -- how far it went across the ground on the last tick, in world units.
@@ -160,6 +163,8 @@ static func clip_for(state: Dictionary) -> String:
 		return CLIP_DEATH
 	if bool(state.get("hurt", false)):
 		return CLIP_HIT
+	if bool(state.get("jumped", false)):
+		return CLIP_JUMP
 	if float(state.get("rise", 0.0)) >= HOP_RISE:
 		return CLIP_JUMP
 	var speed := float(state.get("speed", 0.0))
@@ -181,6 +186,7 @@ static func observer_state(snapshot: Dictionary) -> Dictionary:
 	return {
 		"speed": float(snapshot.get("observer_speed", 0.0)),
 		"rise": float(snapshot.get("observer_rise", 0.0)),
+		"jumped": bool(snapshot.get("observer_jumped", false)),
 		"alive": bool(snapshot.get("observer_alive", true)),
 		"hurt": bool(snapshot.get("observer_hurt", false)),
 	}

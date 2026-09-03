@@ -55,6 +55,40 @@ var y: float = 0.0
 var heading: float = 0.0
 var speed: float = 0.0
 
+## How it actually moved on the last tick: how far across the ground, and how
+## far up or down. Both in world units per tick, and both written by whoever is
+## stepping the world -- `SimWorld.step` -- by comparing where this stands now
+## against where it stood before the tick.
+##
+## Not the same thing as `speed` above, which is a *setting*: how far a drift
+## along `heading` carries this if anything is drifting it at all. These two are
+## what happened, whatever caused it -- a walk the engine resolved, a jump, a
+## drift, or being stood somewhere by a scenario. A viewer picking an animation
+## wants what happened, and a viewer that worked it out for itself would be a
+## viewer keeping a second copy of where everybody was last tick.
+##
+## Deliberately outside `line()` and so outside every fingerprint: both are
+## differences of a position the fingerprint already covers, so folding them in
+## would fold the same fact in twice. That is the reading `SimWorld` already
+## keeps for `observer_speed` and `observer_rise`, which are these two numbers
+## for whichever character the world is looking through.
+var moved: float = 0.0
+var rose: float = 0.0
+
+## Whether what moved it on the last tick was a jump rather than a walk.
+##
+## Written by `ActionEngine._jump` when a jump is allowed, and cleared by
+## whoever is stepping the world at the start of the next tick, so it is true on
+## exactly the tick the jump was resolved on. It is here rather than worked out
+## from `rose` because a jump across level ground rises by nothing at all and is
+## still a jump -- how far something went up is a fact about the ground it
+## crossed, and this is a fact about what it did.
+##
+## Outside `line()` and so outside every fingerprint, like `moved` and `rose`:
+## the position the jump landed at is already in there, and this says nothing
+## about the world that the position does not.
+var jumped: bool = false
+
 ## Which cell it stands on while a fight is on, and whether it is in one at all.
 ## Outside a fight the cell means nothing and `fighting` says so.
 var fighting: bool = false

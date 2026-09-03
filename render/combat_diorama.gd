@@ -80,7 +80,13 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 				# stands on a cell. Not worked out here from the phase: the
 				# simulation already knows, so it says.
 				"speed": float(row.get("speed", 0.0)),
-				"rise": 0.0,
+				# And how far it went up: the simulation says, for the same
+				# reason it says how fast.
+				"rise": float(row.get("rise", 0.0)),
+				# And whether what moved it was a jump. A jump across level
+				# ground rises by nothing, so it cannot be read off the rise;
+				# the world knows which action it resolved and says.
+				"jumped": bool(row.get("jumped", false)),
 				"alive": health > 0,
 				"hurt": health < most,
 			},

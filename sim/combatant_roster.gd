@@ -158,10 +158,15 @@ func snapshot() -> Dictionary:
 			"y": one.y,
 			"z": one.z,
 			"heading": one.heading,
-			# How fast it is actually moving, which is nothing at all while it
-			# is standing on a cell. A viewer picking an animation reads this
+			# How fast it is actually moving and how far it just went up, both
+			# read off what happened on the last tick rather than off any
+			# setting -- see `Combatant.moved`. Nothing at all while it is
+			# standing on a cell, because a piece on a board moves by cells and
+			# not across the ground. A viewer picking an animation reads these
 			# rather than working out for itself what the phase implies.
-			"speed": 0.0 if one.fighting else one.speed,
+			"speed": 0.0 if one.fighting else one.moved,
+			"rise": 0.0 if one.fighting else one.rose,
+			"jumped": one.jumped and not one.fighting,
 			"facing": (one.piece as Commander).facing if one.is_commander() else -1,
 			"fighting": one.fighting,
 			"health": one.piece.health,

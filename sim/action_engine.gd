@@ -209,6 +209,9 @@ static func _jump(
 	actor.x = to.x
 	actor.z = to.y
 	actor.settle(scene.terrain) if scene.terrain != null else null
+	# What moved it was a jump, which is a different thing from a walk of the
+	# same length and is the only place in the engine that can say so.
+	actor.jumped = true
 	return ActionOutcome.done(action.kind, {
 		"at": Vector2(actor.x, actor.z),
 		"gap": snappedf(gap, 0.001),

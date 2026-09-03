@@ -1949,9 +1949,50 @@ is where the densities and size distributions in the write-up come from.
 ./run_render.sh                          # seed 1234
 ./run_render.sh --seed 7
 ./run_render.sh --sheet --scenario encounter    # ...with the character sheet on screen
+./run_render.sh --play                          # drive one of the characters yourself
+./run_render.sh --play --journal                # ...and print what everybody chose
 ```
 
 Needs a display. Escape quits, Space pauses, R restarts on the next seed along.
+
+`--play` hands the character the camera is following over to you. From then on
+it is yours: **WASD** or the arrow keys walk it a step, **G** sends it to the
+nearest place the world has a name for, **J** hops and **K** leaps further than
+an ordinary DEX reaches, so the engine refuses it and says why on screen. Every
+one of those is an action out of the same catalogue every other character
+chooses from -- a key press puts an `Action` in a holder, and the world's own
+control loop picks it up on its next tick. On every tick you have not chosen
+anything your character waits in the world while everybody else carries on,
+which is the same "no answer yet" a character driven by a language model gets.
+Nothing else about the character changes: same sheet, same roster, same loop,
+same engine, which is section 1's no-preferential-treatment principle being one
+replaced `Callable` rather than a promise.
+
+`--journal` prints the control loop's own account of who chose what on which
+tick. `--input "20:w,60:g"` presses the keys for you at the ticks it names,
+through the engine's own input queue, which is how the shell is driven on a
+machine with no keyboard at it:
+
+```
+xvfb-run -a ./run_render.sh --seed 1234 --play --journal --sheet \
+        --input "2:w,24:g,46:j,52:k" \
+        --screenshot "$PWD/reports/assets/player-input-refusal.png" \
+        --screenshot-tick 62
+```
+
+which walks a step, goes to the nearest landmark, hops, and then leaps too far:
+
+```
+render-shell play t=2  chose go_to(target=(0.000, -3.600))
+render-shell play t=23 go_to(target=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+render-shell play t=24 place landmark l0,0 at 57.4 away
+render-shell play t=45 go_to(target=(38.136, 39.269)) -> go_to ok at=(38.136, 39.269) walked=57.377 steps=64
+render-shell play t=51 jump(target=(38.136, 36.269)) -> jump ok at=(38.136, 36.269) gap=3.0 reach=3.75 dex=3
+render-shell play t=57 jump(target=(38.136, 24.269)) -> jump refused: 12.00 is further than DEX 3 jumps (3.75)
+```
+
+That last sentence is the engine's, and it is what the panel on screen says --
+the interface quotes the refusal rather than writing one of its own.
 `--sheet` puts the character-sheet panel over the world; the two buttons on it
 page through whichever characters the scenario put in the world.
 `--start X Z` and `--paused` work here too: the first aims the camera at a place,
