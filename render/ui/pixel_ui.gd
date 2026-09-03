@@ -15,11 +15,12 @@ extends CanvasLayer
 ## one at 3, and a window too small for even that draws at 1 and lets the panel
 ## run off the bottom rather than shrinking it to a fraction.
 ##
-## ## Three panels, one theme
+## ## Four panels, one theme
 ##
 ## The character sheet sits in the top-left corner, the combat readout in the
-## top-right and the answer panel along the bottom left, and all three are asked
-## for separately -- a run may have any of them, all of them or none. What they
+## top-right, and the two a person playing needs -- what they have aimed at and
+## what the world answered -- stack along the bottom left. They are asked for
+## separately, so a run may have any of them, all of them or none. What they
 ## may not have is three ideas of what the interface looks like, so the theme is
 ## built once here and carried by the frame the panels sit in; no panel builds a
 ## style of its own and none names a file on disk.
@@ -45,6 +46,12 @@ var readout: CombatPanel = null
 ## What the person driving chose and what the world answered, or null in a run
 ## with nobody driving.
 var answer: AnswerPanel = null
+
+## What the person driving has aimed at, what is on the table and what has been
+## said within earshot, or null in a run with nobody driving. It sits above the
+## answer panel: what you are about to do, and then what came of the last thing
+## you did.
+var play: PlayPanel = null
 
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
@@ -111,6 +118,8 @@ static func build(
 	below.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	down.add_child(below)
 	if with_answer:
+		layer.play = PlayPanel.new()
+		down.add_child(layer.play)
 		layer.answer = AnswerPanel.new()
 		down.add_child(layer.answer)
 	layer._frame.add_child(down)

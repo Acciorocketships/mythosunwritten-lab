@@ -439,6 +439,23 @@ func observer_on_path() -> float:
 const PLACE_REACH := PathNetwork.LINK_RADIUS
 
 
+## What one of the world's characters can pick out around it, as plain data.
+##
+## The question an interface asks on the frame somebody is choosing what to do:
+## what is there to aim at, what am I carrying, what has been offered to me and
+## what have I heard. It is `Surroundings`'s answer, which is the observation's,
+## with the nearest named place added -- that one is the world's own and nothing
+## smaller than the world can answer it.
+##
+## Empty for an id nobody in the cast has, which is what asking about a character
+## that is not there should say.
+func surroundings_of(id: int) -> Surroundings:
+	var view := Surroundings.of(combat.scene, id)
+	if view.driven_id != 0 and follow_id == id:
+		view.place = place_near_observer()
+	return view
+
+
 ## The nearest place the world has a name for, as plain data, or an empty
 ## dictionary when there is none in reach.
 ##

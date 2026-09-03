@@ -1993,6 +1993,34 @@ render-shell play t=57 jump(target=(38.136, 24.269)) -> jump refused: 12.00 is f
 
 That last sentence is the engine's, and it is what the panel on screen says --
 the interface quotes the refusal rather than writing one of its own.
+
+**The rest of the verbs.** Movement needs no target, because a position is one.
+The other nine of section 2.1's twelve actions are aimed at something, so there
+is an aim list and it is not the interface's: **Tab** walks along what your
+character can actually make out, which is `Observation` -- the same packet a
+language-model mind is handed -- and nothing else is in it. **F** picks up and
+puts down what is in your hands (or nothing, which is a real choice), **C**
+picks one of the things you can see inside whatever you have aimed at, **B**
+picks something to say and **-** / **=** dial the coins in your next offer.
+Then, all of it at what you have aimed at: **P** go to it, **E** examine it,
+**L** look at what you are holding, **Q** take, **X** drop, **V** put in,
+**T** say, **Y** shout, **O** offer a trade, **U** accept, **I** deny,
+**H** interact with what you are holding, **N** attack with it, **M** wait. The
+shell prints the whole list at boot.
+
+There is nothing to do most of that *to* in the ordinary world -- three
+wanderers on an empty meadow -- so `--scenario play` sets out the smallest world
+that holds one of each:
+
+```
+./run_render.sh --scenario play --play          # a trader, a brawler, a pile, a locked chest
+./tools/play_actions.sh                         # ...every verb performed from a key press, headless
+```
+
+[reports/player-actions.md](reports/player-actions.md) has the whole table --
+twelve verbs, twenty-four actions, four refusals in the engine's own words -- and
+the frames it was photographed from.
+
 `--sheet` puts the character-sheet panel over the world; the two buttons on it
 page through whichever characters the scenario put in the world.
 `--start X Z` and `--paused` work here too: the first aims the camera at a place,
@@ -2061,7 +2089,11 @@ cast 3 following #1
 
 `--scenario encounter` sets a whole fight out in the world before the first
 frame, and `--scenario encounter-island` puts the same cycle on a floating
-island's top. `--scenario market` and `--scenario quarrel` set the five
+island's top. `--scenario play` sets out the stage a person can reach
+every atomic action from -- a trader, a brawler, a pile and a locked chest -- and
+is what `--play` is meant to be pointed at (see
+[reports/player-actions.md](reports/player-actions.md)). `--scenario market` and
+`--scenario quarrel` set the five
 characters of the character walkthrough out *where the run starts* and let the
 world's own control loop live them forward in front of the camera; `--frozen`
 asks for the old behaviour instead -- the run is played headless to a stated tick

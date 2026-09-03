@@ -171,6 +171,33 @@ static func region(path: String, rect: Rect2i) -> AtlasTexture:
 	return cut
 
 
+## What the pack's font has no glyph for, and what to draw instead.
+##
+## The font is a pixel font on an eight-by-fourteen cell and its glyph set is
+## small: it has no `#`, no `_`, no square brackets and no middle dot. A sentence
+## carrying one of those draws an empty box, which is worse than a substitution
+## -- an id nobody can read is not an id, and a refusal with a box in the middle
+## of the verb reads as a fault in the game rather than as an answer from it.
+##
+## The list is what the simulation's own sentences actually use: an id is written
+## `#7`, an action's name has an underscore in it, and a list of item names is
+## written in square brackets. Nothing here changes a word: it changes which
+## letters a word is drawn with, and it is in this file because this file is the
+## one that knows what the art is.
+const FONT_SUBSTITUTES := {
+	"#": "no.", "_": " ", "[": "(", "]": ")", "\u00b7": "-",
+}
+
+
+## One line of text in glyphs this pack's font actually has. Every panel puts
+## what it is about to draw through this.
+static func drawable(text: String) -> String:
+	var written := text
+	for missing in FONT_SUBSTITUTES:
+		written = written.replace(missing, String(FONT_SUBSTITUTES[missing]))
+	return written
+
+
 ## One 16x16 icon out of the generic sheet, addressed by its place in the cream
 ## set rather than by a pixel offset.
 static func icon(at: Vector2i) -> AtlasTexture:

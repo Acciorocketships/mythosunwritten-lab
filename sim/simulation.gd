@@ -31,12 +31,13 @@ const SCENARIO_ENCOUNTER := "encounter"
 const SCENARIO_ENCOUNTER_ISLAND := "encounter-island"
 const SCENARIO_MARKET := "market"
 const SCENARIO_QUARREL := "quarrel"
+const SCENARIO_PLAY := "play"
 
 ## Every scenario there is, in a fixed order, for a report line and a usage
 ## message.
 const SCENARIOS := [
 	SCENARIO_ENCOUNTER, SCENARIO_ENCOUNTER_ISLAND,
-	SCENARIO_MARKET, SCENARIO_QUARREL,
+	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY,
 ]
 
 var world: SimWorld = null
@@ -87,6 +88,17 @@ func driven_answer() -> Dictionary:
 	return world.loop.answer_of(driven_id)
 
 
+## What the character being driven can pick out around it, or an empty view in a
+## run nobody is driving.
+##
+## The other half of `driven_answer()`: that one is what the world said about the
+## last choice, this one is what there is to choose from next. Both are the
+## world's own answer, forwarded, so an entry point has one place to ask and no
+## reason to reach into the cast itself.
+func driven_surroundings() -> Surroundings:
+	return Surroundings.new() if driven_id == 0 else world.surroundings_of(driven_id)
+
+
 ## Set a named scenario out in the world. Returns whether it was recognised and
 ## could be set out.
 ##
@@ -133,6 +145,12 @@ func begin_scenario(named: String, frozen: bool = false) -> bool:
 			# quarrel: live, the quarrel is something you watch happen.
 			return ScriptedScenario.muster_live(
 				world, ScriptedScenario.BRAM) > 0
+		SCENARIO_PLAY:
+			# A world with something in it to do, for a person to do it in: a
+			# trader, a brawler, a pile and a shut chest. It takes no notice of
+			# `frozen` -- a stage nobody is standing on is not a picture worth
+			# taking.
+			return ScriptedPlay.muster(world) > 0
 	return false
 
 

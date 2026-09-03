@@ -837,6 +837,7 @@ func _the_layer_stands_on_its_own() -> void:
 		"res://sim/scripted_actions.gd", "res://sim/scripted_check.gd",
 		"res://sim/scripted_encounter.gd",
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
+		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
 		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
 		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",

@@ -11,7 +11,9 @@ extends PanelContainer
 ##
 ## Every sentence on this panel is the simulation's own. What was chosen is
 ## `Action.line()`, and what came of it is `ActionOutcome.line()`, both carried
-## out of `ControlLoop.answer_of` unchanged. There is no table of friendly
+## out of `ControlLoop.answer_of` unchanged -- through `SproutPack.drawable()`,
+## which swaps the handful of characters the art's font has no glyph for and
+## changes no word. There is no table of friendly
 ## wordings here, no rewriting of "12.00 is further than DEX 3 jumps (3.75)" into
 ## something an interface author preferred, and no sentence written on this side
 ## of the line at all except the two labels that say which row is which and the
@@ -116,12 +118,12 @@ func refresh() -> void:
 	visible = choice != null and driven_id != 0
 	if not visible:
 		return
-	_chose_label.text = RESTING if choice.waiting() else choice.line()
+	_chose_label.text = RESTING if choice.waiting() else SproutPack.drawable(choice.line())
 	_chose_label.theme_type_variation = StringName(
 		SproutTheme.DIM_LABEL) if choice.waiting() else StringName("")
 
 	var answer := _answer()
-	var said := String(answer.get("line", ""))
+	var said := SproutPack.drawable(String(answer.get("line", "")))
 	_answer_label.text = said
 	_answer_icon.visible = said != ""
 	_answer_label.visible = said != ""

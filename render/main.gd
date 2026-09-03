@@ -571,7 +571,14 @@ var _sheet_ui: PixelUi = null
 ## Off by default, so a run nobody asked to play is the world walking itself and
 ## every capture ever taken of it still reproduces.
 var _playing := false
-var _facing := PlayerControls.FACING_AT_REST
+
+## The controls themselves: which key means what, and what the person has aimed
+## at, is holding, is taking and has dialled up in coin.
+##
+## The whole of it is `render/player_controls.gd`; what is here is one of them,
+## because what a person has aimed at is a thing that lasts between presses. It
+## builds actions out of the catalogue and resolves nothing.
+var _controls := PlayerControls.new()
 
 ## Whether to print the world's own journal as it is written. What makes a run
 ## driven from a script a trace rather than only a picture: it is the control
@@ -852,41 +859,46 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Turn a key press into what the person driving wants their character to do
 ## next, and put it where that character's decision function will read it.
 ##
-## The whole of the input half of a person being one of the minds, and it is four
-## lines of arithmetic and a hand-over. Which key means what is
-## `render/player_controls.gd`'s; where the choice goes is `LiveChoice`'s; what
-## becomes of it is `ActionEngine`'s. Nothing is decided here and nothing is
-## resolved here -- in particular there is no test that the step is walkable, no
-## measure of how far a character can jump and no second movement path: the
-## action goes into the holder and the world's control loop picks it up.
+## The whole of the input half of a person being one of the minds, and it is a
+## hand-over and a print. Which key means what, and what the person has picked to
+## aim it at, is `render/player_controls.gd`'s; what may be aimed at is the
+## simulation's answer, read through `Simulation.driven_surroundings()`, which is
+## `Observation` -- the same packet a language-model mind is handed; where the
+## choice goes is `LiveChoice`'s; what becomes of it is `ActionEngine`'s. Nothing
+## is decided here and nothing is resolved here -- in particular there is no test
+## that a step is walkable, no measure of how far a character can jump, no reach,
+## no earshot and no second movement path: the action goes into the holder and
+## the world's control loop picks it up.
 ##
 ## Returns whether the key meant anything.
 func _drive(keycode: int) -> bool:
 	if _sim.driven == null:
 		return false
-	var here := Vector2(_sim.world.observer_x, _sim.world.observer_z)
-	var way := PlayerControls.direction_of(keycode)
-	var chosen: Action = null
-	if way != Vector2.ZERO:
-		_facing = way
-		chosen = PlayerControls.walk_from(here, way)
-	elif keycode == PlayerControls.KEY_HOP:
-		chosen = PlayerControls.jump_from(here, _facing, PlayerControls.HOP)
-	elif keycode == PlayerControls.KEY_LEAP:
-		chosen = PlayerControls.jump_from(here, _facing, PlayerControls.LEAP)
-	elif keycode == PlayerControls.KEY_PLACE:
-		var place := _sim.world.place_near_observer()
-		if place.is_empty():
-			print("render-shell play t=%d nowhere named within reach"
-				% _sim.world.tick)
+	var view := _sim.driven_surroundings()
+	var chosen := _controls.press(keycode, view)
+	if chosen == null:
+		# Either the key picked something rather than choosing an action, or the
+		# person has not yet picked what the action needs. The second one says
+		# so; neither is a refusal, which is the engine's word and goes on the
+		# answer panel.
+		if _controls.note != "":
+			print("render-shell play t=%d %s" % [_sim.world.tick, _controls.note])
 			return true
-		chosen = PlayerControls.go_to_place(place)
-		print("render-shell play t=%d place %s %s at %.1f away" % [
-			_sim.world.tick, String(place["kind"]), String(place["id"]),
-			float(place["distance"]),
-		])
-	else:
+		if keycode == PlayerControls.KEY_AIM or keycode == PlayerControls.KEY_HOLD \
+				or keycode == PlayerControls.KEY_INSIDE \
+				or keycode == PlayerControls.KEY_LINE \
+				or keycode == PlayerControls.KEY_FEWER_COINS \
+				or keycode == PlayerControls.KEY_MORE_COINS:
+			print("render-shell play t=%d aims at %s · %s" % [
+				_sim.world.tick, _controls.aim_line(view), _controls.holding_line(),
+			])
+			return true
 		return false
+	if keycode == PlayerControls.KEY_PLACE and not view.place.is_empty():
+		print("render-shell play t=%d place %s %s at %.1f away" % [
+			_sim.world.tick, String(view.place["kind"]), String(view.place["id"]),
+			float(view.place["distance"]),
+		])
 	_sim.driven.choose(chosen)
 	print("render-shell play t=%d chose %s" % [_sim.world.tick, chosen.line()])
 	return true
@@ -1832,6 +1844,11 @@ func _sync_sheet() -> void:
 	# where their choices go. It reads all three again on every frame.
 	if _sheet_ui.answer != null:
 		_sheet_ui.answer.watch(_sim.world, _sim.driven_id, _sim.driven)
+	# And what there is to choose from: the world, who is being driven and the
+	# controls they are driving with. The panel reads the world again on every
+	# frame and keeps no copy of what it says.
+	if _sheet_ui.play != null:
+		_sheet_ui.play.watch(_sim.world, _sim.driven_id, _controls)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:

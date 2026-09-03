@@ -289,7 +289,7 @@ func _a_refusal_comes_back_in_the_engines_own_words() -> void:
 	var panel := AnswerPanel.new()
 	panel.watch(world, id, choice)
 	panel.refresh()
-	equal(panel._answer_label.text, String(answer["line"]),
+	equal(panel._answer_label.text, SproutPack.drawable(String(answer["line"])),
 		"the panel should quote the engine rather than phrase its own refusal")
 	check(panel._answer_label.text.contains(String(answer["reason"])),
 		"the reason should reach the screen whole")

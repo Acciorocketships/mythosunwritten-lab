@@ -143,6 +143,28 @@ func observed() -> Dictionary:
 	return seen
 
 
+## The names of what is lying in it, for anyone who can see inside.
+##
+## `observed()` above says how many things are in an open container and how much
+## money, which is what a glance gives; this is the same glance carried one step
+## further, to what those things are called. It is here rather than beside
+## whoever is looking for the reason `observed()` is here: what can be seen of an
+## object is the object's own answer, and a second reading of it somewhere else
+## would be a second answer.
+##
+## Nothing comes back from a shut thing and nothing from a thing that holds
+## nothing, so the rule that a shut chest keeps its contents to itself is this
+## one line and not a check made by every caller.
+func contents_seen() -> PackedStringArray:
+	var named := PackedStringArray()
+	if not holds_things() or shut:
+		return named
+	for entry in contents.carried:
+		var item := Inventory.item_of(entry)
+		named.append("?" if item == null else item.item_name)
+	return named
+
+
 ## One line, in the form the transcripts and the tests compare.
 func line() -> String:
 	return "#%d %s at (%.3f, %.3f, %.3f) %s%s" % [

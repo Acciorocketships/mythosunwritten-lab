@@ -508,6 +508,7 @@ func _no_code_asks_which_item_it_is_holding() -> void:
 	equal(handed_out, PackedStringArray([
 		"res://sim/scripted_actions.gd", "res://sim/scripted_encounter.gd",
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
+		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
 		"res://sim/scripted_turn.gd",
 	]), "and only the files that set a scenario up name a weapon at all")
