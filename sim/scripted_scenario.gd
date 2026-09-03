@@ -393,11 +393,40 @@ static func play(ticks: int = TICKS, seed_value: int = SEED) -> PackedStringArra
 		written.append_array(_fight_step(scene))
 
 	written.append("")
+	written.append_array(relationship_lines(scene))
+	written.append("")
 	written.append("after %d ticks" % scene.tick)
 	written.append_array(_indent(scene.lines()))
 	written.append("  " + _counts_line(loop))
 	written.append("  fingerprint %s" % scene.fingerprint())
 	release(scene)
+	return written
+
+
+## What the world recorded between these five, out of what they actually did to
+## each other.
+##
+## The market is where a trade is *honoured*, so this is where the trust and
+## respect an exchange moves can be read as numbers rather than described: the
+## two who traded carry them and the three who only spoke do not. Every edge here
+## was folded in by `CharacterUpkeep`, on the path all five pass, out of the
+## engine's own record of what happened -- see `sim/relationship_graph.gd` for
+## which happening moves which field.
+static func relationship_lines(scene: ActionScene) -> PackedStringArray:
+	var written := PackedStringArray()
+	var graph := scene.relationships
+	written.append("what the world recorded between them (%d edge%s, %d happening%s)"
+		% [
+			graph.size(), "" if graph.size() == 1 else "s",
+			graph.happenings(), "" if graph.happenings() == 1 else "s",
+		])
+	written.append("  sentiment is familiarity x (trust - fear), the one number"
+		+ " section 6 reads")
+	for one in scene.actors:
+		for edge in graph.edges_of(one.id):
+			written.append("  " + edge.line_toward(one.id))
+	for line in graph.lines():
+		written.append("    " + line)
 	return written
 
 
@@ -417,13 +446,23 @@ static func stage_for(seed_value: int) -> ActionScene:
 ## Play the run to a tick and hand back the scene, so a picture of it can be
 ## taken. Nothing is different about the run: it is the same call `play` makes,
 ## stopped early.
-static func played_to(at_tick: int, seed_value: int = SEED) -> ActionScene:
+##
+## `watching` is handed the scene at the end of every tick, and is how something
+## that wants to see the run go past rather than only its end gets a look --
+## `ScriptedObservation` keeps its trail of what changed that way. It decides
+## nothing and is given no way to: a watcher that writes into the scene is
+## writing into the run, and no watcher in this project does.
+static func played_to(
+	at_tick: int, seed_value: int = SEED, watching: Callable = Callable()
+) -> ActionScene:
 	var scene := stage_for(seed_value)
 	var loop := ControlLoop.on(scene, LOOP_SEED)
 	drive(scene)
 	for _step in maxi(0, at_tick):
 		loop.step()
 		_fight_step(scene)
+		if watching.is_valid():
+			watching.call(scene)
 	release(scene)
 	return scene
 

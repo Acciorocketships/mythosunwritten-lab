@@ -12,11 +12,15 @@ extends SceneTree
 ## says and keeps nothing. The asset check says the simulation must not know what
 ## anything looks like: it names tags, and the render layer's table turns a tag
 ## into a model. The interface check covers the directory the player-facing
-## interface lives in, render/ui/: the art it is drawn from is named in one table
-## and nowhere else, and nothing in it reaches for the engine's own theme or
-## typeface, which is the silent way a pixel interface ends up half grey. The
-## same rules run inside the test suite; this entry point exists so all four can
-## be wired into a commit hook or a build without running it.
+## interface lives in, render/ui/ -- now two panels, the character sheet and the
+## combat readout, and the one file each of them reads the simulation through:
+## the art they are drawn from is named in one table and nowhere else, and
+## nothing in there reaches for the engine's own theme or typeface, which is the
+## silent way a pixel interface ends up half grey. The second art table,
+## render/effect_art.gd, sits beside the prop table under render/ rather than in
+## render/ui/, and the combat check covers it there. The same rules run inside
+## the test suite; this entry point exists so all four can be wired into a commit
+## hook or a build without running it.
 
 
 func _initialize() -> void:

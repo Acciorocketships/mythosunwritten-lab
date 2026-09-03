@@ -259,7 +259,7 @@ static func of(named: String) -> Texture2D:
 		return _made[named]
 	if not ART.has(named):
 		return null
-	var texture := _build(ART[named])
+	var texture := draw(ART[named])
 	_made[named] = texture
 	return texture
 
@@ -277,7 +277,13 @@ static func names() -> PackedStringArray:
 	return found
 
 
-static func _build(rows: Array) -> ImageTexture:
+## Sixteen rows of source, as something drawable.
+##
+## Public because this idiom has a second user: render/effect_art.gd draws the
+## six effect sprites the same way, on the same cell and in the same three
+## colours, and there should be one place that turns `.oml` into pixels rather
+## than two that could drift apart.
+static func draw(rows: Array) -> ImageTexture:
 	var image := Image.create_empty(CELL, CELL, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0.0, 0.0, 0.0, 0.0))
 	for y in mini(CELL, rows.size()):

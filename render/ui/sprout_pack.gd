@@ -101,14 +101,28 @@ const HEART_EMPTY := Rect2i(32, 0, 16, 16)
 ## against the frame's dark interior, so every icon named here is a cream one.
 const ICON_CREAM_COLUMN := 6
 
-## The four generic icons this panel uses, by their column and row in the sheet's
-## cream set. Everything else on the panel is drawn rather than taken; see
-## render/ui/pixel_icons.gd, which says which is which one by one.
+## The generic icons the two panels use, by their column and row in the sheet's
+## cream set. Everything else on either panel is drawn rather than taken; see
+## render/ui/pixel_icons.gd for the sheet's, render/effect_art.gd for the
+## readout's, and reports/ui.md, which says which is which one by one.
 const ICON_STAR := Vector2i(5, 0)
 const ICON_CROWN := Vector2i(5, 1)
 const ICON_COIN := Vector2i(1, 1)
-const ICON_WORN := Vector2i(3, 2)
-const ICON_NO_SLOT := Vector2i(5, 2)
+
+## The tick and the prohibition sign. Both do double duty and are therefore
+## named for what they are on the sheet rather than for one use of them: on the
+## character sheet they mark a carried thing that is worn and one that goes in
+## no slot, and on the combat readout they mark a weapon action that may be used
+## now and one that is still cooling down.
+const ICON_TICK := Vector2i(3, 2)
+const ICON_BAR := Vector2i(5, 2)
+const ICON_WORN := ICON_TICK
+const ICON_NO_SLOT := ICON_BAR
+
+## The exclamation mark and the plain horizontal bar, which the readout uses for
+## the commander whose turn it is and for the ones waiting their turn.
+const ICON_MARK := Vector2i(0, 1)
+const ICON_DASH := Vector2i(1, 2)
 
 
 # One cut per rectangle, made on first ask. A cut is a read-only window onto a

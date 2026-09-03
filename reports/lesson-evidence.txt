@@ -1,0 +1,100 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+does a lesson change what is chosen? seed=1234, 100 ticks watched
+  channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+  recording  recorded 2026-09-02 from anthropic/claude-fable-5 at https://openrouter.ai/api/v1/chat/completions, 76 replies
+  character  Pell, standing in the market, choosing nothing while the 100 ticks go by
+
+the same moment, four times
+  observation fingerprint    9a14b32a0f3eefc1 in all four arms: yes
+  prompt outside its memory  identical in all four arms: yes
+  so the only thing that differs between the arms is what the character remembers
+  what it lived through   6 things in its log before any lesson
+
+arm: no lesson -- prompt 9d1f8d9fedcb8e8d, 6 things remembered
+  lesson kept: none
+  what it remembers, as the prompt carried it:
+    What you remember:
+      lessons    0 you have kept
+      lately     the last 6 of 6 things you remember
+        - I saw Rook (#2), a commander, about 6m away.
+        - I saw Wren (#1), a commander, about 12m away.
+        - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+        - I saw Wren (#1), a commander, about 7m away.
+        - I saw Wren (#1), a commander, about 6m away.
+        - Wren (#1) shouted: "a fair bargain"
+  the model said:     say text=A fair bargain, you say? What are you offering, Wren? target=#1
+  which read back as: say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+
+arm: the ground first -- prompt bd97aab0d327b347, 7 things remembered
+  lesson kept: Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not.
+  what it remembers, as the prompt carried it:
+    What you remember:
+      lessons    1 you have kept
+        - Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not.
+      lately     the last 6 of 6 things you remember
+        - I saw Rook (#2), a commander, about 6m away.
+        - I saw Wren (#1), a commander, about 12m away.
+        - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+        - I saw Wren (#1), a commander, about 7m away.
+        - I saw Wren (#1), a commander, about 6m away.
+        - Wren (#1) shouted: "a fair bargain"
+  the model said:     
+  which read back as: -- nothing readable --
+
+arm: Rook, not Wren -- prompt 90f91eda299fba85, 7 things remembered
+  lesson kept: Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me.
+  what it remembers, as the prompt carried it:
+    What you remember:
+      lessons    1 you have kept
+        - Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me.
+      lately     the last 6 of 6 things you remember
+        - I saw Rook (#2), a commander, about 6m away.
+        - I saw Wren (#1), a commander, about 12m away.
+        - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+        - I saw Wren (#1), a commander, about 7m away.
+        - I saw Wren (#1), a commander, about 6m away.
+        - Wren (#1) shouted: "a fair bargain"
+  the model said:     say text="Wren's shouting again, but you're the one who actually deals. Got anything worth a few coins, Rook?" target=#2
+  which read back as: say(text="Wren's shouting again, but you're the one who actually deals. Got anything worth a few coins, Rook?" target=2)
+
+arm: let them come -- prompt f8af88581e3760f4, 7 things remembered
+  lesson kept: The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me.
+  what it remembers, as the prompt carried it:
+    What you remember:
+      lessons    1 you have kept
+        - The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me.
+      lately     the last 6 of 6 things you remember
+        - I saw Rook (#2), a commander, about 6m away.
+        - I saw Wren (#1), a commander, about 12m away.
+        - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+        - I saw Wren (#1), a commander, about 7m away.
+        - I saw Wren (#1), a commander, about 6m away.
+        - Wren (#1) shouted: "a fair bargain"
+  the model said:     wait ticks=3
+  which read back as: wait(ticks=3)
+
+what the lessons changed
+  two columns, because the two are different claims: a different action, and a different
+  choice of any sort including the same action with other words in it
+  arm                which action     chose                                          action     choice
+  no lesson          say at #1        say(text=A fair bargain, you say? What are yo… --         --
+  the ground first   --               -- nothing readable --                         differs    differs
+  Rook, not Wren     say at #2        say(text="Wren's shouting again, but you're t… differs    differs
+  let them come      wait at nobody   wait(ticks=3)                                  differs    differs
+  3 of 3 lessons changed which action was chosen; 3 changed the choice at all
+
+  keeping "Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."
+    with no lesson it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    with that one it chose   -- nothing readable --
+    which is a different action: -- rather than say at #1
+
+  keeping "Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."
+    with no lesson it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    with that one it chose   say(text="Wren's shouting again, but you're the one who actually deals. Got anything worth a few coins, Rook?" target=2)
+    which is a different action: say at #2 rather than say at #1
+
+  keeping "The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."
+    with no lesson it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    with that one it chose   wait(ticks=3)
+    which is a different action: wait at nobody rather than say at #1

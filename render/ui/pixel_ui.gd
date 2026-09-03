@@ -15,7 +15,15 @@ extends CanvasLayer
 ## one at 3, and a window too small for even that draws at 1 and lets the panel
 ## run off the bottom rather than shrinking it to a fraction.
 ##
-## Nothing here belongs to the simulation. This layer, the panel under it, the
+## ## Two panels, one theme
+##
+## The character sheet sits in the top-left corner and the combat readout in the
+## top-right, and both are asked for separately -- a run may have either, both or
+## neither. What they may not have is two ideas of what the interface looks like,
+## so the theme is built once here and carried by the frame both panels sit in;
+## neither panel builds a style of its own and neither names a file on disk.
+##
+## Nothing here belongs to the simulation. This layer, the panels under it, the
 ## theme and the pack are all render-side; a headless run loads not one of them,
 ## which `./run_headless.sh --assets` says from outside by asking the engine's
 ## own resource cache.
@@ -24,11 +32,14 @@ class_name PixelUi
 ## How many pixels of window height buy one step of interface scale.
 const DESIGN_HEIGHT := 320
 
-## How far the panel sits from the corner, in art pixels.
+## How far the panels sit from the corners, in art pixels.
 const MARGIN := 8
 
-## The panel this layer exists to hold.
+## The character sheet, or null in a run that did not ask for one.
 var panel: CharacterPanel = null
+
+## The combat readout, or null in a run that did not ask for one.
+var readout: CombatPanel = null
 
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
@@ -37,10 +48,13 @@ var art_scale := 1
 var _frame: MarginContainer = null
 
 
-## The layer, the theme and the panel, ready to be added to the scene -- or null
-## when the pack has not been unpacked, in which case the caller says so and the
-## world is drawn without an interface over it.
-static func build() -> PixelUi:
+## The layer, the theme and whichever panels were asked for, ready to be added to
+## the scene -- or null when the pack has not been unpacked, in which case the
+## caller says so and the world is drawn without an interface over it.
+##
+## The defaults are the character sheet alone, which is what `--sheet` has always
+## meant and what every existing caller asks for.
+static func build(with_sheet: bool = true, with_readout: bool = false) -> PixelUi:
 	var theme := SproutTheme.build()
 	if theme == null:
 		return null
@@ -52,10 +66,29 @@ static func build() -> PixelUi:
 	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
 		layer._frame.add_theme_constant_override(side, MARGIN)
 	layer._frame.theme = theme
-	layer.panel = CharacterPanel.new()
-	layer.panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	layer.panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	layer._frame.add_child(layer.panel)
+
+	# One row across the whole window: the sheet packed to the left, the readout
+	# to the right, and whatever space is left between them. A run with only one
+	# of the two still puts it in its own corner, because the spacer is what
+	# holds the gap rather than either panel's position.
+	var across := HBoxContainer.new()
+	across.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	across.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	across.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	across.alignment = BoxContainer.ALIGNMENT_BEGIN
+	if with_sheet:
+		layer.panel = CharacterPanel.new()
+		layer.panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		layer.panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		across.add_child(layer.panel)
+	var gap := Control.new()
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	across.add_child(gap)
+	if with_readout:
+		layer.readout = CombatPanel.new()
+		across.add_child(layer.readout)
+	layer._frame.add_child(across)
 	layer.add_child(layer._frame)
 	return layer
 
@@ -77,3 +110,17 @@ func _fit(window: Vector2) -> void:
 	# window is screen pixels divided by the scale.
 	if _frame != null:
 		_frame.size = window / float(art_scale)
+
+
+## Where a panel landed and how big it came out, in screen pixels: what the
+## measuring tool needs in order to ask whether that rectangle is made of whole
+## art pixels. Empty for a panel this run did not build.
+func geometry_of(which: Control) -> Rect2i:
+	if which == null:
+		return Rect2i()
+	return Rect2i(
+		int(which.global_position.x * art_scale),
+		int(which.global_position.y * art_scale),
+		int(which.size.x * art_scale),
+		int(which.size.y * art_scale),
+	)

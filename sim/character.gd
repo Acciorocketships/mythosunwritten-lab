@@ -19,8 +19,20 @@ extends RefCounted
 ##   * `health`, and the `max_health()` its level entitles it to;
 ##   * `inventory`, everything it carries and its money, with `equipment` a view
 ##     onto that rather than a second store;
-##   * the identity: `backstory`, `goal`, `traits`, `tendencies`;
-##   * `memory` and `sentiment`, the two handles the agent milestones fill.
+##   * the identity: `backstory`, `goals`, `traits`, `tendencies`;
+##   * `memory` -- what it remembers, in two segments.
+##
+## **How it feels about everyone it knows of is not on here, and that is the
+## point.** Section 2 lists a sentiment map among what a character has, and this
+## sheet used to carry an empty `sentiment: Dictionary` waiting for it. Section 10
+## is more specific and wins: "Relationships live on edges between entities, not
+## inside any single NPC's memory." So the map is retired rather than filled, and
+## what replaces it is `RelationshipGraph`, one store the world owns, where an
+## edge between two characters is one record reached from both ends. Nothing was
+## lost with the field: nothing ever wrote to it, and the one thing that read it
+## -- the observation packet's test for whether this character has met that one
+## -- reads the graph now, and gets a better answer, because having met somebody
+## is not a fact either of the two can hold privately.
 ##
 ## **Status is not the level, and it is not a copy of it.** Section 2 gives a
 ## character two threat numbers: `level` is military and `status` is diplomatic,
@@ -93,8 +105,24 @@ var equipment: Dictionary:
 ## Identity, section 2: who it was before the simulation started.
 var backstory: String = ""
 
-## Identity: what it is trying to do now. One goal, replaceable.
-var goal: String = ""
+## Identity: what it is trying to do, as several structured goals rather than one
+## line of prose.
+##
+## **The single `goal: String` this replaces is retired.** It was one free-text
+## sentence, nothing read it, and section 10 asks for something it could not be:
+## several goals at once, over two horizons, each completable, replaceable and
+## reprioritisable. Carrying it forward beside `goals` would have left two places
+## saying what a character wants, and two places saying one thing drift -- the
+## same argument that made the action list one table with two columns instead of
+## two lists. Nothing expressive was lost with it: a goal still carries the
+## character's own words for itself (`Goal.text`), so a sentence a person would
+## have written into the old field is written into a goal instead, and now
+## something reads it.
+##
+## A sheet nobody has given a goal to holds an empty set and behaves exactly as
+## it did before, which is what keeps a human-driven character unchanged: there
+## is no goal to satisfy, nothing is asked of it, and `identity_line()` says so.
+var goals: GoalSet = GoalSet.new()
 
 ## Identity: personality traits, in the character's own vocabulary.
 var traits: PackedStringArray = PackedStringArray()
@@ -102,14 +130,19 @@ var traits: PackedStringArray = PackedStringArray()
 ## Identity: behavioural tendencies -- greedy, cautious, aggressive, friendly.
 var tendencies: PackedStringArray = PackedStringArray()
 
-## Persistent memory: a first-person log of what happened to it. Empty, and a
-## handle: the memory milestone decides what a remembered thing is.
-var memory: Array = []
-
-## How it feels about everyone it knows of, by that character's id. Empty, and a
-## handle: section 6's ownership maths and section 10's relationship edges are
-## what fill it.
-var sentiment: Dictionary = {}
+## Persistent memory, in section 10's two segments: a first-person log of
+## experiences and facts, and the durable lessons drawn out of them.
+##
+## It lives here, on the sheet, for the same reason the six scores do -- it is
+## part of what a character *is*, and a character that put its memory somewhere
+## else would forget it the moment anything else took a turn. It survives every
+## decision the character makes because nothing between decisions replaces the
+## sheet.
+##
+## Nothing on this side writes to it. The store's own rule is that the only way
+## in is an observation -- see `sim/character_memory.gd` -- and it is written by
+## whatever is deciding for this character, out of what that character was shown.
+var memory: CharacterMemory = CharacterMemory.new()
 
 ## The one thing that differs between a character a person drives and a character
 ## an agent drives: what is called to choose the next action. Unset here, and
@@ -231,9 +264,22 @@ func sheet_line() -> String:
 ## The identity in one line. Kept apart from `sheet_line()` on purpose: the
 ## numbers are what the combat layer reads and these are what an agent reads.
 func identity_line() -> String:
-	return "%s | goal: %s | traits: %s | tendencies: %s" % [
+	return "%s | goals: %s | traits: %s | tendencies: %s" % [
 		"-" if backstory == "" else backstory,
-		"-" if goal == "" else goal,
+		goals_line(),
 		"-" if traits.is_empty() else ", ".join(traits),
 		"-" if tendencies.is_empty() else ", ".join(tendencies),
 	]
+
+
+## What it is trying to do, in one line: every open goal in the order it is
+## pressing. A character with nothing it is trying to do prints a dash, exactly
+## as the one free-text line it replaces did when nobody had written in it.
+func goals_line() -> String:
+	var open := goals.open()
+	if open.is_empty():
+		return "-"
+	var parts := PackedStringArray()
+	for goal in open:
+		parts.append("%s (%s)" % [goal.said(), goal.horizon])
+	return "; ".join(parts)

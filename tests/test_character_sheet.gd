@@ -5,8 +5,10 @@ extends TestSuite
 ##
 ##   1. The sheet carries every field section 2 names -- the six ability scores,
 ##      the level, the status, the health, handles for inventory and equipment,
-##      the four identity fields, and handles for the persistent memory and the
-##      sentiment map that later milestones fill.
+##      the four identity fields, and a handle for the persistent memory. How a
+##      character feels about everyone it knows of is deliberately *not* a field
+##      here: it lives on edges in the world's own `RelationshipGraph`, and the
+##      empty `sentiment` handle this sheet used to carry is retired.
 ##   2. A character a person drives and a character an agent drives are the same
 ##      type with the same fields. Shown twice: by reflection over two sheets,
 ##      and by a scan of every file under sim/ for a word that would mean the
@@ -28,8 +30,8 @@ class_name TestCharacterSheet
 const SHEET_FIELDS := [
 	"scores", "level", "assigned_status", "health",
 	"inventory", "equipment",
-	"backstory", "goal", "traits", "tendencies",
-	"memory", "sentiment", "decide",
+	"backstory", "goals", "traits", "tendencies",
+	"memory", "decide",
 ]
 
 ## Words that would mean a file knows which kind of character it is holding.
@@ -99,12 +101,17 @@ func _the_sheet_carries_section_twos_fields() -> void:
 	# The handles later milestones fill are here and empty.
 	equal(sheet.inventory.size(), 0, "the inventory handle is not empty")
 	equal(sheet.equipment.size(), 0, "the equipment handle is not empty")
-	equal(sheet.memory.size(), 0, "the memory handle is not empty")
-	equal(sheet.sentiment.size(), 0, "the sentiment handle is not empty")
+	equal(sheet.memory.entry_count(), 0, "the memory handle is not empty")
+	equal(sheet.goals.size(), 0, "a new sheet is already after something")
+	equal(sheet.goals_line(), "-",
+		"a character nobody has set a goal for is after something")
+	check(not Array(_field_names(sheet)).has("sentiment"),
+		"the sheet still carries a sentiment map, which now lives on edges in the"
+		+ " world's own graph")
 
 	# The identity fields hold what is written on them.
 	sheet.backstory = "raised by the mushroom keepers of the marsh"
-	sheet.goal = "find the lantern her mother left on the far bank"
+	sheet.goals.add(Goal.unwritten("find the lantern her mother left on the far bank"))
 	sheet.traits = PackedStringArray(["curious", "stubborn"])
 	sheet.tendencies = PackedStringArray(["cautious", "friendly"])
 	check(sheet.identity_line().contains("mushroom keepers"),
@@ -221,7 +228,7 @@ func _a_level_up_spends_one_point_on_one_score() -> void:
 		Ability.DEX: 7, Ability.WIS: 6, Ability.INT: 5,
 	})
 	sheet.backstory = "a hedge witch's apprentice"
-	sheet.goal = "reach the blossom grove before the petals fall"
+	sheet.goals.add(Goal.of(Goal.BE_AT, {"target": Vector2(8.0, 3.0)}))
 	sheet.set_status(11)
 	var before := sheet.scores.duplicate()
 	var identity_before := sheet.identity_line()
@@ -351,6 +358,15 @@ func _suited(at_level: int) -> Commander:
 func _value_of(sheet: Character, field: String) -> String:
 	if field == "inventory":
 		return sheet.inventory.fingerprint()
+	# A memory, like an inventory, is a store of its own and every character has
+	# its own one. What has to be the same between two sheets is what is *in* it,
+	# so it is compared by its contents and not by which object it is.
+	if field == "memory":
+		return "\n".join(sheet.memory.lines())
+	# The same for the goals: a set of its own per character, compared by what is
+	# in it rather than by which object it is.
+	if field == "goals":
+		return "\n".join(sheet.goals.lines())
 	return str(sheet.get(field))
 
 

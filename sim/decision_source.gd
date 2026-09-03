@@ -13,7 +13,7 @@ extends RefCounted
 ##
 ##     func(scene: ActionScene, actor: Combatant) -> Action
 ##
-## Four are built here. `recorded()` and `plan()` are both fed choices written
+## Five are built here. `recorded()` and `plan()` are both fed choices written
 ## down in advance -- what a person's turns look like once they have been taken,
 ## and what stands in for a person in a headless test, because a screen is not a
 ## thing a simulation can have. They differ in what *being asked* does to the
@@ -21,10 +21,14 @@ extends RefCounted
 ## while a plan is read at the position its character has actually reached and so
 ## cannot be spent by a question. `scripted()` wraps a rule that computes its
 ## choice from the world it is handed -- what a program's turns look like.
+## `model()` hands the question to a `ModelMind`, which assembles what the
+## character can see, writes it out as a prompt, puts it to a language model and
+## reads the answer back as one action -- what a model's turns look like.
 ## `deliberate()` wraps any of those in a decider that will not answer for a
 ## stated number of ticks -- the scripted stand-in for a decision that takes
 ## arbitrarily long, and the reason a driver must read "no answer yet" as "the
-## character waits" rather than as "stop the world". None is privileged:
+## character waits" rather than as "stop the world", which is also exactly how
+## `model()` answers while its call is outstanding. None is privileged:
 ## `drive()` calls whichever is on the sheet, hands what comes back to
 ## `ActionEngine.resolve`, and cannot tell which it called.
 ##
@@ -43,6 +47,15 @@ extends RefCounted
 ##
 ## Nothing here resolves anything. This file contains no rule about distance,
 ## reach, cost or possibility -- it chooses, and the engine answers.
+##
+## ## Driving a character is more than asking it
+##
+## `drive()` passes every character it drives through `CharacterUpkeep` before
+## asking it anything, which is the same object `ControlLoop` passes every
+## character it services through: the two stores the sheet declares for
+## everybody -- what the character remembers and what it is after -- are
+## maintained on a path that runs whatever is on `Character.decide`, and there is
+## nothing here that could tell which is on it.
 class_name DecisionSource
 
 
@@ -117,6 +130,32 @@ static func scripted(rule: Callable) -> Callable:
 		return next if next is Action else null
 
 
+## A decision function whose mind is a language model.
+##
+## The same two arguments, the same one return, and the same nothing-else: a
+## `ModelMind` is asked what its character does next, and whatever it says is
+## handed back if it is an action and dropped if it is not. This function is the
+## whole of the seam between the model layer and everything else, and it is four
+## lines long for the reason `scripted()` above it is four lines long -- there is
+## nothing for it to do but call and check.
+##
+## What makes it worth a factory of its own rather than `scripted(mind.answer_for)`
+## is nothing about privilege and everything about being able to say where the
+## seam is. A driver cannot tell the two apart, and neither can the engine: the
+## `Callable` this returns has the same signature as the three above it, and a
+## model's choice reaches `ActionEngine.resolve` as an `Action` like any other,
+## to be refused with the same sentence when the world will not allow it.
+##
+## The mind answers null while it is waiting for the model, which is the same
+## null a recorded person out of choices returns and is read the same way: the
+## character stands in the world and everybody else carries on. Nothing anywhere
+## in this file waits for a model, and nothing in `ControlLoop` does either.
+static func model(mind: ModelMind) -> Callable:
+	return func(scene: ActionScene, actor: Combatant) -> Action:
+		var next: Variant = mind.answer_for(scene, actor)
+		return next if next is Action else null
+
+
 ## A decision function that takes its time.
 ##
 ## Section 12 requires that the simulation never blocks on a decision -- "the
@@ -156,15 +195,31 @@ static func deliberate(inner: Callable, ticks: int) -> Callable:
 ## sort of function it is, and nothing to branch on -- a `Callable` is a
 ## `Callable`.
 ##
+## Before each choice the character is serviced by `CharacterUpkeep`, exactly as
+## `ControlLoop` services it: the world closes the goals its own state says are
+## finished, and the character takes in its surroundings. That is not a second
+## way of doing it -- it is the same object, called at the same point relative to
+## the decision function, so a character driven here accrues a memory and has its
+## goals closed exactly as one serviced by the loop does. One is handed in by a
+## caller that keeps its own -- a run watching its characters with an
+## `ObservationTrail` -- and one is made here otherwise, which costs nothing
+## because under `drive()` one call is one resolution and so every call is due a
+## look anyway.
+##
 ## Returns one row per action taken: `{"chose": Action, "got": ActionOutcome}`.
 ## It stops early when the decision function returns null, which is how a
 ## recorded person's list of choices ends.
-static func drive(scene: ActionScene, actor: Combatant, steps: int = 1) -> Array:
+static func drive(
+	scene: ActionScene, actor: Combatant, steps: int = 1,
+	upkeep: CharacterUpkeep = null
+) -> Array:
 	var taken := []
 	var sheet := _sheet_of(actor)
 	if sheet == null or not sheet.decide.is_valid():
 		return taken
+	var serving := CharacterUpkeep.new() if upkeep == null else upkeep
 	for _step in steps:
+		serving.serve(scene, actor)
 		var chosen: Variant = sheet.decide.call(scene, actor)
 		if not (chosen is Action):
 			break

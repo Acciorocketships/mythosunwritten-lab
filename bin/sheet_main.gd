@@ -22,13 +22,21 @@ const ROLLED := {
 func _initialize() -> void:
 	var person := _rolled(ADVENTURER)
 	person.backstory = "a marsh lantern-keeper's daughter, out of the reeds"
-	person.goal = "find the lantern her mother left on the far bank"
+	# What each is after, as section 10's structured goals rather than the one
+	# free-text line the sheet used to carry: several at once, over two horizons.
+	# These are this command's own setup for two made-up characters and nothing
+	# the simulation declares.
+	person.goals.add(Goal.of(
+		Goal.HOLD, {"item": "marsh lantern"},
+		"find the lantern her mother left on the far bank", Goal.LONG, 0))
+	person.goals.add(Goal.of(Goal.BE_AT, {"target": Vector2(40.0, -12.0)}, "", Goal.SHORT, 1))
 	person.traits = PackedStringArray(["curious", "stubborn"])
 	person.tendencies = PackedStringArray(["cautious", "friendly"])
 
 	var agent := _rolled(NOBLE)
 	agent.backstory = "third child of a blossom-grove house, never in a fight"
-	agent.goal = "be owed a favour by everyone who matters"
+	agent.goals.add(Goal.unwritten("be owed a favour by everyone who matters"))
+	agent.goals.add(Goal.of(Goal.MONEY, {"amount": 200}, "", Goal.LONG, 1))
 	agent.traits = PackedStringArray(["charming", "idle"])
 	agent.tendencies = PackedStringArray(["greedy", "diplomatic"])
 	agent.decide = func(_of: Character) -> String: return "wait"

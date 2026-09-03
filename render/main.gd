@@ -502,14 +502,17 @@ var _board_fight := -1
 var _piece_views := {}
 var _pieces_drawn := 0
 
-## The interface, when --sheet asked for one: one CanvasLayer at a whole-number
-## scale holding one character-sheet panel. Null in every run that did not, and
-## in a run where the Sprout Lands pack has not been unpacked.
+## The interface, when --sheet or --readout asked for one: one CanvasLayer at a
+## whole-number scale holding the character sheet, the combat readout, or both.
+## Null in every run that asked for neither, and in a run where the Sprout Lands
+## pack has not been unpacked.
 ##
-## It owns no fact about any character. The panel is handed the simulation's own
-## `Character` objects and reads them every frame; there is no copy of a score,
-## a level or an inventory anywhere on this side of the line. render/ui/ is the
-## whole of the interface and bin/check_layers.gd covers it.
+## It owns no fact about any character and none about any fight. The sheet is
+## handed the simulation's own `Character` objects and the readout the world
+## itself, and both read every number off those on every frame; there is no copy
+## of a score, a level, an inventory, a turn order or a cooldown anywhere on this
+## side of the line. render/ui/ is the whole of the interface and
+## bin/check_layers.gd covers it.
 var _sheet_ui: PixelUi = null
 
 var _screenshot_path := ""
@@ -583,12 +586,12 @@ func _ready() -> void:
 		_board_view.material_override = _board_material
 		_board_view.extra_cull_margin = 100.0
 		add_child(_board_view)
-	if options["sheet"]:
-		_sheet_ui = PixelUi.build()
+	if options["sheet"] or options["readout"]:
+		_sheet_ui = PixelUi.build(options["sheet"], options["readout"])
 		if _sheet_ui == null:
 			printerr(
-				"render-shell --sheet: the Sprout Lands UI pack is not unpacked;"
-				+ " run ./tools/extract_sprout_lands.sh"
+				"render-shell --sheet/--readout: the Sprout Lands UI pack is not"
+				+ " unpacked; run ./tools/extract_sprout_lands.sh"
 			)
 		else:
 			add_child(_sheet_ui)
@@ -604,7 +607,8 @@ func _ready() -> void:
 		_distant_tiles, _distant_triangles, _island_views.size(),
 		_grass_blades, motes.y,
 		0 if _sheet_ui == null else _sheet_ui.art_scale,
-		0 if _sheet_ui == null else _sheet_ui.panel.sheets.size(),
+		0 if _sheet_ui == null or _sheet_ui.panel == null \
+			else _sheet_ui.panel.sheets.size(),
 		AntiAliasing.of(get_viewport()),
 	])
 
@@ -614,15 +618,22 @@ func _exit_tree() -> void:
 	# measurement of it is a command rather than a guess. tools/measure_ui.sh
 	# reads this line and then asks the saved frame whether that rectangle is
 	# made of whole art pixels.
-	if _sheet_ui != null:
+	if _sheet_ui != null and _sheet_ui.panel != null:
 		var panel := _sheet_ui.panel
+		var at := _sheet_ui.geometry_of(panel)
 		print("render-shell sheet scale=%d x=%d y=%d w=%d h=%d sheets=%d showing=%d" % [
-			_sheet_ui.art_scale,
-			int(panel.global_position.x * _sheet_ui.art_scale),
-			int(panel.global_position.y * _sheet_ui.art_scale),
-			int(panel.size.x * _sheet_ui.art_scale),
-			int(panel.size.y * _sheet_ui.art_scale),
-			panel.sheets.size(), panel.showing,
+			_sheet_ui.art_scale, at.position.x, at.position.y,
+			at.size.x, at.size.y, panel.sheets.size(), panel.showing,
+		])
+	# The same line for the readout, in the same shape and for the same reason:
+	# tools/measure_ui.sh reads a rectangle off it and then asks the saved frame
+	# whether that rectangle is made of whole art pixels.
+	if _sheet_ui != null and _sheet_ui.readout != null:
+		var readout := _sheet_ui.readout
+		var box := _sheet_ui.geometry_of(readout)
+		print("render-shell readout scale=%d x=%d y=%d w=%d h=%d fight=%d" % [
+			_sheet_ui.art_scale, box.position.x, box.position.y,
+			box.size.x, box.size.y, 1 if readout.has_fight() else 0,
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
 	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d frame_ms=%.2f timed=%d digest=%s" % [
@@ -1475,7 +1486,13 @@ func _sync_board(snapshot: Dictionary) -> void:
 func _sync_sheet() -> void:
 	if _sheet_ui == null:
 		return
-	_sheet_ui.panel.show_sheets(SheetSource.sheets_in(_sim.world))
+	if _sheet_ui.panel != null:
+		_sheet_ui.panel.show_sheets(SheetSource.sheets_in(_sim.world))
+	# The world itself, for the readout: the same handle every frame, so that a
+	# restart onto a different world is picked up without anything being pushed.
+	# What is on the readout it reads through render/ui/fight_source.gd.
+	if _sheet_ui.readout != null:
+		_sheet_ui.readout.watch(_sim.world)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:
@@ -1601,7 +1618,7 @@ func _parse_args() -> Dictionary:
 		"model_tint": true, "grass": true, "atmosphere": true, "board": false,
 		"distant": true, "lod_levels": false, "lod_centre": false,
 		"lod_centre_x": 0.0, "lod_centre_z": 0.0,
-		"scenario": Simulation.SCENARIO_NONE, "sheet": false,
+		"scenario": Simulation.SCENARIO_NONE, "sheet": false, "readout": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 	}
@@ -1691,6 +1708,15 @@ func _parse_args() -> Dictionary:
 				# the same with it and without it -- which is what
 				# tests/test_ui_panel.gd checks by running both.
 				options["sheet"] = true
+			"--readout":
+				# Put the combat readout on screen: one panel in the same Sprout
+				# Lands pixel pack, showing whose turn it is, the order the
+				# commanders act in and what the one acting can swing. It reads
+				# the fight the simulation is holding and writes nothing back,
+				# so the world's fingerprint is the same with it and without it
+				# -- which is what tests/test_ui_readout.gd checks by running
+				# both.
+				options["readout"] = true
 			"--board":
 				# Draw the tactical lattice over the ground the observer is
 				# standing on. It reads the board out of the simulation and

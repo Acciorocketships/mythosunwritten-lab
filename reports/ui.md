@@ -12,6 +12,10 @@ xvfb-run -a ./tools/measure_ui.sh               # ...and is it crisp
 ./run_tests.sh --layers-only                    # ...and is it on the right side
 ```
 
+The second panel, the combat turn-and-cooldown readout, is built on this
+foundation and written up separately in
+[reports/combat-readout.md](combat-readout.md).
+
 ![The character sheet over the rendered world](assets/character-sheet.png)
 
 ---
@@ -362,9 +366,13 @@ checked the second would pass for a shell that never drew anything.
 
 ## 7. What is deliberately not here
 
-One panel. No dialogue panel, no trade panel, no combat turn-and-cooldown
-readout, no menu system, no cursor. The pack ships art for all of those — dialog
-boxes in four sizes, a click-to-continue indicator, six cursors including cat
-paws, an emote sheet, a settings frame — and none of it is wired up. The
-combat readout is the next one; dialogue and trade wait for the model layer they
-are about.
+One panel here. The combat turn-and-cooldown readout is the second, and it is
+built on everything above — the same theme, the same pack table, the same
+whole-pixel rule and the same measuring instrument, none of it re-decided. See
+[reports/combat-readout.md](combat-readout.md).
+
+After those two: no dialogue panel, no trade panel, no menu system, no cursor.
+The pack ships art for all of those — dialog boxes in four sizes, a
+click-to-continue indicator, six cursors including cat paws, an emote sheet, a
+settings frame — and none of it is wired up. Dialogue and trade wait for the
+model layer they are about.

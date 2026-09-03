@@ -35,11 +35,17 @@ func _initialize() -> void:
 		printerr(options["error"])
 		printerr("usage: measure_ui.gd --frame PNG --at X Y --size W H --scale N")
 		printerr("       measure_ui.gd --icons PNG [--icon-scale N]")
+		printerr("       measure_ui.gd --effects PNG [--icon-scale N]")
 		quit(2)
 		return
 
 	if options["icons"] != "":
 		_write_icon_sheet(options["icons"], options["icon_scale"])
+		quit(0)
+		return
+
+	if options["effects"] != "":
+		_write_effect_sheet(options["effects"], options["icon_scale"])
 		quit(0)
 		return
 
@@ -143,6 +149,98 @@ func _write_icon_sheet(path: String, at_scale: int) -> void:
 	print("wrote %s: %s at %dx" % [path, ", ".join(names), at_scale])
 
 
+## Lay the second art table out as a picture: the six effect sprites along the
+## top, and under each animation one row of the poses it puts a sprite through.
+##
+## This is what "the seven animations differ" looks like rather than what it
+## reads like, and it is a still picture of a moving thing on purpose -- a strip
+## of poses can be committed and looked at, where a recording of the panel cannot
+## be either. Every pixel of it is this project's own art, so nothing here
+## touches the pack's redistribution line.
+##
+## The sprite each animation is shown with is one that names it in the weapon
+## catalogue, so the strip shows the pairs the simulation actually makes.
+func _write_effect_sheet(path: String, at_scale: int) -> void:
+	const POSES := 6
+	var cell := EffectArt.CELL
+	# Wide enough across that the furthest any of the seven travels -- the shot's
+	# twenty-four pixels -- still lands inside its own cell, so the strip shows
+	# the distance of a play and not only its shape; tight enough down that the
+	# rows read as a table.
+	var gap_x := 26
+	var gap_y := 10
+
+	# Which sprite the weapon catalogue actually pairs each animation with. The
+	# strip below is drawn with the arrow instead, because a diagram of seven
+	# motions should differ between rows only in the motion -- and because the
+	# flail's burst, which is what the catalogue pairs `spin` with, is symmetric
+	# under a quarter turn and would show a spin as nothing at all. The pairing
+	# is printed rather than drawn.
+	var paired := {}
+	for shape in Weapon.catalogue() + Weapon.composed():
+		for index in shape.attack_count():
+			var one := shape.attack_at(index)
+			if one.animation_tag != "" and not paired.has(one.animation_tag):
+				paired[one.animation_tag] = one.sprite_tag
+
+	var sprites := AssetTags.EFFECT_SPRITES
+	var animations := AssetTags.ANIMATIONS
+	var across := maxi(sprites.size(), POSES)
+	var rows := 1 + animations.size()
+	var sheet := Image.create_empty(
+		across * (cell + gap_x) + gap_x, rows * (cell + gap_y) + gap_y,
+		false, Image.FORMAT_RGBA8)
+	sheet.fill(Color(0.0, 0.0, 0.0, 0.0))
+	var written := PackedStringArray()
+
+	for index in sprites.size():
+		var sprite := EffectArt.sprite_of(sprites[index]).get_image()
+		sheet.blit_rect(sprite, Rect2i(Vector2i.ZERO, sprite.get_size()),
+			Vector2i(gap_x + index * (cell + gap_x), gap_y))
+	written.append("sprites: " + ", ".join(sprites))
+
+	var art := EffectArt.sprite_of(AssetTags.EFFECT_ARROW).get_image()
+	for row in animations.size():
+		var animation: String = animations[row]
+		var trace := PackedStringArray()
+		for step in POSES:
+			var pose := EffectArt.pose_of(animation, float(step) / float(POSES - 1))
+			var offset: Vector2i = pose["offset"]
+			var quarters := int(pose["quarter_turns"])
+			trace.append("(%d,%d)x%d" % [offset.x, offset.y, quarters])
+			var posed := _turned(art, quarters)
+			# The offset is in whole art pixels, applied as it is and clamped
+			# only at the edge of the cell's own padding.
+			var at := Vector2i(
+				gap_x + step * (cell + gap_x) + clampi(offset.x, -gap_x, gap_x),
+				(row + 1) * (cell + gap_y) + gap_y + clampi(offset.y, -gap_y, gap_y))
+			sheet.blit_rect(posed, Rect2i(Vector2i.ZERO, posed.get_size()), at)
+		written.append("%s (the catalogue pairs it with the %s): %s" % [
+			animation, paired.get(animation, "-"), " ".join(trace),
+		])
+
+	if at_scale > 1:
+		sheet.resize(sheet.get_width() * at_scale, sheet.get_height() * at_scale,
+			Image.INTERPOLATE_NEAREST)
+	var error := sheet.save_png(path)
+	if error != OK:
+		printerr("could not write %s (%d)" % [path, error])
+		return
+	print("wrote %s at %dx" % [path, at_scale])
+	for line in written:
+		print("  " + line)
+
+
+## One image turned by whole quarter turns clockwise. Whole quarter turns only,
+## because that is all `EffectArt.pose_of` ever asks for -- and it is the only
+## turn that maps a square of pixels exactly onto itself.
+static func _turned(source: Image, quarter_turns: int) -> Image:
+	var turned := source.duplicate() as Image
+	for _step in posmod(quarter_turns, 4):
+		turned.rotate_90(CLOCKWISE)
+	return turned
+
+
 ## Every colour the interface is allowed to be: every opaque colour in the pack's
 ## own files, plus the three `PixelIcons` draws with.
 ##
@@ -208,7 +306,7 @@ func _parse(args: PackedStringArray) -> Dictionary:
 	var options := {
 		"frame": ProjectSettings.globalize_path(DEFAULT_FRAME),
 		"at_x": 0, "at_y": 0, "width": 0, "height": 0, "scale": 1,
-		"icons": "", "icon_scale": 6,
+		"icons": "", "effects": "", "icon_scale": 6,
 	}
 	var i := 0
 	while i < args.size():
@@ -231,13 +329,14 @@ func _parse(args: PackedStringArray) -> Dictionary:
 				var key := "scale" if args[i] == "--scale" else "icon_scale"
 				options[key] = maxi(1, args[i + 1].to_int())
 				i += 2
-			"--icons":
+			"--icons", "--effects":
 				if i + 1 >= args.size():
-					return {"error": "--icons needs a path"}
-				options["icons"] = args[i + 1]
+					return {"error": "%s needs a path" % args[i]}
+				options["icons" if args[i] == "--icons" else "effects"] = args[i + 1]
 				i += 2
 			_:
 				return {"error": "unknown argument '%s'" % args[i]}
-	if options["icons"] == "" and (options["width"] <= 0 or options["height"] <= 0):
+	if options["icons"] == "" and options["effects"] == "" \
+			and (options["width"] <= 0 or options["height"] <= 0):
 		return {"error": "--size needs a rectangle with area"}
 	return options

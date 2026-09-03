@@ -33,6 +33,17 @@ extends RefCounted
 ## rule reach this file as the same `Callable` and there is nothing here to tell
 ## them apart.
 ##
+## ## Servicing a character is more than asking it
+##
+## Every character serviced here is first handed to `CharacterUpkeep`, which
+## maintains the two stores the sheet declares for everybody: the world closes
+## the goals its own state says are finished, and the character takes in its
+## surroundings at the stated cadence. That happens before the decision function
+## is called and regardless of what the decision function is -- the loop passes
+## every character through it and has nothing to branch on if it wanted to. See
+## `sim/character_upkeep.gd` for the cadence and why it is that one; the loop
+## contributes only the servicing.
+##
 ## ## On a board, a turn is what a character spends
 ##
 ## A character in the overworld chooses whenever it is free. One standing on a
@@ -109,6 +120,13 @@ var continue_bias: float = CONTINUE_BIAS
 ## prints and what the tests read.
 var journal := PackedStringArray()
 
+## What the world does for each character it services, beside asking it: the two
+## stores on its sheet, maintained on a path every character passes. See the note
+## above. It is a field so that a run can hand it what is watching the characters
+## for the "recently changed" part of an observation, and so that a report can
+## read off how much witnessing was done.
+var upkeep := CharacterUpkeep.new()
+
 var _busy: Dictionary = {}
 var _ticks: Dictionary = {}
 var _resolved: Dictionary = {}
@@ -128,10 +146,13 @@ var _chosen_on: Dictionary = {}
 ## this file keeps -- one account of what somebody is doing, read from two places
 ## -- and it closes over that dictionary rather than over this loop, so a scene
 ## holding it does not hold the loop that made it.
-static func on(world: ActionScene, from_seed: int) -> ControlLoop:
+static func on(
+	world: ActionScene, from_seed: int, watched: ObservationTrail = null
+) -> ControlLoop:
 	var loop := ControlLoop.new()
 	loop.scene = world
 	loop.seed_value = from_seed
+	loop.upkeep = CharacterUpkeep.watching(watched)
 	loop._watched = loop._watch()
 	var busy := loop._busy
 	world.in_progress = func(id: int) -> Action:
@@ -188,6 +209,7 @@ func run(ticks: int) -> PackedStringArray:
 func _serve(one: Combatant) -> void:
 	if not _can_act(one):
 		return
+	upkeep.serve(scene, one)
 	if not _busy.has(one.id):
 		if _may_choose(one):
 			_ask(one)

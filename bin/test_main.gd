@@ -31,7 +31,15 @@ const SUITES := [
 	preload("res://tests/test_effects.gd"),
 	preload("res://tests/test_actions.gd"),
 	preload("res://tests/test_control_loop.gd"),
+	preload("res://tests/test_observation.gd"),
 	preload("res://tests/test_scenario.gd"),
+	preload("res://tests/test_agent.gd"),
+	preload("res://tests/test_memory.gd"),
+	preload("res://tests/test_goals.gd"),
+	preload("res://tests/test_upkeep.gd"),
+	preload("res://tests/test_relationships.gd"),
+	preload("res://tests/test_checks.gd"),
+	preload("res://tests/test_orchestrator.gd"),
 	preload("res://tests/test_fight_driver.gd"),
 	preload("res://tests/test_turn_seam.gd"),
 	preload("res://tests/test_window_glow.gd"),
@@ -41,6 +49,7 @@ const SUITES := [
 	preload("res://tests/test_anti_aliasing.gd"),
 	preload("res://tests/test_render_shell.gd"),
 	preload("res://tests/test_ui_panel.gd"),
+	preload("res://tests/test_ui_readout.gd"),
 ]
 
 

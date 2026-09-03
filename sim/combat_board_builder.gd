@@ -89,9 +89,16 @@ func build(
 	var deep := highest.y - lowest.y + 1
 
 	var board := CombatBoard.new()
-	board.world_seed = terrain.world_seed
 	board.shape(lowest, across, deep, size)
 	board.anchor_cell = CombatBoard.cell_of(x, z, size)
+	# A builder with no terrain hands back the window with nothing read in it:
+	# the cells are there and every one of them is unknown. A scene staged
+	# without ground under it -- which is what a bare test scene is -- has no
+	# ground to report, and saying so is the same answer the packet already gives
+	# for a cell it could not read.
+	if terrain == null:
+		return board
+	board.world_seed = terrain.world_seed
 	# Which storey the height names, taken as given rather than settled first.
 	# Settling would consult `support_at`, and `support_at` carries you up onto
 	# anything within a hop -- so a board asked for on the ground under an

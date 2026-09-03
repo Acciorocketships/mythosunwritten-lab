@@ -1,0 +1,657 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+model run seed=1234 ticks=400 where=(-480.0, 420.0)
+  channel    live -- every question put to anthropic/claude-fable-5 as the run reaches it
+  recording  recorded 2026-09-02 from anthropic/claude-fable-5 at https://openrouter.ai/api/v1/chat/completions, 16 replies
+  prompt     the twelve actions of the one list and the observation packet;
+             no rule about distance, reach, cost, damage or possibility,
+             no goal, and nothing named as an outcome to reach for.
+    Wren   #1 driven by a person Wren level=2 status=2 hp=32/32 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    Rook   #2 driven by a rule   Rook level=2 status=2 hp=32/32 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    Bram   #3 driven by a rule   Bram level=3 status=3 hp=38/38 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    Sable  #4 driven by a rule   Sable level=3 status=3 hp=38/38 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    Odo    #5 driven by a rule   Odo level=1 status=1 hp=26/26 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    Pell   #7 driven by a model  Pell level=2 status=2 hp=32/32 [str 5 con 4 cha 3 dex 4 wis 3 int 2]
+    tick 0 actors=6 objects=1 offers=0
+      #1 commander band=1 at (-486.000, -2.460, 416.000) hp=32/32 walking
+        carries money=30 carried=[] worn=[]
+      #2 commander band=1 at (-478.000, -2.352, 416.000) hp=32/32 walking
+        carries money=8 carried=[common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak] worn=[]
+      #3 commander band=3 at (-436.000, 0.952, 407.000) hp=38/38 walking
+        carries money=0 carried=[common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots | common weapon hand L3 P=12 mov=0 def=0 eff=12 str [sword:12] common sword] worn=[boots=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots hand=common weapon hand L3 P=12 mov=0 def=0 eff=12 str [sword:12] common sword]
+      #4 commander band=4 at (-424.000, 2.169, 407.000) hp=38/38 walking
+        carries money=0 carried=[common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots | common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear] worn=[boots=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots hand=common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear]
+      #5 commander band=5 at (-484.000, 0.568, 472.000) hp=26/26 walking
+        carries money=0 carried=[] worn=[]
+      #7 commander band=1 at (-476.000, -2.195, 422.000) hp=32/32 walking
+        carries money=9 carried=[] worn=[]
+      #6 pile at (-471.000, -2.340, 416.000) open [1 carried, 0 equipped, 0 money]
+
+t=  1  Wren   began say(text=good morning target=2), 5 ticks
+t=  1  Rook   began wait(ticks=4), 4 ticks
+t=  1  Bram   began wait(ticks=4), 4 ticks
+t=  1  Sable  began wait(ticks=4), 4 ticks
+t=  1  Odo    began go_to(target=(-484.000, 514.000)), 20 ticks
+t=  1  Pell   has not decided yet, and waits in the world
+t=  5  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=9
+t=  5  Rook   began wait(ticks=4), 4 ticks
+t=  5  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=9
+t=  5  Bram   began wait(ticks=4), 4 ticks
+t=  5  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=9
+t=  5  Sable  began wait(ticks=4), 4 ticks
+t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1
+t=  6  Wren   began go_to(target=6), 20 ticks
+t=  6  Odo    thought again at 5/20t, wanted the same thing
+t=  6  Rook   interrupted (spoken to), abandoned wait(ticks=4) 1/4t
+t=  6  Rook   began say(text=what will it be? target=1), 5 ticks
+t=  9  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=13
+t=  9  Bram   began wait(ticks=4), 4 ticks
+t=  9  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=13
+t=  9  Sable  began wait(ticks=4), 4 ticks
+t= 11  Wren   thought again at 5/20t, wanted the same thing
+t= 11  Rook   finished say(text=what will it be? target=1) -> say ok shout=false heard_by=1
+t= 11  Rook   began wait(ticks=4), 4 ticks
+t= 11  Odo    thought again at 10/20t, wanted the same thing
+t= 11  Wren   interrupted (spoken to), abandoned go_to(target=6) 5/20t
+t= 11  Wren   began go_to(target=6), 20 ticks
+t= 13  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=17
+t= 13  Bram   began wait(ticks=4), 4 ticks
+t= 13  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=17
+t= 13  Sable  began wait(ticks=4), 4 ticks
+t= 15  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=19
+t= 15  Rook   began wait(ticks=4), 4 ticks
+t= 16  Wren   thought again at 5/20t, wanted the same thing
+t= 16  Odo    thought again at 15/20t, wanted the same thing
+t= 17  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=21
+t= 17  Bram   began wait(ticks=4), 4 ticks
+t= 17  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=21
+t= 17  Sable  began wait(ticks=4), 4 ticks
+t= 19  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=23
+t= 19  Rook   began wait(ticks=4), 4 ticks
+t= 21  Wren   thought again at 10/20t, wanted the same thing
+t= 21  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=25
+t= 21  Bram   began wait(ticks=4), 4 ticks
+t= 21  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=25
+t= 21  Sable  began wait(ticks=4), 4 ticks
+t= 21  Odo    finished go_to(target=(-484.000, 514.000)) -> go_to ok at=(-484.000, 514.000) walked=42.0 steps=47
+t= 21  Odo    began wait(ticks=30), 30 ticks
+t= 23  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=27
+t= 23  Rook   began wait(ticks=4), 4 ticks
+t= 25  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=29
+t= 25  Bram   began wait(ticks=4), 4 ticks
+t= 25  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=29
+t= 25  Sable  began wait(ticks=4), 4 ticks
+t= 26  Wren   thought again at 15/20t, wanted the same thing
+t= 26  Odo    thought again at 5/30t, wanted the same thing
+t= 27  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=31
+t= 27  Rook   began wait(ticks=4), 4 ticks
+t= 29  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=33
+t= 29  Bram   began wait(ticks=4), 4 ticks
+t= 29  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=33
+t= 29  Sable  began wait(ticks=4), 4 ticks
+t= 31  Wren   finished go_to(target=6) -> go_to ok at=(-473.400, 416.000) walked=12.6 steps=14
+t= 31  Wren   began pick_up(item=brass lantern), 3 ticks
+t= 31  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=35
+t= 31  Rook   began wait(ticks=4), 4 ticks
+t= 31  Odo    thought again at 10/30t, wanted the same thing
+t= 33  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=37
+t= 33  Bram   began wait(ticks=4), 4 ticks
+t= 33  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=37
+t= 33  Sable  began wait(ticks=4), 4 ticks
+t= 34  Wren   finished pick_up(item=brass lantern) -> pick_up ok item=brass lantern from=6
+t= 34  Wren   began go_to(target=2), 20 ticks
+t= 35  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=39
+t= 35  Rook   began wait(ticks=4), 4 ticks
+t= 36  Odo    thought again at 15/30t, wanted the same thing
+t= 37  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=41
+t= 37  Bram   began wait(ticks=4), 4 ticks
+t= 37  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=41
+t= 37  Sable  began wait(ticks=4), 4 ticks
+t= 39  Wren   thought again at 5/20t, wanted the same thing
+t= 39  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=43
+t= 39  Rook   began wait(ticks=4), 4 ticks
+t= 41  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=45
+t= 41  Bram   began wait(ticks=4), 4 ticks
+t= 41  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=45
+t= 41  Sable  began wait(ticks=4), 4 ticks
+t= 41  Odo    thought again at 20/30t, wanted the same thing
+t= 43  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=47
+t= 43  Rook   began wait(ticks=4), 4 ticks
+t= 44  Wren   thought again at 10/20t, wanted the same thing
+t= 45  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=49
+t= 45  Bram   began wait(ticks=4), 4 ticks
+t= 45  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=49
+t= 45  Sable  began wait(ticks=4), 4 ticks
+t= 46  Odo    thought again at 25/30t, wanted the same thing
+t= 47  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=51
+t= 47  Rook   began wait(ticks=4), 4 ticks
+t= 49  Wren   thought again at 15/20t, wanted the same thing
+t= 49  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=53
+t= 49  Bram   began wait(ticks=4), 4 ticks
+t= 49  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=53
+t= 49  Sable  began wait(ticks=4), 4 ticks
+t= 51  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=55
+t= 51  Rook   began wait(ticks=4), 4 ticks
+t= 51  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=81
+t= 51  Odo    began wait(ticks=30), 30 ticks
+t= 53  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=57
+t= 53  Bram   began wait(ticks=4), 4 ticks
+t= 53  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=57
+t= 53  Sable  began wait(ticks=4), 4 ticks
+t= 54  Wren   finished go_to(target=2) -> go_to ok at=(-476.100, 416.000) walked=2.7 steps=3
+t= 54  Wren   began trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0), 4 ticks
+t= 55  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=59
+t= 55  Rook   began wait(ticks=4), 4 ticks
+t= 56  Odo    thought again at 5/30t, wanted the same thing
+t= 57  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=61
+t= 57  Bram   began go_to(target=4), 20 ticks
+t= 57  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=61
+t= 57  Sable  began go_to(target=3), 20 ticks
+t= 58  Wren   finished trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0) -> trade_propose ok to=2 give=0 give_money=12 want=1 want_money=0
+t= 58  Wren   began wait(ticks=8), 8 ticks
+t= 59  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=63
+t= 59  Rook   began trade_accept(target=1), 3 ticks
+t= 61  Odo    thought again at 10/30t, wanted the same thing
+t= 62  Rook   finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
+t= 62  Rook   began wait(ticks=4), 4 ticks
+t= 62  Bram   thought again at 5/20t, wanted the same thing
+t= 62  Sable  thought again at 5/20t, wanted the same thing
+t= 63  Wren   thought again at 5/8t, wanted the same thing
+t= 66  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=74
+t= 66  Wren   began examine(target=silk cloak), 4 ticks
+t= 66  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=70
+t= 66  Rook   began wait(ticks=4), 4 ticks
+t= 66  Odo    thought again at 15/30t, wanted the same thing
+t= 67  Bram   thought again at 10/20t, wanted the same thing
+t= 67  Sable  thought again at 10/20t, wanted the same thing
+t= 70  Wren   finished examine(target=silk cloak) -> examine ok item=silk cloak seen=common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak
+t= 70  Wren   began say(text=a fair bargain), 5 ticks
+t= 70  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=74
+t= 70  Rook   began wait(ticks=4), 4 ticks
+t= 71  Odo    thought again at 20/30t, wanted the same thing
+t= 72  Bram   thought again at 15/20t, wanted the same thing
+t= 72  Sable  thought again at 15/20t, wanted the same thing
+t= 74  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=78
+t= 74  Rook   began wait(ticks=4), 4 ticks
+t= 75  Wren   finished say(text=a fair bargain) -> say ok shout=true heard_by=2
+t= 75  Wren   began wait(ticks=24), 24 ticks
+t= 76  Odo    thought again at 25/30t, wanted the same thing
+t= 77  Bram   finished go_to(target=4) -> go_to ok at=(-426.100, 407.000) walked=9.9 steps=11
+t= 77  Bram   began wait(ticks=4), 4 ticks
+t= 77  Sable  finished go_to(target=3) -> go_to ok at=(-424.000, 407.000) walked=0.0 steps=0
+t= 77  Sable  began wait(ticks=4), 4 ticks
+t= 77  --     Bram and somebody of another band have met
+    snap-in around #3 at (-426.100, 1.811, 407.000) radius=24.0 span=30.0 storey=0 joined=2
+    snap-in board 15a5a4b9f14a7bfc cells=441 standable=440 holes=1 cliffs=6
+    snap-in #3 (-426.100, 407.000) -> cell (-143,135) centre (-427.500, 406.500) moved 1.487 rings=0
+    snap-in #4 (-424.000, 407.000) -> cell (-142,135) centre (-424.500, 406.500) moved 0.707 rings=0
+    board 15a5a4b9f14a7bfc cells=441 standable=440 holes=1 cliffs=6
+    dice seed=1607968660 swing=92..108
+    commanders 2
+      #1 commander owner=1 level=3 hp=38/38 def=0 power=0
+      #2 commander owner=2 level=3 hp=38/38 def=0 power=0
+    round 1 turn #1 at (-143,135) facing=north hp=38/38 def=0 sword + boots(4/4)
+t= 78  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=82
+t= 78  Rook   began wait(ticks=4), 4 ticks
+t= 78  Bram   interrupted (combat began), abandoned wait(ticks=4) 1/4t
+t= 78  Bram   began attack(target=4 item=common sword), 6 ticks
+t= 78  Sable  interrupted (combat began), abandoned wait(ticks=4) 1/4t
+t= 80  Wren   thought again at 5/24t, wanted the same thing
+t= 81  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=111
+t= 81  Odo    began wait(ticks=30), 30 ticks
+t= 82  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=86
+t= 82  Rook   began wait(ticks=4), 4 ticks
+t= 83  Bram   thought again at 5/6t, wanted the same thing
+t= 84  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=7
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=5 x150 swing=105 flank def=0 dealt=7 hp=31/38
+      face #1 east
+    round 1 turn #2 at (-142,135) facing=north hp=31/38 def=0 spear + boots(4/4)
+t= 85  Wren   thought again at 10/24t, wanted the same thing
+t= 85  Sable  began attack(target=3 item=common spear), 6 ticks
+t= 86  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=90
+t= 86  Rook   began wait(ticks=4), 4 ticks
+t= 86  Odo    thought again at 5/30t, wanted the same thing
+t= 90  Wren   thought again at 15/24t, wanted the same thing
+t= 90  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=94
+t= 90  Rook   began wait(ticks=4), 4 ticks
+t= 90  Sable  thought again at 5/6t, wanted the same thing
+t= 91  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+t= 91  Odo    thought again at 10/30t, wanted the same thing
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=101 front def=0 dealt=12 hp=26/38
+      face #2 west
+    round 2 turn #1 at (-143,135) facing=east hp=26/38 def=0 sword + boots(4/4)
+t= 92  Bram   began attack(target=4 item=common sword), 6 ticks
+t= 94  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=98
+t= 94  Rook   began wait(ticks=4), 4 ticks
+t= 95  Wren   thought again at 20/24t, wanted the same thing
+t= 96  Odo    thought again at 15/30t, wanted the same thing
+t= 97  Bram   thought again at 5/6t, wanted the same thing
+t= 98  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=102
+t= 98  Rook   began wait(ticks=4), 4 ticks
+t= 98  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=5
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=5 x100 swing=107 front def=0 dealt=5 hp=26/38
+      face #1 east
+    round 2 turn #2 at (-142,135) facing=west hp=26/38 def=0 spear + boots(4/4)
+t= 99  Wren   finished wait(ticks=24) -> wait ok ticks=24 until=123
+t= 99  Wren   began say(text=what was that noise?), 5 ticks
+t= 99  Sable  began attack(target=3 item=common spear), 6 ticks
+t=101  Odo    thought again at 20/30t, wanted the same thing
+t=102  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=106
+t=102  Rook   began wait(ticks=4), 4 ticks
+t=104  Wren   finished say(text=what was that noise?) -> say ok shout=true heard_by=2
+t=104  Wren   has not decided yet, and waits in the world
+t=104  Sable  thought again at 5/6t, wanted the same thing
+t=105  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=100 front def=0 dealt=12 hp=14/38
+      face #2 west
+    round 3 turn #1 at (-143,135) facing=east hp=14/38 def=0 sword + boots(4/4)
+t=106  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=110
+t=106  Rook   began wait(ticks=4), 4 ticks
+t=106  Bram   began attack(target=4 item=common sword), 6 ticks
+t=106  Odo    thought again at 25/30t, wanted the same thing
+t=110  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=114
+t=110  Rook   began wait(ticks=4), 4 ticks
+t=111  Bram   thought again at 5/6t, wanted the same thing
+t=111  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=141
+t=111  Odo    began wait(ticks=30), 30 ticks
+t=112  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=5
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=5 x100 swing=99 front def=0 dealt=5 hp=21/38
+      face #1 east
+    round 3 turn #2 at (-142,135) facing=west hp=21/38 def=0 spear + boots(4/4)
+t=113  Sable  began attack(target=3 item=common spear), 6 ticks
+t=114  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=118
+t=114  Rook   began wait(ticks=4), 4 ticks
+t=116  Odo    thought again at 5/30t, wanted the same thing
+t=118  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=122
+t=118  Rook   began wait(ticks=4), 4 ticks
+t=118  Sable  thought again at 5/6t, wanted the same thing
+t=119  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=103 front def=0 dealt=12 hp=2/38
+      face #2 west
+    round 4 turn #1 at (-143,135) facing=east hp=2/38 def=0 sword + boots(4/4)
+t=120  Bram   began attack(target=4 item=common sword), 6 ticks
+t=121  Odo    thought again at 10/30t, wanted the same thing
+t=122  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=126
+t=122  Rook   began wait(ticks=4), 4 ticks
+t=125  Bram   thought again at 5/6t, wanted the same thing
+t=126  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=130
+t=126  Rook   began wait(ticks=4), 4 ticks
+t=126  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=5
+t=126  Odo    thought again at 15/30t, wanted the same thing
+      attack #1 cut cells=3 hits=1
+        hit #1->#2 power=5 x100 swing=101 front def=0 dealt=5 hp=16/38
+      face #1 east
+    round 4 turn #2 at (-142,135) facing=west hp=16/38 def=0 spear + boots(4/4)
+t=127  Sable  began attack(target=3 item=common spear), 6 ticks
+t=130  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=134
+t=130  Rook   began wait(ticks=4), 4 ticks
+t=131  Odo    thought again at 20/30t, wanted the same thing
+t=132  Sable  thought again at 5/6t, wanted the same thing
+t=133  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=11
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=92 front def=0 dealt=11 hp=0/38 dead removed=1
+      commander #1 is out
+    over rounds=4 survivors=1 winner=#2
+t=133  --     the fight is over; real time again
+    over turns=8 rounds=4 ending=decided survivors=1 fallen=1
+    snap-out #3 fell
+    snap-out #4 cell (-142,135) -> (-424.500, 2.092, 406.500) back to cell (-142,135) hp=16/38
+t=134  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=138
+t=134  Rook   began wait(ticks=4), 4 ticks
+t=134  Sable  began wait(ticks=30), 30 ticks
+t=136  Odo    thought again at 25/30t, wanted the same thing
+t=138  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=142
+t=138  Rook   began wait(ticks=4), 4 ticks
+t=139  Sable  thought again at 5/30t, wanted the same thing
+t=141  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=171
+t=141  Odo    began wait(ticks=30), 30 ticks
+t=142  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=146
+t=142  Rook   began wait(ticks=4), 4 ticks
+t=144  Sable  thought again at 10/30t, wanted the same thing
+t=146  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=150
+t=146  Rook   began wait(ticks=4), 4 ticks
+t=146  Odo    thought again at 5/30t, wanted the same thing
+t=149  Sable  thought again at 15/30t, wanted the same thing
+t=150  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=154
+t=150  Rook   began wait(ticks=4), 4 ticks
+t=151  Odo    thought again at 10/30t, wanted the same thing
+t=153  Pell   began examine(target=6), 4 ticks
+t=154  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=158
+t=154  Rook   began wait(ticks=4), 4 ticks
+t=154  Sable  thought again at 20/30t, wanted the same thing
+t=156  Odo    thought again at 15/30t, wanted the same thing
+t=157  Pell   finished examine(target=6) -> examine refused: there is nothing with id 6
+t=157  Pell   has not decided yet, and waits in the world
+t=158  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=162
+t=158  Rook   began wait(ticks=4), 4 ticks
+t=159  Sable  thought again at 25/30t, wanted the same thing
+t=161  Odo    thought again at 20/30t, wanted the same thing
+t=162  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=166
+t=162  Rook   began wait(ticks=4), 4 ticks
+t=164  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=194
+t=164  Sable  began wait(ticks=30), 30 ticks
+t=166  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=170
+t=166  Rook   began wait(ticks=4), 4 ticks
+t=166  Odo    thought again at 25/30t, wanted the same thing
+t=169  Sable  thought again at 5/30t, wanted the same thing
+t=170  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=174
+t=170  Rook   began wait(ticks=4), 4 ticks
+t=171  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=201
+t=171  Odo    began wait(ticks=30), 30 ticks
+t=174  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=178
+t=174  Rook   began wait(ticks=4), 4 ticks
+t=174  Sable  thought again at 10/30t, wanted the same thing
+t=176  Odo    thought again at 5/30t, wanted the same thing
+t=178  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=182
+t=178  Rook   began wait(ticks=4), 4 ticks
+t=179  Sable  thought again at 15/30t, wanted the same thing
+t=181  Odo    thought again at 10/30t, wanted the same thing
+t=182  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=186
+t=182  Rook   began wait(ticks=4), 4 ticks
+t=184  Sable  thought again at 20/30t, wanted the same thing
+t=186  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=190
+t=186  Rook   began wait(ticks=4), 4 ticks
+t=186  Odo    thought again at 15/30t, wanted the same thing
+t=189  Sable  thought again at 25/30t, wanted the same thing
+t=190  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=194
+t=190  Rook   began wait(ticks=4), 4 ticks
+t=191  Odo    thought again at 20/30t, wanted the same thing
+t=194  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=198
+t=194  Rook   began wait(ticks=4), 4 ticks
+t=194  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=224
+t=194  Sable  began wait(ticks=30), 30 ticks
+t=196  Odo    thought again at 25/30t, wanted the same thing
+t=198  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=202
+t=198  Rook   began wait(ticks=4), 4 ticks
+t=199  Sable  thought again at 5/30t, wanted the same thing
+t=201  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=231
+t=201  Odo    began wait(ticks=30), 30 ticks
+t=202  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=206
+t=202  Rook   began wait(ticks=4), 4 ticks
+t=204  Sable  thought again at 10/30t, wanted the same thing
+t=206  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=210
+t=206  Rook   began wait(ticks=4), 4 ticks
+t=206  Odo    thought again at 5/30t, wanted the same thing
+t=209  Sable  thought again at 15/30t, wanted the same thing
+t=210  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=214
+t=210  Rook   began wait(ticks=4), 4 ticks
+t=211  Odo    thought again at 10/30t, wanted the same thing
+t=214  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=218
+t=214  Rook   began wait(ticks=4), 4 ticks
+t=214  Sable  thought again at 20/30t, wanted the same thing
+t=216  Odo    thought again at 15/30t, wanted the same thing
+t=218  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=222
+t=218  Rook   began wait(ticks=4), 4 ticks
+t=219  Sable  thought again at 25/30t, wanted the same thing
+t=221  Odo    thought again at 20/30t, wanted the same thing
+t=222  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=226
+t=222  Rook   began wait(ticks=4), 4 ticks
+t=224  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=254
+t=224  Sable  began wait(ticks=30), 30 ticks
+t=226  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=230
+t=226  Rook   began wait(ticks=4), 4 ticks
+t=226  Odo    thought again at 25/30t, wanted the same thing
+t=229  Sable  thought again at 5/30t, wanted the same thing
+t=230  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=234
+t=230  Rook   began wait(ticks=4), 4 ticks
+t=231  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=261
+t=231  Odo    began wait(ticks=30), 30 ticks
+t=234  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=238
+t=234  Rook   began wait(ticks=4), 4 ticks
+t=234  Sable  thought again at 10/30t, wanted the same thing
+t=236  Odo    thought again at 5/30t, wanted the same thing
+t=238  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=242
+t=238  Rook   began wait(ticks=4), 4 ticks
+t=239  Sable  thought again at 15/30t, wanted the same thing
+t=241  Odo    thought again at 10/30t, wanted the same thing
+t=242  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=246
+t=242  Rook   began wait(ticks=4), 4 ticks
+t=244  Sable  thought again at 20/30t, wanted the same thing
+t=246  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=250
+t=246  Rook   began wait(ticks=4), 4 ticks
+t=246  Odo    thought again at 15/30t, wanted the same thing
+t=249  Sable  thought again at 25/30t, wanted the same thing
+t=250  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=254
+t=250  Rook   began wait(ticks=4), 4 ticks
+t=251  Odo    thought again at 20/30t, wanted the same thing
+t=254  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=258
+t=254  Rook   began wait(ticks=4), 4 ticks
+t=254  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=284
+t=254  Sable  began wait(ticks=30), 30 ticks
+t=256  Odo    thought again at 25/30t, wanted the same thing
+t=258  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=262
+t=258  Rook   began wait(ticks=4), 4 ticks
+t=259  Sable  thought again at 5/30t, wanted the same thing
+t=261  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=291
+t=261  Odo    began wait(ticks=30), 30 ticks
+t=262  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=266
+t=262  Rook   began wait(ticks=4), 4 ticks
+t=264  Sable  thought again at 10/30t, wanted the same thing
+t=266  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=270
+t=266  Rook   began wait(ticks=4), 4 ticks
+t=266  Odo    thought again at 5/30t, wanted the same thing
+t=269  Sable  thought again at 15/30t, wanted the same thing
+t=270  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=274
+t=270  Rook   began wait(ticks=4), 4 ticks
+t=271  Odo    thought again at 10/30t, wanted the same thing
+t=273  Pell   began say(text=I heard it too — it came from beyond the drop. Stay close. target=1), 5 ticks
+t=274  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=278
+t=274  Rook   began wait(ticks=4), 4 ticks
+t=274  Sable  thought again at 20/30t, wanted the same thing
+t=276  Odo    thought again at 15/30t, wanted the same thing
+t=278  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=282
+t=278  Rook   began wait(ticks=4), 4 ticks
+t=278  Pell   finished say(text=I heard it too — it came from beyond the drop. Stay close. target=1) -> say ok shout=false heard_by=1
+t=278  Pell   has not decided yet, and waits in the world
+t=279  Sable  thought again at 25/30t, wanted the same thing
+t=281  Odo    thought again at 20/30t, wanted the same thing
+t=282  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=286
+t=282  Rook   began wait(ticks=4), 4 ticks
+t=284  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=314
+t=284  Sable  began wait(ticks=30), 30 ticks
+t=286  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=290
+t=286  Rook   began wait(ticks=4), 4 ticks
+t=286  Odo    thought again at 25/30t, wanted the same thing
+t=289  Sable  thought again at 5/30t, wanted the same thing
+t=290  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=294
+t=290  Rook   began wait(ticks=4), 4 ticks
+t=291  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=321
+t=291  Odo    began wait(ticks=30), 30 ticks
+t=294  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=298
+t=294  Rook   began wait(ticks=4), 4 ticks
+t=294  Sable  thought again at 10/30t, wanted the same thing
+t=296  Odo    thought again at 5/30t, wanted the same thing
+t=298  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=302
+t=298  Rook   began wait(ticks=4), 4 ticks
+t=299  Sable  thought again at 15/30t, wanted the same thing
+t=301  Odo    thought again at 10/30t, wanted the same thing
+t=302  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=306
+t=302  Rook   began wait(ticks=4), 4 ticks
+t=304  Sable  thought again at 20/30t, wanted the same thing
+t=306  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=310
+t=306  Rook   began wait(ticks=4), 4 ticks
+t=306  Odo    thought again at 15/30t, wanted the same thing
+t=309  Sable  thought again at 25/30t, wanted the same thing
+t=310  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=314
+t=310  Rook   began wait(ticks=4), 4 ticks
+t=311  Odo    thought again at 20/30t, wanted the same thing
+t=314  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=318
+t=314  Rook   began wait(ticks=4), 4 ticks
+t=314  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=344
+t=314  Sable  began wait(ticks=30), 30 ticks
+t=316  Odo    thought again at 25/30t, wanted the same thing
+t=318  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=322
+t=318  Rook   began wait(ticks=4), 4 ticks
+t=319  Sable  thought again at 5/30t, wanted the same thing
+t=321  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=351
+t=321  Odo    began wait(ticks=30), 30 ticks
+t=322  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=326
+t=322  Rook   began wait(ticks=4), 4 ticks
+t=324  Sable  thought again at 10/30t, wanted the same thing
+t=326  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=330
+t=326  Rook   began wait(ticks=4), 4 ticks
+t=326  Odo    thought again at 5/30t, wanted the same thing
+t=329  Sable  thought again at 15/30t, wanted the same thing
+t=330  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=334
+t=330  Rook   began wait(ticks=4), 4 ticks
+t=331  Odo    thought again at 10/30t, wanted the same thing
+t=334  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=338
+t=334  Rook   began wait(ticks=4), 4 ticks
+t=334  Sable  thought again at 20/30t, wanted the same thing
+t=336  Odo    thought again at 15/30t, wanted the same thing
+t=338  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=342
+t=338  Rook   began wait(ticks=4), 4 ticks
+t=339  Sable  thought again at 25/30t, wanted the same thing
+t=341  Odo    thought again at 20/30t, wanted the same thing
+t=342  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=346
+t=342  Rook   began wait(ticks=4), 4 ticks
+t=344  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=374
+t=344  Sable  began wait(ticks=30), 30 ticks
+t=346  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=350
+t=346  Rook   began wait(ticks=4), 4 ticks
+t=346  Odo    thought again at 25/30t, wanted the same thing
+t=349  Sable  thought again at 5/30t, wanted the same thing
+t=350  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=354
+t=350  Rook   began wait(ticks=4), 4 ticks
+t=351  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=381
+t=351  Odo    began wait(ticks=30), 30 ticks
+t=354  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=358
+t=354  Rook   began wait(ticks=4), 4 ticks
+t=354  Sable  thought again at 10/30t, wanted the same thing
+t=356  Odo    thought again at 5/30t, wanted the same thing
+t=358  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=362
+t=358  Rook   began wait(ticks=4), 4 ticks
+t=359  Sable  thought again at 15/30t, wanted the same thing
+t=361  Odo    thought again at 10/30t, wanted the same thing
+t=362  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=366
+t=362  Rook   began wait(ticks=4), 4 ticks
+t=364  Sable  thought again at 20/30t, wanted the same thing
+t=366  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=370
+t=366  Rook   began wait(ticks=4), 4 ticks
+t=366  Odo    thought again at 15/30t, wanted the same thing
+t=369  Sable  thought again at 25/30t, wanted the same thing
+t=370  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=374
+t=370  Rook   began wait(ticks=4), 4 ticks
+t=371  Odo    thought again at 20/30t, wanted the same thing
+t=374  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=378
+t=374  Rook   began wait(ticks=4), 4 ticks
+t=374  Sable  finished wait(ticks=30) -> wait ok ticks=30 until=404
+t=374  Sable  began wait(ticks=30), 30 ticks
+t=376  Odo    thought again at 25/30t, wanted the same thing
+t=378  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=382
+t=378  Rook   began wait(ticks=4), 4 ticks
+t=379  Sable  thought again at 5/30t, wanted the same thing
+t=381  Odo    finished wait(ticks=30) -> wait ok ticks=30 until=411
+t=381  Odo    began wait(ticks=30), 30 ticks
+t=382  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=386
+t=382  Rook   began wait(ticks=4), 4 ticks
+t=384  Sable  thought again at 10/30t, wanted the same thing
+t=386  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=390
+t=386  Rook   began wait(ticks=4), 4 ticks
+t=386  Odo    thought again at 5/30t, wanted the same thing
+t=389  Sable  thought again at 15/30t, wanted the same thing
+t=390  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=394
+t=390  Rook   began wait(ticks=4), 4 ticks
+t=391  Odo    thought again at 10/30t, wanted the same thing
+t=394  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=398
+t=394  Rook   began wait(ticks=4), 4 ticks
+t=394  Sable  thought again at 20/30t, wanted the same thing
+t=396  Odo    thought again at 15/30t, wanted the same thing
+t=398  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=402
+t=398  Rook   began wait(ticks=4), 4 ticks
+t=399  Sable  thought again at 25/30t, wanted the same thing
+
+Pell's turns -- 2 asked, 2 chose an action
+  turn  asked  answered  observed          the model said                   which read back as               what the engine answered
+     1      1       153  c37b1498904e5803  examine target=#6                examine(target=6)                examine refused: there is nothing with id 6
+        saw: 2 nearby Rook #2 6.3 seen Wren #1 11.7 seen | 0 heard | 1 about pile#6 7.8 open | ground 7x7, 0 recent
+     2    157       273  a930169111c28976  say text=I heard it too — it ca… say(text=I heard it too — it ca… say ok shout=false heard_by=1
+        saw: 2 nearby Wren #1 6.0 seen Rook #2 6.3 seen | 2 heard | 0 about | ground 7x7, 0 recent
+
+nobody waits on Pell
+  turn  waited  ticks each of the others was serviced for across that wait  actions they resolved in it
+        (a character that has fallen out of the world is serviced no further, and shows 0)
+     1     152  Wren 152 Rook 152 Bram 131 Sable 152 Odo 152                90
+     2     116  Wren 116 Rook 116 Bram 0 Sable 116 Odo 116                  37
+
+what the first run of this file measured, measured again
+  turns                      2
+  lines of speech chosen     1, 1 of them different
+  the most-repeated line     1 time: "I heard it too — it came from beyond the drop. Stay close."
+  turns asked with the same observation as the one before  0
+  turns that chose a position 0
+
+after 400 ticks
+    tick 400 actors=5 objects=0 offers=0
+      #1 commander band=1 at (-476.100, -2.373, 416.000) hp=32/32 walking
+        carries money=18 carried=[common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [brass lantern:4] brass lantern] worn=[]
+      #2 commander band=1 at (-478.000, -2.352, 416.000) hp=32/32 walking
+        carries money=20 carried=[] worn=[]
+      #4 commander band=4 at (-424.500, 2.092, 406.500) hp=16/38 walking
+        carries money=0 carried=[common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots | common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear] worn=[boots=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots hand=common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear]
+      #5 commander band=5 at (-484.000, -0.816, 514.000) hp=26/26 walking
+        carries money=0 carried=[] worn=[]
+      #7 commander band=1 at (-476.000, -2.195, 422.000) hp=32/32 walking
+        carries money=9 carried=[] worn=[]
+      said #1 to #2 "good morning" heard by [2]
+      said #2 to #1 "what will it be?" heard by [1]
+      said #1 aloud "a fair bargain" heard by [2, 7]
+      said #1 aloud "what was that noise?" heard by [2, 7]
+      said #7 to #1 "I heard it too — it came from beyond the drop. Stay close." heard by [1]
+  reviews=137 changes=0 finished=170 attacked=0 combat began=2 spoken to=2
+  fingerprint c30ab5da63f3cc41
+
+the first question in full -- 2357 characters, digest e7193836368f4ea2
+
+    You are Pell, one character in a world of many.
+    
+    Choose the one thing your character does next.
+    
+    The actions, and the keys each one takes:
+      go_to          target=#7 or (12.5, -4.0)
+      jump           target=(12.5, -4.0)
+      attack         target=#7 item=words
+      say            text=words target=#7 (may be left out)
+      trade_propose  target=#7 give=[one name, another name] (may be left out) give_money=a whole number (may be left out) want=[one name, another name] (may be left out) want_money=a whole number (may be left out)
+      trade_accept   target=#7
+      trade_deny     target=#7
+      pick_up        item=words target=#7 (may be left out)
+      drop           item=words target=#7 (may be left out)
+      examine        target=#7 or a name
+      interact       target=#7 item=words (may be left out)
+      wait           ticks=a whole number
+    
+    A key marked (may be left out) can be left out.
+    Values are written like this: id is #7; position is (12.5, -4.0); id-or-position is #7 or (12.5, -4.0); id-or-name is #7 or a name; text is words; count is a whole number; names is [one name, another name].
+    
+    What you can see from where you are standing:
+    
+    observation for #7 Pell
+      you        commander level 2 status 2 hp 32/32 at (-476.000, -2.195, 422.000) facing 0.00 in the world
+      carrying   nothing (9 coins)
+      wearing    nothing
+      entities   2 within 40.0
+        #2   commander  Rook     (-2.0, -0.2, -6.0)   6.32 seen   doing wait           health unhurt     wearing -
+        #1   commander  Wren     (-10.0, -0.3, -6.0)  11.66 seen   doing say Rook       health unhurt     wearing -
+      objects    1 within 40.0
+        #6   pile       pile     (+5.0, -0.1, -6.0)   7.81 seen   open holds 1, 0 coins
+      ground     7x7 cells of 3.0, north up, east right; each mark is followed by how far that cell stands above you
+      legend     @ where you stand; ~ a hole with nothing to stand on; x a building; # a face of ground too tall to climb; ! the edge of a drop; . ground to walk on; ? not read
+        .-1  .0   .0   .0   .0   .0   .1  
+        .0   .0   .0   .0   .0   .0   .0  
+        !0   .0   .0   .0   .0   .0   .0  
+        ~-   !-1  .0   @0   .0   .0   .0  
+        ~-   ~-   !-1  !-1  .-1  .-1  .-1 
+        ~-   ~-   ~-   ~-   !-2  !-2  .-2 
+        !-1  !-2  ~-   ~-   ~-   ~-   !-3 
+      heard      0 lines of speech, oldest first
+      recently   0 changes
+    
+    Answer with one line: the action, then its keys. Nothing else.
+waited for 1 call still in flight when the run ended

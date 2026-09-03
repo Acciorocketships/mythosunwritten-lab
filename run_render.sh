@@ -5,6 +5,7 @@
 #   ./run_render.sh --seed 7
 #
 #   ./run_render.sh --sheet --scenario encounter   # ...with the character sheet
+#   ./run_render.sh --readout --scenario encounter # ...with the combat readout
 #
 # Needs a display. Escape quits, Space pauses, R restarts on the next seed.
 # --no-model-tint draws the pack models in the colours they ship in, which is

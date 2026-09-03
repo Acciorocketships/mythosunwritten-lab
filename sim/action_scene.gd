@@ -92,6 +92,14 @@ var actors: Array[Combatant] = []
 ## Everything else in the world, in the order it was added.
 var objects: Array[WorldObject] = []
 
+## Every ability check the world has raised, in the order it raised them.
+##
+## The world raises one and goes on turning. Nothing here settles a check: this
+## is a queue with the raised checks left in it, and whatever is running the world
+## advances them. A scene nobody advances simply carries a raised check that never
+## got an answer, which is the honest state of affairs and not an error.
+var raised: Array[AbilityCheck] = []
+
 ## The fight under way, or null.
 var fight: Encounter = null
 
@@ -134,6 +142,39 @@ var refusals: Array[Dictionary] = []
 ## "shout": bool, "heard_by": PackedInt32Array}`.
 var said: Array[Dictionary] = []
 
+## Every trade the engine has actually honoured, in order:
+## `{"from": id, "to": id, "tick": int, "gave": int, "gave_money": int,
+## "back": int, "back_money": int}`. Written on the one path a trade goes
+## through and by nothing else, so it is the world's own account of a trade
+## having happened rather than a second one kept beside it.
+##
+## The four counts say what was actually in it, which is what makes a gift
+## readable off this record: a gift is section 2.1's "trade with nothing in
+## return", so it is an honoured trade whose other half was empty, and it is not
+## a second kind of event kept somewhere else.
+##
+## It is here for the same reason `actions_taken` is: something outside the
+## engine needs to be able to ask what has actually happened without holding
+## whatever made it happen. What asks is `GoalCheck`, which answers a character's
+## "have traded with #2" out of this and never out of the character.
+var trades: Array[Dictionary] = []
+
+## Every blow the engine has landed through an `attack`, in order:
+## `{"from": id, "to": id, "tick": int, "dealt": int, "out_of": int}`. The
+## world's own record of a blow struck, written by `ActionEngine` on the one path
+## an attack takes.
+var blows: Array[Dictionary] = []
+
+## Every relationship in this world: section 10's graph of edges between
+## entities, held here because it is the world's and not any character's.
+##
+## Nothing in this file writes to it. What moves an edge is a happening the
+## engine has already written down above -- a line heard, a trade honoured, a
+## blow landed -- folded in by `sim/character_upkeep.gd`, the path every
+## character passes whoever is deciding for it. See `sim/relationship_graph.gd`
+## for which field each happening moves and why.
+var relationships: RelationshipGraph = RelationshipGraph.new()
+
 ## Which tick each character is idle until, by id: the engine's own record of a
 ## `wait` it has just resolved. The control loop does not read it -- it counts a
 ## wait's ticks itself, out of the same catalogue column every other action's
@@ -157,6 +198,7 @@ var actions_taken: Dictionary = {}
 
 # One counter over everything in the scene.
 var _next_id: int = 1
+var _next_check: int = 1
 
 
 ## An empty scene, on some ground or on none.
@@ -199,6 +241,23 @@ func remove_object(thing: WorldObject) -> bool:
 		return false
 	objects.remove_at(at)
 	return true
+
+
+## Raise an ability check on the world, because something in it warranted one.
+##
+## `ActionEngine`'s to call, from the one hook named in `AbilityCheck.HOOK`, and
+## the whole of what the world does about a check: it writes down that one was
+## attempted and returns. What class it is, what it is rolled against, whether it
+## passes and what follows are all somebody else's, later.
+func raise_check(
+	actor: Combatant, thing: WorldObject, offered: String
+) -> AbilityCheck:
+	var check := AbilityCheck.raised_by(
+		_next_check, tick, actor.id, name_of(actor),
+		thing.id, thing.object_name, offered)
+	_next_check += 1
+	raised.append(check)
+	return check
 
 
 # --- Finding things in it -------------------------------------------------
@@ -493,6 +552,34 @@ func note_action(id: int) -> void:
 	actions_taken[id] = actions_of(id) + 1
 
 
+## Write down one trade the engine has honoured. `ActionEngine`'s to call, on the
+## one path a trade goes through.
+func note_trade(
+	from_id: int, to_id: int,
+	gave: int = 0, gave_money: int = 0, back: int = 0, back_money: int = 0
+) -> void:
+	trades.append({
+		"from": from_id, "to": to_id, "tick": tick,
+		"gave": gave, "gave_money": gave_money,
+		"back": back, "back_money": back_money,
+	})
+
+
+## Write down one blow the engine has landed: who swung, who was hit, how much it
+## took and how much that character has at full. `ActionEngine`'s to call, on the
+## one path an attack takes.
+##
+## Here for the same reason `trades` is: the world needs to be able to say what
+## has happened in it without holding whatever made it happen. What reads it is
+## `CharacterUpkeep`, folding it into the relationship graph; nothing else does,
+## and nothing here decides what a blow *means*.
+func note_blow(from_id: int, to_id: int, dealt: int, out_of: int) -> void:
+	blows.append({
+		"from": from_id, "to": to_id, "tick": tick,
+		"dealt": dealt, "out_of": out_of,
+	})
+
+
 # --- Description ----------------------------------------------------------
 
 
@@ -511,6 +598,8 @@ func lines() -> PackedStringArray:
 			written.append("    carries %s" % pack.fingerprint())
 	for thing in objects:
 		written.append("  " + thing.line())
+	for check in raised:
+		written.append("  " + check.line())
 	for spoken in said:
 		written.append("  said #%d %s \"%s\" heard by %s" % [
 			spoken["speaker"],
@@ -562,4 +651,11 @@ func fingerprint() -> String:
 		])
 	for id in idle_until:
 		parts.append("idle %d until %d" % [id, idle_until[id]])
+	parts.append("relationships %s" % relationships.fingerprint())
+	for check in raised:
+		parts.append("check %d %s %s %s %d+%d vs %d" % [
+			check.id, check.context, check.state,
+			"passed" if check.passed else "failed",
+			check.score, check.roll, check.difficulty,
+		])
 	return "|".join(parts).sha256_text().substr(0, 16)

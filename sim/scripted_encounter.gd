@@ -150,7 +150,8 @@ static func muster(world: SimWorld) -> void:
 	var green := roster.add(Combatant.commander_at(
 		WHERE.x - APPROACH, WHERE.y, EAST, WALK, BAND_LEVEL, AssetTags.KNIGHT))
 	green.piece.equip(Armour.boots())
-	_as_character(green, GREEN_NAME).wield(Weapon.held(Weapon.sword(), BAND_LEVEL))
+	(green.piece as Commander).wield(Weapon.held(Weapon.sword(), BAND_LEVEL))
+	_name_and_roll(green, GREEN_NAME)
 	roster.add(Combatant.minion_at(
 		Minion.CAT, green.id,
 		WHERE.x - APPROACH - 4.0, WHERE.y - 5.0, EAST, WALK, BAND_LEVEL))
@@ -161,7 +162,8 @@ static func muster(world: SimWorld) -> void:
 	var amber := roster.add(Combatant.commander_at(
 		WHERE.x + APPROACH, WHERE.y, WEST, WALK, BAND_LEVEL, AssetTags.BARBARIAN))
 	amber.piece.equip(Armour.boots())
-	_as_character(amber, AMBER_NAME).wield(Weapon.held(Weapon.spear(), BAND_LEVEL))
+	(amber.piece as Commander).wield(Weapon.held(Weapon.spear(), BAND_LEVEL))
+	_name_and_roll(amber, AMBER_NAME)
 	roster.add(Combatant.minion_at(
 		Minion.ENT, amber.id,
 		WHERE.x + APPROACH + 4.0, WHERE.y - 5.0, WEST, WALK, BAND_LEVEL))
@@ -172,8 +174,8 @@ static func muster(world: SimWorld) -> void:
 	var distant := roster.add(Combatant.commander_at(
 		WHERE.x, WHERE.y + BYSTANDER_AWAY, AWAY, WALK, BYSTANDER_LEVEL, AssetTags.MAGE))
 	distant.piece.equip(Armour.boots())
-	_as_character(distant, DISTANT_NAME).wield(
-		Weapon.held(Weapon.dagger(), BYSTANDER_LEVEL))
+	(distant.piece as Commander).wield(Weapon.held(Weapon.dagger(), BYSTANDER_LEVEL))
+	_name_and_roll(distant, DISTANT_NAME)
 	roster.add(Combatant.minion_at(
 		Minion.TOADSTOOL, distant.id,
 		WHERE.x + 4.0, WHERE.y + BYSTANDER_AWAY, AWAY, WALK, BYSTANDER_LEVEL))
@@ -209,7 +211,8 @@ static func muster_on_island(world: SimWorld) -> FloatingIsland:
 	var green := roster.add(Combatant.commander_at(
 		middle_x - ISLAND_APPROACH, middle_z, EAST, WALK, BAND_LEVEL, AssetTags.KNIGHT))
 	green.piece.equip(Armour.boots())
-	_as_character(green, GREEN_NAME).wield(Weapon.held(Weapon.sword(), BAND_LEVEL))
+	(green.piece as Commander).wield(Weapon.held(Weapon.sword(), BAND_LEVEL))
+	_name_and_roll(green, GREEN_NAME)
 	roster.add(Combatant.minion_at(
 		Minion.CAT, green.id,
 		middle_x - ISLAND_APPROACH, middle_z - 4.0, EAST, WALK, BAND_LEVEL))
@@ -217,7 +220,8 @@ static func muster_on_island(world: SimWorld) -> FloatingIsland:
 	var amber := roster.add(Combatant.commander_at(
 		middle_x + ISLAND_APPROACH, middle_z, WEST, WALK, BAND_LEVEL, AssetTags.BARBARIAN))
 	amber.piece.equip(Armour.boots())
-	_as_character(amber, AMBER_NAME).wield(Weapon.held(Weapon.spear(), BAND_LEVEL))
+	(amber.piece as Commander).wield(Weapon.held(Weapon.spear(), BAND_LEVEL))
+	_name_and_roll(amber, AMBER_NAME)
 	roster.add(Combatant.minion_at(
 		Minion.FROG, amber.id,
 		middle_x + ISLAND_APPROACH, middle_z - 4.0, WEST, WALK, BAND_LEVEL))
@@ -230,19 +234,16 @@ static func muster_on_island(world: SimWorld) -> FloatingIsland:
 	return island
 
 
-# The character behind a commander this scenario stood up: named, and with its
-# six ability scores rolled.
+# Name a commander this scenario stood up, and roll its six ability scores.
 #
-# Both are on the sheet the commander was made with, so there is nothing to
-# adopt and nothing to copy -- `Combatant.commander_at` reaches `Commander.make`,
-# which starts a `Character`, and this writes the two things that file has no way
-# to know. It hands the commander back so the caller can go straight on to arming
-# it, which is what every call site does.
-static func _as_character(one: Combatant, called: String) -> Commander:
-	var commander := one.piece as Commander
-	commander.sheet.character_name = called
-	commander.sheet.record_scores(ROLL)
-	return commander
+# Both go on the sheet the commander was made with, so there is nothing to adopt
+# and nothing to copy: `Combatant.commander_at` reaches `Commander.make`, which
+# starts a `Character` with a blank name and no score recorded on it, and this
+# writes the two things that file has no way to know.
+static func _name_and_roll(one: Combatant, called: String) -> void:
+	var sheet := (one.piece as Commander).sheet
+	sheet.character_name = called
+	sheet.record_scores(ROLL)
 
 
 ## Run the whole cycle and hand back the transcript.

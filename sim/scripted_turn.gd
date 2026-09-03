@@ -236,6 +236,8 @@ static func play() -> PackedStringArray:
 	written.append("")
 	written.append_array(both_blows_land())
 	written.append("")
+	written.append_array(relationship_lines())
+	written.append("")
 	written.append_array(a_turn_nobody_answered())
 	written.append("")
 	written.append_array(what_the_board_waits_for())

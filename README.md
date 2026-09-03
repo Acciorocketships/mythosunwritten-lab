@@ -861,6 +861,508 @@ the run where both answer, because turns nobody answered cost a single tick each
 The rule, the two rejected alternatives and what each was rejected on, is in
 [reports/turn-action-seam.md](reports/turn-action-seam.md).
 
+## What a character can see
+
+`./run_observation.sh` assembles section 10's **local, structured observation**
+for a character: the packet a language model will later be handed so it can pick
+an atomic action. It is built and tested headless with no language model, no
+prompt, no network call and no new dependency — producing what a model reads must
+not itself require one.
+
+**The terrain in it is the combat lattice, not a third grid.** Section 13 listed
+the representation as open and said it had to converge with the board a fight is
+played on. It does, by *being* it: the observation carries a `CombatBoard` built
+by the world's own `CombatBoardBuilder`, and the suite builds a board for a fight
+at the same place and compares fingerprints. Line of sight is traced across that
+same board, cell by cell, stopped by exactly what stops a line there.
+
+**Every field is present with a value or absent with a stated reason.** A name
+appears only if this character knows it, an action only if it is in sight, health
+and equipment only if they are visible:
+
+```
+    #4   commander  ?        (+12.0, +1.2, +0.0)  12.00 seen   doing go_to you      health unhurt     wearing boots=common boots hand=common spear
+         not shown: name (this character has not met it)
+```
+
+**It is local.** No weather, no clock, no tick, no seed, no region summary and
+nobody further off than 40 world units. And no *player*: section 10 writes the
+entity type as "NPC/player/monster/object", and that distinction cannot be made
+from this side and must not be — `Character` has no field saying who is driving
+it, so an observation is available to a character a person drives on exactly the
+terms it is available to one a program drives.
+
+**The recent changes are a diff, not a report.** `ObservationTrail` snapshots each
+character once a tick and writes the difference in words — "moved 0.9m
+north-east", "gained brass lantern", "spent 12 coins". Nothing under `sim/` was
+changed to make that work and nothing reports to it, which is also why the wording
+never claims to know *how*: an item that arrives says `gained`, not `picked up`,
+because a trade and a pick-up look the same from outside.
+
+**It can hear.** The packet carries the last six lines of speech the character
+could hear, oldest first, saying who spoke, what was said, and whether it was
+said to this character or shouted — its own words among them, written as `you`,
+so a character can tell it has already spoken. Who heard a line is not decided
+here: `ActionEngine._say` already works that out and writes it into
+`ActionScene.said` as `heard_by`, and the observation filters by that list and
+nothing else.
+
+```
+  heard      3 lines of speech, oldest first
+    you said to #2 "good morning"
+    #2 Rook said to you "what will it be?"
+    you shouted "a fair bargain"
+```
+
+**The window of ground says what its marks mean.** A legend goes with it, in the
+packet, generated from the same table the marks come from: `@ where you stand; ~
+a hole with nothing to stand on; x a building; # a face of ground too tall to
+climb; ! the edge of a drop; . ground to walk on; ? not read`. It says what a
+mark *is* and never what may be done about it.
+
+**Measured, because it has to fit in a context.** Fifteen observations off the
+shipped scenario at seed 1234, at ticks 1, 66 and 80: **a typical one is 1,113
+characters and 51 entries**, 859 at the smallest and 1,225 at the largest — 250
+characters more than before the legend and the speech, which is what those two
+cost. Its 7×7 window of ground with its legend is 558 of those characters;
+printing the whole 28×28 board the observation was read from would cost 4,608,
+for cells nobody is going to step on this turn. Two processes on one seed print
+identical bytes.
+
+```
+./run_observation.sh            # fifteen packets, and how big each one came to
+./run_observation_suite.sh      # just the observation suite
+```
+
+The whole of it, with the tables and the ground picture, is in
+[reports/observation.md](reports/observation.md).
+
+## Every non-player character deciding through a language model
+
+`./run_agent.sh` plays the same seeded run as `./run_scenario.sh`, with one more
+character standing in the market and with **five of the six deciding through a
+language model**. Each has its own `ModelMind` on `Character.decide`, put there
+the same way a person's written-down plan is; the same control loop drives all
+six, and `ActionEngine` resolves what any of them chooses. Six rows of one shape,
+differing in one column:
+
+```
+Wren  #1 driven by a person   (a list of choices, written down in advance)
+Rook  #2  Bram #3  Sable #4  Odo #5  Pell #7   driven by a model
+```
+
+Nothing in the run is scripted any more except where people stand. The four
+written rules the earlier version had — a stall to mind, a quarrel from tick 55,
+a walk away — are gone, and what happens after tick 0 is what five models chose.
+In the shipped run Pell walks to Rook and greets it; Wren, the one character a
+person drives, takes the brass lantern out of the market pile at tick 38 and
+offers Rook twelve coins for its silk cloak; and Bram and Sable introduce
+themselves, agree to split a pile of goods, and walk within nine units of each
+other, at which point the tactical board snaps in under them because that is the
+engagement rule and not anybody's decision. Three of the models then spend the
+rest of the run trying to walk to a pile that is no longer there — *"go_to
+refused: there is nothing with id 6"*, the engine's own sentence, because Wren
+emptied it and nothing told them.
+
+**The model chooses and never resolves.** Its prompt is the twelve actions of the
+one list, read out of `ActionCatalog.ROWS`, the observation packet above, what the
+character remembers, and what it is after — and no rule about distance, reach,
+cost, damage or possibility. The suite searches a real prompt for all of those and
+finds none. Fourteen of the run's fifty-five resolutions are refusals, in the
+engine's own words, and they read the same for the person as for a model.
+
+**Several answers are outstanding at once, and none of them queue.** 57 of the
+run's 160 ticks had more than one question pending, five at the most. Across every
+wait each of the other five characters was serviced for exactly the wait's ticks.
+The longest span, grouped by how many other answers were outstanding across it, is
+`0:3 1:4 2:4 3:4 4:3` — a channel serving questions in turn would make one put
+with five others pending take about eighteen ticks.
+
+**What it costs, which is the number the milestone turns on.** 59 model calls over
+160 ticks — 0.369 a tick. `ControlLoop` steps the world at twenty ticks a second,
+so an hour of play is 72,000 ticks and comes to **26,550 calls an hour for five
+characters, about 5,310 each**. Section 12's distance-based back-off and
+speculative next action are still deferred: at this cast size the run is
+recordable and replayable without either.
+
+**Being asked again mid-action is not a new call.** The loop asks a decision
+function again every five ticks while an action runs. Of 309 asks across the five
+minds, 59 put a question (19.1%): 82 were answered out of the choice the mind was
+already holding — section 2.2's bias toward continuing — and 168 were polls of a
+question already outstanding. 77 mid-action re-evaluations against 59 calls.
+
+**No credential, and no network, anywhere but one command.** `./run_tests.sh`,
+`./run_agent.sh`, `./run_lesson.sh`, `./run_goal.sh`, `./run_check.sh` and
+`./run_world.sh` replay
+a recorded exchange, so two processes print the same bytes. The 76 replies of the
+first three, the 3 of the difficulty-class run and the 8 of the orchestrator run,
+were put to
+`anthropic/claude-fable-5` once and are checked in verbatim. Nine of the character
+runs' questions came back empty on the draw that recorded them — the provider
+declined them under its own content policy — and the run replays that as the model
+having said nothing readable: the question is closed and paid for, the character
+stands where it is, and it is asked again on its next tick. A replayed reply is
+matched to its question by the prompt's fingerprint rather than by position,
+because a recording is written in the order answers *arrive* and a character in a
+fight is not serviced every tick; and an answer the provider declines closes its
+question rather than stranding the character, which at seventy questions a pass is
+the difference between a recording that can be made and one that cannot.
+
+**The simulation itself calls nothing, and holds nothing a model said.** Nothing
+under `sim/` may read a clock — every duration in the world is a count of ticks —
+and nothing under `sim/` may name what sort of character it is holding, a scan
+that reads string literals as code. The connection, the worker thread, the timeout
+and the credential live in `net/model_call.gd`, and the recorded replies in
+`net/model_recording.gd`, outside the simulation; what crosses the line is a
+`Callable` that is asked a question, a `Callable` that either has an answer or has
+not, and a dictionary of replies handed in.
+
+The whole of it, with the tables and the transcript, is in
+[reports/agent-cast.md](reports/agent-cast.md); the first, one-character step is
+[reports/agent.md](reports/agent.md).
+
+```
+./run_agent.sh                  # six characters, five of them models, and the tables
+./run_agent_suite.sh            # just this suite
+OPENROUTER_API_KEY=... ./run_record.sh --live          # remake the whole recording
+OPENROUTER_API_KEY=... ./run_record.sh --live --cast   # remake the three character-run tables alone
+```
+
+The whole of it, with the exchange in full and the three things the run found, is
+in [reports/agent.md](reports/agent.md).
+
+## What a character remembers
+
+Until this step a character forgot everything between one decision and the next,
+so the same surroundings got the same answer forever. It now carries section 10's
+two segments on its own sheet, and both survive every decision it makes:
+
+* **a first-person log of experiences and facts** — *"I saw Rook (#2), a
+  commander, about 6m away"*, *"Wren (#1) shouted: a fair bargain"*, *"I moved
+  5.4m north-east"*;
+* **durable lessons** — sentences it keeps and is biased by afterwards.
+
+**Nothing gets in that the character could not perceive, and that is a fact about
+the code rather than a promise.** `sim/character_memory.gd` names exactly one
+world type — `Observation` — and every function in it that writes into either
+segment takes one. Both are scans over the source in `tests/test_memory.gd`, and
+both are then shown to fire on lines written to break them. The consequence, in
+the world: Rook says *"a word in your ear"* to Wren while Odo stands one unit
+away, and afterwards Wren remembers being told, Rook remembers saying it, and Odo
+remembers nothing about it at all. Nothing in the store measures a position; who
+heard a line is `ActionEngine`'s answer, and the packet carries it through.
+
+**Recent goes in; older is asked for.** Every prompt carries all of the lessons
+and the last eight lines of the log. Reaching the rest is a *tool*, and there are
+two — `recall about=…` and `learn text=…`. Neither is an atomic action and
+neither is a row of `ActionCatalog`: section 2.1's list is twelve long and stays
+twelve long, and a tool touches the character's own memory rather than the world.
+A reply naming one costs an exchange, changes nothing, and the next prompt carries
+what it did. `recall` reads the same two segments the context is written out of —
+no index, no embedding, no consolidation pass, which is section 10's own order of
+work.
+
+**A lesson measurably changes what is chosen.** `./run_lesson.sh` asks one
+character the same question in one moment four times, with the *only* difference
+being what it remembers: the observation fingerprints match across all four arms,
+and the prompts are identical outside their `What you remember` block.
+
+| what it had kept | what it chose |
+|---|---|
+| nothing | `say(… What are you offering, Wren? target=1)` |
+| *"…I have been slow to go and look at what is lying on the ground here…"* | *— nothing readable —* |
+| *"…Rook is the only one here who has ever actually traded with me."* | `say(… you're the one who actually deals … target=2)` |
+| *"…the one who shouted had already turned away…"* | `wait(ticks=3)` |
+
+Two of the three lessons changed *which action* was chosen, not merely its
+wording; the run reports the two as separate columns because they are separate
+claims. The second arm is the one honest gap in the table: on the draw that
+recorded this comparison the provider declined that question under its own
+content policy, so the model said nothing readable and the arm shows it. The
+claim rests on the two arms that answered.
+
+**How much memory there is, measured rather than guessed.** Across the shipped
+160-tick run one character came to remember **15 things in 883 characters**, of
+which a packet carries **546 (62%)** — every lesson and the last eight events.
+The last question put was 4,213 characters, **650 of them (15%)** what it
+remembers. Nothing here is near needing an index.
+
+**And every character remembers, not only the ones a model drives.** Both stores
+the sheet declares — the memory and the goal set — are maintained by
+`sim/character_upkeep.gd`, on the path every character passes: `ControlLoop.step`
+runs it for everybody it services and `DecisionSource.drive` runs it before every
+choice it asks for, in both cases before `Character.decide` is read and with
+nothing to branch on if either wanted to. `ModelMind` reads both stores and fills
+neither. In the shipped run the character a person drives ends with **17
+remembered events**, against 10 to 15 for the five whose minds are models; before
+this it ended with none, because the only call site was inside the model layer.
+
+A character takes in its surroundings **once for every action the world has
+carried out for it** — `ActionScene.actions_taken`, the count `ActionEngine`
+writes on the one path every action goes through — with its first servicing
+counting as one. Deliberately not once per question: a mind waiting for a model is
+asked again every tick, a plan is asked again every five ticks while its character
+walks, and a person will be asked whenever a person looks at the screen, so a
+cadence keyed to questions would make what a character remembers a readout of
+which driver it has.
+
+```
+./run_lesson.sh                 # one moment, four memories, four answers
+./run_memory_suite.sh           # just this suite
+```
+
+The whole of it, including what the model did and did not do with the two tools,
+is in [reports/agent-memory.md](reports/agent-memory.md).
+
+## What a character is after
+
+The sheet used to carry one line of prose called `goal` that nothing read, and
+the prompt named no outcome at all. Section 10 asks for something that line could
+not be, and this is it: **several structured goals at once**, over a long and a
+short horizon, each completable, replaceable and reprioritisable. The single
+string is **retired** rather than kept beside them — two places saying what a
+character wants drift, and nothing could tell you which was current. Nothing
+expressive went with it: a goal still carries the character's own words for
+itself, and now something reads them.
+
+A goal is a **wanted state of the world and never a route to one**: *be beside
+#2*, *be carrying a brass lantern*, *have traded with #2*, *be 20 clear of #4*.
+No kind names a step, an order of steps, or a verb out of the action list — the
+suite searches every line of a written goals block for each of the twelve action
+names and fails on a hit, because a goal that named an action would be an
+instruction.
+
+**The model chooses; the world says whether a goal is met.** Seven of the eight
+kinds name something the engine holds — a position, an inventory, a money count,
+the trades it has honoured, a standing, whether somebody is still in the world —
+and `GoalCheck` reads the answer off the scene before every question, without
+asking anybody. The eighth is the character's own words for something the engine
+holds no state for (*"be thought well of in this market"*): there is no field in
+the simulation that is being thought well of, inventing a proxy would be the
+check making up its own answer, so it says so and that goal is the character's to
+close with a third tool, `done goal=N`. `done` on any of the other seven is
+refused with the world named as the reason, and the run tries both hands and
+prints what each did.
+
+**A goal measurably changes what is chosen.** `./run_goal.sh` puts one character
+the same question in one moment four times, with the only difference being what
+it is after — same observation fingerprint in all four arms, same memory, prompts
+identical outside the `What you are after` block.
+
+| what it was after | what it chose |
+|---|---|
+| nothing | `say(… What are you offering, Wren? target=1)` |
+| be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
+| have traded with #2 | `trade_propose(target=2 give_money=1)` |
+| be thought well of in this market | `say(… I deal honestly with all in this market. target=1)` |
+
+Two of the three changed *which action* was chosen; all three changed the choice.
+The position arm is the first time a model in this project has answered with a
+position at all — it was after a place, and it named the place.
+
+**And in the shipped run, unprompted.** Pell starts after three things, stated as
+scenario setup. Its first move is to walk to the character its most pressing goal
+names, and the world closes that goal out of its own state twenty-five ticks in:
+
+```
+turn 1   go_to target=#2      go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
+t= 25    be beside #2         closed by the world: #2 is 1.8 away
+```
+
+The second — carrying the brass lantern — it chased and did not get: Wren took
+the lantern out of the market pile at tick 38 and the pile went out of the world
+with it, so Pell's three attempts to walk to it came back `go_to refused: there is
+nothing with id 6`, the engine's own sentence. Nothing told Pell that and nothing
+hinted where the lantern went. The goal is still open at the end and the table
+says so.
+
+**The world closes goals for every character, not only for the ones a model
+drives.** Wren, the character a person drives through choices written down in
+advance, is set out after one thing — *be carrying 1 money or more* — while
+carrying thirty coins, so the world already answers it true before anything has
+happened. It closes at Wren's very first servicing, in the world's own words:
+
+```
+t= 1     be carrying 1 money or more   closed by the world: 30 money in the pack
+```
+
+Before the settling moved onto the shared servicing path that goal stayed open for
+all 160 ticks, because the only thing that ever asked the world was inside the
+model layer. Closing a goal the world *cannot* answer is one shared function too —
+`GoalCheck.close_by_hand`, which the model prompt's `done` tool is one caller of —
+so a person's character will reach it the same way, be refused the same seven
+kinds with the world named as the reason, and leave the same record.
+
+**Nothing hard-codes a story.** The suite reads every file under `sim/` with
+comments and string literals stripped and collects the ones that construct a
+`Goal`; the answer must be exactly two, both scenario setup — the shipped run's
+own character and the comparison's four arms. The machinery makes none. There is
+no quest, no giver, no chain, no reward and no step anywhere in it.
+
+```
+./run_goal.sh                   # one moment, four goals, four answers
+./run_goal_suite.sh             # just this suite
+```
+
+The whole of it is in [reports/goals.md](reports/goals.md).
+
+## Ability checks: the difficulty-class agent
+
+The second shape of language-model call in this game, and the opposite of a
+character agent. A character agent **loops**. This one is **one-off and
+hook-triggered**: it sits idle until something in the world raises a check, deals
+with that one check, and goes quiet again. A run in which nobody attempts
+anything unusual makes no call from it at all.
+
+**One hook, and the suite reads the source to prove it.** `raise_check(` appears
+in exactly one file under `sim/`, and `AbilityCheck.HOOK` names it:
+`ActionEngine._interact`, section 2.1's generic interaction. Of the four ways an
+interaction with a shut thing can go, exactly one changed — the one where the
+character offers an item it is carrying that is *not* what the thing opens with.
+Bare hands are still a flat refusal, the right item still just works, and nothing
+that ran before this step raises a check, so every fingerprint in the repository
+is what it was.
+
+**The agent picks two things and decides nothing.** Shown the attempt and the
+character's own ability scores, it answers with a difficulty class and the
+ability score to test against — `dc=12 ability=str` — and the prompt tells it in
+its first line that whether the attempt works is not its to say. Then the engine
+does all of the arithmetic, in three functions:
+
+```
+bounded(said)                        -> clampi(said, 1, 30)   # what the engine accepts
+rolled(roll_seed, check_id, context) -> 1 + hash_ints(...) % 20
+beats(score, roll, difficulty)       -> score + roll >= difficulty
+```
+
+The die is **hashed from the check, never drawn out of a stream** — the same
+discipline the combat layer keeps for a blow, and enforced across this layer by
+the same scan. A stream's numbers depend on how many were drawn before them, and
+a check settled out of memory draws none, so a streamed die would make whether an
+attempt worked depend on what the character happened to have tried earlier.
+
+**A model's words are not a resolution**, checked two ways. The same reply run at
+twelve roll seeds gives both verdicts — so the die decides, not the answer. And a
+reply whose prose says *"the lid splinters and the chest flies open"* leaves the
+chest shut at every seed where the roll fails, records no operations, and costs
+one call rather than two, because the second call is only ever made on the
+success branch.
+
+**On a success, a second call with a different system prompt** — a scoped
+orchestrator in section 8's sense. It may name only four operations, and the
+engine is the one that carries them out:
+
+```
+open   target=#7                 -- a shut thing comes open
+shut   target=#7                 -- an open thing falls shut
+move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units
+spill  target=#7                 -- everything inside an open thing ends up beside it
+```
+
+It answered `open target=#2`. A line that is not one of the four —
+`delete target=#2`, `chest.shut = false`, a sentence of prose — is not read as an
+operation at all and changes nothing; an operation that does not apply is refused
+and says why; more than three has the rest refused.
+
+**And the triggering context is stored, so a similar attempt is not rolled
+again.** A check carries a context — `interact:<kind of thing>:<what was
+offered>` — and two attempts are *similar* when that string is the same. When a
+check settles it goes into a third segment of the character's memory, through the
+same door every other write into that store uses. Taking a check up, the agent
+looks there first: a shape already in there is settled from the stored row, with
+no call and no roll, and on a stored success the operations that worked the first
+time are carried out again against the thing in front of the character now.
+
+`./run_check.sh` walks one character past four shut things nothing it carries
+opens:
+
+| # | context | settled by | arithmetic | verdict |
+|---|---|---|---|---|
+| 1 | `interact:oak chest:iron pry bar` | rolled | str 5 + roll 15 = 20 vs dc 12 | passed → `open target=#2` |
+| 2 | `interact:oak chest:iron pry bar` | **remembered** | the same, reused | passed → `open target=#3` |
+| 3 | `interact:hazel crate:whittling knife` | rolled | dex 4 + roll 6 = 10 vs dc 12 | failed |
+| 4 | `interact:hazel crate:whittling knife` | **remembered** | the same, reused | failed |
+
+**Four checks, three model calls, two rolls.** The recording is three rows long,
+which is itself the evidence that two of the four were never asked about. Both
+verdicts are reused: a failure is remembered as firmly as a success.
+
+**The model never resolves**, read off the source. Three scans over the layer,
+comments and string literals stripped, each shown to have teeth on a line that
+would break it: the die is drawn on exactly one line and nowhere out of a stream,
+a difficulty class is compared by magnitude on exactly one line, and nothing
+outside the operations table writes the world at all.
+
+```
+./run_check.sh                  # four attempts, two rolled, two remembered
+./run_check_suite.sh            # just this suite
+OPENROUTER_API_KEY=... ./run_record.sh --live --checks   # remake this one table
+```
+
+The whole of it is in [reports/checks.md](reports/checks.md).
+
+## The orchestrator: the world's dungeon master
+
+The third and last shape of language-model call in this layer, and it is the one
+that is **polled over the world** rather than looping over a character or waiting
+on a hook. Every thirty ticks it is shown the world as it stands and asked what
+changes, out of a fixed list of operations the engine exposes. Section 8 gives it
+two duties: spawn characters, and resolve world events through tools.
+
+**A spawn happens in section 8's stated order, and the order is the shape of the
+code.** `sim/spawn_roll.gd` rolls the sheet -- six ability scores out of bands
+set by the unit role and lifted by the local region difficulty -- and *has no way
+to see an answer*: the suite reads its source and requires that `reply`,
+`channel`, `prompt` and `ask(` appear nowhere in it. The character then stands in
+the world with those six numbers and no name of its own, and only then is a
+second call, with a different system prompt, asked who that makes them. The run's
+third spawn is the example section 8 itself gives:
+
+```
+rolled at tick 94   str 7 con 9 cha 17 dex 6 wis 4 int 8     highest cha, lowest wis
+answered at tick 97 name        Silverbell
+                    traits      magnetic voice, tireless traveler, hopelessly credulous
+                    backstory   ...their voice opening doors that swords could not...
+                                Yet they have delivered lies as gladly as truths, for
+                                they have never once thought to ask what a message
+                                means before shouting it.
+```
+
+A charming fool, and the six numbers afterwards are the six numbers before: a
+persona reply whose second line reads `str=18 con=18 cha=18 ...` moves none of
+them.
+
+**The local region difficulty is section 5's own gradient, read from the world.**
+`SpawnRoll.difficulty_at(x, z)` is `ItemFrontier.level_at` of the distance from
+the origin and nothing else, so a spawned character's level *is* the ring's
+level; its ability bands rise more slowly, one point every four rings, which is
+this agent's own conversion and is stated as one. Its gear is forged by
+`ItemFrontier.carried_at` at the same level.
+
+**What it may do is a list of world operations, not a list of narrative beats.**
+Seven: `place`, `remove`, `spawn` -- and `open`, `shut`, `move`, `spill`, which
+are the difficulty-class agent's four, read and carried out by that file rather
+than by a second copy of it. Each is refusable, and the run shows two refusals
+where the ground would not carry a character. A source scan requires that no
+`quest`, `story`, `plot`, `narrative`, `ending`, `villain` or `hero` appears
+anywhere in the layer -- in code or in a string literal, because a quest written
+into a prompt is a quest -- and another requires that nothing in it names
+`.decide`, `.goals`, `.memory`, `.sentiment` or an `Action`: it changes the
+world, never a mind.
+
+**Nothing waits for it.** Handed a channel that never answers, a world steps all
+60 of its ticks and the character acts throughout. On the shipped run the
+orchestrator had a question outstanding on 24 of 150 ticks, the longest run of
+them six ticks, and the character was part-way through an action on all 24.
+
+```
+./run_world.sh                  # five looks, three spawns, six operations
+./run_world_suite.sh            # just this suite
+OPENROUTER_API_KEY=... ./run_record.sh --live --world     # remake this one table
+```
+
+The whole of it is in [reports/orchestrator.md](reports/orchestrator.md).
+
 ## The character sheet
 
 The first player-facing interface: one panel, in the Sprout Lands pixel pack,
@@ -1504,9 +2006,22 @@ never has to be serialised for the world to be reproducible.
 ./run_scenario_suite.sh         # just the character-scenario suite
 ./run_skirmish.sh               # a patrol of two and one stranger: the scene drives its own fight
 ./run_turn.sh                   # a turn lasts as long as the weapon action that spends it
+./run_observation.sh            # what each of five characters can see, and how big the packet is
+./run_observation_suite.sh      # just the observation suite
+./run_agent.sh                  # every non-player character deciding through a model, in the same run
+./run_agent_suite.sh            # just the model-agent suite
+./run_lesson.sh                 # does a lesson change what is chosen? one moment, four memories
+./run_memory_suite.sh           # just the memory suite
+./run_goal.sh                   # does a goal change what is chosen? one moment, four goals
+./run_goal_suite.sh             # just the goal suite
+./run_upkeep_suite.sh           # just the suite for the path every character's memory and goals are maintained on
+./run_check.sh                  # ability checks: four attempts, two rolled, two remembered
+./run_check_suite.sh            # just the difficulty-class suite
+./run_world.sh                  # the orchestrator: five looks at a world, three spawns rolled before they were written
+./run_world_suite.sh            # just the orchestrator suite
 ```
 
-Thirty-five suites: the random number generator; determinism; the terrain field
+Forty-four suites: the random number generator; determinism; the terrain field
 and mesher; chunk streaming; the coarse ground drawn past it; the biomes; the water; the floating islands; what
 grows on them; the villages and roads; the flora and prop scatter; the tactical
 board; the pieces that stand on it; what happens when they act; the snap between
@@ -1519,7 +2034,17 @@ base every attack, projectile and spell is built out of; the twelve atomic
 actions and the one surface a person and a program both drive them through; the
 control loop that gives an action a length in ticks, re-evaluates on a cadence
 while it runs, and lets a character wait in the world for a decision that is not
-ready; the end-to-end run of five characters through all of it; the one driver a
+ready; the local observation a character is given of its surroundings; the
+end-to-end run of five characters through all of it; the whole non-player cast whose
+decision functions are language models, five answers outstanding at once, which
+the loop and the engine cannot tell from the one person among them; the two segments of memory that character carries and the
+scans that say nothing can get into them it did not perceive; the structured
+goals it holds several of at once and the world's own answer to which are
+finished; the one path both of those stores are maintained on, which every
+character passes whoever is deciding for it; the difficulty-class agent that judges one attempt the rules have no
+answer for and never resolves it; the orchestrator that is polled over the world,
+spawns characters rolls first and changes nothing except through the operations
+the engine exposes; the one driver a
 fight has, wherever it is held; the turn that lasts as long as the weapon action
 it spends; the lit windows; the grass; the lighting and atmosphere; the water's mirror; the
 anti-aliasing; and a smoke test that boots the render shell at a fixed frame rate
@@ -1689,6 +2214,7 @@ Godot theme, proved by one panel — a character sheet reading a live `Character
 off the simulation, drawn at a whole-number scale with a nearest-neighbour
 filter, measured crisp rather than assumed so.
 Everything a village, a road or the scatter puts down is named by tag, so the
-art drop is an edit to one table. Still to come: the language-model agents that
-drive the characters, and the world they will be measured on — territory,
-sentiment and the orchestrator.
+art drop is an edit to one table. Still to come: the rest of the language-model
+layer — every non-player character deciding through a model at once, the
+difficulty-class agent and the orchestrator — and the world they will be measured
+on: territory and sentiment.

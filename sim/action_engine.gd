@@ -311,6 +311,10 @@ static func _attack(
 	var dealt := 0
 	for hit in swung["hits"]:
 		dealt += int(hit.get("dealt", 0))
+	# The world's own record of the blow, on the one path an attack takes. What
+	# it means to the two of them is `RelationshipGraph`'s and is worked out
+	# nowhere near here.
+	scene.note_blow(actor.id, target.id, dealt, target.piece.max_health())
 	return ActionOutcome.done(action.kind, {
 		"attack": swung["attack"],
 		"cells": swung["cells"],
@@ -438,6 +442,9 @@ static func _trade_accept(
 	):
 		return ActionOutcome.failed(action.kind, "the exchange could not be honoured")
 	scene.clear_offer(proposer.id, actor.id)
+	scene.note_trade(
+		proposer.id, actor.id,
+		given.size(), int(offer["give_money"]), back.size(), int(offer["want_money"]))
 	return ActionOutcome.done(action.kind, {
 		"from": proposer.id,
 		"took": given.size(), "took_money": offer["give_money"],
@@ -563,7 +570,7 @@ static func _examine(
 		return ActionOutcome.failed(action.kind, "%s is out of sight (%.2f > %.2f)" % [
 			ActionScene.name_of(thing), gap, SIGHT,
 		])
-	var seen: Dictionary = _observed(thing)
+	var seen: Dictionary = observed_of(thing)
 	seen["distance"] = snappedf(gap, 0.001)
 	return ActionOutcome.done(action.kind, seen)
 
@@ -607,9 +614,23 @@ static func _interact(
 				ActionScene.name_of(actor), used,
 			])
 		if used != thing.needs:
-			return ActionOutcome.failed(action.kind, "a %s will not work the %s" % [
-				used, thing.object_name,
-			])
+			# --- The hook. See `AbilityCheck.HOOK`. ---
+			#
+			# The character is holding out something the world has no rule for.
+			# Bare hands are still a flat refusal above, and the item the thing
+			# plainly opens with still just works below; what is left here is an
+			# attempt whose chance of working nobody has written down, which is
+			# exactly what section 7's difficulty class is for. So the engine
+			# raises a check and says so, and settling it is somebody else's,
+			# later -- nothing here waits for it, and the interaction itself did
+			# not open anything, so it is a refusal like any other.
+			var check := scene.raise_check(actor, thing, used)
+			return ActionOutcome.failed(
+				action.kind,
+				"a %s is not what the %s opens with, so it is put to a check" % [
+					used, thing.object_name,
+				],
+				{"check": check.id, "context": check.context})
 	var was := thing.shut
 	thing.shut = false
 	return ActionOutcome.done(action.kind, {
@@ -734,8 +755,14 @@ static func _between(one: Combatant, other: Combatant) -> float:
 	return one.distance_to(other)
 
 
-# What can be seen of a thing from outside.
-static func _observed(thing: Variant) -> Dictionary:
+## What can be seen of a thing from outside: its kind, how hurt it looks, and
+## what it has on -- and for an object, whatever `WorldObject.observed()` says.
+##
+## Public because it is asked twice now and must be answered once. `_examine`
+## asks it of one thing a character has aimed at; `Observation` asks it of
+## everything a character can see, which is section 10's observation. A second
+## reading of "how hurt does that look" would be a second answer to it.
+static func observed_of(thing: Variant) -> Dictionary:
 	if thing is WorldObject:
 		return thing.observed()
 	var one := thing as Combatant

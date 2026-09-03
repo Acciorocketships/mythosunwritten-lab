@@ -1,0 +1,87 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+does a goal change what is chosen? seed=1234, 100 ticks watched
+  channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+  recording  recorded 2026-09-02 from anthropic/claude-fable-5 at https://openrouter.ai/api/v1/chat/completions, 76 replies
+  character  Pell, standing in the market, choosing nothing while the 100 ticks go by
+
+the same moment, four times
+  observation fingerprint    9a14b32a0f3eefc1 in all four arms: yes
+  what it remembers          identical in all four arms: yes
+  prompt outside its goals   identical in all four arms: yes
+  so the only thing that differs between the arms is what the character is after
+
+arm: no goal -- prompt 9d1f8d9fedcb8e8d
+  what it is after, as the prompt carried it:
+    What you are after: nothing in particular.
+  what the world answered about each, before the question:
+    (it is after nothing, so there was nothing to answer)
+  the model said:     say text=A fair bargain, you say? What are you offering, Wren? target=#1
+  which read back as: say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+
+arm: the empty stall -- prompt bcf8d2552df681b4
+  what it is after, as the prompt carried it:
+    What you are after, the most pressing first:
+      1  short be at (-471.0, 416.0)                          the world says when this one is done
+  what the world answered about each, before the question:
+    be at (-471.0, 416.0)                          not yet -- 7.8 from (-471.0, 416.0)
+  the model said:     go_to target=(-471.0, 416.0)
+  which read back as: go_to(target=(-471.000, 416.000))
+
+arm: a trade with Rook -- prompt 39c75ed90fe09a38
+  what it is after, as the prompt carried it:
+    What you are after, the most pressing first:
+      1  short have traded with #2                            the world says when this one is done
+  what the world answered about each, before the question:
+    have traded with #2                            not yet -- no trade of its has been honoured
+  the model said:     trade_propose target=#2 give_money=1
+  which read back as: trade_propose(target=2 give_money=1)
+
+arm: thought well of here -- prompt 1427f3b27253d1aa
+  what it is after, as the prompt carried it:
+    What you are after, the most pressing first:
+      1  long  be thought well of in this market              answer `done goal=1` when you judge it done
+  what the world answered about each, before the question:
+    be thought well of in this market              not yet -- nothing in the world answers this one
+  the model said:     say text=A fair bargain indeed, Wren — I deal honestly with all in this market. target=#1
+  which read back as: say(text=A fair bargain indeed, Wren — I deal honestly with all in this market. target=1)
+
+what the goals changed
+  two columns, because the two are different claims: a different action, and a different
+  choice of any sort including the same action with other words in it
+  arm                    which action     chose                                      action     choice
+  no goal                say at #1        say(text=A fair bargain, you say? What ar… --         --
+  the empty stall        go_to at nobody  go_to(target=(-471.000, 416.000))          differs    differs
+  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=1)       differs    differs
+  thought well of here   say at #1        say(text=A fair bargain indeed, Wren — I … same       differs
+  2 of 3 goals changed which action was chosen; 3 changed the choice at all
+
+  being after "be at (-471.0, 416.0)"
+    after nothing it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    after that one it chose go_to(target=(-471.000, 416.000))
+    which is a different action: go_to at nobody rather than say at #1
+
+  being after "have traded with #2"
+    after nothing it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    after that one it chose trade_propose(target=2 give_money=1)
+    which is a different action: trade_propose at #2 rather than say at #1
+
+  being after "be thought well of in this market"
+    after nothing it chose  say(text=A fair bargain, you say? What are you offering, Wren? target=1)
+    after that one it chose say(text=A fair bargain indeed, Wren — I deal honestly with all in this market. target=1)
+    which is the same action, say at #1, said in other words
+
+who answers each of these goals
+  arm                    what it is after                               answered by
+  the empty stall        be at (-471.0, 416.0)                          the world, out of its own state
+  a trade with Rook      have traded with #2                            the world, out of its own state
+  thought well of here   be thought well of in this market              the character: the world holds no state for it
+  a goal the world answers is closed by the world and by nothing else; the section below
+  tries the `done` tool on one of each, and the shipped run's own goals table shows
+  the world closing one out of its own state -- see reports/goals.md
+
+both hands, tried -- the `done` line below is written down by this run, not said by
+  the model, which was offered the tool in all four arms above and did not use it
+  no  what it is after                               answered by              what `done` did
+  1   be carrying 900 money or more                  the world                refused: the world answers this one
+  2   be thought well of in this market              the character itself     closed: the character said so

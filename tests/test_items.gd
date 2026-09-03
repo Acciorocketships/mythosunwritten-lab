@@ -52,6 +52,30 @@ const RANDOM_SOURCES := [
 	"randi", "randf", "randomize", "RandomNumberGenerator", "Rng.",
 ]
 
+## The readers of the item layer that are not part of a fight, and what each of
+## them may name.
+##
+## Two, and both for the same underlying reason. `Ability` is in the item layer
+## because an item's gate is read against a score, and `ItemFrontier` is in it
+## because the power budget was the first thing that needed section 5's
+## distance-to-level gradient. So a file that reads a score, or reads what a
+## piece of ground is worth, for any *other* purpose reaches into this layer
+## without being part of a fight:
+##
+##   * the difficulty-class agent's prompt writer, which names an ability to put
+##     the six scores to a language model and to read one back;
+##   * the orchestrator's roller, which names an ability to roll the six of them
+##     and the frontier to ask what the ground it is rolling for is worth and to
+##     forge the gear that ground gives.
+##
+## Each is excused from the fight-reads-items direction below and checked against
+## a narrower rule instead: it names what is listed for it here and no more of
+## the item layer, so no rule about items can have moved into it.
+const NOT_A_FIGHT := [
+	{"path": "res://sim/check_prompt.gd", "may_name": ["Ability"]},
+	{"path": "res://sim/spawn_roll.gd", "may_name": ["Ability", "ItemFrontier"]},
+]
+
 ## The directory both structural checks read, all of it.
 const SIM_DIR := "res://sim"
 
@@ -745,6 +769,15 @@ func _run_items() -> Dictionary:
 ##     item's budget, its split, its gate, its description and the frontier's
 ##     arithmetic draw nothing; if any of them could, "the same seed gives the
 ##     same item" would be a property of how often they were called.
+# Whether a reader is one of the two excused from the fight-reads-items
+# direction, and checked against a narrower rule instead.
+func _is_excused(path: String) -> bool:
+	for row in NOT_A_FIGHT:
+		if String(row["path"]) == path:
+			return true
+	return false
+
+
 func _the_layer_stands_on_its_own() -> void:
 	var sources := _sim_sources()
 	check(sources.size() > 40, "the scan opened sim/ and found %d files" % sources.size())
@@ -786,18 +819,50 @@ func _the_layer_stands_on_its_own() -> void:
 	# `sim/scripted_skirmish.gd` is the fifth: the second action-surface run
 	# forges the three weapons its patrol and its stranger fight with.
 	# `sim/scripted_turn.gd` is the sixth: the turn/action seam's duel forges the
-	# two spears whose blows the rule is about.
+	# two spears whose blows the rule is about. `sim/scripted_encounter.gd` is the
+	# seventh and joined for a different reason: it names an ability to *roll* its
+	# three commanders' six scores, not to forge anything -- the scores an item's
+	# gate is read against are named in the same vocabulary the item names.
+	# `sim/scripted_check.gd` is the eighth, and the same kind again: the
+	# difficulty-class run forges the two tools its attempts are made with.
+	# `sim/scripted_world.gd` is the ninth: the orchestrator run forges the
+	# lantern and the rope its one written-down character carries about.
 	equal(readers, PackedStringArray([
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
-		"res://sim/commander.gd", "res://sim/inventory.gd",
-		"res://sim/scripted_actions.gd", "res://sim/scripted_loop.gd",
-		"res://sim/scripted_match.gd", "res://sim/scripted_scenario.gd",
-		"res://sim/scripted_skirmish.gd", "res://sim/scripted_turn.gd",
-		"res://sim/weapon.gd",
-	]), "and these files of the combat layer are the ones that read the item layer")
+		"res://sim/check_prompt.gd", "res://sim/commander.gd",
+		"res://sim/inventory.gd",
+		"res://sim/scripted_actions.gd", "res://sim/scripted_check.gd",
+		"res://sim/scripted_encounter.gd",
+		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
+		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
+		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
+		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",
+	]), "and these files are the ones that read the item layer")
 	for path in readers:
+		if _is_excused(path):
+			continue
 		check(LayerCheck.first_combat_match(_read(path)) != "",
 			"%s is a combat file, so the naming runs fight -> items" % path)
+
+	# The readers that are not part of a fight, each excused for a reason that is
+	# checked rather than stated. The direction claim they have to keep is
+	# narrower and is asserted here: each names what `NOT_A_FIGHT` lists for it
+	# and nothing else of the item layer, so no rule about items can have moved
+	# into either of them.
+	for row in NOT_A_FIGHT:
+		var path := String(row["path"])
+		var allowed := PackedStringArray(row["may_name"])
+		check(readers.has(path), "%s no longer reads the item layer" % path)
+		equal(LayerCheck.first_combat_match(_read(path)), "",
+			"%s has become a fight file, so it does not need excusing" % path)
+		var named := PackedStringArray()
+		for word in ITEM_CLASSES:
+			if not allowed.has(word) and LayerCheck._contains_word(_read(path), word):
+				named.append(word)
+		equal(named, PackedStringArray(),
+			"%s names more of the item layer than %s: %s" % [
+				path, " ".join(allowed), " ".join(named),
+			])
 
 	var drawing := PackedStringArray()
 	for path in item_files:
