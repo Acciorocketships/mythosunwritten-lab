@@ -22,18 +22,38 @@ extends RefCounted
 ##
 ## ## Why that line is near the end rather than at the top
 ##
-## Measured, not preferred. Put first, both of these prompts are refused by the
-## provider before the model ever sees them -- every one of five questions in a
-## recording pass came back "this request triggered restrictions on violative
-## cyber content", and bisecting the prompt showed the trigger was having *any*
-## leading paragraph of instruction in front of the world and the operation
-## table: a message that opens with a role and then lists commands with
-## `target=` in them reads, to something upstream, like an attempt to drive a
-## system. The same prompt with its first line moved to the bottom is answered
-## every time, and the same words are in it. So the naming line sits above the
-## answer instruction instead, and a run opens with a title that says what the
-## page is. Moving it back to the top will break the recorder, silently and
-## completely, which is why this paragraph is here.
+## Measured, not preferred -- twice, against two providers, for two different
+## reasons. The shape has outlived the reason it was given, and the second
+## reason is why it stays.
+##
+## **What the shape was for.** On `anthropic/claude-fable-5` both of these
+## prompts, put first line first, were refused before the model ever saw them:
+## every one of five questions in a recording pass came back "this request
+## triggered restrictions on violative cyber content". Bisecting showed the
+## trigger was having *any* leading paragraph of instruction in front of the
+## world and the operation table -- a message that opens with a role and then
+## lists commands with `target=` in them reads, to something upstream, like an
+## attempt to drive a system. Moving that line to sit above the answer
+## instruction, and opening with a plain title, was answered every time.
+##
+## **That reason has gone.** The project no longer calls that provider. Put to
+## the model this file's calls now go to, both shapes were measured on
+## 2026-09-04 -- all eleven questions the orchestrator run puts, three times
+## each, in both shapes, 66 calls -- and not one of them was declined, in either
+## shape. The filter constraint does not bind here.
+##
+## **A second reason took its place.** The leading shape is still not free. On
+## the largest of the five world questions it drives this model into thinking
+## until the answer ceiling runs out, and it answers with nothing at all: seven
+## empty answers in eleven puts, against none in eleven for the shape below,
+## which is a difference in the shape and not in the draw. An empty answer costs
+## the recorder that question exactly as completely as a refusal did.
+##
+## So the naming line stays where it is, and a run opens with a title that says
+## what the page is. Moving it back to the top no longer trips a filter, and
+## will still cost the recorder answers. The measurement, every call of it, is
+## in `.lab/memory/files/prompt-lead-check-2026-09-04.md`, and
+## `tools/prompt_lead_probe.sh` puts it again.
 ##
 ## ## What is deliberately not in either
 ##
