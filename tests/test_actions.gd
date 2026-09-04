@@ -23,7 +23,14 @@ extends TestSuite
 ##   5. **A person's decision function and a program's drive the identical
 ##      surface**, shown by the same choice through each producing the same world
 ##      change -- one fingerprint, compared.
-##   6. **Two processes agree** on `./run_actions.sh`, so nothing in the layer
+##   6. **A choice the catalogue cannot read costs the character one turn.** It
+##      is counted as an action attempted and refused in the catalogue's own
+##      words; the four refusals that are about the world rather than the choice
+##      are counted for nobody; and a plan, a person and a model each move on to
+##      their next choice rather than offering the refused one back forever.
+##      Nothing outside `ActionScene` keeps that count, which is scanned for
+##      rather than promised.
+##   7. **Two processes agree** on `./run_actions.sh`, so nothing in the layer
 ##      reads a clock, a random number or an address.
 class_name TestActions
 
@@ -67,6 +74,10 @@ const WREN_AT := Vector2(2.0, 0.0)
 const PILE_AT := Vector2(10.0, 0.0)
 const CHEST_AT := Vector2(-10.0, 0.0)
 
+## How long the three minds are run for when each is handed a faulted choice and
+## a good one: long enough for both to be resolved and reviewed several times.
+const MIND_TICKS := 40
+
 ## Rook's dexterity in the bare scene, and the two jumps measured against it:
 ## `ActionEngine.JUMP_BASE + 4 x JUMP_PER_DEX` is 4.5.
 const ROOK_DEX := 4
@@ -89,6 +100,9 @@ func run() -> void:
 	_every_resolver_takes_the_same_three_things()
 	_two_minds_one_surface()
 	_a_recorded_person_stops_when_the_list_runs_out()
+	_a_refused_choice_is_a_turn_spent()
+	_every_mind_moves_on_from_a_line_the_catalogue_faults()
+	_nothing_outside_the_scene_counts_an_action()
 	_two_processes_agree()
 
 
@@ -604,7 +618,209 @@ func _a_recorded_person_stops_when_the_list_runs_out() -> void:
 		"a character nobody is deciding for takes no action")
 
 
-# --- 6. Two processes agree ----------------------------------------------
+# --- 6. A refused choice is a turn spent ----------------------------------
+
+
+## A choice the catalogue cannot read counts as one action attempted, and the
+## four refusals that are about the world rather than the choice count for
+## nobody.
+##
+## The count is what every mind reads its own position out of, so this is the
+## whole of why a malformed line costs one turn instead of the rest of the run.
+## What it must not become is a silent no-op or an action the world carried out:
+## the sentence is the catalogue's own, and the world is unmoved either side of
+## it.
+func _a_refused_choice_is_a_turn_spent() -> void:
+	var scene := _bare_scene()
+	var rook: Combatant = scene.actors[0]
+	var faulted := {
+		"a missing key": Action.of(ActionCatalog.EXAMINE, {}),
+		"a name where an id is wanted": Action.of(
+			ActionCatalog.SAY, {"text": "well met", "target": "Wren"}),
+		"a key the row does not take": Action.of(
+			ActionCatalog.WAIT, {"ticks": 2, "loudly": true}),
+		"an action that does not exist": Action.of("sing", {}),
+		"nothing chosen at all": null,
+	}
+	for how in faulted:
+		var before := scene.actions_of(rook.id)
+		var world := scene.fingerprint()
+		var outcome := ActionEngine.resolve(scene, rook, faulted[how])
+		check(not outcome.ok, "%s is refused" % how)
+		equal(scene.actions_of(rook.id), before + 1,
+			"%s costs the character one action attempted" % how)
+		equal(scene.fingerprint(), world, "%s moved nothing in the world" % how)
+	equal(ActionEngine.resolve(scene, rook, Action.of(ActionCatalog.EXAMINE, {})).reason,
+		ActionCatalog.fault(Action.of(ActionCatalog.EXAMINE, {})),
+		"and the refusal is still the catalogue's own sentence")
+
+	# The four that are about the world and not about the choice. Each is given a
+	# well-formed choice and then a malformed one, because the catalogue's
+	# sentence is the one that comes back when both apply and neither may count.
+	var outsider := Combatant.commander_at(0.0, 0.0, 0.0, 0.0, 1, AssetTags.KNIGHT)
+	(outsider.piece as Commander).adopt(Character.make("Nobody", 1))
+	var minion := scene.add_actor(Combatant.minion_at(
+		Minion.TOADSTOOL, 9, 1.0, 0.0, 0.0, 0.0))
+	var downed := scene.add_actor(Combatant.commander_at(
+		3.0, 0.0, 0.0, 0.0, 1, AssetTags.KNIGHT))
+	(downed.piece as Commander).adopt(Character.make("Fallen", 1))
+	downed.piece.health = 0
+	var nowhere := {
+		"there is no world to act in": [null, rook, rook.id],
+		"the one acting is not in the world": [scene, outsider, outsider.id],
+		"only a character acts": [scene, minion, minion.id],
+		"%s is down" % ActionScene.name_of(downed): [scene, downed, downed.id],
+	}
+	for said in nowhere:
+		var at: ActionScene = nowhere[said][0]
+		var actor: Combatant = nowhere[said][1]
+		var id: int = nowhere[said][2]
+		var before := scene.actions_of(id)
+		var refused := ActionEngine.resolve(at, actor, Action.wait(1))
+		check(not refused.ok, "'%s' is a refusal" % said)
+		equal(refused.reason, said, "and it says so")
+		equal(scene.actions_of(id), before, "and nothing is counted for it")
+		var both := ActionEngine.resolve(at, actor, Action.of(ActionCatalog.EXAMINE, {}))
+		equal(both.reason, ActionCatalog.fault(Action.of(ActionCatalog.EXAMINE, {})),
+			"a malformed choice for '%s' still reads back as the catalogue's fault" % said)
+		equal(scene.actions_of(id), before,
+			"and it is still counted for nobody: %s" % said)
+
+
+## A plan, a person and a model, each handed a line the catalogue faults and a
+## good one after it, each reaching the good one.
+##
+## Run rather than read: the three are put on three identical scenes under the
+## same loop, and what is asserted is the second choice actually being resolved.
+## Before a refused choice counted, all three offered the refused one back on
+## every review for as long as the run lasted.
+func _every_mind_moves_on_from_a_line_the_catalogue_faults() -> void:
+	var faulted := Action.of(ActionCatalog.SAY, {"text": "well met", "target": "Wren"})
+	not_equal(ActionCatalog.fault(faulted), "", "the first choice is one the catalogue faults")
+
+	var by_a_plan := func(_c: LiveChoice) -> Callable:
+		return DecisionSource.plan([faulted, Action.wait(2)])
+	var written := _run_one_mind(by_a_plan)
+	equal(written["resolved"], 2, "a written-down plan reaches its second entry")
+	check(written["reached"], "and the second entry is the one it wanted")
+
+	var person := LiveChoice.new()
+	var by_a_person := func(chosen: LiveChoice) -> Callable:
+		chosen.choose(faulted)
+		return DecisionSource.live(chosen)
+	var by_hand := _run_one_mind(by_a_person, person)
+	equal(by_hand["resolved"], 2, "a person chooses again once their choice has been had")
+	check(by_hand["reached"], "and their second choice is the one they made")
+	equal(person.carried_out, 2,
+		"and both of their choices -- the refused one and the good one -- were had")
+
+	var mind := ModelMind.with_channel(ModelChannel.replaying({
+		"rows": [
+			{"prompt": "", "reply": "say text=well met target=#Wren", "ms": 0},
+			{"prompt": "", "reply": "wait ticks=2", "ms": 0},
+		],
+		"from": "written here: two replies, the first of them unreadable",
+		"model": "none",
+	}, "two replies handed in, the first of them unreadable"))
+	var by_a_model := func(_c: LiveChoice) -> Callable:
+		return DecisionSource.model(mind)
+	var answered := _run_one_mind(by_a_model)
+	equal(answered["resolved"], 2, "a model is asked again once its answer has been had")
+	check(answered["reached"], "and its second answer is the one it gave")
+	check(mind.opened >= 2,
+		"and the second answer cost a second question: %d were put" % mind.opened)
+
+
+# One character, one mind, one loop, run long enough for two actions and their
+# reviews. Hands back what the world counted and whether the second choice was
+# reached.
+#
+# The person is a person: nothing is written down in advance, and the second
+# choice is made only once the world has taken the first one back, which is what
+# somebody watching their character would see happen.
+func _run_one_mind(make: Callable, chosen: LiveChoice = null) -> Dictionary:
+	var scene := _bare_scene()
+	var one: Combatant = scene.actors[0]
+	var holder := chosen if chosen != null else LiveChoice.new()
+	(one.piece as Commander).sheet.decide = make.call(holder)
+	var loop := ControlLoop.on(scene, 7)
+	var reached := false
+	for _tick in MIND_TICKS:
+		loop.step()
+		if holder.made > 0 and holder.waiting() and holder.made < 2:
+			holder.choose(Action.wait(2))
+		var answer := loop.answer_of(one.id)
+		if not answer.is_empty() and String(answer["action"]).begins_with(
+				ActionCatalog.WAIT) and bool(answer["ok"]):
+			reached = true
+	return {"resolved": scene.actions_of(one.id), "reached": reached}
+
+
+## Nothing outside `ActionScene` keeps the count, and one file alone moves it.
+##
+## Read off disk over every script in the project rather than off the one
+## function: the count is the thing three decision functions read their own
+## position out of, so a second place that moved it would be a second answer to
+## "has this character had its go".
+func _nothing_outside_the_scene_counts_an_action() -> void:
+	var moved := PackedStringArray()
+	var kept := PackedStringArray()
+	var scripts := _every_script()
+	check(scripts.size() > 100, "the scan opened the project: %d scripts" % scripts.size())
+	for path in scripts:
+		var code := _code_of(path)
+		if code.contains("note_action("):
+			moved.append(path)
+		if code.contains("actions_taken"):
+			kept.append(path)
+	equal(", ".join(kept), "res://sim/action_scene.gd",
+		"only the scene keeps the count")
+	equal(", ".join(moved), "res://sim/action_engine.gd, res://sim/action_scene.gd",
+		"only the engine moves it, and only the scene declares it")
+	var engine := _code_of("res://sim/action_engine.gd")
+	equal(engine.count("scene.note_action("), 1,
+		"and the engine moves it in exactly one place")
+
+	# The three minds read that one count and no other.
+	for path in ["res://sim/decision_source.gd", "res://sim/model_mind.gd"]:
+		var code := _code_of(path)
+		equal(code.count("actions_of("), code.count("scene.actions_of("),
+			"%s reads its position out of the scene and nowhere else" % path)
+
+	# And the scan has teeth: a line that would keep a second count is caught.
+	check(_code_like("var actions_taken := {}").contains("actions_taken"),
+		"the scan would notice a second count kept somewhere else")
+	check(_code_like("# actions_taken is what the scene keeps").strip_edges() == "",
+		"and it does not read prose about the count as a second one")
+
+
+## Every script in the project, as paths.
+func _every_script() -> PackedStringArray:
+	var found := PackedStringArray()
+	var stack := PackedStringArray(["res://"])
+	while not stack.is_empty():
+		var here := stack[stack.size() - 1]
+		stack.remove_at(stack.size() - 1)
+		var directory := DirAccess.open(here)
+		if directory == null:
+			continue
+		for name in directory.get_directories():
+			if not name.begins_with("."):
+				stack.append(here + name + "/")
+		for name in directory.get_files():
+			if name.ends_with(".gd"):
+				found.append(here + name)
+	found.sort()
+	return found
+
+
+## One line with its comments and string literals taken off, the way the scan
+## above reads a file.
+func _code_like(line: String) -> String:
+	return AssetCheck.split_code_and_strings(line)["code"].strip_edges()
+
+
+# --- 7. Two processes agree ----------------------------------------------
 
 
 ## The documented command run twice, in two processes, printing the same bytes.

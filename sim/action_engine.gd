@@ -25,7 +25,8 @@ extends RefCounted
 ##
 ##   1. the choice is malformed -- an unknown action, a missing parameter, a
 ##      target of the wrong sort. `ActionCatalog.fault()` answers this without
-##      looking at the world at all.
+##      looking at the world at all. It still costs the character the action it
+##      attempted; see `resolve()`.
 ##   2. the actor cannot act -- there is nobody, or it is not a character.
 ##   3. the world says no -- too far to jump, out of earshot, the chest is
 ##      locked, the target is outside the weapon's pattern, the offer was denied.
@@ -99,28 +100,56 @@ static func resolvers() -> Dictionary:
 ## function and no way to reach a resolver except through here, so everything
 ## said above about failure and about the caller is true of every call made.
 ##
-## Being the one path, it is also where the world counts what it has carried out:
-## a choice that reaches a resolver is one action taken, noted on the scene. A
-## count kept anywhere else would be a second count of the same thing, and a
-## count kept per driver could not be read by anything but that driver.
+## Being the one path, it is also where the world counts what a character has
+## attempted: a choice handed in for somebody who could act on it is one action
+## attempted, noted on the scene. A count kept anywhere else would be a second
+## count of the same thing, and a count kept per driver could not be read by
+## anything but that driver.
+##
+## **A choice the catalogue cannot read counts too.** It is the one refusal that
+## is about the choice rather than about the world, so it is the one refusal a
+## character can repeat forever: every mind in this project reads its own
+## position out of `ActionScene.actions_of` -- a plan is read at that index, a
+## person's standing choice is taken back when it moves, a `ModelMind` keeps its
+## answer against it -- and a malformed line that left the count where it was
+## came back on every review for the rest of the run. So the count moves and the
+## line is refused, which costs the character the turn it spent and nothing more.
+## The refusal itself is unchanged: the catalogue's own sentence comes back, the
+## resolver is not reached, and nothing in the world moves.
+##
+## The four refusals below it are not that. There is nobody to count for (no
+## world, an actor that is not in it), nothing that keeps a count (the thing
+## acting is not a character), or nobody able to spend a turn (the actor is
+## down), so none of them counts and each still says what it says.
 static func resolve(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
 	var named := "nothing" if action == null else action.kind
 	var fault := ActionCatalog.fault(action)
+	var refusal := _cannot_act(scene, actor)
+	if refusal != "":
+		return ActionOutcome.failed(named, fault if fault != "" else refusal)
+	scene.note_action(actor.id)
 	if fault != "":
 		return ActionOutcome.failed(named, fault)
-	if scene == null:
-		return ActionOutcome.failed(named, "there is no world to act in")
-	if actor == null or not scene.actors.has(actor):
-		return ActionOutcome.failed(named, "the one acting is not in the world")
-	if _sheet_of(actor) == null:
-		return ActionOutcome.failed(named, "only a character acts")
-	if not actor.piece.is_alive():
-		return ActionOutcome.failed(named, "%s is down" % ActionScene.name_of(actor))
-	scene.note_action(actor.id)
 	var resolver: Callable = resolvers()[action.kind]
 	return resolver.call(scene, actor, action)
+
+
+# Why there is nobody here for a choice to be resolved for, or "" when there is.
+#
+# These are the refusals that are about the world rather than about the choice,
+# and they are the ones nothing is counted for: see `resolve()` above.
+static func _cannot_act(scene: ActionScene, actor: Combatant) -> String:
+	if scene == null:
+		return "there is no world to act in"
+	if actor == null or not scene.actors.has(actor):
+		return "the one acting is not in the world"
+	if _sheet_of(actor) == null:
+		return "only a character acts"
+	if not actor.piece.is_alive():
+		return "%s is down" % ActionScene.name_of(actor)
+	return ""
 
 
 # --- go to ----------------------------------------------------------------

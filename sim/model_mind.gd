@@ -25,11 +25,18 @@ extends RefCounted
 ## exchange on every one of those would make a model call four times a second and
 ## spend a recorded exchange in a handful of ticks. So the mind is read the way
 ## `DecisionSource.plan` is read: it keeps its answer against the number of
-## actions the character has actually had carried out, which the world counts in
+## actions the character has attempted, which the world counts in
 ## `ActionScene.actions_taken`. Asked again while its action is still running it
 ## offers the same action back -- the review line reads "wanted the same thing"
 ## -- and it asks the model again only once the world says the character has
-## actually done something. One resolved action, one exchange.
+## actually had a go. One action resolved, one exchange.
+##
+## An answer the catalogue cannot read is one of those. It is offered to the
+## engine like any other, refused there in the catalogue's own words, and counted
+## as the turn it spent, so the next review opens a new exchange rather than
+## handing the same unreadable line back for the rest of the run. Nothing here
+## reads the refusal or knows there was one: what closes the loop is the world's
+## count moving, which is the same thing that moves for a plan and for a person.
 ##
 ## ## Memory, which lives on the character and not here
 ##

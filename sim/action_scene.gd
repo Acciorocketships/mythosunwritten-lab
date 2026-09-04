@@ -183,14 +183,21 @@ var relationships: RelationshipGraph = RelationshipGraph.new()
 ## being unable to change your mind.
 var idle_until: Dictionary = {}
 
-## How many actions the engine has carried out for each character, by id.
+## How many actions each character has attempted, by id.
 ##
-## The world's own count of what has actually happened in it, written by
-## `ActionEngine` the moment a choice reaches a resolver and by nothing else. It
-## counts resolutions and not questions: asking a character what it wants to do
-## next changes nothing here, which is what makes it something a decision
-## function can read its own position out of without holding whatever is driving
-## it (`DecisionSource.plan`).
+## The world's own count of what has been handed in for a character to do,
+## written by `ActionEngine` the moment a choice reaches somebody who could act
+## on it and by nothing else. It counts choices resolved and not questions:
+## asking a character what it wants to do next changes nothing here, which is
+## what makes it something a decision function can read its own position out of
+## without holding whatever is driving it (`DecisionSource.plan`).
+##
+## A choice the catalogue cannot read is counted with the rest, because it is a
+## turn the character spent: the engine refuses it in the catalogue's own words
+## and moves nothing in the world, but the character has had its go. Leaving it
+## uncounted left every mind in the project offering the same unreadable line
+## back for the rest of the run -- see the note on `ActionEngine.resolve`. The
+## refusals that are about the world rather than the choice are not counted.
 ##
 ## `ControlLoop.actions_of` counts the same thing for the characters that one
 ## loop resolved for; this counts it for the scene, whatever drove it.
@@ -541,13 +548,14 @@ func idle_of(id: int) -> int:
 	return int(idle_until.get(id, 0))
 
 
-## How many actions have been carried out for a character.
+## How many actions a character has attempted.
 func actions_of(id: int) -> int:
 	return int(actions_taken.get(id, 0))
 
 
-## Count one action as carried out for a character. `ActionEngine`'s to call, on
-## the one path every action takes, so that one action carried out is one count.
+## Count one action as attempted for a character. `ActionEngine`'s to call, on
+## the one path every action takes, so that one action attempted is one count --
+## including one the catalogue refused, which is a turn spent all the same.
 func note_action(id: int) -> void:
 	actions_taken[id] = actions_of(id) + 1
 

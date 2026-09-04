@@ -1,0 +1,188 @@
+A line the engine cannot read costs one turn, not the rest of the run
+=====================================================================
+
+What this file holds: the failure reproduced before anything was changed, the
+same command run again after it, and the checks either side. Every block below
+is the output of a command named above it, pasted unedited.
+
+The command:
+
+    tools/fault_lock_probe.sh
+
+It needs no key, no network and no model. Section A replays the checked-in
+recording with exactly one reply replaced -- the reply recorded for one
+character's first question, replaced by the line
+`inception/mercury-2.5-preview` actually answered in the live pass of the
+previous cycle. Sections B and C build their own small scenes.
+
+
+1. The failure, before anything was changed
+-------------------------------------------
+
+=== the fault lock -- what a line the catalogue cannot read costs
+
+=== A -- ./run_agent.sh, seed 1234, 160 ticks, with one reply replaced
+  the line:      examine #3
+  reads back as: examine(target=-)
+  the catalogue: examine needs target
+  put in place of the reply recorded for Sable's first question (c9a74a2162a37689);
+  every other reply in the recording is the shipped one.
+
+  who     turns  asked resolved  refusals no reply  what the engine last answered it
+  Rook       22     23       21         2        0  wait ok ticks=1 until=159
+  Bram        2      3        2         0        1  examine ok id=4 name=Sable kind=commander health=unhurt fighting=false equipment=boots=common boots hand=common spear distance=12.0
+  Sable       1      1        0        39        0  examine refused: examine needs target
+  Odo        15     15       14        10        0  examine ok id=7 name=Pell kind=commander health=unhurt fighting=false equipment=- distance=34.635
+  Pell       19     19       16         2        0  trade_propose ok to=1 give=0 give_money=9 want=1 want_money=0
+
+  Sable put 1 question to the model in 160 ticks and held one answer for 39 of them.
+  the one sentence `examine refused: examine needs target' came back 39 times.
+  `no reply' is the other thing a locked character does to a replayed run: it stops
+  moving, so what everybody else sees stops being what the recording was made
+  against, and a question nothing recorded answers leaves its asker standing too.
+
+=== B -- one faulted choice and one good one, handed to three minds
+  the faulted choice: say(text=well met target=Sable) -- say's target must be an id
+  the good one after it: wait(ticks=2)
+
+  the mind                     resolved  refusals  reached what it did with the second choice
+  a written-down plan                 0        11       no never reached -- say refused: say's target must be an id
+  a person at a keyboard              0        11       no never reached -- say refused: say's target must be an id
+  a model                             0        11       no never reached -- say refused: say's target must be an id
+                                 questions put: 1, answers held: 11
+
+=== C -- the four refusals that are not the catalogue's
+  the refusal                        what it says                                 counted
+  there is no world to act in        there is no world to act in                  no (0 -> 0)
+  the one acting is not in the world the one acting is not in the world           no (0 -> 0)
+  only a character acts              only a character acts                        no (0 -> 0)
+  the actor is down                  Fallen is down                               no (0 -> 0)
+
+
+
+2. The same command, after the change
+--------------------------------------
+
+=== the fault lock -- what a line the catalogue cannot read costs
+
+=== A -- ./run_agent.sh, seed 1234, 160 ticks, with one reply replaced
+  the line:      examine #3
+  reads back as: examine(target=-)
+  the catalogue: examine needs target
+  put in place of the reply recorded for Sable's first question (c9a74a2162a37689);
+  every other reply in the recording is the shipped one.
+
+  who     turns  asked resolved  refusals no reply  what the engine last answered it
+  Rook       18     18       17         4        0  wait ok ticks=5 until=152
+  Bram       16     16       15         7        0  go_to refused: the position is too far to walk to at once
+  Sable      13     13       11         5        0  wait ok ticks=1 until=161
+  Odo        15     16       14         8        0  wait ok ticks=5 until=163
+  Pell       17     18       16         8        0  examine ok id=7 name=Pell kind=commander health=unhurt fighting=true equipment=- distance=0.0
+
+  Sable put 13 questions to the model in 160 ticks and held one answer for 13 of them.
+  the one sentence `examine refused: examine needs target' came back 2 times.
+  `no reply' is the other thing a locked character does to a replayed run: it stops
+  moving, so what everybody else sees stops being what the recording was made
+  against, and a question nothing recorded answers leaves its asker standing too.
+
+=== B -- one faulted choice and one good one, handed to three minds
+  the faulted choice: say(text=well met target=Sable) -- say's target must be an id
+  the good one after it: wait(ticks=2)
+
+  the mind                     resolved  refusals  reached what it did with the second choice
+  a written-down plan                 2         1      yes wait ok ticks=2 until=10
+  a person at a keyboard              2         1      yes wait ok ticks=2 until=11
+  a model                             2         1      yes wait ok ticks=2 until=16
+                                 questions put: 3, answers held: 0
+
+=== C -- the four refusals that are not the catalogue's
+  the refusal                        what it says                                 counted
+  there is no world to act in        there is no world to act in                  no (0 -> 0)
+  the one acting is not in the world the one acting is not in the world           no (0 -> 0)
+  only a character acts              only a character acts                        no (0 -> 0)
+  the actor is down                  Fallen is down                               no (0 -> 0)
+
+
+
+3. Per-character turns, side by side
+-------------------------------------
+
+  who    | before: turns/asked/resolved | after:  turns/asked/resolved
+  -------+------------------------------+-----------------------------
+  Rook   | 22 / 23 / 21   (2 refused)   | 18 / 18 / 17   (4 refused)  
+  Bram   | 2 / 3 / 2   (0 refused)      | 16 / 16 / 15   (7 refused)  
+  Sable  | 1 / 1 / 0   (39 refused)     | 13 / 13 / 11   (5 refused)  
+  Odo    | 15 / 15 / 14   (10 refused)  | 15 / 16 / 14   (8 refused)  
+  Pell   | 19 / 19 / 16   (2 refused)   | 17 / 18 / 16   (8 refused)  
+
+  `turns' is how many questions that character's mind put and had answered;
+  `asked' is how many exchanges it opened; `resolved' is what the world counted
+  for it. Before the change Sable put one question in the whole run and the world
+  counted nothing for it; the same refused sentence came back 39 times. After the
+  change Sable puts 13 questions and the world counts 11 actions for it, and that
+  sentence comes back twice.
+
+  Bram's 2 in the before column is not the lock and is worth saying plainly: a
+  character that stops moving changes what everybody else sees, so Bram's third
+  question stopped matching anything in the recording and it had no reply to give
+  him (the `no reply' column). It is an artefact of replaying a recording against
+  a world that has diverged from it, not of the bug -- and after the change,
+  nobody's questions go unanswered.
+
+
+4. The rest of the checks
+--------------------------
+
+The whole suite, headless, with no OPENROUTER_API_KEY in the environment and no
+network:
+
+    ./run_tests.sh
+    all 49 suites passed (196400 checks)          exit 0
+    (196,347 before; the 53 new ones are the four checks added to
+     tests/test_actions.gd for this rule)
+
+The structure checks:
+
+    ./run_tests.sh --layers-only
+    layer check:     OK -- res://sim references nothing in the render layer
+    combat check:    OK -- res://render draws the fight and holds none of it
+    interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+    asset check:     OK -- res://sim names asset tags and no asset
+
+Determinism, two processes each:
+
+    ./run_headless.sh            two processes, identical bytes
+    tools/fault_lock_probe.sh    two processes, identical bytes
+
+The world's seed-1234 fingerprint, quoted before and after the change:
+
+    before  5014980a58150055   (the value the previous cycle's result quotes)
+    after   5014980a58150055   unchanged
+
+The shipped model run, before and after the change:
+
+    ./run_agent.sh               byte-identical either side of the change
+
+That last one is why the checked-in recording was not re-made. The change alters
+what the world does only when a chosen line faults, and the shipped recording
+(z-ai/glm-5.3-flash, 2026-09-03) has no faulted line in it, so nothing that is
+recorded moved.
+
+What the new checks in tests/test_actions.gd assert, for the record:
+
+  * five shapes of malformed choice -- a missing key, a name where an id is
+    wanted, a key the row does not take, an action that does not exist, and
+    nothing chosen at all -- each refused, each counted as one action attempted,
+    and each leaving the scene's fingerprint exactly as it was;
+  * the four refusals that are about the world -- no world, the actor is not in
+    it, the thing acting is not a character, the actor is down -- each saying
+    what it says and counted for nobody, including when a malformed choice is
+    handed in as well (the catalogue's sentence still wins and still counts for
+    nobody);
+  * a plan, a person at a keyboard and a model each reaching their second choice
+    after their first one was faulted, run rather than read;
+  * a scan over every .gd file in the project: `actions_taken` is named as code
+    in sim/action_scene.gd alone, `note_action(` in the scene that declares it
+    and the engine that calls it and nowhere else, the engine calls it exactly
+    once, and every `actions_of(` in sim/decision_source.gd and sim/model_mind.gd
+    is `scene.actions_of(`.

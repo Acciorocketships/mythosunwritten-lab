@@ -90,8 +90,10 @@ static func recorded(choices: Array) -> Callable:
 ## A decision function fed a plan written down in advance.
 ##
 ## The same list as `recorded()`, read the other way round: the choice offered is
-## the one at the index of how many actions the character has actually had
-## carried out, which the world counts in `ActionScene.actions_taken`. Nothing is
+## the one at the index of how many actions the character has attempted, which the
+## world counts in `ActionScene.actions_taken` -- a choice the catalogue refused
+## among them, so an entry the engine cannot read costs the plan one line rather
+## than stopping it where it stands. Nothing is
 ## consumed by being asked, so a driver may ask as often as it likes and get the
 ## same answer until the world changes under it:
 ##
@@ -153,6 +155,12 @@ static func plan(choices: Array) -> Callable:
 ## what they want while their character is still walking has not thereby spent
 ## their next turn -- and what makes an interrupted walk something the character
 ## takes up again rather than something the person has to press twice.
+##
+## A choice the engine refuses has still been had: the count moves, the standing
+## choice is taken back, and the person is asked for another one. That holds for
+## the refusals the catalogue gives as much as for the ones the world gives, so a
+## line the engine cannot read costs a person one turn rather than leaving the
+## same unusable choice standing for the rest of the run.
 static func live(chosen: LiveChoice) -> Callable:
 	# Which choice was last read, and what its character had carried out at the
 	# moment it was read. Two numbers, kept beside the function for the same
@@ -171,9 +179,10 @@ static func live(chosen: LiveChoice) -> Callable:
 			reading[0] = chosen.serial
 			reading[1] = done
 		elif done > reading[1]:
-			# The world has carried an action out for this character since the
-			# choice was made, so the choice has been had. The person chooses
-			# again, and until they do their character waits.
+			# The world has resolved an action for this character since the
+			# choice was made, so the choice has been had -- whether the engine
+			# carried it out or refused it. The person chooses again, and until
+			# they do their character waits.
 			chosen.carried_out += 1
 			chosen.withdraw()
 			return null
