@@ -185,11 +185,24 @@ onto the processor and costs $28$ s a call, where a $4096$-token context keeps
 every layer on the graphics card at $0.15$ s. The prompt measures about $1{,}100$
 tokens and a reply $6$ to $14$, so $4096$ is ample.
 
-The endpoint seam that would make this a supported path is **not built**:
-`net/model_call.gd` still nails one host, port $443$, TLS and a bearer header
-into constants. The probe reached a local model by replacing the one `Callable`
-that `bin/agent_main.gd` hands to the channel, and nothing under `sim/` had to
-change — which is the evidence that the seam is in the right place.
+The endpoint seam that makes this a supported path is now **built**, in commit
+`feda216`: `net/model_call.gd` resolves the host, the port, the transport, the
+route, the model name and the authorisation header from two environment
+variables, `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL`, read the way the key
+already was. With neither set every command means exactly what it meant before,
+shown by re-running `--live` and getting a byte-identical transcript. Nothing
+under `sim/` learned that a second endpoint exists. A local endpoint is sent no
+key, and a recording made against one writes `LOCAL := true`, so its provenance
+line reads *"a local model, `<name>`"* and cannot be quoted as the cloud pass.
+
+Which models can answer here was then established by trying nine candidates
+rather than by reading version numbers, on 2026-09-04 against a card that was
+free the whole time. Two more run outright and cost nothing to reach —
+`gemma3n:e2b` at $6{,}072$ MiB and $0.787$ s a call, `gemma3n:e4b` at $7{,}944$
+MiB and $0.849$ s — and one diffusion model, `LLaDA2.1-mini`, runs at 4-bit but
+answers in $77.7$ s. `DiffusionGemma` does not run here at all. The full arm
+list, with the runtime and settings or the reason per line, is
+[reports/local-roster.md](local-roster.md).
 
 ## The recording has moved on, and that is the point
 
