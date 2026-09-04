@@ -123,16 +123,17 @@ So a difference in what comes back is a difference the goal made:
 
 | arm | what it is after | the model chose |
 |---|---|---|
-| no goal | — | `say(text="A fair bargain, you say? What are you offering, Wren?" target=1)` |
+| no goal | — | `say(text=then let us trade target=1)` |
 | the empty stall | be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
-| a trade with Rook | have traded with #2 | `trade_propose(target=2 give_money=1)` |
-| thought well of here | be thought well of in this market | `say(text=A fair bargain indeed, Wren! What are you offering? target=1)` |
+| a trade with Rook | have traded with #2 | `trade_propose(target=2 give_money=1 want_money=0)` |
+| thought well of here | be thought well of in this market | `say(text=I will deal fairly with you both target=1)` |
 
 Two of the three changed **which action** was chosen; all three changed the
 choice. The position arm is worth pausing on: the character was after a place, and
 it answered with the one action in the list that names a place, at exactly the
-coordinates it was after. It is the first time in this project's transcripts that
-a model has chosen a position at all.
+coordinates it was after, to the same three decimals the goal was written in. The
+trade arm proposed to the one character its goal named, and offered a coin to do
+it.
 
 The full transcript is `reports/goal-evidence.txt`.
 
@@ -144,27 +145,32 @@ alone. What happened is the model's own:
 
 ```
 turn 1   go_to target=#2         go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
-t= 24    be beside #2            closed by the world: #2 is 1.8 away
+t= 25    be beside #2            closed by the world: #2 is 1.8 away
 ```
 
 The first thing it did was walk to the character its most pressing goal named,
-and the world closed that goal out of its own state twenty-four ticks in — no
+and the world closed that goal out of its own state twenty-five ticks in — no
 step towards it was written down anywhere, and Pell was never asked whether it
 had arrived.
 
-The second goal it pursued and did not get. It spoke to the market looking for
-the lantern, then proposed a trade for it eleven times running:
+The second goal it pursued for the rest of the run and did not get. It asked Rook
+twice and Wren three times where a brass lantern was to be found, looked back
+through its own memory seven times, reached for the market pile the lantern had
+been in, and twice offered Wren coin for it:
 
 ```
-t= 88  Pell   finished trade_propose(target=2 give_money=7 want=[brass lantern])
-              -> trade_propose refused: Rook carries none of that
+t= 31  Pell   finished examine(target=6)
+              -> examine refused: there is nothing with id 6
+t= 92  Pell   finished trade_propose(target=1 give_money=5 want=[brass lantern])
+              -> trade_propose refused: Wren is out of reach (4.38 > 2.50)
 ```
 
-Rook never had it: Wren picked it up at tick 34. Nothing in the prompt told Pell
-that, nothing told it where the lantern went, and the refusal is the engine's own
-sentence — the same one any other caller gets. The goal is still open at the end
-of the run and the table says so. The third, `be thought well of in this market`,
-is Pell's own to close and Pell never closed it.
+Wren picked the lantern up at tick 29 and the pile went out of the world with it.
+Nothing in the prompt told Pell that, nothing told it where the lantern went, and
+both refusals are the engine's own sentences — the same ones any other caller
+gets. The goal is still open at the end of the run and the table says so. The
+third, `be thought well of in this market`, is Pell's own to close and Pell never
+closed it.
 
 ## Nothing hard-codes a story
 
@@ -197,6 +203,7 @@ own and over the whole prompt, and finds nothing in either.
 | world fingerprint (`./run_headless.sh`) | unchanged |
 | layer, combat, interface and asset checks | pass |
 
-The recording was re-made live for this step, because the prompts changed: 21
-replies for the shipped run, 4 for the lesson comparison and 4 for the goal
-comparison, all from `anthropic/claude-fable-5` in one pass on 2026-09-02.
+The recording has been re-made live since this step was written, most recently on
+2026-09-04: 77 replies for the shipped run, 4 for the lesson comparison and 4 for
+the goal comparison, all from `z-ai/glm-5.3-flash` in one pass. Not one of them
+was declined and not one came back empty.

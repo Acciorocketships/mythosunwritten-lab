@@ -26,8 +26,10 @@ extends RefCounted
 ## reasons. The shape has outlived the reason it was given, and the second
 ## reason is why it stays.
 ##
-## **What the shape was for.** On `anthropic/claude-fable-5` both of these
-## prompts, put first line first, were refused before the model ever saw them:
+## **What the shape was for.** On the model this project called before
+## 2026-09-03 -- named, with the whole comparison that replaced it, in
+## `reports/model.md` -- both of these prompts, put first line first, were
+## refused before the model ever saw them:
 ## every one of five questions in a recording pass came back "this request
 ## triggered restrictions on violative cyber content". Bisecting showed the
 ## trigger was having *any* leading paragraph of instruction in front of the

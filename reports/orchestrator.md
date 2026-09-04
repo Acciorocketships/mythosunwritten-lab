@@ -16,7 +16,7 @@ narratives by putting characters and events next to each other. It scripts none
 of them.
 
 ```
-./run_world.sh              # the run: five looks, three spawns, six operations
+./run_world.sh              # the run: five looks, six spawns, eleven operations
 ./run_world_suite.sh        # just this step's suite (282 checks)
 OPENROUTER_API_KEY=... ./run_record.sh --live --world   # re-make this recording
 ```
@@ -55,8 +55,8 @@ scores, an empty backstory, and a placeholder name (`herald #5`).
 
 ### The shipped run's charming fool
 
-The run's third look spawned a `herald` — the role whose charisma band is high
-and whose wisdom band is low. What the engine rolled, at tick 94:
+The run's second look spawned a `herald` — the role whose charisma band is high
+and whose wisdom band is low. What the engine rolled, at tick 34:
 
 ```
 str 7  con 9  cha 17  dex 6  wis 4  int 8        highest cha, lowest wis, 13 apart
@@ -66,27 +66,26 @@ and what came back three ticks later, having been shown those numbers and asked
 who they add up to:
 
 ```
-name        Silverbell
-traits      magnetic voice, tireless traveler, hopelessly credulous
-tendencies  charms crowds and gatekeepers alike, repeats any message given
-            without questioning it, wanders far past sensible bounds
-backstory   Silverbell has carried proclamations across nine rings of the
-            world, their voice opening doors that swords could not, and their
-            sturdy legs outlasting every road. Yet they have delivered lies as
-            gladly as truths, for they have never once thought to ask what a
-            message means before shouting it.
+name        Vessaline
+traits      silver-tongued, magnetic, careless of counsel
+tendencies  charms first, asks never, forgets warnings
+backstory   Born in the ninth ring's edge-lands, Vessaline learned early that a
+            beautiful voice opens doors that strength and sense cannot, and has
+            talked their way into a herald's office while leaving a trail of
+            ignored advice behind them.
 ```
 
 That is the acceptance line "extreme enough that the explanation is checkable",
-and it checks: charisma $17$ is the voice that opens doors, wisdom $4$ is
-delivering lies as gladly as truths, and constitution $9$ against a level-10
-region is the "sturdy legs". The transcript prints the six numbers again
-afterwards, and they are the same six.
+and it checks: charisma $17$ is the beautiful voice that opens doors, wisdom $4$
+is the trail of ignored advice, and the ninth ring is where the run stands. The
+transcript prints the six numbers again afterwards, and they are the same six.
 
-The other two spawns are the same mechanism on less extreme sheets — a scout
-rolled highest on dexterity became *Sable Quickstep, light-footed, keen-eyed,
-slight of frame*; a scholar rolled `wis 12 int 12` against `str 5` became *Maren
-Quill, keen-eyed, patient, frail of arm*.
+The other five spawns are the same mechanism on less extreme sheets — a scout
+rolled highest on dexterity became *Swiftbrook, quick-fingered, observant,
+soft-spoken*; a guard rolled `str 14` against `cha 5` became *Grum Vask,
+brutishly strong, tireless, stone-faced*, who "misreads kindness as mockery"; a
+scholar rolled `wis 14 int 13` against `dex 6` became *Sage Verrin*, whose "weak
+hand at coordination has always made fieldwork and craft embarrassing".
 
 **A persona cannot move a number.** The suite answers a persona question with a
 reply whose second line reads `str=18 con=18 cha=18 dex=18 wis=18 int=18`. The
@@ -156,16 +155,19 @@ The four `place` kinds are the two axes an object has, and nothing more: `chest`
 (holds things, open), `crate` (holds things, shut), `door` (holds nothing, shut),
 `stone` (holds nothing, open).
 
-**Every operation is refusable, and the run shows it.** Two of the six the model
-named were refused because the ground would not carry a character there:
+**Every operation is refusable, and the run shows it.** Of the eleven the model
+named, the engine carried out nine and refused two — one for ground that would
+not carry the thing asked for, one for a shove longer than a shove goes:
 
 ```
-did       spawn role=scout at=(-470.0, 415.0)     ... stands at (-470.000, 415.000) as #4
-would not spawn role=herald at=(-478.0, 425.0)    nothing at (-478.000, 425.000) would carry it
-would not spawn role=herald at=(-476.0, 428.0)    nothing at (-476.000, 428.000) would carry it
-did       spawn role=herald at=(-486.0, 408.0)    ... stands at (-486.000, 408.000) as #5
 did       open target=#3                          the hazel crate came open
-did       spawn role=scholar at=(-478.0, 412.0)   ... stands at (-478.000, 412.000) as #6
+did       spill target=#2                         0 things and 9 coins out of the oak chest onto pile #4
+did       spawn role=scout at=(-470.0, 418.0)     ... stands at (-470.000, 418.000) as #5
+did       spawn role=herald at=(-466.0, 424.0)    ... stands at (-466.000, 424.000) as #6
+did       spawn role=guard at=(-480.0, 412.0)     ... stands at (-480.000, 412.000) as #7
+would not place kind=chest at=(-490.0, 420.0)     nothing at (-490.000, 420.000) would carry it
+would not move target=#4 to=(-478.0, 416.0)       5.66 is further than a shove carries (4.00)
+did       place kind=chest at=(-476.0, 416.0)     a chest now stands at (-476.000, 416.000) as #11
 ```
 
 `nothing` is also an answer — a look that decides the world needs no change is
@@ -213,10 +215,10 @@ exactly one question — an unanswered look is not asked again.
 
 ```
 ticks      150 asked for, 150 advanced
-thinking   24 of those ticks had a question outstanding, the longest run of them 6 ticks
-meanwhile  the character was part-way through an action on 24 of those 24 ticks
+thinking   30 of those ticks had a question outstanding, the longest run of them 6 ticks
+meanwhile  the character was part-way through an action on 30 of those 30 ticks
            and stood idle on none of them
-and it     carried out 13 actions over the run, 2 of them landing on a tick
+and it     carried out 13 actions over the run, 4 of them landing on a tick
            the orchestrator was thinking
 left over  0 questions outstanding when the run ended
 ```
@@ -229,9 +231,9 @@ decision is. A look that has been asked and not answered simply stays open.
 | | |
 |---|---|
 | looks | 5 taken, 0 of which left the world alone |
-| calls | 8 put to a model — 5 looks and one persona per spawn |
-| operations | 6 named, 4 carried out by the engine |
-| spawns | 3, each of them one roll and one call |
+| calls | 11 put to a model — 5 looks and one persona per spawn |
+| operations | 11 named, 9 carried out by the engine |
+| spawns | 6, each of them one roll and one call |
 
 A spawn is therefore **two calls and one roll**, and a look that spawns nobody is
 one call. The persona call is the only part of a spawn that costs anything beyond
@@ -245,19 +247,38 @@ question swapped. That line sits **near the bottom of the prompt, above the
 answer instruction**, and not at the top where the difficulty-class agent's
 equivalent sits.
 
-That is not a style preference. Put first, both prompts were refused by the
-provider before the model ever saw them: every one of five questions in the first
-recording pass came back *"this request triggered restrictions on violative cyber
-content"*. Bisecting the prompt block by block showed the trigger was having
-**any** leading paragraph of instruction in front of the world and the operation
-table — a message that opens with a role and then lists commands with `target=`
-in them reads, to something upstream, like an attempt to drive a system. The same
-words with that line moved to the bottom are answered every time; the second
-recording pass put eight questions and had eight answered.
+That is not a style preference, and it has now been measured twice, against two
+providers, for two different reasons.
 
-The reason is written into the head of `sim/orchestrator_prompt.gd`, because
-moving that line back to the top would break the recorder silently and
-completely.
+**What the shape was for.** Put first, both prompts were refused by the provider
+this project used before 2026-09-03 — named, with the whole comparison, in
+[reports/model.md](model.md) — before the model ever saw them: every one of five
+questions in that recording pass came back *"this request triggered restrictions
+on violative cyber content"*. Bisecting the prompt block by block showed the
+trigger was having **any** leading paragraph of instruction in front of the world
+and the operation table — a message that opens with a role and then lists commands
+with `target=` in them reads, to something upstream, like an attempt to drive a
+system. Moving that line to the bottom was answered every time.
+
+**That reason has gone.** Put to the model this file's calls now go to, both
+shapes were measured on 2026-09-04: all eleven questions the orchestrator run
+puts, three times each, in both shapes, 66 calls, and **not one was declined, in
+either shape**. By the rule of three the content-refusal rate here is under about
+9% at 95% confidence either way. A refusal belongs to a provider, not to a
+prompt.
+
+**A second reason took its place, so the shape stays.** On the largest of the five
+world questions the leading shape drives this model into thinking until the answer
+ceiling runs out and it answers with nothing at all: **7 empty answers in 11 puts,
+against 0 in 11** for the shape that ships, every one of the seven cut off at
+`length`, $p \approx 0.004$ by Fisher's exact test. An empty answer costs the
+recorder that question exactly as completely as a refusal did. So the naming line
+stays where it is — now as a measured choice about this model rather than a
+workaround for somebody's filter.
+
+Every call of that measurement is in `.lab/memory/files/prompt-lead-check-2026-09-04.md`,
+`tools/prompt_lead_probe.sh` puts it again, and the reason is written into the
+head of `sim/orchestrator_prompt.gd`.
 
 ## Headless, deterministic, and no network
 

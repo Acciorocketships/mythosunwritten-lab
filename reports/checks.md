@@ -250,9 +250,9 @@ line. A pass with no `--checks` still records all four together.
 The whole exchange is three rows:
 
 ```
-{"prompt": "b723d1dc859f2ded", "reply": "dc=12 ability=str", "ms": 5972},
-{"prompt": "b4dc9bc7079ce35a", "reply": "open target=#2",    "ms": 4725},
-{"prompt": "424074711a1ba4fe", "reply": "dc=12 ability=dex", "ms": 5427},
+{"prompt": "b723d1dc859f2ded", "reply": "dc=12 ability=str", "ms": 2250},
+{"prompt": "b4dc9bc7079ce35a", "reply": "open target=#2",    "ms": 5890},
+{"prompt": "424074711a1ba4fe", "reply": "dc=12 ability=dex", "ms": 3392},
 ```
 
 Three rows for four checks — the recording itself is the evidence that two of

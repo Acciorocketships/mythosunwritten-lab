@@ -163,25 +163,25 @@ language model and one driven by a person's recorded choices, 160 ticks, seed
 
 ```
 what the world recorded between them
-  4 edges, made of 16 happenings, and not one of them on anybody's sheet
+  4 edges, made of 33 happenings, and not one of them on anybody's sheet
   sentiment is familiarity x (trust - fear), which is the one number section 6 reads
   who    driven by with     trust    fear   respect   familiarity  sentiment
   Wren   a person  Rook      0.00    0.00      0.00          0.68      +0.00
-  Wren   a person  Pell      0.00    0.00      0.00          0.44      +0.00
+  Wren   a person  Pell      0.00    0.00      0.00          0.82      +0.00
   Rook   a model   Wren      0.00    0.00      0.00          0.68      +0.00
-  Rook   a model   Pell      0.00    0.00      0.00          0.68      +0.00
-  Bram   a model   Sable     0.00    0.00      0.00          0.82      +0.00
-  Sable  a model   Bram      0.00    0.00      0.00          0.82      +0.00
+  Rook   a model   Pell      0.00    0.00      0.00          0.98      +0.00
+  Bram   a model   Sable     0.00    0.00      0.00          0.92      +0.00
+  Sable  a model   Bram      0.00    0.00      0.00          0.92      +0.00
   Odo    a model   nothing has passed between it and anybody
-  Pell   a model   Rook      0.00    0.00      0.00          0.68      +0.00
-  Pell   a model   Wren      0.00    0.00      0.00          0.44      +0.00
+  Pell   a model   Rook      0.00    0.00      0.00          0.98      +0.00
+  Pell   a model   Wren      0.00    0.00      0.00          0.82      +0.00
 ```
 
 Wren is the character a person drives. Its two edges sit in the same table as the
 five model-driven ones, carrying the same kind of numbers, of the same order:
-0.68 and 0.44 against Rook's 0.68/0.68 and Bram and Sable's 0.82. Odo walked away
-from everybody and has no edges, which is a fact about where Odo went and not
-about what is on its `decide`. This is the finding of the earlier review — that
+0.68 and 0.82 against Rook and Pell's 0.98 and Bram and Sable's 0.92. Odo walked
+away from everybody and has no edges, which is a fact about where Odo went and
+not about what is on its `decide`. This is the finding of the earlier review — that
 the two per-character stores filled only along the model layer's path — not
 repeated for the third store.
 
