@@ -15,8 +15,15 @@ func _initialize() -> void:
 			quit(2)
 			return
 	var flights := []
-	var channel := ModelChannel.for_run(
-		ModelRecording.goal_exchange(), _transport(args.has("--live"), flights))
+	# The transport first, because whether there is one decides which model the
+	# head of this run should name. A replay names the model the rows were
+	# recorded from; a live run names the one actually answering, which since
+	# there are two endpoints is no longer the same thing.
+	var transport := _transport(args.has("--live"), flights)
+	var exchange := ModelRecording.goal_exchange()
+	if transport.is_valid():
+		exchange = ModelCall.live_exchange(exchange)
+	var channel := ModelChannel.for_run(exchange, transport)
 	for line in ScriptedGoal.play(channel):
 		print(line)
 	var settled := ModelCall.settle(flights)

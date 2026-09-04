@@ -67,8 +67,15 @@ func _initialize() -> void:
 	var only_cast := args.has("--cast")
 	var everything := not only_checks and not only_world and not only_cast
 	var credentials := ModelCall.credentials()
-	print("recorder: %s" % ModelCall.ENDPOINT)
-	print("  model      %s" % ModelCall.MODEL)
+	# Where this pass would go, rather than where the shipped recording came
+	# from. They are the same unless the environment names a local endpoint, and
+	# the whole reason the head prints it is so that a pass which is not the
+	# shipped kind cannot be mistaken for one.
+	var where := ModelCall.endpoint()
+	print("recorder: %s" % (where["url"] if where["ok"] else "nowhere"))
+	print("  model      %s%s" % [
+		where["model"], " (running locally)" if where["local"] else "",
+	])
 	print("  credential %s" % credentials["why"])
 	print("  putting    %s" % _what_is_being_put(
 		everything, only_cast, only_checks, only_world))
@@ -83,6 +90,10 @@ func _initialize() -> void:
 		printerr("  did nothing: %s" % credentials["why"])
 		printerr("  a person with a key would run:")
 		printerr("    %s=sk-... ./run_record.sh --live" % ModelCall.KEY_VARIABLE)
+		printerr("  or, against a model running on this machine:")
+		printerr("    %s=http://127.0.0.1:11435/v1/chat/completions \\" % (
+			ModelCall.ENDPOINT_VARIABLE))
+		printerr("    %s=<the model> ./run_record.sh --live" % ModelCall.MODEL_VARIABLE)
 		quit(1)
 		return
 
@@ -231,7 +242,10 @@ const TRIES := 6
 # everything.
 func _fresh() -> ModelChannel:
 	return ModelChannel.recording(
-		{"rows": [], "from": "nothing recorded yet", "model": ModelCall.MODEL},
+		{
+			"rows": [], "from": "nothing recorded yet",
+			"model": ModelCall.endpoint()["model"],
+		},
 		ModelCall.at_once(ModelCall.key(), TRIES))
 
 
@@ -279,10 +293,22 @@ func _write(rows: Dictionary) -> String:
 			break
 		kept.append(line)
 
+	var where := ModelCall.endpoint()
 	kept.append("## Which model was asked, where, and when. Rewritten by the recorder.")
-	kept.append('const MODEL := "%s"' % ModelCall.MODEL)
-	kept.append('const ENDPOINT := "%s"' % ModelCall.ENDPOINT)
+	kept.append('const MODEL := "%s"' % where["model"])
+	kept.append('const ENDPOINT := "%s"' % where["url"])
 	kept.append('const RECORDED_ON := "%s"' % rows["on"])
+	kept.append("")
+	kept.append("## Whether these replies came from a model running on the machine that recorded")
+	kept.append("## them rather than from the endpoint the shipped recording is made against.")
+	kept.append("##")
+	kept.append("## A local model answers this run's questions in a fifth of a second and for")
+	kept.append("## nothing, which makes it the right thing to iterate against and the wrong")
+	kept.append("## thing to ship: the replies checked in here are quoted across the reports as")
+	kept.append("## what a capable model chose. So a recording made against one says so in its")
+	kept.append("## own provenance line -- printed at the head of every run that replays it --")
+	kept.append("## and no report can quote it as the other thing.")
+	kept.append("const LOCAL := %s" % ("true" if where["local"] else "false"))
 	kept.append("")
 	kept.append("## When the difficulty-class table was recorded, which is its own date because")
 	kept.append("## it is the one table that can be recorded on its own -- `./run_record.sh")
@@ -354,17 +380,23 @@ func _write(rows: Dictionary) -> String:
 	kept.append('\treturn {"rows": WORLD_ROWS, "from": world_provenance(), "model": MODEL}')
 	kept.append("")
 	kept.append("")
+	kept.append("## How a provenance line names who answered: the model, and whether it was one")
+	kept.append("## running on the machine that recorded it. See `LOCAL` above.")
+	kept.append("static func said_by() -> String:")
+	kept.append('\treturn "a local model, %s" % MODEL if LOCAL else MODEL')
+	kept.append("")
+	kept.append("")
 	kept.append("## Where the orchestrator replies came from.")
 	kept.append("static func world_provenance() -> String:")
 	kept.append('\treturn "recorded %s from %s at %s, %d replies" % [')
-	kept.append("\t\tWORLD_RECORDED_ON, MODEL, ENDPOINT, WORLD_ROWS.size(),")
+	kept.append("\t\tWORLD_RECORDED_ON, said_by(), ENDPOINT, WORLD_ROWS.size(),")
 	kept.append("\t]")
 	kept.append("")
 	kept.append("")
 	kept.append("## Where the difficulty-class replies came from.")
 	kept.append("static func check_provenance() -> String:")
 	kept.append('\treturn "recorded %s from %s at %s, %d replies" % [')
-	kept.append("\t\tCHECKS_RECORDED_ON, MODEL, ENDPOINT, CHECK_ROWS.size(),")
+	kept.append("\t\tCHECKS_RECORDED_ON, said_by(), ENDPOINT, CHECK_ROWS.size(),")
 	kept.append("\t]")
 	kept.append("")
 	kept.append("")
@@ -381,7 +413,7 @@ func _write(rows: Dictionary) -> String:
 	kept.append("## orchestrator tables, each of which has its own date and its own line.")
 	kept.append("static func provenance() -> String:")
 	kept.append('\treturn "recorded %s from %s at %s, %d replies" % [')
-	kept.append("\t\tRECORDED_ON, MODEL, ENDPOINT,")
+	kept.append("\t\tRECORDED_ON, said_by(), ENDPOINT,")
 	kept.append("\t\tROWS.size() + LESSON_ROWS.size() + GOAL_ROWS.size(),")
 	kept.append("\t]")
 

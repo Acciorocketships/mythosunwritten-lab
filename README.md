@@ -1047,6 +1047,60 @@ OPENROUTER_API_KEY=... ./run_record.sh --live          # remake the whole record
 OPENROUTER_API_KEY=... ./run_record.sh --live --cast   # remake the three character-run tables alone
 ```
 
+### A small model running on the same machine
+
+There is a second endpoint, and it is named in the environment rather than in the
+tree. `net/model_call.gd` ships one host, port 443, TLS and a bearer header; a
+small model running beside the game is plain HTTP on a loopback port with no
+credential at all. Setting two variables sends every `--live` call there instead,
+and nothing else changes — not a flag, not a script, and nothing under `sim/`,
+which learns no more about the second endpoint than it does about the first.
+
+```
+LOCAL_MODEL_ENDPOINT=http://127.0.0.1:11435/v1/chat/completions \
+LOCAL_MODEL=qwen3:4b-instruct ./run_agent.sh --live
+```
+
+With neither variable set, `--live` means exactly what it has always meant: the
+paid endpoint, and without a key for it the recorded exchange replayed instead.
+The key is never sent to a local endpoint even when one is set, and an address
+that will not parse is refused and named rather than quietly falling back to the
+paid endpoint, which would be a typo that spends money.
+
+**The shipped recording stays a cloud recording.** A local model answers this
+run's questions in a fifth of a second and for nothing, which makes it right for
+soaks, for long runs and for shaking out a prompt change before paying for a
+pass — and wrong for `net/model_recording.gd`, whose replies are quoted across
+these reports as what a capable model chose. So a recording made against a local
+model says so in its own provenance line, printed at the head of every run that
+replays it, and no report can quote it as the other thing:
+
+```
+recording  recorded 2026-09-04 from a local model, qwen3:4b-instruct at http://127.0.0.1:11435/v1/chat/completions, 85 replies
+recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+```
+
+**Two things about the server that will otherwise cost an hour.** They are facts
+about running `ollama`, not about this repository, and both were found the hard
+way:
+
+* it writes a key into `$HOME/.ollama` at startup and dies with "read-only file
+  system" where the home directory is not writable, so `HOME` and
+  `OLLAMA_MODELS` have to point somewhere that is;
+* its default context length of 32768 tokens makes a 3.6 GiB KV cache for a 3B
+  model, which pushes layers off the GPU and costs **28 seconds a call** against
+  **0.15 seconds** with `OLLAMA_CONTEXT_LENGTH=4096`. The run's prompt measures
+  about 1100 tokens and the replies 6 to 14, so 4096 is ample.
+
+```
+HOME=/somewhere/writable OLLAMA_MODELS=/somewhere/writable/models \
+OLLAMA_CONTEXT_LENGTH=4096 OLLAMA_HOST=127.0.0.1:11435 ollama serve
+```
+
+What one live run against a local model measured, beside the numbers of the
+recording it replaced, is in
+[reports/local-endpoint-evidence.txt](reports/local-endpoint-evidence.txt).
+
 The whole of it, with the exchange in full and the three things the run found, is
 in [reports/agent.md](reports/agent.md).
 

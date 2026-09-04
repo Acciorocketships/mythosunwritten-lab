@@ -1,0 +1,154 @@
+a second endpoint: a small model running on this machine, answering the same questions
+======================================================================================
+
+what was measured, and on what
+
+  net/model_call.gd used to nail one host, port 443, TLSOptions.client(), one
+  route, one model id and a bearer header into constants. It now reads the
+  endpoint out of the environment the way it already reads the key:
+  LOCAL_MODEL_ENDPOINT names the whole URL and LOCAL_MODEL names the model. With
+  neither set, every command means exactly what it meant before. No address is
+  written anywhere in the tree, and nothing under sim/ learns that a second
+  endpoint exists.
+
+  The server, for every run below:
+
+    HOME=<writable> OLLAMA_MODELS=<writable>/models OLLAMA_CONTEXT_LENGTH=4096 \
+      OLLAMA_HOST=127.0.0.1:11435 ollama serve
+
+  ollama 0.17.4 on an RTX 4090. Read the numbers below knowing that another
+  process held 22.5 of the card's 24 GiB throughout, leaving about 1.6 GiB: only
+  11 of qwen3:4b-instruct's 37 layers and 4 of qwen2.5:3b-instruct's went onto
+  the GPU. A card to itself would be faster than anything here.
+
+
+1. --live with no local endpoint set means what it has always meant
+------------------------------------------------------------------
+
+  $ env -u OPENROUTER_API_KEY -u LOCAL_MODEL_ENDPOINT -u LOCAL_MODEL \
+      ./run_agent.sh --live
+  --live: OPENROUTER_API_KEY is not set in the environment, so the recorded
+          exchange is replayed instead
+
+  $ diff reports/agent-evidence.txt <that run's output>
+  (no output: byte for byte the transcript that is checked in)
+
+
+2. one call, on the run's own first question
+--------------------------------------------
+
+  The question ./run_record.sh prints without --live: 3,267 characters, 1,069
+  prompt tokens, digest 6a973c08474c3f48. Each model asked four times in a row,
+  max_tokens 1200, temperature 0, no reasoning field.
+
+  model                        first call   then          reply           tokens
+  qwen3:4b-instruct (local)         840 ms  301/290/301   examine target=#7    6
+  qwen2.5:3b-instruct (local)    79,074 ms  612/743       recall about=the    14
+                                                          last 3 of 3 things
+                                                          you remember
+  the recording's own rows       --         median 3,493  --                  --
+  (99 replies, z-ai/glm-5.3-flash            min 476
+   over HTTPS, checked in)                  max 59,234
+
+  The first call of each row is the model being loaded, not the model thinking;
+  qwen2.5's 79 seconds is a cold load onto a card with 1.6 GiB free. Warm, a
+  local call on this run's own prompt is between 5 and 12 times faster than the
+  median call the shipped recording was made with, on a machine giving it almost
+  no GPU at all.
+
+
+3. a live run against a local model, end to end
+-----------------------------------------------
+
+  $ LOCAL_MODEL_ENDPOINT=http://127.0.0.1:11435/v1/chat/completions \
+    LOCAL_MODEL=qwen3:4b-instruct ./run_agent.sh --live
+  ... 24.5 seconds, exit 0
+
+  model cast run seed=1234 ticks=160 where=(-480.0, 420.0)
+    channel    live -- every question put to qwen3:4b-instruct as the run reaches it
+    recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+
+  The head names the model that is answering, not the one the rows were recorded
+  from -- those are no longer the same thing, so the entry point swaps the live
+  model's name in on the way past.
+
+  the model cast's turns -- 10 questions across 5 characters, 9 chose an action
+    who    turn  the model said              what the engine answered
+    Rook   1     examine target=#7           examine ok id=7 name=Pell kind=commander health=unhurt distance=6.325
+    Bram   1     examine target=#6           examine refused: there is nothing with id 6
+    Sable  1     examine target=#3           examine ok id=3 name=Bram ... distance=12.0
+    Odo    1     wait 10                     wait refused: wait needs ticks
+    Pell   1     go_to target=#2             go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
+    Rook   3     say text=hello target=#7    say ok shout=false heard_by=1
+
+  15 calls over 160 ticks, 0.094 calls a tick. Every one of them cost nothing and
+  went to a loopback port; no key was sent, because the key is not read at all
+  when the endpoint is a local one.
+
+
+4. what a local soak found, reported and not fixed here
+-------------------------------------------------------
+
+  Two 3000-tick runs, same seed, same world, same prompt, differing only in which
+  local model answered.
+
+  model                   turns  chose an action   recall   go_to  wait  say  examine
+  qwen3:4b-instruct         382              380        2     154   135   79       12
+  qwen2.5:3b-instruct     4,854              143    4,711     142     0    0        0
+
+  qwen2.5:3b-instruct spent 97.1% of a three-thousand-tick run on the recall
+  tool. Four of the five characters -- Rook, Bram, Sable, Odo -- made between
+  1,174 and 1,181 calls each and resolved not one action in the whole run; only
+  Pell, which never once chose recall, moved at all. The run cost 4,858 calls
+  against 386 for the same run with qwen3:4b-instruct: 1.619 calls a tick against
+  0.129, twelve and a half times the volume, which against a paid endpoint is
+  twelve and a half times the bill.
+
+  The shape is the one a side probe saw before this step (141 of 161 calls) and
+  it is a hole in the tool surface, not in the model: recall costs no world time
+  and answers at once, so a mind that chooses it is asked again on the very next
+  tick, having changed nothing. Three of the four looping characters were asking
+  about nothing in particular -- "recall about=lately", "recall about=words",
+  "recall about=the last 3 of 3 things you remember" -- and got "0 things came
+  back" every time, which never made a repeat visibly pointless.
+
+  This is reported here and deliberately not fixed here: redesigning the tool
+  surface is out of this step's scope. What it establishes is that a cheap local
+  model is a good stress test for exactly this class of hole, because it is cheap
+  enough to run five thousand calls through and find one.
+
+
+5. the recording question
+-------------------------
+
+  The shipped recording stays a cloud recording. A local model makes a full pass
+  in seconds and for nothing, which is right for iteration and wrong for
+  net/model_recording.gd, whose replies are quoted across these reports as what a
+  capable model chose.
+
+  A recording made against a local model is not forbidden -- it is labelled.
+  ./run_record.sh writes the endpoint it actually used, and a local one also
+  writes LOCAL := true, which the provenance line at the head of every replaying
+  run reads:
+
+    recording  recorded ... from a local model, qwen3:4b-instruct at http://127.0.0.1:11435/v1/chat/completions, N replies
+    recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+
+  No report can quote the first as the second.
+
+
+6. the two operational facts
+----------------------------
+
+  * ollama serve writes $HOME/.ollama/id_ed25519 at startup and dies with
+    "read-only file system" where the home directory is not writable. HOME and
+    OLLAMA_MODELS have to point somewhere writable.
+
+  * its default context length of 32768 tokens makes a 3.6 GiB KV cache for a 3B
+    model, which pushes layers off the GPU: 28 seconds a call against 0.15
+    seconds with OLLAMA_CONTEXT_LENGTH=4096. This run's prompt measures about
+    1,100 tokens (1,069 measured above) and its replies 6 to 14, so 4096 is
+    ample.
+
+  Both are written down in README.md, beside the two commands, where whoever
+  runs it will find them.

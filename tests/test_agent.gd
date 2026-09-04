@@ -53,6 +53,13 @@ extends TestSuite
 ##      rate that comes to, what an hour of play would be at the same rate, and
 ##      the ratio of mid-action re-evaluations to model calls -- all printed by
 ##      the command rather than worked out by hand afterwards.
+##  10. **Where a call goes is read from the environment, and `sim/` does not know
+##      there is anywhere to go.** A second endpoint -- a small model running on
+##      the machine that is playing, plain HTTP on a loopback port with no
+##      credential -- is named by two environment variables and by nothing in the
+##      tree. With them unset every command means what it meant before. Every file
+##      under `sim/` is scanned for either variable, for either host and for the
+##      key's name, and names none of them.
 class_name TestAgent
 
 ## The file the decision functions live in, and the six it declares. `live` is
@@ -104,6 +111,25 @@ const BROKEN_PROMPT := "You cannot attack a target outside your weapon's reach."
 const TRANSCRIPT := "res://reports/agent-evidence.txt"
 const COMMAND := "res://run_agent.sh"
 
+## An address to take apart, and a model to ask for at it. A fixture and not a
+## machine: nothing here ever connects to it, and all that is checked is that it
+## comes apart into the four things opening a connection needs.
+const A_LOCAL_ADDRESS := "http://127.0.0.1:11435/v1/chat/completions"
+const A_LOCAL_MODEL := "qwen3:4b-instruct"
+
+## Addresses the reader must refuse rather than quietly answer with the endpoint
+## that ships: no scheme, no host, a port that is not a number, a port outside
+## the range, and a scheme nothing here can speak.
+const REFUSED_ADDRESSES := [
+	"127.0.0.1:11435/v1/chat/completions",
+	"http://",
+	"ftp://127.0.0.1/v1/chat/completions",
+	"http://127.0.0.1:eleven/v1/chat/completions",
+	"http://127.0.0.1:99999/v1/chat/completions",
+	"http://:11435/v1/chat/completions",
+]
+
+
 ## A jump nobody's dexterity reaches, used to make a model choose something the
 ## world will refuse.
 const TOO_FAR := Vector2(400.0, 400.0)
@@ -154,6 +180,7 @@ func run() -> void:
 	_the_run_names_what_it_saw_chose_and_was_told()
 	_the_whole_cast_decides_through_a_model()
 	_the_run_says_what_it_cost()
+	_the_endpoint_is_read_from_the_environment()
 	_two_processes_agree()
 
 
@@ -291,6 +318,125 @@ func _the_model_scan_would_notice() -> void:
 		"the scan fires on a comment saying the words")
 	check(not _names_a_model("	var remodelled := 1"),
 		"the scan fires on a word that merely contains one it looks for")
+
+
+# --- 10. A second endpoint, read from the environment ----------------------
+
+
+## Where a call goes is worked out from two environment variables, no address is
+## written into the tree, and nothing under `sim/` learns that a second endpoint
+## exists.
+func _the_endpoint_is_read_from_the_environment() -> void:
+	# With the environment silent, this is what it has always been: one host,
+	# port 443, TLS, the paid endpoint's route and its reasoning field.
+	var shipped := ModelCall.endpoint_named("", "")
+	check(bool(shipped["ok"]), "the endpoint with nothing set is refused")
+	check(not bool(shipped["local"]),
+		"the endpoint with nothing set is taken for a local one")
+	equal(String(shipped["host"]), ModelCall.HOST, "with nothing set, the host")
+	equal(int(shipped["port"]), 443, "with nothing set, the port")
+	check(bool(shipped["tls"]), "with nothing set, the socket is not wrapped in TLS")
+	equal(String(shipped["route"]), ModelCall.ROUTE, "with nothing set, the route")
+	equal(String(shipped["model"]), ModelCall.MODEL, "with nothing set, the model")
+	equal(String(shipped["url"]), ModelCall.ENDPOINT, "with nothing set, the URL")
+	equal(JSON.stringify(shipped["reasoning"]), JSON.stringify(ModelCall.REASONING),
+		"with nothing set, how much thinking is asked for")
+
+	# With an address named it is that address, in the four pieces opening a
+	# connection needs -- and no reasoning field, which is one provider's word and
+	# not every server's.
+	var local := ModelCall.endpoint_named(A_LOCAL_ADDRESS, A_LOCAL_MODEL)
+	check(bool(local["ok"]), "a plain http:// address on a loopback port is refused")
+	check(bool(local["local"]), "an address out of the environment is not called local")
+	equal(String(local["host"]), "127.0.0.1", "the host out of the address")
+	equal(int(local["port"]), 11435, "the port out of the address")
+	check(not bool(local["tls"]), "a plain http:// call would be wrapped in TLS")
+	equal(String(local["route"]), "/v1/chat/completions", "the route out of the address")
+	equal(String(local["model"]), A_LOCAL_MODEL, "the model out of the environment")
+	equal(String(local["url"]), A_LOCAL_ADDRESS, "the URL is the one that was given")
+	equal(JSON.stringify(local["reasoning"]), "{}",
+		"a local call carries the paid endpoint's reasoning field")
+
+	# A port where the address gives none, and a route where it gives none.
+	equal(int(ModelCall.address_of("http://a.b/v1")["port"]), 80,
+		"http with no port is not port 80")
+	equal(int(ModelCall.address_of("https://a.b/v1")["port"]), 443,
+		"https with no port is not port 443")
+	equal(String(ModelCall.address_of("http://a.b")["route"]), "/",
+		"an address with no path is not routed at /")
+
+	# Nonsense is refused and said back, never answered with the other endpoint
+	# instead: an address with a typo in it that fell back would call -- and bill
+	# -- the paid one.
+	for address in REFUSED_ADDRESSES:
+		var refused := ModelCall.endpoint_named(String(address), A_LOCAL_MODEL)
+		check(not bool(refused["ok"]), "'%s' was accepted as an address" % address)
+		check(String(refused["why"]).contains(String(address)),
+			"'%s' was refused without being named: %s" % [address, refused["why"]])
+	check(not bool(ModelCall.endpoint_named(A_LOCAL_ADDRESS, "")["ok"]),
+		"an endpoint with no model named to ask for is accepted")
+
+	# And the whole path, through the environment this process really has.
+	var had_address := OS.has_environment(ModelCall.ENDPOINT_VARIABLE)
+	var was_address := OS.get_environment(ModelCall.ENDPOINT_VARIABLE)
+	var had_model := OS.has_environment(ModelCall.MODEL_VARIABLE)
+	var was_model := OS.get_environment(ModelCall.MODEL_VARIABLE)
+	OS.set_environment(ModelCall.ENDPOINT_VARIABLE, A_LOCAL_ADDRESS)
+	OS.set_environment(ModelCall.MODEL_VARIABLE, A_LOCAL_MODEL)
+	var read := ModelCall.endpoint()
+	check(bool(read["local"]) and String(read["url"]) == A_LOCAL_ADDRESS,
+		"the endpoint is not read from the environment")
+	check(bool(ModelCall.credentials()["ok"]),
+		"a local endpoint is refused for want of a key it never asked for")
+	equal(ModelCall.key(), "",
+		"a key would be handed to a server on a loopback port that never asked for one")
+	equal(String(ModelCall.live_exchange(
+			{"rows": [], "from": "", "model": ModelCall.MODEL})["model"]),
+		A_LOCAL_MODEL,
+		"a live run would name the model the rows were recorded from, not the one answering")
+	_environment_back(ModelCall.ENDPOINT_VARIABLE, had_address, was_address)
+	_environment_back(ModelCall.MODEL_VARIABLE, had_model, was_model)
+	check(not bool(ModelCall.endpoint()["local"]),
+		"with the variables gone the endpoint is still the local one")
+	equal(String(ModelCall.endpoint()["url"]), ModelCall.ENDPOINT,
+		"with the variables gone, where a call goes")
+
+	# Nothing under sim/ learns any of it. The same rule that keeps the first
+	# endpoint's name out of the simulation keeps the second one's out: neither
+	# variable, neither host, and not the key's name either.
+	var needles := [
+		ModelCall.ENDPOINT_VARIABLE, ModelCall.MODEL_VARIABLE, ModelCall.KEY_VARIABLE,
+		ModelCall.HOST, "127.0.0.1", "localhost",
+	]
+	var naming := PackedStringArray()
+	var read_files := 0
+	for path in _files_under("res://sim"):
+		var text := _read(path)
+		if text == "":
+			continue
+		read_files += 1
+		var lines := text.split("\n")
+		for index in lines.size():
+			for needle in needles:
+				if lines[index].contains(String(needle)):
+					naming.append("%s:%d names %s" % [path, index + 1, needle])
+	check(read_files > 40, "the scan opened %d files under sim/" % read_files)
+	equal(naming, PackedStringArray(),
+		"a file under sim/ names an endpoint or the variable one is read from")
+	# With teeth: the file that really does name both is outside sim/.
+	var transport := _read("res://net/model_call.gd")
+	check(transport.contains(ModelCall.ENDPOINT_VARIABLE) \
+			and transport.contains(ModelCall.HOST),
+		"the file that names both endpoints is not where it is said to be")
+
+
+# One environment variable put back the way it was found, so that the rest of
+# the suite runs in the environment it was started in.
+func _environment_back(variable: String, had: bool, was: String) -> void:
+	if had:
+		OS.set_environment(variable, was)
+	else:
+		OS.unset_environment(variable)
 
 
 # --- 3. The prompt holds no rule ------------------------------------------

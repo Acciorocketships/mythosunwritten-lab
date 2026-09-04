@@ -9,6 +9,15 @@
 # says what it would do and changes nothing. With --live and no key it says so
 # and changes nothing.
 #
+# It obeys the same LOCAL_MODEL_ENDPOINT / LOCAL_MODEL pair every other --live
+# command does, and a pass made against a local model needs no key and takes
+# seconds rather than minutes. That is for shaking out a prompt change, not for
+# what is checked in: the replies in net/model_recording.gd are quoted across
+# reports/ as what a capable model chose. A recording made against a local model
+# writes LOCAL := true and says "a local model, <name>" in its own provenance
+# line, printed at the head of every run that replays it, so no report can quote
+# it as the other thing.
+#
 # After it has written the recording, ./run_agent.sh replays that exchange, so
 # the transcript under reports/ has to be regenerated with it and the suite's
 # copy of it updated:

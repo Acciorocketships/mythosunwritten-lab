@@ -40,9 +40,15 @@ func _initialize() -> void:
 	var repeats := _repeats_from(args)
 	var only := _only_from(args)
 	var credentials := ModelCall.credentials()
-	print("prompt lead probe: %s" % ModelCall.ENDPOINT)
-	print("  model      %s" % ModelCall.MODEL)
-	print("  reasoning  %s" % JSON.stringify(ModelCall.REASONING))
+	# Where this probe's calls would go, which is the paid endpoint unless the
+	# environment names a local one. See the note on the two endpoints at the head
+	# of net/model_call.gd.
+	var where := ModelCall.endpoint()
+	print("prompt lead probe: %s" % (where["url"] if where["ok"] else "nowhere"))
+	print("  model      %s%s" % [
+		where["model"], " (running locally)" if where["local"] else "",
+	])
+	print("  reasoning  %s" % JSON.stringify(where["reasoning"]))
 	print("  credential %s" % credentials["why"])
 	print("  repeats    %d per question per arm" % repeats)
 	if only != "":

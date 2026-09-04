@@ -16,8 +16,15 @@ func _initialize() -> void:
 	# flight when the last tick goes by can be waited on before the engine shuts
 	# down. A run that ends mid-question is the normal case, not an error.
 	var flights := []
-	var channel := ModelChannel.for_run(
-		ModelRecording.exchange(), _transport(options["live"], flights))
+	# The transport first, because whether there is one decides which model the
+	# head of this run should name. A replay names the model the rows were
+	# recorded from; a live run names the one actually answering, which since
+	# there are two endpoints is no longer the same thing.
+	var transport := _transport(options["live"], flights)
+	var exchange := ModelRecording.exchange()
+	if transport.is_valid():
+		exchange = ModelCall.live_exchange(exchange)
+	var channel := ModelChannel.for_run(exchange, transport)
 	for line in ScriptedAgent.play(
 			channel, options["ticks"], options["seed"], _pacing(options["live"])):
 		print(line)

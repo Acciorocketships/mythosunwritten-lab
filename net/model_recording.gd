@@ -66,6 +66,17 @@ const MODEL := "z-ai/glm-5.3-flash"
 const ENDPOINT := "https://openrouter.ai/api/v1/chat/completions"
 const RECORDED_ON := "2026-09-04"
 
+## Whether these replies came from a model running on the machine that recorded
+## them rather than from the endpoint the shipped recording is made against.
+##
+## A local model answers this run's questions in a fifth of a second and for
+## nothing, which makes it the right thing to iterate against and the wrong
+## thing to ship: the replies checked in here are quoted across the reports as
+## what a capable model chose. So a recording made against one says so in its
+## own provenance line -- printed at the head of every run that replays it --
+## and no report can quote it as the other thing.
+const LOCAL := false
+
 ## When the difficulty-class table was recorded, which is its own date because
 ## it is the one table that can be recorded on its own -- `./run_record.sh
 ## --live --checks` puts only its questions and writes the other three back
@@ -230,17 +241,23 @@ static func world_exchange() -> Dictionary:
 	return {"rows": WORLD_ROWS, "from": world_provenance(), "model": MODEL}
 
 
+## How a provenance line names who answered: the model, and whether it was one
+## running on the machine that recorded it. See `LOCAL` above.
+static func said_by() -> String:
+	return "a local model, %s" % MODEL if LOCAL else MODEL
+
+
 ## Where the orchestrator replies came from.
 static func world_provenance() -> String:
 	return "recorded %s from %s at %s, %d replies" % [
-		WORLD_RECORDED_ON, MODEL, ENDPOINT, WORLD_ROWS.size(),
+		WORLD_RECORDED_ON, said_by(), ENDPOINT, WORLD_ROWS.size(),
 	]
 
 
 ## Where the difficulty-class replies came from.
 static func check_provenance() -> String:
 	return "recorded %s from %s at %s, %d replies" % [
-		CHECKS_RECORDED_ON, MODEL, ENDPOINT, CHECK_ROWS.size(),
+		CHECKS_RECORDED_ON, said_by(), ENDPOINT, CHECK_ROWS.size(),
 	]
 
 
@@ -257,6 +274,6 @@ static func size() -> int:
 ## orchestrator tables, each of which has its own date and its own line.
 static func provenance() -> String:
 	return "recorded %s from %s at %s, %d replies" % [
-		RECORDED_ON, MODEL, ENDPOINT,
+		RECORDED_ON, said_by(), ENDPOINT,
 		ROWS.size() + LESSON_ROWS.size() + GOAL_ROWS.size(),
 	]

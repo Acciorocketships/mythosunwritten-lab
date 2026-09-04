@@ -40,13 +40,43 @@ extends RefCounted
 ##     the recorder is not simulating a world, it is transcribing an exchange.
 class_name ModelCall
 
-## Where a call goes. One endpoint, named once.
+## Where a call goes when the environment names nowhere else. One host, named
+## once.
+##
+## ## Two endpoints, and why only one of them is written down here
+##
+## What is named below is a paid service reached over TLS on port 443 with a
+## bearer token in a header. A small model running on the same machine as the
+## game is none of those things -- it is plain HTTP on a loopback port with no
+## credential at all -- and three non-thinking 3-4B models answered this run's
+## own prompt in 115 to 175 milliseconds warm, against a 5.2-second median for
+## the calls the shipped recording was made with. That is worth having: a soak
+## that would cost real money against the paid endpoint costs nothing against a
+## local one, and a prompt change can be shaken out before a recording is paid
+## for.
+##
+## So there are two endpoints, and the second one is read out of the environment
+## for exactly the reason the key is. An address is a fact about somebody's
+## machine and not about this project; writing `127.0.0.1` into the tree would
+## make the repository claim something about whichever machine is reading it.
+## `LOCAL_MODEL_ENDPOINT` names the whole URL and `LOCAL_MODEL` names the model to
+## ask for. With neither set, every command in the repository means exactly what
+## it meant before this seam existed.
+##
+## The seam is here and nowhere else. Nothing under `sim/` learns that a second
+## endpoint exists, in the same way and for the same reason that nothing under
+## `sim/` knows the first one's name: what crosses the line is a `Callable`.
 const HOST := "openrouter.ai"
 const ROUTE := "/api/v1/chat/completions"
 const ENDPOINT := "https://openrouter.ai/api/v1/chat/completions"
 
 ## Which environment variable the key is read from. Never a file in the tree.
 const KEY_VARIABLE := "OPENROUTER_API_KEY"
+
+## Which environment variables the second endpoint is read from. Never a file in
+## the tree either, and for the same reason. See the note above.
+const ENDPOINT_VARIABLE := "LOCAL_MODEL_ENDPOINT"
+const MODEL_VARIABLE := "LOCAL_MODEL"
 
 ## Which model is asked, how much of an answer is paid for, and how much
 ## thinking is asked of it. The temperature is nailed down because a recording
@@ -124,6 +154,124 @@ const PATIENCE_MS := 60000
 const REST_MS := 10
 
 
+# --- Which endpoint, and which model --------------------------------------
+
+
+## Where a call goes, worked out from the environment.
+##
+## Answers a dictionary and not a URL, because a call needs all of it: the host
+## and port to open, whether to wrap the socket in TLS, the route to POST to,
+## which model to ask for, and whether a `reasoning` field belongs in the body.
+##
+## `ok` is false when the environment says something that cannot be obeyed, with
+## `why` saying what, and `fetch` then refuses the call rather than quietly going
+## to the other endpoint instead. A mistyped address is a mistake and not a
+## fallback: silently calling and billing the paid endpoint because a port number
+## had a letter in it is the one behaviour nobody would want.
+static func endpoint() -> Dictionary:
+	return endpoint_named(
+		OS.get_environment(ENDPOINT_VARIABLE).strip_edges(),
+		OS.get_environment(MODEL_VARIABLE).strip_edges())
+
+
+## The same decision, given what the environment says rather than reading it.
+##
+## Pure, and that is the point: the whole of where a call goes can be checked by
+## a suite that sets nothing in its own environment, which is the only way it
+## could be checked beside every other check rather than by hand.
+static func endpoint_named(address: String, model: String) -> Dictionary:
+	if address == "":
+		return {
+			"ok": true, "why": "", "local": false,
+			"url": ENDPOINT, "host": HOST, "port": 443, "tls": true,
+			"route": ROUTE, "model": MODEL, "reasoning": REASONING,
+		}
+	var parsed := address_of(address)
+	if not parsed["ok"]:
+		return _nowhere("%s is set to '%s', which %s" % [
+			ENDPOINT_VARIABLE, address, parsed["why"],
+		])
+	if model == "":
+		return _nowhere("%s names an endpoint but %s names no model" % [
+			ENDPOINT_VARIABLE, MODEL_VARIABLE,
+		])
+	return {
+		"ok": true, "why": "", "local": true,
+		"url": address, "host": parsed["host"], "port": parsed["port"],
+		"tls": parsed["tls"], "route": parsed["route"], "model": model,
+		# No `reasoning` field, and its absence is as deliberate as its presence
+		# above. It is the word the paid endpoint's API understands for "do not
+		# think until the ceiling is spent", and a server on a loopback port
+		# speaks its own dialect of the same request shape: a field it does not
+		# know is ignored at best and answered with HTTP 400 at worst. The models
+		# measured against a local endpoint here were chosen for having no
+		# thinking to turn down in the first place.
+		"reasoning": {},
+	}
+
+
+## A URL split into the four things opening a connection to it needs.
+##
+## Deliberately small: `http://` or `https://`, a host, an optional `:port`, and
+## whatever is left as the route. That is the whole shape of an OpenAI-compatible
+## chat endpoint, and a parser that accepted more would be accepting addresses
+## this file then could not call.
+static func address_of(address: String) -> Dictionary:
+	var tls := false
+	var rest := ""
+	if address.begins_with("https://"):
+		tls = true
+		rest = address.substr(8)
+	elif address.begins_with("http://"):
+		rest = address.substr(7)
+	else:
+		return {"ok": false, "why": "does not begin with http:// or https://"}
+	var slash := rest.find("/")
+	var authority := rest if slash < 0 else rest.substr(0, slash)
+	var route := "/" if slash < 0 else rest.substr(slash)
+	if authority == "":
+		return {"ok": false, "why": "names no host"}
+	var host := authority
+	var port := 443 if tls else 80
+	var colon := authority.rfind(":")
+	if colon >= 0:
+		var written := authority.substr(colon + 1)
+		if not written.is_valid_int():
+			return {"ok": false, "why": "has '%s' where a port number should be" % written}
+		host = authority.substr(0, colon)
+		port = written.to_int()
+		if host == "":
+			return {"ok": false, "why": "names a port but no host"}
+		if port <= 0 or port > 65535:
+			return {"ok": false, "why": "names port %d, which is not a port" % port}
+	return {"ok": true, "why": "", "host": host, "port": port, "tls": tls, "route": route}
+
+
+# An endpoint no call can be made to, and the sentence saying why not.
+static func _nowhere(why: String) -> Dictionary:
+	return {
+		"ok": false, "why": why, "local": true,
+		"url": "", "host": "", "port": 0, "tls": false, "route": "",
+		"model": "", "reasoning": {},
+	}
+
+
+## The recorded exchange, said to have been answered by whichever model is about
+## to be asked live.
+##
+## A channel takes the model's name out of the exchange it is handed, because
+## nothing under `sim/` may name a model or an endpoint. That is right for a
+## replay and wrong for a live run, whose head would otherwise name the model the
+## rows were recorded from rather than the one actually answering. So the entry
+## point swaps the name in on the way past: it is the one place that knows both,
+## and swapping it there keeps the simulation as ignorant of the second endpoint
+## as it is of the first.
+static func live_exchange(recorded: Dictionary) -> Dictionary:
+	var said := recorded.duplicate()
+	said["model"] = endpoint()["model"]
+	return said
+
+
 # --- The two transports ---------------------------------------------------
 
 
@@ -142,13 +290,18 @@ const REST_MS := 10
 ## it, and it cannot do that if the only handle is inside a closure.
 static func on_a_thread(key: String, started: Array = []) -> Callable:
 	var threads := started
+	# Where the calls go, worked out once and here rather than once per call and
+	# on a worker thread. The environment cannot change under a run, and reading
+	# it on the thread that builds the transport keeps every call of a run going
+	# to the one endpoint the run said at its head that it was using.
+	var where := endpoint()
 	return func(prompt: String) -> Callable:
 		var box := []
 		var guard := Mutex.new()
 		var thread := Thread.new()
 		threads.append(thread)
 		thread.start(func() -> void:
-			var got := fetch(key, prompt)
+			var got := fetch(key, prompt, where)
 			guard.lock()
 			box.append(got)
 			guard.unlock())
@@ -191,8 +344,9 @@ static func settle(started: Array) -> int:
 ## final, and it is greater than one only because the recorder needs it -- see
 ## the note inside. Nothing that ships passes it.
 static func at_once(key: String, tries: int = 1) -> Callable:
+	var where := endpoint()
 	return func(prompt: String) -> Callable:
-		var got := fetch(key, prompt)
+		var got := fetch(key, prompt, where)
 		var left := maxi(1, tries) - 1
 		while left > 0 and String(got.get("reply", "")).strip_edges() == "":
 			# One question, asked again. A provider that answers a question with
@@ -204,7 +358,7 @@ static func at_once(key: String, tries: int = 1) -> Callable:
 			# recording a run of fifty questions practical at all. Nothing that
 			# ships uses this: the live channel makes one call and reports what
 			# came back.
-			got = fetch(key, prompt)
+			got = fetch(key, prompt, where)
 			left -= 1
 		return func() -> Dictionary:
 			return got
@@ -213,13 +367,34 @@ static func at_once(key: String, tries: int = 1) -> Callable:
 # --- The credential -------------------------------------------------------
 
 
-## The key, out of the environment and out of nowhere else.
+## The key for wherever the call is going, out of the environment and out of
+## nowhere else.
+##
+## Nothing for a local endpoint, and that is a rule and not an omission: a key is
+## a secret belonging to one service, and a machine with both a key set and a
+## local endpoint named would otherwise hand that secret to a server on a
+## loopback port that never asked for it.
 static func key() -> String:
+	if bool(endpoint()["local"]):
+		return ""
 	return OS.get_environment(KEY_VARIABLE).strip_edges()
 
 
 ## Whether a call could be made from here at all, and why not when it could not.
+##
+## Three answers rather than two, because there are two endpoints. An endpoint
+## the environment named but garbled is refused outright and named in the
+## sentence; a local endpoint needs no credential at all and says which model it
+## will be asked for; and with the environment silent this is what it always was,
+## a question about one key.
 static func credentials() -> Dictionary:
+	var where := endpoint()
+	if not where["ok"]:
+		return {"ok": false, "why": where["why"]}
+	if where["local"]:
+		return {"ok": true, "why": "%s names %s, asked for %s, and needs no key" % [
+			ENDPOINT_VARIABLE, where["url"], where["model"],
+		]}
 	if key() == "":
 		return {"ok": false, "why": "%s is not set in the environment" % KEY_VARIABLE}
 	return {"ok": true, "why": "%s is set" % KEY_VARIABLE}
@@ -234,32 +409,47 @@ static func credentials() -> Dictionary:
 ## back as an empty reply with a `why`, because the thing that asked is a
 ## character standing in a field and the only thing it can do about any of this
 ## is go on standing there.
-static func fetch(key_value: String, prompt: String) -> Dictionary:
+static func fetch(key_value: String, prompt: String, where: Dictionary = {}) -> Dictionary:
+	var going: Dictionary = endpoint() if where.is_empty() else where
+	if not going["ok"]:
+		return _nothing(0, String(going["why"]))
+	var host := String(going["host"])
 	var began := Time.get_ticks_msec()
 	var http := HTTPClient.new()
-	if http.connect_to_host(HOST, 443, TLSOptions.client()) != OK:
-		return _nothing(0, "could not open a connection to %s" % HOST)
+	# TLS on the paid endpoint, none on a loopback one. `connect_to_host` takes
+	# the options it should wrap the socket in, and no options is a plain socket.
+	var wrapping: TLSOptions = TLSOptions.client() if bool(going["tls"]) else null
+	if http.connect_to_host(host, int(going["port"]), wrapping) != OK:
+		return _nothing(0, "could not open a connection to %s" % host)
 	while http.get_status() == HTTPClient.STATUS_CONNECTING \
 			or http.get_status() == HTTPClient.STATUS_RESOLVING:
 		http.poll()
 		OS.delay_msec(REST_MS)
 		if Time.get_ticks_msec() - began > PATIENCE_MS:
-			return _nothing(0, "connecting to %s timed out" % HOST)
+			return _nothing(0, "connecting to %s timed out" % host)
 	if http.get_status() != HTTPClient.STATUS_CONNECTED:
-		return _nothing(0, "no connection to %s (status %d)" % [HOST, http.get_status()])
+		return _nothing(0, "no connection to %s (status %d)" % [host, http.get_status()])
 
-	var body := JSON.stringify({
-		"model": MODEL,
+	var asking := {
+		"model": going["model"],
 		"max_tokens": MAX_TOKENS,
 		"temperature": TEMPERATURE,
-		"reasoning": REASONING,
 		"messages": [{"role": "user", "content": prompt}],
-	})
-	var headers := [
-		"Authorization: Bearer %s" % key_value,
-		"Content-Type: application/json",
-	]
-	if http.request(HTTPClient.METHOD_POST, ROUTE, headers, body) != OK:
+	}
+	# Only where the endpoint has one. See the note beside `reasoning` in
+	# `endpoint_named`: it is this provider's word, and a server that does not
+	# know it may refuse the whole call over it.
+	var reasoning: Dictionary = going["reasoning"]
+	if not reasoning.is_empty():
+		asking["reasoning"] = reasoning
+	var body := JSON.stringify(asking)
+	var headers := ["Content-Type: application/json"]
+	# A local endpoint wants no credential and is not given one. Sending an empty
+	# bearer token to a server that does not want one is a way of being refused
+	# for a reason that has nothing to do with the question.
+	if key_value != "":
+		headers.append("Authorization: Bearer %s" % key_value)
+	if http.request(HTTPClient.METHOD_POST, String(going["route"]), headers, body) != OK:
 		return _nothing(0, "the request could not be sent")
 	while http.get_status() == HTTPClient.STATUS_REQUESTING:
 		http.poll()

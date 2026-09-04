@@ -14,8 +14,15 @@ func _initialize() -> void:
 		quit(2)
 		return
 	var flights := []
-	var channel := ModelChannel.for_run(
-		ModelRecording.check_exchange(), _transport(options["live"], flights))
+	# The transport first, because whether there is one decides which model the
+	# head of this run should name. A replay names the model the rows were
+	# recorded from; a live run names the one actually answering, which since
+	# there are two endpoints is no longer the same thing.
+	var transport := _transport(options["live"], flights)
+	var exchange := ModelRecording.check_exchange()
+	if transport.is_valid():
+		exchange = ModelCall.live_exchange(exchange)
+	var channel := ModelChannel.for_run(exchange, transport)
 	for line in ScriptedCheck.play(
 			channel, options["ticks"], options["seed"], options["roll-seed"]):
 		print(line)
