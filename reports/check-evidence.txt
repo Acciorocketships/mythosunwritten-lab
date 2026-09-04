@@ -3,7 +3,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 difficulty-class run seed=1234 roll_seed=1 ticks=140 where=(-480.0, 420.0)
   hook       ActionEngine._interact -- a check is raised there and nowhere else
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-02 from anthropic/claude-fable-5 at https://openrouter.ai/api/v1/chat/completions, 3 replies
+  recording  recorded 2026-09-03 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 3 replies
   rolls      d20, ability score + roll vs the class, in the engine
   who        Rook, carrying iron pry bar and whittling knife, with no brass key
   what       4 shut things, none of which either tool opens
@@ -69,7 +69,7 @@ what happened, as it happened
   tick 30  check #1 asked the resolving question (b4dc9bc7079ce35a)
   tick 33  check #1 resolved
              open target=#2 -- the oak chest came open
-  tick 53  check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
+  tick 53  check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 10 (no roll, no call)
              open target=#3 -- the oak chest came open
   tick 79  check #3 asked the judging question (424074711a1ba4fe)
   tick 82  check #3 interact:hazel crate:whittling knife -- failed: dex 4 + roll 6 = 10 vs dc 12
@@ -77,9 +77,9 @@ what happened, as it happened
 
 the checks
   #   context                            settled by  abil  score roll  total dc    verdict
-  1   interact:oak chest:iron pry bar    rolled      str   5     15    20    12    passed
+  1   interact:oak chest:iron pry bar    rolled      str   5     15    20    10    passed
       did    open target=#2                           the oak chest came open
-  2   interact:oak chest:iron pry bar    remembered  str   5     15    20    12    passed
+  2   interact:oak chest:iron pry bar    remembered  str   5     15    20    10    passed
       did    open target=#3                           the oak chest came open
   3   interact:hazel crate:whittling knife rolled      dex   4     6     10    12    failed
   4   interact:hazel crate:whittling knife remembered  dex   4     6     10    12    failed
@@ -93,7 +93,7 @@ what it cost
 
 what Rook remembers about it
   checks     2, one per triggering context
-    interact:oak chest:iron pry bar -- str 5 + roll 15 = 20 vs dc 12, passed
+    interact:oak chest:iron pry bar -- str 5 + roll 15 = 20 vs dc 10, passed
     interact:hazel crate:whittling knife -- dex 4 + roll 6 = 10 vs dc 12, failed
   and in its own account of itself:
     I worked the oak chest with an iron pry bar: it gave.
@@ -107,11 +107,11 @@ after 140 ticks
     #3 oak chest at (-474.000, -5.046, 428.000) open [1 carried, 0 equipped, 3 money]
     #4 hazel crate at (-486.000, -3.222, 420.000) shut [0 carried, 0 equipped, 0 money]
     #5 hazel crate at (-486.000, -2.788, 412.000) shut [0 carried, 0 equipped, 0 money]
-    check #1 interact:oak chest:iron pry bar -- passed: str 5 + roll 15 = 20 vs dc 12
-    check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
+    check #1 interact:oak chest:iron pry bar -- passed: str 5 + roll 15 = 20 vs dc 10
+    check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 10 (no roll, no call)
     check #3 interact:hazel crate:whittling knife -- failed: dex 4 + roll 6 = 10 vs dc 12
     check #4 interact:hazel crate:whittling knife -- failed, remembered: dex 4 + roll 6 = 10 vs dc 12 (no roll, no call)
-  fingerprint 305f10e2de31025f
+  fingerprint 6a7e22c722ff5035
 
 the two questions in full
 

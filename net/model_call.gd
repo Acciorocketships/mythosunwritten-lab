@@ -48,27 +48,74 @@ const ENDPOINT := "https://openrouter.ai/api/v1/chat/completions"
 ## Which environment variable the key is read from. Never a file in the tree.
 const KEY_VARIABLE := "OPENROUTER_API_KEY"
 
-## Which model is asked, and how much of an answer is paid for. The temperature
-## is nailed down because a recording of a coin toss is not a recording of
-## anything.
+## Which model is asked, how much of an answer is paid for, and how much
+## thinking is asked of it. The temperature is nailed down because a recording
+## of a coin toss is not a recording of anything.
 ##
-## The ceiling counts everything the model spends before the line comes out, not
-## the line itself: one answer to this run's prompt was measured at 89 tokens for
-## seven tokens of "examine target=#6". A ceiling set to the size of the wanted
-## answer therefore cuts the answer off mid-word -- a reply of "go_to" with the
-## target still to come, or nothing readable at all -- and it did, the first time
-## this run was recorded against the larger observation packet. It is set well
-## clear of that: an answer is still one line, and a run that stops paying for
-## thinking part-way through is not cheaper, it is broken.
+## ## Why `REASONING` is not an option that could be dropped
 ##
-## It was raised again when the prompt grew to carry what the character
-## remembers. One question out of eighteen came back with nothing readable in it
-## and `length` as the reason -- the model had spent the whole ceiling working and
-## never reached its line. The ceiling is about the working, not the answer, and
-## the working grows with the question.
-const MODEL := "anthropic/claude-fable-5"
+## It goes into the request body as `"reasoning": {"effort": "low"}`, and it is
+## the difference between a model that answers and a model that thinks until the
+## money runs out. Every cheap model worth having here is a reasoning model, and
+## at a ceiling of any size it will spend the ceiling working and come back with
+## an empty string and `length` as the reason -- the failure the old note on
+## `MAX_TOKENS` below describes for the model that used to be named here, except
+## that on this class of model it is the normal case rather than the exception.
+##
+## Measured on this run's own first question -- 3,111 characters, the one
+## `./run_record.sh` prints without `--live`:
+##
+##   * with no `reasoning` field at all, this model answered in 9.3 and 13.9
+##     seconds, spending 209 and 326 completion tokens, of which 769 and 1,197
+##     characters were thinking nobody reads;
+##   * with `{"effort": "low"}`, 1.26 and 1.49 seconds, 7 and 18 completion
+##     tokens, and no thinking at all.
+##
+## The obvious stronger form of the same idea does not work here: `{"enabled":
+## false}` is answered with HTTP 400, "Reasoning is mandatory for this endpoint
+## and cannot be disabled". Nor is `{"effort": "minimal"}` the smaller of the two
+## efforts -- it is measurably slower than `low`, which is counter-intuitive
+## enough to be worth writing down rather than rediscovering.
+##
+## The model that *does* take `{"enabled": false}`, `inception/mercury-2.5-preview`,
+## is three times faster again and was recorded in full before this one. It is
+## not what ships. With the thinking off it answered the character prompt very
+## well and the world's prompt very badly: four of its five answers to the
+## orchestrator spawned somebody at `(12.5, -4.0)`, which is the example
+## coordinate out of the prompt's own format line, so the run carried out 1 of 15
+## operations and spawned nobody, against this model's 5 of 9 and two characters
+## with names and backstories. That is the whole reason the fallback the probe
+## documented was taken.
+##
+## ## What the ceiling has to cover
+##
+## It is left where it was, at 1200, and it is slack rather than a budget --
+## nothing is paid for a token that is not produced. What it has to cover is now
+## two things rather than one, because this model's thinking can be turned down
+## but not off:
+##
+##   * whatever working an `{"effort": "low"}` call still does, which on the
+##     shipped prompt measured at none but is not promised to be none; and
+##   * the longest answer any of the five runs asks for, which is not a character
+##     choosing an action (7 to 18 tokens) but the orchestrator's "who is this",
+##     answered with a whole persona -- name, traits, tendencies and backstory,
+##     431 to 516 characters, so roughly 110 to 140 tokens.
+##
+## The note it replaces is kept because its reasoning is why this one exists: the
+## ceiling counts everything the model spends *before* the line comes out, not
+## the line itself. One answer to this run's prompt was once measured at 89
+## tokens for seven tokens of "examine target=#6", and a ceiling set to the size
+## of the wanted answer cut the answer off mid-word. That is still true, and it
+## is why a model whose thinking cannot be held to nothing is not given a ceiling
+## trimmed to the length of its line.
+const MODEL := "z-ai/glm-5.3-flash"
 const MAX_TOKENS := 1200
 const TEMPERATURE := 0
+
+## How much thinking is asked of the model, sent as `reasoning` in the request
+## body. See the note above: this is what makes the model answer in a second
+## rather than in ten, and on this endpoint it may not be set to nothing at all.
+const REASONING := {"effort": "low"}
 
 ## How long a call is given before it is called unanswered, in milliseconds, and
 ## how long the polling loop sleeps between looks. Neither is a simulation
@@ -205,6 +252,7 @@ static func fetch(key_value: String, prompt: String) -> Dictionary:
 		"model": MODEL,
 		"max_tokens": MAX_TOKENS,
 		"temperature": TEMPERATURE,
+		"reasoning": REASONING,
 		"messages": [{"role": "user", "content": prompt}],
 	})
 	var headers := [

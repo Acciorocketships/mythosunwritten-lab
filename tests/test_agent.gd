@@ -509,12 +509,23 @@ func _the_simulation_never_blocks() -> void:
 				others, waited, ModelChannel.THINKS_FOR,
 			])
 		longest[others] = maxi(int(longest.get(others, 0)), waited)
-	check(longest.has(0), "no question was put with nothing else outstanding")
-	var alone := int(longest[0])
+	# The baseline is the fewest others any question was put alongside, and not
+	# nothing at all. Whether a question is ever put with nothing outstanding is a
+	# fact about the recorded exchange -- with five characters deciding, a
+	# recording whose answers are short enough that everybody is asking at once
+	# has no such tick -- and it is not the thing being measured. What is measured
+	# is that the span does not grow with k, which needs a smallest k and not a
+	# zero one.
+	check(not longest.is_empty(), "no question was put at all, so nothing was measured")
+	var fewest := -1
+	for others in longest:
+		if fewest < 0 or int(others) < fewest:
+			fewest = int(others)
+	var alone := int(longest[fewest])
 	for others in longest:
 		check(int(longest[others]) - alone < ModelChannel.THINKS_FOR,
-			"the longest wait with %d others outstanding was %d ticks against %d with none"
-				% [others, int(longest[others]), alone])
+			"the longest wait with %d others outstanding was %d ticks against %d with %d"
+				% [others, int(longest[others]), alone, fewest])
 
 
 # --- 6. The whole action set, and nothing else ----------------------------

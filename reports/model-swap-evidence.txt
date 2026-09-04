@@ -1,0 +1,83 @@
+What the model swap was measured against, 2026-09-03
+====================================================
+
+Every number here was produced by a command in this repository or by the
+two probe scripts quoted below, on the shipped run's own first question --
+3,111 characters, the one ./run_record.sh prints without --live.
+
+1. The reasoning field, on inception/mercury-2.5-preview
+   max_tokens=1200, temperature=0, three calls each way
+
+   no reasoning field               2679ms in=1006 out=1171 fin=length  reasoning_chars=0 | ''
+   no reasoning field               5027ms in=987 out=1092 fin=stop    reasoning_chars=0 | 'examine target=#6'
+   no reasoning field               2268ms in=1006 out=1171 fin=length  reasoning_chars=0 | ''
+   reasoning={"enabled": false}      277ms in=989 out=7 fin=stop    reasoning_chars=0 | 'examine target=#7'
+   reasoning={"enabled": false}      335ms in=1008 out=9 fin=stop    reasoning_chars=0 | 'examine target=#7'
+   reasoning={"enabled": false}     1463ms in=1010 out=9 fin=stop    reasoning_chars=0 | 'examine target=#6'
+
+2. The reasoning field, on z-ai/glm-5.3-flash -- the model that shipped
+   max_tokens=1200, temperature=0, two calls each way
+
+   no reasoning field                9314ms in=1005 out=326 fin=stop    think_chars=1197 | 'examine target=#6'
+   no reasoning field               13947ms in=1005 out=209 fin=stop    think_chars=769 | 'examine target=#6'
+   reasoning={"enabled": false}       153ms in=None out=None fin=None    think_chars=None | 'HTTP 400 {"error":{"message":"Reasoning is mandatory for this endpoint and cannot be disabled.","cod'
+   reasoning={"enabled": false}        96ms in=None out=None fin=None    think_chars=None | 'HTTP 400 {"error":{"message":"Reasoning is mandatory for this endpoint and cannot be disabled.","cod'
+   reasoning={"effort": "low"}       1255ms in=1005 out=7 fin=stop    think_chars=0 | 'examine target=#6'
+   reasoning={"effort": "low"}       1494ms in=1005 out=18 fin=stop    think_chars=0 | 'trade_propose target=#7 give=[silk cloak] want_money=8'
+
+3. What the prompt reader makes of every recorded reply
+   tools/read_census.gd over the three character tables of each recording
+   (ROWS + LESSON_ROWS + GOAL_ROWS; empty replies are counted off the
+   recording itself, not here)
+
+   anthropic/claude-fable-5        actions=62 tools=5 refused-by-the-reader=0 faulted-by-the-catalogue=0
+   inception/mercury-2.5-preview   actions=98 tools=3 refused-by-the-reader=1 faulted-by-the-catalogue=1
+     refused: recall
+     the catalogue faults it (examine needs target): examine #3
+   z-ai/glm-5.3-flash              actions=93 tools=5 refused-by-the-reader=0 faulted-by-the-catalogue=0
+
+4. A name where the reader wants an id, put through tools/read_spot.gd
+
+   examine target=Pell          | action=examine    params={ "target": "Pell" }           | catalogue:  | tool={  }
+   examine #3                   | action=examine    params={  }                           | catalogue: examine needs target | tool={  }
+   examine target=#3            | action=examine    params={ "target": 3 }                | catalogue:  | tool={  }
+   recall                       | action=-          params=-                              | catalogue: nothing was chosen | tool={  }
+   say target=#Sable text=hi    | action=say        params={ "target": "#Sable", "text": "hi" } | catalogue: say's target must be an id | tool={  }
+
+   examine's target is an id-or-name, so a name there is legal and the
+   reader passes it through; say's target is an id, so the catalogue
+   faults a name -- and a faulted action is refused before
+   ActionScene.note_action, so the character's count of actions carried
+   out never moves and ModelMind offers the same line again forever.
+
+5. The three passes counted side by side
+
+   the recording (all five tables)     fable      mercury    glm-5.3-flash
+     replies recorded                     87          110              108
+     replies empty                         9            0                0
+     replies the reader refused            0            1                0
+     replies the catalogue faults          0            1                0
+     seconds a call, median             5.161        0.551            1.612
+     seconds a call, mean               5.075        1.386            2.160
+     seconds a call, worst             13.429       14.774           11.430
+     the prompt's own example
+       coordinate (12.5, -4.0) copied        0            4                5
+     dollars per million in / out     10 / 50  0.04 / 0.15    0.075 / 0.25
+
+   the shipped 160-tick run            fable      mercury    glm-5.3-flash
+     questions put                        59           85               81
+     turns the engine resolved            32           67               57
+     turns the engine refused             13           14               17
+     turns that were a tool                9            2                4
+     lines nothing could be read from      5            1                0
+     still running when it ended           5            2                3
+     turns of the least-served character   7            2               12
+
+   the orchestrator run                fable      mercury    glm-5.3-flash
+     operations named                      6           15                9
+     operations the engine carried out     4            1                5
+     characters spawned                    3            0                2
+
+   Tokens out are not in the recording -- it keeps milliseconds, not usage --
+   so the token figures quoted anywhere are from the probes in 1 and 2, which
+   report the provider's own usage.completion_tokens.
