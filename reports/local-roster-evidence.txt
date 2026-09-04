@@ -1,0 +1,130 @@
+Evidence for reports/local-roster.md -- W-local-roster, cycle 170, 2026-09-04
+All commands run on this machine; outputs verbatim.
+
+================ CARD AS FOUND (17:43:09Z) ================
+$ nvidia-smi --query-gpu=memory.total,memory.used,memory.free,utilization.gpu --format=csv
+24564 MiB, 667 MiB, 23472 MiB, 1 %
+compute processes: (none)
+
+================ CARD AS LEFT (18:58:33Z) ================
+memory.total [MiB], memory.used [MiB], memory.free [MiB], utilization.gpu [%]
+24564 MiB, 504 MiB, 23635 MiB, 0 %
+compute processes:
+pid, used_gpu_memory [MiB], process_name
+
+================ NEIGHBOUR CHAIN DRIVERS LEFT UNTOUCHED ================
+state T = suspended (SIGSTOP). Read from /proc only; nothing signalled.
+pid 836800   state=T
+pid 836807   state=T
+pid 844509   state=T
+pid 844516   state=T
+pid 847180   state=T
+pid 847187   state=T
+pid 862311   state=T
+pid 862320   state=T
+pid 897513   state=T
+pid 1587197  state=T
+pid 4067074  state=T
+stopped: 11/11
+
+================ UPSTREAM STATE, RE-CHECKED 2026-09-04 ================
+https://github.com/ggml-org/llama.cpp/pull/24423
+  DiffusionGemma
+  state=open draft=True merged=False updated=2026-09-04T10:02:46Z assignee=None
+https://github.com/ggml-org/llama.cpp/pull/24427
+  Add diffusion-gemma block-diffusion support
+  state=open draft=True merged=False updated=2026-08-24T04:00:27Z assignee=None
+https://github.com/ggml-org/llama.cpp/pull/17454
+  model : add LLADA 2.0 diffusion support 
+  state=open draft=True merged=False updated=2026-07-22T18:11:14Z assignee=None
+https://github.com/ollama/ollama/issues/16664
+  Support GGUF models with diffusion-gemma architecture
+  state=open draft=None merged=None updated=2026-07-06T13:56:39Z assignee=None
+
+================ OLLAMA: WHICH DIFFUSION ARCHITECTURES ARE BUILT ================
+$ strings /usr/local/bin/ollama | grep -x -E "dream|llada|llada-moe|rnd1|diffusion-gemma"
+dream
+llada
+llada-moe
+rnd1
+$ strings /usr/local/bin/ollama | grep -ci diffusion
+0
+(0 = ollama has no diffusion DECODING loop, only the graph builders above)
+
+================ GGUF HEADERS OF EVERY CHECKPOINT TRIED ================
+(see below)
+Dream-org_Dream-v0-Instruct-7B-Q4_K_M.gguf -> general.architecture: dream
+LLaDA-8B-Instruct.Q4_K_M.gguf             -> general.architecture: llada
+LLaDA-MoE-7B-A1B-Instruct.Q4_K_M.gguf     -> general.architecture: llada-moe
+diffusiongemma-26B-A4B-it-Q4_K_M.gguf     -> general.architecture: diffusion-gemma, size_label 128x2.6B
+
+================ SERVER LOG: THE THREE DECISIVE LINES ================
+  Device 0: NVIDIA GeForce RTX 4090, compute capability 8.9, VMM: yes, ID: GPU-27b28d03-6943-9ad0-d1b8-82630601b372
+llama_model_load: error loading model: error loading model architecture: unknown model architecture: 'diffusion-gemma'
+ollama: llama-sampling.cpp:660: void llama_sampler_dist_apply(llama_sampler*, llama_token_data_array*): Assertion `found' failed.
+
+================ GEMMA 3N LOAD + OFFLOAD ================
+time=2026-09-04T14:29:09.623-04:00 level=INFO source=device.go:272 msg="total memory" size="4.7 GiB"
+load_tensors: offloaded 33/33 layers to GPU
+time=2026-09-04T14:41:37.053-04:00 level=INFO source=ggml.go:494 msg="offloaded 31/31 layers to GPU"
+time=2026-09-04T14:41:37.053-04:00 level=INFO source=device.go:240 msg="model weights" device=CUDA0 size="5.2 GiB"
+time=2026-09-04T14:41:37.053-04:00 level=INFO source=device.go:245 msg="model weights" device=CPU size="420.4 MiB"
+time=2026-09-04T14:41:37.053-04:00 level=INFO source=device.go:251 msg="kv cache" device=CUDA0 size="64.0 MiB"
+time=2026-09-04T14:41:37.053-04:00 level=INFO source=device.go:272 msg="total memory" size="5.9 GiB"
+time=2026-09-04T14:42:03.700-04:00 level=INFO source=ggml.go:494 msg="offloaded 36/36 layers to GPU"
+time=2026-09-04T14:42:03.700-04:00 level=INFO source=device.go:240 msg="model weights" device=CUDA0 size="7.0 GiB"
+time=2026-09-04T14:42:03.700-04:00 level=INFO source=device.go:245 msg="model weights" device=CPU size="420.4 MiB"
+time=2026-09-04T14:42:03.700-04:00 level=INFO source=device.go:251 msg="kv cache" device=CUDA0 size="64.0 MiB"
+time=2026-09-04T14:42:03.700-04:00 level=INFO source=device.go:272 msg="total memory" size="7.7 GiB"
+
+================ LLADA2.1-MINI: LOAD, PRECISION, MEMORY, TIMINGS ================
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.10.0+cu128).
+card free before load: 22988 MiB
+loaded in 68.8s
+WEIGHTS (torch tensors allocated): 8955 MiB
+torch reserved: 16302 MiB | card free now: 6624 MiB | card delta: 16364 MiB
+param dtypes: {'torch.bfloat16': 102, 'torch.uint8': 14692}
+prompt tokens: (1, 1129)
+`use_return_dict` is deprecated! Use `return_dict` instead!
+  speed  (threshold=0.5, editing=0): median 77.71s (min 75.00 max 84.12) -> "It looks like your message got cut off or mixed up at the end. Could you please clarify what you're "
+  quality(threshold=0.7, editing=0.5): median 89.32s (min 87.54 max 91.34) -> "It looks like your message got cut off or mixed up at the end. If you're trying to ask a question or"
+peak card usage during gen: 17996 MiB
+=== DONE ===
+
+================ LLADA2.1-MINI: REMOTE CODE UNDER TRANSFORMERS 5.5 ================
+transformers 5.5.0 torch 2.10.0+cu128
+vram free/total MiB before: (22988, 24563)
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.10.0+cu128).
+
+=== STEP 1: tokenizer (trust_remote_code) ===
+tokenizer OK: TokenizersBackend vocab 157153
+
+=== STEP 2: config + remote code import (trust_remote_code) ===
+config OK: LLaDA2MoeConfig | declares transformers_version 4.57.1
+
+=== STEP 3: 4-bit load (bitsandbytes nf4) ===
+
+MODEL LOADED in 75.4s
+vram free after load MiB: 0 -> model resident approx MiB: 24564
+dtype sample: {'model.word_embeddings.weight': 'torch.bfloat16', 'model.layers.0.attention.query_key_value.weight': 'torch.uint8', 'model.layers.0.attention.query_layernorm.weight': 'torch.bfloat16'}
+
+
+================ SGLANG / VLLM AVAILABILITY ================
+ModuleNotFoundError: No module named 'sglang'
+ModuleNotFoundError: No module named 'vllm'
+pip index: sglang (0.5.18); vllm (0.28.0)  -- resolvable, NOT installed, install not attempted
+
+================ WHERE THE WEIGHTS WENT ================
+HOME and OLLAMA_MODELS redirected to the session scratchpad:
+export HOME=/tmp/lab-sbx-fqy4i3yt/tmp/claude-1000/-home-ryko-proj-game/afaaaa37-2f5c-4024-a343-9810d4be666a/scratchpad/roster/home
+export OLLAMA_MODELS=/tmp/lab-sbx-fqy4i3yt/tmp/claude-1000/-home-ryko-proj-game/afaaaa37-2f5c-4024-a343-9810d4be666a/scratchpad/roster/models
+export OLLAMA_CONTEXT_LENGTH=4096
+export OLLAMA_NUM_PARALLEL=1
+export OLLAMA_HOST=127.0.0.1:11500
+42G	/tmp/lab-sbx-fqy4i3yt/tmp/claude-1000/-home-ryko-proj-game/afaaaa37-2f5c-4024-a343-9810d4be666a/scratchpad/roster/models
+60G	/tmp/lab-sbx-fqy4i3yt/tmp/claude-1000/-home-ryko-proj-game/afaaaa37-2f5c-4024-a343-9810d4be666a/scratchpad/roster/hf
+
+repository status after all of the above:
+?? reports/local-roster-evidence.txt
+?? reports/local-roster.md
+(only the two small report files above; no weights, no model store, nothing large)
