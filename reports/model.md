@@ -74,6 +74,9 @@ $5.1$ seconds against `low`'s $2.6$ and $3.4$ on the probe's shorter prompt.
 
 One live recording pass per model, all five tables in each, with
 `OPENROUTER_API_KEY=... ./run_record.sh --live` — mercury 7m24s, glm 8m32s.
+These three passes were taken on 2026-09-03; the glm column is the pass that
+*won*, not the pass that is checked in today. See "The recording has moved on"
+below.
 Every figure is off the recording itself or off the transcripts regenerated from
 it, except the token and price columns, which are the provider's own usage
 figures from the probe: the recording keeps milliseconds, not usage. The
@@ -141,7 +144,7 @@ that line out of `ModelCall.MODEL`, not because anyone typed it:
 
 ```
 const MODEL       := "z-ai/glm-5.3-flash"
-const RECORDED_ON := "2026-09-03"
+const RECORDED_ON := "2026-09-04"
 ```
 
 Two rules follow, and both matter for anything written about this project.
@@ -188,25 +191,71 @@ into constants. The probe reached a local model by replacing the one `Callable`
 that `bin/agent_main.gd` hands to the channel, and nothing under `sim/` had to
 change — which is the evidence that the seam is in the right place.
 
+## The recording has moved on, and that is the point
+
+Giving `go_to` a second shape changed the questions the run puts, which forced a
+fresh live pass on 2026-09-04 against the same model at the same settings. It is
+what ships now, and almost nothing about it matches the glm column above:
+
+| the same model, the same settings | 2026-09-03 | 2026-09-04 |
+|---|---|---|
+| replies recorded, all five tables | 108 | 99 |
+| replies empty | 0 | 0 |
+| seconds a call, median | 1.612 | 3.493 |
+| turns in the 160-tick character run | 81 | 69 |
+| turns that named a place | 3, all refused | 13, none out of reach |
+| orchestrator operations named / carried out | 9 / 5 | 11 / 9 |
+| characters spawned | 2 | 6 |
+| the prompt's own example coordinate copied | 5 | 1 |
+
+Both passes are honest. Neither is a constant. This is the rule above, shown
+rather than asserted: a recording is one draw, and the second draw of the same
+model was twice as slow a call and twice as productive a world.
+
+## A refusal belongs to the provider, not to the prompt
+
+The orchestrator prompt keeps its naming line at the bottom because the previous
+provider's filter declined it five times of five when that line led. Put again
+to the model that now answers — all eleven questions the run puts, three times
+each, both shapes, $66$ calls — not one was declined on content. By the rule of
+three the content-refusal rate here is under about $9\%$ at $95\%$ confidence in
+either shape.
+
+The shape stays anyway, for a new and different reason. On the largest of the
+five world questions the leading arm came back with nothing readable $7$ times
+in $11$ — every one of them `length`, the model spending the whole $1200$-token
+ceiling on thinking — against $0$ in $11$ for the shape that ships, $p \approx
+0.004$ by Fisher's exact test. The probe (`tools/prompt_lead_probe.sh`) writes
+no file and changes no prompt; it asserts the two arms are the same multiset of
+lines before putting either.
+
+## Verified today, on this tree
+
+`./run_tests.sh`, headless, with no key and no network: **all 49 suites passed
+(196,281 checks)**, exit 0. `./run_headless.sh` on seed $1234$ prints
+`final=5014980a58150055`, the same fingerprint as before the model changed —
+nothing under `sim/` learned which model answers.
+
 ## What is not settled
 
 * **One candidate the probe could not judge.** `qwen/qwen3.8-flash` answered
   HTTP $429$, "Too Many Requests", on all six of its calls across both probe
   passes. It is neither ruled in nor out. Two others were judged and failed:
-  `qwen/qwen3.7-flash` and `z-ai/glm-4.7-flash` returned an empty string on
-  every call, cut off at the ceiling.
-* **A faulted line locks a character.** A line the catalogue cannot read is
-  refused *before* the world counts an action as taken, so the character is
-  offered the same dead line forever. Mercury's `examine #3` cost one character
-  $148$ of a $160$-tick run. Nothing in the shipped recording faults, so nothing
-  is locked today; the hole is filed as a finding, not patched.
+  `qwen/qwen3.7-flash` returned an empty string on three calls of three, and
+  `z-ai/glm-4.7-flash` on two of three, all cut off at the ceiling, at $25$ to
+  $40$ seconds a call.
 * **The independent review has not run.** The check that nothing in the tree
   still asks the old model, and that the recording really is the new model's
-  words, is planned and not yet done.
+  words re-derived from the file rather than from prose, is planned and not yet
+  done.
 * **The prose has not caught up.** `README.md` and several pages under
   `reports/` still name fable and quote its replies; that is its own piece of
   work. `reports/agent-live-evidence.txt` still says fable correctly — it is the
   transcript of a live pass, not a replay, and regenerating it would cost a
   third live call.
-* **Which coordinate space a chosen position is in** is still open, and is what
-  makes the copied-example failure hard to rule out by prompt wording alone.
+Two things this page listed as open have since been closed, and are recorded
+here so the list is not read as current: a line the catalogue cannot read now
+counts as an action attempted, so it costs one turn rather than the rest of the
+run (`reports/fault-lock-evidence.txt`); and `go_to` grew an `offset` key, so
+which coordinate space a chosen position is in is named by the key
+(`reports/position-space-evidence.txt`).
