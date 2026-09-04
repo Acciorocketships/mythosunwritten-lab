@@ -1,0 +1,212 @@
+# The model layer: which model answers, what it costs, and what a recording is
+
+Every character in this game that a person is not driving decides for itself by
+being asked a question in words. This page is about the one place in the
+repository that asks: what model answers now, what a call costs in seconds and
+in money, why the request has to tell the model *not* to think, and what the
+checked-in recording of those answers may honestly be quoted as.
+
+Terms used below, each meant in this project's own sense:
+
+* **A tick** is one step of the world's clock; the world runs at $20$ ticks a
+  second.
+* **The recording** is `net/model_recording.gd`: the questions the shipped runs
+  put, asked once over a real connection, with what came back written down. It
+  is why `./run_tests.sh` and `./run_agent.sh` need no key, no network and no
+  model at all.
+* **A replay** is a run answered out of that table rather than off the network.
+* **The prompt reader** is the code that turns a line of a model's prose into an
+  action — `tools/read_census.gd` counts what it makes of every recorded reply.
+* **The catalogue** is the list of the twelve atomic actions with the shape of
+  each one's arguments; it *faults* a line whose arguments are wrong.
+* **The orchestrator** is the second model layer, the world's dungeon master: it
+  spawns characters and resolves world events.
+
+---
+
+## The change, in two constants and one field
+
+`net/model_call.gd` is the only file in the tree that touches the network, a
+clock or a thread. It names the model, the ceiling on an answer, and — new this
+cycle — how much thinking is asked for:
+
+```
+const MODEL     := "z-ai/glm-5.3-flash"
+const MAX_TOKENS := 1200
+const REASONING := {"effort": "low"}     # sent in the request body
+```
+
+`anthropic/claude-fable-5`, which answered every recorded reply until now, is
+gone from the code, from the recording and from every transcript that replays
+it.
+
+## The reasoning field is what makes these models answer at all
+
+This is the finding, and it is a measurement rather than an opinion. Both cheap
+candidates are *reasoning models*: left to themselves they produce a long block
+of private working before the one line anybody wants. At a ceiling of $1200$
+tokens the working can eat the whole ceiling, and what comes back is an empty
+string with `length` as the reason.
+
+Put to the shipped run's own first question — $3{,}111$ characters, the one
+`./run_record.sh` prints without `--live` — at temperature $0$:
+
+![Seconds a call and tokens produced, each model asked both ways](assets/model-thinking.png)
+
+| the same question, asked both ways | seconds a call | completion tokens | what came back |
+|---|---|---|---|
+| mercury, no reasoning field | 2.7 / 5.0 / 2.3 | 1,171 / 1,092 / 1,171 | two of three empty, cut off at the ceiling |
+| mercury, `{"enabled": false}` | 0.28 / 0.34 / 1.46 | 7 / 9 / 9 | three of three a usable line |
+| glm-5.3-flash, no reasoning field | 9.3 / 13.9 | 209 / 326 | a line, after 769 and 1,197 characters of hidden thinking |
+| glm-5.3-flash, `{"effort": "low"}` | 1.26 / 1.49 | 7 / 18 | a line, and no thinking at all |
+
+So on mercury the field is the difference between an answer and nothing; on glm
+it is the difference between $1.4$ seconds and $11.6$. On neither is it an
+optimisation that could be dropped.
+
+The stronger form does not work on the model that ships: `{"enabled": false}` is
+answered with HTTP $400$, *"Reasoning is mandatory for this endpoint and cannot
+be disabled"*, reproduced twice this cycle and three times in the probe. Nor is
+`{"effort": "minimal"}` the smaller of the two efforts — measured at $5.3$ and
+$5.1$ seconds against `low`'s $2.6$ and $3.4$ on the probe's shorter prompt.
+
+## The three passes, counted side by side
+
+One live recording pass per model, all five tables in each, with
+`OPENROUTER_API_KEY=... ./run_record.sh --live` — mercury 7m24s, glm 8m32s.
+Every figure is off the recording itself or off the transcripts regenerated from
+it, except the token and price columns, which are the provider's own usage
+figures from the probe: the recording keeps milliseconds, not usage. The
+starred cell is off the probe's own shorter question, which is the only place
+fable's usage was captured.
+
+| the recording, all five tables | fable | mercury | glm-5.3-flash |
+|---|---|---|---|
+| replies recorded | 87 | 110 | 108 |
+| replies empty | 9 | 0 | 0 |
+| replies the prompt reader refused | 0 | 1 | 0 |
+| replies the catalogue faults | 0 | 1 | 0 |
+| seconds a call, median | 5.161 | 0.551 | 1.612 |
+| seconds a call, worst | 13.429 | 14.774 | 11.430 |
+| completion tokens for one action | 8–45* | 7–9 | 7–18 |
+| the prompt's own example coordinate copied | 0 | 4 | 5 |
+| dollars per million tokens, in / out | 10 / 50 | 0.04 / 0.15 | 0.075 / 0.25 |
+
+| the shipped 160-tick run | fable | mercury | glm |
+|---|---|---|---|
+| questions put | 59 | 85 | 81 |
+| turns the engine resolved | 32 | 67 | 57 |
+| turns the engine refused | 13 | 14 | 17 |
+| lines nothing could be read from | 5 | 1 | 0 |
+| turns of the least-served character | 7 | 2 | 12 |
+
+| the orchestrator run | fable | mercury | glm |
+|---|---|---|---|
+| operations named | 6 | 15 | 9 |
+| operations the engine carried out | 4 | 1 | 5 |
+| characters spawned | 3 | 0 | 2 |
+
+## Why the faster, cheaper model is not the one that ships
+
+Mercury with its thinking off is the best thing that has ever answered the
+*character* prompt here: no empty replies against fable's nine, half a second a
+call against five, and twice the turns resolved.
+
+It answers the *world's* prompt degenerately. Four of its five orchestrator
+answers were `spawn role=scout at=(12.5, -4.0)` — and $(12.5, -4.0)$ is the
+coordinate printed in the prompt's own line explaining how a position is
+written. The engine refused each one, because that point is $646$ units from the
+nearest character. So mercury's world run spawned nobody, where fable spawned
+three and glm spawns two with names and backstories. Since the orchestrator is
+where the world gets its people, that is disqualifying.
+
+Copying the example is not unique to mercury: glm does it five times, and a
+local $3$-billion-parameter model did the same thing on the character prompt. It
+is a property of cheap models faced with a worked example, not of one provider.
+
+## The ceiling
+
+`MAX_TOKENS` stays at $1200$. It is slack rather than a budget — nothing is paid
+for a token that is not produced — and it now has to cover two things: whatever
+working an `{"effort": "low"}` call still does (measured at none on the shipped
+prompt, but not promised to be none), and the longest answer any of the five
+runs asks for. That is not a character's one line at $7$ to $18$ tokens but the
+orchestrator's persona block, $431$ to $516$ characters, or roughly $110$ to
+$140$ tokens.
+
+## What a recording may be quoted as
+
+The recording names the model that answered because `bin/record_main.gd` writes
+that line out of `ModelCall.MODEL`, not because anyone typed it:
+
+```
+const MODEL       := "z-ai/glm-5.3-flash"
+const RECORDED_ON := "2026-09-03"
+```
+
+Two rules follow, and both matter for anything written about this project.
+
+**A recording is one draw, not a constant.** Even at temperature $0$ the
+provider does not answer the same prompt the same way twice: two passes over
+byte-identical prompts gave different replies and the runs diverged from there.
+So every count above — how many turns chose to speak, how many named a position
+— is a fact about *this* draw and stops being true the next time
+`./run_record.sh --live` is run.
+
+**The shipped recording stays a cloud recording.** A local model can answer the
+same questions, but a recording made against one must say so in its own
+provenance line, so that no report can quote a free local run's numbers as
+though they were the cloud model's costs and latencies. The shipped table is the
+cloud pass, and the reports may quote it as such.
+
+## What a local model is for
+
+Measured on this machine: `ollama` $0.17.4$ with an RTX 4090, three non-thinking
+$3$–$4$ billion parameter models answered the shipped run's own prompt in $115$
+to $175$ ms warm, and drove a full $160$-tick run at a median of $0.15$ to
+$0.25$ s a decision, against the cloud recording's $5.16$ s median. That is
+roughly $25$ times faster and costs nothing.
+
+What it is for is therefore soaking: long runs, repeated runs, and stress on the
+action surface, where volume matters and the quality of any single decision does
+not. What it is *not* for is the shipped recording, for two reasons — its
+choices are visibly worse (one model spent $141$ of $161$ calls on `recall`, a
+tool that costs no world time and returns at once; another copied the prompt's
+example coordinate), and quoting its speed as the game's cost would be false.
+
+Two operational facts gate it, both worth writing down rather than
+rediscovering: `ollama` insists on writing a key into `$HOME/.ollama`, so `HOME`
+and `OLLAMA_MODELS` must point somewhere writable; and its default
+$32{,}768$-token context makes a $3.6$ GiB cache that pushes $6$ of $29$ layers
+onto the processor and costs $28$ s a call, where a $4096$-token context keeps
+every layer on the graphics card at $0.15$ s. The prompt measures about $1{,}100$
+tokens and a reply $6$ to $14$, so $4096$ is ample.
+
+The endpoint seam that would make this a supported path is **not built**:
+`net/model_call.gd` still nails one host, port $443$, TLS and a bearer header
+into constants. The probe reached a local model by replacing the one `Callable`
+that `bin/agent_main.gd` hands to the channel, and nothing under `sim/` had to
+change — which is the evidence that the seam is in the right place.
+
+## What is not settled
+
+* **One candidate the probe could not judge.** `qwen/qwen3.8-flash` answered
+  HTTP $429$, "Too Many Requests", on all six of its calls across both probe
+  passes. It is neither ruled in nor out. Two others were judged and failed:
+  `qwen/qwen3.7-flash` and `z-ai/glm-4.7-flash` returned an empty string on
+  every call, cut off at the ceiling.
+* **A faulted line locks a character.** A line the catalogue cannot read is
+  refused *before* the world counts an action as taken, so the character is
+  offered the same dead line forever. Mercury's `examine #3` cost one character
+  $148$ of a $160$-tick run. Nothing in the shipped recording faults, so nothing
+  is locked today; the hole is filed as a finding, not patched.
+* **The independent review has not run.** The check that nothing in the tree
+  still asks the old model, and that the recording really is the new model's
+  words, is planned and not yet done.
+* **The prose has not caught up.** `README.md` and several pages under
+  `reports/` still name fable and quote its replies; that is its own piece of
+  work. `reports/agent-live-evidence.txt` still says fable correctly — it is the
+  transcript of a live pass, not a replay, and regenerating it would cost a
+  third live call.
+* **Which coordinate space a chosen position is in** is still open, and is what
+  makes the copied-example failure hard to rule out by prompt wording alone.
