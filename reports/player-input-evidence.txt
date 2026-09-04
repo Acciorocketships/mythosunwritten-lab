@@ -12,8 +12,17 @@ binding a person's press does. The command:
 W walks a step, G goes to the nearest named place, J hops 3.0 units, and K
 leaps 12.0 -- further than DEX 3 reaches, so the engine refuses it. Every one
 of the four is an action out of the same catalogue every other character
-chooses from; render/player_controls.gd builds nothing but Action.go_to and
-Action.jump, and the world's own ControlLoop commits them.
+chooses from; render/player_controls.gd builds nothing but Action.go_to,
+Action.go_to_offset and Action.jump, and the world's own ControlLoop commits
+them.
+
+W and G are the two shapes of one row. A key press is a direction and a
+length and never a place, so W writes its step under `go_to`'s `offset` key --
+`chose go_to(offset=(0.000, -3.600))` below -- and the engine works out where
+that lands from where Pip is standing when the walk starts. G has somewhere in
+mind and writes it under `target`. This is the same pair of shapes a language
+model is offered, on the same row of the same catalogue; see
+reports/position-space-evidence.txt.
 
 === What the person chose, and what the engine answered ===
 
@@ -23,8 +32,8 @@ render-shell keys G            go to the nearest named place
 render-shell keys J            hop (3.0 units)
 render-shell keys K            leap (12.0 units, further than an ordinary DEX reaches)
 render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 motes=1073 sheet=2/3 aa=msaa4+fxaa
-render-shell play t=2 chose go_to(target=(0.000, -3.600))
-render-shell play t=23 go_to(target=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+render-shell play t=2 chose go_to(offset=(0.000, -3.600))
+render-shell play t=23 go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
 render-shell play t=24 place landmark l0,0 at 57.4 away
 render-shell play t=24 chose go_to(target=(38.136, 39.269))
 render-shell play t=45 go_to(target=(38.136, 39.269)) -> go_to ok at=(38.136, 39.269) walked=57.377 steps=64
@@ -43,7 +52,7 @@ beginning new ones in the same ticks. The world does not block on a person.
   t=  1  Pip    has not decided yet, and waits in the world
   t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
   t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
-  t=  3  Pip    began go_to(target=(0.000, -3.600)), 20 ticks
+  t=  3  Pip    began go_to(offset=(0.000, -3.600)), 20 ticks
   t=  6  Nettle thought again at 5/20t, wanted the same thing
   t=  6  Corin  thought again at 5/20t, wanted the same thing
   t=  8  Pip    thought again at 5/20t, wanted the same thing
@@ -57,7 +66,7 @@ beginning new ones in the same ticks. The world does not block on a person.
   t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
   t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
   t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
-  t= 23  Pip    finished go_to(target=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+  t= 23  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
   t= 23  Pip    has not decided yet, and waits in the world
   t= 25  Pip    began go_to(target=(38.136, 39.269)), 20 ticks
   t= 26  Nettle thought again at 5/20t, wanted the same thing

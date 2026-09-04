@@ -208,7 +208,7 @@ func press(keycode: int, view: Surroundings) -> Action:
 	var way := direction_of(keycode)
 	if way != Vector2.ZERO:
 		facing = way
-		return walk_from(view.here, way)
+		return walk(way)
 	match keycode:
 		KEY_HOP:
 			return jump_from(view.here, facing, HOP)
@@ -398,10 +398,16 @@ static func direction_of(keycode: int) -> Vector2:
 	return way if way is Vector2 else Vector2.ZERO
 
 
-## Walk one step from a position in a direction: the catalogue's `go to`, to the
-## position a step away.
-static func walk_from(here: Vector2, way: Vector2) -> Action:
-	return Action.go_to(here + way.normalized() * STEP)
+## Walk one step in a direction: the catalogue's `go to`, written as the step
+## itself rather than as the place it ends at.
+##
+## A key press is a direction and a length and never a place, so this is the
+## shape of the row that fits it -- the same `go_to` a model chooses, given its
+## offset instead of its target. It reads nothing about where the character is:
+## a person pressing W means "one step north from wherever I am", and where that
+## is is the engine's to know when the step is actually taken.
+static func walk(way: Vector2) -> Action:
+	return Action.go_to_offset(way.normalized() * STEP)
 
 
 ## Jump a stated distance from a position in a direction: the catalogue's

@@ -81,6 +81,7 @@ extends RefCounted
 ## The reply is expected to be one line of the form
 ##
 ##     go_to target=#6
+##     go_to offset=(+2.0, -6.0)
 ##     say text=good morning target=#2
 ##     trade_propose target=#2 give_money=12 want=[silk cloak]
 ##
@@ -112,12 +113,23 @@ const RULE_WORDS := (
 const SORT_FORMS := {
 	ActionCatalog.ID: "#7",
 	ActionCatalog.POSITION: "(12.5, -4.0)",
+	ActionCatalog.OFFSET: "(+2.0, -6.0)",
 	ActionCatalog.ID_OR_POSITION: "#7 or (12.5, -4.0)",
 	ActionCatalog.ID_OR_NAME: "#7 or a name",
 	ActionCatalog.TEXT: "words",
 	ActionCatalog.COUNT: "a whole number",
 	ActionCatalog.NAMES: "[one name, another name]",
 }
+
+
+## The line under the menu that says what a verb printed more than once is. An
+## action with more than one shape gets a line per shape rather than one line
+## carrying both, because a line carrying both is a line that gets copied whole:
+## the first recording made against a menu that joined the two with a bar drew
+## `go_to target=#2 offset=(-2.0, -6.0)` -- both keys at once -- on 5 of its 15
+## walks, and the catalogue refused every one of them.
+const SHAPES_LINE := ("An action printed on more than one line has that many"
+	+ " shapes: write one of the lines, not two.")
 
 
 ## The three things a reply may name that are not actions. See the note above: a
@@ -198,6 +210,7 @@ static func written_for(
 	written.append_array(tool_lines())
 	written.append("")
 	written.append("A key marked (may be left out) can be left out.")
+	written.append(SHAPES_LINE)
 	written.append("Values are written like this: %s." % _sort_forms_line())
 	written.append("")
 	written.append("What you can see from where you are standing:")
@@ -348,7 +361,16 @@ static func menu_lines() -> PackedStringArray:
 			keys.append("%s=%s (may be left out)" % [
 				key, SORT_FORMS.get(row["optional"][key], "?"),
 			])
-		written.append("  %-14s %s" % [row["name"], " ".join(keys)])
+		var one_of := ActionCatalog.either_of(row)
+		if one_of.is_empty():
+			written.append("  %-14s %s" % [row["name"], " ".join(keys)])
+			continue
+		for key in one_of:
+			var shape := PackedStringArray(["%s=%s" % [
+				key, SORT_FORMS.get(one_of[key], "?"),
+			]])
+			shape.append_array(keys)
+			written.append("  %-14s %s" % [row["name"], " ".join(shape)])
 	return written
 
 
@@ -440,11 +462,7 @@ static func _action_of_line(line: String) -> Action:
 # value with spaces in it -- a line of speech, a position, a list of names --
 # survives being read.
 static func _params_of(rest: String, row: Dictionary) -> Dictionary:
-	var sorts := {}
-	for key in row["params"]:
-		sorts[key] = row["params"][key]
-	for key in row["optional"]:
-		sorts[key] = row["optional"][key]
+	var sorts := ActionCatalog.keys_of(row)
 
 	var marks := []
 	for key in sorts:
@@ -481,7 +499,7 @@ static func _value_of(raw: String, sort: String) -> Variant:
 	match sort:
 		ActionCatalog.ID:
 			return _id_of(raw)
-		ActionCatalog.POSITION:
+		ActionCatalog.POSITION, ActionCatalog.OFFSET:
 			return _position_of(raw)
 		ActionCatalog.ID_OR_POSITION:
 			return _position_of(raw) if raw.begins_with("(") else _id_of(raw)

@@ -2,7 +2,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 does a goal change what is chosen? seed=1234, 100 ticks watched
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-03 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 98 replies
+  recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
 
 the same moment, four times
@@ -11,15 +11,15 @@ the same moment, four times
   prompt outside its goals   identical in all four arms: yes
   so the only thing that differs between the arms is what the character is after
 
-arm: no goal -- prompt 9d1f8d9fedcb8e8d
+arm: no goal -- prompt 6ee3266ffbedbb7f
   what it is after, as the prompt carried it:
     What you are after: nothing in particular.
   what the world answered about each, before the question:
     (it is after nothing, so there was nothing to answer)
-  the model said:     examine target=#6
-  which read back as: examine(target=6)
+  the model said:     say text=then let us trade target=#1
+  which read back as: say(text=then let us trade target=1)
 
-arm: the empty stall -- prompt bcf8d2552df681b4
+arm: the empty stall -- prompt e268a7eacbb71f52
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short be at (-471.0, 416.0)                          the world says when this one is done
@@ -28,48 +28,48 @@ arm: the empty stall -- prompt bcf8d2552df681b4
   the model said:     go_to target=(-471.0, 416.0)
   which read back as: go_to(target=(-471.000, 416.000))
 
-arm: a trade with Rook -- prompt 39c75ed90fe09a38
+arm: a trade with Rook -- prompt 8e549582ef6d5ff5
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short have traded with #2                            the world says when this one is done
   what the world answered about each, before the question:
     have traded with #2                            not yet -- no trade of its has been honoured
-  the model said:     trade_propose target=#2 give_money=1
-  which read back as: trade_propose(target=2 give_money=1)
+  the model said:     trade_propose target=#2 give_money=1 want_money=0
+  which read back as: trade_propose(target=2 give_money=1 want_money=0)
 
-arm: thought well of here -- prompt 1427f3b27253d1aa
+arm: thought well of here -- prompt 1636920c36bb19a2
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  long  be thought well of in this market              answer `done goal=1` when you judge it done
   what the world answered about each, before the question:
     be thought well of in this market              not yet -- nothing in the world answers this one
-  the model said:     say text="a fair bargain indeed" target=#1
-  which read back as: say(text="a fair bargain indeed" target=1)
+  the model said:     say text=I will deal fairly with you both target=#1
+  which read back as: say(text=I will deal fairly with you both target=1)
 
 what the goals changed
   two columns, because the two are different claims: a different action, and a different
   choice of any sort including the same action with other words in it
   arm                    which action     chose                                      action     choice
-  no goal                examine at #6    examine(target=6)                          --         --
+  no goal                say at #1        say(text=then let us trade target=1)       --         --
   the empty stall        go_to at nobody  go_to(target=(-471.000, 416.000))          differs    differs
-  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=1)       differs    differs
-  thought well of here   say at #1        say(text="a fair bargain indeed" target=1) differs    differs
-  3 of 3 goals changed which action was chosen; 3 changed the choice at all
+  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=1 want_… differs    differs
+  thought well of here   say at #1        say(text=I will deal fairly with you both… same       differs
+  2 of 3 goals changed which action was chosen; 3 changed the choice at all
 
   being after "be at (-471.0, 416.0)"
-    after nothing it chose  examine(target=6)
+    after nothing it chose  say(text=then let us trade target=1)
     after that one it chose go_to(target=(-471.000, 416.000))
-    which is a different action: go_to at nobody rather than examine at #6
+    which is a different action: go_to at nobody rather than say at #1
 
   being after "have traded with #2"
-    after nothing it chose  examine(target=6)
-    after that one it chose trade_propose(target=2 give_money=1)
-    which is a different action: trade_propose at #2 rather than examine at #6
+    after nothing it chose  say(text=then let us trade target=1)
+    after that one it chose trade_propose(target=2 give_money=1 want_money=0)
+    which is a different action: trade_propose at #2 rather than say at #1
 
   being after "be thought well of in this market"
-    after nothing it chose  examine(target=6)
-    after that one it chose say(text="a fair bargain indeed" target=1)
-    which is a different action: say at #1 rather than examine at #6
+    after nothing it chose  say(text=then let us trade target=1)
+    after that one it chose say(text=I will deal fairly with you both target=1)
+    which is the same action, say at #1, said in other words
 
 who answers each of these goals
   arm                    what it is after                               answered by

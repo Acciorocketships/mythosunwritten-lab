@@ -343,8 +343,19 @@ func _the_prompt_holds_no_rule() -> void:
 		"and does not say that it was said to this character")
 	equal(_rule_words_in(after), PackedStringArray(),
 		"carrying speech put a rule in the prompt")
-	equal(ModelPrompt.menu_lines().size(), ActionCatalog.ROWS.size(),
-		"the menu has one line per row of the one list")
+	# One line per *shape* of the one list: a row with no group of alternatives
+	# is one line, and a row wanting one of a group gets a line per alternative.
+	# Nothing else may add a line, so a thirteenth verb still cannot appear here.
+	var shapes := 0
+	for row in ActionCatalog.ROWS:
+		shapes += maxi(1, ActionCatalog.either_of(row).size())
+	equal(ModelPrompt.menu_lines().size(), shapes,
+		"the menu has one line per shape of the one list")
+	var verbs := {}
+	for line in ModelPrompt.menu_lines():
+		verbs[line.strip_edges().split(" ")[0]] = true
+	equal(PackedStringArray(verbs.keys()), ActionCatalog.names(),
+		"and the verbs on it are the rows of the one list, in the row order")
 
 	# And it names no outcome this character was not given. The prompt now carries
 	# what a character is after -- that is the goal layer, and `tests/test_goals.gd`

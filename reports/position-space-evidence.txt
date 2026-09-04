@@ -1,0 +1,120 @@
+Which space a chosen position is in: the same measurement either side of the
+decision.
+
+The command, which anyone can re-run:
+
+    tools/position_space_probe.sh
+
+It replays the shipped seeded model run -- ./run_agent.sh, seed 1234, 160 ticks
+-- against whatever exchange is checked in at net/model_recording.gd, and prints
+every turn on which a model named a place by its coordinates rather than by an
+id. No key, no network, no model; two runs print identical bytes.
+
+It measures the recording that is checked in, so the two captures below were
+taken at two commits. The first was taken with the tree at 2c1b23b -- the
+recording of 2026-09-03, against a menu on which `go_to` took `target` and
+nothing else. The second was taken after `go_to` grew its second shape and the
+exchange was re-recorded live on 2026-09-04. To re-take the first:
+
+    git stash push -- $(git diff --name-only)   # or: git checkout 2c1b23b
+    tools/position_space_probe.sh
+    git stash pop
+
+Three ways were open and the second was taken.
+
+  1. The ground window could carry a cell's world coordinate as well as its
+     height. Refused: the packet already tells the looker where it is standing,
+     in world coordinates, on the line above the window -- the model had that
+     number every time and still wrote a small one. An anchor is not the gap.
+     The gap is that nothing says which space the *parameter* is in, and a
+     packet cannot say that without holding a sentence about what an action
+     means, which it is not allowed to hold.
+  2. `go_to` grows a relative form on the action surface. Taken. Section 10's
+     own call surface spells the row four ways and one of them is
+     `MoveRelative(offset)`; the row has carried that spelling since the two
+     lists were made one, and offered no parameter it could be written with. So
+     this is finishing a row that already claimed the shape rather than
+     inventing one, and it puts the coordinate space in the name of a key on the
+     action surface -- where what an action means belongs -- instead of in a
+     sentence in the packet, where it is forbidden.
+  3. Nothing changes and the engine's refusal is the whole answer. Refused on
+     the numbers below: it was every position the model named, not some of them.
+
+What changed, and nothing else did: `go_to` grew an `offset` key beside its
+`target` key, exactly one of the two is given, the menu prints one line per
+shape, and the exchange was re-recorded because the prompt had changed. The
+observation packet was not touched: not one word of `sim/observation.gd` moved.
+
+The short of it. Before: 3 of 81 turns named a place, every one of them under
+`target`, every one of them refused, and every one of them a walk of six hundred
+units that would have been thirteen had the same two numbers meant an offset --
+all three were the prompt's own example value, (12.5, -4.0), copied. After: 13
+of 69 turns named a place, every one of them under `offset`, none refused for
+being out of reach; the engine walked five of them, refused four because the
+character was in a fight (which is not about coordinates at all) and four were
+still running when the run ended.
+
+One thing measured in between and thrown away. The first menu wrote the two
+shapes on one line joined by a bar -- `target=#7 or (12.5, -4.0) | offset=(+2.0,
+-6.0)` -- and the model copied the whole line: 5 of the 15 walks in that
+recording carried both keys, `go_to target=#2 offset=(-2.0, -6.0)`, and the
+catalogue refused every one of them. A line carrying both shapes is a line that
+gets copied whole, so the menu now prints one line per shape and that recording
+was replaced.
+
+
+=== BEFORE -- tree at 2c1b23b, exchange recorded 2026-09-03
+
+
+=== which space a chosen position is in -- the shipped model run
+  run        ./run_agent.sh, seed 1234, 160 ticks, replayed
+  exchange   recorded 2026-09-03 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 98 replies
+
+  who    turn under   the value written standing at          the walk the other  what the engine answered
+  Odo    1    target  (12.5, -4.0)     (-484.0, 472.0)         687.8     13.1  go_to refused: the way to the position is blocked
+  Sable  11   target  (12.5, -4.0)     (-424.0, 407.0)         599.5     13.1  go_to refused: the board decides where a fighter goes
+  Sable  12   target  (12.5, -4.0)     (-424.5, 406.5)         599.6     13.1  go_to refused: the board decides where a fighter goes
+
+  turns                        81, across 5 characters
+  turns that named a place      3
+    of those, under target      3 (a place in the world)
+    of those, under offset      0 (a place from where it stood)
+  the engine walked it          0
+  the engine refused it         3
+  still running at the end      0
+  refused for not being reachable  1 (the walk ran out of steps, or met something in the way)
+  the walk asked for            599.5 least, 599.6 middle, 687.8 most (units)
+  the walk under the other key  13.1 least, 13.1 middle, 13.1 most (units)
+
+=== AFTER -- go_to has two shapes, exchange recorded 2026-09-04
+
+
+=== which space a chosen position is in -- the shipped model run
+  run        ./run_agent.sh, seed 1234, 160 ticks, replayed
+  exchange   recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+
+  who    turn under   the value written standing at          the walk the other  what the engine answered
+  Odo    2    offset  (2.0, -6.0)      (-484.0, 472.0)           6.3    681.7  go_to ok at=(-482.008, 466.023) walked=6.3 steps=7
+  Odo    4    offset  (2.0, -6.0)      (-482.0, 466.0)           6.3    676.1  go_to ok at=(-480.016, 460.047) walked=6.3 steps=7
+  Sable  10   offset  (0.0, -6.0)      (-424.0, 407.0)           6.0    591.9  go_to refused: the board decides where a fighter goes
+  Odo    7    offset  (0.0, -6.0)      (-480.0, 460.0)           6.0    669.0  go_to ok at=(-480.016, 454.047) walked=6.0 steps=7
+  Bram   6    offset  (2.0, -6.0)      (-426.1, 407.0)           6.3    594.8  go_to refused: the board decides where a fighter goes
+  Odo    9    offset  (2.0, -6.0)      (-480.0, 454.0)           6.3    666.3  go_to ok at=(-478.023, 448.070) walked=6.3 steps=7
+  Sable  11   offset  (0.0, -6.0)      (-424.5, 406.5)           6.0    591.9  go_to refused: the board decides where a fighter goes
+  Bram   7    offset  (3.0, 0.0)       (-427.5, 406.5)           3.0    592.1  go_to refused: the board decides where a fighter goes
+  Odo    10   offset  (0.0, -3.0)      (-478.0, 448.1)           3.0    657.2  go_to ok at=(-478.023, 445.370) walked=2.7 steps=3
+  Rook   14   offset  (2.0, -6.0)      (-472.6, 416.0)           6.3    635.1  still running when the run ended
+  Sable  12   offset  (2.0, -6.0)      (-424.5, 406.5)           6.3    593.3  still running when the run ended
+  Bram   9    offset  (3.0, 0.5)       (-427.5, 406.5)           3.0    591.7  still running when the run ended
+  Odo    12   offset  (2.0, -6.0)      (-478.0, 445.4)           6.3    658.9  still running when the run ended
+
+  turns                        69, across 5 characters
+  turns that named a place      13
+    of those, under target      0 (a place in the world)
+    of those, under offset      13 (a place from where it stood)
+  the engine walked it          5
+  the engine refused it         4
+  still running at the end      4
+  refused for not being reachable  0 (the walk ran out of steps, or met something in the way)
+  the walk asked for            3.0 least, 6.3 middle, 6.3 most (units)
+  the walk under the other key  591.7 least, 635.1 middle, 681.7 most (units)

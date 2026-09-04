@@ -10,6 +10,11 @@ extends TestSuite
 ##      section 2.1 spells out: going to a position, an item and a character;
 ##      saying targeted and shouted; trading proposed, accepted and denied;
 ##      dropping on the ground and into a chest.
+##   1a. **`go to` names a place in either of two spaces.** Section 10 spells the
+##      row `MoveRelative(offset)` as well as `MoveTo(position)`, so the row takes
+##      `target` or `offset` and exactly one of them; the same offset resolved for
+##      two characters standing apart lands in two different places, and a person
+##      at a keyboard reaches the same shape through the walk keys.
 ##   2. **Section 2.1's list and section 10's call surface are one list.** The
 ##      check is `ActionCatalog.faults()`, run over the real table and then over
 ##      six deliberately broken copies of it, each of which it must catch.
@@ -91,6 +96,7 @@ func _init() -> void:
 func run() -> void:
 	_every_action_exists_and_is_callable()
 	_the_variants_section_2_1_names_are_callable()
+	_a_place_can_be_named_in_either_space()
 	_the_two_lists_are_one_list()
 	_the_one_list_check_would_notice()
 	_every_action_can_fail_and_says_why()
@@ -295,6 +301,92 @@ func _the_variants_section_2_1_names_are_callable() -> void:
 	check(String(at_item.got("seen", "")).contains(PICK), "and it saw what it was")
 
 
+# --- The two spaces a place can be named in --------------------------------
+
+
+## `go to` takes a world position or an offset from where the character stands,
+## and exactly one of the two.
+##
+## The gap this closes was measured rather than guessed: `tools/position_space_probe.sh`
+## replays the shipped model run and prints every position a model named beside
+## how far it was from the character that named it. The packet says where the
+## looker is standing in world coordinates and says everything else as an offset
+## from it, so both readings of a pair of numbers are reasonable and only one of
+## them was sayable. Now both are, and which is meant is the name of the key.
+func _a_place_can_be_named_in_either_space() -> void:
+	var scene := _bare_scene()
+	var rook: Combatant = scene.actors[0]
+	var wren: Combatant = scene.actors[1]
+
+	# The offset is measured from where the character is standing, so the same
+	# offset takes two characters standing apart to two different places. No
+	# character is privileged: it is one row of the one list.
+	var step := Vector2(3.0, 4.0)
+	var rook_from := Vector2(rook.x, rook.z)
+	var wren_from := Vector2(wren.x, wren.z)
+	var rook_went := ActionEngine.resolve(scene, rook, Action.go_to_offset(step))
+	check(rook_went.ok, "go to an offset: %s" % rook_went.reason)
+	check(Vector2(rook.x, rook.z).distance_to(rook_from + step) <= ActionEngine.ARRIVE,
+		"and it arrived at where it stood plus the offset")
+	var wren_went := ActionEngine.resolve(scene, wren, Action.go_to_offset(step))
+	check(wren_went.ok, "the same offset for somebody else: %s" % wren_went.reason)
+	check(Vector2(wren.x, wren.z).distance_to(wren_from + step) <= ActionEngine.ARRIVE,
+		"and it arrived at where *it* stood plus the offset")
+	check(rook_from + step != wren_from + step,
+		"two characters standing apart went to two different places")
+
+	# The same two numbers under the other key are a place in the world, and the
+	# two readings are as far apart as the character is from the origin.
+	var here := Vector2(rook.x, rook.z)
+	ActionEngine.resolve(scene, rook, Action.go_to(here + Vector2(20.0, 0.0)))
+	var stood := Vector2(rook.x, rook.z)
+	var as_world := ActionEngine.resolve(scene, rook, Action.go_to(step))
+	check(as_world.ok, "the same numbers as a target: %s" % as_world.reason)
+	check(Vector2(rook.x, rook.z).distance_to(step) <= ActionEngine.ARRIVE,
+		"and it went to the world position rather than the offset")
+	check(stood.distance_to(step) > (stood + step).distance_to(stood),
+		"the two readings are two different walks")
+
+	# Exactly one of the two keys. Both, or neither, is a fault of the choice --
+	# refused by the catalogue before the world is consulted at all.
+	equal(ActionCatalog.fault(Action.of(ActionCatalog.GO_TO, {})),
+		"go_to needs target or offset", "a go_to naming no place is refused")
+	equal(ActionCatalog.fault(Action.of(ActionCatalog.GO_TO,
+			{"target": wren.id, "offset": step})),
+		"go_to takes target or offset, not both",
+		"a go_to naming a place twice is refused")
+	equal(ActionCatalog.fault(Action.of(ActionCatalog.GO_TO, {"offset": wren.id})),
+		"go_to's offset must be an offset", "an id under offset is refused")
+	equal(ActionCatalog.fault(Action.go_to_offset(step)), "",
+		"and the offset shape itself is clean")
+
+	# It is on the surface a model is handed, in the catalogue's own words, and
+	# a reply written in it reads back as that action.
+	var menu := ModelPrompt.menu_lines()
+	var shapes := 0
+	for line in menu:
+		if line.strip_edges().begins_with(ActionCatalog.GO_TO + " "):
+			shapes += 1
+	equal(shapes, 2, "go_to is on the menu once per shape")
+	check(" ".join(menu).contains(
+			"offset=%s" % ModelPrompt.SORT_FORMS[ActionCatalog.OFFSET]),
+		"the menu offers the offset shape: %s" % " ".join(menu))
+	var read_back := ModelPrompt.action_of("go_to offset=(+2.0, -6.0)")
+	check(read_back != null and read_back.kind == ActionCatalog.GO_TO,
+		"a reply naming an offset reads back as a go_to")
+	check(read_back.names_an_offset(), "and it reads back as an offset")
+	equal(read_back.offset(), Vector2(2.0, -6.0), "and the offset is what was written")
+	equal(ActionCatalog.fault(read_back), "", "and the catalogue takes it")
+
+	# And a person at a keyboard reaches the same shape: a walk key is a
+	# direction and a length, which is exactly what an offset is.
+	var pressed := PlayerControls.walk(PlayerControls.direction_of(KEY_W))
+	check(pressed != null and pressed.kind == ActionCatalog.GO_TO,
+		"a walk key builds a go_to")
+	check(pressed.names_an_offset(), "and it names its step as an offset")
+	equal(ActionCatalog.fault(pressed), "", "and the catalogue takes that too")
+
+
 # --- 2. One list ----------------------------------------------------------
 
 
@@ -310,6 +402,13 @@ func _the_two_lists_are_one_list() -> void:
 
 	equal(PackedStringArray(Action.constructors().keys()), ActionCatalog.names(),
 		"there is one constructor per row, in the row order")
+	# And a constructor that builds a second shape of a row names the row it
+	# builds, so the extras cannot become a thirteenth verb by the back door.
+	for shape in Action.shapes():
+		check(ActionCatalog.is_action(String(Action.shapes()[shape])),
+			"the shape %s builds an action the catalogue lists" % shape)
+		check(not ActionCatalog.names().has(shape),
+			"the shape %s is not itself a row" % shape)
 	equal(PackedStringArray(ActionEngine.resolvers().keys()), ActionCatalog.names(),
 		"there is one resolver per row, in the row order")
 
@@ -355,6 +454,18 @@ func _the_one_list_check_would_notice() -> void:
 	var shared := _rows_with({"name": "jump", "calls": ["Attack"]})
 	check(not ActionCatalog.faults(shared, good_constructors, good_resolvers).is_empty(),
 		"one call name on two rows is caught")
+
+	var lonely := _rows_with({"name": "go_to", "either": {"target": ActionCatalog.ID}})
+	check(not ActionCatalog.faults(lonely, good_constructors, good_resolvers).is_empty(),
+		"a row wanting one of a group of one is caught")
+
+	var twice := _rows_with({
+		"name": "go_to",
+		"params": {"target": ActionCatalog.ID_OR_POSITION},
+		"either": {"target": ActionCatalog.ID_OR_POSITION, "offset": ActionCatalog.OFFSET},
+	})
+	check(not ActionCatalog.faults(twice, good_constructors, good_resolvers).is_empty(),
+		"a row declaring one parameter twice is caught")
 
 	var extra_row := ActionCatalog.ROWS.duplicate(true)
 	extra_row.append({

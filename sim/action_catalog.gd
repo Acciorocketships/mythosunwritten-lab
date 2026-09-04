@@ -38,6 +38,9 @@ extends RefCounted
 ##     duration is what it actually costs; `ControlLoop.occupies()` is where
 ##     that one reading lives.
 ##   * `params` -- the parameters the action cannot be resolved without.
+##   * `either` -- a group of parameters of which exactly one must be given. A
+##     row with one is an action with more than one shape: `go_to` is the only
+##     one, and the two shapes are the two spaces a place can be named in.
 ##   * `optional` -- the ones it can.
 ##
 ## Two of section 2.1's actions -- jump and wait -- have no spelling in section
@@ -54,6 +57,18 @@ extends RefCounted
 ## gives an agent "nearby entities: id; type (NPC/player/monster/object)" as one
 ## numbered list, and an action that took two id spaces would need the caller to
 ## know which list a thing came from.
+##
+## ## Where a place is, in which of two spaces
+##
+## Section 10 spells `go to` four ways, and one of them is `MoveRelative(offset)`
+## -- a place named from where the character is standing rather than from the
+## world's origin. The row has carried that spelling since the two lists were
+## made one, and for as long as it did the row offered no parameter it could be
+## written with: `target` is a world position, and a caller meaning "six paces
+## back and six left" had nowhere to put it. So `go_to` has a second key,
+## `offset`, and exactly one of the two is given. Which space a place is in is
+## then the name of the key it was given under, which is a thing the caller
+## writes down rather than a thing anybody has to be told.
 class_name ActionCatalog
 
 ## The twelve actions of section 2.1. Section 2.1 writes trade as one entry with
@@ -75,8 +90,15 @@ const WAIT := "wait"
 
 ## What a parameter may hold. A `target` is checked against one of the first
 ## three; the rest say what a plain value is.
+##
+## `OFFSET` is a pair of world units measured from wherever the character is
+## standing, and `POSITION` is a pair measured from the world's own origin. They
+## are the same two numbers and they are not the same sort, which is the whole
+## reason there are two names here: a value cannot say which of the two spaces it
+## is in, so the *key* does, and a key declares its sort in the table.
 const ID := "id"
 const POSITION := "position"
+const OFFSET := "offset"
 const ID_OR_POSITION := "id-or-position"
 const ID_OR_NAME := "id-or-name"
 const TEXT := "text"
@@ -95,7 +117,8 @@ const ROWS := [
 		"listed": "go to (position / item / character)",
 		"calls": ["MoveTo", "MoveRelative", "Roam", "Flee"],
 		"occupies": 20,
-		"params": {"target": ID_OR_POSITION},
+		"params": {},
+		"either": {"target": ID_OR_POSITION, "offset": OFFSET},
 		"optional": {},
 	},
 	{
@@ -260,6 +283,7 @@ static func fault(action: Action, table: Array = ROWS) -> String:
 	if row.is_empty():
 		return "%s is not an action" % action.kind
 	var required: Dictionary = row["params"]
+	var one_of: Dictionary = either_of(row)
 	var optional: Dictionary = row["optional"]
 	for key in required:
 		if not action.params.has(key):
@@ -267,8 +291,22 @@ static func fault(action: Action, table: Array = ROWS) -> String:
 		var wrong := _wrong_sort(action.params[key], required[key])
 		if wrong != "":
 			return "%s's %s %s" % [action.kind, key, wrong]
+	if not one_of.is_empty():
+		var given := PackedStringArray()
+		for key in one_of:
+			if action.params.has(key):
+				given.append(key)
+		if given.is_empty():
+			return "%s needs %s" % [action.kind, " or ".join(PackedStringArray(one_of.keys()))]
+		if given.size() > 1:
+			return "%s takes %s, not both" % [action.kind, " or ".join(given)]
 	for key in action.params:
 		if required.has(key):
+			continue
+		if one_of.has(key):
+			var wrong_one := _wrong_sort(action.params[key], one_of[key])
+			if wrong_one != "":
+				return "%s's %s %s" % [action.kind, key, wrong_one]
 			continue
 		if not optional.has(key):
 			return "%s takes no %s" % [action.kind, key]
@@ -276,6 +314,29 @@ static func fault(action: Action, table: Array = ROWS) -> String:
 		if wrong != "":
 			return "%s's %s %s" % [action.kind, key, wrong]
 	return ""
+
+
+## The group of parameters a row wants exactly one of, or an empty dictionary.
+##
+## Read through here rather than off the row, because eleven of the twelve rows
+## have no such group and do not carry the column.
+static func either_of(row: Dictionary) -> Dictionary:
+	var one_of: Variant = row.get("either", {})
+	return one_of if one_of is Dictionary else {}
+
+
+## Every key a row takes and the sort each holds: required, then the group it
+## wants one of, then optional. What a caller reading a written line needs, and
+## the order the keys of an action print in.
+static func keys_of(row: Dictionary) -> Dictionary:
+	var sorts := {}
+	for key in row["params"]:
+		sorts[key] = row["params"][key]
+	for key in either_of(row):
+		sorts[key] = either_of(row)[key]
+	for key in row["optional"]:
+		sorts[key] = row["optional"][key]
+	return sorts
 
 
 # Whether a value is the sort of thing a parameter takes, said as the tail of a
@@ -286,6 +347,8 @@ static func _wrong_sort(value: Variant, sort: String) -> String:
 			return "" if value is int else "must be an id"
 		POSITION:
 			return "" if value is Vector2 else "must be a position"
+		OFFSET:
+			return "" if value is Vector2 else "must be an offset"
 		ID_OR_POSITION:
 			return "" if value is int or value is Vector2 else "must be an id or a position"
 		ID_OR_NAME:
@@ -312,6 +375,8 @@ static func _wrong_sort(value: Variant, sort: String) -> String:
 ##   * every row costs at least one tick, so no action can be free and therefore
 ##     un-interruptible;
 ##   * no call name is shared by two rows, so a spelling means one action;
+##   * a row that wants one of a group of parameters offers at least two of them,
+##     and no row declares one parameter in two of its three groups;
 ##   * `Action` declares a constructor named for every row and for nothing else;
 ##   * `ActionEngine` declares a resolver named for every row and for nothing
 ##     else.
@@ -332,6 +397,17 @@ static func faults(
 			found.append("%s has no call-surface name" % action_name)
 		if int(row.get("occupies", 0)) < 1:
 			found.append("%s costs no ticks to carry out" % action_name)
+		var one_of := either_of(row)
+		if not one_of.is_empty() and one_of.size() < 2:
+			found.append("%s wants one of %s, which is not a choice" % [
+				action_name, " or ".join(PackedStringArray(one_of.keys())),
+			])
+		var seen_keys := {}
+		for group in [row["params"], one_of, row["optional"]]:
+			for key in group:
+				if seen_keys.has(key):
+					found.append("%s declares %s twice" % [action_name, key])
+				seen_keys[key] = true
 		for spelling in row["calls"]:
 			if seen_calls.has(spelling):
 				found.append("%s is the call name of both %s and %s" % [

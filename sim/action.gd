@@ -22,6 +22,17 @@ extends RefCounted
 ## `examine` also takes the name of something carried; both are in the catalogue
 ## as the sorts those parameters accept, and a target of the wrong sort is
 ## refused by `ActionCatalog.fault()` before the world is consulted.
+##
+## ## Two shapes of `go to`, because a place can be named in two spaces
+##
+## Section 10 spells the row four ways and one of them is `MoveRelative(offset)`.
+## So `go_to` has two constructors rather than one: `go_to()` names a place in
+## the world's own coordinates, and `go_to_offset()` names it from wherever the
+## character is standing. They build one action of one kind, differing in the
+## key the place is written under, and the catalogue refuses a choice carrying
+## both keys or neither. Nothing here works out what an offset comes to -- that
+## needs a character standing somewhere, and where a character is standing is the
+## engine's to know.
 class_name Action
 
 ## An absent target: shouting names nobody, and dropping on the ground goes into
@@ -69,6 +80,19 @@ static func constructors() -> Dictionary:
 	}
 
 
+## The constructors that build a second *shape* of a row rather than a row of
+## their own, and the row each one builds.
+##
+## `constructors()` above is one per row, which is what `ActionCatalog.faults()`
+## reads and what makes a thirteenth verb impossible. A row with more than one
+## shape needs more than one constructor even so -- `go_to` names a place in
+## either of two spaces and there is a constructor for each -- and this is where
+## the extras are declared, so that anything reading constructor names off this
+## file can tell a second shape of an action from a verb nobody listed.
+static func shapes() -> Dictionary:
+	return {"go_to_offset": ActionCatalog.GO_TO}
+
+
 # --- One constructor per row of the one list ------------------------------
 
 
@@ -76,6 +100,13 @@ static func constructors() -> Dictionary:
 ## id of anything in the scene.
 static func go_to(target: Variant) -> Action:
 	return of(ActionCatalog.GO_TO, {"target": target})
+
+
+## Go the same distance again from wherever the character is standing: a
+## `Vector2` of world units east and south of it. Section 10's
+## `MoveRelative(offset)`, and the same row of the one list as `go_to`.
+static func go_to_offset(offset: Vector2) -> Action:
+	return of(ActionCatalog.GO_TO, {"offset": offset})
 
 
 ## Jump to a position. How far is the character's DEX to say.
@@ -196,6 +227,19 @@ func targets_a_name() -> bool:
 	return params.get("target", null) is String
 
 
+## Whether the place was named from where the character is standing rather than
+## from the world's origin.
+func names_an_offset() -> bool:
+	return params.get("offset", null) is Vector2
+
+
+## The offset the place was named by, or a zero one. Only meaningful where the
+## catalogue says the action takes an offset.
+func offset() -> Vector2:
+	var named: Variant = params.get("offset", Vector2.ZERO)
+	return named if named is Vector2 else Vector2.ZERO
+
+
 ## The chosen action in one line, in the form the transcripts and the tests
 ## compare. Parameters are written in the catalogue row's own order -- required
 ## first, then optional -- so two equal choices print equal lines.
@@ -206,6 +250,9 @@ func line() -> String:
 	var written := PackedStringArray()
 	for key in row["params"]:
 		written.append("%s=%s" % [key, _value_line(params.get(key, null))])
+	for key in ActionCatalog.either_of(row):
+		if params.has(key):
+			written.append("%s=%s" % [key, _value_line(params[key])])
 	for key in row["optional"]:
 		if params.has(key):
 			written.append("%s=%s" % [key, _value_line(params[key])])

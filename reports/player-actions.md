@@ -55,7 +55,7 @@ drop             170  - with silver ring     drop ok item=silver ring into=6
 wait             176  -                      wait ok ticks=5 until=181
 jump             181  (-482.9, 417.9)        jump ok at=(-482.939, 417.891) gap=3.0 reach=3.75 dex=3
 jump             186  (-482.9, 405.9)        jump refused: 12.00 is further than DEX 3 jumps (3.75)
-go_to            207  (-482.9, 414.3)        go_to ok at=(-482.939, 414.291) walked=3.6 steps=4
+go_to            207  offset (+0.0, -3.6)    go_to ok at=(-482.939, 414.291) walked=3.6 steps=4
 go_to            228  #3                     go_to ok at=(-451.902, 419.670) walked=31.5 steps=35
 attack           244  #3 with common sword   attack ok attack=cut cells=3 hits=1 dealt=3
 
@@ -71,6 +71,13 @@ Every target in the "at" column is one the person picked out of the aim list,
 and the four sorts section 2.1 names are all there: a character (#2, #3), an item
 lying on the ground (#4, the pile), a container (#5, the chest), and a position
 (the two jumps and the walk).
+
+The walk at tick 207 is `go_to`'s second shape rather than its first. A walk key
+is a direction and a length and never a place, so it writes its step under the
+row's `offset` key -- section 10's `MoveRelative(offset)` -- and the engine works
+out where that lands from where the character is standing when the walk starts.
+It is the same row, the same twelve-long catalogue, and the same pair of shapes a
+language-model mind is offered; see `reports/position-space-evidence.txt`.
 
 ## Refused, in the engine's own words, four ways
 

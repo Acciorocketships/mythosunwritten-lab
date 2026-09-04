@@ -216,8 +216,7 @@ func _every_control_is_an_action_the_catalogue_already_offers() -> void:
 	var here := Vector2(10.0, -4.0)
 	var made := []
 	for keycode in PlayerControls.WALK_KEYS:
-		made.append(PlayerControls.walk_from(
-			here, PlayerControls.direction_of(keycode)))
+		made.append(PlayerControls.walk(PlayerControls.direction_of(keycode)))
 	made.append(PlayerControls.jump_from(
 		here, PlayerControls.FACING_AT_REST, PlayerControls.HOP))
 	made.append(PlayerControls.jump_from(
@@ -233,9 +232,13 @@ func _every_control_is_an_action_the_catalogue_already_offers() -> void:
 		equal(ActionCatalog.fault(chosen), "",
 			"the controls built an action the catalogue refuses: %s" % chosen.line())
 
-	# A walk key carries exactly one step, and a hop exactly a hop.
-	var north := PlayerControls.walk_from(here, PlayerControls.FACING_AT_REST)
-	equal(snappedf(here.distance_to(north.target_position()), 0.001),
+	# A walk key carries exactly one step, and a hop exactly a hop. The step is
+	# written as an offset -- one of `go_to`'s two shapes, and the one a key
+	# press is: a direction and a length, and no place at all.
+	var north := PlayerControls.walk(PlayerControls.FACING_AT_REST)
+	check(north.names_an_offset(),
+		"a walk key should name its step from where the character is standing")
+	equal(snappedf(north.offset().length(), 0.001),
 		snappedf(PlayerControls.STEP, 0.001),
 		"a walk key should send the character one step")
 	var hop := PlayerControls.jump_from(

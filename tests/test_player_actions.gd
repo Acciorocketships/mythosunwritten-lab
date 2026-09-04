@@ -357,7 +357,7 @@ func _the_interface_invents_no_verb_and_holds_no_rule() -> void:
 		check(not code.contains("Action.of("),
 			"%s builds an action by name, which can name a verb that is not one" % path)
 		for built in _actions_built_in(code):
-			check(listed.has(built),
+			check(listed.has(built) or Action.shapes().has(built),
 				"%s builds '%s', which the catalogue does not list" % [path, built])
 
 	# And the controls really can build all twelve: what the run performed is
@@ -525,7 +525,10 @@ static func table_lines(run: Dictionary) -> PackedStringArray:
 # with whatever item the action carries.
 static func _target_line(action: Action) -> String:
 	var written := ""
-	if action.targets_a_position():
+	if action.names_an_offset():
+		var step := action.offset()
+		written = "offset (%+.1f, %+.1f)" % [step.x, step.y]
+	elif action.targets_a_position():
 		var to := action.target_position()
 		written = "(%.1f, %.1f)" % [to.x, to.y]
 	elif action.targets_a_name():
@@ -546,7 +549,8 @@ static func _target_line(action: Action) -> String:
 ## any name at all and is how a thirteenth verb would get in.
 const ACTION_READERS := [
 	"line", "param", "target_id", "target_position", "target_name",
-	"targets_a_position", "targets_a_name", "new", "constructors",
+	"targets_a_position", "targets_a_name", "names_an_offset", "offset",
+	"new", "constructors",
 ]
 
 

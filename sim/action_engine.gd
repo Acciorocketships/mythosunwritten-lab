@@ -163,6 +163,13 @@ static func _cannot_act(scene: ActionScene, actor: Combatant) -> String:
 ## walking the overworld uses, so walking into a floating island's rim carries
 ## you up onto it here exactly as it does there. A step onto ground nothing can
 ## stand on stops the walk where it stands and says so.
+##
+## The place is named one of the catalogue's three ways: a world position, an
+## offset from wherever the character is standing, or the id of something to walk
+## to. The offset is worked out here and nowhere else, because it is only a place
+## once there is a character standing somewhere, and a chosen action holds no
+## world. It is measured from where the character stands when the walk *starts*,
+## which is the same moment the other two are measured from.
 static func _go_to(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
@@ -171,7 +178,9 @@ static func _go_to(
 	var to := action.target_position()
 	var arrive := ARRIVE
 	var what := "the position"
-	if not action.targets_a_position():
+	if action.names_an_offset():
+		to = Vector2(actor.x, actor.z) + action.offset()
+	elif not action.targets_a_position():
 		var thing: Variant = scene.thing_of(action.target_id())
 		if thing == null:
 			return ActionOutcome.failed(
