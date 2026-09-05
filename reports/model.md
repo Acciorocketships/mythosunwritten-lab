@@ -193,15 +193,37 @@ cloud pass, and the reports may quote it as such.
 Measured on this machine: `ollama` $0.17.4$ with an RTX 4090, three non-thinking
 $3$–$4$ billion parameter models answered the shipped run's own prompt in $115$
 to $175$ ms warm, and drove a full $160$-tick run at a median of $0.15$ to
-$0.25$ s a decision, against the cloud recording's $5.16$ s median. That is
-roughly $25$ times faster and costs nothing.
+$0.25$ s a decision. The baseline to set that against is the recording that
+ships, not the one that used to: the $101$ replies checked in today have a
+median of $1.874$ s a call, a fastest of $0.574$ s and a slowest of $56.894$ s,
+so a local arm is roughly $10$ times the median and costs nothing. (The $5.16$ s
+median quoted elsewhere in this page is fable's, from the pass that lost.)
 
-What it is for is therefore soaking: long runs, repeated runs, and stress on the
-action surface, where volume matters and the quality of any single decision does
-not. What it is *not* for is the shipped recording, for two reasons — its
-choices are visibly worse (one model spent $141$ of $161$ calls on `recall`, a
-tool that costs no world time and returns at once; another copied the prompt's
-example coordinate), and quoting its speed as the game's cost would be false.
+Two of the local arms are *thinking* models and could not answer through the
+seam at all until commit `f4994a4`: the local branch of `net/model_call.gd` now
+sends `reasoning_effort: "none"` in the body it already posts. Before it,
+`qwen3.5:0.8b` returned empty content on three calls of three, `finish_reason`
+`length`, the whole $1200$-token ceiling spent on $4{,}309$ characters of
+private working; after it, `stop`, $15$ tokens, no working, $190$ ms. A whole
+$160$-tick run went from $8$ calls with none answered in the model's own words
+to $115$ of $115$ answered and $57$ turns resolved. The two Gemma arms, which
+have no thinking to turn off, return the identical line at the identical token
+count either way.
+
+What a local model is for is therefore soaking: long runs, repeated runs, and
+stress on the action surface, where volume matters and the quality of any single
+decision does not. What it is *not* for is the shipped recording, for two
+reasons — its choices are visibly worse, and quoting its speed as the game's
+cost would be false.
+
+How much worse, reproduced on this tree rather than quoted from a side run: a
+$3{,}000$-tick soak against `qwen2.5:3b-instruct` took $6{,}158$ turns, of which
+$5{,}417$ ($88.0\%$) were the `recall` tool, and four of the five characters
+resolved no action at all. That hole is now priced — two asks that cost the
+world no time are free between actions, the next costs a turn — and the same
+soak on the same seed came back at $3{,}009$ turns and $1.003$ calls a tick
+against $2.053$; see [reports/tool-budget.md](tool-budget.md). The guard prices
+the loop and does not cure the model: four of five still resolved nothing.
 
 Two operational facts gate it, both worth writing down rather than
 rediscovering: `ollama` insists on writing a key into `$HOME/.ollama`, so `HOME`
