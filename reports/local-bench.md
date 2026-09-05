@@ -92,25 +92,81 @@ that ships is the first row of each.
 
 ### A — what a decision cost, and whether the answer could be read
 
-| arm | runtime | median s | max s | max s, cold load excluded | questions put | empty | nothing readable | faulted by the catalogue | refused by the world | action mix, shipped run |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `z-ai/glm-5.3-flash` | OpenRouter, cloud | 1.874 | 56.894 | 31.161 | 101 | 0 | 0 | 1 | 3 | say 25 go_to 20 trade_propose 12 examine 9 |
-| `qwen3.5:0.8b` | ollama 0.17.4 | 0.246 | 28.268 | 0.494 | 84 | 0 | 0 | 0 | 36 | go_to 31 pick_up 30 recall 2 |
-| `nemotron-3-nano:4b` | ollama 0.17.4 | 0.248 | 19.207 | 0.544 | 56 | 0 | 0 | 2 | 23 | go_to 38 examine 3 |
-| `gemma3n:e2b` | ollama 0.17.4 | 0.620 | 18.385 | 1.617 | 96 | 0 | 0 | 46 | 6 | examine 56 go_to 21 |
-| `gemma3n:e4b` | ollama 0.17.4 | 0.708 | 3.555 | 1.114 | 125 | 0 | 0 | 41 | 0 | say 53 examine 52 go_to 5 |
-| `qwen3:4b-instruct` | ollama 0.17.4 | 0.212 | 6.401 | 6.401 | 63 | 0 | 0 | 0 | 15 | go_to 32 wait 11 say 2 examine 1 |
-| `qwen2.5:3b-instruct` | ollama 0.17.4 | 0.192 | 4.200 | 1.982 | 152 | 0 | 2 | 0 | 3 | recall 134 pick_up 3 |
-| `llama3.2:3b` | ollama 0.17.4 | 0.202 | 4.604 | 4.604 | 61 | 0 | 0 | 5 | 10 | wait 24 go_to 21 |
-| `llama3.2:1b` | ollama 0.17.4 | 0.172 | 2.735 | 0.474 | 162 | 0 | 25 | 67 | 22 | trade_accept 70 recall 43 jump 28 go_to 4 |
-| `granite4:micro` | ollama 0.17.4 | 0.197 | 3.414 | 0.466 | 86 | 0 | 1 | 25 | 0 | recall 28 go_to 28 say 13 |
+| arm | runtime | median s | max s | questions put | empty | nothing readable | faulted by the catalogue | refused by the world | action mix, shipped run |
+|---|---|---|---|---|---|---|---|---|---|
+| `z-ai/glm-5.3-flash` | OpenRouter, cloud | 1.874 | 56.894 | 101 | 0 | 0 | 1 | 3 | say 25 go_to 20 trade_propose 12 examine 9 |
+| `qwen3.5:0.8b` | ollama 0.17.4 | 0.246 | 28.268 | 84 | 0 | 0 | 0 | 36 | go_to 31 pick_up 30 recall 2 |
+| `nemotron-3-nano:4b` | ollama 0.17.4 | 0.248 | 19.207 | 56 | 0 | 0 | 2 | 23 | go_to 38 examine 3 |
+| `gemma3n:e2b` | ollama 0.17.4 | 0.620 | 18.385 | 96 | 0 | 0 | 46 | 6 | examine 56 go_to 21 |
+| `gemma3n:e4b` | ollama 0.17.4 | 0.708 | 3.555 | 125 | 0 | 0 | 41 | 0 | say 53 examine 52 go_to 5 |
+| `qwen3:4b-instruct` | ollama 0.17.4 | 0.212 | 6.401 | 63 | 0 | 0 | 0 | 15 | go_to 32 wait 11 say 2 examine 1 |
+| `qwen2.5:3b-instruct` | ollama 0.17.4 | 0.192 | 4.200 | 152 | 0 | 2 | 0 | 3 | recall 134 pick_up 3 |
+| `llama3.2:3b` | ollama 0.17.4 | 0.202 | 4.604 | 61 | 0 | 0 | 5 | 10 | wait 24 go_to 21 |
+| `llama3.2:1b` | ollama 0.17.4 | 0.172 | 2.735 | 162 | 0 | 25 | 67 | 22 | trade_accept 70 recall 43 jump 28 go_to 4 |
+| `granite4:micro` | ollama 0.17.4 | 0.197 | 3.414 | 86 | 0 | 1 | 25 | 0 | recall 28 go_to 28 say 13 |
 
-*The cold-load column matters.* For seven of the nine local arms the slowest call
-of the whole pass is call number one, which is the runtime loading the weights
-onto the card. Excluding it, no local arm's slowest call reaches $2$ seconds
-except `gemma3n:e2b` at $1.617$ and the two arms whose slowest call is genuinely
-warm (`qwen3:4b-instruct` at $6.401$ s, call three; `llama3.2:3b` at $4.604$ s,
-call $58$). The cloud row's slowest call is call $40$ and takes $56.894$ s.
+*A column was struck from this table, and this is why.* Until 2026-09-05 Table A
+carried an eleventh column, **max s, cold load excluded** — each arm's slowest
+call with call one dropped, call one being the runtime loading the weights onto
+the card. It is gone, because for nine of the ten arms there is no file it can
+be read out of. A pass writes its per-call timings into `net/model_recording.gd`
+and the pass then restores that file with `git checkout`, so each local arm's
+per-call series lived only in the scratchpad directory of the session that made
+it — the directory ending `73a7c62a-0ee1-446f-8ff2-b2fab00eeaf0/scratchpad`,
+named in the evidence file's own determinism section. That directory no longer
+exists; nor do the $\approx 26$ GB of weights it held. Every scratchpad still on
+this machine was listed and opened before that was concluded. What survives per
+arm is the **max s** column above, which is in the evidence file. *Which call*
+that maximum was is recorded for nobody but the cloud model.
+
+**Re-making the nine passes was weighed and refused, and it was not the card
+that refused it.** The card is free as this is written — $839$ MiB used of
+$24{,}564$, no compute process — and the evidence file timestamps the nine
+passes from 09:26:53Z to 10:52:27Z, about $86$ minutes, on top of pulling nine
+models again. The reason not to spend that is that a second pass is a
+*different* pass: its call one would be a fresh load off freshly-written
+weights, so nine new cold-load cells would sit beside nine **max s** cells
+measured on a different day, and Table A would become a mixture of two passes.
+One column struck is a smaller loss than the rest of the row made untraceable.
+No arm was re-run for this correction, local or cloud.
+
+**The cloud row is the exception, and the struck figure was wrong.** Its
+recording is the one checked in, so it can still be read: `net/model_recording.gd`
+holds $101$ calls, the first of them takes $9.748$ s, and the slowest is call
+$40$ at $56.894$ s. Dropping call one therefore leaves $56.894$ s exactly where
+it is. The struck column had said $31.161$ s in that cell, which is merely the
+*second*-largest call and not what the column's own rule gives — it contradicted
+this page's own sentence about call $40$. In any case a call to a paid endpoint
+loads no weights, so for this row the exclusion had nothing to exclude.
+
+**What can still be said about cold load, and what cannot.** Each of the nine
+local arms has a maximum far above its own median — `qwen3.5:0.8b` peaks at
+$28.268$ s against a median of $0.246$ s, a factor of $115$ — and a first call
+that loads weights is the obvious explanation, and was measured directly on this
+machine in an earlier probe (`gemma3n:e2b`, cold call $11.7$ s against a warm
+median of $0.787$ s). That is a *hypothesis* about these nine rows, though, not a
+reading of them. The two claims this paragraph used to make cannot be checked
+against any file: that seven of the nine arms' slowest call is call one, and
+that the other two are genuinely warm — `qwen3:4b-instruct` at $6.401$ s on call
+three and `llama3.2:3b` at $4.604$ s on call $58$. Both of those figures do
+survive, in the evidence file, as those arms' **maxima**; neither survives as a
+*warm* maximum, because the call number is exactly what went with the deleted
+recording. They are named here rather than quietly dropped, so that nobody
+re-quotes them as warm figures. **What a decision costs is the median column**,
+and it is untouched by all of this: a median over an arm's whole pass moves by
+nothing when one call of it is a weight load.
+
+**Where every column of Table A comes from.** `arm`, `runtime`, `median s`,
+`max s`, `questions put`, `empty`, `faulted by the catalogue`, `refused by the
+world` and `action mix, shipped run` are each copied cell-for-cell from the
+first table of `.lab/memory/files/local-bench-2026-09-05.md`, which is the raw
+pass; `nothing readable` is that file's `unreadable` column under a plainer
+name. All ten cloud cells re-derive independently from `net/model_recording.gd`,
+which is checked in: $101$ rows across its five tables, median $1.874$ s,
+maximum $56.894$ s, no empty reply, and the shipped run's action mix counted off
+its replies. The nine local rows have no artifact of their own left and are
+traceable to the evidence file only — which is the whole reason the eleventh
+column had to go.
 
 **The cloud baseline, quoted rather than asserted.** The recording checked in
 today holds $101$ replies from `z-ai/glm-5.3-flash` with a median of $1.874$ s
@@ -325,6 +381,17 @@ depends on the card staying free.
   turns of $122$ and left four characters of five with nothing resolved.
   `granite4:micro` ($0.197$ s) left one character on zero. Speed is not the
   scarce thing here; a readable, varied answer is.
+
+**Re-read against the table with the cold-load column gone, none of this moves,
+and here is why.** Every reason given above is a ratio or a count, not a peak
+latency: `qwen3:4b-instruct` is recommended for characters on $0$ faulted and
+$0$ unreadable of $40$ turns and $26$ distinct lines of $47$; `llama3.2:3b` for
+the orchestrator on $12$ operations named, $4$ carried out and one spawn written
+into a persona; `gemma3n:e4b` for volume on $55$ resolved turns of $96$ and
+$7{,}944$ MiB. The only latency figure any of them rests on is the median —
+$0.620$ and $0.708$ s for the two Gemma sizes — and the median is in the
+evidence file and does not change when one call of a pass is a weight load. The
+recommendation stands as written, for the reasons it was written for.
 
 **No local arm is fit for the recording that ships, and none is proposed for it.**
 Every column that matters is still far behind the cloud model: distinct lines
