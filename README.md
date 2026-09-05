@@ -1112,9 +1112,25 @@ HOME=/somewhere/writable OLLAMA_MODELS=/somewhere/writable/models \
 OLLAMA_CONTEXT_LENGTH=4096 OLLAMA_HOST=127.0.0.1:11435 ollama serve
 ```
 
+**A local model is sent one field the paid endpoint is not: the thinking, turned
+off.** The fastest arms that run here are thinking models, and through the seam
+with nothing said about it `qwen3.5:0.8b` spends all 1,200 tokens of the ceiling
+thinking and hands back an empty string, three times of three, while
+`nemotron-3-nano:4b` answers only because its thought happens to fit. So a local
+call carries `reasoning_effort: "none"` — the local endpoint's word for what
+`reasoning` says to the paid one — and the same question then comes back as
+`go_to target=(12.5, -4.0)` in 15 tokens and 190 milliseconds. Two arms with no
+thinking to turn off, `gemma3n:e2b` and `gemma3n:e4b`, answer identically with
+the field and without it. A server that has never heard of the field refuses the
+whole call over it, and that refusal is said back with the field named, never
+retried against the paid endpoint.
+
 What one live run against a local model measured, beside the numbers of the
 recording it replaced, is in
-[reports/local-endpoint-evidence.txt](reports/local-endpoint-evidence.txt).
+[reports/local-endpoint-evidence.txt](reports/local-endpoint-evidence.txt); the
+three levers tried, the arm-by-arm table with and without the field and the two
+whole runs it separates are in
+[reports/local-thinking-field-evidence.txt](reports/local-thinking-field-evidence.txt).
 
 The whole of it, with the exchange in full and the three things the run found, is
 in [reports/agent.md](reports/agent.md).

@@ -58,8 +58,12 @@ extends TestSuite
 ##      the machine that is playing, plain HTTP on a loopback port with no
 ##      credential -- is named by two environment variables and by nothing in the
 ##      tree. With them unset every command means what it meant before. Every file
-##      under `sim/` is scanned for either variable, for either host and for the
-##      key's name, and names none of them.
+##      under `sim/` is scanned for either variable, for either host, for the
+##      key's name, for the field that turns a thinking model's thinking off, for
+##      what any of the models are called and for what runs them, and names none
+##      of them. What each endpoint is sent is checked to the byte in the same
+##      place: the paid body is the one it has always been, and the local body is
+##      that body with one field different.
 class_name TestAgent
 
 ## The file the decision functions live in, and the six it declares. `live` is
@@ -339,12 +343,13 @@ func _the_endpoint_is_read_from_the_environment() -> void:
 	equal(String(shipped["route"]), ModelCall.ROUTE, "with nothing set, the route")
 	equal(String(shipped["model"]), ModelCall.MODEL, "with nothing set, the model")
 	equal(String(shipped["url"]), ModelCall.ENDPOINT, "with nothing set, the URL")
-	equal(JSON.stringify(shipped["reasoning"]), JSON.stringify(ModelCall.REASONING),
+	equal(JSON.stringify(shipped["body"]),
+		JSON.stringify({"reasoning": ModelCall.REASONING}),
 		"with nothing set, how much thinking is asked for")
 
 	# With an address named it is that address, in the four pieces opening a
-	# connection needs -- and no reasoning field, which is one provider's word and
-	# not every server's.
+	# connection needs -- and the thinking turned off in the other endpoint's
+	# word, because the two fastest local arms measured say nothing without it.
 	var local := ModelCall.endpoint_named(A_LOCAL_ADDRESS, A_LOCAL_MODEL)
 	check(bool(local["ok"]), "a plain http:// address on a loopback port is refused")
 	check(bool(local["local"]), "an address out of the environment is not called local")
@@ -354,8 +359,32 @@ func _the_endpoint_is_read_from_the_environment() -> void:
 	equal(String(local["route"]), "/v1/chat/completions", "the route out of the address")
 	equal(String(local["model"]), A_LOCAL_MODEL, "the model out of the environment")
 	equal(String(local["url"]), A_LOCAL_ADDRESS, "the URL is the one that was given")
-	equal(JSON.stringify(local["reasoning"]), "{}",
-		"a local call carries the paid endpoint's reasoning field")
+	equal(JSON.stringify(local["body"]), JSON.stringify(ModelCall.THINKING_OFF),
+		"a local call does not turn a thinking model's thinking off")
+
+	# And what each is actually sent, to the byte. The paid endpoint's body is the
+	# four fields it has always carried with `reasoning` on the end -- one word of
+	# it moved and a recording made against it would stop being comparable with
+	# the one checked in. The local body is that same body with one field
+	# different: `reasoning_effort`, which is the word an OpenAI-compatible server
+	# on a loopback port understands and the paid one does not.
+	var paid_body := ModelCall.body_for("a question", shipped)
+	equal(paid_body, '{"max_tokens":%d,"messages":[{"content":"a question","role":"user"}],"model":"%s","reasoning":{"effort":"low"},"temperature":%d}' % [
+		ModelCall.MAX_TOKENS, ModelCall.MODEL, ModelCall.TEMPERATURE],
+		"the paid endpoint is sent something other than what it always was")
+	var local_body := ModelCall.body_for("a question", local)
+	equal(local_body, '{"max_tokens":%d,"messages":[{"content":"a question","role":"user"}],"model":"%s","reasoning_effort":"none","temperature":%d}' % [
+		ModelCall.MAX_TOKENS, A_LOCAL_MODEL, ModelCall.TEMPERATURE],
+		"a local endpoint is sent something other than the thinking-off field")
+	check(not local_body.contains('"reasoning"'),
+		"a local call carries the paid endpoint's word for it")
+	check(not paid_body.contains("reasoning_effort"),
+		"the paid call carries the local endpoint's word for it")
+
+	# An endpoint no call can be made to carries no field either, so a refused
+	# address cannot be turned into a call by the body it would have had.
+	equal(JSON.stringify(ModelCall.endpoint_named("nowhere", A_LOCAL_MODEL)["body"]),
+		"{}", "an endpoint that was refused still carries a request body")
 
 	# A port where the address gives none, and a route where it gives none.
 	equal(int(ModelCall.address_of("http://a.b/v1")["port"]), 80,
@@ -404,9 +433,16 @@ func _the_endpoint_is_read_from_the_environment() -> void:
 	# Nothing under sim/ learns any of it. The same rule that keeps the first
 	# endpoint's name out of the simulation keeps the second one's out: neither
 	# variable, neither host, and not the key's name either.
+	# And nothing under sim/ learns that thinking is a thing a request may ask
+	# for, or what any of the models answering are called, or what runs them. The
+	# field name is spelled out rather than the word "reasoning", because that
+	# word is ordinary English and half the files under sim/ use it about their
+	# own working.
 	var needles := [
 		ModelCall.ENDPOINT_VARIABLE, ModelCall.MODEL_VARIABLE, ModelCall.KEY_VARIABLE,
 		ModelCall.HOST, "127.0.0.1", "localhost",
+		"reasoning_effort", "enable_thinking", ModelCall.MODEL,
+		"ollama", "qwen", "gemma", "nemotron", "mercury", "glm-",
 	]
 	var naming := PackedStringArray()
 	var read_files := 0

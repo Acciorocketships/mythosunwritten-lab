@@ -138,6 +138,17 @@ const MODEL_VARIABLE := "LOCAL_MODEL"
 ## of the wanted answer cut the answer off mid-word. That is still true, and it
 ## is why a model whose thinking cannot be held to nothing is not given a ceiling
 ## trimmed to the length of its line.
+##
+## It is the right ceiling for the local endpoint too, now that the thinking
+## there really can be held to nothing, and here is the number: the longest reply
+## in the whole checked-in recording -- the orchestrator's persona for Grum Vask,
+## and the longest answer any of the five runs has ever asked for -- is 485
+## characters, which the two thinking arms measured here count as 109 and 115
+## tokens. With the field below sent, a character's line costs 7 to 15 tokens and
+## the thinking costs none. So 1200 is about ten times the largest answer anybody
+## asks for, and it stays: nothing is paid for a token that is not produced, and
+## the same constant still has to cover the paid endpoint above, whose thinking
+## can be turned down but not off.
 const MODEL := "z-ai/glm-5.3-flash"
 const MAX_TOKENS := 1200
 const TEMPERATURE := 0
@@ -146,6 +157,52 @@ const TEMPERATURE := 0
 ## body. See the note above: this is what makes the model answer in a second
 ## rather than in ten, and on this endpoint it may not be set to nothing at all.
 const REASONING := {"effort": "low"}
+
+## What is sent to a local endpoint to turn a thinking model's thinking off, as
+## one top-level field of the request body.
+##
+## ## Why there is one at all, when there used to be none
+##
+## The note that used to sit on the local branch below said the models measured
+## against a local endpoint had been chosen for having no thinking to turn down.
+## That stopped being true the moment the arm list grew: `qwen3.5:0.8b` and
+## `nemotron-3-nano:4b` are the two fastest local arms measured here -- 0.19 and
+## 0.15 seconds a call against 0.79 for `gemma3n:e2b` -- and both are thinking
+## models. Through this seam with no such field, on the shipped run's own first
+## question at `MAX_TOKENS` 1200 and temperature 0:
+##
+##   * `qwen3.5:0.8b` came back with **empty content, three times of three**,
+##     `finish_reason` `length`, all 1,200 completion tokens spent reasoning.
+##     Uncapped it spends 40,960 tokens and 136 seconds and still says nothing.
+##   * `nemotron-3-nano:4b` answered -- because its thought happened to fit
+##     inside the ceiling. That is luck and not a contract: the thought is 677
+##     characters on this question here and was 1,015 on the same question in an
+##     earlier session, and a draw that runs long is the row above.
+##
+## ## Which field, and why this one
+##
+## Three levers were tried here, one field at a time, on both models:
+##
+##   * `reasoning_effort: "none"`, a top-level field of the OpenAI-compatible
+##     `/v1/chat/completions` body -- **works** on both, and is what is sent.
+##   * `think: false` -- works on both, but only on ollama's own `/api/chat`,
+##     which is a different route with a different request shape and a different
+##     answer shape. Taking it would mean a second transport in this file for one
+##     runtime's dialect, where the field above is one key in the body this file
+##     already sends.
+##   * `chat_template_kwargs: {"enable_thinking": false}` -- accepted with HTTP
+##     200 and **ignored**: both models still emit the whole thought. A field
+##     that is obeyed nowhere and refused nowhere is the worst of the three.
+##
+## The one taken was tried here rather than read about, and the measurements it
+## is quoted from are in `reports/local-thinking-field-evidence.txt`.
+##
+## A server that has never heard of it is not a fallback either. An unknown field
+## is refused with an HTTP status, and `fetch` says that back in a sentence
+## naming the fields the request carried, exactly as an unparseable address is
+## said back -- never a quiet retry against the paid endpoint, which is the one
+## behaviour that would turn a typo into a bill.
+const THINKING_OFF := {"reasoning_effort": "none"}
 
 ## How long a call is given before it is called unanswered, in milliseconds, and
 ## how long the polling loop sleeps between looks. Neither is a simulation
@@ -161,7 +218,9 @@ const REST_MS := 10
 ##
 ## Answers a dictionary and not a URL, because a call needs all of it: the host
 ## and port to open, whether to wrap the socket in TLS, the route to POST to,
-## which model to ask for, and whether a `reasoning` field belongs in the body.
+## which model to ask for, and what else belongs in the request body -- which is
+## how much thinking is asked for, in whichever of the two words that endpoint
+## understands.
 ##
 ## `ok` is false when the environment says something that cannot be obeyed, with
 ## `why` saying what, and `fetch` then refuses the call rather than quietly going
@@ -184,7 +243,7 @@ static func endpoint_named(address: String, model: String) -> Dictionary:
 		return {
 			"ok": true, "why": "", "local": false,
 			"url": ENDPOINT, "host": HOST, "port": 443, "tls": true,
-			"route": ROUTE, "model": MODEL, "reasoning": REASONING,
+			"route": ROUTE, "model": MODEL, "body": {"reasoning": REASONING},
 		}
 	var parsed := address_of(address)
 	if not parsed["ok"]:
@@ -199,14 +258,15 @@ static func endpoint_named(address: String, model: String) -> Dictionary:
 		"ok": true, "why": "", "local": true,
 		"url": address, "host": parsed["host"], "port": parsed["port"],
 		"tls": parsed["tls"], "route": parsed["route"], "model": model,
-		# No `reasoning` field, and its absence is as deliberate as its presence
-		# above. It is the word the paid endpoint's API understands for "do not
-		# think until the ceiling is spent", and a server on a loopback port
-		# speaks its own dialect of the same request shape: a field it does not
-		# know is ignored at best and answered with HTTP 400 at worst. The models
-		# measured against a local endpoint here were chosen for having no
-		# thinking to turn down in the first place.
-		"reasoning": {},
+		# The same thing asked for in the other endpoint's word. `reasoning` is
+		# the paid API's spelling of "do not think until the ceiling is spent"
+		# and a server on a loopback port speaks its own dialect of the same
+		# request shape; `reasoning_effort` is the spelling an OpenAI-compatible
+		# local server understands, and the two fastest local arms measured here
+		# say nothing at all without it. See the note beside `THINKING_OFF`, which
+		# names the two levers that work, the one that is accepted and ignored,
+		# and why this is the one sent.
+		"body": THINKING_OFF,
 	}
 
 
@@ -252,7 +312,7 @@ static func _nowhere(why: String) -> Dictionary:
 	return {
 		"ok": false, "why": why, "local": true,
 		"url": "", "host": "", "port": 0, "tls": false, "route": "",
-		"model": "", "reasoning": {},
+		"model": "", "body": {},
 	}
 
 
@@ -403,6 +463,35 @@ static func credentials() -> Dictionary:
 # --- One call -------------------------------------------------------------
 
 
+## The bytes one question is sent as, given where it is going.
+##
+## Pulled out of `fetch` so that what each endpoint is actually sent can be
+## looked at without a network, a key or a server -- by the suite, and by anyone
+## reading. Every call carries the same four fields and the endpoint adds its
+## own, and `JSON.stringify` writes a dictionary's keys in sorted order rather
+## than the order they were put in, so the paid endpoint's body is the same bytes
+## it has always been and the local one's differs from it by exactly one field.
+## Both are checked against a literal in `tests/test_agent.gd` rather than left to
+## be believed.
+static func body_for(prompt: String, going: Dictionary) -> String:
+	var asking := {
+		"model": going["model"],
+		"max_tokens": MAX_TOKENS,
+		"temperature": TEMPERATURE,
+		"messages": [{"role": "user", "content": prompt}],
+	}
+	# Whatever this endpoint says over and above the question: `reasoning` where
+	# the call is paid for, `reasoning_effort` where it is local. See the note
+	# beside `THINKING_OFF` -- each is one endpoint's own word for the same
+	# request, and a server that does not know the word refuses the whole call
+	# over it rather than ignoring it, which is why the sentence a refusal comes
+	# back as names the fields that were sent.
+	var extra: Dictionary = going["body"]
+	for field in extra:
+		asking[field] = extra[field]
+	return JSON.stringify(asking)
+
+
 ## One HTTPS call, and everything that can go wrong with it said in a sentence.
 ##
 ## Never returns an error and never pushes one: a call that did not work comes
@@ -430,19 +519,7 @@ static func fetch(key_value: String, prompt: String, where: Dictionary = {}) -> 
 	if http.get_status() != HTTPClient.STATUS_CONNECTED:
 		return _nothing(0, "no connection to %s (status %d)" % [host, http.get_status()])
 
-	var asking := {
-		"model": going["model"],
-		"max_tokens": MAX_TOKENS,
-		"temperature": TEMPERATURE,
-		"messages": [{"role": "user", "content": prompt}],
-	}
-	# Only where the endpoint has one. See the note beside `reasoning` in
-	# `endpoint_named`: it is this provider's word, and a server that does not
-	# know it may refuse the whole call over it.
-	var reasoning: Dictionary = going["reasoning"]
-	if not reasoning.is_empty():
-		asking["reasoning"] = reasoning
-	var body := JSON.stringify(asking)
+	var body := body_for(prompt, going)
 	var headers := ["Content-Type: application/json"]
 	# A local endpoint wants no credential and is not given one. Sending an empty
 	# bearer token to a server that does not want one is a way of being refused
@@ -471,9 +548,29 @@ static func fetch(key_value: String, prompt: String, where: Dictionary = {}) -> 
 	http.close()
 	var spent := Time.get_ticks_msec() - began
 	if code != 200:
-		return _nothing(spent, "the model answered with HTTP %d: %s" % [
-			code, raw.get_string_from_utf8().substr(0, 200)])
+		# Said back plainly and never retried somewhere else. A server that has
+		# never heard of the field the request carried refuses the whole call over
+		# it, and the likeliest reason a call to a machine on this network is
+		# refused at all is a word one endpoint uses and another does not -- so
+		# the sentence names the fields that were sent beside the question. What
+		# it will not do is call the paid endpoint instead: an address or a field
+		# a local server will not take is a thing to be told about, exactly as an
+		# address that will not parse is, and not a reason to spend money.
+		return _nothing(spent, "the model answered with HTTP %d%s: %s" % [
+			code, _besides_the_question(going), raw.get_string_from_utf8().substr(0, 200)])
 	return _said_in(raw.get_string_from_utf8(), spent)
+
+
+# The fields this endpoint sends over and above the question, named for a
+# sentence, and nothing at all where it sends none.
+static func _besides_the_question(going: Dictionary) -> String:
+	var extra: Dictionary = going.get("body", {})
+	if extra.is_empty():
+		return ""
+	var named := PackedStringArray()
+	for field in extra:
+		named.append("%s=%s" % [field, JSON.stringify(extra[field])])
+	return " to a request carrying %s" % " ".join(named)
 
 
 # What the model said, out of the answer it came in.

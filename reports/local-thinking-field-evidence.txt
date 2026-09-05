@@ -1,0 +1,248 @@
+the one field a thinking model needs, which the local branch of the seam did not send
+=====================================================================================
+
+what was measured, and on what
+
+  net/model_call.gd sends the paid endpoint `"reasoning": {"effort": "low"}` and
+  sent a local endpoint nothing at all, on a note saying the models measured
+  against a local endpoint had been chosen for having no thinking to turn down.
+  That stopped being true when the arm list grew by two: qwen3.5:0.8b and
+  nemotron-3-nano:4b are the fastest local arms measured here and both are
+  thinking models. This is that one field, and the note above the branch
+  rewritten to say what is now true.
+
+  The server, for every measurement below:
+
+    HOME=<scratchpad> OLLAMA_MODELS=<scratchpad>/models OLLAMA_CONTEXT_LENGTH=4096 \
+      OLLAMA_NUM_PARALLEL=1 OLLAMA_HOST=127.0.0.1:11512 ollama serve
+
+  ollama 0.17.4 on an RTX 4090 with 23.7 of 24 GiB free. Four arms pulled from
+  the ollama library into the session scratchpad: qwen3.5:0.8b (1.0 GB),
+  nemotron-3-nano:4b (2.8 GB), gemma3n:e2b (5.6 GB), gemma3n:e4b (7.5 GB).
+  Nothing of any of them is in the repository or in git.
+
+  The question, everywhere below, is the shipped run's own first one -- the one
+  ./run_record.sh prints without --live: 3,267 characters, digest
+  6a973c08474c3f48, 1,095 to 1,099 prompt tokens depending on whose tokenizer
+  counts it. max_tokens 1200, temperature 0, which is what the seam sends.
+
+  "before" is not a reconstruction. It is the seam at commit 1a5ca1e, checked out
+  into a second working tree and run against the same server on the same
+  afternoon.
+
+
+1. which field, and the evidence for choosing it
+------------------------------------------------
+
+  Three levers, tried here rather than read about, one field at a time, on both
+  thinking arms:
+
+    lever                                       route              qwen3.5:0.8b        nemotron-3-nano:4b
+    reasoning_effort: "none"                    /v1/chat/...       works, 190 ms       works, 150 ms
+    think: false                                /api/chat          works, 524 ms       works, 1,307 ms
+    chat_template_kwargs enable_thinking=false  /v1/chat/...       HTTP 200, ignored   HTTP 200, ignored
+
+  The third is the worst of the three and is why "the server took it" is not
+  evidence of anything: both models answered HTTP 200 with the field set and both
+  still emitted the whole thought -- qwen3.5:0.8b spent all 1,200 tokens on it and
+  came back with empty content, nemotron-3-nano:4b thought for 515 characters.
+
+  `think: false` works, and is not what is sent. It is a field of ollama's own
+  /api/chat, which is a different route with a different request shape and a
+  different answer shape: taking it would mean a second transport in net/ for one
+  runtime's dialect. `reasoning_effort` is a top-level field of the
+  OpenAI-compatible body this file already posts, so it is one key in a body, and
+  it is what the local branch now sends.
+
+  The two are not measured against each other for speed. The /api/chat numbers
+  above are one cold call each; the /v1 numbers are warm medians of three. What
+  they establish is that both work.
+
+
+2. the same call, with the field and without it
+-----------------------------------------------
+
+  The bytes are the seam's own: the body ModelCall.body_for() builds for the
+  local endpoint, posted as it stands ("with"), and posted with that one field
+  removed ("without"), which is exactly what the branch used to send. Three calls
+  each, warm; the first call of each arm is a model load and is not counted.
+
+    arm                  field   median   finish_reason  completion tokens  thought  content
+    qwen3.5:0.8b         without  4,085ms  length                    1,200  4,309 c  (empty)
+    qwen3.5:0.8b         with       190ms  stop                         15        0  go_to target=(12.5, -4.0)
+    nemotron-3-nano:4b   without    937ms  stop                        178    677 c  wait ticks=1
+    nemotron-3-nano:4b   with       150ms  stop                          7        0  go_to target=#7
+    gemma3n:e2b          without    543ms  stop                          5        0  examine #7
+    gemma3n:e2b          with       534ms  stop                          5        0  examine #7
+    gemma3n:e4b          without    610ms  stop                          9        0  say text=words target=#7
+    gemma3n:e4b          with       625ms  stop                          9        0  say text=words target=#7
+
+  qwen3.5:0.8b is the whole case in one row: without the field it spends every
+  one of the 1,200 tokens the ceiling allows on thinking, is cut off mid-thought,
+  and hands back an empty string, three times of three. With the field it answers
+  in 15 tokens and 190 milliseconds.
+
+  nemotron-3-nano:4b answered before and answers now, and the difference is that
+  it now answers by contract. Without the field its thought is 677 characters
+  here and was 1,015 characters on the same question in an earlier session -- a
+  length that happens to fit under the ceiling, not one that is promised to. With
+  the field the thought is 0 characters and the answer is 7 tokens, and nothing
+  about the reply depends on how long the model felt like thinking.
+
+  Turning thinking off changes what nemotron says (`wait ticks=1` becomes `go_to
+  target=#7`). It is a different, cheaper model of itself, and that is the trade
+  being made; it is not a claim that the answers are the same.
+
+  The two arms with no thinking to turn off are unaffected: gemma3n:e2b and
+  gemma3n:e4b return the identical line with the identical completion-token count
+  with the field sent and without it, three calls each way. The 15 ms difference
+  on e4b is inside the noise of the three calls either way.
+
+
+3. through the seam, before and after
+-------------------------------------
+
+  One question, put by ModelCall.fetch itself, through the seam at 1a5ca1e and
+  through the seam as it now ships. Same server, same question.
+
+    arm                  seam at 1a5ca1e                    seam as it ships
+    qwen3.5:0.8b         "" (an empty reply, no reason)     "go_to target=(12.5, -4.0)"
+    nemotron-3-nano:4b   "wait ticks=1"                     "go_to target=#7"
+    gemma3n:e2b          "examine #7"                       "examine #7"
+    gemma3n:e4b          "say text=words target=#7"         "say text=words target=#7"
+
+  The head of each run says what it was sent:
+
+    endpoint   http://127.0.0.1:11512/v1/chat/completions
+    model      qwen3.5:0.8b
+    body extra {"reasoning_effort":"none"}
+
+
+4. and through a whole run
+--------------------------
+
+  ./run_agent.sh --live, 160 ticks, seed 1234, against qwen3.5:0.8b, once through
+  each seam.
+
+    the same run                          seam at 1a5ca1e   seam as it ships
+    calls made                                          8              115
+    calls that came back inside the run                 3              115
+    of those, answered in the model's own words         0              115
+    turns the engine resolved                           3               57
+    wall clock                                     35.5 s           1m 26s
+
+  The old seam's run is the shorter of the two and that is not a point in its
+  favour: it is 160 ticks either way, and a run that gets 0.2 seconds an answer
+  asks fourteen times as many questions in it as one that gets four.
+
+  The three lines the old seam resolved are not qwen3.5:0.8b's. They are rows 1,
+  2 and 3 of the checked-in recording, byte for byte -- `go_to target=#6`,
+  `examine target=#4`, `say text=Hail, fellow commander. target=#3` -- because a
+  live answer that comes back empty is answered out of the recording instead
+  (sim/model_channel.gd, _fall_back_to_the_recording, and the note at the head of
+  that file). That is the designed behaviour and it is right; it is also why the
+  field matters more than the empty-reply count suggests. Without it, a pass
+  against a local thinking model produces a transcript that looks like it
+  answered and is quoting the cloud model it was meant to be compared against.
+
+  The run through the shipped seam has qwen's own lines in it -- `go_to
+  target=(12.5, -4.0)`, `recall about=words`, `pick_up item=words target=#7` --
+  none of which appear anywhere in the recording. Those lines are the prompt's
+  own syntax placeholders, which is the separate finding already recorded for
+  every small local arm and owned by W-prompt-placeholders. Nothing about it is
+  fixed or judged here.
+
+
+5. a server that refuses the field
+----------------------------------
+
+  No server available here refuses `reasoning_effort`, so one was written that
+  does: an OpenAI-compatible stub on 127.0.0.1:11599 that answers HTTP 400 to any
+  field it does not know and answers normally otherwise. Through the seam:
+
+    endpoint   http://127.0.0.1:11599/v1/chat/completions
+    model      a-model-that-does-not-think
+    body extra {"reasoning_effort":"none"}
+    why        the model answered with HTTP 400 to a request carrying
+               reasoning_effort="none": {"error": {"message": "unknown field:
+               reasoning_effort", "type": "invalid_request_error"}}
+    reply      ""
+
+  Said back plainly, with the field that was refused named in the sentence, and
+  no call made anywhere else. The same run with OPENROUTER_API_KEY set in the
+  environment prints the identical sentence: a local endpoint is never given a
+  key and a refusal is never retried against the paid one. That is the same
+  handling an address the seam cannot parse already gets, for comparison:
+
+    endpoint   nowhere
+    why        LOCAL_MODEL_ENDPOINT is set to
+               'http://127.0.0.1:eleven/v1/chat/completions', which has 'eleven'
+               where a port number should be
+    reply      ""
+
+
+6. is 1200 still the right ceiling
+----------------------------------
+
+  Yes, and the number is this: the longest reply in the whole checked-in
+  recording -- the orchestrator's persona for Grum Vask, and the longest answer
+  any of the five runs has ever asked for -- is 485 characters, which
+  qwen3.5:0.8b counts as 109 tokens and nemotron-3-nano:4b as 115. With the field
+  sent, a character's line costs 7 to 15 tokens and the thinking costs none. So
+  1,200 is about ten times the largest answer anybody asks for.
+
+  It stays where it is: nothing is paid for a token that is not produced, the
+  same constant covers the paid endpoint whose thinking can be turned down but
+  not off, and lowering it would only re-open the failure it was raised for. This
+  is reported rather than acted on.
+
+
+7. what did not move
+--------------------
+
+  The paid endpoint's request body, to the byte. What each endpoint is sent is
+  now built by ModelCall.body_for() and checked in tests/test_agent.gd against a
+  literal:
+
+    paid   {"max_tokens":1200,"messages":[...],"model":"z-ai/glm-5.3-flash",
+            "reasoning":{"effort":"low"},"temperature":0}
+    local  {"max_tokens":1200,"messages":[...],"model":"<the local model>",
+            "reasoning_effort":"none","temperature":0}
+
+  The paid body carries no reasoning_effort and the local body carries no
+  reasoning; the two differ by exactly one field.
+
+  Nothing under sim/ learns any of it. The scan in tests/test_agent.gd walks the
+  directory -- every file it finds, not a list written out by hand, and sim/ holds
+  110 of them -- and now looks for the two endpoint variables, the key's name,
+  both hosts, `reasoning_effort`, `enable_thinking`, the shipped model's id, and
+  the words ollama, qwen, gemma, nemotron, mercury and glm-. It finds none of
+  them, and the same check confirms the file that does name them is
+  net/model_call.gd. It is part of the agent suite:
+
+    $ env -u OPENROUTER_API_KEY -u LOCAL_MODEL_ENDPOINT -u LOCAL_MODEL \
+        ./run_agent_suite.sh
+    PASS  agent          1106 checks
+
+  The shipped recording still replays byte-identically:
+
+    $ env -u OPENROUTER_API_KEY -u LOCAL_MODEL_ENDPOINT -u LOCAL_MODEL \
+        ./run_agent.sh > <a file>
+    $ diff <that file> reports/agent-evidence.txt
+    (no output: byte for byte the transcript that is checked in)
+
+  The suite, headless, with no key and no network, twice:
+
+    $ env -u OPENROUTER_API_KEY -u LOCAL_MODEL_ENDPOINT -u LOCAL_MODEL \
+        ./run_tests.sh
+    all 50 suites passed (196384 checks)          exit 0, both times
+    $ cmp <the first run's stdout> <the second's>
+    (no output: identical bytes)
+
+  The world on seed 1234, before and after, on this machine:
+
+    before (the tree at 1a5ca1e)  done ticks=100 chunks=39 built=60 final=5014980a58150055
+    after                         done ticks=100 chunks=39 built=60 final=5014980a58150055
+
+  Nothing about the terrain, the cast or the recording moved. Only where a local
+  call's request body has one more field in it did.
