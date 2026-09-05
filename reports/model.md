@@ -258,9 +258,25 @@ tables. The short answer: every local arm is $3$ to $10$ times faster than the
 recording that ships and none of them returned an empty reply, but the ranking by
 speed is not the ranking by behaviour — the three fastest arms are three of the
 four worst-behaved, and no local arm's orchestrator answers come close. **No arm
-copied the prompt's example coordinate**, which four of four did on the last full
-pass before commit `f39055b`. The table, the per-arm evidence and the
-recommendation are in [reports/local-bench.md](local-bench.md).
+copied the prompt's example coordinate.** On the last full pass before commit
+`f39055b`, every local arm that attempted a spawn at all copied it in every
+attempt: three of the four arms made $14$ attempts between them and the engine
+carried out none, while the fourth (`nemotron-3-nano:4b`) answered the
+orchestrator `nothing` five times of five and so attempted nothing to copy into.
+The table, the per-arm evidence and the recommendation are in
+[reports/local-bench.md](local-bench.md).
+
+**Two cautions on reading that table, both of which apply to this page too.**
+Every arm was given the same $160$-tick run, and a live channel hands a reply
+back on whichever tick the worker thread answers on, so a faster arm is simply
+asked more often: $69$ turns at a $1.874$ s median, $96$ at $0.708$ s, $127$ at
+$0.172$ s. An arm's turn count is therefore partly a restatement of its latency,
+and nothing here compares two arms on a raw count — only on a share of that arm's
+own turns. And a turn that "ran to a finish" is not a turn that went well: the
+run's own counter marks a journal line finished whether the action was carried
+out, refused by the world, or faulted by the catalogue. The comparable figure is
+the engine's own `ok` verdict as a share of that arm's turns — the cloud model
+$63$ of $69$ ($91\%$), `gemma3n:e4b` $55$ of $96$ ($57\%$) with $41$ faults.
 
 ## The recording has moved on, and that is the point
 
@@ -320,10 +336,19 @@ nothing under `sim/` learned which model answers.
   `qwen/qwen3.7-flash` returned an empty string on three calls of three, and
   `z-ai/glm-4.7-flash` on two of three, all cut off at the ceiling, at $25$ to
   $40$ seconds a call.
-* **The independent review has not run.** The check that nothing in the tree
-  still asks the old model, and that the recording really is the new model's
-  words re-derived from the file rather than from prose, is planned and not yet
-  done.
+* **The independent review has now run, and two of its three findings are still
+  open.** It confirmed the three things it went after: `net/model_recording.gd`
+  is byte-identical to its state at commit `f39055b`, which predates all ten
+  local passes, and names the cloud model on every provenance line; the recall
+  guard refuses a character a person drives in the same sentence as the other
+  two kinds of mind; and the whole cloud row of the comparison re-derives off the
+  checked-in recording. Of its three findings, the cold-load column was struck in
+  commit `0886c10`. Still open in `reports/local-bench.md`: the column headed
+  *resolved, per character* counts refusals and catalogue faults as finished
+  turns and is not renamed there, and that page still ranks two arms on raw turn
+  counts without disclosing that a faster arm is asked more often. Both are
+  corrected on this page above and in the living report; the bench page itself is
+  a separate piece of work.
 * **The prose has not caught up.** `README.md` and several pages under
   `reports/` still name fable and quote its replies; that is its own piece of
   work. `reports/agent-live-evidence.txt` still says fable correctly — it is the
