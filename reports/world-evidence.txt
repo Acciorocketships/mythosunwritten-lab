@@ -3,7 +3,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 orchestrator run seed=1234 ticks=150 every=30 where=(-480.0, 420.0)
   polled     every 30 ticks over the world, which is what makes this the third shape of call and not the other two
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 11 replies
+  recording  recorded 2026-09-05 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 10 replies
   region     637.8 from the world origin, ring 9, difficulty 10 -- section 5's own gradient, out of ItemFrontier
   who        Rook, carrying a brass lantern and a coil of rope
 
@@ -18,13 +18,13 @@ two prompts, two calls
   watching   You are the dungeon master of a living world. You change the world. You never decide what anyone in it does.
   peopling   You write who someone is, out of the numbers they have already been rolled with. You do not change the numbers.
   and the watching call may name only these, which the engine carries out:
-    place  kind=one of chest/crate/door/stone at=(12.5, -4.0) -- a new thing stands there, on ground that carries it
-    remove target=#7                      -- a thing is taken out of the world
-    spawn  role=one of guard/herald/scout/scholar at=(12.5, -4.0) -- a character is rolled for that ground and stands there
-    open   target=#7              -- a shut thing comes open
-    shut   target=#7              -- an open thing falls shut
-    move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units, onto ground that carries it
-    spill  target=#7              -- everything inside an open thing ends up on the ground beside it
+    place  kind=one of chest/crate/door/stone at=(<x>, <z>) -- a new thing stands there, on ground that carries it
+    remove target=#<id>                   -- a thing is taken out of the world
+    spawn  role=one of guard/herald/scout/scholar at=(<x>, <z>) -- a character is rolled for that ground and stands there
+    open   target=#<id>           -- a shut thing comes open
+    shut   target=#<id>           -- an open thing falls shut
+    move   target=#<id> to=(<x>, <z>) -- a thing is shoved, at most 4.0 units, onto ground that carries it
+    spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
   that list is the whole of what it may do.
 
 the bands a sheet is rolled from here (ring 9, lift +2)
@@ -36,7 +36,7 @@ the bands a sheet is rolled from here (ring 9, lift +2)
 
 what the character did, which nothing here chose for it
   t=  1  Rook   began say(text=anyone about? I have rope and a lantern to trade), 5 ticks
-  t=  5  scout #5 has not decided yet, and waits in the world
+  t=  5  scout #4 has not decided yet, and waits in the world
   t=  6  Rook   finished say(text=anyone about? I have rope and a lantern to trade) -> say ok shout=true heard_by=1
   t=  6  Rook   began go_to(target=(-474.000, 422.000)), 20 ticks
   t= 11  Rook   thought again at 5/20t, wanted the same thing
@@ -44,11 +44,10 @@ what the character did, which nothing here chose for it
   t= 21  Rook   thought again at 15/20t, wanted the same thing
   t= 26  Rook   finished go_to(target=(-474.000, 422.000)) -> go_to ok at=(-474.023, 421.992) walked=6.3 steps=7
   t= 26  Rook   began examine(target=2), 4 ticks
-  t= 30  Rook   finished examine(target=2) -> examine ok id=2 name=oak chest kind=object shut=false holds=0 money=0 distance=1.992
+  t= 30  Rook   finished examine(target=2) -> examine ok id=2 name=oak chest kind=object shut=false holds=0 money=9 distance=1.992
   t= 30  Rook   began wait(ticks=6), 6 ticks
   t= 35  Rook   thought again at 5/6t, wanted the same thing
-  t= 35  herald #6 has not decided yet, and waits in the world
-  t= 35  guard #7 has not decided yet, and waits in the world
+  t= 35  scout #6 has not decided yet, and waits in the world
   t= 36  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=42
   t= 36  Rook   began go_to(target=(-484.000, 424.000)), 20 ticks
   t= 41  Rook   thought again at 5/20t, wanted the same thing
@@ -59,7 +58,7 @@ what the character did, which nothing here chose for it
   t= 60  Rook   finished examine(target=3) -> examine ok id=3 name=hazel crate kind=object shut=false holds=0 money=0 distance=4.861
   t= 60  Rook   began wait(ticks=6), 6 ticks
   t= 65  Rook   thought again at 5/6t, wanted the same thing
-  t= 65  guard #8 has not decided yet, and waits in the world
+  t= 65  herald #8 has not decided yet, and waits in the world
   t= 66  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=72
   t= 66  Rook   began go_to(target=(-478.000, 414.000)), 20 ticks
   t= 71  Rook   thought again at 5/20t, wanted the same thing
@@ -70,7 +69,7 @@ what the character did, which nothing here chose for it
   t= 91  Rook   thought again at 5/6t, wanted the same thing
   t= 92  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=98
   t= 92  Rook   began go_to(target=(-472.000, 418.000)), 20 ticks
-  t= 95  scholar #9 has not decided yet, and waits in the world
+  t= 95  herald #9 has not decided yet, and waits in the world
   t= 97  Rook   thought again at 5/20t, wanted the same thing
   t=102  Rook   thought again at 10/20t, wanted the same thing
   t=107  Rook   thought again at 15/20t, wanted the same thing
@@ -80,7 +79,7 @@ what the character did, which nothing here chose for it
   t=118  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=124
   t=118  Rook   began go_to(target=(-482.000, 416.000)), 20 ticks
   t=123  Rook   thought again at 5/20t, wanted the same thing
-  t=125  scout #10 has not decided yet, and waits in the world
+  t=125  scout #12 has not decided yet, and waits in the world
   t=128  Rook   thought again at 10/20t, wanted the same thing
   t=133  Rook   thought again at 15/20t, wanted the same thing
   t=138  Rook   finished go_to(target=(-482.000, 416.000)) -> go_to ok at=(-481.708, 416.058) walked=9.9 steps=11
@@ -91,50 +90,52 @@ what the character did, which nothing here chose for it
   t=149  Rook   thought again at 5/8t, wanted the same thing
 
 what the orchestrator did, as it happened
-  tick 1  looked at the world (22f1292b9d684f27)
+  tick 1  looked at the world (b77c1f0f47dd07fa)
+  tick 4  did       spawn role=scout at=(-476.0, 418.0) -- a scout was rolled for ground of difficulty 10 and stands at (-476.000, 418.000) as #4, with no one written into it yet
+  tick 4  #4 is rolled and standing: str 7 con 8 cha 7 dex 13 wis 12 int 10 -- asked who that is (73280e9a88e2ef7c)
   tick 4  did       open target=#3 -- the hazel crate came open
-  tick 4  did       spill target=#2 -- 0 things and 9 coins out of the oak chest onto pile #4
-  tick 4  did       spawn role=scout at=(-470.0, 418.0) -- a scout was rolled for ground of difficulty 10 and stands at (-470.000, 418.000) as #5, with no one written into it yet
-  tick 4  #5 is rolled and standing: str 7 con 8 cha 7 dex 13 wis 12 int 10 -- asked who that is (346ecaac8f2ac8a8)
-  tick 7  wrote     #5 is Swiftbrook, and the six numbers it was rolled with are untouched
-  tick 31  looked at the world (9322c3c96440021f)
-  tick 34  did       spawn role=herald at=(-466.0, 424.0) -- a herald was rolled for ground of difficulty 10 and stands at (-466.000, 424.000) as #6, with no one written into it yet
-  tick 34  #6 is rolled and standing: str 7 con 9 cha 17 dex 6 wis 4 int 8 -- asked who that is (81121fb07d1d8671)
-  tick 34  did       spawn role=guard at=(-480.0, 412.0) -- a guard was rolled for ground of difficulty 10 and stands at (-480.000, 412.000) as #7, with no one written into it yet
-  tick 34  #7 is rolled and standing: str 14 con 12 cha 5 dex 8 wis 7 int 6 -- asked who that is (3e2d2ab066156f34)
-  tick 37  wrote     #6 is Vessaline, and the six numbers it was rolled with are untouched
-  tick 37  wrote     #7 is Grum Vask, and the six numbers it was rolled with are untouched
-  tick 61  looked at the world (64008373031daed2)
-  tick 64  did       spawn role=guard at=(-488.0, 416.0) -- a guard was rolled for ground of difficulty 11 and stands at (-488.000, 416.000) as #8, with no one written into it yet
-  tick 64  #8 is rolled and standing: str 11 con 10 cha 5 dex 9 wis 8 int 5 -- asked who that is (b9ee3dc30d6509de)
-  tick 67  wrote     #8 is Brakk Stonegrip, and the six numbers it was rolled with are untouched
-  tick 91  looked at the world (4383cfbd6b2dd8f7)
-  tick 94  did       spawn role=scholar at=(-484.0, 410.0) -- a scholar was rolled for ground of difficulty 10 and stands at (-484.000, 410.000) as #9, with no one written into it yet
-  tick 94  #9 is rolled and standing: str 7 con 7 cha 7 dex 6 wis 14 int 13 -- asked who that is (3d229a466eda60fd)
-  tick 94  would not place kind=chest at=(-490.0, 420.0) -- nothing at (-490.000, 420.000) would carry it
-  tick 94  would not move target=#4 to=(-478.0, 416.0) -- 5.66 is further than a shove carries (4.00)
-  tick 97  wrote     #9 is Sage Verrin, and the six numbers it was rolled with are untouched
-  tick 121  looked at the world (3cd4c95d23e541f5)
-  tick 124  did       spawn role=scout at=(-478.0, 414.0) -- a scout was rolled for ground of difficulty 10 and stands at (-478.000, 414.000) as #10, with no one written into it yet
-  tick 124  #10 is rolled and standing: str 9 con 8 cha 9 dex 14 wis 12 int 8 -- asked who that is (e8380b759c127e1c)
-  tick 124  did       place kind=chest at=(-476.0, 416.0) -- a chest now stands at (-476.000, 416.000) as #11
-  tick 127  wrote     #10 is Serra Quickfoot, and the six numbers it was rolled with are untouched
+  tick 4  did       place kind=stone at=(-470.0, 415.0) -- a stone now stands at (-470.000, 415.000) as #5
+  tick 7  wrote     #4 is Vesper Quick, and the six numbers it was rolled with are untouched
+  tick 31  looked at the world (1ce5fe114cf96571)
+  tick 34  did       spawn role=scout at=(-478.0, 416.0) -- a scout was rolled for ground of difficulty 10 and stands at (-478.000, 416.000) as #6, with no one written into it yet
+  tick 34  #6 is rolled and standing: str 8 con 9 cha 6 dex 13 wis 9 int 9 -- asked who that is (1814df89cf7d67f9)
+  tick 34  did       spill target=#2 -- 0 things and 9 coins out of the oak chest onto pile #7
+  tick 37  wrote     #6 is Quickfoot Sable, and the six numbers it was rolled with are untouched
+  tick 61  looked at the world (82746f9a1990768f)
+  tick 64  did       spawn role=herald at=(-472.0, 419.0) -- a herald was rolled for ground of difficulty 10 and stands at (-472.000, 419.000) as #8, with no one written into it yet
+  tick 64  #8 is rolled and standing: str 7 con 8 cha 15 dex 7 wis 6 int 11 -- asked who that is (f5a7da6002a96f8d)
+  tick 64  would not open target=#5 -- the stone is already open
+  tick 64  did       move target=#7 to=(-475.0, 418.0) -- the pile was shoved 2.24 to (-475.000, 418.000)
+  tick 67  wrote     #8 is Veylin Brightvoice, and the six numbers it was rolled with are untouched
+  tick 91  looked at the world (3a94ebb7269d8ddb)
+  tick 94  did       spawn role=herald at=(-474.0, 416.0) -- a herald was rolled for ground of difficulty 10 and stands at (-474.000, 416.000) as #9, with no one written into it yet
+  tick 94  #9 is rolled and standing: str 7 con 9 cha 15 dex 6 wis 6 int 11 -- asked who that is (b4e30dfb88bdb990)
+  tick 94  did       place kind=chest at=(-479.0, 421.0) -- a chest now stands at (-479.000, 421.000) as #10
+  tick 94  would not open target=#9 -- there is nothing with id 9 to change
+  tick 97  wrote     #9 is Vessalius Goldtongue, and the six numbers it was rolled with are untouched
+  tick 121  looked at the world (14c8709b4ee94a64)
+  tick 124  did       place kind=chest at=(-468.0, 420.0) -- a chest now stands at (-468.000, 420.000) as #11
+  tick 124  did       spawn role=scout at=(-466.0, 417.0) -- a scout was rolled for ground of difficulty 10 and stands at (-466.000, 417.000) as #12, with no one written into it yet
+  tick 124  #12 is rolled and standing: str 6 con 9 cha 8 dex 15 wis 9 int 6 -- asked who that is (5a8f65cec544f29a)
+  tick 127  wrote     #12 is Quickfoot Sable, and the six numbers it was rolled with are untouched
 
 the operations, every one of them the engine's
+  did       spawn role=scout at=(-476.0, 418.0)        a scout was rolled for ground of difficulty 10 and stands at (-476.000, 418.000) as #4, with no one written into it yet
   did       open target=#3                             the hazel crate came open
-  did       spill target=#2                            0 things and 9 coins out of the oak chest onto pile #4
-  did       spawn role=scout at=(-470.0, 418.0)        a scout was rolled for ground of difficulty 10 and stands at (-470.000, 418.000) as #5, with no one written into it yet
-  did       spawn role=herald at=(-466.0, 424.0)       a herald was rolled for ground of difficulty 10 and stands at (-466.000, 424.000) as #6, with no one written into it yet
-  did       spawn role=guard at=(-480.0, 412.0)        a guard was rolled for ground of difficulty 10 and stands at (-480.000, 412.000) as #7, with no one written into it yet
-  did       spawn role=guard at=(-488.0, 416.0)        a guard was rolled for ground of difficulty 11 and stands at (-488.000, 416.000) as #8, with no one written into it yet
-  did       spawn role=scholar at=(-484.0, 410.0)      a scholar was rolled for ground of difficulty 10 and stands at (-484.000, 410.000) as #9, with no one written into it yet
-  would not place kind=chest at=(-490.0, 420.0)        nothing at (-490.000, 420.000) would carry it
-  would not move target=#4 to=(-478.0, 416.0)          5.66 is further than a shove carries (4.00)
-  did       spawn role=scout at=(-478.0, 414.0)        a scout was rolled for ground of difficulty 10 and stands at (-478.000, 414.000) as #10, with no one written into it yet
-  did       place kind=chest at=(-476.0, 416.0)        a chest now stands at (-476.000, 416.000) as #11
+  did       place kind=stone at=(-470.0, 415.0)        a stone now stands at (-470.000, 415.000) as #5
+  did       spawn role=scout at=(-478.0, 416.0)        a scout was rolled for ground of difficulty 10 and stands at (-478.000, 416.000) as #6, with no one written into it yet
+  did       spill target=#2                            0 things and 9 coins out of the oak chest onto pile #7
+  did       spawn role=herald at=(-472.0, 419.0)       a herald was rolled for ground of difficulty 10 and stands at (-472.000, 419.000) as #8, with no one written into it yet
+  would not open target=#5                             the stone is already open
+  did       move target=#7 to=(-475.0, 418.0)          the pile was shoved 2.24 to (-475.000, 418.000)
+  did       spawn role=herald at=(-474.0, 416.0)       a herald was rolled for ground of difficulty 10 and stands at (-474.000, 416.000) as #9, with no one written into it yet
+  did       place kind=chest at=(-479.0, 421.0)        a chest now stands at (-479.000, 421.000) as #10
+  would not open target=#9                             there is nothing with id 9 to change
+  did       place kind=chest at=(-468.0, 420.0)        a chest now stands at (-468.000, 420.000) as #11
+  did       spawn role=scout at=(-466.0, 417.0)        a scout was rolled for ground of difficulty 10 and stands at (-466.000, 417.000) as #12, with no one written into it yet
 
 the relationships, which are the world's record and not a model's
-  #1 <-> #5 1 happening | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25 | #5 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25
+  #1 <-> #4 1 happening | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.25
   and an answer that tried to write one:
     the line          relate target=#2 trust=1.0 fear=0.0
     read as           0 operations -- there is none of that name in the table
@@ -142,105 +143,88 @@ the relationships, which are the world's record and not a model's
     and the graph     unmoved
 
 the spawns, rolls first
-  #5  a scout at (-470.0, 418.0)
+  #4  a scout at (-476.0, 418.0)
       1. rolled on tick 4, level 10 for this region
          str 7 con 8 cha 7 dex 13 wis 12 int 10
          highest dex, lowest str, 6 apart
-         and it stood in the world as "scout #5", with nobody written into it
+         and it stood in the world as "scout #4", with nobody written into it
       2. asked who that is, answered on tick 7
-         name        Swiftbrook
-         traits      quick-fingered, observant, soft-spoken
-         tendencies  tests every path twice, notices what others miss, avoids brute force
-         backstory   A scout with quick hands and sharp eyes but 
-                     little strength, Swiftbrook learned early to 
-                     survive by watching and staying light rather than 
-                     standing and fighting.
-      3. #5 is Swiftbrook, and the six numbers it was rolled with are untouched
+         name        Vesper Quick
+         traits      agile, observant, soft-handed
+         tendencies  ducks work that needs muscle, watches before speaking, smooths things over with charm
+         backstory   Raised on the edge of nine rings of settled 
+                     ground, Vesper learned to slip through gaps and 
+                     read a trail faster than anyone, but a body that 
+                     tires early taught them to talk their way out of 
+                     what their arms cannot carry.
+      3. #4 is Vesper Quick, and the six numbers it was rolled with are untouched
          str 7 con 8 cha 7 dex 13 wis 12 int 10
          which is the line rolled in step 1, unchanged
-  #6  a herald at (-466.0, 424.0)
+  #6  a scout at (-478.0, 416.0)
       1. rolled on tick 34, level 10 for this region
-         str 7 con 9 cha 17 dex 6 wis 4 int 8
-         highest cha, lowest wis, 13 apart
-         and it stood in the world as "herald #6", with nobody written into it
+         str 8 con 9 cha 6 dex 13 wis 9 int 9
+         highest dex, lowest cha, 7 apart
+         and it stood in the world as "scout #6", with nobody written into it
       2. asked who that is, answered on tick 37
-         name        Vessaline
-         traits      silver-tongued, magnetic, careless of counsel
-         tendencies  charms first, asks never, forgets warnings
-         backstory   Born in the ninth ring's edge-lands, Vessaline 
-                     learned early that a beautiful voice opens doors 
-                     that strength and sense cannot, and has talked 
-                     their way into a herald's office while leaving a 
-                     trail of ignored advice behind them.
-      3. #6 is Vessaline, and the six numbers it was rolled with are untouched
-         str 7 con 9 cha 17 dex 6 wis 4 int 8
+         name        Quickfoot Sable
+         traits      agile, observant, awkward in company
+         tendencies  acts first, trusts their own eyes, keeps to the edges
+         backstory   Raised on the outskirts of the nine rings, they 
+                     learned to move light and watch close, more at 
+                     home slipping past trouble than talking their way 
+                     through it.
+      3. #6 is Quickfoot Sable, and the six numbers it was rolled with are untouched
+         str 8 con 9 cha 6 dex 13 wis 9 int 9
          which is the line rolled in step 1, unchanged
-  #7  a guard at (-480.0, 412.0)
-      1. rolled on tick 34, level 10 for this region
-         str 14 con 12 cha 5 dex 8 wis 7 int 6
-         highest str, lowest cha, 9 apart
-         and it stood in the world as "guard #7", with nobody written into it
-      2. asked who that is, answered on tick 37
-         name        Grum Vask
-         traits      brutishly strong, tireless, stone-faced
-         tendencies  settles arguments by looming rather than talking, keeps his five belongings in exact order, misreads kindness as mockery
-         backstory   Ten years of gate duty carved Grum into a slab of 
-                     muscle with a dull wit and no grace to spare, and 
-                     the same lonely stretches on watch left him 
-                     unable to hold a civil conversation. Travelers 
-                     remember him as the guard they were glad to have 
-                     behind them rather than in front of them.
-      3. #7 is Grum Vask, and the six numbers it was rolled with are untouched
-         str 14 con 12 cha 5 dex 8 wis 7 int 6
-         which is the line rolled in step 1, unchanged
-  #8  a guard at (-488.0, 416.0)
-      1. rolled on tick 64, level 11 for this region
-         str 11 con 10 cha 5 dex 9 wis 8 int 5
-         highest str, lowest cha, 6 apart
-         and it stood in the world as "guard #8", with nobody written into it
+  #8  a herald at (-472.0, 419.0)
+      1. rolled on tick 64, level 10 for this region
+         str 7 con 8 cha 15 dex 7 wis 6 int 11
+         highest cha, lowest wis, 9 apart
+         and it stood in the world as "herald #8", with nobody written into it
       2. asked who that is, answered on tick 67
-         name        Brakk Stonegrip
-         traits      musclebound, blunt, gruff
-         tendencies  solves problems by force, distrusts clever talk, stands his ground
-         backstory   Born at the edge of the ten rings, Brakk earned 
-                     his guard post on raw strength alone, though his 
-                     rough manner and slow wits have cost him every 
-                     promotion but this one.
-      3. #8 is Brakk Stonegrip, and the six numbers it was rolled with are untouched
-         str 11 con 10 cha 5 dex 9 wis 8 int 5
+         name        Veylin Brightvoice
+         traits      silver-tongued, charismatic, tactless
+         tendencies  talks first, wins strangers over, misses the obvious
+         backstory   Born in the outer ninth ring, Veylin learned 
+                     early that a charming word opens more doors than 
+                     any sword arm. But a lifetime of being applauded 
+                     for pretty speeches left no room for learning 
+                     when to stay quiet.
+      3. #8 is Veylin Brightvoice, and the six numbers it was rolled with are untouched
+         str 7 con 8 cha 15 dex 7 wis 6 int 11
          which is the line rolled in step 1, unchanged
-  #9  a scholar at (-484.0, 410.0)
+  #9  a herald at (-474.0, 416.0)
       1. rolled on tick 94, level 10 for this region
-         str 7 con 7 cha 7 dex 6 wis 14 int 13
-         highest wis, lowest dex, 8 apart
-         and it stood in the world as "scholar #9", with nobody written into it
+         str 7 con 9 cha 15 dex 6 wis 6 int 11
+         highest cha, lowest dex, 9 apart
+         and it stood in the world as "herald #9", with nobody written into it
       2. asked who that is, answered on tick 97
-         name        Sage Verrin
-         traits      Perceptive, Contemplative, Clumsy
-         tendencies  Studies old texts for hours, Asks quiet probing questions, Fumbles with tools and small objects
-         backstory   At level ten with wisdom as their loudest gift, 
-                     Verrin has spent years at the rings of the world 
-                     learning to read people and omens, though a weak 
-                     hand at coordination has always made fieldwork 
-                     and craft embarrassing.
-      3. #9 is Sage Verrin, and the six numbers it was rolled with are untouched
-         str 7 con 7 cha 7 dex 6 wis 14 int 13
+         name        Vessalius Goldtongue
+         traits      charismatic, sturdy, clumsy
+         tendencies  talks first, collects followers, fumbles delicate work
+         backstory   Raised on the ninth ring's streets, Vessalius won 
+                     every crowd with a silver voice and a thick hide 
+                     to take the jeers, though her clumsy hands could 
+                     never hold what her words promised.
+      3. #9 is Vessalius Goldtongue, and the six numbers it was rolled with are untouched
+         str 7 con 9 cha 15 dex 6 wis 6 int 11
          which is the line rolled in step 1, unchanged
-  #10  a scout at (-478.0, 414.0)
+  #12  a scout at (-466.0, 417.0)
       1. rolled on tick 124, level 10 for this region
-         str 9 con 8 cha 9 dex 14 wis 12 int 8
-         highest dex, lowest con, 6 apart
-         and it stood in the world as "scout #10", with nobody written into it
+         str 6 con 9 cha 8 dex 15 wis 9 int 6
+         highest dex, lowest str, 9 apart
+         and it stood in the world as "scout #12", with nobody written into it
       2. asked who that is, answered on tick 127
-         name        Serra Quickfoot
-         traits      quick-fingered, silver-tongued, thin-skinned
-         tendencies  scouts wide arcs, talks her way past trouble, bruises and keeps moving
-         backstory   Raised on the ninth ring's fringe roads, she 
-                     learned to slip ahead of caravans and charm her 
-                     way back with news, though every scrape she takes 
-                     lingers longer than she admits.
-      3. #10 is Serra Quickfoot, and the six numbers it was rolled with are untouched
-         str 9 con 8 cha 9 dex 14 wis 12 int 8
+         name        Quickfoot Sable
+         traits      light-fingered, restless, soft-spoken
+         tendencies  flees before fighting, trusts instinct over plans, avoids heavy burdens
+         backstory   Raised on the far edges of the nine rings, 
+                     Quickfoot learned early that being the fastest in 
+                     any crowd mattered more than being the strongest, 
+                     and a lifetime of dodging consequences left more 
+                     than one promise dropped behind them.
+      3. #12 is Quickfoot Sable, and the six numbers it was rolled with are untouched
+         str 6 con 9 cha 8 dex 15 wis 9 int 6
          which is the line rolled in step 1, unchanged
 
 nothing waited for it
@@ -252,36 +236,36 @@ nothing waited for it
 
 what it cost
   looks      5 taken, 0 of which left the world alone
-  calls      11 put to a model
-  operations 11 named, 9 carried out by the engine
-  spawns     6, each of them one roll and one call
+  calls      10 put to a model
+  operations 13 named, 11 carried out by the engine
+  spawns     5, each of them one roll and one call
 
 after 150 ticks
-  tick 150 actors=7 objects=4 offers=0
+  tick 150 actors=6 objects=6 offers=0
     #1 commander band=1 at (-481.708, -2.350, 416.058) hp=32/32 walking
       carries money=0 carried=[common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [brass lantern:4] brass lantern | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [coil of rope:4] coil of rope] worn=[]
-    #5 commander band=5 at (-470.000, -2.411, 418.000) hp=80/80 walking
+    #4 commander band=4 at (-476.000, -2.245, 418.000) hp=80/80 walking
       carries money=0 carried=[common armour boots L10 P=40 mov=26 def=8 eff=6 dex [warding:6] common boots | common armour chestplate L10 P=40 mov=12 def=26 eff=2 cha [warding:2] common chestplate | common armour helmet L10 P=40 mov=23 def=11 eff=6 wis [homing:6] common helmet | legendary weapon hand L10 P=140 mov=3 def=31 eff=106 cha [shock:17|blink:48|warding:41] legendary staff | uncommon armour helmet L10 P=60 mov=25 def=29 eff=6 cha [flame:3|frost:3] uncommon helmet] worn=[]
-    #6 commander band=6 at (-466.000, -2.986, 424.000) hp=80/80 walking
-      carries money=0 carried=[common armour boots L10 P=40 mov=23 def=6 eff=11 con [frost:11] common boots | common armour leggings L10 P=40 mov=17 def=12 eff=11 int [keen:11] common leggings | legendary armour helmet L10 P=140 mov=80 def=41 eff=19 con [shock:1|homing:18] legendary helmet | legendary armour helmet L10 P=140 mov=88 def=31 eff=21 dex [blink:2|warding:9|homing:10] legendary helmet | uncommon weapon hand L10 P=60 mov=7 def=8 eff=45 cha [keen:45] uncommon bow] worn=[]
-    #7 commander band=7 at (-480.000, -2.653, 412.000) hp=80/80 walking
-      carries money=0 carried=[common armour boots L10 P=40 mov=24 def=5 eff=11 wis [homing:11] common boots | common armour boots L10 P=40 mov=30 def=4 eff=6 con [flame:6] common boots | common armour chestplate L10 P=40 mov=0 def=34 eff=6 int [shock:6] common chestplate | common weapon hand L10 P=40 mov=5 def=3 eff=32 con [shock:32] common blade | rare armour helmet L10 P=90 mov=41 def=23 eff=26 wis [blink:26] rare helmet] worn=[]
-    #8 commander band=8 at (-488.000, -2.517, 416.000) hp=86/86 walking
-      carries money=0 carried=[common armour boots L11 P=44 mov=39 def=1 eff=4 dex [leap:4] common boots | common armour boots L11 P=44 mov=4 def=39 eff=1 str [keen:1] common boots | common armour helmet L11 P=44 mov=9 def=33 eff=2 dex [keen:2] common helmet | rare armour helmet L11 P=99 mov=43 def=39 eff=17 wis [blink:17] rare helmet | uncommon weapon hand L11 P=66 mov=9 def=8 eff=49 str [homing:13|splitting:36] uncommon staff] worn=[]
-    #9 commander band=9 at (-484.000, -2.762, 410.000) hp=80/80 walking
-      carries money=0 carried=[common armour helmet L10 P=40 mov=32 def=0 eff=8 str [splitting:8] common helmet | legendary armour chestplate L10 P=140 mov=67 def=67 eff=6 str [frost:6] legendary chestplate | legendary weapon hand L10 P=140 mov=14 def=24 eff=102 int [keen:102] legendary blade | rare armour helmet L10 P=90 mov=86 def=4 eff=0 int [] rare helmet | rare armour leggings L10 P=90 mov=64 def=8 eff=18 str [keen:18] rare leggings] worn=[]
-    #10 commander band=10 at (-478.000, -2.516, 414.000) hp=80/80 walking
-      carries money=0 carried=[common armour chestplate L10 P=40 mov=19 def=11 eff=10 wis [frost:10] common chestplate | common armour helmet L10 P=40 mov=22 def=10 eff=8 cha [homing:8] common helmet | common weapon hand L10 P=40 mov=14 def=4 eff=22 dex [frost:22] common blade | uncommon armour helmet L10 P=60 mov=24 def=19 eff=17 wis [homing:17] uncommon helmet | uncommon armour leggings L10 P=60 mov=17 def=34 eff=9 cha [leap:9] uncommon leggings] worn=[]
+    #6 commander band=6 at (-478.000, -2.352, 416.000) hp=80/80 walking
+      carries money=0 carried=[common armour chestplate L10 P=40 mov=12 def=18 eff=10 int [siphon:10] common chestplate | common armour chestplate L10 P=40 mov=25 def=13 eff=2 wis [warding:2] common chestplate | common armour chestplate L10 P=40 mov=40 def=0 eff=0 int [] common chestplate | common weapon hand L10 P=40 mov=13 def=3 eff=24 int [splitting:24] common buckler | legendary armour chestplate L10 P=140 mov=97 def=40 eff=3 cha [frost:3] legendary chestplate] worn=[]
+    #8 commander band=8 at (-472.000, -2.399, 419.000) hp=80/80 walking
+      carries money=0 carried=[common armour chestplate L10 P=40 mov=24 def=5 eff=11 con [leap:11] common chestplate | common armour leggings L10 P=40 mov=15 def=25 eff=0 cha [] common leggings | legendary weapon hand L10 P=140 mov=7 def=50 eff=83 cha [leap:19|frost:19|flame:45] legendary bow | rare armour chestplate L10 P=90 mov=70 def=0 eff=20 wis [blink:20] rare chestplate | uncommon armour chestplate L10 P=60 mov=41 def=7 eff=12 str [warding:6|siphon:6] uncommon chestplate] worn=[]
+    #9 commander band=9 at (-474.000, -2.386, 416.000) hp=80/80 walking
+      carries money=0 carried=[common armour boots L10 P=40 mov=31 def=2 eff=7 str [splitting:7] common boots | common armour chestplate L10 P=40 mov=1 def=29 eff=10 cha [shock:10] common chestplate | common armour helmet L10 P=40 mov=22 def=7 eff=11 dex [splitting:11] common helmet | common armour leggings L10 P=40 mov=29 def=6 eff=5 wis [warding:5] common leggings | common weapon hand L10 P=40 mov=4 def=5 eff=31 int [flame:31] common staff] worn=[]
+    #12 commander band=12 at (-466.000, -2.194, 417.000) hp=80/80 walking
+      carries money=0 carried=[common armour helmet L10 P=40 mov=14 def=14 eff=12 con [splitting:12] common helmet | common armour helmet L10 P=40 mov=7 def=25 eff=8 cha [keen:8] common helmet | common armour leggings L10 P=40 mov=23 def=9 eff=8 con [leap:8] common leggings | legendary armour boots L10 P=140 mov=11 def=102 eff=27 str [homing:8|splitting:10|warding:9] legendary boots | uncommon weapon hand L10 P=60 mov=5 def=5 eff=50 wis [keen:17|warding:33] uncommon staff] worn=[]
     #2 oak chest at (-474.000, -2.256, 420.000) open [0 carried, 0 equipped, 0 money]
     #3 hazel crate at (-485.000, -4.658, 424.000) open [0 carried, 0 equipped, 0 money]
-    #4 pile at (-474.000, -2.256, 420.000) open [0 carried, 0 equipped, 9 money]
-    #11 chest at (-476.000, -2.374, 416.000) open [0 carried, 0 equipped, 0 money]
-    said #1 aloud "anyone about? I have rope and a lantern to trade" heard by [5]
-  fingerprint fd0ca7d50e2cd1ad
+    #5 stone at (-470.000, -2.221, 415.000) open
+    #7 pile at (-475.000, -2.290, 418.000) open [0 carried, 0 equipped, 9 money]
+    #10 chest at (-479.000, -2.107, 421.000) open [0 carried, 0 equipped, 0 money]
+    #11 chest at (-468.000, -2.440, 420.000) open [0 carried, 0 equipped, 0 money]
+    said #1 aloud "anyone about? I have rope and a lantern to trade" heard by [4]
+  fingerprint 37bd8b92ef92dd5d
 
 the questions in full
 
-  --- question 1, 1666 characters, digest 22f1292b9d684f27 ---
+  --- question 1, 1663 characters, digest b77c1f0f47dd07fa ---
   A world, and what may change in it.
   
   This is the world at tick 1.
@@ -300,13 +284,13 @@ the questions in full
   The roles there are: guard, herald, scout, scholar.
   
   These are the only changes that can be made to it; anything else changes nothing:
-    place  kind=one of chest/crate/door/stone at=(12.5, -4.0) -- a new thing stands there, on ground that carries it
-    remove target=#7                      -- a thing is taken out of the world
-    spawn  role=one of guard/herald/scout/scholar at=(12.5, -4.0) -- a character is rolled for that ground and stands there
-    open   target=#7              -- a shut thing comes open
-    shut   target=#7              -- an open thing falls shut
-    move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units, onto ground that carries it
-    spill  target=#7              -- everything inside an open thing ends up on the ground beside it
+    place  kind=one of chest/crate/door/stone at=(<x>, <z>) -- a new thing stands there, on ground that carries it
+    remove target=#<id>                   -- a thing is taken out of the world
+    spawn  role=one of guard/herald/scout/scholar at=(<x>, <z>) -- a character is rolled for that ground and stands there
+    open   target=#<id>           -- a shut thing comes open
+    shut   target=#<id>           -- an open thing falls shut
+    move   target=#<id> to=(<x>, <z>) -- a thing is shoved, at most 4.0 units, onto ground that carries it
+    spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
   
   A thing may be placed, and a character spawned, within 40 of somebody who is already there.
   

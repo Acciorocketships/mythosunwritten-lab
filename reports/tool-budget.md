@@ -57,6 +57,15 @@ happen: an ask that costs no world time leaves the character in front of the
 world it was in front of before, so the next question is the same question and
 the same answer comes back for as long as anybody keeps asking.
 
+Two of those four lines are worth naming as a second, separate finding, since
+they were later chased down on their own: `recall about=words` and
+`recall about:the la…` hand back `words`, which at the time was the *prompt's own
+placeholder* for a piece of text. That is a fault in the prompt rather than in
+the loop, and it has since been fixed — every placeholder now names what goes in
+the slot instead of showing a specimen of it (see
+[reports/model.md](model.md)). The budget below is the guard against the loop,
+and it is still needed: a mind can repeat any answer, placeholder or not.
+
 ## Which guard, and why not the other one
 
 Two shapes were named when the hole was found. **The one built is the budget**:

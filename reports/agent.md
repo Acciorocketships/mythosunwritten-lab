@@ -82,10 +82,10 @@ and the same answer: the simulation is given what it needs and fetches nothing.
 **A live call was made, and the exchange has been re-recorded from scratch every
 time the questions changed.** A prompt change makes every old reply an answer to
 a question nobody asks any more, so the recording is not patched, it is re-made.
-The recording the tree holds today was made on 2026-09-04: `OPENROUTER_API_KEY`
+The recording the tree holds today was made on 2026-09-05: `OPENROUTER_API_KEY`
 was present, the machine could reach the network, and `./run_record.sh --live`
 put every question of all five runs to **`z-ai/glm-5.3-flash`** at
-`https://openrouter.ai/api/v1/chat/completions`. **99 replies came back, not one
+`https://openrouter.ai/api/v1/chat/completions`. **101 replies came back, not one
 of them declined and not one of them empty**, and they are checked in as
 `ModelRecording`'s five tables verbatim — including the answers the world then
 refused, which were not edited out. Which model answers and why, with the
@@ -125,7 +125,7 @@ into them:
   against the provider this project used then: one of the four recording attempts
   was blocked by that provider's usage policy, said so, and wrote nothing rather
   than recording a silence. It has not fired once against the model that answers
-  now — the pass that ships came back with 99 replies and no silence at all —
+  now — the pass that ships came back with 101 replies and no silence at all —
   which is a fact about the provider and not about the path, so the path stays.
 * **The recorder used to drop functions out of the file it rewrites.** It
   regenerated everything below the marker in `net/model_recording.gd` but never
@@ -241,9 +241,9 @@ that span:
 | who | turn | waited | Wren | Rook | Bram | Sable | Odo | Pell | actions the others resolved in it |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Rook | 1 | 3 | 3 | — | 3 | 3 | 3 | 3 | 0 |
-| Pell | 2 | 3 | 3 | 3 | 3 | 3 | 3 | — | 3 |
+| Pell | 2 | 3 | 3 | 3 | 3 | 3 | 3 | — | 1 |
 | Sable | 12 | 4 | 4 | 4 | 4 | — | 4 | 4 | 1 |
-| Odo | 12 | 3 | 3 | 3 | 3 | 3 | — | 3 | 0 |
+| Odo | 2 | 3 | 3 | 3 | 3 | 3 | — | 3 | 1 |
 
 Every other character was serviced for the whole span, every time — the run
 prints all 69 rows and none of them is short. Nobody falls out of this world, so

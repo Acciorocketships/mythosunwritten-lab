@@ -16,7 +16,7 @@ narratives by putting characters and events next to each other. It scripts none
 of them.
 
 ```
-./run_world.sh              # the run: five looks, six spawns, eleven operations
+./run_world.sh              # the run: five looks, five spawns, thirteen operations
 ./run_world_suite.sh        # just this step's suite (282 checks)
 OPENROUTER_API_KEY=... ./run_record.sh --live --world   # re-make this recording
 ```
@@ -55,37 +55,38 @@ scores, an empty backstory, and a placeholder name (`herald #5`).
 
 ### The shipped run's charming fool
 
-The run's second look spawned a `herald` — the role whose charisma band is high
-and whose wisdom band is low. What the engine rolled, at tick 34:
+The run's third look spawned a `herald` — the role whose charisma band is high
+and whose wisdom band is low. What the engine rolled, at tick 64:
 
 ```
-str 7  con 9  cha 17  dex 6  wis 4  int 8        highest cha, lowest wis, 13 apart
+str 7  con 8  cha 15  dex 7  wis 6  int 11       highest cha, lowest wis, 9 apart
 ```
 
 and what came back three ticks later, having been shown those numbers and asked
 who they add up to:
 
 ```
-name        Vessaline
-traits      silver-tongued, magnetic, careless of counsel
-tendencies  charms first, asks never, forgets warnings
-backstory   Born in the ninth ring's edge-lands, Vessaline learned early that a
-            beautiful voice opens doors that strength and sense cannot, and has
-            talked their way into a herald's office while leaving a trail of
-            ignored advice behind them.
+name        Veylin Brightvoice
+traits      silver-tongued, charismatic, tactless
+tendencies  talks first, wins strangers over, misses the obvious
+backstory   Born in the outer ninth ring, Veylin learned early that a charming
+            word opens more doors than any sword arm. But a lifetime of being
+            applauded for pretty speeches left no room for learning when to stay
+            quiet.
 ```
 
 That is the acceptance line "extreme enough that the explanation is checkable",
-and it checks: charisma $17$ is the beautiful voice that opens doors, wisdom $4$
-is the trail of ignored advice, and the ninth ring is where the run stands. The
+and it checks: charisma $15$ is the charming word that opens doors, wisdom $6$ is
+never learning when to stay quiet, and the ninth ring is where the run stands. The
 transcript prints the six numbers again afterwards, and they are the same six.
 
-The other five spawns are the same mechanism on less extreme sheets — a scout
-rolled highest on dexterity became *Swiftbrook, quick-fingered, observant,
-soft-spoken*; a guard rolled `str 14` against `cha 5` became *Grum Vask,
-brutishly strong, tireless, stone-faced*, who "misreads kindness as mockery"; a
-scholar rolled `wis 14 int 13` against `dex 6` became *Sage Verrin*, whose "weak
-hand at coordination has always made fieldwork and craft embarrassing".
+The other four spawns are the same mechanism on other sheets — a scout rolled
+`dex 13` against `str 7` became *Vesper Quick*, whose "body that tires early
+taught them to talk their way out of what their arms cannot carry"; a second
+herald rolled `cha 15` against `dex 6` became *Vessalius Goldtongue*, whose
+"clumsy hands could never hold what her words promised"; a scout rolled `dex 15`
+against `str 6` and `int 6` became *Quickfoot Sable*, for whom "being the fastest
+in any crowd mattered more than being the strongest".
 
 **A persona cannot move a number.** The suite answers a persona question with a
 reply whose second line reads `str=18 con=18 cha=18 dex=18 wis=18 int=18`. The
@@ -132,19 +133,19 @@ spawned in a run turns out to be does not depend on how many were spawned first.
 ## 3. What it may do is a list of world operations
 
 Seven of them, and the model never edits anything itself. It writes
-`place kind=crate at=(12.5, -4.0)`; `sim/world_effects.gd` checks the kind is one
+`place kind=crate at=(-470.0, 415.0)`; `sim/world_effects.gd` checks the kind is one
 it knows, checks the ground would carry it, and puts one there. Every line that
 is not one of these is inert and is printed as refused.
 
 | operation | what the engine does |
 |---|---|
-| `place kind=<k> at=(x, z)` | a new thing stands there, on ground that carries it |
-| `remove target=#7` | a thing is taken out of the world |
-| `spawn role=<r> at=(x, z)` | a character is rolled for that ground and stands there |
-| `open target=#7` | a shut thing comes open |
-| `shut target=#7` | an open thing falls shut |
-| `move target=#7 to=(x, z)` | a thing is shoved, at most 4 units |
-| `spill target=#7` | everything inside an open thing ends up on the ground |
+| `place kind=<k> at=(<x>, <z>)` | a new thing stands there, on ground that carries it |
+| `remove target=#<id>` | a thing is taken out of the world |
+| `spawn role=<r> at=(<x>, <z>)` | a character is rolled for that ground and stands there |
+| `open target=#<id>` | a shut thing comes open |
+| `shut target=#<id>` | an open thing falls shut |
+| `move target=#<id> to=(<x>, <z>)` | a thing is shoved, at most 4 units |
+| `spill target=#<id>` | everything inside an open thing ends up on the ground |
 
 **Three of its own, four borrowed.** The last four are `CheckEffects`' — already
 written, and already the only place in the project those four edits happen — and
@@ -155,19 +156,19 @@ The four `place` kinds are the two axes an object has, and nothing more: `chest`
 (holds things, open), `crate` (holds things, shut), `door` (holds nothing, shut),
 `stone` (holds nothing, open).
 
-**Every operation is refusable, and the run shows it.** Of the eleven the model
-named, the engine carried out nine and refused two — one for ground that would
-not carry the thing asked for, one for a shove longer than a shove goes:
+**Every operation is refusable, and the run shows it.** Of the thirteen the model
+named, the engine carried out eleven and refused two — both for a thing that was
+not what the answer took it for:
 
 ```
+did       spawn role=scout at=(-476.0, 418.0)     ... stands at (-476.000, 418.000) as #4
 did       open target=#3                          the hazel crate came open
-did       spill target=#2                         0 things and 9 coins out of the oak chest onto pile #4
-did       spawn role=scout at=(-470.0, 418.0)     ... stands at (-470.000, 418.000) as #5
-did       spawn role=herald at=(-466.0, 424.0)    ... stands at (-466.000, 424.000) as #6
-did       spawn role=guard at=(-480.0, 412.0)     ... stands at (-480.000, 412.000) as #7
-would not place kind=chest at=(-490.0, 420.0)     nothing at (-490.000, 420.000) would carry it
-would not move target=#4 to=(-478.0, 416.0)       5.66 is further than a shove carries (4.00)
-did       place kind=chest at=(-476.0, 416.0)     a chest now stands at (-476.000, 416.000) as #11
+did       place kind=stone at=(-470.0, 415.0)     a stone now stands at (-470.000, 415.000) as #5
+did       spill target=#2                         0 things and 9 coins out of the oak chest onto pile #7
+would not open target=#5                          the stone is already open
+did       move target=#7 to=(-475.0, 418.0)       the pile was shoved 2.24 to (-475.000, 418.000)
+would not open target=#9                          there is nothing with id 9 to change
+did       place kind=chest at=(-468.0, 420.0)     a chest now stands at (-468.000, 420.000) as #11
 ```
 
 `nothing` is also an answer — a look that decides the world needs no change is
@@ -231,9 +232,9 @@ decision is. A look that has been asked and not answered simply stays open.
 | | |
 |---|---|
 | looks | 5 taken, 0 of which left the world alone |
-| calls | 11 put to a model — 5 looks and one persona per spawn |
-| operations | 11 named, 9 carried out by the engine |
-| spawns | 6, each of them one roll and one call |
+| calls | 10 put to a model — 5 looks and one persona per spawn |
+| operations | 13 named, 11 carried out by the engine |
+| spawns | 5, each of them one roll and one call |
 
 A spawn is therefore **two calls and one roll**, and a look that spawns nobody is
 one call. The persona call is the only part of a spawn that costs anything beyond

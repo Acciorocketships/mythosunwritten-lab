@@ -144,10 +144,10 @@ What is within 12 paces of it:
   #4 hazel crate, shut
 
 Say what that success changes. You may name only these operations; anything else changes nothing:
-  open   target=#7              -- a shut thing comes open
-  shut   target=#7              -- an open thing falls shut
-  move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units, onto ground that carries it
-  spill  target=#7              -- everything inside an open thing ends up on the ground beside it
+  open   target=#<id>           -- a shut thing comes open
+  shut   target=#<id>           -- an open thing falls shut
+  move   target=#<id> to=(<x>, <z>) -- a thing is shoved, at most 4.0 units, onto ground that carries it
+  spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
 
 Answer with at most 3 lines, one operation each, and nothing else.
 ```
@@ -185,10 +185,10 @@ into the log the character's own prompt already carries.
 ```
 checks     2, one per triggering context
   interact:oak chest:iron pry bar -- str 5 + roll 15 = 20 vs dc 12, passed
-  interact:hazel crate:whittling knife -- dex 4 + roll 6 = 10 vs dc 12, failed
+  interact:hazel crate:whittling knife -- dex 4 + roll 6 = 10 vs dc 10, passed
 and in its own account of itself:
   I worked the oak chest with an iron pry bar: it gave.
-  I failed to work the hazel crate with a whittling knife: it held.
+  I worked the hazel crate with a whittling knife: it gave.
 ```
 
 Taking a check up, the desk looks there *first*, before writing any prompt. A
@@ -206,16 +206,20 @@ Four attempts on four shut things, none of which either tool opens.
 |---|---|---|---|---|---|---|---|---|
 | 1 | `interact:oak chest:iron pry bar` | rolled | str | 5 | 15 | 20 | 12 | passed → `open target=#2` |
 | 2 | `interact:oak chest:iron pry bar` | **remembered** | str | 5 | 15 | 20 | 12 | passed → `open target=#3` |
-| 3 | `interact:hazel crate:whittling knife` | rolled | dex | 4 | 6 | 10 | 12 | failed |
-| 4 | `interact:hazel crate:whittling knife` | **remembered** | dex | 4 | 6 | 10 | 12 | failed |
+| 3 | `interact:hazel crate:whittling knife` | rolled | dex | 4 | 6 | 10 | 10 | passed → `open target=#4` |
+| 4 | `interact:hazel crate:whittling knife` | **remembered** | dex | 4 | 6 | 10 | 10 | passed → `open target=#5` |
 
-**4 checks, 3 model calls, 2 rolls, 2 settled out of memory.** Which is 0.75
-calls a settled check against the 1.25 it would have been had every one of them
-been judged afresh. Both verdicts are reused: a failure is remembered as firmly
-as a success, so a character does not keep trying its luck at the same thing.
+**4 checks, 4 model calls, 2 rolls, 2 settled out of memory.** Which is 1.00
+calls a settled check against the 1.50 it would have been had every one of them
+been judged afresh. Both verdicts are reused whichever way they went: on the draw
+this page was first written from the crate check failed at `dc 12` and was
+remembered as a failure, so the character did not try its luck at it again; on
+this one the same reply came back as `dc=10`, the same roll of 10 cleared it, and
+the remembered row carried the success — and its operations — to the second
+crate.
 
-The world after: chests #2 and #3 open, crates #4 and #5 shut. Fingerprint
-`11725229a9e8314a`, printed by the run and identical across processes.
+The world after: chests #2 and #3 and crates #4 and #5 all open. Fingerprint
+`550e14813932bf8c`, printed by the run and identical across processes.
 
 ## The model never resolves, read off the source
 
@@ -247,16 +251,18 @@ the other three tables back byte for byte, keeping their own `RECORDED_ON`. The
 difficulty-class table has its own `CHECKS_RECORDED_ON` and its own provenance
 line. A pass with no `--checks` still records all four together.
 
-The whole exchange is three rows:
+The whole exchange is four rows:
 
 ```
-{"prompt": "b723d1dc859f2ded", "reply": "dc=12 ability=str", "ms": 2250},
-{"prompt": "b4dc9bc7079ce35a", "reply": "open target=#2",    "ms": 5890},
-{"prompt": "424074711a1ba4fe", "reply": "dc=12 ability=dex", "ms": 3392},
+{"prompt": "b723d1dc859f2ded", "reply": "dc=12 ability=str", "ms": 1271},
+{"prompt": "4b265df7f4e73b4a", "reply": "open target=#2",    "ms": 1194},
+{"prompt": "424074711a1ba4fe", "reply": "dc=10 ability=dex", "ms": 1293},
+{"prompt": "8b86636a0af3979b", "reply": "open   target=#4",  "ms": 5622},
 ```
 
-Three rows for four checks — the recording itself is the evidence that two of
-them were never asked about.
+Four rows for four checks — two judgements and the two resolutions they earned.
+The two checks settled out of memory are the ones that are *not* in the table,
+and the recording is itself the evidence that they were never asked about.
 
 ## Open, and out of scope
 

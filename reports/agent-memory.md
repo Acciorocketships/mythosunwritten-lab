@@ -142,27 +142,28 @@ The six things in the log are the same in all four arms. What came back:
 
 | arm | lesson kept | chose |
 |---|---|---|
-| no lesson | — | `say(text="a fair bargain indeed, Wren" target=1)` |
-| the ground first | *"Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."* | `say(text=what do you offer, Wren? target=1)` |
-| Rook, not Wren | *"Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."* | `recall about=trade with Rook` — a tool, so *— nothing readable —* |
-| let them come | *"The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."* | `say(text=a fair bargain, then. target=1)` |
+| no lesson | — | `say(text="what bargain did you have in mind?" target=1)` |
+| the ground first | *"Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."* | `trade_accept(target=1)` |
+| Rook, not Wren | *"Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."* | `recall about=bargain` — a tool, so *— nothing readable —* |
+| let them come | *"The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."* | `recall about=bargain or trade with Wren` — a tool, so *— nothing readable —* |
 
-**3 of 3 lessons changed the choice; 1 of 3 changed which action was chosen**, and
-the run reports that in two columns on purpose: a different *action* and a merely
-different *wording* are different claims. Named plainly: with nothing kept, the
-character agreed with Wren's shout; having kept that the ground does not wait, it
-asked Wren what was on offer; having kept that answering shouts has never worked,
-it agreed in fewer words. The arm that changed which action is the Rook one, and
-it changed it by not choosing an action at all: it answered `recall about=trade
-with Rook`, which is a look back through its own memory rather than a move in the
-world, and this harness puts one question and reads one action back, so the arm
-shows nothing readable and the run scores it as such rather than pretending it
-was a choice.
+**3 of 3 lessons changed the choice, and 3 of 3 changed which action was chosen**,
+and the run reports that in two columns on purpose: a different *action* and a
+merely different *wording* are different claims. Named plainly: with nothing kept,
+the character asked Wren what the bargain was; having kept that the ground does
+not wait, it stopped asking and accepted the offer outright; having kept either of
+the two lessons about who is worth talking to, it went and looked through its own
+memory instead of speaking at all. Those last two changed the action by not
+choosing one: `recall` is a look back through the store rather than a move in the
+world, and this harness puts one question and reads one action back, so both arms
+show nothing readable and the run scores them as such rather than pretending they
+were choices.
 
-This is a weaker result than the draw this page was first written from, where all
-three lessons moved the action outright. It is the same measurement on a
-different recording, and a recording is one draw: what holds across both is that
-the lesson is the only thing that differs and the answer differs every time.
+This draw is the stronger of the two this page has been written from. An earlier
+recording of the same four prompts moved the action once in three and the wording
+three times in three. It is the same measurement on a different recording, and a
+recording is one draw: what holds across both is that the lesson is the only thing
+that differs and the answer differs every time.
 
 The lessons are the character's own sentences and not borrowed rules. The suite
 runs the prompt's own rule-word scan — *distance, reach, cost, damage, possible,
@@ -172,26 +173,26 @@ and finds nothing.
 ## How much memory there is
 
 Measured on the shipped run (`./run_agent.sh`, seed 1234, 160 ticks), on Pell,
-the character that comes to remember most, over its 22 turns:
+the character that comes to remember most, over its 18 turns:
 
 | | |
 |---|---|
-| entries | **32** — 32 events, 0 lessons |
-| by kind | 11 things seen, 20 lines of speech, 1 state change |
-| characters held | **1,954** |
-| characters a packet carries | **503 of 1,954 (26%)** — every lesson and the last 8 events |
-| the memory block in the last question | **703 characters of 4,570 (15%)** |
-| tools the model used | 7 recalls, 0 lessons written |
+| entries | **17** — 17 events, 0 lessons |
+| by kind | 8 things seen, 8 lines of speech, 1 state change |
+| characters held | **1,057** |
+| characters a packet carries | **593 of 1,057 (56%)** — every lesson and the last 8 events |
+| the memory block in the last question | **282 characters of 3,244 (9%)** |
+| tools the model used | 2 recalls, 0 lessons written |
 
 The stop condition on this item was the other direction — stop and report if the
-memory outgrew what a context can carry — and it did not fire: 1,954 characters
-against a question already 4,570 characters long is not a retrieval problem, and
-the recent-plus-query split is only just starting to carry weight. The number to
-watch is *characters held*; a packet now carries 26% of it where it once carried
-76%, so the fraction is falling as the store grows, which is exactly the trend
-that would eventually be the evidence for an index. It is not evidence for one
-yet: `recall` returned at most ten entries in a run of 160 ticks, and a linear
-walk over thirty-two of them costs nothing.
+memory outgrew what a context can carry — and it did not fire: 1,057 characters
+against a question already 3,244 characters long is not a retrieval problem, and
+the recent-plus-query split has barely begun to carry weight. The number to watch
+is *characters held*; a packet carries 56% of it here where an earlier draw of the
+same run, in which Pell talked far more, carried 26%, so the fraction falls as the
+store grows, which is exactly the trend that would eventually be the evidence for
+an index. It is not evidence for one yet: `recall` returned at most five entries
+in a run of 160 ticks, and a linear walk over seventeen of them costs nothing.
 
 Two honest notes about that table:
 
@@ -200,17 +201,16 @@ Two honest notes about that table:
   a mind through `recall about=lantern` and `learn text=…` against a real store
   and checks that the query found a real entry, that the lesson landed on the
   character's own sheet, and that the mind then went back to choosing an action.
-  On the recording that ships, Pell called `recall` seven times unprompted, six of
-  them for the brass lantern it was after, and Odo wrote one lesson — `learn
-  text=Keep heading north across the rising slope.` The other three of the five
-  used neither. Which of those a given draw does is the model's business; that it
+  On the recording that ships, Pell called `recall about=brass lantern` twice
+  unprompted, drawing back four and then five things, and nobody wrote a lesson;
+  an earlier recording of the same run had Odo writing one and Pell recalling
+  seven times. The other four of the five used neither tool here. Which of those a given draw does is the model's business; that it
   *can* is this step's.
 * **The log does not hold what an `examine` told the character.** An action's
   outcome is not in the observation packet — the packet carries state
   transitions, and examining changes no state — so it cannot come in through the
-  one door. In the shipped run that shows in the questions: ten of the sixty-nine
-  turns were put off an observation identical to the one before, and Sable
-  answered `wait(ticks=1)` three times running off one byte-identical prompt. A
+  one door. In the shipped run that shows in the questions: seven of the
+  sixty-nine turns were put off an observation identical to the one before. A
   character that wants to keep what it learned that way has `learn`. Widening the
   door would have cost the perception check above, which is worth more.
 

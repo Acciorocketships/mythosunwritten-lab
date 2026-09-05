@@ -134,15 +134,25 @@ static func kind_row(kind: String) -> Dictionary:
 	return {}
 
 
+# How one key's value is written, as the orchestrator prompt shows it.
+#
+# A key holding a position or an id is shown in angle brackets naming what goes
+# there, and never a specimen of one, for the reason `ModelPrompt.SORT_FORMS`
+# states at length and measured: over a full recording pass three of four local
+# arms answered every one of this run's five looks with `spawn role=... at=`
+# followed by the coordinate this function used to print, and the world refused
+# all fifteen because that ground is 650 units from anybody. `kind` and `role`
+# stay as they are: those are not placeholders but the engine's own two lists,
+# and a value copied out of either is a value that works.
 static func _example_of(key: String) -> String:
 	match key:
 		"at", "to":
-			return "(12.5, -4.0)"
+			return "(<x>, <z>)"
 		"kind":
 			return "one of %s" % "/".join(kinds())
 		"role":
 			return "one of %s" % "/".join(SpawnRoll.roles())
-	return "#7"
+	return "#<id>"
 
 
 # --- Reading an answer -----------------------------------------------------

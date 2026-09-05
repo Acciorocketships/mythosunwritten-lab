@@ -32,7 +32,11 @@ extends TestSuite
 ##   5. **The context is stored and reused.** A second attempt of the same shape
 ##      is settled out of the character's memory: no call, no roll, and the
 ##      operations carried out again against the thing in front of it now. Shown
-##      in the shipped run, whose four checks cost three calls and two rolls.
+##      in the shipped run, whose four checks cost four calls and two rolls --
+##      two judgements and the two resolutions they earned, with the other two
+##      checks settled out of memory for nothing. How many calls that is depends
+##      on how many of the rolls passed, which is a fact about the recorded draw
+##      and moves when the recording is re-made.
 ##   6. **The model never resolves.** The die is drawn in one function, the
 ##      comparison made in one function, and the world written in one file --
 ##      read off the source of the whole layer, with the scans shown to have
@@ -412,7 +416,15 @@ func _the_context_is_stored_and_reused() -> void:
 		"a shape never attempted before was answered out of memory")
 
 
-## The shipped run: four checks, three calls, two rolls, two remembered.
+## The shipped run: four checks, four calls, two rolls, two remembered.
+##
+## The counts that are structural -- four raised, four settled, two reused, two
+## rolled, two rows kept -- hold for any draw. The two that are not, `calls` and
+## how many passed, are read off whichever recording is checked in: a passed roll
+## asks a second question and a failed one does not, so a re-record that turns a
+## pass into a failure moves both. On the draw before this one the crate check
+## came back `dc=12`, failed on a roll of 10, and the run cost three calls with
+## two passes.
 func _the_shipped_run_pays_for_two_of_four() -> void:
 	var played := ScriptedCheck.played_with(
 		ModelChannel.for_run(ModelRecording.check_exchange()))
@@ -421,7 +433,8 @@ func _the_shipped_run_pays_for_two_of_four() -> void:
 	equal(desk.settled(), 4, "every one of them settles")
 	equal(desk.reused, 2, "two of the four are settled out of memory")
 	equal(desk.rolls, 2, "so only two of the four are rolled for")
-	equal(desk.calls, 3, "and they cost three calls: two to judge, one to resolve")
+	equal(desk.calls, 4,
+		"and they cost four calls: two to judge, two to resolve")
 	var remembered: CharacterMemory = played["memory"]
 	equal(remembered.checks.size(), 2,
 		"four attempts of two shapes should leave two rows")
@@ -429,7 +442,7 @@ func _the_shipped_run_pays_for_two_of_four() -> void:
 	for one in desk.seen:
 		if one.passed:
 			passed += 1
-	equal(passed, 2, "the shipped run should show two passes and two failures")
+	equal(passed, 4, "on this draw all four checks passed")
 
 
 # --- 6. The model never resolves ------------------------------------------

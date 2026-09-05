@@ -38,18 +38,18 @@ the run counts them and prints them.
 
 | who | model calls | answers read | actions resolved | calls per 100 ticks |
 |---|---|---|---|---|
-| Rook | 14 | 14 | 13 | 8.8 |
-| Bram | 9 | 9 | 8 | 5.6 |
+| Rook | 19 | 19 | 18 | 11.9 |
+| Bram | 12 | 12 | 11 | 7.5 |
 | Sable | 12 | 12 | 11 | 7.5 |
-| Odo | 12 | 12 | 10 | 7.5 |
-| Pell | 23 | 22 | 15 | 14.4 |
-| **total** | **70** | **69** | **57** | **43.8** |
+| Odo | 9 | 8 | 8 | 5.6 |
+| Pell | 19 | 18 | 16 | 11.9 |
+| **total** | **71** | **69** | **64** | **44.4** |
 
-The run is 160 ticks, so 70 calls is **0.438 calls a tick**. `ControlLoop` states
+The run is 160 ticks, so 71 calls is **0.444 calls a tick**. `ControlLoop` states
 the world is stepped at twenty ticks a second, which makes an hour of play 72,000
 ticks, so at this rate an hour comes to
 
-> **31,500 model calls an hour for five characters — about 6,300 each.**
+> **31,950 model calls an hour for five characters — about 6,390 each.**
 
 That is the number. It is a count of questions put, not an estimate of latency or
 price, and it is the one thing that does not change between a replayed run and a
@@ -72,19 +72,19 @@ of a mind is exactly one of three things, and the three sum to the asks.
 
 | who | asked | calls | held | polled | re-evaluations | re-evaluations per call |
 |---|---|---|---|---|---|---|
-| Rook | 68 | 14 | 12 | 42 | 8 | 0.57 |
-| Bram | 52 | 9 | 20 | 23 | 16 | 1.78 |
-| Sable | 63 | 12 | 17 | 34 | 13 | 1.08 |
-| Odo | 63 | 12 | 15 | 36 | 15 | 1.25 |
-| Pell | 97 | 23 | 7 | 67 | 3 | 0.13 |
-| **total** | **343** | **70** | **71** | **202** | **55** | **0.79** |
+| Rook | 82 | 19 | 6 | 57 | 3 | 0.16 |
+| Bram | 62 | 12 | 15 | 35 | 12 | 1.00 |
+| Sable | 62 | 12 | 16 | 34 | 13 | 1.08 |
+| Odo | 53 | 9 | 19 | 25 | 19 | 2.11 |
+| Pell | 81 | 19 | 6 | 56 | 6 | 0.32 |
+| **total** | **340** | **71** | **62** | **207** | **53** | **0.75** |
 
 *Held* is the bias: the mind offered back the action it had already chosen,
 because the world says its character has not finished it. *Polled* is a question
 already outstanding — the channel was read once and the character went on
-standing in the world. **70 of 343 asks cost a call: 20.4%.** The ratio the
-milestone asks for is the last column: **55 mid-action re-evaluations against 70
-model calls, 0.79, and not one of those re-evaluations was a call.**
+standing in the world. **71 of 340 asks cost a call: 20.9%.** The ratio the
+milestone asks for is the last column: **53 mid-action re-evaluations against 71
+model calls, 0.75, and not one of those re-evaluations was a call.**
 
 ## Several answers outstanding at once, and none of them queueing
 
@@ -96,9 +96,9 @@ a mode anything switches into — it is the same thing happening more than once.
 The run samples, every tick, who is waiting:
 
 ```
-ticks with more than one answer outstanding  61 of 160
+ticks with more than one answer outstanding  65 of 160
 the most outstanding at once                 5
-ticks by how many were outstanding           0:40 1:59 2:37 3:18 4:3 5:3
+ticks by how many were outstanding           0:38 1:57 2:45 3:15 4:2 5:3
 ```
 
 For each of the 69 questions the run prints how many ticks the asking character
@@ -108,9 +108,9 @@ Every row reads the same way:
 
 ```
 who    turn asked answered waited alongside  ticks each of the others was serviced for   actions
-Sable  12     134      138      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4                1
-Odo    11     145      148      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3              1
-Pell   22     151      154      3         1  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3               1
+Sable  11     116      120      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4                2
+Bram   12     137      141      4         4  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4               3
+Sable  12     140      144      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4                1
 ```
 
 A simulation that blocked would show zeroes in those columns. It shows the span,
@@ -121,15 +121,15 @@ line:
 
 ```
 the longest span, by how many other answers were outstanding across it
-  0:3   1:3   2:4   3:4   4:3
+  0:3   1:3   2:4   3:4   4:4
 ```
 
 A channel that served questions in turn would make one put while five others were
 outstanding take about eighteen ticks. The longest span in the whole run is four,
 and four is not more common when more are pending than when none are — the
-longest span with four others outstanding is three ticks, shorter than the
-longest with two. Sixty-four of the sixty-nine spans took the stated three ticks;
-the five that ran to four are a character that was not serviced on the tick its
+longest span with four others outstanding is four ticks, the same as the longest
+with two or three. Sixty-six of the sixty-nine spans took the stated three ticks;
+the three that ran to four are a character that was not serviced on the tick its
 answer was ready — a commander waiting for its turn on the tactical board — which
 is the loop's cadence and not the channel's.
 
@@ -137,66 +137,65 @@ is the loop's cadence and not the channel's.
 
 Nobody told Pell to want a brass lantern in particular; it was set out after one,
 and it spent the run asking. Wren — the character a person drives — had taken that
-lantern out of the market pile at tick 29 and nothing told anybody. So Pell asked
-the character standing beside it, and Rook, asked nothing and told nothing, ran
-out of patience over ninety ticks:
+lantern out of the market pile and nothing told anybody. So Pell asked the two
+characters standing near it, was offered the wrong thing, turned to the one who
+really had it, and got no answer at all:
 
 ```
-said #7 to #2 "where can I find a brass lantern"
-said #2 to #7 "I don't know where to find a brass lantern, sorry"
-said #7 to #2 "where can I find a brass lantern, Rook"
-said #2 to #7 "I already told you, Pell — I don't know where to find one"
-said #2 to #7 "Pell, asking again won't change my answer — try the pile I saw nearby, maybe"
-said #2 to #7 "Pell, I've answered you three times now — leave me be"
-said #2 to #7 "Enough, Pell — go ask Wren if you like"
-said #2 to #7 "I already pointed you at the pile I saw nearby — and leave me be after this, Pell"
-said #2 to #7 "That's the last you'll hear from me, Pell — good luck at the market."
-said #7 to #2 "Thank you, Rook. I'll head to the market then."
+said #7 to #2 "Do either of you have a brass lantern to sell or trade? I have 9 coins."
+said #2 to #7 "I don't have a brass lantern, Pell, but I do have a silk cloak I'd sell for 9 coins."
+said #1 aloud  "a fair bargain"
+said #7 to #1 "Wren, do you have a brass lantern to sell? I have 9 coins."
+said #7 to #1 "Thank you, Rook. I'll pass on the cloak — I'm set on a brass lantern. Wren, would you sell me one?"
+said #7 to #1 "Wren, I'll take your silence as a no. I have 9 coins if you change your mind about a brass lantern."
+said #7 to #2 "Farewell, then. I'll seek a brass lantern elsewhere."
 ```
 
-Rook's count of how many times it had answered is Rook's own; nothing in the
-prompt tallies it, and nothing in the engine tracks who has asked what. Pell did
-take the advice — it turned to Wren, who really did have the lantern, and twice
-offered coin for it from `4.38` units away, which the engine refused because a
-trade is proposed within `2.50`.
+Reading a silence as a refusal is Pell's own move; nothing in the prompt says
+that an unanswered question means no, and nothing in the engine tracks who has
+asked what. Rook, meanwhile, took the opening and put the offer through the
+engine rather than through speech: `trade_propose target=#7 give=[silk cloak]
+want_money=9`, twice, both accepted by the engine as well-formed offers, and Pell
+answered with a counter-offer of its own money for the same cloak.
 
 Bram and Sable, two strangers of different bands, introduced themselves, agreed
-to walk north together, and the board came up under them:
+to travel together, and the board came up under them:
 
 ```
-said #4 to #3 "Hail, fellow commander."
-said #3 to #4 "Well met, Sable. Just wandering these lands."
-said #4 to #3 "The road ahead looks quiet. Care to walk together a while?"
-said #3 to #4 "A walk sounds fine. Lead the way."
-said #4 to #3 "Quiet lands make for easy travel. Shall we wander north together, then?"
-said #3 to #4 "Lead on, Sable. I'll keep pace."
-t= 88  --     Bram and somebody of another band have met
+said #4 to #3 "Hail, traveler. I am Sable."
+said #3 to #4 "Well met, Sable. I am Bram."
+said #4 to #3 "Oh, just wandering — looking for a bit of adventure, maybe some coin. Care to travel together?"
+said #3 to #4 "A soldier out this way could find plenty of adventure, I'd wager. Traveling together suits me fine — where shall we head?"
+said #4 to #3 "East, then — up toward the high ground. Quiet roads seldom stay quiet, and hills hide the best adventures."
+said #3 to #4 "Northeast, toward that stranger perhaps — but careful, Sable. Eyes up."
+t=116  --     Bram and somebody of another band have met
               snap-in around #3 ... joined=2
 ```
 
 The board appeared under them because they closed within nine units of each
 other, which is the engagement rule and not a decision anybody made — two
 characters who had just agreed to travel together were put on a tactical grid by
-their distance alone, and neither ever chose to attack. From tick 88 to the end
+their distance alone, and neither ever chose to attack. From tick 116 to the end
 of the run the board holds them: every `go_to` either of them chooses is refused
 with *"the board decides where a fighter goes"*, four times between them, and
-what they do instead is turn to face each other and, once, speak.
+what they do instead is turn to face each other.
 
-Two of them used the memory tools without being prompted, and in opposite
-directions: Odo kept one lesson — `learn text=Keep heading north across the
-rising slope.` — and Pell called `recall` seven times, six of them for the
-lantern, drawing back up to ten things it already remembered. Which of the five
-reaches for which tool is a fact about this draw and not about the tools.
+One of the five used the memory tools without being prompted: Pell called
+`recall about=brass lantern` twice, drawing back four and then five things it
+already remembered. Nobody wrote a lesson on this draw. Which of the five reaches
+for which tool is a fact about the draw and not about the tools — an earlier
+recording of this same run had Odo keeping a lesson and Pell recalling seven
+times.
 
 ## The refusals are the same refusals
 
-Thirteen of the run's sixty-seven resolutions were refusals, and they read the
-same whichever kind of mind chose them:
+Five of the run's seventy-four resolutions were refusals, and they read the same
+whichever kind of mind chose them:
 
 ```
-t= 31  Pell   finished examine(target=6) -> examine refused: there is nothing with id 6
-t= 61  Rook   finished examine(target=6) -> examine refused: there is nothing with id 6
-t= 77  Wren   finished examine(target=silk cloak) -> examine refused: Wren carries no silk cloak
+t= 61  Pell   finished examine(target=6) -> examine refused: there is nothing with id 6
+t= 89  Rook   finished go_to() -> go_to refused: go_to needs target or offset
+t= 99  Wren   finished examine(target=silk cloak) -> examine refused: Wren carries no silk cloak
 ```
 
 The first two are models; the third is the person. Same sentence shape, same
@@ -208,19 +207,19 @@ action list.
 ## No key, no network, two processes, same bytes
 
 ```
-90523142039bef5b61d46bce681ddbe297a0de92a116883b4b80198e8cc2f5aa  first run
-90523142039bef5b61d46bce681ddbe297a0de92a116883b4b80198e8cc2f5aa  second run
-90523142039bef5b61d46bce681ddbe297a0de92a116883b4b80198e8cc2f5aa  reports/agent-evidence.txt
+0bc39073d2b1f2f131053b40aa73cad6670129b57de3fb094ca9660a4acd270d  first run
+0bc39073d2b1f2f131053b40aa73cad6670129b57de3fb094ca9660a4acd270d  second run
+0bc39073d2b1f2f131053b40aa73cad6670129b57de3fb094ca9660a4acd270d  reports/agent-evidence.txt
 ```
 
-The 99 replies the run and its four sibling runs replay were put to
-**`z-ai/glm-5.3-flash`** over `openrouter.ai` once, on 2026-09-04, by
+The 101 replies the run and its four sibling runs replay were put to
+**`z-ai/glm-5.3-flash`** over `openrouter.ai` once, on 2026-09-05, by
 `./run_record.sh --live` — the only command in the repository that touches the
 network, and one no test and no other run script calls. Everything else replays
-them. 85 of the 99 answer the three character runs; the rest answer the
+them. 87 of the 101 answer the three character runs; the rest answer the
 difficulty-class run and the orchestrator run.
 
-**Not one of the 99 was declined and not one came back empty.** Every question
+**Not one of the 101 was declined and not one came back empty.** Every question
 that pass put came back with something a reader could take a line from, so
 nothing in the shipped transcript is a silence. That is a fact about this
 provider and this draw, and the machinery for a silence stays because the
@@ -252,7 +251,7 @@ back to position when none matches and saying so in the transcript.
 
 ## What holds
 
-- All 49 suites pass (196,324 checks); the agent suite alone is 1,101 of them,
+- All 50 suites pass (196,390 checks); the agent suite alone is 1,112 of them,
   every one with no key, no network and no model.
 - `./run_headless.sh` at seed 1234 still ends at `5014980a58150055` — unmoved.
 - `./run_tests.sh --layers-only`: layer, combat, interface and asset checks OK.
@@ -265,15 +264,16 @@ back to position when none matches and saying so in the transcript.
 
 - **The cast is five.** Whether the rate holds at fifty or five hundred is not
   measured here, and the linear reading above is an extrapolation, not a result.
-- **Pell cost two and a half times what Bram did** (23 calls against 9) because
-  it stood in a market with people to answer and a thing it wanted, while Bram
-  walked north and then stood on a board. Call volume tracks how eventful a
+- **Rook and Pell each cost twice what Odo did** (19 calls against 9) because
+  they stood in a market with people to answer and a thing one of them wanted,
+  while Odo walked away from everybody. Call volume tracks how eventful a
   character's surroundings are, which is the thing section 12's distance-based
   back-off would exploit — and the first evidence that it would work.
-- **The tools are used unevenly.** One of the five kept a lesson and one used
-  `recall`, seven times; the other three used neither. Whether that is the tool,
-  the prompt or the draw is not answered by one run.
+- **The tools are used unevenly.** One of the five used `recall`, twice; the
+  other four used neither, and nobody wrote a lesson. The draw before this one
+  had a different one of the five keeping a lesson. Whether that is the tool, the
+  prompt or the draw is not answered by one run.
 
-The full transcript, all 886 lines of it, is
+The full transcript, all 826 lines of it, is
 [reports/agent-evidence.txt](agent-evidence.txt). The one-character run this grew
 out of is [reports/agent.md](agent.md).

@@ -2,7 +2,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 does a goal change what is chosen? seed=1234, 100 ticks watched
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+  recording  recorded 2026-09-05 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
 
 the same moment, four times
@@ -11,64 +11,64 @@ the same moment, four times
   prompt outside its goals   identical in all four arms: yes
   so the only thing that differs between the arms is what the character is after
 
-arm: no goal -- prompt 6ee3266ffbedbb7f
+arm: no goal -- prompt a2a5e1e44a3ae219
   what it is after, as the prompt carried it:
     What you are after: nothing in particular.
   what the world answered about each, before the question:
     (it is after nothing, so there was nothing to answer)
-  the model said:     say text=then let us trade target=#1
-  which read back as: say(text=then let us trade target=1)
+  the model said:     say text="what bargain do you offer?" target=#1
+  which read back as: say(text="what bargain do you offer?" target=1)
 
-arm: the empty stall -- prompt e268a7eacbb71f52
+arm: the empty stall -- prompt 4385c3db379e6198
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short be at (-471.0, 416.0)                          the world says when this one is done
   what the world answered about each, before the question:
     be at (-471.0, 416.0)                          not yet -- 7.8 from (-471.0, 416.0)
-  the model said:     go_to target=(-471.0, 416.0)
-  which read back as: go_to(target=(-471.000, 416.000))
+  the model said:     go_to offset=(5.0, -6.0)
+  which read back as: go_to(offset=(5.000, -6.000))
 
-arm: a trade with Rook -- prompt 8e549582ef6d5ff5
+arm: a trade with Rook -- prompt b54959b49794a7c1
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short have traded with #2                            the world says when this one is done
   what the world answered about each, before the question:
     have traded with #2                            not yet -- no trade of its has been honoured
-  the model said:     trade_propose target=#2 give_money=1 want_money=0
-  which read back as: trade_propose(target=2 give_money=1 want_money=0)
+  the model said:     trade_propose target=#2 give_money=9 want=[an axe]
+  which read back as: trade_propose(target=2 give_money=9 want=[an axe])
 
-arm: thought well of here -- prompt 1636920c36bb19a2
+arm: thought well of here -- prompt d8e8e038403335f2
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  long  be thought well of in this market              answer `done goal=1` when you judge it done
   what the world answered about each, before the question:
     be thought well of in this market              not yet -- nothing in the world answers this one
-  the model said:     say text=I will deal fairly with you both target=#1
-  which read back as: say(text=I will deal fairly with you both target=1)
+  the model said:     say text=a fair bargain, agreed target=#1
+  which read back as: say(text=a fair bargain, agreed target=1)
 
 what the goals changed
   two columns, because the two are different claims: a different action, and a different
   choice of any sort including the same action with other words in it
   arm                    which action     chose                                      action     choice
-  no goal                say at #1        say(text=then let us trade target=1)       --         --
-  the empty stall        go_to at nobody  go_to(target=(-471.000, 416.000))          differs    differs
-  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=1 want_… differs    differs
-  thought well of here   say at #1        say(text=I will deal fairly with you both… same       differs
+  no goal                say at #1        say(text="what bargain do you offer?" tar… --         --
+  the empty stall        go_to at nobody  go_to(offset=(5.000, -6.000))              differs    differs
+  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=9 want=… differs    differs
+  thought well of here   say at #1        say(text=a fair bargain, agreed target=1)  same       differs
   2 of 3 goals changed which action was chosen; 3 changed the choice at all
 
   being after "be at (-471.0, 416.0)"
-    after nothing it chose  say(text=then let us trade target=1)
-    after that one it chose go_to(target=(-471.000, 416.000))
+    after nothing it chose  say(text="what bargain do you offer?" target=1)
+    after that one it chose go_to(offset=(5.000, -6.000))
     which is a different action: go_to at nobody rather than say at #1
 
   being after "have traded with #2"
-    after nothing it chose  say(text=then let us trade target=1)
-    after that one it chose trade_propose(target=2 give_money=1 want_money=0)
+    after nothing it chose  say(text="what bargain do you offer?" target=1)
+    after that one it chose trade_propose(target=2 give_money=9 want=[an axe])
     which is a different action: trade_propose at #2 rather than say at #1
 
   being after "be thought well of in this market"
-    after nothing it chose  say(text=then let us trade target=1)
-    after that one it chose say(text=I will deal fairly with you both target=1)
+    after nothing it chose  say(text="what bargain do you offer?" target=1)
+    after that one it chose say(text=a fair bargain, agreed target=1)
     which is the same action, say at #1, said in other words
 
 who answers each of these goals

@@ -3,7 +3,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 difficulty-class run seed=1234 roll_seed=1 ticks=140 where=(-480.0, 420.0)
   hook       ActionEngine._interact -- a check is raised there and nowhere else
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 3 replies
+  recording  recorded 2026-09-05 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 4 replies
   rolls      d20, ability score + roll vs the class, in the engine
   who        Rook, carrying iron pry bar and whittling knife, with no brass key
   what       4 shut things, none of which either tool opens
@@ -21,10 +21,10 @@ two prompts, two calls
   judging    You judge how hard something is. You do not decide whether it works.
   resolving  You say what changes in a world after something has already worked.
   and the resolving call may name only these, which the engine carries out:
-    open   target=#7              -- a shut thing comes open
-    shut   target=#7              -- an open thing falls shut
-    move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units, onto ground that carries it
-    spill  target=#7              -- everything inside an open thing ends up on the ground beside it
+    open   target=#<id>           -- a shut thing comes open
+    shut   target=#<id>           -- an open thing falls shut
+    move   target=#<id> to=(<x>, <z>) -- a thing is shoved, at most 4.0 units, onto ground that carries it
+    spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
 
 what the character did
   t=  1  Rook   began go_to(target=2), 20 ticks
@@ -66,14 +66,18 @@ what the character did
 what happened, as it happened
   tick 27  check #1 asked the judging question (b723d1dc859f2ded)
   tick 30  check #1 interact:oak chest:iron pry bar -- judged, so it is resolved
-  tick 30  check #1 asked the resolving question (b4dc9bc7079ce35a)
+  tick 30  check #1 asked the resolving question (4b265df7f4e73b4a)
   tick 33  check #1 resolved
              open target=#2 -- the oak chest came open
   tick 53  check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
              open target=#3 -- the oak chest came open
   tick 79  check #3 asked the judging question (424074711a1ba4fe)
-  tick 82  check #3 interact:hazel crate:whittling knife -- failed: dex 4 + roll 6 = 10 vs dc 12
-  tick 105  check #4 interact:hazel crate:whittling knife -- failed, remembered: dex 4 + roll 6 = 10 vs dc 12 (no roll, no call)
+  tick 82  check #3 interact:hazel crate:whittling knife -- judged, so it is resolved
+  tick 82  check #3 asked the resolving question (8b86636a0af3979b)
+  tick 85  check #3 resolved
+             open   target=#4 -- the hazel crate came open
+  tick 105  check #4 interact:hazel crate:whittling knife -- passed, remembered: dex 4 + roll 6 = 10 vs dc 10 (no roll, no call)
+             open   target=#5 -- the hazel crate came open
 
 the checks
   #   context                            settled by  abil  score roll  total dc    verdict
@@ -81,23 +85,25 @@ the checks
       did    open target=#2                           the oak chest came open
   2   interact:oak chest:iron pry bar    remembered  str   5     15    20    12    passed
       did    open target=#3                           the oak chest came open
-  3   interact:hazel crate:whittling knife rolled      dex   4     6     10    12    failed
-  4   interact:hazel crate:whittling knife remembered  dex   4     6     10    12    failed
+  3   interact:hazel crate:whittling knife rolled      dex   4     6     10    10    passed
+      did    open   target=#4                         the hazel crate came open
+  4   interact:hazel crate:whittling knife remembered  dex   4     6     10    10    passed
+      did    open   target=#5                         the hazel crate came open
 
 what it cost
   checks     4 raised, 4 settled
-  calls      3 put to a model
+  calls      4 put to a model
   rolls      2 rolled by the engine
   remembered 2 settled out of a character's memory, with neither a call nor a roll
-  which is   0.75 calls a settled check, against the 1.25 it would have been had every one of them been judged afresh
+  which is   1.00 calls a settled check, against the 1.50 it would have been had every one of them been judged afresh
 
 what Rook remembers about it
   checks     2, one per triggering context
     interact:oak chest:iron pry bar -- str 5 + roll 15 = 20 vs dc 12, passed
-    interact:hazel crate:whittling knife -- dex 4 + roll 6 = 10 vs dc 12, failed
+    interact:hazel crate:whittling knife -- dex 4 + roll 6 = 10 vs dc 10, passed
   and in its own account of itself:
     I worked the oak chest with an iron pry bar: it gave.
-    I failed to work the hazel crate with a whittling knife: it held.
+    I worked the hazel crate with a whittling knife: it gave.
 
 after 140 ticks
   tick 140 actors=1 objects=4 offers=0
@@ -105,13 +111,13 @@ after 140 ticks
       carries money=0 carried=[common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [iron pry bar:4] iron pry bar | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [whittling knife:4] whittling knife] worn=[]
     #2 oak chest at (-474.000, -2.256, 420.000) open [1 carried, 0 equipped, 7 money]
     #3 oak chest at (-474.000, -5.046, 428.000) open [1 carried, 0 equipped, 3 money]
-    #4 hazel crate at (-486.000, -3.222, 420.000) shut [0 carried, 0 equipped, 0 money]
-    #5 hazel crate at (-486.000, -2.788, 412.000) shut [0 carried, 0 equipped, 0 money]
+    #4 hazel crate at (-486.000, -3.222, 420.000) open [0 carried, 0 equipped, 0 money]
+    #5 hazel crate at (-486.000, -2.788, 412.000) open [0 carried, 0 equipped, 0 money]
     check #1 interact:oak chest:iron pry bar -- passed: str 5 + roll 15 = 20 vs dc 12
     check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
-    check #3 interact:hazel crate:whittling knife -- failed: dex 4 + roll 6 = 10 vs dc 12
-    check #4 interact:hazel crate:whittling knife -- failed, remembered: dex 4 + roll 6 = 10 vs dc 12 (no roll, no call)
-  fingerprint 305f10e2de31025f
+    check #3 interact:hazel crate:whittling knife -- passed: dex 4 + roll 6 = 10 vs dc 10
+    check #4 interact:hazel crate:whittling knife -- passed, remembered: dex 4 + roll 6 = 10 vs dc 10 (no roll, no call)
+  fingerprint 550e14813932bf8c
 
 the two questions in full
 
@@ -133,7 +139,7 @@ the two questions in full
   Answer with one line and nothing else:
     dc=<whole number> ability=<one of the six>
 
-  --- question 2, 852 characters, digest b4dc9bc7079ce35a ---
+  --- question 2, 853 characters, digest 4b265df7f4e73b4a ---
   You say what changes in a world after something has already worked.
   
   This happened, and it worked:
@@ -150,9 +156,9 @@ the two questions in full
     #4 hazel crate, shut
   
   Say what that success changes. You may name only these operations; anything else changes nothing:
-    open   target=#7              -- a shut thing comes open
-    shut   target=#7              -- an open thing falls shut
-    move   target=#7 to=(12.5, -4.0) -- a thing is shoved, at most 4.0 units, onto ground that carries it
-    spill  target=#7              -- everything inside an open thing ends up on the ground beside it
+    open   target=#<id>           -- a shut thing comes open
+    shut   target=#<id>           -- an open thing falls shut
+    move   target=#<id> to=(<x>, <z>) -- a thing is shoved, at most 4.0 units, onto ground that carries it
+    spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
   
   Answer with at most 3 lines, one operation each, and nothing else.

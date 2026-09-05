@@ -63,7 +63,10 @@ static func catalogue_lines() -> PackedStringArray:
 	for row in ROWS:
 		var keys := PackedStringArray()
 		for key in row["keys"]:
-			keys.append("%s=%s" % [key, "(12.5, -4.0)" if key == "to" else "#7"])
+			# In angle brackets and never a specimen, the same way the other two
+			# prompts write a value. See `ModelPrompt.SORT_FORMS`: a placeholder
+			# that reads back as a legal value is one a model hands back.
+			keys.append("%s=%s" % [key, "(<x>, <z>)" if key == "to" else "#<id>"])
 		written.append("  %-6s %-22s -- %s" % [row["name"], " ".join(keys), row["says"]])
 	return written
 

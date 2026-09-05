@@ -123,17 +123,18 @@ So a difference in what comes back is a difference the goal made:
 
 | arm | what it is after | the model chose |
 |---|---|---|
-| no goal | — | `say(text=then let us trade target=1)` |
-| the empty stall | be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
-| a trade with Rook | have traded with #2 | `trade_propose(target=2 give_money=1 want_money=0)` |
-| thought well of here | be thought well of in this market | `say(text=I will deal fairly with you both target=1)` |
+| no goal | — | `say(text="what bargain do you offer?" target=1)` |
+| the empty stall | be at (-471.0, 416.0) | `go_to(offset=(5.000, -6.000))` |
+| a trade with Rook | have traded with #2 | `trade_propose(target=2 give_money=9 want=[an axe])` |
+| thought well of here | be thought well of in this market | `say(text=a fair bargain, agreed target=1)` |
 
 Two of the three changed **which action** was chosen; all three changed the
-choice. The position arm is worth pausing on: the character was after a place, and
-it answered with the one action in the list that names a place, at exactly the
-coordinates it was after, to the same three decimals the goal was written in. The
-trade arm proposed to the one character its goal named, and offered a coin to do
-it.
+choice. The position arm is worth pausing on: the character stood at
+`(-476.0, 422.0)`, was after `(-471.0, 416.0)` — `7.8` away, as the world told it
+— and answered with a step of `(5.0, -6.0)`, which is exactly the difference
+between the two, to the tenth, in one move. The trade arm
+proposed to the one character its goal named, and put all nine of its coins on
+the table to do it.
 
 The full transcript is `reports/goal-evidence.txt`.
 
@@ -154,18 +155,19 @@ step towards it was written down anywhere, and Pell was never asked whether it
 had arrived.
 
 The second goal it pursued for the rest of the run and did not get. It asked Rook
-twice and Wren three times where a brass lantern was to be found, looked back
-through its own memory seven times, reached for the market pile the lantern had
-been in, and twice offered Wren coin for it:
+once and Wren three times where a brass lantern was to be found, looked back
+through its own memory twice, reached for the market pile the lantern had been
+in, and answered Rook's offer of a silk cloak with a counter-offer of its own
+nine coins:
 
 ```
-t= 31  Pell   finished examine(target=6)
+t= 61  Pell   finished examine(target=6)
               -> examine refused: there is nothing with id 6
-t= 92  Pell   finished trade_propose(target=1 give_money=5 want=[brass lantern])
-              -> trade_propose refused: Wren is out of reach (4.38 > 2.50)
+t=104  Pell   finished trade_propose(target=2 give_money=9 want=[silk cloak])
+              -> trade_propose ok to=2 give=0 give_money=9 want=1 want_money=0
 ```
 
-Wren picked the lantern up at tick 29 and the pile went out of the world with it.
+Wren picked the lantern up and the pile went out of the world with it.
 Nothing in the prompt told Pell that, nothing told it where the lantern went, and
 both refusals are the engine's own sentences — the same ones any other caller
 gets. The goal is still open at the end of the run and the table says so. The

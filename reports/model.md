@@ -123,9 +123,35 @@ nearest character. So mercury's world run spawned nobody, where fable spawned
 three and glm spawns two with names and backstories. Since the orchestrator is
 where the world gets its people, that is disqualifying.
 
-Copying the example is not unique to mercury: glm does it five times, and a
-local $3$-billion-parameter model did the same thing on the character prompt. It
-is a property of cheap models faced with a worked example, not of one provider.
+Copying the example was not unique to mercury: glm did it five times in the pass
+this table is from and ten times in the pass after it, and a local
+$3$-billion-parameter model did the same thing on the character prompt. It was a
+property of any model faced with a worked example, not of one provider — which is
+what made it a fact about the prompt.
+
+**And it was fixed there.** Every placeholder the prompts print is now the *name*
+of what goes in the slot, in angle brackets, rather than a specimen of one:
+`#<id>`, `(<x>, <z>)`, `(<x from here>, <z from here>)`, `<what you mean>`. The
+punctuation that carries the syntax is unchanged, and the parser is untouched;
+what changed is that a copy no longer reads back as a value, so
+`ActionCatalog.fault()` refuses it with its own sentence instead of the world
+silently doing something at $(12.5, -4.0)$.
+
+Put to the four small local arms on 2026-09-05, every question of all five runs
+once per arm, before and after that change:
+
+| arm | copies before | copies after | distinct replies before | after |
+|---|---|---|---|---|
+| a $0.8$B arm | 108 of 113 | 1 of 84 | 10 of 113 | 22 of 84 |
+| a $4$B arm | 40 of 49 | 1 of 56 | 8 of 49 | 17 of 56 |
+| a small $2$B arm | 71 of 115 | 0 of 96 | 17 of 115 | 20 of 96 |
+| a small $4$B arm | 95 of 140 | 23 of 125 | 18 of 140 | 17 of 125 |
+
+Before the change the four arms between them made $14$ attempts to spawn somebody
+and the engine refused every one, all of them at the example coordinate. After it
+they made $8$ and the engine carried out $7$. The one arm still copying hands back
+`#<id>`, which the catalogue now refuses rather than resolving to a real
+character. The model that ships went from $10$ copies to $0$.
 
 ## The ceiling
 
@@ -144,7 +170,7 @@ that line out of `ModelCall.MODEL`, not because anyone typed it:
 
 ```
 const MODEL       := "z-ai/glm-5.3-flash"
-const RECORDED_ON := "2026-09-04"
+const RECORDED_ON := "2026-09-05"
 ```
 
 Two rules follow, and both matter for anything written about this project.
@@ -207,23 +233,28 @@ list, with the runtime and settings or the reason per line, is
 ## The recording has moved on, and that is the point
 
 Giving `go_to` a second shape changed the questions the run puts, which forced a
-fresh live pass on 2026-09-04 against the same model at the same settings. It is
-what ships now, and almost nothing about it matches the glm column above:
+fresh live pass on 2026-09-04 against the same model at the same settings. Taking
+the worked examples out of the prompt's placeholders — the change described under
+"Copying the example", below — changed them again, and forced a third on
+2026-09-05. That third pass is what ships now, and almost nothing about it
+matches the glm column above:
 
-| the same model, the same settings | 2026-09-03 | 2026-09-04 |
-|---|---|---|
-| replies recorded, all five tables | 108 | 99 |
-| replies empty | 0 | 0 |
-| seconds a call, median | 1.612 | 3.493 |
-| turns in the 160-tick character run | 81 | 69 |
-| turns that named a place | 3, all refused | 13, none out of reach |
-| orchestrator operations named / carried out | 9 / 5 | 11 / 9 |
-| characters spawned | 2 | 6 |
-| the prompt's own example coordinate copied | 5 | 1 |
+| the same model, the same settings | 2026-09-03 | 2026-09-04 | 2026-09-05 |
+|---|---|---|---|
+| replies recorded, all five tables | 108 | 99 | 101 |
+| replies empty | 0 | 0 | 0 |
+| turns in the 160-tick character run | 81 | 69 | 69 |
+| turns the engine resolved | 57 | 61 | 67 |
+| turns that named a place | 3, all refused | 13, none out of reach | 13, none out of reach |
+| orchestrator operations named / carried out | 9 / 5 | 11 / 9 | 13 / 11 |
+| characters spawned | 2 | 6 | 5 |
+| the prompt's own example coordinate copied | 5 | 10 | **0** |
 
-Both passes are honest. Neither is a constant. This is the rule above, shown
-rather than asserted: a recording is one draw, and the second draw of the same
-model was twice as slow a call and twice as productive a world.
+Every pass is honest. None is a constant. This is the rule above, shown rather
+than asserted. The last column is the one line that is not a draw: the example
+coordinate and the example offset are not in the prompt any more, so there is
+nothing there to copy, and the count is zero by construction rather than by
+luck.
 
 ## A refusal belongs to the provider, not to the prompt
 
@@ -244,8 +275,8 @@ lines before putting either.
 
 ## Verified today, on this tree
 
-`./run_tests.sh`, headless, with no key and no network: **all 49 suites passed
-(196,281 checks)**, exit 0. `./run_headless.sh` on seed $1234$ prints
+`./run_tests.sh`, headless, with no key and no network: **all 50 suites passed
+(196,390 checks)**, exit 0. `./run_headless.sh` on seed $1234$ prints
 `final=5014980a58150055`, the same fingerprint as before the model changed —
 nothing under `sim/` learned which model answers.
 

@@ -163,23 +163,23 @@ language model and one driven by a person's recorded choices, 160 ticks, seed
 
 ```
 what the world recorded between them
-  4 edges, made of 33 happenings, and not one of them on anybody's sheet
+  4 edges, made of 27 happenings, and not one of them on anybody's sheet
   sentiment is familiarity x (trust - fear), which is the one number section 6 reads
   who    driven by with     trust    fear   respect   familiarity  sentiment
-  Wren   a person  Rook      0.00    0.00      0.00          0.68      +0.00
-  Wren   a person  Pell      0.00    0.00      0.00          0.82      +0.00
-  Rook   a model   Wren      0.00    0.00      0.00          0.68      +0.00
-  Rook   a model   Pell      0.00    0.00      0.00          0.98      +0.00
-  Bram   a model   Sable     0.00    0.00      0.00          0.92      +0.00
-  Sable  a model   Bram      0.00    0.00      0.00          0.92      +0.00
+  Wren   a person  Rook      0.00    0.00      0.00          0.87      +0.00
+  Wren   a person  Pell      0.00    0.00      0.00          0.76      +0.00
+  Rook   a model   Wren      0.00    0.00      0.00          0.87      +0.00
+  Rook   a model   Pell      0.00    0.00      0.00          0.58      +0.00
+  Bram   a model   Sable     0.00    0.00      0.00          0.97      +0.00
+  Sable  a model   Bram      0.00    0.00      0.00          0.97      +0.00
   Odo    a model   nothing has passed between it and anybody
-  Pell   a model   Rook      0.00    0.00      0.00          0.98      +0.00
-  Pell   a model   Wren      0.00    0.00      0.00          0.82      +0.00
+  Pell   a model   Rook      0.00    0.00      0.00          0.58      +0.00
+  Pell   a model   Wren      0.00    0.00      0.00          0.76      +0.00
 ```
 
 Wren is the character a person drives. Its two edges sit in the same table as the
 five model-driven ones, carrying the same kind of numbers, of the same order:
-0.68 and 0.82 against Rook and Pell's 0.98 and Bram and Sable's 0.92. Odo walked
+0.87 and 0.76 against Rook and Pell's 0.58 and Bram and Sable's 0.97. Odo walked
 away from everybody and has no edges, which is a fact about where Odo went and
 not about what is on its `decide`. This is the finding of the earlier review — that
 the two per-character stores filled only along the model layer's path — not
@@ -317,6 +317,14 @@ carries a field of that name.
 | `./run_scenario.sh` | `7efa1a16f912e51d` | `2810e3d79c9c7ece` |
 | `./run_world.sh` | `939f85ef6e27b820` | `e667d199e628967b` |
 | `./run_agent.sh` | `d506019b20bd1ce8` | `bcd16fab0ee99f47` |
+
+  Those four are the move *this* work made, and they are left as they were
+  measured. Three of them have since moved again for an unrelated reason — the
+  model recording was re-made on 2026-09-05 against a changed prompt, so the
+  three runs that replay it now end at `550e14813932bf8c` (`./run_check.sh`),
+  `37bd8b92ef92dd5d` (`./run_world.sh`) and `5bc35efd0901430d`
+  (`./run_agent.sh`). `./run_scenario.sh` replays no model reply and is still at
+  `2810e3d79c9c7ece`.
 
 * **One behavioural move on the agent run, and it is the one the work asks for.**
   Bram and Sable are of different bands and had only ever met by speaking. Under

@@ -110,15 +110,44 @@ const RULE_WORDS := (
 
 ## How a value of each sort is written in a reply, said once here and printed
 ## into the prompt so the model and the parser are reading one description.
+##
+## Every one of them names what goes there, in angle brackets, and never shows a
+## specimen of it. That is not a style: a placeholder that is itself a legal
+## value is a value a model can hand back, and measured over a full recording
+## pass every mind asked did. The forms used to be specimens -- `#7`,
+## `(12.5, -4.0)`, `(+2.0, -6.0)`, `words` -- and put every question of all five
+## runs, four small minds answered `recall about=words` 50 times in 97,
+## `examine #7` 57 in 98, `say text=words target=#7` 39 in 140, and three of the
+## four answered every one of the world run's five looks with a spawn at
+## `(12.5, -4.0)`, ground the engine refused all fifteen times because it is 650
+## units from anybody. Nor is this a small mind's failing: the checked-in
+## recording in `net/model_recording.gd` answers `go_to offset=(+2.0, -6.0)` --
+## this table's own offset, digit for digit -- 8 times in 77, more often than
+## any other line it chose. Put the same questions again with the specimens in
+## brackets and the copying falls from 108 answers in 113 to 1 in 84 on the
+## worst of the four, and no spawn lands on that coordinate again.
+##
+## In brackets a copy is not a value. `#<id>` has no whole number after the `#`,
+## `(<x>, <z>)` has no number either side of the comma, so `_value_of` leaves
+## both as the text they came as and `ActionCatalog.fault()` refuses the choice
+## with its own sentence, the way it refuses any other parameter that is the
+## wrong sort. Two sorts cannot be made unreadable, because any string is a legal
+## `text` and any list of words a legal `names`; for those the brackets do the
+## other half of the job, which is that a copy is unmistakable in a transcript
+## rather than passing for something a character meant to say.
+##
+## The shape is unchanged: the punctuation around each bracket is still the
+## syntax, so the line that says how a position is written still says it with
+## parentheses and a comma in it, and the parser is untouched.
 const SORT_FORMS := {
-	ActionCatalog.ID: "#7",
-	ActionCatalog.POSITION: "(12.5, -4.0)",
-	ActionCatalog.OFFSET: "(+2.0, -6.0)",
-	ActionCatalog.ID_OR_POSITION: "#7 or (12.5, -4.0)",
-	ActionCatalog.ID_OR_NAME: "#7 or a name",
-	ActionCatalog.TEXT: "words",
-	ActionCatalog.COUNT: "a whole number",
-	ActionCatalog.NAMES: "[one name, another name]",
+	ActionCatalog.ID: "#<id>",
+	ActionCatalog.POSITION: "(<x>, <z>)",
+	ActionCatalog.OFFSET: "(<x from here>, <z from here>)",
+	ActionCatalog.ID_OR_POSITION: "#<id> or (<x>, <z>)",
+	ActionCatalog.ID_OR_NAME: "#<id> or <a name>",
+	ActionCatalog.TEXT: "<what you mean>",
+	ActionCatalog.COUNT: "<a whole number>",
+	ActionCatalog.NAMES: "[<a name>, <another name>]",
 }
 
 
