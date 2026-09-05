@@ -98,10 +98,21 @@ fable's usage was captured.
 | the shipped 160-tick run | fable | mercury | glm |
 |---|---|---|---|
 | questions put | 59 | 85 | 81 |
-| turns the engine resolved | 32 | 67 | 57 |
+| turns the engine carried out and which then finished | 32 | 67 | 57 |
 | turns the engine refused | 13 | 14 | 17 |
-| lines nothing could be read from | 5 | 1 | 0 |
+| — of those, lines nothing could be read from | 5 | 1 | 0 |
+| turns that asked a tool instead of acting | 9 | 2 | 4 |
+| turns still running when the run ended | 5 | 2 | 3 |
 | turns of the least-served character | 7 | 2 | 12 |
+
+Four kinds of turn — carried out and finished, refused, a tool ask, still running
+when the clock stopped — are disjoint and sum to the questions put in every
+column ($32 + 13 + 9 + 5 = 59$, $67 + 14 + 2 + 2 = 85$, $57 + 17 + 4 + 3 = 81$).
+A line nothing could be read from is one kind of refusal and is indented under
+it, not a fifth kind. So a turn that was refused, that asked a tool, or that was
+still running is *not* inside the first row. Counts within one column may be
+compared; counts across columns may not, because a faster model is asked more
+often inside the same $160$ ticks.
 
 | the orchestrator run | fable | mercury | glm |
 |---|---|---|---|
@@ -113,7 +124,7 @@ fable's usage was captured.
 
 Mercury with its thinking off is the best thing that has ever answered the
 *character* prompt here: no empty replies against fable's nine, half a second a
-call against five, and twice the turns resolved.
+call against five, and twice the turns the engine carried out.
 
 It answers the *world's* prompt degenerately. Four of its five orchestrator
 answers were `spawn role=scout at=(12.5, -4.0)` — and $(12.5, -4.0)$ is the
@@ -206,9 +217,9 @@ sends `reasoning_effort: "none"` in the body it already posts. Before it,
 `length`, the whole $1200$-token ceiling spent on $4{,}309$ characters of
 private working; after it, `stop`, $15$ tokens, no working, $190$ ms. A whole
 $160$-tick run went from $8$ calls with none answered in the model's own words
-to $115$ of $115$ answered and $57$ turns resolved. The two Gemma arms, which
-have no thinking to turn off, return the identical line at the identical token
-count either way.
+to $115$ of $115$ answered and $57$ turns the engine carried out. The two Gemma
+arms, which have no thinking to turn off, return the identical line at the
+identical token count either way.
 
 What a local model is for is therefore soaking: long runs, repeated runs, and
 stress on the action surface, where volume matters and the quality of any single
@@ -219,11 +230,11 @@ cost would be false.
 How much worse, reproduced on this tree rather than quoted from a side run: a
 $3{,}000$-tick soak against `qwen2.5:3b-instruct` took $6{,}158$ turns, of which
 $5{,}417$ ($88.0\%$) were the `recall` tool, and four of the five characters
-resolved no action at all. That hole is now priced — two asks that cost the
+finished no action at all. That hole is now priced — two asks that cost the
 world no time are free between actions, the next costs a turn — and the same
 soak on the same seed came back at $3{,}009$ turns and $1.003$ calls a tick
 against $2.053$; see [reports/tool-budget.md](tool-budget.md). The guard prices
-the loop and does not cure the model: four of five still resolved nothing.
+the loop and does not cure the model: four of five still finished nothing.
 
 Two operational facts gate it, both worth writing down rather than
 rediscovering: `ollama` insists on writing a key into `$HOME/.ollama`, so `HOME`
@@ -292,11 +303,24 @@ matches the glm column above:
 | replies recorded, all five tables | 108 | 99 | 101 |
 | replies empty | 0 | 0 | 0 |
 | turns in the 160-tick character run | 81 | 69 | 69 |
-| turns the engine resolved | 57 | 61 | 67 |
+| turns the engine ruled on — it acted, refused or faulted | not comparable | 61 | 67 |
 | turns that named a place | 3, all refused | 13, none out of reach | 13, none out of reach |
 | orchestrator operations named / carried out | 9 / 5 | 11 / 9 | 13 / 11 |
 | characters spawned | 2 | 6 | 5 |
 | the prompt's own example coordinate copied | 5 | 10 | **0** |
+
+The row that used to sit here reading *turns the engine resolved — 57 | 61 | 67*
+has been repaired, because its own three cells were not one measurement. The
+$57$ was turns the engine carried out **and** which then finished, with refusals,
+tool asks and still-running actions counted separately beside it; the $61$ and
+$67$ were turns the engine ruled on at all, refusals included. The two later
+cells are one measure and stay; the first is struck rather than converted,
+because converting it would mean re-deriving a pass whose recording was
+overwritten by the two that came after. Replaying the checked-in recording with
+`./run_agent.sh` decomposes the shipped column exactly: of $69$ turns, $63$ the
+engine ruled `ok`, $3$ the world refused, $1$ the catalogue faulted, $2$ asked a
+tool instead of acting — so $67$ is $63 + 3 + 1$, and the ok-and-finished count
+underneath it is $59$, the other $4$ still running when the clock stopped.
 
 Every pass is honest. None is a constant. This is the rule above, shown rather
 than asserted. The last column is the one line that is not a draw: the example
@@ -336,19 +360,21 @@ nothing under `sim/` learned which model answers.
   `qwen/qwen3.7-flash` returned an empty string on three calls of three, and
   `z-ai/glm-4.7-flash` on two of three, all cut off at the ceiling, at $25$ to
   $40$ seconds a call.
-* **The independent review has now run, and two of its three findings are still
-  open.** It confirmed the three things it went after: `net/model_recording.gd`
+* **The independent review has run, and all three of its findings are now
+  closed.** It confirmed the three things it went after: `net/model_recording.gd`
   is byte-identical to its state at commit `f39055b`, which predates all ten
   local passes, and names the cloud model on every provenance line; the recall
   guard refuses a character a person drives in the same sentence as the other
   two kinds of mind; and the whole cloud row of the comparison re-derives off the
-  checked-in recording. Of its three findings, the cold-load column was struck in
-  commit `0886c10`. Still open in `reports/local-bench.md`: the column headed
-  *resolved, per character* counts refusals and catalogue faults as finished
-  turns and is not renamed there, and that page still ranks two arms on raw turn
-  counts without disclosing that a faster arm is asked more often. Both are
-  corrected on this page above and in the living report; the bench page itself is
-  a separate piece of work.
+  checked-in recording. Its cold-load column was struck in commit `0886c10`,
+  because for nine of the ten arms the per-call series it rested on lived in a
+  scratchpad that no longer exists. Its other two — a column headed *resolved,
+  per character* that counted refusals and catalogue faults as finished turns,
+  and two sentences ranking arms on raw turn counts — were fixed in commit
+  `f6ed790`, which renamed that column *turns that ran to a finish, per
+  character*, added a column carrying the engine's own `ok` verdict as a share of
+  each arm's turns, disclosed that a faster arm is asked more often in the same
+  $160$ ticks, and withdrew the recommendation those two sentences carried.
 * **The prose has not caught up.** `README.md` and several pages under
   `reports/` still name fable and quote its replies; that is its own piece of
   work. `reports/agent-live-evidence.txt` still says fable correctly — it is the
