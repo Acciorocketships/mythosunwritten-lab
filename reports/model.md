@@ -375,11 +375,16 @@ nothing under `sim/` learned which model answers.
   character*, added a column carrying the engine's own `ok` verdict as a share of
   each arm's turns, disclosed that a faster arm is asked more often in the same
   $160$ ticks, and withdrew the recommendation those two sentences carried.
-* **The prose has not caught up.** `README.md` and several pages under
-  `reports/` still name fable and quote its replies; that is its own piece of
-  work. `reports/agent-live-evidence.txt` still says fable correctly — it is the
-  transcript of a live pass, not a replay, and regenerating it would cost a
-  third live call.
+* **The prose has caught up, and a script now keeps it that way.** The bullet
+  that stood here said `README.md` and several pages under `reports/` still named
+  fable and quoted its replies. They no longer do: fable is named nowhere in the
+  tree but the two comparisons that judged it, and `tools/readme_model_numbers.sh`
+  re-derives $48$ of the README's model-layer values off the transcripts that hold
+  them and fails when the prose disagrees — it prints *48 checks OK* on this
+  tree. One page is deliberately a draw behind: `reports/agent-live-evidence.txt`
+  is the transcript of a live pass on 2026-09-04 ($85$ replies), not a replay of
+  the $101$-reply recording checked in on 2026-09-05, and regenerating it would
+  cost another live call.
 Two things this page listed as open have since been closed, and are recorded
 here so the list is not read as current: a line the catalogue cannot read now
 counts as an action attempted, so it costs one turn rather than the rest of the
