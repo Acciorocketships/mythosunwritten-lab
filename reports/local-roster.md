@@ -253,3 +253,12 @@ project-local `HOME` and `OLLAMA_MODELS` under the session scratchpad —
 about 102 GB across the two Gemma pulls, four imported GGUFs and LLaDA2.1-mini's 31 GB
 of shards. **Nothing large landed in the repository or in git.** The
 repository is unchanged except for this roster.
+
+---
+
+## What the roster was for
+
+Every arm on this list that runs was then put through the same seeded run end to
+end and compared side by side with the cloud model that ships. That comparison,
+with the recommendation it leads to, is
+[reports/local-bench.md](local-bench.md).

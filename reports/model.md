@@ -252,6 +252,16 @@ answers in $77.7$ s. `DiffusionGemma` does not run here at all. The full arm
 list, with the runtime and settings or the reason per line, is
 [reports/local-roster.md](local-roster.md).
 
+Ten of those arms then drove the same seeded run end to end — nine local plus the
+cloud model that ships — one live `./run_record.sh --live` pass each, all five
+tables. The short answer: every local arm is $3$ to $10$ times faster than the
+recording that ships and none of them returned an empty reply, but the ranking by
+speed is not the ranking by behaviour — the three fastest arms are three of the
+four worst-behaved, and no local arm's orchestrator answers come close. **No arm
+copied the prompt's example coordinate**, which four of four did on the last full
+pass before commit `f39055b`. The table, the per-arm evidence and the
+recommendation are in [reports/local-bench.md](local-bench.md).
+
 ## The recording has moved on, and that is the point
 
 Giving `go_to` a second shape changed the questions the run puts, which forced a
