@@ -179,18 +179,123 @@ empty reply, where fable returned nine.
 
 ### B — what it did in the world
 
-| arm | turns | chose an action | resolved, per character | least-served character | recall share of the shipped run | tool asks the budget made pay a turn | distinct lines / questions | placeholders handed back | prompt's example coordinate copied |
-|---|---|---|---|---|---|---|---|---|---|
-| `z-ai/glm-5.3-flash` | 69 | 67 | Rook 18 Bram 11 Sable 11 Odo 8 Pell 16 | Odo, 8 | 4 of 79 (5%) | 0 | 54 of 79 | none | no |
-| `qwen3.5:0.8b` | 56 | 54 | Rook 6 Bram 6 Sable 5 Odo 6 Pell 26 | Sable, 5 | 2 of 63 (3%) | 0 | 9 of 63 | `<id>` x1, `<what you mean>` x1 | no |
-| `nemotron-3-nano:4b` | 34 | 34 | Rook 5 Bram 6 Sable 6 Odo 6 Pell 6 | Rook, 5 | 0 of 41 (0%) | 0 | 12 of 41 | `<id>` x1 | no |
-| `gemma3n:e2b` | 66 | 66 | Rook 6 Bram 9 Sable 20 Odo 22 Pell 6 | Rook, 6 | 0 of 77 (0%) | 0 | 10 of 77 | none | no |
-| `gemma3n:e4b` | 96 | 96 | Rook 18 Bram 22 Sable 22 Odo 19 Pell 10 | Pell, 10 | 0 of 110 (0%) | 0 | 8 of 110 | `<id>` x23 | no |
-| `qwen3:4b-instruct` | 40 | 40 | Rook 7 Bram 6 Sable 6 Odo 10 Pell 6 | Bram, 6 | 1 of 47 (2%) | 0 | 26 of 47 | none | no |
-| `qwen2.5:3b-instruct` | 122 | 3 | Rook 0 Bram 0 Sable 0 Odo 0 Pell 3 | Rook, 0 | 134 of 137 (98%) | 105 | 22 of 137 | `<what you mean>` x3 | no |
-| `llama3.2:3b` | 40 | 40 | Rook 11 Bram 9 Sable 4 Odo 6 Pell 6 | Sable, 4 | 0 of 45 (0%) | 0 | 14 of 45 | none | no |
-| `llama3.2:1b` | 127 | 93 | Rook 6 Bram 26 Sable 26 Odo 22 Pell 10 | Rook, 6 | 43 of 145 (30%) | 5 | 20 of 145 | `<id>` x32, `<a name>` x2 | no |
-| `granite4:micro` | 61 | 35 | Rook 13 Bram 6 Sable 6 Odo 0 Pell 6 | Odo, 0 | 28 of 69 (41%) | 22 | 12 of 69 | none | no |
+| arm | turns | chose an action | turns that ran to a finish, per character -- a refusal or a fault finishes | fewest finishes, and whose -- not fewest clean turns | ok, as a share of that arm's turns | recall share of the shipped run | tool asks the budget made pay a turn | distinct lines / questions | placeholders handed back | prompt's example coordinate copied |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `z-ai/glm-5.3-flash` | 69 | 67 | Rook 18 Bram 11 Sable 11 Odo 8 Pell 16 | Odo, 8 | 63 of 69 (91%) | 4 of 79 (5%) | 0 | 54 of 79 | none | no |
+| `qwen3.5:0.8b` | 56 | 54 | Rook 6 Bram 6 Sable 5 Odo 6 Pell 26 | Sable, 5 | 18 of 56 (32%) | 2 of 63 (3%) | 0 | 9 of 63 | `<id>` x1, `<what you mean>` x1 | no |
+| `nemotron-3-nano:4b` | 34 | 34 | Rook 5 Bram 6 Sable 6 Odo 6 Pell 6 | Rook, 5 | 9 of 34 (26%) | 0 of 41 (0%) | 0 | 12 of 41 | `<id>` x1 | no |
+| `gemma3n:e2b` | 66 | 66 | Rook 6 Bram 9 Sable 20 Odo 22 Pell 6 | Rook, 6 | 14 of 66 (21%) | 0 of 77 (0%) | 0 | 10 of 77 | none | no |
+| `gemma3n:e4b` | 96 | 96 | Rook 18 Bram 22 Sable 22 Odo 19 Pell 10 | Pell, 10 | 55 of 96 (57%) | 0 of 110 (0%) | 0 | 8 of 110 | `<id>` x23 | no |
+| `qwen3:4b-instruct` | 40 | 40 | Rook 7 Bram 6 Sable 6 Odo 10 Pell 6 | Bram, 6 | 25 of 40 (63%) | 1 of 47 (2%) | 0 | 26 of 47 | none | no |
+| `qwen2.5:3b-instruct` | 122 | 3 | Rook 0 Bram 0 Sable 0 Odo 0 Pell 3 | Rook, 0 | 0 of 122 (0%) | 134 of 137 (98%) | 105 | 22 of 137 | `<what you mean>` x3 | no |
+| `llama3.2:3b` | 40 | 40 | Rook 11 Bram 9 Sable 4 Odo 6 Pell 6 | Sable, 4 | 25 of 40 (63%) | 0 of 45 (0%) | 0 | 14 of 45 | none | no |
+| `llama3.2:1b` | 127 | 93 | Rook 6 Bram 26 Sable 26 Odo 22 Pell 10 | Rook, 6 | 4 of 127 (3%) | 43 of 145 (30%) | 5 | 20 of 145 | `<id>` x32, `<a name>` x2 | no |
+| `granite4:micro` | 61 | 35 | Rook 13 Bram 6 Sable 6 Odo 0 Pell 6 | Odo, 0 | 10 of 61 (16%) | 28 of 69 (41%) | 22 | 12 of 69 | none | no |
+
+**A faster arm is asked more often, so read this table's counts as rates.** Every
+arm was given the same $160$-tick run, and a live channel does not wait: the
+question goes to a worker thread and, in `sim/model_channel.gd`'s own words, "the
+answer appears at whichever tick the flight first answers on". So an arm that
+answers in $0.172$ s is asked far more times in those $160$ ticks than one that
+answers in $1.874$ s, and the **turns** column is partly a restatement of the
+median-seconds column of Table A: the cloud arm took $69$ turns at a $1.874$ s
+median, `gemma3n:e4b` $96$ at $0.708$ s, `llama3.2:1b` $127$ at $0.172$ s. **What
+follows from that is simple: no arm here is ranked against another on a raw
+count.** What compares across arms is a share of that arm's own turns — which is
+what the **ok** column is, and it is the only cross-arm ranking this page now
+makes off Table B.
+
+**And "resolved" was the wrong word, so the column no longer uses it.** The
+figure under *turns that ran to a finish, per character* is counted by
+`sim/scripted_agent.gd`, whose `_resolved_by` walks the run's journal and counts
+every line for that character whose text begins `finished `:
+
+```
+static func _resolved_by(journal: PackedStringArray, who: String) -> int:
+    var found := 0
+    for line in journal:
+        if _who_of(line) == who and _what_of(line).begins_with("finished "):
+            found += 1
+    return found
+```
+
+A turn the world refused finishes, and so does a turn the catalogue faulted. This
+is not read off the code alone — the cloud replay that still ships prints it. Run
+`./run_agent.sh` against the checked-in recording and its journal carries
+
+```
+t= 89  Rook   finished go_to() -> go_to refused: go_to needs target or offset
+```
+
+which is one of Rook's $18$. That turn has no `began` line at all: it is chosen
+and finished on tick $89$, taking no world time, and Rook is asked again on the
+same tick. So the column counts turns that ran to a finish, not turns that
+changed the world, and an arm the catalogue faults heavily scores well on it. The
+measure that does mean the world changed is the engine's own **ok** verdict,
+which is the column beside it.
+
+**The ratios on this page are unaffected and are not restated.** A share taken
+within one arm is already a rate: `qwen3:4b-instruct`'s $26$ distinct lines of
+$47$, `qwen2.5:3b-instruct`'s $134$ recalls of $137$, its $0$ faulted of $40$
+turns. Being asked more often changes the numerator and the denominator
+together, so a ratio survives the confound that a count does not. The
+orchestrator figures in Table C are unaffected for a different reason: every arm
+got exactly five looks, so those denominators are equal by construction and not
+set by latency.
+
+**Whether the per-character column could be rebuilt on the ok verdict was
+settled by looking, and for nine of the ten arms it cannot be.** What survives
+per arm is what is printed above plus, in the evidence file, one ok/fault/refusal
+split for the arm as a whole; per character the evidence file records only calls,
+answers and finished turns. The per-call recordings that would carry the rest
+were written into the scratchpad of the session that made the pass and deleted
+with it: that directory is gone, and every other scratchpad still on this
+machine was listed this cycle — four of them, $4$ to $16$ KB apiece, holding two
+ollama manifest shells with no blobs, one roster file and one empty directory —
+with no `model_recording*.gd` anywhere under `/tmp`. **The
+cloud arm is the exception**, because its recording is the one checked in: replay
+it and count, and its five model-driven characters have $64$ finished lines of
+which $60$ report `ok` — Rook $17$ of $18$, Bram $10$ of $11$, Sable $10$ of
+$11$, Odo $8$ of $8$, Pell $15$ of $16$ — the four that do not matching the
+evidence file's $1$ fault and $3$ world refusals exactly. One arm restated is not
+a comparison, which is why the cross-arm sentence below is dropped rather than
+redone. Rebuilding the other nine means re-running them: $85$ minutes $34$
+seconds of wall clock by the evidence file's own timestamps, plus re-pulling
+about $26$ GB of weights, and it would produce a *different* pass whose cells
+could not be set beside the ones already published — the same objection that
+struck Table A's eleventh column. It was not spent.
+
+**The sweep, so a reader can tell it happened.** Every sentence of the page was
+searched rather than recalled, counted on the version this correction opened
+against (commit `75590cb`): $131$ prose sentences, of which $44$ carry a number.
+All $131$ were read; all $44$ were classed.
+
+The word *resolved* occurred nine times. One is `ollama`'s "manifest resolves"
+and means something else; it is left alone. The other eight are the
+finished-lines sense and every one is handled: the Table B column heading is
+renamed; three "resolved nothing" / "no resolved action" phrases now say
+*finished*; the cross-arm ranking "the arm with the most resolved turns of any
+local model … is the slowest local arm" is replaced by the ok share; the
+per-character coverage sentence is dropped; and the two carrying the third
+recommendation are quoted only as the figures being withdrawn.
+
+Five sentences ranked arms against each other on a raw count, and all five are
+gone or restated. Two are the ones this correction was opened for, both in the
+third recommendation: `gemma3n:e4b` "resolved more turns than any other local arm
+($55$ of $96$)" and "gave its least-served character $10$ turns, more than the
+cloud model gave its own ($8$)". The third is the same least-served comparison
+made again in the paragraph beginning *Per-character coverage*. The fourth is the
+recommendation's own re-read paragraph, which repeated "$55$ resolved turns of
+$96$" as a reason. The fifth is "the arm with the most resolved turns of any
+local model … is the slowest local arm" — which carries no digit at all, and is
+the reason the sweep read all $131$ sentences and not only the numbered ones. One
+further sentence gave raw counts across arms without ranking them — "two other
+arms hit the same guard, `granite4:micro` $22$ times and `llama3.2:1b` $5$ times"
+— and now gives each against that arm's own turns.
+
+The remaining numbered sentences either carry their own denominator, describe a
+single arm, or concern the card, the runtime, the absences or the determinism
+check. None of them ranks arms on a count.
 
 ### C — the orchestrator, and what the card was doing
 
@@ -242,25 +347,48 @@ its own.** The three fastest arms are `llama3.2:1b` ($0.172$ s), `qwen2.5:3b-ins
 ($0.192$ s) and `granite4:micro` ($0.197$ s), and they are three of the four
 worst-behaved: `llama3.2:1b` had $67$ of its $127$ turns faulted and $25$ more
 unreadable; `qwen2.5:3b-instruct` chose an action on $3$ turns of $122$; and
-`granite4:micro` left one character with no resolved action at all. Meanwhile
-the arm with the most resolved turns of any local model, `gemma3n:e4b`, is the
-slowest local arm.
+`granite4:micro` left one of its five characters with no finished turn at all.
+The converse is not true either, and it cannot be put as a count: the two local
+arms with the best **ok** share, `qwen3:4b-instruct` and `llama3.2:3b` (both $25$
+of $40$, $63\%$), sit in the middle of the speed column at $0.212$ and $0.202$ s,
+and the slowest local arm, `gemma3n:e4b` at $0.708$ s, comes third on that share
+($55$ of $96$, $57\%$). Speed and behaviour are simply unrelated here.
 
 **The recall loop is real, it reproduced, and the budget is holding it.**
 `qwen2.5:3b-instruct` spent $134$ of the shipped run's $137$ questions on the
-`recall` tool — $98\%$ — and four of its five characters resolved nothing, which
-is the failure shape recorded when this model was first tried. The guard added
-by the tool-budget work fired $105$ times in that run ("*has already asked 2
-things of no world time since it last acted; this one costs it a turn*"), so the
+`recall` tool — $98\%$ — and four of its five characters finished nothing at all,
+clean or otherwise, which is the failure shape recorded when this model was
+first tried. The guard added by the tool-budget work fired $105$ times in that
+run ("*has already asked 2 things of no world time since it last acted; this one
+costs it a turn*"), so the
 loop now costs the world time instead of being free. It does not cure the model:
 the character still asks. Two other arms hit the same guard, `granite4:micro`
-$22$ times and `llama3.2:1b` $5$ times.
+$22$ times in its $61$ turns and `llama3.2:1b` $5$ times in its $127$.
 
-**Per-character coverage separates arms that look similar in aggregate.** The
-cloud model resolves $8$ turns for its least-served character; the best local
-arms are `gemma3n:e4b` with $10$ and `qwen3:4b-instruct` with $6$. Two local arms
-leave a character on zero: `qwen2.5:3b-instruct` leaves four of five on zero, and
-`granite4:micro` leaves Odo on zero.
+**Per-character coverage: what the evidence supports is whether an arm served
+all five characters at all, and not how many turns each of them got.** The
+comparison this paragraph used to make — the cloud model's least-served character
+on $8$ finished turns against `gemma3n:e4b`'s $10$ — has been dropped, for two
+reasons that compound. It set a nearly-clean count against a heavily faulted one:
+across the whole run the engine called $63$ of the cloud arm's $69$ turns **ok**,
+with $1$ catalogue fault and $3$ world refusals, while it called $55$ of
+`gemma3n:e4b`'s $96$ turns ok with $41$ catalogue faults — so a "finished turn"
+means something different in each column. And it set a count from a $1.874$ s arm
+against a count from a $0.708$ s arm, which the note under Table B says cannot be
+done. Restating it per character on the **ok** verdict is not possible for
+`gemma3n:e4b` or for any of the other eight local arms, for the reason set out
+under Table B: no surviving file carries a per-character verdict split for them.
+The cloud arm alone can be recounted that way, off the recording that is checked
+in, and one arm recounted is not a comparison.
+
+What survives, and is untouched by both problems, is the zeroes — a character
+with no finished turn has no clean turn either, whatever the arm's latency.
+`qwen2.5:3b-instruct` leaves four of its five characters on zero and
+`granite4:micro` leaves Odo on zero; every other arm, cloud and local, gave all
+five characters at least one turn that ran to a finish. Beside that, the honest
+cross-arm figure is the ok share of each arm's own turns, which Table B now
+carries: cloud $91\%$, then `qwen3:4b-instruct` and `llama3.2:3b` at $63\%$,
+`gemma3n:e4b` at $57\%$, and the rest at $32\%$ and below.
 
 **The orchestrator is where the local arms fail worst.** Two of the nine
 (`nemotron-3-nano:4b`, `qwen2.5:3b-instruct`) answer `nothing` to all five looks,
@@ -348,8 +476,9 @@ nine reported `100% GPU` with all its layers offloaded.
 
 **Yes, a local model is worth running this game against — for live and soak runs
 and for shaking out prompt changes, and not for anything that gets checked in.**
-Which one depends on what you are asking it to do, and one of the three answers
-depends on the card staying free.
+Which one depends on what you are asking it to do. There were three answers here
+and there are now two: the third was carried by a raw turn count, and it did not
+survive being restated as a rate.
 
 * **Characters, and it survives the card being taken back:
   `qwen3:4b-instruct`.** It is the only local arm whose answers the catalogue
@@ -369,29 +498,43 @@ depends on the card staying free.
   anybody real. Two arms answer `nothing` five times of five, and three more
   name operations in shapes the engine reads nothing from. `llama3.2:3b` costs
   $3{,}132$ MiB, so it survives too.
-* **Volume, only while the card is free: `gemma3n:e4b`.** It resolved more turns
-  than any other local arm ($55$ of $96$) and gave its least-served character
-  $10$ turns, more than the cloud model gave its own ($8$). But it takes
-  $7{,}944$ MiB — the one arm in this table that would not have fitted before the
-  pause — and it hands the prompt's `#<id>` slot name back $23$ times. Both
-  Gemma sizes are also the two slowest local arms, at $0.620$ and $0.708$ s.
+* **Volume: withdrawn. `gemma3n:e4b` was recommended on two numbers that have
+  since been restated, and it does not survive the restatement.** The two were
+  that it "resolved more turns than any other local arm ($55$ of $96$)" and that
+  it "gave its least-served character $10$ turns, more than the cloud model gave
+  its own ($8$)". The first quoted the engine's **ok** count under the word
+  *resolved* and then ranked it against other arms as a raw count; as a share of
+  its own turns it is $55$ of $96$, $57\%$, which is *third* among the local arms
+  and behind `qwen3:4b-instruct` and `llama3.2:3b` at $25$ of $40$ ($63\%$) —
+  both of which are already recommended above. The second compared a
+  per-character count from a $0.708$ s arm with one from a $1.874$ s arm, and no
+  surviving file carries a per-character ok count that would let it be redone
+  properly. Nothing is left underneath: `gemma3n:e4b` also has the least varied
+  answers of any arm on this page ($8$ distinct lines in $110$ questions, against
+  `qwen3:4b-instruct`'s $26$ in $47$), it faulted $41$ of its $96$ turns, it
+  hands the prompt's `#<id>` slot name back $23$ times, and at $7{,}944$ MiB it is
+  the one arm here that would not have fitted before the neighbouring queue was
+  paused. **There is no volume recommendation, and no arm is recommended on the
+  strength of having taken many turns.**
 * **Nothing is recommended on speed, and the fastest arms are disqualified on
   behaviour.** `llama3.2:1b` ($0.172$ s) faulted $67$ of $127$ turns and left
   $25$ more unreadable. `qwen2.5:3b-instruct` ($0.192$ s) chose an action on $3$
-  turns of $122$ and left four characters of five with nothing resolved.
+  turns of $122$ and left four characters of five with nothing finished at all.
   `granite4:micro` ($0.197$ s) left one character on zero. Speed is not the
   scarce thing here; a readable, varied answer is.
 
-**Re-read against the table with the cold-load column gone, none of this moves,
-and here is why.** Every reason given above is a ratio or a count, not a peak
-latency: `qwen3:4b-instruct` is recommended for characters on $0$ faulted and
-$0$ unreadable of $40$ turns and $26$ distinct lines of $47$; `llama3.2:3b` for
-the orchestrator on $12$ operations named, $4$ carried out and one spawn written
-into a persona; `gemma3n:e4b` for volume on $55$ resolved turns of $96$ and
-$7{,}944$ MiB. The only latency figure any of them rests on is the median —
-$0.620$ and $0.708$ s for the two Gemma sizes — and the median is in the
-evidence file and does not change when one call of a pass is a weight load. The
-recommendation stands as written, for the reasons it was written for.
+**Re-read against the table as it now stands, two of the three hold and the
+third is gone, and here is why.** The two that hold rest on shares taken within
+one arm, which the counts-are-rates note above leaves untouched:
+`qwen3:4b-instruct` is recommended for characters on $0$ faulted and $0$
+unreadable of $40$ turns and $26$ distinct lines of $47$; `llama3.2:3b` for the
+orchestrator on $12$ operations named of the five looks every arm got equally,
+$4$ carried out, and one spawn written into a persona. Neither rests on a raw
+turn count, and neither rests on a peak latency — the only latency figure either
+touches is the median, which is in the evidence file and does not move when one
+call of a pass is a weight load. The third, `gemma3n:e4b` for volume, rested on
+exactly the two numbers this correction restated, and is withdrawn above rather
+than repaired.
 
 **No local arm is fit for the recording that ships, and none is proposed for it.**
 Every column that matters is still far behind the cloud model: distinct lines

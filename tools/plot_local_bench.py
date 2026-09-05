@@ -4,8 +4,10 @@
 Two panels over the same ten arms of the side-by-side comparison, in the order
 the table lists them. Left: median seconds a decision, which is the axis every
 local arm wins on. Right: what the engine made of each arm's turns, as a share
-of that arm's own turns -- resolved, refused by the world, faulted by the
-catalogue, nothing readable, and turns spent on a tool rather than an action.
+of that arm's own turns -- ok, refused by the world, faulted by the catalogue,
+nothing readable, and turns spent on a tool rather than an action. The share is
+the point: a faster arm is asked more often in the same 160 ticks, so the raw
+counts are not comparable across arms and are not drawn.
 The point of putting them side by side is that the two do not line up: the
 fastest arms are among the worst-behaved.
 
