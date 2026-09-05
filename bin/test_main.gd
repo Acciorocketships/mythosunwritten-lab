@@ -32,6 +32,7 @@ const SUITES := [
 	preload("res://tests/test_effects.gd"),
 	preload("res://tests/test_actions.gd"),
 	preload("res://tests/test_control_loop.gd"),
+	preload("res://tests/test_walk_motion.gd"),
 	preload("res://tests/test_observation.gd"),
 	preload("res://tests/test_scenario.gd"),
 	preload("res://tests/test_agent.gd"),

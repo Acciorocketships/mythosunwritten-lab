@@ -223,6 +223,20 @@ var asks_taken: Dictionary = {}
 ## exactly as it would not ask a character part-way through an action.
 var spent_until: Dictionary = {}
 
+## The walk each character is part-way through, by id.
+##
+## A `go_to` is the one action whose effect is a journey rather than an instant,
+## so it is the one action that is part-way done while its span runs. This is
+## where that half-finished journey is kept between one tick and the next:
+## `ControlLoop` advances it a stride a tick and `ActionEngine._go_to` finishes
+## it, and both reach it through `ActionEngine.walk_under_way` so there is one
+## walk per character rather than one per caller.
+##
+## It sits beside `idle_until` and `spent_until` for the same reason those do:
+## it is something the world remembers about a character between two calls, and
+## the engine is static.
+var walks: Dictionary = {}
+
 ## Every such ask the world has refused, in order:
 ## `{"id": id, "tick": int, "why": String}`. The world's own account of what it
 ## charged whom, written by `ToolBudget` and read by whatever wants to report it.
@@ -616,6 +630,23 @@ func clear_asks(id: int) -> void:
 ## number back into it.
 func keep_asks(id: int, count: int) -> void:
 	asks_taken[id] = maxi(0, count)
+
+
+## The walk a character is part-way through, or null.
+func walk_of(id: int) -> Walk:
+	return walks.get(id, null)
+
+
+## Remember the walk a character is part-way through.
+func set_walk(id: int, leg: Walk) -> void:
+	walks[id] = leg
+
+
+## Forget it: the walk was resolved, or abandoned where it had reached. Either
+## way the character stays where it actually got to -- a walk is not undone by
+## being given up on.
+func clear_walk(id: int) -> void:
+	walks.erase(id)
 
 
 ## Which tick a character stands until, having spent a turn on one of those.

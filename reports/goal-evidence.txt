@@ -11,15 +11,16 @@ the same moment, four times
   prompt outside its goals   identical in all four arms: yes
   so the only thing that differs between the arms is what the character is after
 
-arm: no goal -- prompt a2a5e1e44a3ae219
+arm: no goal -- prompt d23f02e17e83d00d
   what it is after, as the prompt carried it:
     What you are after: nothing in particular.
   what the world answered about each, before the question:
     (it is after nothing, so there was nothing to answer)
   the model said:     say text="what bargain do you offer?" target=#1
   which read back as: say(text="what bargain do you offer?" target=1)
+  note: this reply was recorded for another question: the prompt put here fingerprints d23f02e17e83d00d and the recorded one a2a5e1e44a3ae219
 
-arm: the empty stall -- prompt 4385c3db379e6198
+arm: the empty stall -- prompt 077b3f0c0277c982
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short be at (-471.0, 416.0)                          the world says when this one is done
@@ -27,8 +28,9 @@ arm: the empty stall -- prompt 4385c3db379e6198
     be at (-471.0, 416.0)                          not yet -- 7.8 from (-471.0, 416.0)
   the model said:     go_to offset=(5.0, -6.0)
   which read back as: go_to(offset=(5.000, -6.000))
+  note: this reply was recorded for another question: the prompt put here fingerprints 077b3f0c0277c982 and the recorded one 4385c3db379e6198
 
-arm: a trade with Rook -- prompt b54959b49794a7c1
+arm: a trade with Rook -- prompt f0f460a6b3dab19c
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short have traded with #2                            the world says when this one is done
@@ -36,8 +38,9 @@ arm: a trade with Rook -- prompt b54959b49794a7c1
     have traded with #2                            not yet -- no trade of its has been honoured
   the model said:     trade_propose target=#2 give_money=9 want=[an axe]
   which read back as: trade_propose(target=2 give_money=9 want=[an axe])
+  note: this reply was recorded for another question: the prompt put here fingerprints f0f460a6b3dab19c and the recorded one b54959b49794a7c1
 
-arm: thought well of here -- prompt d8e8e038403335f2
+arm: thought well of here -- prompt 330c80554af6f74e
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  long  be thought well of in this market              answer `done goal=1` when you judge it done
@@ -45,6 +48,7 @@ arm: thought well of here -- prompt d8e8e038403335f2
     be thought well of in this market              not yet -- nothing in the world answers this one
   the model said:     say text=a fair bargain, agreed target=#1
   which read back as: say(text=a fair bargain, agreed target=1)
+  note: this reply was recorded for another question: the prompt put here fingerprints 330c80554af6f74e and the recorded one d8e8e038403335f2
 
 what the goals changed
   two columns, because the two are different claims: a different action, and a different

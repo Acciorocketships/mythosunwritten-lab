@@ -158,63 +158,118 @@ static func _cannot_act(scene: ActionScene, actor: Combatant) -> String:
 ## Walk to a position, or to whatever has an id: an item lying on the ground, a
 ## chest, another character.
 ##
-## The walk is taken in steps of the character's own speed, each step settled
+## The walk is taken in strides of the character's own speed, each stride settled
 ## onto whatever surface is under it -- the same one-hop settle a combatant
 ## walking the overworld uses, so walking into a floating island's rim carries
-## you up onto it here exactly as it does there. A step onto ground nothing can
+## you up onto it here exactly as it does there. A stride onto ground nothing can
 ## stand on stops the walk where it stands and says so.
+##
+## **Most of those strides have already been taken by the time this runs.** A
+## walk is the one action whose effect is a journey, and `ControlLoop` advances
+## it one stride per tick while the span it charged for runs out, so what this
+## resolution does is finish whatever is left and report the whole of it. A walk
+## that fitted inside its span finds itself already arrived and reports the
+## strides the span took; one aimed further than the span covers walks the rest
+## here. Either way the strides are the same strides in the same order -- there
+## is one `Walk.stride` and both callers turn it -- so where a character ends up
+## is exactly where it ended up before this was spread over the span.
 ##
 ## The place is named one of the catalogue's three ways: a world position, an
 ## offset from wherever the character is standing, or the id of something to walk
-## to. The offset is worked out here and nowhere else, because it is only a place
-## once there is a character standing somewhere, and a chosen action holds no
-## world. It is measured from where the character stands when the walk *starts*,
-## which is the same moment the other two are measured from.
+## to. The offset is worked out in `aim()` and nowhere else, because it is only a
+## place once there is a character standing somewhere, and a chosen action holds
+## no world. It is measured from where the character stands when the walk
+## *starts*, which is the same moment the other two are measured from -- and now
+## that the walk is lived through, "starts" is the first tick of its span rather
+## than its last.
 static func _go_to(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
 	if scene.is_fighting(actor):
 		return ActionOutcome.failed(action.kind, "the board decides where a fighter goes")
-	var to := action.target_position()
-	var arrive := ARRIVE
-	var what := "the position"
-	if action.names_an_offset():
-		to = Vector2(actor.x, actor.z) + action.offset()
-	elif not action.targets_a_position():
-		var thing: Variant = scene.thing_of(action.target_id())
-		if thing == null:
-			return ActionOutcome.failed(
-				action.kind, "there is nothing with id %d" % action.target_id())
-		to = ActionScene.position_of(thing)
-		arrive = REACH
-		what = ActionScene.name_of(thing)
-
-	var walked := 0.0
-	var steps := 0
-	var stride := maxf(actor.speed, STEP)
-	while _distance_from(actor, to) > arrive:
-		if steps >= MAX_STEPS:
-			return ActionOutcome.failed(action.kind, "%s is too far to walk to at once" % what, {
-				"walked": snappedf(walked, 0.001), "steps": steps,
-			})
-		var here := Vector2(actor.x, actor.z)
-		var gap := to - here
-		var next := here + gap.normalized() * minf(stride, gap.length())
-		if scene.terrain != null and not scene.terrain.is_passable_at(next.x, next.y):
-			return ActionOutcome.failed(action.kind, "the way to %s is blocked" % what, {
-				"blocked_at": next, "walked": snappedf(walked, 0.001), "steps": steps,
-			})
-		walked += here.distance_to(next)
-		actor.x = next.x
-		actor.z = next.y
-		actor.settle(scene.terrain) if scene.terrain != null else null
-		steps += 1
-
+	var leg := walk_under_way(scene, actor, action)
+	while leg.stride(actor, scene.terrain, _stride_of(actor), MAX_STEPS):
+		pass
+	scene.clear_walk(actor.id)
+	if leg.refusal != "":
+		return ActionOutcome.failed(action.kind, leg.refusal)
+	if leg.overrun:
+		return ActionOutcome.failed(
+			action.kind, "%s is too far to walk to at once" % leg.what, leg.tally())
+	if leg.blocked:
+		return ActionOutcome.failed(action.kind, "the way to %s is blocked" % leg.what, {
+			"blocked_at": leg.blocked_at, "walked": leg.tally()["walked"],
+			"steps": leg.steps,
+		})
 	return ActionOutcome.done(action.kind, {
 		"at": Vector2(actor.x, actor.z),
-		"walked": snappedf(walked, 0.001),
-		"steps": steps,
+		"walked": leg.tally()["walked"],
+		"steps": leg.steps,
 	})
+
+
+## The walk a character is part-way through, aimed now if it has not begun.
+##
+## Kept on the scene under the character's id, beside the other things the world
+## remembers per character between one call and the next. Both callers come
+## through here -- the control loop advancing a stride and the resolution
+## finishing the walk -- so there is one walk per character and not one per
+## caller, and the tally the outcome reports covers every stride either of them
+## took.
+static func walk_under_way(
+	scene: ActionScene, actor: Combatant, action: Action
+) -> Walk:
+	var leg := scene.walk_of(actor.id)
+	if leg != null and leg.of_action == action.line():
+		return leg
+	leg = aim(scene, actor, action)
+	scene.set_walk(actor.id, leg)
+	return leg
+
+
+## Where a chosen `go_to` is headed, worked out from where the character stands.
+##
+## The catalogue's three ways of naming a place, read in one function: a world
+## position, an offset from here, or the id of something to walk to. A thing is
+## arrived at within `REACH` rather than `ARRIVE`, because standing on somebody
+## is not arriving at them.
+static func aim(scene: ActionScene, actor: Combatant, action: Action) -> Walk:
+	var line := action.line()
+	if action.names_an_offset():
+		return Walk.toward(
+			Vector2(actor.x, actor.z) + action.offset(), ARRIVE, "the position", line)
+	if action.targets_a_position():
+		return Walk.toward(action.target_position(), ARRIVE, "the position", line)
+	var thing: Variant = scene.thing_of(action.target_id())
+	if thing == null:
+		return Walk.refused("there is nothing with id %d" % action.target_id(), line)
+	return Walk.toward(
+		ActionScene.position_of(thing), REACH, ActionScene.name_of(thing), line)
+
+
+## Carry whatever a character is part-way through one tick further.
+##
+## Called once per tick by `ControlLoop` for every character with something
+## committed. Only a walk has anything to do here -- every other action in the
+## catalogue happens at a point and its span is time spent getting to that point
+## -- so this is a walk taking one stride and, for everything else, nothing at
+## all. Nobody on a board walks: a fighter's position is the board's to say, and
+## the resolution refuses a fighter's `go_to` for the same reason.
+static func advance(scene: ActionScene, actor: Combatant, action: Action) -> void:
+	if scene == null or actor == null or action == null:
+		return
+	if action.kind != ActionCatalog.GO_TO or ActionCatalog.fault(action) != "":
+		return
+	if actor.piece == null or not actor.piece.is_alive() or scene.is_fighting(actor):
+		return
+	var leg := walk_under_way(scene, actor, action)
+	leg.stride(actor, scene.terrain, _stride_of(actor), MAX_STEPS)
+
+
+# How far one stride of a walk covers: the character's own speed, or `STEP` for
+# one that has none of its own.
+static func _stride_of(actor: Combatant) -> float:
+	return maxf(actor.speed, STEP)
 
 
 # --- jump -----------------------------------------------------------------

@@ -57,13 +57,12 @@ const CLIPS := [CLIP_IDLE, CLIP_WALK, CLIP_RUN, CLIP_JUMP, CLIP_HIT, CLIP_DEATH]
 # snapshot's motion is in. They were chosen against a placeholder observer that
 # walked a steady 0.9 units a tick, between the two speed thresholds.
 #
-# The world no longer moves anything at a steady rate: the view follows a
-# character, and a character covers a whole walk on the one tick that walk is
-# resolved, so the speed a snapshot carries is a leg on one tick in twenty and
-# zero on the rest. Nothing here compensates for that, because a threshold that
+# The world does move at that rate again. A walk is spread over the ticks its
+# span costs -- one stride of `ActionEngine.STEP` a tick -- so a character under
+# a `go_to` reports 0.9 units a tick for the whole of it and lands squarely
+# between the two thresholds, which is what they were chosen against. Nothing
+# here compensates for anything, and nothing here needs to: a threshold that
 # tried to would be this layer holding an opinion about how the world moves.
-# What the world needs is for a walk to happen over the ticks it costs; until it
-# does, the thresholds stand where they are and read what they are given.
 
 ## Below this a character is standing still. Not zero, because a character
 ## shuffling a hair per tick is standing, and because a threshold at exactly zero

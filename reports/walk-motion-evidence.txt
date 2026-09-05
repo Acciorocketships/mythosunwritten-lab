@@ -1,0 +1,266 @@
+A walk that happens while it happens -- evidence for W-walk-motion, cycle 192.
+
+Every block below is a command run from the project root on this machine,
+headless, with no display and no network. "before" is the tree at 424edcc with
+the four changed sim/render files stashed; "after" is the tree as it stands.
+
+==============================================================================
+1. tick against position, over one whole walk
+==============================================================================
+
+  ./tools/measure_walk.sh --ticks 44
+
+Seed 1234. The world stands up its ordinary cast of three wanderers and looks
+through the first of them, Pip. Pip commits `go_to(target=(17.566, 3.927))` on
+tick 1; the catalogue says a `go_to` costs 20 ticks. The columns are the ones
+`CombatantRoster.snapshot()` hands the render shell -- x, z, and `speed`, which
+is how far the character actually got on that tick -- and the clip
+`CharacterView.clip_for` picks from that snapshot and nothing else.
+
+  tick   before: x, z, speed, clip          after: x, z, speed, clip
+     0      0.000     0.000   0.000 Idle_A                 0.000     0.000   0.000 Idle_A          
+     1      0.000     0.000   0.000 Idle_A                 0.000     0.000   0.000 Idle_A          
+     2      0.000     0.000   0.000 Idle_A                 0.878     0.196   0.900 Walking_A       
+     3      0.000     0.000   0.000 Idle_A                 1.757     0.393   0.900 Walking_A       
+     4      0.000     0.000   0.000 Idle_A                 2.635     0.589   0.900 Walking_A       
+     5      0.000     0.000   0.000 Idle_A                 3.513     0.785   0.900 Walking_A       
+     6      0.000     0.000   0.000 Idle_A                 4.392     0.982   0.900 Walking_A       
+     7      0.000     0.000   0.000 Idle_A                 5.270     1.178   0.900 Walking_A       
+     8      0.000     0.000   0.000 Idle_A                 6.148     1.374   0.900 Walking_A       
+     9      0.000     0.000   0.000 Idle_A                 7.027     1.571   0.900 Walking_A       
+    10      0.000     0.000   0.000 Idle_A                 7.905     1.767   0.900 Walking_A       
+    11      0.000     0.000   0.000 Idle_A                 8.783     1.963   0.900 Walking_A       
+    12      0.000     0.000   0.000 Idle_A                 9.662     2.160   0.900 Walking_A       
+    13      0.000     0.000   0.000 Idle_A                10.540     2.356   0.900 Walking_A       
+    14      0.000     0.000   0.000 Idle_A                11.418     2.552   0.900 Walking_A       
+    15      0.000     0.000   0.000 Idle_A                12.297     2.749   0.900 Walking_A       
+    16      0.000     0.000   0.000 Idle_A                13.175     2.945   0.900 Walking_A       
+    17      0.000     0.000   0.000 Idle_A                14.053     3.141   0.900 Walking_A       
+    18      0.000     0.000   0.000 Idle_A                14.931     3.338   0.900 Walking_A       
+    19      0.000     0.000   0.000 Idle_A                15.810     3.534   0.900 Walking_A       
+    20      0.000     0.000   0.000 Idle_A                16.688     3.730   0.900 Walking_A       
+    21     17.566     3.927  18.000 Jump_Full_Short       17.566     3.927   0.900 Walking_A       
+    22     17.566     3.927   0.000 Idle_A                18.396     4.276   0.900 Walking_A       
+    23     17.566     3.927   0.000 Idle_A                19.225     4.626   0.900 Walking_A       
+    24     17.566     3.927   0.000 Idle_A                20.055     4.975   0.900 Walking_A       
+    25     17.566     3.927   0.000 Idle_A                20.884     5.325   0.900 Walking_A       
+
+The walk ends in the same place either way, and the engine's own answer is
+word-for-word the same:
+
+  before   t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
+  after    t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
+
+Eighteen units at 0.9 a stride is twenty strides, and a `go_to` costs twenty
+ticks, so the span takes every stride the walk needed and the resolution
+finishes nothing. A walk aimed further than its span reaches -- Odo's 42-unit
+leg in the five-character scenario -- takes twenty strides in the span and the
+remaining twenty-seven in the resolution, and lands in the same place it always
+did.
+
+==============================================================================
+2. the speed the render layer is handed, and the clip it picks
+==============================================================================
+
+  ./tools/measure_motion.sh --ticks 400
+
+Which of the six clips the rule reaches, counted rather than argued, over 400
+ticks of the seed-1234 world. The numbers come out of `SimWorld.snapshot()`.
+
+  before
+  
+  motion seed=1234 ticks=400 speed<=18.000 rise=[-15.359,+7.952] hop>=0.60
+    Idle_A              382   95.3%
+    Walking_A             0    0.0%
+    Running_A            11    2.7%
+    Jump_Full_Short       8    2.0%
+    Hit_A                 0    0.0%
+    Death_A               0    0.0%
+  after
+  
+  motion seed=1234 ticks=400 speed<=0.900 rise=[-0.854,+1.088] hop>=0.60
+    Idle_A                2    0.5%
+    Walking_A           395   98.5%
+    Running_A             0    0.0%
+    Jump_Full_Short       4    1.0%
+    Hit_A                 0    0.0%
+    Death_A               0    0.0%
+
+Before, the character stands still 95.3% of the time and the four ticks it does
+move are read as a run or a hop, because eighteen units in one tick is not a
+walk by any threshold. After, it walks 98.5% of the time at 0.900 units a tick,
+which is where `CharacterView.WALK_SPEED` (0.05) and `RUN_SPEED` (1.30) were
+placed. Nothing in the render layer was tuned to make this happen; the
+thresholds are the ones that were already there.
+
+==============================================================================
+3. the built shell, driven headless
+==============================================================================
+
+  xvfb-run -a ./tools/grass_film.sh --out reports/assets/walk-frames \
+      --frames 6 --stride 24 --warm 120 --seed 1234 \
+      --camera 0 7 11 --aim 2 --focus 12
+
+Six frames of the real render shell, 24 drawn frames apart, seed 1234, ticks 0
+to 159 (`render-shell stop tick=159 frames=240 ... pieces=3`). This machine has
+no display, so the shell is run under xvfb; nothing else about it is changed.
+The frames are reports/assets/walk-frames/frame_001.png .. frame_006.png. The
+followed character is on its feet and mid-stride in each, the camera is behind
+it, and the ground under it moves on from frame to frame -- the camera crosses
+the distance rather than cutting to the end of it.
+
+The camera's own motion is the last column of section 1: `observer_speed`, which
+is what the shell's follow camera is moved by, reads 0.900 on every tick of a
+walk after the change and 18.000 on one tick in twenty before it.
+
+==============================================================================
+4. determinism
+==============================================================================
+
+  ./run_headless.sh --seed 1234 --ticks 200 > a.txt
+  ./run_headless.sh --seed 1234 --ticks 200 > b.txt
+  cmp a.txt b.txt
+
+Two processes, one seed, 200 ticks: byte-identical.
+
+  sha256  cc8bb4bfb82a800ac73b3795f822491eda07781f8a5d26def0cf59e5814cd7bb  (both)
+  final fingerprint  efab1f61f1c6689f
+
+Where a walk ends is unchanged by construction rather than by measurement: the
+strides taken during the span and the strides taken by the resolution are the
+same `Walk.stride` calls in the same order, so `tests/test_walk_motion.gd`
+compares the spread walk against the same walk resolved in one call and requires
+the coordinates to be equal exactly, not within a tolerance.
+
+The seed-1234 100-tick world fingerprint moved:
+
+  before  5014980a58150055
+  after   baac1b9efedf472a
+
+It moved because the cast is somewhere different on every tick of a walk, so the
+ground streamed around it, the islands loaded and the props grown all differ
+from tick to tick. It is a different world state at tick 100, reached the same
+way twice.
+
+==============================================================================
+5. a walk interrupted part-way
+==============================================================================
+
+From reports/scenario-evidence.txt, seed 1234. Wren sets off for the pile (#6)
+at tick 6 and is spoken to at tick 11, five ticks into a twenty-tick walk:
+
+  t=  6  Wren   began go_to(target=6), 20 ticks
+  t= 11  Wren   interrupted (spoken to), abandoned go_to(target=6) 5/20t
+  t= 11  Wren   began go_to(target=6), 20 ticks
+  t= 31  Wren   finished go_to(target=6) -> go_to ok at=(-473.400, 416.000) walked=8.1 steps=9
+
+Before, the second walk covered 12.6 units in 14 strides, because the first had
+moved Wren nowhere. After, it covers 8.1 in 9, because the first walk had
+already carried her 4.5 units -- five strides of 0.9 -- toward the pile. The two
+add to 12.6 either way, and she arrives at the same (-473.400, 416.000).
+
+The abandoned walk still never reaches the engine: `ControlLoop.actions_of`
+counts it as nothing, and the suite checks that. What changed is that giving up
+on a walk half way now leaves the character half way, which is what happened.
+
+==============================================================================
+6. one movement implementation, found by scanning
+==============================================================================
+
+`tests/test_walk_motion.gd` reads every `.gd` file under sim/, render/, bin/,
+net/, tools/ and tests/ and collects every line that *adds to* a combatant's
+ground coordinates. Advancing a position adds; putting somebody down at one
+sets, and every other place in the project that touches those fields sets them.
+The scan finds four lines in two files and the suite requires exactly that:
+
+  res://sim/combatant.gd:145 x += cos(heading) * speed     the drift along a heading
+  res://sim/combatant.gd:146 z += sin(heading) * speed
+  res://sim/walk.gd:131 actor.x += step.x                  the stride toward a place
+  res://sim/walk.gd:132 actor.z += step.y
+
+`ActionEngine._go_to` holds no step arithmetic of its own any more: it aims a
+`Walk` and turns `Walk.stride` until it stops returning true. `ControlLoop`
+calls the same `Walk.stride`, once per tick. The scan is then run over a planted
+line that would break the claim, and must catch it.
+
+The scan also reaches the suites, where it finds six lines shifting a fixture
+along to set a case up (test_water, test_observation, test_combat_snap,
+test_player_actions). Those are named separately rather than hidden.
+
+==============================================================================
+7. what this moved, and what it did not
+==============================================================================
+
+Re-recorded with this change, because the world they record now walks:
+
+  reports/scenario-evidence.txt   ./run_scenario.sh
+  reports/agent-evidence.txt      ./run_agent.sh
+  reports/lesson-evidence.txt     ./run_lesson.sh
+  reports/goal-evidence.txt       ./run_goal.sh
+  reports/world-evidence.txt      ./run_world.sh
+  reports/live-world-evidence.txt ./run_headless.sh --ticks 60
+  reports/decision-plan-evidence.txt  tools/critic_recorded_drain_probe.gd
+                                      (a re-take appended, the earlier two kept)
+
+Unchanged, and checked rather than assumed:
+
+  reports/check-evidence.txt      ./run_check.sh -- byte-identical
+  reports/combat-snap-evidence.txt and reports/dice-encounter-evidence.txt --
+    ./run_encounter.sh holds no control loop and resolves no `go_to`, so nothing
+    here can reach it. (Both were already behind the tree for an unrelated
+    reason before this change; that is not this change's to fix.)
+
+Not re-recordable here, and named:
+
+  reports/agent-live-evidence.txt -- a `--live` run against a real model.
+  reports/position-space-evidence.txt -- already behind the recording that ships
+    (it quotes the exchange of 2026-09-04, 85 replies; the tree carries the one
+    of 2026-09-05, 87 replies), and it is a narrative with dated captures rather
+    than a transcript.
+  reports/board-overlay-suite-evidence.txt -- a dump of the whole suite, already
+    behind it (46 suites against 51), and the suite does not pass clean right now
+    for the reason in section 8.
+
+README.md's model-layer numbers were re-taken off the re-recorded transcripts;
+`./tools/readme_model_numbers.sh` passes 48 of 48.
+
+==============================================================================
+8. what this breaks, measured, and not fixed here
+==============================================================================
+
+The checked-in model recording no longer answers the questions the shipped model
+run puts. Measured, replaying `./run_agent.sh` against `net/model_recording.gd`:
+
+                                              before    after
+  recorded rows                                   79       79
+  questions the run puts                          71       71
+  questions with a reply recorded for them        71       15
+  questions with none                              0       56
+  recorded replies never claimed                   8       64
+
+`ModelChannel` matches a recorded reply to a question by the fingerprint of the
+prompt and falls back to position when no unspent row fingerprints the same. The
+prompt carries the character's own position to three decimal places and its
+heading, so a world in which a character stands still for nineteen ticks and
+then jumps produces one set of prompts and a world in which it walks produces
+another. That is what moved: the recording was replayable because the world was
+not moving.
+
+The visible consequence is one failing check in the whole suite --
+`1 of 51 suites failed (1 failed check of 196501)`:
+
+  FAIL  agent  1124 checks, 1 failed
+    - the run ran out of recorded replies: Odo: this reply was recorded for
+      another question: the prompt put here fingerprints 69bc6ed7467c7af4 and
+      the recorded one bfc8438137a15413
+
+The documented fix is `OPENROUTER_API_KEY=... ./run_record.sh --live`, which is
+the only command in the repository that makes a network call. It replaces the
+shipped exchange, and every report that quotes that exchange -- its date, its
+model, its reply count and the replies themselves -- moves with it. That is a
+call to make deliberately rather than as a side effect of a movement fix, so it
+is reported here rather than taken.
+
+Everything else in the suite passes: 50 of 51 suites, including the new `walk
+motion` suite (93 checks) and `control loop` (78). `./run_tests.sh --layers-only`
+passes.

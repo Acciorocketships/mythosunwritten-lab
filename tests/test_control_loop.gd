@@ -13,7 +13,10 @@ extends TestSuite
 ##      once where it is declared, and read by name everywhere else.
 ##   3. **Each of section 2.2's four events re-evaluates immediately**, each in
 ##      its own headless case: the action finishing, being attacked while acting,
-##      combat starting, and a conversation opening.
+##      combat starting, and a conversation opening. What an interrupted action
+##      leaves behind is `tests/test_walk_motion.gd`'s: the abandoned action gets
+##      no answer, and a walk given up on leaves the walker where its strides
+##      actually carried it.
 ##   3b. **Being asked does not spend a written-down turn.** A plan on
 ##      `DecisionSource.plan` offers back the action already running when it is
 ##      re-evaluated part-way through; the queue-shaped reading of the same list
@@ -288,8 +291,12 @@ func _a_conversation_opening_re_evaluates_at_once() -> void:
 		"a word addressed by name interrupted the walker")
 	equal(loop.actions_of(rook.id), 0,
 		"and the walk it abandoned never reached the engine")
-	equal(snappedf(rook.x, 0.001), snappedf(ROOK_AT.x, 0.001),
-		"so the walker never went anywhere")
+	# It is standing where the strides it took actually carried it, which is not
+	# where it started and not where it was going: a walk given up on part-way is
+	# a walk half taken, not a walk undone. `tests/test_walk_motion.gd` counts
+	# the strides; here it is enough that the abandoned walk got no answer.
+	check(rook.x > ROOK_AT.x and rook.x < ROOK_AT.x + WALK_TO.x,
+		"so the walker is part-way to where it was going (%.3f)" % rook.x)
 
 
 # --- 3b. Being asked does not spend a planned turn ------------------------

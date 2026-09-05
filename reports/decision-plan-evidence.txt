@@ -19,3 +19,14 @@ the same probe, after it, with what the source has left added
   REVIEW_EVERY=5  CONTINUE_BIAS=0.85  go_to costs 20t
   [10 of 10 resolved, 0 left in the source, 10 accounted for] read as a plan (DecisionSource.plan) -- 57 re-evaluations over 160 ticks
   [4 of 10 resolved, 0 left in the source, 4 accounted for] read as a queue (DecisionSource.recorded) -- 53 re-evaluations over 160 ticks
+
+the same probe again at cycle 192, after a walk was spread over the ticks its span
+costs (W-walk-motion). The claim is unchanged and the counts moved, because a
+character that walks while it walks meets things sooner: the five-character run's
+quarrel now starts at tick 59 rather than 77, so there are four fewer mid-action
+re-evaluations on the plan reading and four fewer on the queue reading.
+
+=== F -- the same ten choices, read two ways, under one loop
+  REVIEW_EVERY=5  CONTINUE_BIAS=0.85  go_to costs 20t
+  [10 of 10 resolved, 0 left in the source, 10 accounted for] read as a plan (DecisionSource.plan) -- 53 re-evaluations over 160 ticks
+  [4 of 10 resolved, 0 left in the source, 4 accounted for] read as a queue (DecisionSource.recorded) -- 49 re-evaluations over 160 ticks

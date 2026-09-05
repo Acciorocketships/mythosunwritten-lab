@@ -113,7 +113,7 @@ what the orchestrator did, as it happened
   tick 94  did       place kind=chest at=(-479.0, 421.0) -- a chest now stands at (-479.000, 421.000) as #10
   tick 94  would not open target=#9 -- there is nothing with id 9 to change
   tick 97  wrote     #9 is Vessalius Goldtongue, and the six numbers it was rolled with are untouched
-  tick 121  looked at the world (14c8709b4ee94a64)
+  tick 121  looked at the world (15dd761d6d21bae0)
   tick 124  did       place kind=chest at=(-468.0, 420.0) -- a chest now stands at (-468.000, 420.000) as #11
   tick 124  did       spawn role=scout at=(-466.0, 417.0) -- a scout was rolled for ground of difficulty 10 and stands at (-466.000, 417.000) as #12, with no one written into it yet
   tick 124  #12 is rolled and standing: str 6 con 9 cha 8 dex 15 wis 9 int 6 -- asked who that is (5a8f65cec544f29a)

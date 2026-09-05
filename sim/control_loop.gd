@@ -23,9 +23,28 @@ extends RefCounted
 ## because an atomic action's effect is indivisible -- that is what makes it
 ## atomic, and it is what lets one engine answer serve a person and a program
 ## alike. What the loop contributes is that carrying the action out costs the
-## character a span of ticks, and the world only changes when the span completes.
+## character a span of ticks, and the answer only comes when the span completes.
 ## An abandoned span therefore never reaches the engine: a character interrupted
-## halfway to somewhere did not go.
+## part-way through something never gets an outcome for it.
+##
+## ## An action in progress is carried out while it is in progress
+##
+## For eleven of the twelve actions that is the whole story, because their effect
+## lands at a point and the span before it is time spent getting there: a blow
+## interrupted did not land, a trade interrupted was never struck. A walk is the
+## exception, and it is not a special case so much as what a journey is -- a
+## character that stood still for nineteen ticks and was eighteen units away on
+## the twentieth did not walk, it teleported. So every tick a character is busy,
+## the loop hands what it is doing to `ActionEngine.advance`, which for a walk
+## takes one stride toward where it is going and for everything else does
+## nothing at all.
+##
+## This costs the atomic reading nothing. The strides are `Walk.stride`, the same
+## ones `ActionEngine._go_to` turns when it finishes the walk off, taken in the
+## same order -- so where a character ends up and how far it walked are what they
+## were when the whole walk happened at once. What an interruption means for a
+## walk is now the true thing rather than the convenient one: a walker struck
+## half way is standing half way, because the half it walked, it walked.
 ##
 ## It also asks nothing about who is deciding. The decision function is read off
 ## `Character.decide` and called with `(scene, actor)`, exactly as
@@ -217,6 +236,12 @@ func _serve(one: Combatant) -> void:
 			_ask(one)
 		return
 	var doing: Activity = _busy[one.id]
+	# An action in progress is *carried out* while it is in progress, not only
+	# when its span runs out. For everything in the catalogue but a walk that is
+	# nothing at all -- a blow lands at a point and the span before it is time
+	# spent getting ready -- but a walk is a journey, and a journey happens over
+	# the ticks it costs. See `ActionEngine.advance`.
+	ActionEngine.advance(scene, one, doing.action)
 	if doing.spend():
 		_complete(one, doing)
 	elif doing.elapsed(scene.tick) % REVIEW_EVERY == 0:
@@ -303,7 +328,7 @@ func _review(one: Combatant, doing: Activity) -> void:
 	_note(one, "changed its mind %s, dropped %s for %s" % [
 		_through(doing), doing.action.line(), proposed.line(),
 	])
-	_busy.erase(one.id)
+	_drop(one)
 	_commit(one, proposed)
 
 
@@ -321,11 +346,21 @@ func _notice_disturbances() -> void:
 		if cause == "":
 			continue
 		var doing: Activity = _busy[one.id]
-		_busy.erase(one.id)
+		_drop(one)
 		_count(cause)
 		_note(one, "interrupted (%s), abandoned %s" % [cause, doing.line()])
 		if _can_act(one) and _may_choose(one):
 			_ask(one)
+
+
+# Give up on what a character was doing. Whatever it had already got done is
+# done: a walk abandoned half way leaves the character half way, because the
+# strides it took were taken. What is forgotten is the *commitment* -- the
+# activity and, with it, the walk's aim and its tally -- so a character that
+# chooses the same walk again sets off afresh from where it stands.
+func _drop(one: Combatant) -> void:
+	_busy.erase(one.id)
+	scene.clear_walk(one.id)
 
 
 # Why a character stopped what it was doing, or "".

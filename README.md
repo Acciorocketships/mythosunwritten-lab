@@ -776,6 +776,19 @@ their journals are identical across the two runs.
 The whole of it, with the transcript and the numbers, is in
 [reports/control-loop.md](reports/control-loop.md).
 
+**A walk happens over the ticks it costs.** Eleven of the twelve actions land at
+a point, so the span the loop charges for them is time spent getting there and
+nothing moves until the engine answers. A walk is a journey, so it is taken a
+stride at a time while the span runs and the resolution finishes whatever is
+left — the same `Walk.stride` calls in the same order either way, which is why
+the arrival point is exactly what it was when the whole walk happened at once.
+A character under a `go_to` covers 0.9 units on every tick of its span instead of
+18 on one tick in twenty, so `CombatantRoster.snapshot` reports motion, the
+animated view picks its walk clip on 98.5% of ticks rather than none, and the
+follow camera crosses the distance rather than cutting to the end of it.
+[reports/walk-motion.md](reports/walk-motion.md) has the traces, the frames and
+the scan that finds the project's two movement implementations and no third.
+
 ## Five characters, one seeded run
 
 `./run_scenario.sh` is the end-to-end proof of everything above: one headless run
@@ -991,14 +1004,14 @@ turn and no more.
 one list, read out of `ActionCatalog.ROWS`, the observation packet above, what the
 character remembers, and what it is after — and no rule about distance, reach,
 cost, damage or possibility. The suite searches a real prompt for all of those and
-finds none. Five of the run's seventy-four resolutions are refusals, in the
+finds none. Eleven of the run's seventy-four resolutions are refusals, in the
 engine's own words, and they read the same for the person as for a model.
 
-**Several answers are outstanding at once, and none of them queue.** 65 of the
+**Several answers are outstanding at once, and none of them queue.** 68 of the
 run's 160 ticks had more than one question pending, five at the most. Across every
 wait each of the other five characters was serviced for exactly the wait's ticks.
 The longest span, grouped by how many other answers were outstanding across it, is
-`0:3 1:3 2:4 3:4 4:4` — a channel serving questions in turn would make one put
+`0:3 1:4 2:4 3:4 4:3` — a channel serving questions in turn would make one put
 with five others pending take about eighteen ticks.
 
 **What it costs, which is the number the milestone turns on.** 71 model calls over
@@ -1009,10 +1022,10 @@ speculative next action are still deferred: at this cast size the run is
 recordable and replayable without either.
 
 **Being asked again mid-action is not a new call.** The loop asks a decision
-function again every five ticks while an action runs. Of 340 asks across the five
-minds, 71 put a question (20.9%): 62 were answered out of the choice the mind was
-already holding — section 2.2's bias toward continuing — and 207 were polls of a
-question already outstanding. 53 mid-action re-evaluations against 71 calls.
+function again every five ticks while an action runs. Of 335 asks across the five
+minds, 71 put a question (21.2%): 61 were answered out of the choice the mind was
+already holding — section 2.2's bias toward continuing — and 203 were polls of a
+question already outstanding. 52 mid-action re-evaluations against 71 calls.
 
 **No credential, and no network, anywhere but one command.** `./run_tests.sh`,
 `./run_agent.sh`, `./run_lesson.sh`, `./run_goal.sh`, `./run_check.sh` and
@@ -1200,9 +1213,10 @@ readable and the run says so rather than scoring either as a choice.
 
 **How much memory there is, measured rather than guessed.** Across the shipped
 160-tick run the character whose store the run prints in full — Pell — came to
-hold **17 things in 1,057 characters**, of which a packet carries **593 (56%)** —
-every lesson and the last eight events. The last question put was 3,244
-characters, **282 of them (9%)** what it remembers. Nothing here is near needing
+hold **17 things in 915
+characters**, of which a packet carries **517 (57%)** —
+every lesson and the last eight events. The last question put was 3,200
+characters, **238 of them (7%)** what it remembers. Nothing here is near needing
 an index.
 
 **And every character remembers, not only the ones a model drives.** Both stores
@@ -1212,7 +1226,7 @@ runs it for everybody it services and `DecisionSource.drive` runs it before ever
 choice it asks for, in both cases before `Character.decide` is read and with
 nothing to branch on if either wanted to. `ModelMind` reads both stores and fills
 neither. In the shipped run the character a person drives ends with **23
-remembered events**, against 8 to 22 for the five whose minds are models; before
+remembered events**, against 6 to 26 for the five whose minds are models; before
 this it ended with none, because the only call site was inside the model layer.
 
 A character takes in its surroundings **once for every action the world has
@@ -1433,7 +1447,7 @@ are models, with numbers of the same order:
 ```
 who    driven by with     trust    fear   respect   familiarity  sentiment
 Wren   a person  Rook      0.00    0.00      0.00          0.87      +0.00
-Wren   a person  Pell      0.00    0.00      0.00          0.76      +0.00
+Wren   a person  Pell      0.00    0.00      0.00          0.68      +0.00
 Rook   a model   Wren      0.00    0.00      0.00          0.87      +0.00
 Bram   a model   Sable     0.00    0.00      0.00          0.97      +0.00
 Odo    a model   nothing has passed between it and anybody
