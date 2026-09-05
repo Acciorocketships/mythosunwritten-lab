@@ -434,6 +434,10 @@ static func turn_lines(cast: ModelCast, loop: ControlLoop) -> PackedStringArray:
 				"%d thing%s came back" % [
 					int(row["found"]), "" if int(row["found"]) == 1 else "s",
 				] if String(row["tool"]) == ModelPrompt.RECALL else "one lesson kept")
+			# An ask the world would not allow: its own sentence, in place of
+			# what the tool would have come back with, because it did not run.
+			if String(row["refused"]) != "":
+				answered = "(the world refused it: %s)" % row["refused"]
 		if chose != null:
 			answered = "still running when the run ended"
 			var mine: Array[Dictionary] = answers[who]
@@ -613,6 +617,15 @@ static func volume_lines(
 	written.append("                                %d calls an hour for %d characters"
 		% [_an_hour(calls, ticks), cast.order.size()]
 		+ ", %d each" % _an_hour(calls, ticks * cast.order.size()))
+	# What the world charged for asks that cost it no time, when it charged
+	# anything. Printed only when there was something to print, so a run nobody
+	# was refused anything in says what it always said.
+	var refused := scene.asks_refused.size()
+	if refused > 0:
+		written.append("  asks the world refused     %d of %d calls (%.1f%%), each"
+			% [refused, calls, 100.0 * float(refused) / float(maxi(1, calls))]
+			+ " one turn and %d ticks standing -- see sim/tool_budget.gd"
+			% ToolBudget.costs())
 	return written
 
 
@@ -901,9 +914,12 @@ static func memory_lines(
 			"" if remembered.events.size() == 1 else "s",
 		])
 	written.append_array(_last_question_lines(channel))
-	written.append("  tools used                 %d recall%s, %d lesson%s written" % [
+	written.append("  tools used                 %d recall%s, %d lesson%s written%s" % [
 		mind.recalls, "" if mind.recalls == 1 else "s",
 		mind.lessons_written, "" if mind.lessons_written == 1 else "s",
+		"" if mind.refused_asks == 0 else ", %d ask%s the world refused" % [
+			mind.refused_asks, "" if mind.refused_asks == 1 else "s",
+		],
 	])
 	written.append("  everything it remembers")
 	for line in remembered.lines():

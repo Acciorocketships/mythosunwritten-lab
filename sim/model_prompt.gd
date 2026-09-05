@@ -285,7 +285,13 @@ static func _closed_by_line(goal: Goal) -> String:
 
 ## What the character remembers, as the prompt prints it: every lesson it keeps,
 ## the most recent few lines of its log, and -- when the last thing it did was
-## look back -- what looking back turned up.
+## look back -- what looking back turned up, or the world's sentence when it
+## would not allow the look at all.
+##
+## Neither of those last two is a line of the prompt's own: they appear only when
+## the character did that thing on the question before, exactly as a refused
+## action's sentence reaches whoever chose it. A run in which no tool was used
+## and none refused writes the same prompt it always wrote.
 ##
 ## The older lines of the log are deliberately not here. They are what `recall`
 ## is for, and a prompt that carried them all would make the tool pointless and
@@ -309,6 +315,11 @@ static func memory_lines(
 	for line in lately:
 		written.append("    - %s" % line)
 	if looked_back.is_empty():
+		return written
+	if looked_back.has("refused"):
+		written.append("  the world refused your %s: %s" % [
+			looked_back.get("tool", ""), looked_back["refused"],
+		])
 		return written
 	var found := PackedStringArray(looked_back.get("lines", PackedStringArray()))
 	written.append("  looked back for \"%s\": %d thing%s" % [

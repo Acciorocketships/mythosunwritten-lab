@@ -867,12 +867,19 @@ func _run_one_mind(make: Callable, chosen: LiveChoice = null) -> Dictionary:
 	return {"resolved": scene.actions_of(one.id), "reached": reached}
 
 
-## Nothing outside `ActionScene` keeps the count, and one file alone moves it.
+## Nothing outside `ActionScene` keeps the count, and two files alone move it.
 ##
 ## Read off disk over every script in the project rather than off the one
 ## function: the count is the thing three decision functions read their own
 ## position out of, so a second place that moved it would be a second answer to
 ## "has this character had its go".
+##
+## The second file is `sim/tool_budget.gd`, and it is the one thing besides an
+## action that spends a character's turn: an ask that costs the world no time,
+## made past the budget, is refused and charged the same turn a refused action is
+## charged. It moves the count through `ActionScene.note_action` -- the same call
+## on the same path -- rather than keeping a second count of its own, which is
+## exactly what this check is for.
 func _nothing_outside_the_scene_counts_an_action() -> void:
 	var moved := PackedStringArray()
 	var kept := PackedStringArray()
@@ -886,8 +893,11 @@ func _nothing_outside_the_scene_counts_an_action() -> void:
 			kept.append(path)
 	equal(", ".join(kept), "res://sim/action_scene.gd",
 		"only the scene keeps the count")
-	equal(", ".join(moved), "res://sim/action_engine.gd, res://sim/action_scene.gd",
-		"only the engine moves it, and only the scene declares it")
+	equal(", ".join(moved),
+		"res://sim/action_engine.gd, res://sim/action_scene.gd,"
+		+ " res://sim/tool_budget.gd",
+		"only the engine and the tool budget move it, and only the scene"
+		+ " declares it")
 	var engine := _code_of("res://sim/action_engine.gd")
 	equal(engine.count("scene.note_action("), 1,
 		"and the engine moves it in exactly one place")

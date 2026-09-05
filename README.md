@@ -1205,6 +1205,55 @@ which driver it has.
 The whole of it, including what the model did and did not do with the two tools,
 is in [reports/agent-memory.md](reports/agent-memory.md).
 
+## What an ask that costs the world no time costs
+
+Twelve of the thirteen things a mind may answer with are actions, and every one
+costs the character a span of ticks. The three tools — `recall`, `learn`, `done`
+— cost **nothing**: they answer on the tick they are asked and the world
+afterwards is the world before, so the next question is the same question. A
+cheap local model walked into that. On a 3,000-tick soak of the shipped world
+`qwen2.5:3b-instruct` spent **5,417 of its 6,158 turns on `recall`**, made
+**2.053 model calls a tick**, and four of its five characters resolved **not one
+action** in the whole run.
+
+The guard is a rule of the world, not of the model layer:
+
+> A character may make **two** asks of that kind between the *actions* it takes
+> (`ToolBudget.FREE`). One past that is refused in the world's own words, and
+> that one costs it a turn: the world counts the turn — the same
+> `ActionScene.note_action` a refused action moves — and the character stands
+> **four ticks** before it may choose again. The free ones come back when it
+> acts, and not when it pays.
+
+Neither number is invented. Four ticks is what the catalogue already charges for
+`examine`, the action that is looking at something. Two is a stated choice:
+enough to look something up and follow it up, few enough that a mind that only
+looks cannot outrun the world. The other shape — feeding a recall's own result
+back so a repeat is visibly the same answer — was **considered and not built**,
+because half of it already exists and the looping run is what it looks like when
+that is not enough: three of the four stuck characters were shown `0 things` and
+asked again, 1,357 times each.
+
+The same soak with the guard in: **3,009 turns, 1.003 calls a tick** — half the
+bill — and of 2,281 `recall`s asked, **2,260 were refused** and never ran. The
+honest other half: it prices the loop, it does not cure the model. Four of five
+still resolved nothing.
+
+`./run_asks.sh` is the claim that it is the world's rule and not one mind's, put
+as a run rather than as a reading of the source: a person (`DecisionSource.live`),
+a program (`DecisionSource.scripted`) and a language model
+(`DecisionSource.model`) at the same door under one `ControlLoop`, one sentence
+between them, one turn each, and each asked again and acting when its span ran
+out.
+
+```
+./run_asks.sh                   # three minds, one door
+./run_budget_suite.sh           # just this suite (58 checks)
+```
+
+The whole of it, including the before-and-after soak and what the wall clock
+turned out to be made of, is in [reports/tool-budget.md](reports/tool-budget.md).
+
 ## What a character is after
 
 The sheet used to carry one line of prose called `goal` that nothing read, and
@@ -2295,13 +2344,15 @@ never has to be serialised for the world to be reproducible.
 ./run_goal.sh                   # does a goal change what is chosen? one moment, four goals
 ./run_goal_suite.sh             # just the goal suite
 ./run_upkeep_suite.sh           # just the suite for the path every character's memory and goals are maintained on
+./run_asks.sh                   # what an ask that costs the world no time costs: a person, a program and a model at one door
+./run_budget_suite.sh           # just the tool-budget suite
 ./run_check.sh                  # ability checks: four attempts, two rolled, two remembered
 ./run_check_suite.sh            # just the difficulty-class suite
 ./run_world.sh                  # the orchestrator: five looks at a world, three spawns rolled before they were written
 ./run_world_suite.sh            # just the orchestrator suite
 ```
 
-Forty-four suites: the random number generator; determinism; the terrain field
+Fifty suites: the random number generator; determinism; the terrain field
 and mesher; chunk streaming; the coarse ground drawn past it; the biomes; the water; the floating islands; what
 grows on them; the villages and roads; the flora and prop scatter; the tactical
 board; the pieces that stand on it; what happens when they act; the snap between
@@ -2321,7 +2372,8 @@ the loop and the engine cannot tell from the one person among them; the two segm
 scans that say nothing can get into them it did not perceive; the structured
 goals it holds several of at once and the world's own answer to which are
 finished; the one path both of those stores are maintained on, which every
-character passes whoever is deciding for it; the difficulty-class agent that judges one attempt the rules have no
+character passes whoever is deciding for it; the price the world puts on an ask
+that costs it no time, charged to every character alike; the difficulty-class agent that judges one attempt the rules have no
 answer for and never resolves it; the orchestrator that is polled over the world,
 spawns characters rolls first and changes nothing except through the operations
 the engine exposes; the one driver a

@@ -72,6 +72,19 @@ extends RefCounted
 ## not persisted", and persisting it would make the tool a slow way of growing the
 ## packet.
 ##
+## ## What a tool costs, which the world says and this file only asks
+##
+## A tool changes nothing in the world, so nothing about the world stops one
+## being asked again on the very next tick -- and a cheap model asked the same
+## one four thousand seven hundred times in a single run, resolving no action at
+## all. The world now prices them: `ToolBudget.asked()` is put the question
+## before any of the three is carried out, answers whether this character may,
+## and past its budget refuses in the world's own words and charges the character
+## a turn. A refused tool is carried out on nothing, is kept on the turn like any
+## other answer, and goes into the next prompt so the character is told what it
+## was told. Nothing about the rule is here: this file asks and obeys, and a
+## person's hand on the same door gets the same sentence.
+##
 ## ## Goals, which also live on the character and not here
 ##
 ## The same arrangement as the memory, and read the same way. What the character
@@ -115,6 +128,10 @@ var turns: Array[Dictionary] = []
 ## measures what the memory came to.
 var recalls: int = 0
 var lessons_written: int = 0
+
+## How many tool calls the world refused for costing it no time -- `ToolBudget`'s
+## answer, counted here only so a run can print it.
+var refused_asks: int = 0
 
 ## What every ask of this mind came to. Four numbers that sum: `consulted` is the
 ## total, and it is `opened` plus `held` plus `polled`.
@@ -272,6 +289,13 @@ func _take(scene: ActionScene, actor: Combatant, carried_out: int) -> Action:
 
 # One tool call, carried out against the character's own memory.
 #
+# The world is asked first, because a tool costs it no time and something has to:
+# `ToolBudget.asked()` answers whether this character may make another such ask,
+# and one past its budget is refused there and costs the character a turn. A
+# refused tool is not carried out at all -- nothing is looked up, nothing is
+# learned and no goal is closed -- and what the world said goes onto the turn and
+# into the next prompt.
+#
 # `recall` reads the same store the recent lines came out of and keeps what it
 # found for the next prompt alone. `learn` writes one sentence into the lessons,
 # stamped with the observation it was drawn from -- which is the only door that
@@ -280,6 +304,16 @@ func _take(scene: ActionScene, actor: Combatant, carried_out: int) -> Action:
 func _use(
 	used: Dictionary, turn: Dictionary, actor: Combatant, scene: ActionScene
 ) -> void:
+	var allowed := ToolBudget.asked(scene, actor)
+	if not bool(allowed["allowed"]):
+		refused_asks += 1
+		turn["refused"] = String(allowed["why"])
+		_looked_back = {
+			"tool": String(used["tool"]),
+			"about": String(used["text"]),
+			"refused": String(allowed["why"]),
+		}
+		return
 	if String(used["tool"]) == ModelPrompt.DONE:
 		_close_by_hand(String(used["text"]), turn, actor, scene)
 		return

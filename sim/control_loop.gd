@@ -137,6 +137,7 @@ var _changes: int = 0
 var _interruptions: Dictionary = {}
 var _chosen_on: Dictionary = {}
 var _answers: Dictionary = {}
+var _standing: Dictionary = {}
 
 
 ## A loop over a scene, with a seed for the bias draws.
@@ -227,7 +228,22 @@ func _serve(one: Combatant) -> void:
 # the character standing in the world with nothing committed, and it is asked
 # again the next time it may choose: next tick in the overworld, and on its next
 # turn on a board.
+#
+# A character the world has charged a turn for an ask that cost it no time is not
+# asked at all until that span runs out -- `ToolBudget.free_to_choose`. The check
+# is here rather than in `_serve` because every path that asks anybody anything
+# goes through this function: the first ask, the one after an action completes
+# and the one after an interruption. Nothing about it reads what is deciding for
+# the character, and there is nothing here that could.
 func _ask(one: Combatant) -> void:
+	var until := scene.spent_until_of(one.id)
+	if not ToolBudget.free_to_choose(scene, one.id):
+		if not _standing.get(one.id, false):
+			_standing[one.id] = true
+			_note(one, "spent a turn on an ask that costs the world no time,"
+				+ " and stands until tick %d" % until)
+		return
+	_standing[one.id] = false
 	var chosen := _decide(one)
 	if chosen == null:
 		if not _thinking.get(one.id, false):

@@ -1,0 +1,309 @@
+evidence for W-recall-budget -- what an ask that costs the world no time costs
+taken on 2026-09-04 on this machine, headless, with no key and no network
+except where a run says --live and names the endpoint it called.
+
+1. the loop, reproduced before anything was changed
+-----------------------------------------------------
+
+  $ HOME=<writable> OLLAMA_MODELS=<writable>/models OLLAMA_CONTEXT_LENGTH=4096 \
+      OLLAMA_HOST=127.0.0.1:11435 ollama serve
+  $ ollama pull qwen2.5:3b-instruct
+  $ LOCAL_MODEL_ENDPOINT=http://127.0.0.1:11435/v1/chat/completions \
+      LOCAL_MODEL=qwen2.5:3b-instruct ./run_agent.sh --live --ticks 3000
+    (run against a copy of the tree at 4dd81ef, so nothing under sim/ moved
+     while it ran)
+
+  
+  model cast run seed=1234 ticks=3000 where=(-480.0, 420.0)
+    cast       5 of the 6 characters decide through a model; Wren is driven by a person's choices written down in advance
+    channel    live -- every question put to qwen2.5:3b-instruct as the run reaches it
+    recording  recorded 2026-09-04 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 85 replies
+    prompt     the twelve actions of the one list, the observation packet,
+               and what this character remembers -- every lesson it has kept
+               and the last few lines of its own log, with the three tools
+               that look further back, keep a new lesson and close a goal;
+               no rule about distance, reach, cost, damage or possibility;
+               and what this character is after, as several structured goals
+
+  the first four turns of the run:
+    Rook   1        1        2  61c4c589e491b02a  recall about=pell              recall about=pell            (a tool, not an action: 1 thing came back)
+    Bram   1        1        2  e93b8c696aa47b56  recall about:the last 2 of 2 … -- nothing readable --       (nothing was chosen)
+    Sable  1        1        2  60b5070aee3adb9b  recall about=lately            recall about=lately          (a tool, not an action: 0 things came back)
+    Odo    1        1        2  0cb1af14149ac60d  recall about=words             recall about=words           (a tool, not an action: 0 things came back)
+
+  the last four turns of the run:
+    Bram   a model   nothing has passed between it and anybody
+    Sable  a model   nothing has passed between it and anybody
+    Odo    a model   nothing has passed between it and anybody
+    Pell   a model   Wren      0.00    0.00      0.00          0.44      +0.00
+
+  what the run cost in model calls
+    who     calls  answered  resolved calls per 100 ticks
+    Rook     1358      1357         0                45.3
+    Bram     1357      1357         0                45.2
+    Sable    1357      1357         0                45.2
+    Odo      1357      1357         0                45.2
+    Pell      731       730       229                24.4
+    total    6160      6158
+    the run                    3000 ticks, 6160 calls -> 2.053 calls a tick
+    an hour of play at that rate  20 ticks a second, so 72000 ticks an hour
+                                  147840 calls an hour for 5 characters, 29568 each
+
+  being asked again is not a new call
+    who       asked  calls    held  polled  re-evaluations re-evaluations per call
+    Rook       3000   1358       0    1642               0                    0.00
+    Bram       3000   1357       0    1643               0                    0.00
+    Sable      3000   1357       0    1643               0                    0.00
+    Odo        3000   1357       0    1643               0                    0.00
+    Pell       1540    731       0     809               0                    0.00
+    total     13540   6160       0    7380               0                    0.00
+    re-evaluations to model calls  0 : 6160 = 0.00 -- the loop asks again every 5 ticks an action runs, and none of those asks is a call
+    asks that cost a call          6160 of 13540 (45.5%)
+    the loop's own counts          reviews=11 changes=0 finished=740 attacked=0 combat began=0 spoken to=0
+
+  tallied off that transcript:
+    turns per character: {'Rook': 1357, 'Bram': 1357, 'Sable': 1357, 'Odo': 1357, 'Pell': 730} total 6158
+    action/tool mix: [('recall', 5428), ('pick_up', 730)]
+        Bram {'recall': 1357}
+        Odo {'recall': 1357}
+        Pell {'pick_up': 730}
+        Rook {'recall': 1357}
+        Sable {'recall': 1357}
+      who     calls  answered  resolved calls per 100 ticks
+
+  of the 6,158 turns, 5,417 carried a tool (grep 'a tool, not an action')
+  and 11 were unreadable; 730 were Pell's pick_up. Rook, Bram, Sable and Odo
+  resolved 0 actions each.
+
+  	Percent of CPU this job got: 92%
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 34:59.67
+  	Maximum resident set size (kbytes): 484192
+
+2. the guard, and what it cost the run
+---------------------------------------
+
+  the rule, in sim/tool_budget.gd:
+    ToolBudget.FREE   = 2   asks between the actions a character takes
+    ToolBudget.costs() = 4  ticks, = ActionCatalog.occupies_of(EXAMINE)
+
+  $ LOCAL_MODEL_ENDPOINT=http://127.0.0.1:11435/v1/chat/completions \
+      LOCAL_MODEL=qwen2.5:3b-instruct ./run_agent.sh --live --ticks 3000
+    (same seed, same world, same endpoint, same model as section 1)
+
+  the first refusals of the run, in the world's own words:
+    Rook   3        5        6  ffdb9452e251a9bc  recall about=the last 3 of 3 … recall about=the last 3 of … (the world refused it: Rook has already asked 2 things of no world time since it last acted; this one costs it a turn)
+    Sable  3        5        7  60b5070aee3adb9b  recall about=lately            recall about=lately          (the world refused it: Sable has already asked 2 things of no world time since it last acted; this one costs it a turn)
+    Odo    3        6        7  0cb1af14149ac60d  recall about=words             recall about=words           (the world refused it: Odo has already asked 2 things of no world time since it last acted; this one costs it a turn)
+
+  what the run cost in model calls
+    who     calls  answered  resolved calls per 100 ticks
+    Rook      569       569         0                19.0
+    Bram      576       576         0                19.2
+    Sable     568       568         0                18.9
+    Odo       568       568         0                18.9
+    Pell      729       728       248                24.3
+    total    3010      3009
+    the run                    3000 ticks, 3010 calls -> 1.003 calls a tick
+    an hour of play at that rate  20 ticks a second, so 72000 ticks an hour
+                                  72240 calls an hour for 5 characters, 14448 each
+    asks the world refused     2260 of 3010 calls (75.1%), each one turn and 4 ticks standing -- see sim/tool_budget.gd
+
+  being asked again is not a new call
+    who       asked  calls    held  polled  re-evaluations re-evaluations per call
+    Rook       1301    569       0     732               0                    0.00
+    Bram       1319    576       0     743               0                    0.00
+    Sable      1302    568       0     734               0                    0.00
+    Odo        1303    568       0     735               0                    0.00
+    Pell       1544    729       0     815               0                    0.00
+    total      6769   3010       0    3759               0                    0.00
+    re-evaluations to model calls  0 : 3010 = 0.00 -- the loop asks again every 5 ticks an action runs, and none of those asks is a call
+    asks that cost a call          3010 of 6769 (44.5%)
+    the loop's own counts          reviews=11 changes=0 finished=738 attacked=0 combat began=0 spoken to=0
+
+  	Percent of CPU this job got: 91%
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 30:51.85
+  	Maximum resident set size (kbytes): 314064
+
+  tallied off that transcript:
+    turns per character: {'Rook': 569, 'Bram': 576, 'Sable': 568, 'Odo': 568, 'Pell': 728} total 3009
+    action/tool mix: [('recall', 2281), ('pick_up', 728)]
+        Bram {'recall': 576}
+        Odo {'recall': 568}
+        Pell {'pick_up': 728}
+        Rook {'recall': 569}
+        Sable {'recall': 568}
+      Rook   3        5        6  ffdb9452e251a9bc  recall about=the last 3 of 3 … recall about=the last 3 of … (the world refused it: Rook has already asked 2 things of no world time since it last acted; this one costs it a turn)
+
+  before and after, side by side
+                                          before      after
+    turns                                  6,158      3,009
+    model calls over 3,000 ticks           6,160      3,010
+    calls a tick                           2.053      1.003
+    turns that were the recall tool        5,417      2,281
+    of those, refused by the world             0      2,260
+    characters resolving no action        4 of 5     4 of 5
+    turns the least-served character got   1,357        568
+    times the world asked that character   3,000      1,302
+    wall clock                          34:59.67   30:51.85
+    percent of one core                      92%        91%
+
+3. three minds at one door
+---------------------------
+
+  $ ./run_asks.sh
+
+  two lines z-ai/glm-5.3-flash gave in the shipped exchange recorded on 2026-09-04 -- "recall about=brass lantern" and "wait          ticks=3" -- re-asked here in a different moment; nothing was recorded for this run
+  
+  three minds, one door: what an ask that costs the world no time costs a character
+    the rule: 2 free asks between the actions a character takes; one past that is refused and costs it a turn, and the free ones come back when it acts and not when it pays
+    a turn here is 4 ticks, which is what the catalogue charges for examine -- the action that is looking at something
+  
+  Ash, a person (#1)
+    tick 1  asked, and may: 1 of 2 free
+    tick 2  asked, and may: 2 of 2 free
+    tick 3  asked, and may not: Ash has already asked 2 things of no world time since it last acted; this one costs it a turn
+    tick 4  asked, and may not: Ash is standing out the turn its last ask cost it, until tick 7
+    the world charged it 1 turn and stood it until tick 7
+    t=  1  Ash    has not decided yet, and waits in the world
+    t=  4  Ash    spent a turn on an ask that costs the world no time, and stands until tick 7
+    t=  7  Ash    began wait(ticks=1), 1 ticks
+    t=  8  Ash    finished wait(ticks=1) -> wait ok ticks=1 until=9
+    t=  8  Ash    has not decided yet, and waits in the world
+  
+  Bryn, a program (#2)
+    tick 1  asked, and may: 1 of 2 free
+    tick 2  asked, and may: 2 of 2 free
+    tick 3  asked, and may not: Bryn has already asked 2 things of no world time since it last acted; this one costs it a turn
+    tick 7  asked, and may not: Bryn has already asked 2 things of no world time since it last acted; this one costs it a turn
+    the world charged it 2 turns and stood it until tick 11
+    t=  1  Bryn   has not decided yet, and waits in the world
+    t=  4  Bryn   spent a turn on an ask that costs the world no time, and stands until tick 7
+    t=  8  Bryn   spent a turn on an ask that costs the world no time, and stands until tick 11
+    t= 11  Bryn   began wait(ticks=1), 1 ticks
+    t= 12  Bryn   finished wait(ticks=1) -> wait ok ticks=1 until=13
+    t= 12  Bryn   has not decided yet, and waits in the world
+  
+  Cass, a language model (#3)
+    tick 4  asked recall about "brass lantern", and may: 0 back
+    tick 8  asked recall about "brass lantern", and may: 0 back
+    tick 12  asked recall about "brass lantern", and may not: Cass has already asked 2 things of no world time since it last acted; this one costs it a turn
+    tick 19  asked recall about "brass lantern", and may not: Cass has already asked 2 things of no world time since it last acted; this one costs it a turn
+    tick 26  answered wait ticks=3, which is an action
+    the world charged it 2 turns and stood it until tick 23
+    t=  1  Cass   has not decided yet, and waits in the world
+    t= 13  Cass   spent a turn on an ask that costs the world no time, and stands until tick 16
+    t= 20  Cass   spent a turn on an ask that costs the world no time, and stands until tick 23
+    t= 26  Cass   began wait(ticks=3), 3 ticks
+    t= 29  Cass   finished wait(ticks=3) -> wait ok ticks=3 until=32
+    t= 29  Cass   has not decided yet, and waits in the world
+  
+  the three side by side
+    1 sentence over 5 refusals across 3 characters, with the names taken off the front:
+      "... has already asked 2 things of no world time since it last acted; this one costs it a turn"
+    Ash    charged 1 turn, 4 ticks apiece, and resolved 1 action afterwards
+    Bryn   charged 2 turns, 4 ticks apiece, and resolved 1 action afterwards
+    Cass   charged 2 turns, 4 ticks apiece, and resolved 1 action afterwards
+
+  two processes print identical bytes:
+    $ ./run_asks.sh > a; ./run_asks.sh > b; cmp a b   -> no output
+
+
+4. does the per-tick cost grow as turns pile up?
+-------------------------------------------------
+
+  the endpoint's own log, calls served a minute and the model's own median
+  latency, over the whole of the before run (turns going 0 -> 6,158):
+    16:27 calls  162 median latency 0.129s
+    16:28 calls  179 median latency 0.128s
+    16:29 calls  180 median latency 0.128s
+    16:30 calls  180 median latency 0.130s
+    16:31 calls  183 median latency 0.128s
+    16:32 calls  184 median latency 0.128s
+    16:33 calls  182 median latency 0.128s
+    16:34 calls  182 median latency 0.129s
+    16:35 calls  181 median latency 0.128s
+    16:36 calls  183 median latency 0.128s
+    16:37 calls  182 median latency 0.134s
+    16:38 calls  182 median latency 0.129s
+    16:39 calls  180 median latency 0.128s
+    16:40 calls  180 median latency 0.128s
+    16:41 calls  181 median latency 0.129s
+    16:42 calls  180 median latency 0.130s
+    16:43 calls  179 median latency 0.130s
+    16:44 calls  184 median latency 0.130s
+    16:45 calls  181 median latency 0.130s
+    16:46 calls  183 median latency 0.128s
+    16:47 calls  179 median latency 0.128s
+    16:48 calls  181 median latency 0.129s
+    16:49 calls  181 median latency 0.128s
+    16:50 calls  182 median latency 0.127s
+    16:51 calls  181 median latency 0.130s
+    16:52 calls  180 median latency 0.130s
+    16:53 calls  181 median latency 0.128s
+    16:54 calls  182 median latency 0.128s
+    16:55 calls  181 median latency 0.127s
+    16:56 calls  181 median latency 0.130s
+    16:57 calls  181 median latency 0.129s
+    16:58 calls  180 median latency 0.128s
+    16:59 calls  181 median latency 0.129s
+
+  flat. A per-tick cost growing with accumulated turns would show here as a
+  falling call rate, and there is none.
+
+  the engine's own per-tick cost, same 3,000 ticks, same six characters,
+  no live call in it:
+    $ /usr/bin/time -v ./run_agent.sh --ticks 3000
+    	Percent of CPU this job got: 99%
+    	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:53.97
+    = 18 ms a tick, against the 50 ms the world is stated to be stepped at.
+
+  so the 35 minutes is a level and not a slope. A live run sleeps
+  ScriptedAgent.TICK_MS = 50 ms a tick on purpose (bin/agent_main.gd,
+  _pacing), which is 2.5 minutes of it; the rest is what a tick costs while
+  calls are in flight -- 0.65 s a tick at 2.053 calls a tick, 0.57 s at
+  1.003 -- which barely moved when the calls halved, so it is per-tick and
+  not per-call, and it is in the live transport rather than in the world.
+  Reported as a finding, not fixed here.
+
+5. the checks
+--------------
+
+  the shipped run replays the recorded exchange byte for byte, and the
+  checked-in transcript is untouched by this step:
+    $ ./run_agent.sh > a; ./run_agent.sh > b; cmp a b            -> no output
+    $ diff <(tail -n +2 reports/agent-evidence.txt) <(tail -n +2 a)  -> no output
+    (re-checked after every change to the guard, including the last one)
+
+  the whole suite, headless, with no key and no network:
+    PASS  turn seam      23 checks
+    PASS  player input   105 checks
+    PASS  player actions 146 checks
+    PASS  window glow    11225 checks
+    PASS  board overlay  21 checks
+    PASS  grass          886 checks
+    PASS  atmosphere     156 checks
+    PASS  reflection     31 checks
+    PASS  anti-alias     55 checks
+    PASS  render shell   58 checks
+    PASS  ui panel       157 checks
+    PASS  ui readout     1523 checks
+    ...
+    all 50 suites passed (196379 checks)
+
+  the layer check:
+    $ ./run_tests.sh --layers-only
+    layer check: OK -- res://sim references nothing in the render layer
+    combat check: OK -- res://render draws the fight and holds none of it
+    interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+    asset check: OK -- res://sim names asset tags and no asset
+
+  the world on seed 1234, before the change and after it, byte for byte:
+    tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f60b62ef97420caa
+    tick 50 chunks=40 islands=11 villages=1 roads=4 props=811 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 208b145a3eb915e5
+    done ticks=100 chunks=39 built=60 final=5014980a58150055
+    (the whole 100-tick run diffs empty against the same run at 4dd81ef)
+
+  the two mutation harnesses, run one after the other with nothing else
+  running against the repo:
+    ./tools/piece_mutations.sh       all 19 broken rules were caught
+    ./tools/resolution_mutations.sh  all 61 broken rules were caught

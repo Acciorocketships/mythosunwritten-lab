@@ -203,6 +203,31 @@ var idle_until: Dictionary = {}
 ## loop resolved for; this counts it for the scene, whatever drove it.
 var actions_taken: Dictionary = {}
 
+## How many asks that cost the world no time each character has made since it
+## last spent a turn, by id.
+##
+## The three tools a mind may answer with instead of an action -- `recall`,
+## `learn`, `done` -- return on the tick they are asked and move nothing here in
+## the world, so nothing about the world stops one being asked again at once.
+## This is the count that lets `ToolBudget` say when one of them has to start
+## costing something; the rule about how many are free, and what the next one
+## costs, is that file's and not this one's.
+var asks_taken: Dictionary = {}
+
+## Which tick each character stands until, having spent a turn on one of those,
+## by id.
+##
+## Not the same thing as `idle_until` above, which is a character's own `wait`
+## and binds nobody: this is a turn the world took off a character, and
+## `ControlLoop` will not ask it for a choice until the tick comes round --
+## exactly as it would not ask a character part-way through an action.
+var spent_until: Dictionary = {}
+
+## Every such ask the world has refused, in order:
+## `{"id": id, "tick": int, "why": String}`. The world's own account of what it
+## charged whom, written by `ToolBudget` and read by whatever wants to report it.
+var asks_refused: Array[Dictionary] = []
+
 # One counter over everything in the scene.
 var _next_id: int = 1
 var _next_check: int = 1
@@ -556,8 +581,53 @@ func actions_of(id: int) -> int:
 ## Count one action as attempted for a character. `ActionEngine`'s to call, on
 ## the one path every action takes, so that one action attempted is one count --
 ## including one the catalogue refused, which is a turn spent all the same.
+##
+## It also forgets how many asks that cost the world no time the character has
+## made, because `asks_taken` counts them *since the character last took a turn
+## on an action* and this is that turn. One definition, maintained where the
+## thing it is defined against moves. The one caller that counts a turn for
+## something other than an action -- `ToolBudget`, charging for an ask -- puts
+## the count straight back afterwards, because a look is not an action.
 func note_action(id: int) -> void:
 	actions_taken[id] = actions_of(id) + 1
+	clear_asks(id)
+
+
+## How many asks that cost the world no time a character has made since it last
+## spent a turn.
+func asks_of(id: int) -> int:
+	return int(asks_taken.get(id, 0))
+
+
+## Count one of those asks for a character. `ToolBudget`'s to call, on the one
+## path all three tools take.
+func note_ask(id: int) -> void:
+	asks_taken[id] = asks_of(id) + 1
+
+
+## Forget how many a character has made, which is what taking a turn on an
+## action does.
+func clear_asks(id: int) -> void:
+	asks_taken[id] = 0
+
+
+## Set how many a character is to be counted as having made. `ToolBudget`'s to
+## call: the count means something the rule decides, so the rule is what puts a
+## number back into it.
+func keep_asks(id: int, count: int) -> void:
+	asks_taken[id] = maxi(0, count)
+
+
+## Which tick a character stands until, having spent a turn on one of those.
+func spent_until_of(id: int) -> int:
+	return int(spent_until.get(id, 0))
+
+
+## Write down one such ask the world refused, and the tick the character stands
+## until for it. `ToolBudget`'s to call, on the one path a refusal takes.
+func note_ask_spent(id: int, until: int, why: String) -> void:
+	spent_until[id] = until
+	asks_refused.append({"id": id, "tick": tick, "why": why})
 
 
 ## Write down one trade the engine has honoured. `ActionEngine`'s to call, on the
