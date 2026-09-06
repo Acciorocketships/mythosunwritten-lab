@@ -556,9 +556,23 @@ func _two_who_have_met() -> Combatant:
 	return null
 
 
-## Take the fallen out of the world. A combatant whose piece is no longer on the
-## board is gone -- including one despawned by the king rule, which never lost a
-## hit point, which is why this asks the fight rather than reading a health.
+## Take the fallen out of the world, leaving behind whatever fell off them. A
+## combatant whose piece is no longer on the board is gone -- including one
+## despawned by the king rule, which never lost a hit point, which is why this
+## asks the fight rather than reading a health.
+##
+## What is left is `Inventory.spill_into`: each carried item rolled on its own
+## one-in-five stream by the drop layer, exactly as it has always been rolled.
+## Not one number of the drop rule is decided here, and this file does not name
+## that layer -- it asks the inventory, which is the same call a gift and a
+## purchase go through. This is only the place the roll finally has a floor to
+## land on, which is a pile at the position the character was standing when it
+## went down.
+##
+## An empty pile is not made. A defeat where nothing fell leaves nothing, which
+## is what "each item drops with some probability" means at the bottom of the
+## distribution and is also what keeps a long fight from littering the meadow
+## with things nobody can pick up.
 func _drop_the_fallen() -> void:
 	var gone := {}
 	for one in fight.fallen():
@@ -569,7 +583,35 @@ func _drop_the_fallen() -> void:
 	for one in actors:
 		if not gone.has(one.id):
 			kept.append(one)
+		else:
+			_leave_what_fell(one)
 	actors = kept
+
+
+## Roll one defeated character's gear onto the ground where it fell.
+##
+## The kill is addressed by the character's id, which is unique in the scene's
+## one id space and never reused, so the same world seed and the same defeat
+## produce the same drops however the fight got there. A minion carries nothing
+## -- it has no sheet -- and so leaves nothing.
+func _leave_what_fell(one: Combatant) -> WorldObject:
+	var pack := inventory_of(one)
+	if pack == null or pack.size() == 0:
+		return null
+	var pile := WorldObject.loose(one.x, one.z)
+	var seed_of_the_world := 0 if terrain == null else terrain.world_seed
+	if pack.spill_into(pile.contents, seed_of_the_world, kill_label(one)).is_empty():
+		return null
+	return add_object(pile)
+
+
+## How a defeat is named to the drop layer: `fallen#<id>`.
+##
+## Public because a report and a test both have to be able to say which stream a
+## verdict came off, and a claim about which streams exist is worth more when the
+## name can be read next to the number it produced.
+static func kill_label(one: Combatant) -> String:
+	return "fallen#%d" % (0 if one == null else one.id)
 
 
 # --- Time -----------------------------------------------------------------

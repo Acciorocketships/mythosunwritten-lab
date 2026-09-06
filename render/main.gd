@@ -545,6 +545,16 @@ var _board_fight := -1
 var _piece_views := {}
 var _pieces_drawn := 0
 
+## One drawable per item lying on the ground, keyed by `GroundItems`' own key --
+## which object it is in and which place in it -- so a pile that gains or loses
+## something costs one add or one free rather than a rebuild.
+##
+## Nothing about an item is kept here. The key is a string, the value is a node,
+## and every fact about what the item is worth stays in the simulation: the
+## shell has no rarity, no level and no budget of its own to disagree with.
+var _ground_views := {}
+var _ground_drawn := 0
+
 ## The interface, when --sheet or --readout asked for one: one CanvasLayer at a
 ## whole-number scale holding the character sheet, the combat readout, or both.
 ## Null in every run that asked for neither, and in a run where the Sprout Lands
@@ -1062,6 +1072,7 @@ func _sync_views() -> void:
 	_sync_water(snapshot)
 	_sync_board(snapshot)
 	_sync_combat(snapshot)
+	_sync_ground(snapshot)
 	_sync_sheet()
 
 	var observer := Vector3(
@@ -1961,6 +1972,81 @@ func _build_piece_view(row: Dictionary) -> Node3D:
 		return null
 	add_child(model)
 	return model
+
+
+## Put what is lying on the ground on screen: one drawable per item, where the
+## simulation says its pile is, at the height of the ground under it.
+##
+## The same three steps every other layer gets -- drop what has gone, add what
+## has arrived, leave the rest alone -- keyed by the item's place in its pile, so
+## picking one thing off a heap of five frees one node.
+##
+## Where each item goes is `GroundItems`, which is a pure function of the
+## snapshot and holds nothing; the height is sampled here because how high the
+## ground is under a point is the world's answer and not the snapshot's. An item
+## is normalised to one size: what it is built from is measured and divided, so a
+## bottle and a two-metre staff lie on the grass as things of the same order and
+## a pile reads as a pile.
+func _sync_ground(snapshot: Dictionary) -> void:
+	var rows := GroundItems.placements(snapshot)
+	var still_here := {}
+	for row in rows:
+		still_here[String(row["key"])] = true
+	for key in _ground_views.keys():
+		if not still_here.has(key):
+			(_ground_views[key] as Node3D).queue_free()
+			_ground_views.erase(key)
+
+	for row in rows:
+		var key := String(row["key"])
+		var x := float(row["x"])
+		var z := float(row["z"])
+		var view: Node3D = _ground_views.get(key, null)
+		if view == null:
+			view = AssetLibrary.build(
+				String(row["tag"]), _sim.world.terrain.profile_at(x, z))
+			if view == null:
+				continue
+			add_child(view)
+			# Measured after it is in the tree and before it is scaled, because
+			# a model's own size is the only thing that says how much to divide
+			# by -- the packs draw a sword along its height and a bow along its
+			# depth, so a single axis would not do.
+			var box := _bounds_of(view, Transform3D.IDENTITY)
+			var factor := GroundItems.scale_for(box.size)
+			view.scale = Vector3.ONE * factor
+			# And it rests on the ground rather than sinking into it: the models
+			# are not all drawn with their lowest point at their own origin.
+			view.set_meta("floor", box.position.y * factor)
+			_ground_views[key] = view
+			_ground_drawn += 1
+		view.position = Vector3(
+			x,
+			_sim.world.terrain.ground_height_at(x, z)
+				- float(view.get_meta("floor", 0.0)) + GroundItems.LIFT,
+			z,
+		)
+		view.rotation.y = float(row["yaw"])
+
+
+## The box a built visual occupies, in its own space: what every mesh under it
+## covers, together. The shell's own measurement of what the table handed it.
+func _bounds_of(node: Node, so_far: Transform3D) -> AABB:
+	var box := AABB()
+	var started := false
+	if node is VisualInstance3D:
+		var here: AABB = so_far * (node as VisualInstance3D).get_aabb()
+		box = here
+		started = true
+	for child in node.get_children():
+		if not (child is Node3D):
+			continue
+		var below := _bounds_of(child, so_far * (child as Node3D).transform)
+		if below.size == Vector3.ZERO:
+			continue
+		box = below if not started else box.merge(below)
+		started = true
+	return box
 
 
 ## Wash one tile's colours towards the tint that stands for its level, so a

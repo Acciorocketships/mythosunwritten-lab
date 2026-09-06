@@ -134,7 +134,8 @@ static func held(
 	var names: Array[String] = [shape.weapon_name]
 	return from_item(shape, Item.weapon(
 		"%s %s" % [of_rarity, shape.weapon_name], at_level, of_rarity,
-		Ability.STR, weights, names
+		Ability.STR, weights, names, [] as Array[int],
+		ItemModel.for_shape(shape.weapon_name)
 	))
 
 

@@ -123,6 +123,21 @@ var rarity: String = ItemRarity.COMMON
 ## Which of the six ability scores the item is read against.
 var governing: String = Ability.STR
 
+## The name in the asset catalog that says what this item looks like, or "" for
+## an item nobody recorded a shape for.
+##
+## A *name*, exactly like the `fir` a biome grows: this field holds a string out
+## of `AssetTags` and the file has never heard of a model, a pack or a path. The
+## forge writes it because the forge is where the shape is drawn -- a blade and a
+## bow are both held in the same slot and the slot cannot tell them apart -- and
+## everything else leaves it empty and is resolved from its slot by
+## `sim/item_model.gd`, which is the one place the question is answered.
+##
+## It is not part of the budget, it is read by no rule, and no number anywhere
+## depends on it, which is why it is absent from `line()`: two items with the
+## same line are the same item to the arithmetic whatever they look like.
+var model: String = ""
+
 ## Points of the budget spent on ways of moving.
 var movement: int = 0
 
@@ -148,6 +163,7 @@ static func from_shape(
 	weights: Array[int],
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
+	looks_like: String = "",
 ) -> Item:
 	var item := Item.new()
 	item.item_name = called
@@ -156,6 +172,7 @@ static func from_shape(
 	item.level = maxi(0, at_level)
 	item.rarity = of_rarity
 	item.governing = read_against
+	item.model = looks_like
 
 	var parts := ItemBudget.split(
 		ItemBudget.total(of_rarity, item.level), weights
@@ -178,10 +195,11 @@ static func weapon(
 	weights: Array[int],
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
+	looks_like: String = "",
 ) -> Item:
 	return from_shape(
 		KIND_WEAPON, called, SLOT_HAND, at_level, of_rarity, read_against,
-		weights, effect_names, effect_weights
+		weights, effect_names, effect_weights, looks_like
 	)
 
 
@@ -195,10 +213,11 @@ static func armour(
 	weights: Array[int],
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
+	looks_like: String = "",
 ) -> Item:
 	return from_shape(
 		KIND_ARMOUR, called, worn_in, at_level, of_rarity, read_against,
-		weights, effect_names, effect_weights
+		weights, effect_names, effect_weights, looks_like
 	)
 
 
@@ -217,10 +236,11 @@ static func consumable(
 	read_against: String,
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
+	looks_like: String = "",
 ) -> Item:
 	return from_shape(
 		KIND_CONSUMABLE, called, SLOT_NONE, at_level, of_rarity, read_against,
-		[0, 0, 1] as Array[int], effect_names, effect_weights
+		[0, 0, 1] as Array[int], effect_names, effect_weights, looks_like
 	)
 
 

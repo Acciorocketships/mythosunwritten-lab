@@ -188,7 +188,51 @@ func snapshot() -> Dictionary:
 		"anchor_x": 0.0 if fight == null else fight.anchor_x,
 		"anchor_z": 0.0 if fight == null else fight.anchor_z,
 		"pieces": rows,
+		"ground": ground_rows(),
 	}
+
+
+## One row per thing standing in the world that is not a character: where it is,
+## what it is, and -- for an open pile -- what is lying in it.
+##
+## The same rule the piece rows follow. Every value is a number or a name the
+## simulation already holds; there is no model, no scale and no colour, because
+## what a `gear_blade` looks like is the render layer's table's business and this
+## layer has never heard of one. `ItemModel` is asked which *name* an item goes
+## under, which is the same sort of answer as the `appearance` on a piece row.
+##
+## Only a pile lists its items. A chest is a placed thing and what is inside it
+## is not lying on the ground; a shut one says nothing about its contents at all,
+## which is the rule `WorldObject.contents_seen` already keeps and this does not
+## get a second opinion on.
+func ground_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for thing in scene.objects:
+		var row := {
+			"id": thing.id,
+			"name": thing.object_name,
+			"kind": "pile" if thing.pile else "object",
+			"shut": thing.shut,
+			"x": thing.x,
+			"y": thing.y,
+			"z": thing.z,
+			"items": [],
+		}
+		if thing.pile and thing.is_open() and thing.holds_things():
+			var lying: Array[Dictionary] = []
+			for entry in thing.contents.carried:
+				var item := Inventory.item_of(entry)
+				if item == null:
+					continue
+				lying.append({
+					"name": item.item_name,
+					"rarity": item.rarity,
+					"level": item.level,
+					"model": ItemModel.of(item),
+				})
+			row["items"] = lying
+		rows.append(row)
+	return rows
 
 
 ## One line per combatant, in id order. What a report prints and what a test

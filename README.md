@@ -1772,6 +1772,7 @@ To see what everything currently resolves to:
 ```
 ./run_assets.sh          # one line per tag; exits 1 if any tag has no visual
 ./run_asset_sheet.sh     # the same thing, drawn (needs a display)
+./run_item_sheet.sh      # generated items across every rarity tier, drawn (needs a display)
 ```
 
 ### The palette is still the simulation's
@@ -2397,6 +2398,7 @@ never has to be serialised for the world to be reproducible.
 ./run_encounter.sh              # play the whole real-time-fight-real-time cycle
 ./run_items.sh                  # the item layer's own tables: budgets, the trade, the gate
 ./run_drops.sh                  # what a kill leaves behind, and the frontier ahead of your gear
+./tools/ground_items_probe.sh   # the gear table, the fallback count, one seeded drop, one round trip
 ./run_loadout.sh                # what a loadout is worth on a board: grants, defence, damage
 ./run_effects.sh                # the composable effect base's own tables
 ./run_effect_suite.sh           # just the composable-effect suite

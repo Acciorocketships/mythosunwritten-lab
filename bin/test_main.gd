@@ -29,6 +29,7 @@ const SUITES := [
 	preload("res://tests/test_items.gd"),
 	preload("res://tests/test_inventory.gd"),
 	preload("res://tests/test_drops.gd"),
+	preload("res://tests/test_ground_items.gd"),
 	preload("res://tests/test_effects.gd"),
 	preload("res://tests/test_actions.gd"),
 	preload("res://tests/test_control_loop.gd"),

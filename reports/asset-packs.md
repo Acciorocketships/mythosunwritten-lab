@@ -13,11 +13,15 @@ forty-three rows now name a scene. The other nine still name nothing and fall
 back to their primitives; they are listed by name below.
 
 > Later: those numbers are this task's. The catalog has since grown to
-> fifty-eight tags and fifty-four of them name a model -- the JustCreate and
-> Mistage packs closed five of the nine gaps, and `W-character-visuals` added
-> fourteen character and creature rows, all of which name one. Four rows are
-> still placeholders: `petal_drift`, `blossom_tree`, `hanging_root` and
-> `glowing_orb`. `./run_assets.sh` is always the current answer.
+> **seventy** tags and **fifty-nine** of them name a model -- the JustCreate and
+> Mistage packs closed five of the nine gaps, `W-character-visuals` added
+> fourteen character and creature rows, all of which name one, and
+> `W-ground-items` added the twelve `gear_*` rows, five of which name one. Eleven
+> rows are still placeholders: `petal_drift`, `blossom_tree`, `hanging_root`,
+> `glowing_orb`, and the seven pieces of gear no free pack holds --
+> `gear_spear`, `gear_flail`, `gear_boots`, `gear_leggings`, `gear_chestplate`,
+> `gear_helmet` and `gear_bundle`, which is not a shape anything forges.
+> `./run_assets.sh` is always the current answer.
 
 ![Every tag in the catalog before the packs: coloured primitives](assets/asset-tag-sheet-before.png)
 

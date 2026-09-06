@@ -10,11 +10,12 @@ extends RefCounted
 ## of changing what the world looks like.
 ##
 ## A row's shape is `scene_path` first and primitives second, so installing a
-## pack means filling in one string per row. Eight free KayKit packs are
-## installed, and thirty-four of the forty-three rows now name a model out of
-## one; the nine that do not are listed in reports/asset-packs.md and keep the
-## primitives, which every row carries underneath either way -- a checkout
-## without the packs draws the old coloured world rather than an empty one.
+## pack means filling in one string per row. Of the seventy rows, fifty-nine name
+## a model out of an installed pack and eleven keep their primitives -- and every
+## row carries the primitives underneath either way, so a checkout without the
+## packs draws the old coloured world rather than an empty one.
+## `./run_assets.sh` prints which is which and is the answer this comment is a
+## snapshot of; reports/asset-packs.md says why each gap is a gap.
 ##
 ## A row points either straight at a pack model, for the tags the scatter layer
 ## sizes from `scene_height`, or at a wrapper scene under assets/tag_scenes/,
@@ -61,6 +62,9 @@ const AMBER := Color(1.00, 0.72, 0.36)
 const CLOTH := Color(0.72, 0.30, 0.32)
 const PETAL := Color(0.94, 0.68, 0.80)
 const CAP_RED := Color(0.80, 0.26, 0.24)
+const STEEL := Color(0.72, 0.75, 0.80)
+const LEATHER := Color(0.46, 0.32, 0.22)
+const GLASS_GREEN := Color(0.40, 0.72, 0.46)
 const CREAM := Color(0.90, 0.86, 0.74)
 const MARSH_GLOW := Color(0.62, 0.94, 0.86)
 
@@ -1897,6 +1901,133 @@ static func _built() -> Dictionary:
 	_row(rows, AssetTags.SKELETON_MINION, "res://assets/kaykit_skeletons/KayKit_Skeletons_1.1_FREE/characters/gltf/Skeleton_Minion.glb",
 		_person_placeholder(2.166, CREAM, Color(0.48, 0.46, 0.42)),
 		2.166, AssetVisual.TINT_NONE, 0.0, CharacterRig.RIG_MEDIUM)
+
+	# --- Gear ------------------------------------------------------------
+
+	# What a generated item looks like. Twelve rows for the twelve names in the
+	# catalog's gear category: six shapes a held thing comes in, four worn slots,
+	# a draught, and the bundle an item nobody recorded a shape for is drawn as.
+	#
+	# Every one of them takes no biome colour. Steel is steel in a marsh and in a
+	# meadow, and a sword that turned pink in the blossom grove would be reading
+	# the world's palette as if it had grown there. That is the same judgement the
+	# fence and the bridge already carry, and it is stated on every row rather
+	# than inherited, because these are the rows most likely to be repointed at a
+	# bought armoury pack later.
+	#
+	# Four of the twelve name an installed model and eight keep their placeholder.
+	# The free packs hold a sword, a bow, a staff, a round shield and a bottle,
+	# and hold no spear, no flail and no armour off a body at all -- those are
+	# what a bought armoury pack would bring, and until it does they are drawn as
+	# the primitives below. reports/ground-items.md carries the roll call.
+	#
+	# Sizes are drawn to be *read*, not to be right: the shell normalises every
+	# item to GroundItems.LYING_LENGTH before it lies down, so what matters here
+	# is the silhouette and not the scale.
+
+	_row(rows, AssetTags.GEAR_BLADE, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/sword_1handed.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.09, 0.62, 0.03), Vector3(0.0, 0.55, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.26, 0.05, 0.06), Vector3(0.0, 0.23, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.06, 0.20, 0.06), Vector3(0.0, 0.11, 0.0),
+			LEATHER),
+	], 1.775, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_SPEAR, "", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 1.30, 0.05), Vector3(0.0, 0.65, 0.0),
+			WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CONE, Vector3(0.12, 0.30, 0.12), Vector3(0.0, 1.45, 0.0),
+			STEEL),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_BOW, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/bow_withString.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.70, 0.05), Vector3(0.0, 0.60, 0.0),
+			WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.34, 0.05), Vector3(0.06, 1.06, 0.0),
+			WOOD, AssetVisual.TINT_NONE, 0.0, Vector3(0.0, 0.0, 28.0)),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.34, 0.05), Vector3(0.06, 0.14, 0.0),
+			WOOD, AssetVisual.TINT_NONE, 0.0, Vector3(0.0, 0.0, -28.0)),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.02, 1.16, 0.02), Vector3(0.14, 0.60, 0.0),
+			CREAM),
+	], 0.156, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_STAFF, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/staff.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.06, 1.30, 0.06), Vector3(0.0, 0.65, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.22, 0.22, 0.22), Vector3(0.0, 1.40, 0.0),
+			MARSH_GLOW, AssetVisual.TINT_NONE, 1.4),
+	], 2.155, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_FLAIL, "", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.07, 0.44, 0.07), Vector3(0.0, 0.22, 0.0),
+			LEATHER),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.03, 0.26, 0.03), Vector3(0.0, 0.57, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.26, 0.26, 0.26), Vector3(0.0, 0.82, 0.0),
+			DARK_STONE),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_BUCKLER, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/shield_round.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.62, 0.07, 0.62), Vector3(0.0, 0.04, 0.0),
+			WOOD, AssetVisual.TINT_NONE, 0.0, Vector3(90.0, 0.0, 0.0)),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.20, 0.20, 0.12), Vector3(0.0, 0.31, 0.0),
+			STEEL),
+	], 0.883, AssetVisual.TINT_NONE, 0.0)
+
+	_row(rows, AssetTags.GEAR_BOOTS, "", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.17, 0.30, 0.34), Vector3(-0.11, 0.15, 0.0),
+			LEATHER),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.17, 0.30, 0.34), Vector3(0.11, 0.15, 0.0),
+			LEATHER),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_LEGGINGS, "", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.18, 0.52, 0.18), Vector3(-0.11, 0.26, 0.0),
+			DARK_STONE),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.18, 0.52, 0.18), Vector3(0.11, 0.26, 0.0),
+			DARK_STONE),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.44, 0.12, 0.24), Vector3(0.0, 0.56, 0.0),
+			LEATHER),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	_row(rows, AssetTags.GEAR_CHESTPLATE, "", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.46, 0.52, 0.28), Vector3(0.0, 0.30, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.26, 0.20, 0.28), Vector3(-0.28, 0.52, 0.0),
+			DARK_STONE),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.26, 0.20, 0.28), Vector3(0.28, 0.52, 0.0),
+			DARK_STONE),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.50, 0.08, 0.32), Vector3(0.0, 0.06, 0.0),
+			LEATHER),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	# A helmet has to not read as a boulder, which a bare dome does: the brim and
+	# the dark slit across the front are what say which way it is facing and that
+	# it is a made thing.
+	_row(rows, AssetTags.GEAR_HELMET, "", [
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.38, 0.42, 0.38), Vector3(0.0, 0.24, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.50, 0.05, 0.50), Vector3(0.0, 0.14, 0.0),
+			DARK_STONE),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.30, 0.08, 0.20), Vector3(0.0, 0.28, 0.14),
+			Color(0.14, 0.14, 0.17)),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.06, 0.14, 0.34), Vector3(0.0, 0.46, 0.0),
+			CLOTH),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
+
+	_row(rows, AssetTags.GEAR_DRAUGHT, "res://assets/kaykit_dungeon_remastered/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/bottle_A_green.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.24, 0.28, 0.24), Vector3(0.0, 0.14, 0.0),
+			GLASS_GREEN),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.10, 0.16, 0.10), Vector3(0.0, 0.36, 0.0),
+			GLASS_GREEN),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.11, 0.06, 0.11), Vector3(0.0, 0.47, 0.0),
+			WOOD),
+	], 0.886, AssetVisual.TINT_NONE, 0.0)
+	# The one row that is not a shape anything forges: what an item nobody
+	# recorded a shape for is drawn as. A parcel with a cord round it, which is
+	# what an unidentified thing on the ground looks like -- readable as "there is
+	# something here" and deliberately not readable as any particular thing.
+	_row(rows, AssetTags.GEAR_BUNDLE, "", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.42, 0.32, 0.34), Vector3(0.0, 0.16, 0.0),
+			THATCH),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.06, 0.34, 0.36), Vector3(0.0, 0.17, 0.0),
+			LEATHER),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.44, 0.34, 0.06), Vector3(0.0, 0.17, 0.0),
+			LEATHER),
+	], 0.0, AssetVisual.TINT_NONE, 0.0)
 
 	_table = rows
 	return _table

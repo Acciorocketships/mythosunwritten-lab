@@ -94,14 +94,22 @@ static func forge(
 		weights.append(draw.next_int(1, ItemBudget.WEIGHT_TOTAL))
 
 	var called := "%s %s" % [rarity, shape]
+	# The shape is drawn here and nowhere else, so this is the one moment an
+	# item can be told what it looks like. `ItemModel` turns the shape into a
+	# name out of the catalog -- never into a model, a pack or a path, which the
+	# forge has no way of naming and no reason to.
+	var looks_like := ItemModel.for_shape(shape) if not worn \
+		else ItemModel.for_slot(shape)
 	if worn:
 		return Item.armour(
 			called, shape, source_level, rarity, governing,
-			ItemBudget.shape(effects_share, movement_of_rest), names, weights
+			ItemBudget.shape(effects_share, movement_of_rest), names, weights,
+			looks_like
 		)
 	return Item.weapon(
 		called, source_level, rarity, governing,
-		ItemBudget.shape(effects_share, movement_of_rest), names, weights
+		ItemBudget.shape(effects_share, movement_of_rest), names, weights,
+		looks_like
 	)
 
 

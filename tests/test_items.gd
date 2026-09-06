@@ -68,11 +68,19 @@ const RANDOM_SOURCES := [
 ##     and the frontier to ask what the ground it is rolling for is worth and to
 ##     forge the gear that ground gives.
 ##
+## The third joined for a third reason and is the same shape of exception: the
+## table that says which name in the asset catalog an item is drawn under reads
+## `Item` -- its slot, and the name the forge wrote on it -- and nothing else of
+## the layer. It is not a fight and it is not art either; it is two columns of
+## strings, and what it must not become is a place where a rule about items
+## lives, which is exactly what the narrower check below refuses.
+##
 ## Each is excused from the fight-reads-items direction below and checked against
 ## a narrower rule instead: it names what is listed for it here and no more of
 ## the item layer, so no rule about items can have moved into it.
 const NOT_A_FIGHT := [
 	{"path": "res://sim/check_prompt.gd", "may_name": ["Ability"]},
+	{"path": "res://sim/item_model.gd", "may_name": ["Item"]},
 	{"path": "res://sim/spawn_roll.gd", "may_name": ["Ability", "ItemFrontier"]},
 ]
 
@@ -830,10 +838,13 @@ func _the_layer_stands_on_its_own() -> void:
 	# `sim/world_cast.gd` is the tenth and is `sim/scripted_encounter.gd`'s kind:
 	# it names an ability to roll the six scores of the handful of characters who
 	# live in an ordinary world, and forges nothing at all.
+	# `sim/item_model.gd` is the eleventh and is neither kind: it reads `Item` to
+	# ask which slot a thing is worn in, and answers with a name out of the asset
+	# catalog. It is excused below and held to the narrower rule.
 	equal(readers, PackedStringArray([
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
 		"res://sim/check_prompt.gd", "res://sim/commander.gd",
-		"res://sim/inventory.gd",
+		"res://sim/inventory.gd", "res://sim/item_model.gd",
 		"res://sim/scripted_actions.gd", "res://sim/scripted_check.gd",
 		"res://sim/scripted_encounter.gd",
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",

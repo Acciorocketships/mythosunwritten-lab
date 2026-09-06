@@ -142,6 +142,41 @@ const SKELETON_ROGUE := "skeleton_rogue"
 const SKELETON_MAGE := "skeleton_mage"
 const SKELETON_MINION := "skeleton_minion"
 
+# --- Gear ----------------------------------------------------------------
+# What a generated item looks like lying on the ground or in a hand.
+#
+# The item layer builds a thing out of numbers -- a rarity, a level, one budget
+# cut three ways -- and none of those numbers is a shape. What it does draw is a
+# *shape*: the forge picks "blade" or "buckler" for a held item and a slot for a
+# worn one, and those are names of the same sort as `fir` and `boulder`. So they
+# get rows here, and `sim/item_model.gd` is the two-column table that says which
+# shape is which name.
+#
+# The `gear_` prefix is load-bearing for the same reason `minion_` is on the
+# Toadstool: a `boulder` is scenery and a `gear_chestplate` is a thing somebody
+# owns, and a category whose names could collide with the props is a category
+# that will eventually collide with them.
+#
+# `gear_bundle` is not a shape anything forges. It is what an item nobody
+# recorded a shape for is drawn as -- a wrapped parcel -- so that a wool blanket
+# on the ground is something a person can see and walk up to rather than nothing
+# at all. Which items take it is the render layer's decision and is made there.
+
+const GEAR_BLADE := "gear_blade"
+const GEAR_SPEAR := "gear_spear"
+const GEAR_BOW := "gear_bow"
+const GEAR_STAFF := "gear_staff"
+const GEAR_FLAIL := "gear_flail"
+const GEAR_BUCKLER := "gear_buckler"
+
+const GEAR_BOOTS := "gear_boots"
+const GEAR_LEGGINGS := "gear_leggings"
+const GEAR_CHESTPLATE := "gear_chestplate"
+const GEAR_HELMET := "gear_helmet"
+
+const GEAR_DRAUGHT := "gear_draught"
+const GEAR_BUNDLE := "gear_bundle"
+
 # --- Effect sprites and animations ---------------------------------------
 # What an effect looks like and what it looks like happening: the two tags every
 # composable effect carries.
@@ -196,11 +231,13 @@ const BRIDGES := "bridges"
 const LANTERNS := "lanterns"
 const CHARACTERS := "characters"
 const CREATURES := "creatures"
+const GEAR := "gear"
 
 ## Every category, in a fixed order, so anything that walks the catalog walks it
 ## the same way in every process.
 const CATEGORIES := [
 	FLORA, ROCKS, PROPS, BUILDINGS, BRIDGES, LANTERNS, CHARACTERS, CREATURES,
+	GEAR,
 ]
 
 ## category -> the tags in it, in a fixed order. This is the whole catalog: a
@@ -224,6 +261,11 @@ const BY_CATEGORY := {
 	CREATURES: [
 		MINION_TOADSTOOL, MINION_CAT, MINION_ENT, MINION_FROG,
 		SKELETON_WARRIOR, SKELETON_ROGUE, SKELETON_MAGE, SKELETON_MINION,
+	],
+	GEAR: [
+		GEAR_BLADE, GEAR_SPEAR, GEAR_BOW, GEAR_STAFF, GEAR_FLAIL, GEAR_BUCKLER,
+		GEAR_BOOTS, GEAR_LEGGINGS, GEAR_CHESTPLATE, GEAR_HELMET,
+		GEAR_DRAUGHT, GEAR_BUNDLE,
 	],
 }
 

@@ -367,4 +367,4 @@ static func _tool(called: String) -> Item:
 static func _draught(called: String) -> Item:
 	return Item.consumable(
 		called, _level_of(FEN), ItemRarity.COMMON, Ability.CON,
-		[called] as Array[String])
+		[called] as Array[String], [] as Array[int], AssetTags.GEAR_DRAUGHT)
