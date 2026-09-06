@@ -1854,6 +1854,7 @@ eighteen per-tag wrapper scenes under `assets/tag_scenes/`, and the two tools:
 ./tools/fetch_kaykit.sh        # download and install the free packs
 ./tools/extract_justcreate.sh  # unpack the paid village pack the user provided
 ./tools/extract_mistage.sh     # ...and the two paid Mistage packs
+./tools/extract_armoury.sh     # ...and the three paid Mistage armoury packs
 ./tools/bake_mistage.sh        # merge, scale and budget the Mistage models used
 ./tools/fbx_texture_map.py     # what an FBX asks for, read out of the binary
 ./tools/measure_models.sh      # print the size of each installed model, as drawn
@@ -1928,6 +1929,30 @@ numbers rather than a preference: cottages are 7.7 of a village's 12.6 buildings
 so the Mistage one would cost a village 116 312 triangles against 55 381, no
 Mistage shell fits a cottage plot without coming down to 2.62 m against 3.53,
 and at that height its eaves leave the lit-window fit no flat wall.
+
+Three more paid packs the user bought — Daniel Mistage's *STYLIZED Battle Pack*
+(672 models), *STYLIZED Forge & Armory* (435) and *STYLIZED The Alchemist's
+Workshop* (823) — are now unpacked, imported and catalogued, but nothing is drawn
+from them yet. They are the armoury: 293 of their 1 930 models are weapons,
+shields, arrows, potions and bags. All 1 930 import in Godot's built-in ufbx
+importer with no external converter and no failures, in 12.7 s, 9.0 s and 13.7 s
+respectively, for 155 MB of import cache; the only fix needed is the same
+basename-atlas copy the village and market packs wanted, nine files this time.
+[reports/armoury-packs.md](reports/armoury-packs.md) is the write-up, and it
+carries the one thing the next item spends: a 43-row table from every gear shape
+the game needs to a candidate model, covering the twelve `gear_*` tags, the
+shapes the three packs add, and the 25 weapon and armour models that were sitting
+unnamed in the adventurer pack all along — including `arrow_bow.gltf` and
+`arrow_crossbow.gltf`, the two projectile models. Four shapes come out of it as
+real gaps with no model anywhere on this machine: flail, boots, leggings, and the
+chestplate/helmet pair.
+
+```
+./tools/extract_armoury.sh                             # unpack, nine atlas names mapped
+./tools/fbx_texture_map.py assets/mistage_battle \
+    assets/mistage_forge assets/mistage_alchemy        # what the binaries ask for
+./tools/inventory_pack.sh assets/mistage_forge         # tris, size, floor, texture
+```
 
 The forest is still KayKit's, deliberately. The village pack has trees, rocks and
 grass, and the dedicated forest pack's do the same job for a fraction of the

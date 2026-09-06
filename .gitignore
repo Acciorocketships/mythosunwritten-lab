@@ -22,15 +22,19 @@ __pycache__/
 # are not fetchable by any script -- they are files the user bought and dropped
 # into assets/ -- so they stay exactly where they were put and out of git, which
 # is neither a place to store 294 MB of binaries nor a place to redistribute
-# paid art. tools/extract_justcreate.sh and tools/extract_mistage.sh unpack the
-# three this project draws from, reproducibly, from the archives beside them, and
-# tools/bake_mistage.sh writes assets/mistage_baked/ out of two of them -- which
-# is derived from the same paid art and just as reproducible.
+# paid art. tools/extract_justcreate.sh, tools/extract_mistage.sh and
+# tools/extract_armoury.sh unpack the six this project draws from, reproducibly,
+# from the archives beside them, and tools/bake_mistage.sh writes
+# assets/mistage_baked/ out of two of them -- which is derived from the same paid
+# art and just as reproducible.
 /assets/*.rar
 /assets/*.zip
 /assets/justcreate_village/
 /assets/mistage_village/
 /assets/mistage_market/
+/assets/mistage_battle/
+/assets/mistage_forge/
+/assets/mistage_alchemy/
 /assets/mistage_baked/
 
 # The Sprout Lands UI pack, and what tools/extract_sprout_lands.sh unpacks out of
