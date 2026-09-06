@@ -7,7 +7,7 @@ extends SceneTree
 ##
 ##   1. **The table.** Every gear name in the catalog, which model it resolves
 ##      to, and whether that is an installed model or the placeholder underneath.
-##   2. **The fallback.** Every item the five shipped scenarios put in the world,
+##   2. **The fallback.** Every item the six shipped scenarios put in the world,
 ##      the name each resolved through, and how many of them resolved to nothing
 ##      and are therefore drawn as the bundle.
 ##   3. **The drop.** One seeded run of the skirmish, played until the stranger

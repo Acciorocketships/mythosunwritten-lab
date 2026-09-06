@@ -2228,6 +2228,43 @@ scenario put in the world.
 before-and-after of what the gear changed, and the three attempts the rules
 turned down.
 
+**The fight.** The tactical layer was built before anyone could reach it: a fight
+snapped onto the ground and every turn in it was played by `sim/combat_policy.gd`
+because there was nothing else to play them with. `--scenario battle` puts you in
+one — the encounter scenario with the camera looking through one of the two
+commanders, so there is somebody to hand over — and the board then **waits** for
+you:
+
+```
+./run_render.sh --scenario battle --play --readout --board   # play a fight
+./tools/play_combat.sh                                       # ...a whole one, headless
+```
+
+On your turn `[` picks the next cell you may step onto and `]` steps onto it;
+`;` picks one of your minions, `'` picks where it goes and `\` sends it;
+`4` `5` `6` `7` use the first to fourth weapon action; `8` and `9` turn you a
+quarter left or right, which is free; `0` ends your turn and passes the board on.
+That is section 3.6's turn economy exactly — a move, one weapon action, one
+minion, and as much turning as you like — and it is written once, in
+`sim/combat_match.gd`, as three flags and the refusals they produce. The
+interface does not restate it: `sim/board_turn.gd` asks, and every answer is
+`LegalMoves`', the commander's or the match's. Where you may step is painted
+green over the lattice, what your weapons cover from where you stand is painted
+rose, where the picked minion may go is blue, and what you have picked is a
+bright plate — four lists of cells the simulation handed over, coloured.
+
+A choice the board does not offer comes back in the match's own words
+(`refused: (-155,146) is not reachable`), and an action still on its cooldown is
+drawn with the pack's prohibition sign and the number of turns left rather than
+quietly doing nothing. Turning is free and moves the pattern, which is a pair of
+frames six ticks apart.
+
+[reports/player-combat.md](reports/player-combat.md) has the frames, the whole
+fight as a trace, and the two things it changed underneath: a fight waits for a
+person and only for a person (`ActionScene.hands`), and a transcript written
+across ticks needed one seam to reach the world's
+(`Encounter.unreported()`).
+
 `--start X Z` and `--paused` work here too: the first aims the camera at a place,
 the second holds the world still so a capture can wait for the renderer to settle
 without the observer walking away underneath it.

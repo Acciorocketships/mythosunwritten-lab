@@ -120,6 +120,14 @@ var refused := false
 # keeps those lines in the fight's transcript instead of dropping them.
 var _copied: int = 0
 
+# How much of this fight's own transcript the world has been handed already.
+#
+# A second cursor, because a turn is no longer always written inside one call. A
+# turn taken by hand is spent across many ticks and writes as it goes, so "what
+# this call produced" stopped being the same thing as "what has not been said
+# yet", and only the second of those is what the world's trace wants.
+var _reported: int = 0
+
 
 ## Begin a fight around a commander.
 ##
@@ -208,10 +216,76 @@ func advance() -> PackedStringArray:
 	if finished:
 		return PackedStringArray()
 	CombatPolicy.take_turn(match_state)
-	turns_played += 1
+	_turn_is_over()
+	return unreported()
+
+
+## End a turn somebody took for themselves, and wrap it up exactly as a turn the
+## rule played is wrapped up.
+##
+## The other way a turn ends. `advance()` above hands the whole turn to
+## `CombatPolicy` and the last thing that rule does is end it; a turn taken by
+## hand is spent one call at a time -- a move, a swing, a minion, any number of
+## free turns to face -- and ends when whoever is taking it says so. Both go
+## through the same tail below, so a hand-played turn counts, carries and
+## concludes on exactly the terms a played one does.
+func hand_turn_over() -> PackedStringArray:
+	if finished or match_state == null:
+		return PackedStringArray()
+	match_state.end_turn()
+	return _turn_is_over()
+
+
+## Mark everything written so far as already handed to the world.
+##
+## Called by whoever took a fight's opening lines out of `lines` directly --
+## `ActionScene.begin_fight` does, because the snap-in has to reach the world's
+## trace at the tick the fight began on, which may be between two of the ticks
+## `unreported()` is asked on. Without it the snap-in would come back a second
+## time the first time the world asked.
+func mark_reported() -> void:
+	_reported = lines.size()
+
+
+## Everything this fight has written down that the world has not been handed yet,
+## taken rather than read.
+##
+## The one seam between a fight's transcript and the world's trace. Whoever is
+## stepping the world asks this once a tick, and gets what was written since the
+## last time it asked -- whether that was written by the rule playing a turn, by
+## a person spending one over several ticks, or by an attack the engine resolved
+## between two of them. Reporting twice is what the cursor prevents.
+func unreported() -> PackedStringArray:
+	settle()
+	var found := PackedStringArray()
+	for at in range(_reported, lines.size()):
+		found.append(lines[at])
+	_reported = lines.size()
+	return found
+
+
+## Put every piece back where its cell says and hand over whatever the match has
+## written since anyone last looked.
+##
+## What a fight that is waiting on somebody is stepped with. A turn taken by hand
+## is spent across many ticks, and each thing spent in it moves pieces and writes
+## lines; this is how those reach the world on the tick they happened on rather
+## than all at once when the turn ends.
+func settle() -> PackedStringArray:
+	if match_state == null:
+		return PackedStringArray()
 	_carry_positions()
 	var added := _uncopied()
 	lines.append_array(added)
+	return added
+
+
+# The tail both ways of ending a turn share: one more turn played, everyone put
+# back where their cells say, the match's own lines taken up, and the two
+# conditions that end a fight asked.
+func _turn_is_over() -> PackedStringArray:
+	turns_played += 1
+	var added := settle()
 	if match_state.is_over():
 		finished = true
 		ending = DECIDED
@@ -262,8 +336,8 @@ func fallen() -> Array[Combatant]:
 ## the position a survivor stands at is `CombatSnap.world_of` of its own last
 ## cell, which is the exact position that would snap back to that same cell.
 func conclude() -> PackedStringArray:
-	var written := _uncopied()
-	written.append("over turns=%d rounds=%d ending=%s survivors=%d fallen=%d" % [
+	lines.append_array(_uncopied())
+	lines.append("over turns=%d rounds=%d ending=%s survivors=%d fallen=%d" % [
 		turns_played, match_state.round_number, ending,
 		survivors().size(), fallen().size(),
 	])
@@ -271,13 +345,13 @@ func conclude() -> PackedStringArray:
 		var standing := match_state.pieces.piece_of(one.piece.id)
 		one.fighting = false
 		if standing == null:
-			written.append("snap-out #%d fell" % one.id)
+			lines.append("snap-out #%d fell" % one.id)
 			continue
 		var back := CombatSnap.world_of(board, standing.cell)
 		one.x = back.x
 		one.y = back.y
 		one.z = back.z
-		written.append(
+		lines.append(
 			"snap-out #%d cell (%d,%d) -> (%.3f, %.3f, %.3f) back to cell (%d,%d) hp=%d/%d"
 			% [
 				one.id, standing.cell.x, standing.cell.y, back.x, back.y, back.z,
@@ -285,8 +359,7 @@ func conclude() -> PackedStringArray:
 				CombatSnap.cell_for(back.x, back.z, board.cell_size).y,
 				standing.health, standing.max_health(),
 			])
-	lines.append_array(written)
-	return written
+	return unreported()
 
 
 # --- Setting the board out ------------------------------------------------

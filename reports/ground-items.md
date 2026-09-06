@@ -105,7 +105,8 @@ that it does not know what a wool blanket looks like; the render layer's answer
 is that something has to be visible anyway.
 
 **Of the 31 items the five shipped scenarios put in the world, 6 take the
-fallback**: three brass lanterns, a wool blanket, an iron key and a silver ring.
+fallback**  (37 out of six scenarios since the battle scenario landed, which is
+the encounter scenario counted a second time; the fallbacks are the same six): three brass lanterns, a wool blanket, an iron key and a silver ring.
 Every one of them is a hand-slot object with no gear shape — the numbers are in
 `tools/ground_items_probe.sh`, and both are compared against constants in
 `tests/test_ground_items.gd`, so an item added with no shape recorded fails a
@@ -238,7 +239,7 @@ the ground at the start.
    turn up.
 3. An item with no shape recorded resolves to nothing and is drawn as the
    fallback; a named one is not.
-4. The five shipped scenarios hold exactly 31 items and exactly 6 of them fall
+4. The shipped scenarios hold exactly 31 items and exactly 6 of them fall
    back.
 5. For piles of 1, 2, 3, 5, 8, 13 and 24, no two things land closer than the
    spacing, the heap stays inside $0.85\sqrt{n}$, and the first thing is at the

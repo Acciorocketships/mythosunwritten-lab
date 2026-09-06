@@ -103,6 +103,23 @@ var raised: Array[AbilityCheck] = []
 ## The fight under way, or null.
 var fight: Encounter = null
 
+## Whose board turns are taken by hand: the ids of the characters somebody is
+## playing rather than a rule is.
+##
+## A fight takes one turn per tick because something plays each turn as it comes
+## up (`CombatPolicy`, through `Encounter.advance`). A person cannot be played at
+## a tick's notice, so a turn that belongs to one of these is not played at all:
+## `fight_step()` leaves it standing and the fight waits, for as many ticks as it
+## takes, until whoever is taking it ends it themselves through
+## `Encounter.hand_turn_over`. That is the same waiting the world already does
+## for a character that has not decided yet -- section 2.2's "a character waits
+## in-world instead of freezing the game" -- moved onto the board, where the unit
+## of waiting is a turn rather than a tick.
+##
+## Empty in every world nobody is playing, and an empty one changes nothing: a
+## world with no hand in it plays exactly the fights it played before.
+var hands := PackedInt32Array()
+
 ## What each character is part-way through, as `func(id: int) -> Action`.
 ##
 ## Set by whatever is stepping the characters, and read by `fight_step()` alone.
@@ -519,6 +536,13 @@ func fight_step() -> Dictionary:
 		"over": PackedStringArray(),
 	}
 	if fight != null:
+		if _turn_is_taken_by_hand():
+			# It is somebody's turn and that somebody is a person. The fight
+			# waits. What they have spent of the turn so far still reaches the
+			# world on the tick they spent it on, which is what `unreported` is.
+			written.append_array(fight.unreported())
+			turn["lines"] = written
+			return turn
 		if _turn_is_being_spent():
 			# The commander whose turn it is is part-way through the weapon
 			# action that turn will spend. Nothing is played until it lands.
@@ -568,6 +592,9 @@ func begin_fight(anchor_id: int) -> Encounter:
 	# ways into a fight go through this call, so both put the snap-in -- or the
 	# refusal -- into the world's transcript, at the tick it happened on.
 	_opening = started.lines.duplicate()
+	# Taken out of the fight's transcript directly, so the fight is told they
+	# have been said: `unreported()` reports what is written after this point.
+	started.mark_reported()
 	if started.refused:
 		# Nobody was seated and nobody was moved. The world carries on in real
 		# time and the refusal is on the record.
@@ -599,6 +626,31 @@ func end_fight() -> PackedStringArray:
 ## turn does not wait for it -- and neither does the fight wait on a character
 ## that has committed nothing, which is the whole of why a slow decision cannot
 ## stall a board.
+## Take a character's board turns by hand: whoever is driving it plays them, and
+## the fight waits for them rather than playing them itself.
+##
+## Called once, by whoever hands the character over. Naming the same id twice
+## changes nothing.
+func take_by_hand(id: int) -> void:
+	if id != 0 and not played_by_hand(id):
+		hands.append(id)
+
+
+## Whether a character's board turns are taken by hand.
+func played_by_hand(id: int) -> bool:
+	return hands.has(id)
+
+
+# Whether the turn now standing belongs to somebody playing by hand, and so is
+# not this file's to play. A finished fight is nobody's turn: it has to be
+# allowed through so that the snap back out happens.
+func _turn_is_taken_by_hand() -> bool:
+	if fight.finished:
+		return false
+	var acting := fight.active_member()
+	return acting != null and played_by_hand(acting.id)
+
+
 func _turn_is_being_spent() -> bool:
 	if not in_progress.is_valid():
 		return false

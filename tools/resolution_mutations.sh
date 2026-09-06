@@ -144,7 +144,7 @@ MUTATIONS=(
 "a turn never passes to the next commander|sim/combat_match.gd|	var next_slot := _slot if at < 0 else at + 1|	var next_slot := _slot if at < 0 else at"
 "a commander may move as often as it likes|sim/combat_match.gd|	if me == null or _moved:|	if me == null:"
 "a commander may act as often as it likes|sim/combat_match.gd|	if _acted:
-		_write(\"  refused attack #%d: already acted this turn\" % me.id)
+		_refused(\"attack\", me.id, \"already acted this turn\")
 		return {\"ok\": false, \"reason\": \"already acted\"}|	if false:
 		return {\"ok\": false, \"reason\": \"already acted\"}"
 "a commander may march every minion it owns|sim/combat_match.gd|	if _minion_spent:|	if false:"

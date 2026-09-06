@@ -24,6 +24,15 @@
 # --screenshot-ticks "4:one.png,32:two.png" photographs one run at several named
 # moments so a story does not have to be told across several runs.
 #
+# --scenario battle --play --readout puts you in a fight: the encounter scenario
+# with the camera on one of the two commanders, so the board comes round to you
+# and waits. On your turn [ picks the next cell you may step onto and ] steps
+# onto it, ; picks one of your minions, ' picks where it goes and \ sends it,
+# 4 5 6 7 use the first to fourth weapon action, 8 and 9 turn you a quarter left
+# or right for free, and 0 ends your turn. The readout draws what is on offer --
+# where you may go in green, what your weapons cover in rose -- and the buttons
+# along its bottom press the same keys.
+#
 # The sheet is where what you carry is operated from: F turns the ring of what is
 # carried and the sheet marks the row it is on, then 1 puts that on, 2 takes it
 # off, 3 uses it up, X drops it and O offers it to whatever you have aimed at.

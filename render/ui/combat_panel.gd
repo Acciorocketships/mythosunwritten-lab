@@ -33,6 +33,17 @@ extends PanelContainer
 ##   * **the last blow**, as the sprite of the action that struck it, playing the
 ##     animation that action names.
 ##
+##   * **your turn**, in a run where a person is playing and the board has come
+##     round to them: which of the three things a turn buys are still theirs to
+##     spend, what they have picked to spend them on, and a row of controls that
+##     press the same keys the keyboard does.
+##
+## The turn section is drawn only while there is a turn to draw, and it is read
+## through `BoardTurn` -- the simulation's own answer to what is left of the turn
+## and what is legal in it. There is no copy of the budget here and no rule about
+## any of it: a button hands a keycode to the shell, exactly as the character
+## sheet's do, and what comes of that is the match's.
+##
 ## The last two are where `render/effect_art.gd` is used: the six effect sprites
 ## and the seven animations the simulation names are looked up there by tag, so a
 ## resolved weapon action is something you can watch rather than only read.
@@ -68,15 +79,65 @@ const BLOW_REST := Vector2.ZERO
 
 ## The gaps, in art pixels: eighths of the art's own cell, as on the sheet.
 const GAP := 2
-const ROW_GAP := 4
+## Two rather than four since the readout gained a turn section: with a fight on,
+## a blow on the record and a turn standing, every section it has is drawn at
+## once, and the panel has to fit a window whose height buys two art pixels per
+## screen pixel. The section gaps are unchanged, because the spacers below are
+## written as `SECTION_GAP - ROW_GAP` and take up the difference.
+const ROW_GAP := 2
 const SECTION_GAP := 8
 
 ## What an absent name or an empty fight reads as. The sheet's own convention.
 const NOTHING := "-"
 
-## The world whose fight is being read. A handle, never written to, and the only
-## thing this panel is given.
+## The three things a turn buys, in the order the design lists them, and how each
+## is read off the turn. The key is what `BoardTurn` is asked; nothing here
+## counts a budget of its own.
+const SPENT_ROWS := [
+	{"label": "move", "ask": "moved"},
+	{"label": "action", "ask": "acted"},
+	{"label": "minion", "ask": "minion_spent"},
+]
+
+## The controls along the bottom of the readout: what each is called and which
+## key it presses. The keys are `BoardControls`' own constants, so a button and
+## the keyboard cannot come to mean different things -- there is one binding and
+## this names it. Two rows so that a label is a word rather than a letter.
+const CONTROLS := [
+	[
+		{"label": "cell", "key": BoardControls.KEY_PICK_CELL},
+		{"label": "step", "key": BoardControls.KEY_STEP},
+		{"label": "left", "key": BoardControls.KEY_TURN_LEFT},
+		{"label": "right", "key": BoardControls.KEY_TURN_RIGHT},
+	],
+	[
+		{"label": "unit", "key": BoardControls.KEY_PICK_MINION},
+		{"label": "goes", "key": BoardControls.KEY_PICK_MINION_CELL},
+		{"label": "send", "key": BoardControls.KEY_SEND},
+		{"label": "end", "key": BoardControls.KEY_END_TURN},
+	],
+]
+
+## The world whose fight is being read. A handle, never written to.
 var world: SimWorld = null
+
+## Where the panel asks for the board turn standing for the person playing, as
+## `func() -> BoardTurn`. Unset in a run nobody is playing, in which case there is
+## no turn section and no controls.
+##
+## A call rather than a stored turn, and that is the whole of why this panel
+## still holds nothing: a turn asked for on the frame it is drawn is the turn the
+## fight is holding on that frame, and a turn kept between frames would be a copy
+## that can be wrong.
+var turn_source: Callable = Callable()
+
+## What the person has picked to spend the turn on. Read for one line of text and
+## never written.
+var picked: BoardControls = null
+
+## Where a button press goes: `func(keycode: int) -> void`, the shell's own input
+## path, exactly as on the character sheet.
+var on_key: Callable = Callable()
 
 # The labels and rows, which are the drawn picture and not a copy of anything:
 # every one of them is overwritten from the simulation on every frame.
@@ -90,6 +151,10 @@ var _blow_head: Label
 var _blow_stage: Control
 var _blow_sprite: TextureRect
 var _blow_label: Label
+var _turn_head: Label
+var _spent_rows: VBoxContainer
+var _picked_label: Label
+var _control_rows: Array[HBoxContainer] = []
 
 ## How long this panel has been on screen, in seconds. A clock, and the whole of
 ## what this file remembers: an animation has to be somewhere in its play and the
@@ -139,6 +204,18 @@ func _init() -> void:
 	_blow_head = _heading("last blow")
 	column.add_child(_blow_head)
 	column.add_child(_build_blow())
+	_turn_head = _heading("your turn")
+	column.add_child(_turn_head)
+	_spent_rows = _stack()
+	column.add_child(_spent_rows)
+	_picked_label = Label.new()
+	_picked_label.theme_type_variation = SproutTheme.DIM_LABEL
+	_picked_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	column.add_child(_picked_label)
+	for row in CONTROLS:
+		var buttons := _build_controls(row)
+		_control_rows.append(buttons)
+		column.add_child(buttons)
 	refresh()
 
 
@@ -151,6 +228,24 @@ func _process(delta: float) -> void:
 ## again on every frame, so there is nothing here to keep in step.
 func watch(watching: SimWorld) -> void:
 	world = watching
+
+
+## Wire the controls: where to ask for the turn standing now, what has been
+## picked, and where a button press goes. Three handles and nothing else.
+func play(asking: Callable, picking: BoardControls, keys: Callable) -> void:
+	turn_source = asking
+	picked = picking
+	on_key = keys
+
+
+## Press one of the readout's controls, as though the key had been pressed.
+##
+## Public for the reason the character sheet's is: a run with no pointer in it
+## calls this and the suite asserts the shell was handed the key, which is the
+## whole of what a click does.
+func press(keycode: int) -> void:
+	if on_key.is_valid():
+		on_key.call(keycode)
 
 
 ## Whether there is a fight to draw at all.
@@ -176,6 +271,7 @@ func refresh() -> void:
 	_refresh_order(on, order, acting)
 	_refresh_actions(FightSource.standing_in(on, acting), turn)
 	_refresh_blow()
+	_refresh_turn()
 
 
 # --- Reading the fight ----------------------------------------------------
@@ -248,7 +344,89 @@ func _refresh_blow() -> void:
 	_blow_sprite.rotation = EffectArt.radians_of(int(pose["quarter_turns"]))
 
 
+## The turn standing for the person playing, and what is left of it.
+##
+## Every value comes off `BoardTurn`, asked for on this frame: which of the three
+## a turn buys are still theirs, and what they have picked to spend them on. The
+## whole section, controls included, is hidden in a run nobody is playing and on
+## every frame it is somebody else's turn -- a control for a turn that is not
+## yours is a control that would be refused.
+func _refresh_turn() -> void:
+	var turn: BoardTurn = null
+	if turn_source.is_valid():
+		turn = turn_source.call()
+	var showing := turn != null
+	_turn_head.visible = showing
+	_spent_rows.visible = showing
+	_picked_label.visible = showing
+	for row in _control_rows:
+		row.visible = showing
+	if not showing:
+		return
+	# Which way you are turned belongs on the heading rather than on a line of its
+	# own: it is a fact about the turn, and the board is where its consequence --
+	# which cells the pattern covers -- is actually shown.
+	_turn_head.text = "your turn %d, facing %s" % [
+		turn.round_number(), turn.facing_name()]
+	if _spent_rows.get_child_count() != SPENT_ROWS.size():
+		_fill(_spent_rows, SPENT_ROWS.size(), _spent_row)
+	for index in SPENT_ROWS.size():
+		var one: Dictionary = SPENT_ROWS[index]
+		var row := _spent_rows.get_child(index)
+		# Spent or not is the match's own flag, forwarded by the turn. The name
+		# of the question is in the table above so that the three rows are one
+		# row drawn three times rather than three copies of a reading.
+		var spent := bool(turn.call(String(one["ask"])))
+		(row.get_child(0) as TextureRect).texture = \
+			_faces["bar"] if spent else _faces["tick"]
+		(row.get_child(1) as Label).text = String(one["label"])
+		var state := row.get_child(2) as Label
+		state.text = "spent" if spent else "yours"
+		state.theme_type_variation = \
+			StringName(SproutTheme.DIM_LABEL) if spent else StringName("")
+	_picked_label.text = SproutPack.drawable(
+		"nothing picked" if picked == null else picked.picked_line())
+
+
 # --- Building the tree ----------------------------------------------------
+
+
+## One of the three things a turn buys: whether it is still yours, what it is
+## called, and the same in a word.
+func _spent_row() -> Control:
+	var row := _row()
+	# The font's cell rather than the art's: this row carries no sprite that
+	# needs a whole 16-pixel square, and the readout is the tallest panel of the
+	# four -- with a fight on, a blow on the record and a turn standing, every
+	# section it has is drawn at once.
+	row.custom_minimum_size = Vector2(WIDTH - 32, SproutPack.FONT_CELL)
+	row.add_child(_sprite(null))
+	var called := Label.new()
+	called.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	called.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(called)
+	var state := Label.new()
+	state.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	state.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	state.custom_minimum_size = Vector2(SproutPack.CELL * 3, SproutPack.FONT_CELL)
+	row.add_child(state)
+	return row
+
+
+## One row of controls: one button per entry, each of which presses that entry's
+## key and nothing else. The whole of what a button does is in `press()`.
+func _build_controls(entries: Array) -> HBoxContainer:
+	var row := _row()
+	for entry in entries:
+		var button := Button.new()
+		button.text = SproutPack.drawable(String((entry as Dictionary)["label"]))
+		button.custom_minimum_size = Vector2(0, SproutPack.FONT_CELL + 6)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.focus_mode = Control.FOCUS_NONE
+		var keycode := int((entry as Dictionary)["key"])
+		button.pressed.connect(func() -> void: press(keycode))
+		row.add_child(button)
+	return row
 
 
 func _build_header() -> Control:

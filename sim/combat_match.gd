@@ -85,6 +85,16 @@ var _minion_spent := false
 # Whether the conclusion has been written. A match reaches its end once.
 var _concluded := false
 
+## Why the last thing asked of this turn was refused, in the words the match
+## wrote it down in, or "" when the last thing asked of it was allowed.
+##
+## The transcript already carries every refusal, and a caller reading the
+## transcript to find out what just happened would be parsing prose. This is the
+## same sentence, kept where the one who asked can read it back -- which is what
+## a person choosing at a keyboard needs and what a rule choosing in a loop does
+## not, since a rule is refused only when it has got something wrong.
+var last_refusal := ""
+
 
 ## Begin a match on a board, with the pieces already placed.
 static func start(
@@ -156,7 +166,7 @@ func face(direction: int) -> bool:
 	if me == null:
 		return false
 	me.face(direction)
-	_write("  face #%d %s" % [me.id, _facing_name(me.facing)])
+	_write("  face #%d %s" % [me.id, facing_name(me.facing)])
 	return true
 
 
@@ -165,16 +175,16 @@ func face(direction: int) -> bool:
 func move_commander(to: Vector2i) -> bool:
 	var me := active_commander()
 	if me == null or _moved:
-		_write("  refused move #%d: %s" % [
-			_active, "no commander" if me == null else "already moved",
-		])
+		var why := "no commander" if me == null else "already moved"
+		_refused("move", _active, why)
 		return false
 	if not LegalMoves.moves_for(board, pieces, me).has(to):
-		_write("  refused move #%d: (%d,%d) is not reachable" % [me.id, to.x, to.y])
+		_refused("move", me.id, "(%d,%d) is not reachable" % [to.x, to.y])
 		return false
 	var from := me.cell
 	pieces.move_piece(me.id, to)
 	_moved = true
+	last_refusal = ""
 	_write("  move #%d (%d,%d)->(%d,%d)" % [me.id, from.x, from.y, to.x, to.y])
 	return true
 
@@ -188,15 +198,16 @@ func attack(index: int) -> Dictionary:
 	if me == null:
 		return {"ok": false, "reason": "no commander"}
 	if _acted:
-		_write("  refused attack #%d: already acted this turn" % me.id)
+		_refused("attack", me.id, "already acted this turn")
 		return {"ok": false, "reason": "already acted"}
 	var outcome := CombatResolution.commander_attack(
 		board, pieces, me, index, turn_number(me.id), fight_seed
 	)
 	if not outcome.get("ok", false):
-		_write("  refused attack #%d: %s" % [me.id, outcome.get("reason", "?")])
+		_refused("attack", me.id, str(outcome.get("reason", "?")))
 		return outcome
 	_acted = true
+	last_refusal = ""
 	_write("  attack #%d %s cells=%d hits=%d" % [
 		me.id, outcome["attack"], outcome["cells"], (outcome["hits"] as Array).size(),
 	])
@@ -210,20 +221,21 @@ func attack(index: int) -> Dictionary:
 ## one capture. A second call in the same turn is refused and changes nothing.
 func activate_minion(id: int, to: Vector2i) -> Dictionary:
 	if _minion_spent:
-		_write("  refused minion #%d: a minion has already acted this turn" % id)
+		_refused("minion", id, "a minion has already acted this turn")
 		return {"ok": false, "reason": "a minion has already acted"}
 	var minion := pieces.piece_of(id)
 	if minion == null or minion.is_commander():
-		_write("  refused minion #%d: not a minion" % id)
+		_refused("minion", id, "not a minion")
 		return {"ok": false, "reason": "not a minion"}
 	if minion.owner_id != _active:
-		_write("  refused minion #%d: not commanded by #%d" % [id, _active])
+		_refused("minion", id, "not commanded by #%d" % _active)
 		return {"ok": false, "reason": "not yours"}
 	if not LegalMoves.destinations(board, pieces, minion).has(to):
-		_write("  refused minion #%d: (%d,%d) is not reachable" % [id, to.x, to.y])
+		_refused("minion", id, "(%d,%d) is not reachable" % [to.x, to.y])
 		return {"ok": false, "reason": "unreachable"}
 
 	_minion_spent = true
+	last_refusal = ""
 	var outcome := CombatResolution.minion_action(
 		board, pieces, minion, to, fight_seed
 	)
@@ -249,10 +261,43 @@ func end_turn() -> void:
 	_moved = false
 	_acted = false
 	_minion_spent = false
+	last_refusal = ""
 	_write_turn_header()
 
 
+# --- What is left of the turn ---------------------------------------------
+#
+# The three flags above are the whole budget, and these are the whole of the
+# reading of them. They exist so that whoever is spending a turn -- a rule, or a
+# person at a keyboard -- can be shown what is left of it without keeping a
+# count of its own: a second copy of "have I moved yet" is a second copy that
+# can be wrong.
+
+
+## Whether this turn's move has been spent.
+func has_moved() -> bool:
+	return _moved
+
+
+## Whether this turn's one weapon action has been spent.
+func has_acted() -> bool:
+	return _acted
+
+
+## Whether this turn's one minion activation has been spent.
+func has_spent_minion() -> bool:
+	return _minion_spent
+
+
 # --- Bookkeeping ----------------------------------------------------------
+
+
+# Write a refusal into the transcript and keep its reason where the one who
+# asked can read it back. One function so that the sentence in the transcript
+# and the sentence handed back are the same sentence.
+func _refused(what: String, id: int, why: String) -> void:
+	last_refusal = why
+	_write("  refused %s #%d: %s" % [what, id, why])
 
 
 ## Drop every commander that is no longer on the board, keeping the slot of the
@@ -310,7 +355,7 @@ func _write_turn_header() -> void:
 		return
 	_write("round %d turn #%d at (%d,%d) facing=%s hp=%d/%d def=%d %s" % [
 		round_number, me.id, me.cell.x, me.cell.y,
-		_facing_name(me.facing), me.health, me.max_health(), me.defence(),
+		facing_name(me.facing), me.health, me.max_health(), me.defence(),
 		me.loadout_line(),
 	])
 
@@ -332,7 +377,8 @@ func _dice_line() -> String:
 	]
 
 
-static func _facing_name(facing: int) -> String:
+## What a facing is called, in the word the transcript uses.
+static func facing_name(facing: int) -> String:
 	match facing:
 		PieceGeometry.EAST:
 			return "east"

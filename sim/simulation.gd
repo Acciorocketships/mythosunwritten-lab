@@ -32,12 +32,13 @@ const SCENARIO_ENCOUNTER_ISLAND := "encounter-island"
 const SCENARIO_MARKET := "market"
 const SCENARIO_QUARREL := "quarrel"
 const SCENARIO_PLAY := "play"
+const SCENARIO_BATTLE := "battle"
 
 ## Every scenario there is, in a fixed order, for a report line and a usage
 ## message.
 const SCENARIOS := [
 	SCENARIO_ENCOUNTER, SCENARIO_ENCOUNTER_ISLAND,
-	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY,
+	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY, SCENARIO_BATTLE,
 ]
 
 var world: SimWorld = null
@@ -69,7 +70,25 @@ func _init(seed_value: int = 0) -> void:
 func hand_over_followed() -> bool:
 	driven = WorldCast.hand_over(world, world.follow_id)
 	driven_id = world.follow_id if driven != null else 0
+	if driven != null:
+		# And their turns on a board are theirs too. Without this the fight would
+		# play the person's turn for them the tick it came up, which is what it
+		# does for everybody a rule is driving; with it the board waits, for as
+		# many ticks as the person takes, and `driven_turn()` below is the turn
+		# it is waiting on. See `ActionScene.hands`.
+		world.combat.scene.take_by_hand(driven_id)
 	return driven != null
+
+
+## The board turn standing for the person driving, or null when there is not one
+## -- no fight, they are not in it, or it is somebody else's turn.
+##
+## The other half of `driven_surroundings()`. That one is what there is to choose
+## from in real time; this is what there is to choose from on a board, and both
+## are the simulation's own answer forwarded, so an entry point has one place to
+## ask and no reason to reach into the fight itself.
+func driven_turn() -> BoardTurn:
+	return null if driven_id == 0 else BoardTurn.of(world.combat.scene, driven_id)
 
 
 ## What the person driving has chosen and not yet had carried out, in one line,
@@ -145,6 +164,13 @@ func begin_scenario(named: String, frozen: bool = false) -> bool:
 			# quarrel: live, the quarrel is something you watch happen.
 			return ScriptedScenario.muster_live(
 				world, ScriptedScenario.BRAM) > 0
+		SCENARIO_BATTLE:
+			# The same fight the encounter scenario holds, with the camera on one
+			# of the two who fight rather than beside them -- so `--play` has
+			# somebody to hand over, and what it hands over is a commander with
+			# two minions walking towards another one with two of its own. It
+			# takes no notice of `frozen` for the reason the play stage does not.
+			return ScriptedEncounter.muster_played(world) != 0
 		SCENARIO_PLAY:
 			# A world with something in it to do, for a person to do it in: a
 			# trader, a brawler, a pile and a shut chest. It takes no notice of

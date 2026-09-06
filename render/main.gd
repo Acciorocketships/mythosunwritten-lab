@@ -136,6 +136,25 @@ const BOARD_CLIFF := Color(1.0, 0.66, 0.26, 0.52)
 const BOARD_BUILT := Color(0.92, 0.36, 0.36, 0.5)
 const BOARD_HOLE := Color(0.05, 0.07, 0.12, 0.44)
 
+## What the cells offered to whoever is taking a turn are drawn in, over the
+## lattice: cool green for where the commander may step, warm rose for what its
+## weapons cover from where it stands as it is facing, pale blue for where the
+## picked minion may go, and a bright plate for whichever cell is picked right
+## now.
+##
+## Not one of the four is worked out here. Every cell in them comes back from
+## `BoardControls.marks`, which asks the simulation's own `BoardTurn`; this is
+## the colour a list of cells is painted in and nothing else.
+const BOARD_MOVE := Color(0.30, 1.0, 0.42, 0.62)
+const BOARD_REACH := Color(1.0, 0.30, 0.40, 0.62)
+const BOARD_MINION := Color(0.34, 0.68, 1.0, 0.62)
+const BOARD_PICKED := Color(1.0, 0.99, 0.70, 0.88)
+
+## How far above the lattice the offered cells are painted, in world units. Just
+## clear of it, so a square that is both drawn and offered reads as the offer
+## rather than fighting the lattice for the same pixels.
+const CHOICE_LIFT := 0.02
+
 ## The colour a traced route is drawn in, and how far above the ground it floats.
 ##
 ## Warm amber against cool ground, which is the palette's own contrast and the
@@ -534,6 +553,18 @@ var _board_holes := 0
 ## fight puts a different one under it.
 var _board_fight := -1
 
+## The cells offered to whoever is taking a turn, painted over the lattice: one
+## drawable, rebuilt when what is on offer changes and not once a frame.
+##
+## It holds no cell of its own. `_choice_mark` is a written-out signature of the
+## lists the simulation last handed over, and its only use is to answer "is this
+## the same offer as last frame" without re-reading the board -- which costs tens
+## of milliseconds and is the reason the lattice itself is not rebuilt per frame
+## either.
+var _choice_view: MeshInstance3D = null
+var _choice_material: StandardMaterial3D = null
+var _choice_mark := ""
+
 ## One drawable per combatant the snapshot lists, keyed by the simulation's id.
 ##
 ## View bookkeeping and nothing else: which node stands for which id, in the same
@@ -590,11 +621,25 @@ var _playing := false
 ## builds actions out of the catalogue and resolves nothing.
 var _controls := PlayerControls.new()
 
+## The same thing for a turn on a board: which key spends which part of the turn,
+## and what the person has picked to spend it on.
+##
+## `render/board_controls.gd` is the whole of it, and it is a second object for
+## the same reason it is a second file: what a press means in real time and what
+## it means on a board are different questions, and a turn is a thing that has to
+## be picked at before it can be spent. It builds no rule either -- every answer
+## it gives back is the simulation's, asked through `Simulation.driven_turn()`.
+var _board_controls := BoardControls.new()
+
 ## Whether to print the world's own journal as it is written. What makes a run
 ## driven from a script a trace rather than only a picture: it is the control
 ## loop's account of who chose what on which tick, printed unchanged.
 var _journalling := false
 var _journal_said := 0
+
+## Whether a fight was on when the shell last looked, so that the board arriving
+## and the board going away are each said once, with the tick.
+var _was_fighting := false
 
 ## Which tick of the answer to the driven character has already been printed, so
 ## one answer is said once.
@@ -694,6 +739,22 @@ func _ready() -> void:
 		_board_view.material_override = _board_material
 		_board_view.extra_cull_margin = 100.0
 		add_child(_board_view)
+	# The offered cells are painted on the same terms as the lattice they lie
+	# over, in a drawable of their own so that a fresh offer is a small rebuild
+	# rather than the whole board again. Built for a run that asked for the
+	# lattice and for one that asked to play, because a person taking a turn has
+	# to be shown where they may go whether or not they asked to see the squares.
+	if options["board"] or options["play"]:
+		_choice_view = MeshInstance3D.new()
+		_choice_material = StandardMaterial3D.new()
+		_choice_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_choice_material.vertex_color_use_as_albedo = true
+		_choice_material.vertex_color_is_srgb = true
+		_choice_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_choice_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_choice_view.material_override = _choice_material
+		_choice_view.extra_cull_margin = 100.0
+		add_child(_choice_view)
 	# Who is driving. After the scenario and --start, because it hands over
 	# whichever character the world ended up looking through.
 	_journalling = options["journal"]
@@ -707,6 +768,8 @@ func _ready() -> void:
 		else:
 			print("render-shell play driving=#%d" % _sim.driven_id)
 			for line in PlayerControls.bindings():
+				print("render-shell keys %s" % line)
+			for line in BoardControls.bindings():
 				print("render-shell keys %s" % line)
 			# The shell's own key, printed with the rest so a person at the
 			# keyboard is not guessing about it either.
@@ -899,6 +962,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_sync_views()
 			return
 	if _playing:
+		if _drive_the_board(keycode):
+			return
 		_drive(keycode)
 
 
@@ -950,6 +1015,160 @@ func _drive(keycode: int) -> bool:
 	return true
 
 
+## Spend one key press out of the board turn the simulation is holding open, and
+## say what it answered.
+##
+## The board's half of `_drive` above, and the same shape: a hand-over and a
+## print. Which key spends which part of a turn is `render/board_controls.gd`'s;
+## what may be spent, where a piece may go and what a weapon covers is the
+## simulation's, read through `Simulation.driven_turn()`; what becomes of it is
+## the match's. Nothing is decided here -- in particular there is no legality
+## test, no cooldown, no capture and no damage -- and the refusal printed below
+## is the match's own sentence, quoted.
+##
+## Returns whether the key was one of the board's. A key that is meant one thing
+## on a board and another in real time does not exist: `BoardControls.binds` and
+## `PlayerControls` share no key, so this consumes what it binds and nothing else.
+func _drive_the_board(keycode: int) -> bool:
+	if not BoardControls.binds(keycode):
+		return false
+	var turn := _sim.driven_turn()
+	if turn == null:
+		print("render-shell play t=%d it is not your turn on a board" % _sim.world.tick)
+		return true
+	var answered := _board_controls.press(keycode, turn)
+	if _board_controls.note != "":
+		print("render-shell play t=%d %s" % [_sim.world.tick, _board_controls.note])
+		return true
+	if answered.is_empty():
+		print("render-shell play t=%d round %d picks %s" % [
+			_sim.world.tick, turn.round_number(), _board_controls.picked_line(),
+		])
+		return true
+	print("render-shell play t=%d round %d turn %s -> %s" % [
+		_sim.world.tick, turn.round_number(), _the_key_named(keycode),
+		"done" if bool(answered.get("ok", false))
+			else "refused: %s" % String(answered.get("reason", "")),
+	])
+	return true
+
+
+## What a board key is called, for the line above. Interface furniture: the
+## simulation has no name for a key and no opinion about one.
+static func _the_key_named(keycode: int) -> String:
+	var at := BoardControls.SWING_KEYS.find(keycode)
+	if at >= 0:
+		return "weapon action %d" % (at + 1)
+	match keycode:
+		BoardControls.KEY_STEP:
+			return "step"
+		BoardControls.KEY_SEND:
+			return "send a minion"
+		BoardControls.KEY_TURN_LEFT:
+			return "turn left"
+		BoardControls.KEY_TURN_RIGHT:
+			return "turn right"
+		BoardControls.KEY_END_TURN:
+			return "end the turn"
+	return "pick"
+
+
+## Paint the cells the simulation is offering whoever is taking a turn.
+##
+## Read, never worked out: `BoardControls.marks` asks the turn where the
+## commander may step, what its weapons cover, where the picked minion may go and
+## what is picked, and this turns four lists of cells into four colours of quad
+## over the lattice. There is no rule here about any of the four, which is the
+## whole point -- the interface asks what is legal and draws the answer.
+##
+## Rebuilt only when the offer changes, because reading the board out of the
+## simulation costs tens of milliseconds and an offer changes on a key press, not
+## on a frame.
+func _sync_choice() -> void:
+	if _choice_view == null:
+		return
+	var turn := _sim.driven_turn()
+	var marks := BoardControls.marks(turn, _board_controls)
+	var wanted := _choice_signature(marks)
+	if wanted == _choice_mark:
+		return
+	_choice_mark = wanted
+	if wanted == "":
+		_choice_view.mesh = null
+		return
+	var board := _sim.world.combat_board()
+	if board == null:
+		_choice_view.mesh = null
+		return
+	var vertices := PackedVector3Array()
+	var colors := PackedColorArray()
+	var kept := {}
+	# Painted in this order so that the brighter, narrower answer is the one on
+	# top: where you may go, then what you could hit from here, then where the
+	# minion may go, then the cell actually picked.
+	for layer in [
+		["move", BOARD_MOVE], ["reach", BOARD_REACH],
+		["minion", BOARD_MINION], ["picked", BOARD_PICKED],
+	]:
+		var tint: Color = layer[1]
+		for cell in (marks[layer[0]] as Array[Vector2i]):
+			if not board.contains(cell):
+				continue
+			_paint_cell(board, cell, tint, kept, vertices, colors)
+	var mesh := ArrayMesh.new()
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_COLOR] = colors
+	if not vertices.is_empty():
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	_choice_view.mesh = mesh
+
+
+# One offered cell, as the same grid of quads a lattice square is made of, a
+# little higher up. The height under every corner is the surface the square
+# itself follows, so an offer lies on the ground the way the lattice does.
+func _paint_cell(
+	board: CombatBoard,
+	cell: Vector2i,
+	tint: Color,
+	kept: Dictionary,
+	vertices: PackedVector3Array,
+	colors: PackedColorArray,
+) -> void:
+	var wide := BOARD_CUTS + 1
+	var half := board.cell_size * BOARD_FILL * 0.5
+	var middle := board.centre(cell)
+	var surface := _cell_surface(board, cell, kept)
+	for down in BOARD_CUTS:
+		for across in BOARD_CUTS:
+			var at := down * wide + across
+			var quad := [
+				_board_point(middle, half, surface, at, across, down),
+				_board_point(middle, half, surface, at + 1, across + 1, down),
+				_board_point(middle, half, surface, at + wide + 1, across + 1, down + 1),
+				_board_point(middle, half, surface, at + wide, across, down + 1),
+			]
+			for corner in [0, 1, 2, 0, 2, 3]:
+				vertices.append(quad[corner] + Vector3(0.0, CHOICE_LIFT, 0.0))
+				colors.append(tint)
+
+
+# What is on offer, written out, so that "the same offer as last frame" is one
+# string comparison. Empty when there is nothing on offer at all.
+static func _choice_signature(marks: Dictionary) -> String:
+	var written := PackedStringArray()
+	var anything := false
+	for named in ["move", "reach", "minion", "picked"]:
+		var cells: Array[Vector2i] = marks[named]
+		anything = anything or not cells.is_empty()
+		var one := PackedStringArray()
+		for cell in cells:
+			one.append("%d,%d" % [cell.x, cell.y])
+		written.append("%s:%s" % [named, ";".join(one)])
+	return "" if not anything else "|".join(written)
+
+
 ## Press the keys a run was given instead of the keys a person would press.
 ##
 ## This machine has no display, so the only way to show somebody playing is to
@@ -976,6 +1195,18 @@ func _press_the_scripted_keys() -> void:
 ## the answer is `ActionOutcome.line()` carried through `ControlLoop.answer_of`
 ## unchanged, which is the same sentence the answer panel puts on screen.
 func _say_what_happened() -> void:
+	# The board arriving and going away, said once each with the tick it happened
+	# on. Read off the snapshot rather than watched for: the shell asks whether a
+	# fight is on and compares that with what it said last time, which is the
+	# same reading the board overlay is rebuilt from.
+	var fighting := not _last_snapshot.is_empty() \
+		and bool((_last_snapshot["combat"] as Dictionary)["fighting"])
+	if fighting != _was_fighting:
+		_was_fighting = fighting
+		print("render-shell fight t=%d %s" % [
+			_sim.world.tick,
+			"the board appears" if fighting else "the board is put away",
+		])
 	if _journalling:
 		var journal := _sim.world.loop.journal
 		for at in range(_journal_said, journal.size()):
@@ -1071,6 +1302,7 @@ func _sync_views() -> void:
 	_sync_grass(snapshot)
 	_sync_water(snapshot)
 	_sync_board(snapshot)
+	_sync_choice()
 	_sync_combat(snapshot)
 	_sync_ground(snapshot)
 	_sync_sheet()
@@ -1912,6 +2144,14 @@ func _sync_sheet() -> void:
 	# What is on the readout it reads through render/ui/fight_source.gd.
 	if _sheet_ui.readout != null:
 		_sheet_ui.readout.watch(_sim.world)
+		# And, in a run somebody is playing, the three handles the controls need:
+		# where to ask for the turn standing now, what has been picked to spend
+		# it on, and the shell's own input path, so that a button and a key are
+		# one thing. The first is a call rather than a turn, so the panel reads
+		# the turn on the frame it draws and keeps no copy of it.
+		if _playing and not _sheet_ui.readout.on_key.is_valid():
+			_sheet_ui.readout.play(
+				_sim.driven_turn, _board_controls, _drive_the_board)
 	# And the answer panel, the same way: the world, who is being driven and
 	# where their choices go. It reads all three again on every frame.
 	if _sheet_ui.answer != null:

@@ -189,6 +189,35 @@ static func muster(world: SimWorld) -> void:
 		one.settle(world.terrain)
 
 
+## The same scenario, with the camera looking through the green commander rather
+## than standing beside the meeting.
+##
+## One line different from `muster()`, and the line is which character the world
+## is looking through. That is the whole of what it takes to make this fight one
+## a person can be handed: `Simulation.hand_over_followed` hands over whoever is
+## followed, so a scenario that follows nobody has nobody to hand over. Everything
+## else -- the two bands, their minions, their forged weapons, the bystander, the
+## meadow they meet on -- is the scenario above, called rather than copied.
+##
+## Returns the id of the commander now being looked through.
+static func muster_played(world: SimWorld) -> int:
+	muster(world)
+	var green := world.combat.member_of(_first_commander_id(world))
+	if green == null:
+		return 0
+	world.follow(green.id)
+	return green.id
+
+
+# The lowest-numbered commander in the world, which is the green one: `muster`
+# adds it first, and the roster hands out ids in the order it is given people.
+static func _first_commander_id(world: SimWorld) -> int:
+	for one in world.combat.members:
+		if one.is_commander():
+			return one.id
+	return 0
+
+
 ## Put a smaller version of the same scenario on a floating island's top.
 ##
 ## Two bands, no bystander -- an island's top is not wide enough for one to stand

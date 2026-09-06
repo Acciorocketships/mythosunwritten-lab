@@ -28,7 +28,7 @@ class_name TestGroundItems
 const SEED := 4321
 const FORGED := 400
 
-## How many of the items the five shipped scenarios put in the world resolve to
+## How many of the items the six shipped scenarios put in the world resolve to
 ## no name of their own and are therefore drawn as `GroundItems.FALLBACK_TAG`.
 ##
 ## Written down rather than merely counted, so that an item added with no shape
@@ -37,9 +37,14 @@ const FORGED := 400
 ## `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll call.
 const SHIPPED_FALLBACKS := 6
 
-## And how many items the five scenarios ship altogether, for the same reason:
+## And how many items the six scenarios ship altogether, for the same reason:
+##
+## Six rather than five since the battle scenario landed, which is the encounter
+## scenario with the camera on one of the two who fight -- so its six items are
+## the encounter's six, counted a second time because it is a second scenario a
+## person can be handed.
 ## a fallback count means nothing without the total it is out of.
-const SHIPPED_ITEMS := 31
+const SHIPPED_ITEMS := 37
 
 ## The pile sizes the layout is measured over. One is the case that must land
 ## exactly on the pile's own point; the rest are heaps.
@@ -158,7 +163,7 @@ func _the_shipped_items_that_fall_back_are_counted() -> void:
 		"%d shipped items fall back, not %d" % [tally["fallbacks"], SHIPPED_FALLBACKS])
 
 
-## Every item the five shipped scenarios put in the world, and how many of them
+## Every item the six shipped scenarios put in the world, and how many of them
 ## resolve to no name: `{"items": int, "fallbacks": int, "lines": PackedStringArray}`.
 ##
 ## Public because the probe prints the roll call and the test compares the two
