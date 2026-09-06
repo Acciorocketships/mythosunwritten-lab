@@ -42,16 +42,23 @@ class_name ItemModel
 ## Held shapes, as the forge and the weapon catalogue spell them, to the name
 ## each is drawn under.
 ##
-## Nine keys for six tags, because two vocabularies meet here. The forge draws
+## Nine keys for seven tags, because two vocabularies meet here. The forge draws
 ## from its own six held shapes -- blade, spear, bow, staff, flail, buckler --
-## and the weapon catalogue ships a sword, a dagger and a shield, which are the
-## same three silhouettes under older names. A sword and a dagger are both a
+## and the weapon catalogue ships a sword, a dagger and a shield. A sword is a
 ## blade and a shield is a buckler; that is a fact about what they look like, so
 ## it is recorded here and not in either of the two files that use the words.
+##
+## A dagger used to be one too, and is not any more. It is the one catalogue
+## shape whose *silhouette* differs from the shape it was folded into: the blade
+## draws a long straight cruciform sword and a dagger is a short curved knife,
+## and they are already different things to use -- the dagger's one diagonal cut
+## is the shortest cooldown in the catalogue. So it has its own name now.
+## Nothing else in either vocabulary earned one: see the note in `AssetTags` for
+## the shapes the packs have models for and the simulation has no way to be.
 const BY_SHAPE := {
 	"blade": AssetTags.GEAR_BLADE,
 	"sword": AssetTags.GEAR_BLADE,
-	"dagger": AssetTags.GEAR_BLADE,
+	"dagger": AssetTags.GEAR_DAGGER,
 	"spear": AssetTags.GEAR_SPEAR,
 	"bow": AssetTags.GEAR_BOW,
 	"staff": AssetTags.GEAR_STAFF,

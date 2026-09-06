@@ -18,7 +18,11 @@ extends TestSuite
 ##      `ItemDrop` says fell -- the drop probability is read, not re-applied.
 ##   5. Picking an item up and dropping it back leaves the same item, shown by
 ##      reading every number off it before and after.
-##   6. The simulation still names no art. (`AssetCheck` is the checker; this is
+##   6. Every gear name lies down at the same size, measured off the node that
+##      was built rather than off the row that named it -- because the packs do
+##      not agree on which axis a thing is long along, and because how many of
+##      the names are still drawn as primitives is a number worth failing on.
+##   7. The simulation still names no art. (`AssetCheck` is the checker; this is
 ##      the reminder that the gear names went into the catalog and not into a
 ##      table of paths.)
 class_name TestGroundItems
@@ -46,6 +50,24 @@ const SHIPPED_FALLBACKS := 6
 ## a fallback count means nothing without the total it is out of.
 const SHIPPED_ITEMS := 37
 
+## How many of the catalog's gear names are drawn by a model out of an installed
+## pack, and how many are still the primitives written in code.
+##
+## Written down for the reason `SHIPPED_FALLBACKS` is: a row quietly falling back
+## to its primitive -- a pack moved, a path mistyped -- would otherwise look
+## exactly like a row that never had a model, and the difference is the whole
+## point of the table. The four on primitives are `gear_boots`, `gear_leggings`,
+## `gear_chestplate` and `gear_helmet`, and they are on primitives because no
+## pack on this machine ships worn armour off a body: see the note at the head of
+## the gear section of `render/asset_library.gd` for the two near misses and
+## their measurements.
+const GEAR_ON_A_MODEL := 9
+const GEAR_ON_A_PRIMITIVE := 4
+
+## How far from `GroundItems.DRAWN_SPAN` a normalised item's longest side may
+## land, in world units. Floating-point slack, not a tolerance for being wrong.
+const SPAN_SLACK := 0.0005
+
 ## The pile sizes the layout is measured over. One is the case that must land
 ## exactly on the pile's own point; the rest are heaps.
 const PILE_SIZES := [1, 2, 3, 5, 8, 13, 24]
@@ -66,6 +88,7 @@ func _init() -> void:
 
 func run() -> void:
 	_the_table_hands_out_real_names()
+	_every_gear_name_lies_down_the_same_size()
 	_every_forged_item_has_a_name()
 	_an_unnamed_item_falls_back_to_something_visible()
 	_the_shipped_items_that_fall_back_are_counted()
@@ -94,6 +117,55 @@ func _the_table_hands_out_real_names() -> void:
 		if built != null:
 			check(_mesh_count(built) > 0, "'%s' builds nothing visible" % tag)
 			built.free()
+
+
+## Every gear name comes out the same size lying on the ground, and the size is
+## measured off the node the table built.
+##
+## Reading it off the row instead would prove nothing about what a person sees.
+## A row's `scene_height` is a number a human typed; the shell divides by the
+## *longest side of what was actually instantiated*, and the packs disagree about
+## which side that is -- the sword is long along its height, the bow along its
+## depth. So this builds each one, measures it, and applies the shell's own
+## `scale_for()`.
+##
+## The second half is the roll call: how many of the names a pack model draws and
+## how many are still primitives. A pack that stopped loading would leave every
+## row on its placeholder and every other check here would still pass.
+func _every_gear_name_lies_down_the_same_size() -> void:
+	var on_a_model := 0
+	var on_a_primitive := 0
+	for tag in AssetTags.in_category(AssetTags.GEAR):
+		var row := AssetLibrary.visual(tag)
+		check(row != null, "no row for '%s'" % tag)
+		if row == null:
+			continue
+		if row.is_placeholder():
+			on_a_primitive += 1
+		else:
+			on_a_model += 1
+		var built := AssetLibrary.build(tag)
+		check(built != null, "'%s' would not build" % tag)
+		if built == null:
+			continue
+		var box := _bounds_of(built, Transform3D.IDENTITY)
+		var lying := box.size * GroundItems.scale_for(box.size)
+		var longest := maxf(lying.x, maxf(lying.y, lying.z))
+		check(absf(longest - GroundItems.DRAWN_SPAN) <= SPAN_SLACK,
+			"'%s' lies down %.4f long, not %.4f" % [
+				tag, longest, GroundItems.DRAWN_SPAN,
+			])
+		check(box.size.x > 0.0 and box.size.y > 0.0,
+			"'%s' measures nothing to normalise" % tag)
+		built.free()
+	equal(on_a_model, GEAR_ON_A_MODEL,
+		"%d gear names are drawn by a pack model, not %d" % [
+			on_a_model, GEAR_ON_A_MODEL,
+		])
+	equal(on_a_primitive, GEAR_ON_A_PRIMITIVE,
+		"%d gear names are still primitives, not %d" % [
+			on_a_primitive, GEAR_ON_A_PRIMITIVE,
+		])
 
 
 ## A forged item always knows what it is. Both kinds, over four hundred sources:
@@ -411,6 +483,27 @@ func _named_in(pack: Inventory, called: String) -> Item:
 		if item.item_name == called:
 			return item
 	return null
+
+
+## The box a built visual occupies in its own frame: what every mesh under it
+## covers, together. The same measurement `render/main.gd` makes before it
+## normalises an item, written here rather than reached for so the test measures
+## the built node and not the shell's opinion of it.
+func _bounds_of(node: Node, so_far: Transform3D) -> AABB:
+	var box := AABB()
+	var started := false
+	if node is VisualInstance3D:
+		box = so_far * (node as VisualInstance3D).get_aabb()
+		started = true
+	for child in node.get_children():
+		if not (child is Node3D):
+			continue
+		var below := _bounds_of(child, so_far * (child as Node3D).transform)
+		if below.size == Vector3.ZERO:
+			continue
+		box = below if not started else box.merge(below)
+		started = true
+	return box
 
 
 func _mesh_count(node: Node) -> int:

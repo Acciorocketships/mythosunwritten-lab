@@ -1,0 +1,66 @@
+=== after (working tree) ===
+  world seed 1234 / 100 ticks   32656f55cc5eeb1c
+  sim/ sources                  4a3534c3ea91831d014dea16a5f6e1a339ea5afa8d65f743a625146cf96c2cd8
+[gear]
+  gear_blade       scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/sword_1handed.gltf
+  gear_dagger      scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/dagger.gltf
+  gear_spear       scene res://assets/mistage_market/FBX/Armory Stall/Weapons/SFM_Spear_002.fbx
+  gear_bow         scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/bow_withString.gltf
+  gear_staff       scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/staff.gltf
+  gear_flail       scene res://assets/mistage_battle/FBX/Weapons/Mace/SFBP_Mace_004.fbx
+  gear_buckler     scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/shield_round.gltf
+  gear_boots       placeholder box+box h=0.30
+  gear_leggings    placeholder cylinder+cylinder+box h=0.62
+  gear_chestplate  placeholder box+sphere+sphere+box h=0.62
+  gear_helmet      placeholder sphere+cylinder+box+box h=0.53
+  gear_draught     scene res://assets/kaykit_dungeon_remastered/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/bottle_A_green.gltf
+  gear_bundle      scene res://assets/mistage_village/FBX/Exterior Props/Sacks/SFV_Sack_002.fbx
+
+tags=71 resolved=71 missing=0 unknown-rows=0 dropped-tints=0
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+     at: initialize (servers/audio/audio_server.cpp:258)
+item sheet: seed=20260905 level=8 one pile of 8, spacing 0.85, span 0.75
+item sheet: screenshot /home/ryko/proj/game/reports/assets/gear-pile-after.png
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+     at: initialize (servers/audio/audio_server.cpp:258)
+item sheet: 13 gear tags, span 0.75
+  gear_blade       sword_1handed.gltf                 lying 0.21 x 0.75 x 0.06  reached by blade, sword
+  gear_dagger      dagger.gltf                        lying 0.16 x 0.75 x 0.09  reached by dagger
+  gear_spear       SFM_Spear_002.fbx                  lying 0.06 x 0.75 x 0.03  reached by spear
+  gear_bow         bow_withString.gltf                lying 0.37 x 0.06 x 0.75  reached by bow
+  gear_staff       staff.gltf                         lying 0.20 x 0.75 x 0.10  reached by staff
+  gear_flail       SFBP_Mace_004.fbx                  lying 0.16 x 0.75 x 0.16  reached by flail
+  gear_buckler     shield_round.gltf                  lying 0.75 x 0.75 x 0.28  reached by buckler, shield
+  gear_boots       primitive                          lying 0.75 x 0.58 x 0.65  reached by worn: boots
+  gear_leggings    primitive                          lying 0.53 x 0.75 x 0.29  reached by worn: leggings
+  gear_chestplate  primitive                          lying 0.75 x 0.56 x 0.30  reached by worn: chestplate
+  gear_helmet      primitive                          lying 0.73 x 0.75 x 0.71  reached by worn: helmet
+  gear_draught     bottle_A_green.gltf                lying 0.31 x 0.75 x 0.31  reached by no shape; only an item naming it outright
+  gear_bundle      SFV_Sack_002.fbx                   lying 0.54 x 0.75 x 0.39  reached by anything with no shape recorded
+  9 of 13 gear tags name a model
+item sheet: screenshot /home/ryko/proj/game/reports/assets/gear-tag-sheet.png
+
+=== before (HEAD) ===
+  world seed 1234 / 100 ticks   32656f55cc5eeb1c
+  sim/ sources                  5c30c0174d6a5f182e9a383b750a1ac753a296ce1bd8c7f75fb1ab3bad8e1af1
+[gear]
+  gear_blade       scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/sword_1handed.gltf
+  gear_spear       placeholder cylinder+cone h=1.60
+  gear_bow         scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/bow_withString.gltf
+  gear_staff       scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/staff.gltf
+  gear_flail       placeholder cylinder+cylinder+sphere h=0.95
+  gear_buckler     scene res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/shield_round.gltf
+  gear_boots       placeholder box+box h=0.30
+  gear_leggings    placeholder cylinder+cylinder+box h=0.62
+  gear_chestplate  placeholder box+sphere+sphere+box h=0.62
+  gear_helmet      placeholder sphere+cylinder+box+box h=0.53
+  gear_draught     scene res://assets/kaykit_dungeon_remastered/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/bottle_A_green.gltf
+  gear_bundle      placeholder box+box+box h=0.34
+
+tags=70 resolved=70 missing=0 unknown-rows=0 dropped-tints=0
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+     at: initialize (servers/audio/audio_server.cpp:258)
+item sheet: seed=20260905 level=8 one pile of 8, spacing 0.85, span 0.75
+item sheet: screenshot /home/ryko/proj/game/reports/assets/gear-pile-before.png
+
+restored:  M render/asset_library.gd  M render/item_sheet.gd  M run_item_sheet.sh  M sim/asset_tags.gd  M sim/item_model.gd  M tests/test_ground_items.gd 

@@ -72,6 +72,10 @@ about rarity, and this is the first place it can be judged rather than read.
 
 ## The gear table: five models, seven placeholders
 
+> **Superseded.** Nine of thirteen names are on a pack model now, and a
+> thirteenth name was added. [reports/gear-models.md](gear-models.md) is the
+> current account; the table below is what the table said when this was written.
+
 `./run_assets.sh` is the live answer; this is what it said when this was written.
 
 | name | drawn as |

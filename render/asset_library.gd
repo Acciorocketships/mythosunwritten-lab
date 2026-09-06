@@ -1904,9 +1904,10 @@ static func _built() -> Dictionary:
 
 	# --- Gear ------------------------------------------------------------
 
-	# What a generated item looks like. Twelve rows for the twelve names in the
-	# catalog's gear category: six shapes a held thing comes in, four worn slots,
-	# a draught, and the bundle an item nobody recorded a shape for is drawn as.
+	# What a generated item looks like. Thirteen rows for the thirteen names in
+	# the catalog's gear category: seven shapes a held thing comes in, four worn
+	# slots, a draught, and the bundle an item nobody recorded a shape for is
+	# drawn as.
 	#
 	# Every one of them takes no biome colour. Steel is steel in a marsh and in a
 	# meadow, and a sword that turned pink in the blossom grove would be reading
@@ -1915,15 +1916,22 @@ static func _built() -> Dictionary:
 	# than inherited, because these are the rows most likely to be repointed at a
 	# bought armoury pack later.
 	#
-	# Four of the twelve name an installed model and eight keep their placeholder.
-	# The free packs hold a sword, a bow, a staff, a round shield and a bottle,
-	# and hold no spear, no flail and no armour off a body at all -- those are
-	# what a bought armoury pack would bring, and until it does they are drawn as
-	# the primitives below. reports/ground-items.md carries the roll call.
+	# Nine of the thirteen name an installed model; four keep their placeholder,
+	# and all four are worn armour. The three bought armoury packs hold 293 gear
+	# models between them and not one piece of armour off a body: the whole of
+	# what exists is `SFFA_Armor_001`, a 2.243-unit display suit welded to its own
+	# stand in one 9,780-triangle mesh -- helm, breast, greaves and post together,
+	# so it cannot be three different tags and is scenery for a smithy rather than
+	# a thing that lies on grass -- and `AWS_Wizard_Hat_001`, a soft pointed hat
+	# 0.336 tall. Nothing anywhere on this machine is a boot or a legging. So
+	# those four rows keep primitives that are at least the right *thing*, and the
+	# gap is named here rather than papered over with the wrong model.
+	# reports/gear-models.md is the roll call and the measurements.
 	#
 	# Sizes are drawn to be *read*, not to be right: the shell normalises every
-	# item to GroundItems.LYING_LENGTH before it lies down, so what matters here
-	# is the silhouette and not the scale.
+	# item to GroundItems.DRAWN_SPAN before it lies down -- measured off what it
+	# built, because these packs draw a sword along its height and a bow along its
+	# depth -- so what matters here is the silhouette and not the scale.
 
 	_row(rows, AssetTags.GEAR_BLADE, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/sword_1handed.gltf", [
 		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.09, 0.62, 0.03), Vector3(0.0, 0.55, 0.0),
@@ -1933,12 +1941,31 @@ static func _built() -> Dictionary:
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.06, 0.20, 0.06), Vector3(0.0, 0.11, 0.0),
 			LEATHER),
 	], 1.775, AssetVisual.TINT_NONE, 0.0)
-	_row(rows, AssetTags.GEAR_SPEAR, "", [
+	# The blade's small sibling, and the one shape that was drawn as something
+	# else until now: `ItemModel.BY_SHAPE` folded "dagger" into the blade, so a
+	# dagger came out as the long cruciform sword above -- and at the same size,
+	# because the shell normalises both. The pack's own dagger is a short curved
+	# knife, 1.206 along its height and 172 triangles. Wisp, the bystander in the
+	# encounter scenario, carries one.
+	_row(rows, AssetTags.GEAR_DAGGER, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/dagger.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.07, 0.34, 0.03), Vector3(0.0, 0.33, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.16, 0.04, 0.05), Vector3(0.0, 0.14, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.14, 0.05), Vector3(0.0, 0.07, 0.0),
+			LEATHER),
+	], 1.206, AssetVisual.TINT_NONE, 0.0)
+	# A plain leaf point on a plain shaft, which is what the tag means and what
+	# the forge packs' eighteen "spears" are not: `SFFA_Weapon_Spear_Iron_001`
+	# through `_006` are ornate glaives and halberds with curved or winged heads.
+	# The market pack's armoury stall ships the straight one, 1.463 along its
+	# height and 300 triangles.
+	_row(rows, AssetTags.GEAR_SPEAR, "res://assets/mistage_market/FBX/Armory Stall/Weapons/SFM_Spear_002.fbx", [
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 1.30, 0.05), Vector3(0.0, 0.65, 0.0),
 			WOOD),
 		AssetVisual.part(AssetVisual.SHAPE_CONE, Vector3(0.12, 0.30, 0.12), Vector3(0.0, 1.45, 0.0),
 			STEEL),
-	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	], 1.463, AssetVisual.TINT_NONE, 0.0)
 	_row(rows, AssetTags.GEAR_BOW, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/bow_withString.gltf", [
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.70, 0.05), Vector3(0.0, 0.60, 0.0),
 			WOOD),
@@ -1955,14 +1982,20 @@ static func _built() -> Dictionary:
 		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.22, 0.22, 0.22), Vector3(0.0, 1.40, 0.0),
 			MARSH_GLOW, AssetVisual.TINT_NONE, 1.4),
 	], 2.155, AssetVisual.TINT_NONE, 0.0)
-	_row(rows, AssetTags.GEAR_FLAIL, "", [
+	# A spiked ball on a haft. Not a chain, and no pack on this machine has one --
+	# 4,689 models were searched for a chained weapon and the three loose forge
+	# chains are smithy dressing. What is lost by taking the mace is exactly what
+	# the placeholder underneath never drew either: three stacked primitives are a
+	# rigid haft and ball too, so the pack model is the same silhouette with real
+	# art on it. 1.103 along its height, 894 triangles.
+	_row(rows, AssetTags.GEAR_FLAIL, "res://assets/mistage_battle/FBX/Weapons/Mace/SFBP_Mace_004.fbx", [
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.07, 0.44, 0.07), Vector3(0.0, 0.22, 0.0),
 			LEATHER),
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.03, 0.26, 0.03), Vector3(0.0, 0.57, 0.0),
 			STEEL),
 		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.26, 0.26, 0.26), Vector3(0.0, 0.82, 0.0),
 			DARK_STONE),
-	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	], 1.103, AssetVisual.TINT_NONE, 0.0)
 	_row(rows, AssetTags.GEAR_BUCKLER, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/shield_round.gltf", [
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.62, 0.07, 0.62), Vector3(0.0, 0.04, 0.0),
 			WOOD, AssetVisual.TINT_NONE, 0.0, Vector3(90.0, 0.0, 0.0)),
@@ -1970,6 +2003,12 @@ static func _built() -> Dictionary:
 			STEEL),
 	], 0.883, AssetVisual.TINT_NONE, 0.0)
 
+	# The four worn slots, and the four rows in the whole catalog that a bought
+	# pack could not fill. Every model on this machine was searched by name and
+	# by category: no footwear and no leg armour exists at all, and the two
+	# near misses for the other pair are measured in the note at the head of this
+	# section. A primitive that is the right thing beats a model that is a
+	# different thing, so these stay as they were drawn.
 	_row(rows, AssetTags.GEAR_BOOTS, "", [
 		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.17, 0.30, 0.34), Vector3(-0.11, 0.15, 0.0),
 			LEATHER),
@@ -2017,17 +2056,19 @@ static func _built() -> Dictionary:
 			WOOD),
 	], 0.886, AssetVisual.TINT_NONE, 0.0)
 	# The one row that is not a shape anything forges: what an item nobody
-	# recorded a shape for is drawn as. A parcel with a cord round it, which is
-	# what an unidentified thing on the ground looks like -- readable as "there is
-	# something here" and deliberately not readable as any particular thing.
-	_row(rows, AssetTags.GEAR_BUNDLE, "", [
+	# recorded a shape for is drawn as. A tied sack, which is what an unidentified
+	# thing on the ground looks like -- readable as "there is something here" and
+	# deliberately not readable as any particular thing. The village pack's sack
+	# is 0.830 along its height, 400 triangles, and unlike every other gear model
+	# it already stands with its lowest point at its own origin.
+	_row(rows, AssetTags.GEAR_BUNDLE, "res://assets/mistage_village/FBX/Exterior Props/Sacks/SFV_Sack_002.fbx", [
 		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.42, 0.32, 0.34), Vector3(0.0, 0.16, 0.0),
 			THATCH),
 		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.06, 0.34, 0.36), Vector3(0.0, 0.17, 0.0),
 			LEATHER),
 		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.44, 0.34, 0.06), Vector3(0.0, 0.17, 0.0),
 			LEATHER),
-	], 0.0, AssetVisual.TINT_NONE, 0.0)
+	], 0.830, AssetVisual.TINT_NONE, 0.0)
 
 	_table = rows
 	return _table

@@ -161,8 +161,20 @@ const SKELETON_MINION := "skeleton_minion"
 # recorded a shape for is drawn as -- a wrapped parcel -- so that a wool blanket
 # on the ground is something a person can see and walk up to rather than nothing
 # at all. Which items take it is the render layer's decision and is made there.
+#
+# A shape earns its own name here only when something in the simulation can
+# actually be that shape. `gear_dagger` does: the catalogue ships a dagger with
+# its own attack pattern (`Weapon.dagger()`), `ItemModel.BY_SHAPE` has always had
+# a "dagger" key, and until it had a name of its own that key pointed at
+# `gear_blade` -- so a dagger was drawn as the sword the same table draws a
+# sword as. An axe, a crossbow, a wand and a spellbook are the ones that did not
+# earn a name: the packs have models for all four, but nothing the forge draws
+# and nothing the catalogue ships can produce an item of that shape, so the tag
+# would be a name no item could ever carry. Giving them one needs an attack
+# pattern first, which is a change to the combat catalogue and not to this list.
 
 const GEAR_BLADE := "gear_blade"
+const GEAR_DAGGER := "gear_dagger"
 const GEAR_SPEAR := "gear_spear"
 const GEAR_BOW := "gear_bow"
 const GEAR_STAFF := "gear_staff"
@@ -263,7 +275,8 @@ const BY_CATEGORY := {
 		SKELETON_WARRIOR, SKELETON_ROGUE, SKELETON_MAGE, SKELETON_MINION,
 	],
 	GEAR: [
-		GEAR_BLADE, GEAR_SPEAR, GEAR_BOW, GEAR_STAFF, GEAR_FLAIL, GEAR_BUCKLER,
+		GEAR_BLADE, GEAR_DAGGER, GEAR_SPEAR, GEAR_BOW, GEAR_STAFF,
+		GEAR_FLAIL, GEAR_BUCKLER,
 		GEAR_BOOTS, GEAR_LEGGINGS, GEAR_CHESTPLATE, GEAR_HELMET,
 		GEAR_DRAUGHT, GEAR_BUNDLE,
 	],

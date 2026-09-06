@@ -5,6 +5,7 @@
 #   xvfb-run -a ./run_item_sheet.sh --screenshot "$PWD/items.png"
 #   ./run_item_sheet.sh --seed 7                              # a different draw
 #   ./run_item_sheet.sh --pile                                # one heap, from above
+#   ./run_item_sheet.sh --gear                                # every gear tag, with its model
 #
 # Needs a display. This is the item layer's output looked at rather than read:
 # every item on it is one the forge really produced, resolved through the

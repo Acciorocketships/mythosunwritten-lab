@@ -1932,8 +1932,8 @@ and at that height its eaves leave the lit-window fit no flat wall.
 
 Three more paid packs the user bought — Daniel Mistage's *STYLIZED Battle Pack*
 (672 models), *STYLIZED Forge & Armory* (435) and *STYLIZED The Alchemist's
-Workshop* (823) — are now unpacked, imported and catalogued, but nothing is drawn
-from them yet. They are the armoury: 293 of their 1 930 models are weapons,
+Workshop* (823) — are unpacked, imported and catalogued, and the gear rows now
+draw from them. They are the armoury: 293 of their 1 930 models are weapons,
 shields, arrows, potions and bags. All 1 930 import in Godot's built-in ufbx
 importer with no external converter and no failures, in 12.7 s, 9.0 s and 13.7 s
 respectively, for 155 MB of import cache; the only fix needed is the same
@@ -1943,15 +1943,31 @@ carries the one thing the next item spends: a 43-row table from every gear shape
 the game needs to a candidate model, covering the twelve `gear_*` tags, the
 shapes the three packs add, and the 25 weapon and armour models that were sitting
 unnamed in the adventurer pack all along — including `arrow_bow.gltf` and
-`arrow_crossbow.gltf`, the two projectile models. Four shapes come out of it as
-real gaps with no model anywhere on this machine: flail, boots, leggings, and the
-chestplate/helmet pair.
+`arrow_crossbow.gltf`, the two projectile models.
+
+Nine of the thirteen `gear_*` names are now drawn by a pack model, against five
+of twelve before: `gear_spear` takes the market pack's straight-pointed spear
+(the forge pack's eighteen "spears" are all ornate glaives), `gear_flail` a
+morningstar out of the battle pack, `gear_bundle` a tied sack out of the village
+pack, and a thirteenth name, `gear_dagger`, was added because a dagger is a
+catalogue weapon in its own right and was being drawn as the 1.775-unit
+two-handed sword. **Four stay on their primitives, and they are a real gap:** no
+pack on this machine ships worn armour as a separate model at all, so
+`gear_boots`, `gear_leggings`, `gear_chestplate` and `gear_helmet` keep shapes
+that are at least the right thing. The nearest misses are measured in
+[reports/gear-models.md](reports/gear-models.md), which also lists five weapon
+silhouettes the packs have and the simulation cannot yet be — an axe, a
+two-handed sword, a crossbow, a wand and a spellbook, each of which needs an
+attack pattern in the combat catalogue before a tag would mean anything.
+
+![Every gear tag, each with the model file it resolves to and the shape word or worn slot that reaches it](reports/assets/gear-tag-sheet.png)
 
 ```
 ./tools/extract_armoury.sh                             # unpack, nine atlas names mapped
 ./tools/fbx_texture_map.py assets/mistage_battle \
     assets/mistage_forge assets/mistage_alchemy        # what the binaries ask for
 ./tools/inventory_pack.sh assets/mistage_forge         # tris, size, floor, texture
+xvfb-run -a ./run_item_sheet.sh --gear                 # the picture above
 ```
 
 The forest is still KayKit's, deliberately. The village pack has trees, rocks and

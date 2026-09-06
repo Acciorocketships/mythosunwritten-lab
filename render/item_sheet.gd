@@ -36,6 +36,18 @@ extends Node3D
 ## Items and offsets are magnified by the *same* factor, so the ratio between an
 ## item and the gap to its neighbour is exactly the ratio in the world -- which
 ## is the only thing legibility depends on -- at a size a screenshot can show.
+##
+## ## The gear sheet
+##
+##     ./run_item_sheet.sh --gear
+##
+## A third picture, and the only one that is about the *table* rather than about
+## the forge. The rarity sheet shows what the forge drew, which can only ever be
+## the ten names the forge reaches; this shows every name in the catalog's gear
+## category, each with the file it resolves to and the words that reach it -- a
+## forge shape, a catalogue weapon name or a worn slot. A row with no model and a
+## row no item can be are both visible on it, which is what makes it the picture
+## to take after the table is repointed.
 
 ## How many items each rarity tier shows.
 const PER_TIER := 6
@@ -49,6 +61,12 @@ const MAGNIFIED := 4.0
 
 ## How far apart the cells sit, in world units, and how far the rows are apart.
 const CELL := Vector2(5.8, 5.4)
+
+## The same for the gear sheet, which needs more room between rows: every cell
+## there is magnified to the full `DRAWN_SPAN`, so a staff standing three units
+## tall in the row behind would otherwise be drawn through the labels in front
+## of it.
+const GEAR_CELL := Vector2(6.6, 8.4)
 
 ## The level every item on the sheet is forged at.
 ##
@@ -72,6 +90,7 @@ var _screenshot_path := ""
 var _screenshot_frame := 30
 var _seed := SEED
 var _pile_only := false
+var _gear_only := false
 
 
 func _ready() -> void:
@@ -86,8 +105,13 @@ func _ready() -> void:
 			_seed = args[i + 1].to_int()
 		if args[i] == "--pile":
 			_pile_only = true
+		if args[i] == "--gear":
+			_gear_only = true
 
 	var profile := BiomeCatalog.profile(SHEET_BIOME)
+	if _gear_only:
+		_add_the_gear_sheet(profile)
+		return
 	if _pile_only:
 		_build_pile_stage(profile)
 		_add_a_pile(profile)
@@ -185,6 +209,84 @@ func _add_a_pile(profile: BiomeProfile) -> void:
 		_add_label("%d  %s" % [index, tag],
 			built.position + Vector3(0.0, 0.05, GroundItems.SPACING * MAGNIFIED * 0.62),
 			30, Color(0.10, 0.10, 0.12))
+
+
+## Every name in the catalog's gear category, once, with the file it resolves to
+## and the words that reach it.
+##
+## The one picture that is about the table rather than about the forge. It walks
+## `AssetTags.in_category(GEAR)` rather than forging anything, so a name no item
+## can currently be still appears -- with nothing on its "reached by" line, which
+## is how such a name is meant to be visible.
+##
+## The size printed for each tag is measured off the built node and multiplied by
+## the shell's own `scale_for()`, so the line under a model is what that model
+## would really occupy lying on the grass, not what its row claims.
+func _add_the_gear_sheet(profile: BiomeProfile) -> void:
+	var tags := AssetTags.in_category(AssetTags.GEAR)
+	var columns := 5
+	var rows := int(ceil(float(tags.size()) / float(columns)))
+	var span := Vector2((columns - 1) * GEAR_CELL.x, (rows - 1) * GEAR_CELL.y)
+	_build_stage(profile, span)
+
+	var models := 0
+	print("item sheet: %d gear tags, span %.2f" % [tags.size(), GroundItems.DRAWN_SPAN])
+	for index in tags.size():
+		var tag := String(tags[index])
+		var row := AssetLibrary.visual(tag)
+		var drawn_by := "primitive" if row == null or row.is_placeholder() \
+			else row.scene_path.get_file()
+		if row != null and not row.is_placeholder():
+			models += 1
+		var at := Vector3(
+			(index % columns) * GEAR_CELL.x - span.x * 0.5,
+			0.0,
+			(index / columns) * GEAR_CELL.y - span.y * 0.5,
+		)
+		var built := AssetLibrary.build(tag, profile)
+		if built == null:
+			push_error("item sheet: '%s' would not build" % tag)
+			continue
+		add_child(built)
+		var box := _bounds_of(built, Transform3D.IDENTITY)
+		var factor := GroundItems.scale_for(box.size) * MAGNIFIED
+		built.scale = Vector3.ONE * factor
+		built.position = at - Vector3(0.0, box.position.y * factor, 0.0)
+
+		var lying := box.size * GroundItems.scale_for(box.size)
+		_add_label(tag, at + Vector3(0.0, 0.05, GEAR_CELL.y * 0.20), 40,
+			Color(0.10, 0.10, 0.12))
+		_add_label(drawn_by, at + Vector3(0.0, 0.05, GEAR_CELL.y * 0.29), 32,
+			Color(0.22, 0.30, 0.46) if drawn_by != "primitive"
+				else Color(0.52, 0.26, 0.20))
+		_add_label(_reached_by(tag), at + Vector3(0.0, 0.05, GEAR_CELL.y * 0.37), 28,
+			Color(0.30, 0.30, 0.32))
+		print("  %-16s %-34s lying %.2f x %.2f x %.2f  reached by %s" % [
+			tag, drawn_by, lying.x, lying.y, lying.z, _reached_by(tag),
+		])
+	print("  %d of %d gear tags name a model" % [models, tags.size()])
+
+
+## Which words in the simulation reach one gear name: the forge's own held
+## shapes and the catalogue's weapon names out of `ItemModel.BY_SHAPE`, then the
+## worn slots out of `BY_SLOT`. Empty means no item can currently be this shape,
+## which is a gap and is meant to read as one.
+func _reached_by(tag: String) -> String:
+	var words := PackedStringArray()
+	for shape in ItemModel.BY_SHAPE:
+		if String(ItemModel.BY_SHAPE[shape]) == tag:
+			words.append(String(shape))
+	for slot in Item.ARMOUR_SLOTS:
+		if ItemModel.for_slot(slot) == tag:
+			words.append("worn: %s" % slot)
+	if tag == GroundItems.FALLBACK_TAG:
+		words.append("anything with no shape recorded")
+	if words.is_empty():
+		# No shape word reaches it, which does not have to mean nothing can be
+		# it: an item may carry a name outright, which is how a consumable --
+		# with no slot and no held shape -- gets a body at all.
+		return "no shape; only an item naming it outright"
+	return ", ".join(words)
 
 
 ## One cell: the item as the table draws it, standing on the ground, with what it
