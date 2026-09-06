@@ -32,8 +32,8 @@ extends RefCounted
 ##     only meaningful if an action takes time; this column is the time it takes.
 ##     It is here rather than in the control loop for the same reason the two
 ##     name columns are here: a cost written beside the loop would be a
-##     thirteenth list of the twelve actions, and lists of the twelve actions
-##     drift. A wait is the one action that names its own duration -- section
+##     second list of the actions beside the one below, and two lists of one
+##     thing drift. A wait is the one action that names its own duration -- section
 ##     2.1 spells it "wait (duration)" -- so its row is the floor and the chosen
 ##     duration is what it actually costs; `ControlLoop.occupies()` is where
 ##     that one reading lives.
@@ -71,10 +71,34 @@ extends RefCounted
 ## writes down rather than a thing anybody has to be told.
 class_name ActionCatalog
 
-## The twelve actions of section 2.1. Section 2.1 writes trade as one entry with
-## three moves and pick up / drop as one entry with two, and they are separate
-## rows here for the reason the acceptance asks for them separately: propose,
-## accept and deny fail differently and are made by different characters.
+## The fifteen actions. Section 2.1 writes trade as one entry with three moves
+## and pick up / drop as one entry with two, and they are separate rows here for
+## the reason the acceptance asks for them separately: propose, accept and deny
+## fail differently and are made by different characters.
+##
+## ## The three that section 2.1 does not spell, and why they are here
+##
+## Twelve of these are section 2.1's own list, word for word. The last three --
+## `equip`, `unequip` and `use` -- are not in that list, and adding to it was
+## done deliberately and once. Section 2.1 opens by calling itself "a small,
+## **extensible** set", and three other sections need what it does not spell:
+##
+##   * section 2 gives the character sheet "inventory (weapons, armor,
+##     consumables, money -- tradeable/**usable**)" and "equipment (currently
+##     equipped)" -- two facts about a character that nothing could change;
+##   * section 3.4 makes what a character *can do* its gear: "the player's
+##     movement is their gear loadout", so a character that cannot change what
+##     it wears cannot reach its own movement;
+##   * section 5 makes gear go obsolete as the frontier rises, which is only a
+##     loop if what you find can replace what you have.
+##
+## Without these three, gear could only be set out when a world was built, and
+## the loadout mechanic would belong to whoever wrote the scenario rather than to
+## whoever is playing. They are added *to the table*, which is what makes them
+## ordinary: the same row shape, the same fault checking, the same one
+## constructor and one resolver, and reachable by every mind -- a person, a
+## rule, a language model -- through the one interface. Section 1's "no
+## preferential treatment" is a property of that, not a promise.
 const GO_TO := "go_to"
 const JUMP := "jump"
 const ATTACK := "attack"
@@ -87,6 +111,9 @@ const DROP := "drop"
 const EXAMINE := "examine"
 const INTERACT := "interact"
 const WAIT := "wait"
+const EQUIP := "equip"
+const UNEQUIP := "unequip"
+const USE := "use"
 
 ## What a parameter may hold. A `target` is checked against one of the first
 ## three; the rest say what a plain value is.
@@ -212,6 +239,30 @@ const ROWS := [
 		"params": {"ticks": COUNT},
 		"optional": {},
 	},
+	{
+		"name": EQUIP,
+		"listed": "equipment (currently equipped) -- put a carried item on",
+		"calls": ["Equip"],
+		"occupies": 3,
+		"params": {"item": TEXT},
+		"optional": {},
+	},
+	{
+		"name": UNEQUIP,
+		"listed": "equipment (currently equipped) -- take a worn item off",
+		"calls": ["Unequip"],
+		"occupies": 2,
+		"params": {"item": TEXT},
+		"optional": {},
+	},
+	{
+		"name": USE,
+		"listed": "inventory (consumables -- tradeable/usable)",
+		"calls": ["Use"],
+		"occupies": 3,
+		"params": {"item": TEXT},
+		"optional": {},
+	},
 ]
 
 
@@ -318,8 +369,8 @@ static func fault(action: Action, table: Array = ROWS) -> String:
 
 ## The group of parameters a row wants exactly one of, or an empty dictionary.
 ##
-## Read through here rather than off the row, because eleven of the twelve rows
-## have no such group and do not carry the column.
+## Read through here rather than off the row, because every row but `go_to` has
+## no such group and does not carry the column.
 static func either_of(row: Dictionary) -> Dictionary:
 	var one_of: Variant = row.get("either", {})
 	return one_of if one_of is Dictionary else {}

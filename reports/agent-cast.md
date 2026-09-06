@@ -189,20 +189,27 @@ times.
 
 ## The refusals are the same refusals
 
-Five of the run's seventy-four resolutions were refusals, and they read the same
-whichever kind of mind chose them:
+Eighteen of the run's seventy-one resolutions were refusals, and they read the
+same whichever kind of mind chose them:
 
 ```
-t= 61  Pell   finished examine(target=6) -> examine refused: there is nothing with id 6
-t= 89  Rook   finished go_to() -> go_to refused: go_to needs target or offset
-t= 99  Wren   finished examine(target=silk cloak) -> examine refused: Wren carries no silk cloak
+t=110  Rook   finished examine(target=6) -> examine refused: there is nothing with id 6
+t=129  Wren   finished go_to(target=2) -> go_to refused: the board decides where a fighter goes
+t=133  Wren   finished trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0)
+              -> trade_propose refused: Rook is out of reach (6.00 > 2.50)
 ```
 
-The first two are models; the third is the person. Same sentence shape, same
+The first is a model; the last two are the person. Same sentence shape, same
 engine, same call. The suite makes the point directly rather than by inspection:
 it builds an observation packet and a prompt for the human-driven character and
-for a model-driven one and requires both to carry all twelve rows of the one
-action list.
+for a model-driven one and requires both to carry every row of the one action
+list.
+
+(The counts and the lines above are this recording's draw. `net/model_recording.gd`
+was remade on 2026-09-06, when three actions were added to the one list and the
+prompt the recording is keyed to changed; the passages further up that describe
+*what happened* in the shipped run are this page's own older draw and were left as
+they were written.)
 
 ## No key, no network, two processes, same bytes
 

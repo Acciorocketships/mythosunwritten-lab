@@ -266,9 +266,11 @@ func _the_panel_reads_the_character_and_keeps_no_copy() -> void:
 	panel.refresh()
 	equal(panel._carried_names.get_child_count(), 1,
 		"a thing picked up by the character did not appear on the panel")
-	equal((panel._carried_names.get_child(0).get_child(0) as Label).text, "oak cloak",
+	# Child 0 of a carried line is the mark saying which one the controls are
+	# aimed at; the name is the one after it and the "worn" tick is the last.
+	equal((panel._carried_names.get_child(0).get_child(1) as Label).text, "oak cloak",
 		"the panel did not read the name off the item the character is carrying")
-	check(panel._carried_names.get_child(0).get_child(3).visible,
+	check(panel._carried_names.get_child(0).get_child(4).visible,
 		"the panel did not notice the item was put on")
 	equal(panel._equipment[Item.SLOT_CHESTPLATE].theme_type_variation,
 		StringName(SproutTheme.SLOT_FULL),

@@ -65,7 +65,10 @@ var _frame: MarginContainer = null
 ## caller says so and the world is drawn without an interface over it.
 ##
 ## The defaults are the character sheet alone, which is what `--sheet` has always
-## meant and what every existing caller asks for.
+## meant and what every existing caller asks for. A run with somebody driving is
+## built a sheet whether or not it asked for one, shut until the person opens it:
+## a game whose inventory cannot be opened is not one an inventory can be
+## operated from.
 static func build(
 	with_sheet: bool = true, with_readout: bool = false,
 	with_answer: bool = false,
@@ -91,8 +94,12 @@ static func build(
 	across.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	across.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	across.alignment = BoxContainer.ALIGNMENT_BEGIN
-	if with_sheet:
+	if with_sheet or with_answer:
 		layer.panel = CharacterPanel.new()
+		# A run that asked for the sheet gets it open. A run that only asked to
+		# play gets it shut, because opening it is one of the things a person
+		# playing does -- see `render/main.gd`'s sheet key.
+		layer.panel.open = with_sheet
 		layer.panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		layer.panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		across.add_child(layer.panel)

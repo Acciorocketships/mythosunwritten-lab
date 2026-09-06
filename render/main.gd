@@ -601,6 +601,16 @@ var _synthetic: Array = []
 var _screenshot_path := ""
 var _screenshot_frame := 0
 var _screenshot_tick := 0
+
+## Several frames of one run, as `{tick, path}` rows in tick order, from
+## `--screenshot-ticks`.
+##
+## A single capture answers "what did it look like"; a story answers "what
+## happened", and a story photographed across six separate runs is six runs a
+## reader has to be told are the same. So a run may name several moments and be
+## photographed at each of them, and the run quits after the last. The spelling
+## is `--input`'s, because it is the same sort of list: `tick:thing`.
+var _screenshot_ticks: Array = []
 ## Where the camera sits and what it aims at, in the same terms as CAMERA_OFFSET
 ## and CAMERA_AIM_LIFT. Those two are the view the game is played from; these
 ## are what a capture for a report may move it to, and nothing else ever changes
@@ -630,6 +640,7 @@ func _ready() -> void:
 	_screenshot_path = options["screenshot"]
 	_screenshot_frame = options["screenshot_frame"]
 	_screenshot_tick = options["screenshot_tick"]
+	_screenshot_ticks = _parse_screenshot_ticks(String(options["screenshot_ticks"]))
 	var aa := String(options["aa"])
 	if aa != "" and not AntiAliasing.apply(get_viewport(), aa):
 		printerr("render-shell unknown --aa %s, keeping %s" % [
@@ -687,6 +698,9 @@ func _ready() -> void:
 			print("render-shell play driving=#%d" % _sim.driven_id)
 			for line in PlayerControls.bindings():
 				print("render-shell keys %s" % line)
+			# The shell's own key, printed with the rest so a person at the
+			# keyboard is not guessing about it either.
+			print("render-shell keys Z            open or shut the character sheet")
 	_synthetic = _parse_input_script(String(options["input"]))
 	if options["sheet"] or options["readout"] or _playing:
 		_sheet_ui = PixelUi.build(options["sheet"], options["readout"], _playing)
@@ -797,6 +811,9 @@ func _process(delta: float) -> void:
 	_aim_reflection()
 	# Waiting for a tick rather than a frame makes a capture reproducible: the
 	# world is at the same place every time, however fast the machine drew it.
+	if not _screenshot_ticks.is_empty():
+		_capture_the_named_moments()
+		return
 	var ready_to_capture := _frames >= _screenshot_frame
 	if _screenshot_tick > 0:
 		ready_to_capture = _sim.world.tick >= _screenshot_tick
@@ -833,6 +850,14 @@ func _aim_reflection() -> void:
 	)
 
 
+## The key that opens and shuts the character sheet.
+##
+## It is here rather than in `render/player_controls.gd` because it is not an
+## intention for a character: opening a panel changes nothing in the world, so it
+## belongs beside pause and quit, which are the shell's own furniture.
+const KEY_SHEET := KEY_Z
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
@@ -843,6 +868,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		KEY_SPACE:
 			_paused = not _paused
+			return
+		KEY_SHEET:
+			# The interface's own state and nothing else: the world is not told,
+			# nothing is chosen and nothing is resolved. A sheet that cannot be
+			# shut is a sheet a person cannot look past.
+			if _sheet_ui != null and _sheet_ui.panel != null:
+				_sheet_ui.panel.toggle()
+				print("render-shell play t=%d sheet %s" % [
+					_sim.world.tick,
+					"open" if _sheet_ui.panel.open else "shut",
+				])
 			return
 		KEY_R:
 			# Restart from the next seed along, to show a different world.
@@ -944,6 +980,24 @@ func _say_what_happened() -> void:
 	print("render-shell play t=%d %s -> %s" % [
 		_answer_said, String(answer["action"]), String(answer["line"]),
 	])
+
+
+## The moments a run was told to photograph, as `{tick, path}` rows in tick
+## order. Spelled `20:one.png,60:two.png`, which is `--input`'s spelling with a
+## file where the key goes; anything unreadable is reported and skipped.
+func _parse_screenshot_ticks(script: String) -> Array:
+	var wanted := []
+	if script.strip_edges() == "":
+		return wanted
+	for entry in script.split(",", false):
+		var parts := entry.strip_edges().split(":", false)
+		if parts.size() != 2 or not parts[0].is_valid_int():
+			printerr("render-shell --screenshot-ticks: cannot read '%s'" % entry)
+			continue
+		wanted.append({"tick": parts[0].to_int(), "path": parts[1].strip_edges()})
+	wanted.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		return int(left["tick"]) < int(right["tick"]))
+	return wanted
 
 
 ## The keys a run was told to press, as `{tick, key}` rows in tick order.
@@ -1835,6 +1889,13 @@ func _sync_sheet() -> void:
 		return
 	if _sheet_ui.panel != null:
 		_sheet_ui.panel.show_sheets(SheetSource.sheets_in(_sim.world))
+		# The controls, so the sheet can mark which carried thing they are aimed
+		# at, and the way a button press leaves the panel: the shell's own input
+		# path, so a click and a key press are one thing. Both are handles; the
+		# panel reads the first every frame and stores nothing off it.
+		_sheet_ui.panel.controls = _controls
+		if _playing and not _sheet_ui.panel.on_key.is_valid():
+			_sheet_ui.panel.on_key = _drive
 	# The world itself, for the readout: the same handle every frame, so that a
 	# restart onto a different world is picked up without anything being pushed.
 	# What is on the readout it reads through render/ui/fight_source.gd.
@@ -1979,7 +2040,7 @@ func _parse_args() -> Dictionary:
 		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
 		"sheet": false, "readout": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
-		"play": false, "journal": false, "input": "",
+		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 	}
 	var args := OS.get_cmdline_user_args()
@@ -1998,6 +2059,11 @@ func _parse_args() -> Dictionary:
 			"--screenshot-tick":
 				if has_value and args[i + 1].is_valid_int():
 					options["screenshot_tick"] = args[i + 1].to_int()
+			"--screenshot-ticks":
+				# Several moments of one run, `tick:path` and comma-separated,
+				# in `--input`'s own spelling. The run quits after the last.
+				if has_value:
+					options["screenshot_ticks"] = args[i + 1]
 			"--camera":
 				# Where the camera sits relative to the observer, for a capture
 				# that wants a closer or a lower view than the one the game is
@@ -2243,15 +2309,27 @@ func _build_trace(path_name: String) -> void:
 
 ## Save what is on screen to a file and quit. Used to capture the view for a
 ## report; it changes nothing about the world.
-func _save_screenshot(path: String) -> void:
+## Photograph whichever of the named moments have come round, and quit after the
+## last one. One row is taken per frame, so two moments a tick apart are two
+## pictures and never the same picture saved twice.
+func _capture_the_named_moments() -> void:
+	var due: Dictionary = _screenshot_ticks[0]
+	if _sim.world.tick < int(due["tick"]):
+		return
+	_screenshot_ticks.pop_front()
+	_save_screenshot(String(due["path"]), _screenshot_ticks.is_empty())
+
+
+func _save_screenshot(path: String, then_quit: bool = true) -> void:
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	var error := image.save_png(path)
 	if error == OK:
-		print("render-shell screenshot %s" % path)
+		print("render-shell screenshot t=%d %s" % [_sim.world.tick, path])
 	else:
 		printerr("render-shell screenshot failed (%d) for %s" % [error, path])
-	get_tree().quit(0 if error == OK else 1)
+	if then_quit or error != OK:
+		get_tree().quit(0 if error == OK else 1)
 
 
 func _build_scenery() -> void:

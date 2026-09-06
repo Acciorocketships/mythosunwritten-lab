@@ -16,6 +16,11 @@ The second panel, the combat turn-and-cooldown readout, is built on this
 foundation and written up separately in
 [reports/combat-readout.md](combat-readout.md).
 
+The sheet described here is a readout with no controls on it. It has since been
+given some -- put on, take off, use up, drop, give away -- without gaining a rule
+or a cached copy of anything; that is
+[reports/player-inventory.md](player-inventory.md).
+
 ![The character sheet over the rendered world](assets/character-sheet.png)
 
 ---

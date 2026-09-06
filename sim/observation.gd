@@ -389,8 +389,8 @@ func _name_field(row: Dictionary, actor: Combatant, one: Combatant) -> void:
 # actions: the action's own kind, and -- only when the character looking can see
 # the target as well -- who it is aimed at.
 #
-# Deliberately not a phrase per action. There are twelve actions and one list of
-# them; a table of readable sentences here would be a thirteenth.
+# Deliberately not a phrase per action. There is one list of the actions, and a
+# table of readable sentences here would be a second one.
 func _doing(
 	scene: ActionScene, actor: Combatant, one: Combatant, visible: Dictionary
 ) -> String:

@@ -37,7 +37,7 @@ extends TestSuite
 ##      pending, and every span is the stated one. Measured off the loop's own
 ##      counters and a per-tick sample of who was waiting.
 ##   6. **The whole atomic action set can be chosen and nothing else can.** Every
-##      one of the twelve reads back from a model's line into the action it
+##      one row of the one list reads back from a model's line into the action it
 ##      names, and a line naming something that is not an action reads back as no
 ##      choice at all.
 ##   7. **Two processes agree**, the checked-in transcript is what the command
@@ -47,7 +47,7 @@ extends TestSuite
 ##      the shipped run except the one driven by a person's written-down choices
 ##      has a `ModelMind` on its own sheet, reached through the same
 ##      `DecisionSource.model` `Callable`; and the human-driven one is handed the
-##      same twelve actions and the same observation packet, so nothing an agent
+##      same actions and the same observation packet, so nothing an agent
 ##      has is anything a person does not.
 ##   9. **The run says what it cost.** Model calls per character and in total, the
 ##      rate that comes to, what an hour of play would be at the same rate, and
@@ -164,6 +164,9 @@ const REPLIES := [
 	["examine target=silk cloak", "examine(target=silk cloak)"],
 	["interact target=#5 item=lockpick", "interact(target=5 item=lockpick)"],
 	["wait ticks=6", "wait(ticks=6)"],
+	["equip item=common boots", "equip(item=common boots)"],
+	["unequip item=common sword", "unequip(item=common sword)"],
+	["use item=mending draught", "use(item=mending draught)"],
 ]
 
 
@@ -491,7 +494,7 @@ func _the_prompt_holds_no_rule() -> void:
 	equal(hits, PackedStringArray(),
 		"the prompt names a rule: %s" % " ".join(hits))
 
-	# What it does hold: the twelve verbs of the one list, and the packet.
+	# What it does hold: the verbs of the one list, and the packet.
 	for action_name in ActionCatalog.names():
 		check(prompt.contains(action_name),
 			"the prompt does not offer %s" % action_name)
@@ -724,7 +727,7 @@ func _the_simulation_never_blocks() -> void:
 # --- 6. The whole action set, and nothing else ----------------------------
 
 
-## Every one of the twelve can be named by a model and read back as itself.
+## Every row of the one list can be named by a model and read back as itself.
 func _every_action_can_be_chosen_by_a_model() -> void:
 	var covered := {}
 	for row in REPLIES:
@@ -903,8 +906,8 @@ func _the_whole_cast_decides_through_a_model() -> void:
 		check(cast.mind_of(who).turns.size() > 0,
 			"%s put questions and never got an answer it could read" % who)
 
-	# And the person is handed what the models are handed: the same twelve
-	# actions, and an observation packet of the same shape built by the same call.
+	# And the person is handed what the models are handed: the same actions, and
+	# an observation packet of the same shape built by the same call.
 	var person := _named(scene, ScriptedAgent.PERSON)
 	var agent := _named(scene, cast.order[0])
 	check(person != null and agent != null, "the run is missing one of the two")

@@ -91,6 +91,9 @@ static func resolvers() -> Dictionary:
 		ActionCatalog.EXAMINE: ActionEngine._examine,
 		ActionCatalog.INTERACT: ActionEngine._interact,
 		ActionCatalog.WAIT: ActionEngine._wait,
+		ActionCatalog.EQUIP: ActionEngine._equip,
+		ActionCatalog.UNEQUIP: ActionEngine._unequip,
+		ActionCatalog.USE: ActionEngine._use,
 	}
 
 
@@ -753,6 +756,152 @@ static func _wait(
 	return ActionOutcome.done(action.kind, {
 		"ticks": ticks, "until": scene.idle_until[actor.id],
 	})
+
+
+# --- equip, unequip and use -----------------------------------------------
+#
+# The three of them take a scene and read nothing out of it. Every resolver has
+# the same three parameters on purpose -- `tests/test_actions.gd` reads this file
+# and requires it -- so that none of them can be handed anything else about who
+# asked; a wardrobe change happens inside one character and needs nothing of the
+# world, and the signature says so by being the same signature anyway.
+
+
+## Put a carried item on: wear it, or take it in hand.
+##
+## Nothing about what "on" means is decided here. `Inventory` is where being
+## equipped is a slot pointing at something carried, and it is what refuses to
+## put on a thing that is not carried or that goes in no slot; a weapon goes
+## through `Commander.wield` because a weapon's cooldowns start clean when it is
+## taken up, which is the same two lines `_attack` already uses when somebody
+## swings something they were not holding. So there is one rule about what can be
+## worn and one rule about cooldowns, and this reads both rather than repeating
+## either.
+##
+## What comes back is the loadout the change produced -- how many ways of moving,
+## how many attacks, how much defence -- because section 3.4 makes gear the
+## answer to what a character can do, and an action that changed it should say
+## what it changed it to.
+##
+## **Not settled here:** whether gear may be changed in the middle of a fight.
+## The design's turn economy (section 3.6) spends a turn on a move and one weapon
+## action and says nothing about the wardrobe, so nothing here refuses it. Out of
+## a fight the change costs the character the ticks the catalogue charges for it,
+## which is a real cost; on a board it costs nothing, which is a hole somebody
+## will have to price.
+@warning_ignore("unused_parameter")
+static func _equip(
+	scene: ActionScene, actor: Combatant, action: Action
+) -> ActionOutcome:
+	var wanted: String = action.param("item", "")
+	var pack := ActionScene.inventory_of(actor)
+	var entry: Variant = _carried_named(pack, wanted)
+	if entry == null:
+		return ActionOutcome.failed(action.kind, "%s carries no %s" % [
+			ActionScene.name_of(actor), wanted,
+		])
+	if pack.is_equipped(entry):
+		return ActionOutcome.failed(action.kind, "%s already has the %s on" % [
+			ActionScene.name_of(actor), wanted,
+		])
+	var slot := Inventory.slot_of(entry)
+	var displaced := Inventory.item_of(pack.equipped_in(slot))
+	var me := actor.piece as Commander
+	if entry is Weapon:
+		me.wield(entry)
+	else:
+		pack.equip(entry)
+	# Read off the inventory rather than off a return value: whether the thing
+	# went on is a fact about where it now is, and `Inventory` is where that is
+	# kept. Something with no slot has nowhere to be put, and this is the one
+	# sentence for it.
+	if not pack.is_equipped(entry):
+		return ActionOutcome.failed(
+			action.kind, "a %s goes in no slot, so it cannot be worn or held" % wanted)
+	return ActionOutcome.done(action.kind, _loadout(me, {
+		"item": wanted,
+		"slot": slot,
+		"instead_of": "-" if displaced == null else displaced.item_name,
+	}))
+
+
+## Take a worn or held item off. It stays carried, which is `Inventory.unequip`'s
+## own rule and not one restated here.
+@warning_ignore("unused_parameter")
+static func _unequip(
+	scene: ActionScene, actor: Combatant, action: Action
+) -> ActionOutcome:
+	var wanted: String = action.param("item", "")
+	var pack := ActionScene.inventory_of(actor)
+	var entry: Variant = _carried_named(pack, wanted)
+	if entry == null:
+		return ActionOutcome.failed(action.kind, "%s carries no %s" % [
+			ActionScene.name_of(actor), wanted,
+		])
+	if not pack.is_equipped(entry):
+		return ActionOutcome.failed(action.kind, "%s is not wearing or holding the %s" % [
+			ActionScene.name_of(actor), wanted,
+		])
+	var slot := Inventory.slot_of(entry)
+	pack.unequip(slot)
+	var me := actor.piece as Commander
+	return ActionOutcome.done(action.kind, _loadout(me, {
+		"item": wanted, "slot": slot,
+	}))
+
+
+## Use a carried consumable up.
+##
+## What it is worth is the item's own effects axis read through the user's score
+## in the ability the item names -- `Item.effects_for`, the same gate every other
+## reading of an item goes through, so a draught brewed for a stronger
+## constitution than yours works less well in your hands and nothing here decides
+## by how much.
+##
+## What that worth *does* is mend. That is the one effect the mechanical layer
+## can carry today: section 4's composable effect base is what will eventually
+## let a draught do anything an item can do, and until it exists a consumable
+## whose effect resolved to something else would be an effect nothing resolves.
+## So the amount is the item's and the arithmetic is health, and a draught drunk
+## by somebody who has nothing to mend spends itself for nothing, which is what
+## drinking a potion at full health does.
+@warning_ignore("unused_parameter")
+static func _use(
+	scene: ActionScene, actor: Combatant, action: Action
+) -> ActionOutcome:
+	var wanted: String = action.param("item", "")
+	var pack := ActionScene.inventory_of(actor)
+	var entry: Variant = _carried_named(pack, wanted)
+	if entry == null:
+		return ActionOutcome.failed(action.kind, "%s carries no %s" % [
+			ActionScene.name_of(actor), wanted,
+		])
+	var behind := Inventory.item_of(entry)
+	if behind == null or behind.kind != Item.KIND_CONSUMABLE:
+		return ActionOutcome.failed(
+			action.kind, "a %s is not used up: it is kept" % wanted)
+	var me := actor.piece as Commander
+	var worth := behind.effects_for(me.score_for(behind))
+	var most := me.max_health()
+	var mended := clampi(most - me.health, 0, worth)
+	me.health = me.health + mended
+	pack.release(entry)
+	return ActionOutcome.done(action.kind, {
+		"item": wanted, "worth": worth, "mended": mended,
+		"health": me.health, "of": most,
+	})
+
+
+# What a commander can do with what it now has on: how many ways it may move,
+# how many attacks it may choose from, and what it stops. Read off `Commander`,
+# which reads it off the items through the ability gate, so this adds no number
+# of its own -- it is the before-and-after of a change of gear, said in the
+# loadout's own terms.
+static func _loadout(me: Commander, into: Dictionary) -> Dictionary:
+	into["moves"] = me.move_grants().size()
+	into["attacks"] = me.attack_count()
+	into["defence"] = me.defence()
+	return into
 
 
 # --- Shared refusals ------------------------------------------------------

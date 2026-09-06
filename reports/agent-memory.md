@@ -142,22 +142,23 @@ The six things in the log are the same in all four arms. What came back:
 
 | arm | lesson kept | chose |
 |---|---|---|
-| no lesson | — | `say(text="what bargain did you have in mind?" target=1)` |
-| the ground first | *"Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."* | `trade_accept(target=1)` |
-| Rook, not Wren | *"Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."* | `recall about=bargain` — a tool, so *— nothing readable —* |
-| let them come | *"The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."* | `recall about=bargain or trade with Wren` — a tool, so *— nothing readable —* |
+| no lesson | — | `say(text=then let us trade target=1)` |
+| the ground first | *"Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."* | `recall about=pile #6` — a tool, so *— nothing readable —* |
+| Rook, not Wren | *"Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."* | `trade_propose(target=2 give_money=9)` |
+| let them come | *"The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."* | `wait(ticks=1)` |
 
 **3 of 3 lessons changed the choice, and 3 of 3 changed which action was chosen**,
 and the run reports that in two columns on purpose: a different *action* and a
 merely different *wording* are different claims. Named plainly: with nothing kept,
-the character asked Wren what the bargain was; having kept that the ground does
-not wait, it stopped asking and accepted the offer outright; having kept either of
-the two lessons about who is worth talking to, it went and looked through its own
-memory instead of speaking at all. Those last two changed the action by not
-choosing one: `recall` is a look back through the store rather than a move in the
-world, and this harness puts one question and reads one action back, so both arms
-show nothing readable and the run scores them as such rather than pretending they
-were choices.
+the character turned to Wren and proposed trading; having kept that the ground
+does not wait, it went and looked back through its own memory for the pile rather
+than speaking at all; having kept that Rook is the one who actually trades, it put
+its nine coins to Rook instead of Wren; and having kept that answering a shout
+leaves you talking to nobody, it waited. The first of those three changed the
+action by not choosing one: `recall` is a look back through the store rather than
+a move in the world, and this harness puts one question and reads one action back,
+so that arm shows nothing readable and the run scores it as such rather than
+pretending it was a choice.
 
 This draw is the stronger of the two this page has been written from. An earlier
 recording of the same four prompts moved the action once in three and the wording
@@ -173,26 +174,26 @@ and finds nothing.
 ## How much memory there is
 
 Measured on the shipped run (`./run_agent.sh`, seed 1234, 160 ticks), on Pell,
-the character that comes to remember most, over its 18 turns:
+the character the run prints the store of in full, over its 20 turns:
 
 | | |
 |---|---|
-| entries | **17** — 17 events, 0 lessons |
-| by kind | 8 things seen, 8 lines of speech, 1 state change |
-| characters held | **1,057** |
-| characters a packet carries | **593 of 1,057 (56%)** — every lesson and the last 8 events |
-| the memory block in the last question | **282 characters of 3,244 (9%)** |
-| tools the model used | 2 recalls, 0 lessons written |
+| entries | **27** — 27 events, 0 lessons |
+| by kind | 15 things seen, 7 lines of speech, 5 state changes |
+| characters held | **1,247** |
+| characters a packet carries | **483 of 1,247 (39%)** — every lesson and the last 8 events |
+| the memory block in the last question | **628 characters of 4,988 (13%)** |
+| tools the model used | 0 recalls, 0 lessons written — Bram and Odo used one each |
 
 The stop condition on this item was the other direction — stop and report if the
-memory outgrew what a context can carry — and it did not fire: 1,057 characters
-against a question already 3,244 characters long is not a retrieval problem, and
+memory outgrew what a context can carry — and it did not fire: 1,247 characters
+against a question already 4,988 characters long is not a retrieval problem, and
 the recent-plus-query split has barely begun to carry weight. The number to watch
-is *characters held*; a packet carries 56% of it here where an earlier draw of the
-same run, in which Pell talked far more, carried 26%, so the fraction falls as the
-store grows, which is exactly the trend that would eventually be the evidence for
-an index. It is not evidence for one yet: `recall` returned at most five entries
-in a run of 160 ticks, and a linear walk over seventeen of them costs nothing.
+is *characters held*; a packet carries 39% of it here, and the fraction falls as
+the store grows, which is exactly the trend that would eventually be the evidence
+for an index. It is not evidence for one yet: `recall` was reached for twice in
+the whole six-character run, and a linear walk over twenty-seven entries costs
+nothing.
 
 Two honest notes about that table:
 
@@ -201,16 +202,16 @@ Two honest notes about that table:
   a mind through `recall about=lantern` and `learn text=…` against a real store
   and checks that the query found a real entry, that the lesson landed on the
   character's own sheet, and that the mind then went back to choosing an action.
-  On the recording that ships, Pell called `recall about=brass lantern` twice
-  unprompted, drawing back four and then five things, and nobody wrote a lesson;
-  an earlier recording of the same run had Odo writing one and Pell recalling
-  seven times. The other four of the five used neither tool here. Which of those a given draw does is the model's business; that it
-  *can* is this step's.
+  On the recording that ships, Bram and Odo reached for `recall` once each and
+  nobody wrote a lesson; earlier recordings of the same run had Pell recalling
+  twice, and one before that had Odo writing a lesson and Pell recalling seven
+  times. Which of those a given draw does is the model's business; that it *can*
+  is this step's.
 * **The log does not hold what an `examine` told the character.** An action's
   outcome is not in the observation packet — the packet carries state
   transitions, and examining changes no state — so it cannot come in through the
-  one door. In the shipped run that shows in the questions: seven of the
-  sixty-nine turns were put off an observation identical to the one before. A
+  one door. In the shipped run that shows in the questions: four of the seventy
+  turns were put off an observation identical to the one before. A
   character that wants to keep what it learned that way has `learn`. Widening the
   door would have cost the perception check above, which is worth more.
 

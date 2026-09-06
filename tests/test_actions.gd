@@ -5,7 +5,7 @@ extends TestSuite
 ## Six claims:
 ##
 ##   1. **Every action section 2.1 lists exists and is callable.** Not "the
-##      catalogue names twelve rows" -- each one is chosen and resolved on a real
+##      catalogue names them" -- each one is chosen and resolved on a real
 ##      scene and the world change it made is asserted, including the variants
 ##      section 2.1 spells out: going to a position, an item and a character;
 ##      saying targeted and shouted; trading proposed, accepted and denied;
@@ -18,7 +18,7 @@ extends TestSuite
 ##   2. **Section 2.1's list and section 10's call surface are one list.** The
 ##      check is `ActionCatalog.faults()`, run over the real table and then over
 ##      six deliberately broken copies of it, each of which it must catch.
-##   3. **Any action may fail and says why.** Every one of the twelve is made to
+##   3. **Any action may fail and says why.** Every one of them is made to
 ##      fail; the four the acceptance names are checked against their exact
 ##      sentences.
 ##   4. **The engine resolves and the caller only chooses.** The action
@@ -70,6 +70,7 @@ const HONEST_CONTROL := "	var sheet := _sheet_of(actor)"
 const PICK := "lockpick"
 const HATCHET := "worn hatchet"
 const BOOTS := "leather boots"
+const DRAUGHT := "mending draught"
 
 ## Where the two of them stand in the bare scene, and where the furniture is.
 ## No terrain: a bare stage, so a walk is arithmetic and nothing about the
@@ -115,13 +116,14 @@ func run() -> void:
 # --- 1. Every action exists and is callable -------------------------------
 
 
-## Each of the twelve is chosen and resolved, and the world change is asserted.
+## Each row is chosen and resolved, and the world change is asserted.
 ##
 ## The catalogue is walked rather than a list written here, so an action added to
 ## the table with nothing to exercise it fails this test by leaving its name
 ## unticked.
 func _every_action_exists_and_is_callable() -> void:
-	equal(ActionCatalog.names().size(), 12, "section 2.1 has twelve rows")
+	equal(ActionCatalog.names().size(), 15,
+		"the catalogue has section 2.1's twelve rows and the three the wardrobe added")
 	var exercised := {}
 
 	var scene := _bare_scene()
@@ -203,6 +205,40 @@ func _every_action_exists_and_is_callable() -> void:
 		"and the money moved with them")
 	exercised[ActionCatalog.TRADE_ACCEPT] = true
 
+	# equip, and take it off again: the boots that came back across the table are
+	# worn, which changes what the wearer can do, and taking them off puts that
+	# back without dropping them.
+	var bare := (rook.piece as Commander).loadout_line()
+	var put_on := ActionEngine.resolve(scene, rook, Action.equip(BOOTS))
+	check(put_on.ok, "equip: %s" % put_on.reason)
+	check(ActionScene.inventory_of(rook).armour_in(Item.SLOT_BOOTS) != null,
+		"and they are on")
+	not_equal((rook.piece as Commander).loadout_line(), bare,
+		"and the loadout is not what it was")
+	exercised[ActionCatalog.EQUIP] = true
+
+	var took_off := ActionEngine.resolve(scene, rook, Action.unequip(BOOTS))
+	check(took_off.ok, "unequip: %s" % took_off.reason)
+	equal(ActionScene.inventory_of(rook).armour_in(Item.SLOT_BOOTS), null,
+		"and they are off")
+	check(_carries(rook, BOOTS), "and still carried")
+	equal((rook.piece as Commander).loadout_line(), bare,
+		"and the loadout is back where it was")
+	exercised[ActionCatalog.UNEQUIP] = true
+
+	# use: a draught, which is the one sort of thing that is used up. Rook is put
+	# a few points down first, because a draught mends what is missing.
+	var draught := Item.consumable(
+		DRAUGHT, 4, ItemRarity.COMMON, Ability.CON, [DRAUGHT] as Array[String])
+	ActionScene.inventory_of(rook).carry(draught)
+	rook.piece.health = rook.piece.max_health() - 3
+	var drunk := ActionEngine.resolve(scene, rook, Action.use(DRAUGHT))
+	check(drunk.ok, "use: %s" % drunk.reason)
+	equal(drunk.got("mended"), 3, "and it mended what was missing")
+	equal(rook.piece.health, rook.piece.max_health(), "and the character is whole")
+	check(not _carries(rook, DRAUGHT), "and the draught is gone")
+	exercised[ActionCatalog.USE] = true
+
 	# wait.
 	var waited := ActionEngine.resolve(scene, rook, Action.wait(5))
 	check(waited.ok, "wait: %s" % waited.reason)
@@ -239,7 +275,7 @@ func _an_attack_lands() -> bool:
 # --- The variants section 2.1 spells out ----------------------------------
 
 
-## Section 2.1 names more than twelve calls: it names the *shapes* of some of
+## Section 2.1 names more calls than rows: it names the *shapes* of some of
 ## them. Each shape is exercised here.
 func _the_variants_section_2_1_names_are_callable() -> void:
 	var scene := _bare_scene()
@@ -496,7 +532,7 @@ func _the_one_list_check_would_notice() -> void:
 # --- 3. Any action may fail, and says why ---------------------------------
 
 
-## Every one of the twelve is made to fail, and every refusal carries a sentence.
+## Every row is made to fail, and every refusal carries a sentence.
 func _every_action_can_fail_and_says_why() -> void:
 	var scene := _bare_scene()
 	var rook: Combatant = scene.actors[0]
@@ -517,6 +553,9 @@ func _every_action_can_fail_and_says_why() -> void:
 		ActionCatalog.EXAMINE: Action.examine(nobody),
 		ActionCatalog.INTERACT: Action.interact(chest.id),
 		ActionCatalog.WAIT: Action.wait(0),
+		ActionCatalog.EQUIP: Action.equip("a crown"),
+		ActionCatalog.UNEQUIP: Action.unequip(PICK),
+		ActionCatalog.USE: Action.use(PICK),
 	}
 	for action_name in ActionCatalog.names():
 		check(refusals.has(action_name), "%s has a refusal case here" % action_name)
@@ -545,7 +584,7 @@ func _every_action_can_fail_and_says_why() -> void:
 	var before := scene.fingerprint()
 	for action_name in refusals:
 		ActionEngine.resolve(scene, rook, refusals[action_name])
-	equal(scene.fingerprint(), before, "twelve refusals moved nothing in the world")
+	equal(scene.fingerprint(), before, "every refusal moved nothing in the world")
 
 
 ## The four refusals the acceptance names, with the sentence each returns.

@@ -279,9 +279,28 @@ func _a_query_reads_the_same_store() -> void:
 	check(older != "", "there is no older entry to look for")
 	if older == "":
 		return
-	var found := remembered.recall(_a_word_of(older))
-	check(_holds(found, older),
-		"looking back did not find an entry that is in the log: %s" % older)
+	var word := _a_word_of(older)
+	var found := remembered.recall(word)
+	# `recall` keeps the newest `RECALLED` matches, so a word the store holds more
+	# than that many of will not hand back the oldest of them. That is the cap
+	# doing its job rather than the query missing, and the two are told apart by
+	# counting the matches rather than by hoping there are few: what must be true
+	# either way is that everything that came back matches, and that the entry is
+	# there when the cap did not bite.
+	var matches := 0
+	for store in [remembered.lessons, remembered.events]:
+		for one in store:
+			if String(one["text"]).to_lower().contains(word.to_lower()):
+				matches += 1
+	if matches <= CharacterMemory.RECALLED:
+		check(_holds(found, older),
+			"looking back did not find an entry that is in the log: %s" % older)
+	else:
+		equal(found.size(), CharacterMemory.RECALLED,
+			"the cap bit and handed back other than the stated number")
+		for line in found:
+			check(String(line).to_lower().contains(word.to_lower()),
+				"looking back handed back a line that does not answer the query: %s" % line)
 
 	# It is the same entry and not a copy kept somewhere else: the line handed
 	# back is a line of `events`, and nothing was added by looking.

@@ -9,7 +9,7 @@ extends TestSuite
 ##
 ## Six claims:
 ##
-##   1. **One seeded run performs all twelve.** The play scenario is set out,
+##   1. **One seeded run performs every row of the catalogue.** The play scenario is set out,
 ##      one of its characters is handed over, and a script of key presses drives
 ##      every row of `ActionCatalog.ROWS` through `ActionEngine`. The table of
 ##      what was chosen on which tick, at what, and what the engine answered is
@@ -61,6 +61,8 @@ const KEY_ITEM := ScriptedPlay.KEY
 const RING := ScriptedPlay.RING
 const BLANKET := ScriptedPlay.BLANKET
 const SWORD := ScriptedPlay.SWORD
+const BOOTS := ScriptedPlay.BOOTS
+const DRAUGHT := ScriptedPlay.DRAUGHT
 
 ## The files that turn a press into an action or put the choosing on screen. The
 ## scan in claim 4 is over exactly these.
@@ -68,6 +70,7 @@ const INTERFACE_FILES := [
 	"res://render/player_controls.gd",
 	"res://render/ui/play_panel.gd",
 	"res://render/ui/answer_panel.gd",
+	"res://render/ui/character_panel.gd",
 ]
 
 ## What none of them may name: the engine's own rules about how far a thing is,
@@ -165,6 +168,15 @@ static func play() -> Dictionary:
 	_hold(run, RING)
 	_press(run, PlayerControls.KEY_LOOK)
 	_press(run, PlayerControls.KEY_DROP)
+
+	# The wardrobe: put the boots on, take them off again, and drink the draught.
+	# All three are aimed at what is in hand, which is the same ring the trade
+	# beats above turned.
+	_hold(run, BOOTS)
+	_press(run, PlayerControls.KEY_EQUIP)
+	_press(run, PlayerControls.KEY_UNEQUIP)
+	_hold(run, DRAUGHT)
+	_press(run, PlayerControls.KEY_USE)
 
 	# The three that need nobody: wait, hop, and leap further than DEX reaches.
 	_press(run, PlayerControls.KEY_WAIT)
@@ -360,9 +372,9 @@ func _the_interface_invents_no_verb_and_holds_no_rule() -> void:
 			check(listed.has(built) or Action.shapes().has(built),
 				"%s builds '%s', which the catalogue does not list" % [path, built])
 
-	# And the controls really can build all twelve: what the run performed is
-	# what the catalogue lists, which claim 1 asserts, and this is the other
-	# direction -- there is no thirteenth key that means something else.
+	# And the controls really can build every row: what the run performed is what
+	# the catalogue lists, which claim 1 asserts, and this is the other direction
+	# -- there is no extra key that means something the catalogue does not list.
 	var view := Surroundings.new()
 	var controls := PlayerControls.new()
 	for keycode in PlayerControls.WALK_KEYS:

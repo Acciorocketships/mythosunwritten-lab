@@ -712,8 +712,8 @@ is interrupted. `sim/control_loop.gd` is those three sentences and nothing else.
 `ActionCatalog.ROWS` carries an `occupies` column beside its section 2.1 wording
 and its section 10 call names — a walk is twenty ticks, a shout five, a drop
 two. It is there rather than beside the loop because a cost written beside the
-loop would be a thirteenth list of the twelve actions, and lists of the twelve
-actions drift. `ActionCatalog.faults()` refuses a row that costs nothing. A wait
+loop would be a second list of the actions beside the table, and two lists of
+one thing drift. `ActionCatalog.faults()` refuses a row that costs nothing. A wait
 is the one action that names its own duration, because section 2.1 spells it
 "wait (duration)".
 
@@ -776,7 +776,7 @@ their journals are identical across the two runs.
 The whole of it, with the transcript and the numbers, is in
 [reports/control-loop.md](reports/control-loop.md).
 
-**A walk happens over the ticks it costs.** Eleven of the twelve actions land at
+**A walk happens over the ticks it costs.** Every action but the walk lands at
 a point, so the span the loop charges for them is time spent getting there and
 nothing moves until the engine answers. A walk is a journey, so it is taken a
 stride at a time while the span runs and the resolution finishes whatever is
@@ -1000,7 +1000,7 @@ there — *"there is nothing with id 6"*, the engine's own sentence, because Wre
 emptied it and nothing told it — and that line costs its character one
 turn and no more.
 
-**The model chooses and never resolves.** Its prompt is the twelve actions of the
+**The model chooses and never resolves.** Its prompt is the actions of the
 one list, read out of `ActionCatalog.ROWS`, the observation packet above, what the
 character remembers, and what it is after — and no rule about distance, reach,
 cost, damage or possibility. The suite searches a real prompt for all of those and
@@ -1032,10 +1032,13 @@ question already outstanding. 52 mid-action re-evaluations against 71 calls.
 `./run_world.sh` replay a
 recorded exchange, so two processes print the same bytes. The 87 replies of the
 first three, the 4 of the difficulty-class run and the 10 of the orchestrator run
-were all put to **`z-ai/glm-5.3-flash`** over `openrouter.ai` once, on 2026-09-05,
-and are checked in verbatim. **Not one of the hundred and one was declined, and not
-one came back empty** — every question that pass put was answered with something,
-and nothing in the shipped transcript is a silence.
+were all put to **`z-ai/glm-5.3-flash`** over `openrouter.ai` and are checked in
+verbatim; the character-run tables were re-put on 2026-09-06, when three actions
+were added to the one list and the prompt they are keyed to changed, and the
+other two were written back unchanged from the pass of 2026-09-05. **Not one of
+the hundred and one was declined, and not one came back empty** — every question
+either pass put was answered with something, and nothing in the shipped
+transcript is a silence.
 
 That is a fact about this provider and this draw rather than about the prompt.
 It is not a fact about the provider before it: the model that answered every
@@ -1116,7 +1119,7 @@ replays it, and no report can quote it as the other thing:
 
 ```
 recording  recorded ... from a local model, qwen3:4b-instruct at http://127.0.0.1:11435/v1/chat/completions, N replies
-recording  recorded 2026-09-05 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
+recording  recorded 2026-09-06 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
 ```
 
 **Two things about the server that will otherwise cost an hour.** They are facts
@@ -1183,8 +1186,8 @@ heard a line is `ActionEngine`'s answer, and the packet carries it through.
 **Recent goes in; older is asked for.** Every prompt carries all of the lessons
 and the last eight lines of the log. Reaching the rest is a *tool*, and there are
 two — `recall about=…` and `learn text=…`. Neither is an atomic action and
-neither is a row of `ActionCatalog`: section 2.1's list is twelve long and stays
-twelve long, and a tool touches the character's own memory rather than the world.
+neither is a row of `ActionCatalog`: the catalogue is the one list of what
+changes the world, and a tool touches the character's own memory instead.
 A reply naming one costs an exchange, changes nothing, and the next prompt carries
 what it did. `recall` reads the same two segments the context is written out of —
 no index, no embedding, no consolidation pass, which is section 10's own order of
@@ -1197,26 +1200,27 @@ and the prompts are identical outside their `What you remember` block.
 
 | what it had kept | what it chose |
 |---|---|
-| nothing | `say(text="what bargain did you have in mind?" target=1)` |
-| *"…I have been slow to go and look at what is lying on the ground here…"* | `trade_accept(target=1)` |
-| *"…Rook is the only one here who has ever actually traded with me."* | `recall about=bargain` — a tool, so *— nothing readable —* |
-| *"…the one who shouted had already turned away…"* | `recall about=bargain or trade with Wren` — a tool, so *— nothing readable —* |
+| nothing | `say(text=then let us trade target=1)` |
+| *"…I have been slow to go and look at what is lying on the ground here…"* | `recall about=pile #6` — a tool, so *— nothing readable —* |
+| *"…Rook is the only one here who has ever actually traded with me."* | `trade_propose(target=2 give_money=9)` |
+| *"…the one who shouted had already turned away…"* | `wait(ticks=1)` |
 
 All three lessons changed the choice, and the run reports *which action* and *the
 choice at all* as two columns because they are two claims. On this draw all three
-also changed which action: the arm that had kept the lesson about the ground
-accepted Wren's standing offer outright where the arm with no lesson only asked
-what the bargain was, and the other two answered with a *tool* rather than an
-action. A `recall` is a look back through its own memory, which this harness
-puts one question and reads one action back from, so those two arms show nothing
-readable and the run says so rather than scoring either as a choice.
+also changed which action: with nothing kept the character proposed trading to
+Wren, the one who shouts; having kept that Rook is the only one who actually
+trades, it put its coins to Rook instead; having kept that answering a shout
+leaves you talking to nobody, it waited; and having kept that the ground does not
+wait, it answered with a *tool* rather than an action. A `recall` is a look back
+through its own memory, which this harness puts one question and reads one action
+back from, so that arm shows nothing readable and the run says so rather than
+scoring it as a choice.
 
 **How much memory there is, measured rather than guessed.** Across the shipped
 160-tick run the character whose store the run prints in full — Pell — came to
-hold **17 things in 915
-characters**, of which a packet carries **517 (57%)** —
-every lesson and the last eight events. The last question put was 3,200
-characters, **238 of them (7%)** what it remembers. Nothing here is near needing
+hold **27 things in 1,247 characters**, of which a packet carries **483 (39%)** —
+every lesson and the last eight events. The last question put was 4,988
+characters, **628 of them (13%)** what it remembers. Nothing here is near needing
 an index.
 
 **And every character remembers, not only the ones a model drives.** Both stores
@@ -1248,7 +1252,7 @@ is in [reports/agent-memory.md](reports/agent-memory.md).
 
 ## What an ask that costs the world no time costs
 
-Twelve of the thirteen things a mind may answer with are actions, and every one
+All but three of the things a mind may answer with are actions, and every one
 costs the character a span of ticks. The three tools — `recall`, `learn`, `done`
 — cost **nothing**: they answer on the tick they are asked and the world
 afterwards is the world before, so the next question is the same question. A
@@ -1309,7 +1313,7 @@ itself, and now something reads them.
 A goal is a **wanted state of the world and never a route to one**: *be beside
 #2*, *be carrying a brass lantern*, *have traded with #2*, *be 20 clear of #4*.
 No kind names a step, an order of steps, or a verb out of the action list — the
-suite searches every line of a written goals block for each of the twelve action
+suite searches every line of a written goals block for each catalogue action
 names and fails on a hit, because a goal that named an action would be an
 instruction.
 
@@ -1332,16 +1336,17 @@ identical outside the `What you are after` block.
 
 | what it was after | what it chose |
 |---|---|
-| nothing | `say(text="what bargain do you offer?" target=1)` |
-| be at (-471.0, 416.0) | `go_to(offset=(5.000, -6.000))` |
-| have traded with #2 | `trade_propose(target=2 give_money=9 want=[an axe])` |
-| be thought well of in this market | `say(text=a fair bargain, agreed target=1)` |
+| nothing | `recall about=bargain` — a tool, so *— nothing readable —* |
+| be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
+| have traded with #2 | `trade_propose(target=2 want_money=9)` |
+| be thought well of in this market | `say(text=a fair bargain indeed, friend Wren target=1)` |
 
-Two of the three changed *which action* was chosen; all three changed the choice.
-The position arm stood at `(-476.0, 422.0)`, was after `(-471.0, 416.0)` — `7.8`
-away, as the world told it — and answered with a step of `(5.0, -6.0)`, which is
-that difference to the tenth in one move; the trade arm proposed to the one
-character the goal named, and put all nine of its coins on the table.
+All three changed *which action* was chosen and all three changed the choice. The
+position arm stood at `(-476.0, 422.0)`, was after `(-471.0, 416.0)` — `7.8`
+away, as the world told it — and answered by naming that exact position; the
+trade arm proposed to the one character the goal named. The arm with no goal
+reached for a *tool* instead of an action, so there is no action there to compare
+against and the run says so.
 
 **And in the shipped run, unprompted.** Pell starts after three things, stated as
 scenario setup. Its first move is to walk to the character its most pressing goal
@@ -1349,18 +1354,17 @@ names, and the world closes that goal out of its own state twenty-five ticks in:
 
 ```
 turn 1   go_to target=#2      go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
-t= 25    be beside #2         closed by the world: #2 is 1.8 away
+t= 10    be beside #2         closed by the world: #2 is 1.8 away
 ```
 
 The second — carrying the brass lantern — it chased for the rest of the run and
-did not get. Wren took that lantern out of the market pile at tick 54 and the pile
-went out of the world with it, so Pell's reach for it came back `examine refused:
-there is nothing with id 6`, the engine's own sentence. Nothing told Pell that
-and nothing hinted where the lantern went, so it asked Rook once and Wren three times where one was to be
-found, looked back through its own memory twice — both times for the lantern —
-and answered Rook's offer of a silk cloak with a counter-offer of its own nine
-coins (`trade_propose ok to=2 give=0 give_money=9 want=1 want_money=0`). The goal
-is still open at the end and the table says so.
+did not get. Wren took that lantern out of the market pile and the pile went out
+of the world with it, so Pell's reach for it came back `examine refused: there is
+nothing with id 6`, the engine's own sentence. Nothing told Pell that and nothing
+hinted where the lantern went, so it asked after one out loud and looked at the
+pile four separate times before the ground under the market turned into a
+tactical board and `go_to refused: the board decides where a fighter goes` took
+even walking to it away. The goal is still open at the end and the table says so.
 
 **The world closes goals for every character, not only for the ones a model
 drives.** Wren, the character a person drives through choices written down in
@@ -1446,10 +1450,10 @@ are models, with numbers of the same order:
 
 ```
 who    driven by with     trust    fear   respect   familiarity  sentiment
-Wren   a person  Rook      0.00    0.00      0.00          0.87      +0.00
-Wren   a person  Pell      0.00    0.00      0.00          0.68      +0.00
-Rook   a model   Wren      0.00    0.00      0.00          0.87      +0.00
-Bram   a model   Sable     0.00    0.00      0.00          0.97      +0.00
+Wren   a person  Rook      0.00    0.00      0.00          0.92      +0.00
+Wren   a person  Pell      0.00    0.00      0.00          0.25      +0.00
+Rook   a model   Wren      0.00    0.00      0.00          0.92      +0.00
+Bram   a model   Sable     0.00    0.00      0.00          0.92      +0.00
 Odo    a model   nothing has passed between it and anybody
 ```
 
@@ -2195,11 +2199,33 @@ that holds one of each:
 ```
 
 [reports/player-actions.md](reports/player-actions.md) has the whole table --
-twelve verbs, twenty-four actions, four refusals in the engine's own words -- and
-the frames it was photographed from.
+every verb performed, with the engine's own words for what it refused -- and the
+frames it was photographed from.
 
-`--sheet` puts the character-sheet panel over the world; the two buttons on it
-page through whichever characters the scenario put in the world.
+**The wardrobe.** Section 2.1's twelve are what a character does to the *world*.
+Three more are what it does to its own kit, and without them what a character
+wears could only be set out when the world was built: **1** puts on what you are
+holding, **2** takes it off, **3** uses it up. They are rows of the same table as
+the other twelve, with the same one constructor and one resolver, so an NPC
+reaches them by the path a person does. Putting boots on is a way of moving your
+character did not have a moment ago (section 3.4), and taking a sword out of your
+hand takes its attacks with it.
+
+`--sheet` puts the character-sheet panel over the world, and **Z** opens and
+shuts it while you play. The sheet is where the wardrobe is operated from: the
+row it marks is what is in your hands, and the buttons along its bottom press the
+same keys. The two buttons at the top page through whichever characters the
+scenario put in the world.
+
+```
+./run_render.sh --scenario play --play           # Z opens the sheet
+./tools/play_inventory.sh                        # ...the whole wardrobe, headless
+```
+
+[reports/player-inventory.md](reports/player-inventory.md) has the frames, the
+before-and-after of what the gear changed, and the three attempts the rules
+turned down.
+
 `--start X Z` and `--paused` work here too: the first aims the camera at a place,
 the second holds the world still so a capture can wait for the renderer to settle
 without the observer walking away underneath it.
@@ -2214,7 +2240,10 @@ xvfb-run -a ./run_render.sh --seed 1234 \
 
 `--screenshot-frame` waits for a frame, which depends on how fast the machine
 drew it; `--screenshot-tick` waits for the world to reach a tick instead, so the
-same command always captures the same moment. The two biome images above were
+same command always captures the same moment. `--screenshot-ticks
+"4:one.png,32:two.png"` names several moments of *one* run and photographs each
+of them, which is how a story is shown without a reader having to be told that
+six pictures came from the same run. The two biome images above were
 made that way — the same seed and walk, from either side of one border:
 
 ```
@@ -2373,7 +2402,7 @@ never has to be serialised for the world to be reproducible.
 ./run_effect_suite.sh           # just the composable-effect suite
 ./run_sheet.sh                  # the character sheet: two characters of one type, status, a level-up
 ./run_inventory.sh              # one inventory per character: equipment as a view, the ground, money
-./run_actions.sh                # the twelve atomic actions, each called once, and what came of it
+./run_actions.sh                # every atomic action, each called once, and what came of it
 ./run_loop.sh                   # the control loop: the cadence, the four interruptions, the bias, a slow decider
 ./run_loop_suite.sh             # just the control-loop suite
 ./run_scenario.sh               # five characters living one seeded run, end to end
@@ -2407,7 +2436,7 @@ character sheet a player and an NPC share; the one inventory a character
 carries and the equipment view onto it; the
 items, their power budget and the ability-score gate; what a defeated character
 drops and the distance gradient that keeps the frontier ahead of it; the composable effect
-base every attack, projectile and spell is built out of; the twelve atomic
+base every attack, projectile and spell is built out of; the atomic
 actions and the one surface a person and a program both drive them through; the
 control loop that gives an action a length in ticks, re-evaluates on a cadence
 while it runs, and lets a character wait in the world for a decision that is not
@@ -2584,7 +2613,7 @@ takes a real-time overworld onto that board and back again, and one *observer*
 walking through the lot — a placeholder for a character, with no gameplay
 meaning, which exists so that the streaming has someone to follow. On top of all
 that: items and their power budget, the one character sheet a player and an NPC
-share, the twelve atomic actions they both act through, and the control loop
+share, the atomic actions they both act through, and the control loop
 that gives an action a length in ticks, re-evaluates on a cadence while it runs,
 and lets a character wait in the world for a decision that is not ready yet.
 And the first player-facing interface: the Sprout Lands pixel pack as a working

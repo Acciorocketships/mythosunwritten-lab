@@ -10,9 +10,8 @@ extends RefCounted
 ##
 ## ## The prompt is a menu and a view, and nothing else
 ##
-## It carries two things: the twelve actions with the shape of their arguments,
-## read straight out of `ActionCatalog.ROWS` so a thirteenth list cannot appear
-## here, and the observation packet `sim/observation.gd` assembled. It carries no
+## It carries two things: every action with the shape of its arguments, read
+## straight out of `ActionCatalog.ROWS` so a second list cannot appear here, and the observation packet `sim/observation.gd` assembled. It carries no
 ## rule. There is no sentence in it about how far a character can walk, what a
 ## jump costs in dexterity, what an attack does, whether a target is in reach,
 ## whether an item can be picked up from where the character is standing, or
@@ -36,7 +35,7 @@ extends RefCounted
 ## which keeps a sentence for good, and `done`, which says one of the things the
 ## character is after is finished. None is an atomic action: they change nothing
 ## in the world, they take no time in it, and they are deliberately not rows of
-## `ActionCatalog`, which is section 2.1's list and stays twelve long. A reply
+## `ActionCatalog`, which is the one list of what changes the world. A reply
 ## naming one is read by `tool_of()` rather than by `action_of()`, and what is
 ## done about it is `ModelMind`'s business.
 ##
@@ -384,7 +383,7 @@ static func tool_lines() -> PackedStringArray:
 	return written
 
 
-## The twelve actions and their keys, one line each, read out of the one list.
+## Every action and its keys, one line each, read out of the one list.
 ##
 ## The catalogue's `listed` column -- section 2.1's own wording of a row -- is
 ## deliberately not printed. It is prose about what an action does, and one row

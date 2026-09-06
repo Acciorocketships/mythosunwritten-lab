@@ -18,7 +18,7 @@ extends RefCounted
 ##   * **the one list** -- section 2.1's actions beside section 10's call names,
 ##     printed out of `ActionCatalog` rather than typed here, so the transcript
 ##     cannot claim a surface the code does not have.
-##   * **the walkthrough** -- eleven of the twelve actions on one scene, in the
+##   * **the walkthrough** -- all but one of the actions on one scene, in the
 ##     order a character would take them: look about, speak, walk to a pile, pick
 ##     something up, put it down, try a jump DEX will not carry, jump one it
 ##     will, walk to a chest, fail to open it, open it with the lockpick, take

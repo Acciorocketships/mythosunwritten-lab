@@ -15,11 +15,17 @@ extends RefCounted
 ## ## What is in it
 ##
 ##   * **Fen** -- the one the camera follows and `--play` hands over. Carries a
-##     sword, a blanket and twenty coins, and is on the green side with Hob.
+##     sword (in hand), a pair of boots (not on), a mending draught, a blanket
+##     and twenty coins, is a few points of health down, and is on the green side
+##     with Hob. The boots and the
+##     draught are what make the wardrobe reachable: putting the boots on adds a
+##     way of moving, taking the sword out of hand takes the attack away with it,
+##     and the draught is the one thing in the world that is used up.
 ##   * **Hob** -- a trader on Fen's own side, so the two can stand at arm's
 ##     length without the world reading it as a meeting of enemies. He drives his
-##     own bargain: he offers his lantern for four coins, he *denies* whatever is
-##     offered to him, and if his own offer is denied he makes it again.
+##     own bargain: he offers his lantern for four coins, he takes a *gift* --
+##     anything offered that asks nothing of him -- and denies any bargain that
+##     does ask, and if his own offer is denied he makes it again.
 ##   * **Rill** -- an amber-side brawler standing well off, who takes no interest
 ##     in anybody until they come within `NOTICES` of her, and then closes and
 ##     strikes. So the fight is one a person goes looking for: stay at the market
@@ -99,11 +105,28 @@ const BLANKET := "wool blanket"
 const LANTERN := "brass lantern"
 const KEY := "iron key"
 const RING := "silver ring"
+## What the boots Fen carries are called. `Armour.boots` names a piece by its
+## rarity and its slot, so this is that name read back rather than a second one.
+const BOOTS := "common boots"
+const DRAUGHT := "mending draught"
 
 ## What Hob wants for the lantern, and what the two start with in coin.
 const LANTERN_PRICE := 4
 const FEN_MONEY := 20
 const HOB_MONEY := 6
+
+## How many points of health Fen starts down.
+##
+## Stage dressing, and the one piece of it that needs explaining. The stage has
+## to hold one of everything a person can do, and the one thing it could not
+## otherwise hold is a reason to drink: nothing in this world can wound the
+## person. Rill closes and strikes, but the moment two commanders come within
+## `ActionScene.ENGAGE_RADIUS` the fight snaps onto a board, and a commander on a
+## board has no way to walk across it -- there is no board-move action yet -- so
+## whoever the snap left out of reach stays out of reach. Until there is one, a
+## character who has never been scratched is a character whose draught is
+## furniture.
+const FEN_SCRATCHED := 6
 
 ## Where the pile and the chest lie, as offsets from `WHERE`, and what the chest
 ## holds.
@@ -168,8 +191,14 @@ static func populate(scene: ActionScene) -> ActionScene:
 
 	var fen := _named(scene, FEN)
 	(fen.piece as Commander).wield(Weapon.held(Weapon.sword(), _level_of(FEN)))
+	# Carried and deliberately *not* put on: what a person equips has to be
+	# something they are already holding, or equipping it would be two actions
+	# written as one.
+	ActionScene.inventory_of(fen).carry(Armour.boots(_level_of(FEN)))
+	ActionScene.inventory_of(fen).carry(_draught(DRAUGHT))
 	ActionScene.inventory_of(fen).carry(_tool(BLANKET))
 	ActionScene.inventory_of(fen).gain(FEN_MONEY)
+	fen.piece.health = maxi(1, fen.piece.max_health() - FEN_SCRATCHED)
 
 	var hob := _named(scene, HOB)
 	ActionScene.inventory_of(hob).carry(_tool(LANTERN))
@@ -204,10 +233,10 @@ static func drive(scene: ActionScene) -> void:
 
 ## Hob drives his own bargain.
 ##
-## Four things in order, and every one of them reads the world it is handed:
-## whatever is offered to him he denies -- he is not buying today -- and with
-## nothing offered to him and nobody within arm's length there is nothing to do
-## but wait. Standing close enough, he offers the lantern for its price, and once
+## Four things in order, and every one of them reads the world it is handed: a
+## bargain offered to him he denies -- he is not buying today -- while a gift, an
+## offer that asks him for nothing, he takes; and with nothing offered to him and
+## nobody within arm's length there is nothing to do but wait. Standing close enough, he offers the lantern for its price, and once
 ## he has been paid, or while his offer is on the table, he answers whoever spoke
 ## to him.
 ##
@@ -216,8 +245,15 @@ static func drive(scene: ActionScene) -> void:
 ## would be a second rule.
 static func _haggling(scene: ActionScene, actor: Combatant) -> Action:
 	for offer in scene.offers:
-		if int(offer["to"]) == actor.id:
-			return Action.trade_deny(int(offer["from"]))
+		if int(offer["to"]) != actor.id:
+			continue
+		# A gift is a trade with nothing in return -- section 2.1's own reading
+		# of it -- and he will take one. A bargain that asks him for anything he
+		# will not: he is not buying today.
+		var asks := not PackedStringArray(offer["want"]).is_empty() \
+			or int(offer["want_money"]) > 0
+		return Action.trade_deny(int(offer["from"])) if asks \
+			else Action.trade_accept(int(offer["from"]))
 	var buyer := _named(scene, FEN)
 	if buyer == null:
 		return Action.wait(REST)
@@ -322,3 +358,13 @@ static func _who_is_owed_an_answer(scene: ActionScene, id: int) -> int:
 # one: everything it is worth goes to its effects axis.
 static func _tool(called: String) -> Item:
 	return Item.weapon(called, 1, ItemRarity.COMMON, Ability.DEX, [0, 0, 1] as Array[int])
+
+
+# Something to drink, at the level of the one who carries it, read against CON.
+# A consumable's whole budget is on its effects axis by construction
+# (`Item.consumable`), so what it is worth is the item layer's arithmetic and
+# nothing here chooses a number.
+static func _draught(called: String) -> Item:
+	return Item.consumable(
+		called, _level_of(FEN), ItemRarity.COMMON, Ability.CON,
+		[called] as Array[String])

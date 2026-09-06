@@ -123,18 +123,19 @@ So a difference in what comes back is a difference the goal made:
 
 | arm | what it is after | the model chose |
 |---|---|---|
-| no goal | — | `say(text="what bargain do you offer?" target=1)` |
-| the empty stall | be at (-471.0, 416.0) | `go_to(offset=(5.000, -6.000))` |
-| a trade with Rook | have traded with #2 | `trade_propose(target=2 give_money=9 want=[an axe])` |
-| thought well of here | be thought well of in this market | `say(text=a fair bargain, agreed target=1)` |
+| no goal | — | `recall about=bargain` — a tool, so *— nothing readable —* |
+| the empty stall | be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
+| a trade with Rook | have traded with #2 | `trade_propose(target=2 want_money=9)` |
+| thought well of here | be thought well of in this market | `say(text=a fair bargain indeed, friend Wren target=1)` |
 
-Two of the three changed **which action** was chosen; all three changed the
-choice. The position arm is worth pausing on: the character stood at
-`(-476.0, 422.0)`, was after `(-471.0, 416.0)` — `7.8` away, as the world told it
-— and answered with a step of `(5.0, -6.0)`, which is exactly the difference
-between the two, to the tenth, in one move. The trade arm
-proposed to the one character its goal named, and put all nine of its coins on
-the table to do it.
+All three changed **which action** was chosen and all three changed the choice.
+The position arm is worth pausing on: the character stood at `(-476.0, 422.0)`,
+was after `(-471.0, 416.0)` — `7.8` away, as the world told it — and answered by
+naming that exact position. The trade arm proposed to the one character its goal
+named. The arm with no goal at all reached for a *tool* rather than an action —
+`recall`, a look back through its own memory — which the comparison reports as
+nothing readable, because a tool is not an action and there is no action there to
+compare against.
 
 The full transcript is `reports/goal-evidence.txt`.
 
@@ -146,25 +147,27 @@ alone. What happened is the model's own:
 
 ```
 turn 1   go_to target=#2         go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
-t= 25    be beside #2            closed by the world: #2 is 1.8 away
+t= 10    be beside #2            closed by the world: #2 is 1.8 away
 ```
 
 The first thing it did was walk to the character its most pressing goal named,
-and the world closed that goal out of its own state twenty-five ticks in — no
-step towards it was written down anywhere, and Pell was never asked whether it
-had arrived.
+and the world closed that goal out of its own state ten ticks in, while the walk
+was still running — no step towards it was written down anywhere, and Pell was
+never asked whether it had arrived.
 
-The second goal it pursued for the rest of the run and did not get. It asked Rook
-once and Wren three times where a brass lantern was to be found, looked back
-through its own memory twice, reached for the market pile the lantern had been
-in, and answered Rook's offer of a silk cloak with a counter-offer of its own
-nine coins:
+The second goal it pursued for the rest of the run and did not get. It asked
+after a brass lantern out loud, looked at the market pile the lantern had been in
+four separate times, and was still reaching for it when the ground under the
+market turned into a tactical board and the engine stopped answering it about
+where to walk:
 
 ```
-t= 61  Pell   finished examine(target=6)
+t= 45  Pell   finished examine(target=6)
+              -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=6.652
+t= 88  Pell   finished go_to(target=6)
+              -> go_to refused: the board decides where a fighter goes
+t=112  Pell   finished examine(target=6)
               -> examine refused: there is nothing with id 6
-t=104  Pell   finished trade_propose(target=2 give_money=9 want=[silk cloak])
-              -> trade_propose ok to=2 give=0 give_money=9 want=1 want_money=0
 ```
 
 Wren picked the lantern up and the pile went out of the world with it.

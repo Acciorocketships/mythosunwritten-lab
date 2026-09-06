@@ -10,12 +10,30 @@ extends PanelContainer
 ## step: a blow landed on a tick is on the panel on the next frame because the
 ## panel is looking at the same object the blow was struck against. The only
 ## state this file owns is which of the characters in the world is being looked
-## at, which is a fact about the interface and about nothing else.
+## at and whether it is open at all, and both are facts about the interface and
+## about nothing else.
 ##
-## That is also why nothing here writes. The layer rule lets the render side read
-## the simulation and forbids it holding a piece of the fight; a view that reads
-## every frame and stores nothing is the strongest form of that, because there is
-## no second copy for the two sides to disagree about.
+## ## It can be operated, and it still writes nothing
+##
+## The sheet used to be a readout with no controls on it. It has controls now --
+## put on, take off, use up, drop, give away -- and not one of them touches the
+## simulation. A control here does exactly what a key press does, because it *is*
+## a key press: every button hands its keycode to `on_key`, which the shell wires
+## to the same `_drive` a real press goes through, so the action is built by
+## `render/player_controls.gd` out of `Action`'s own constructors and lands in a
+## `LiveChoice` for the world's control loop to pick up. There is no second path
+## from this panel into the world and nothing here calls `Inventory`.
+##
+## That is what keeps the layer rule intact: the render side may read the
+## simulation and must hold no piece of it. A view that reads every frame, stores
+## nothing and asks by pressing a key has no second copy for the two sides to
+## disagree about, and no rule of its own either -- pressing "put on" over a
+## blanket builds the action and lets the engine refuse it, in the engine's
+## words, on the answer panel.
+##
+## What is picked is not this panel's either. The row marked is whichever carried
+## thing `PlayerControls` says is in hand, which is the same ring the **F** key
+## turns; the panel reads that name every frame and keeps no copy of it.
 ##
 ## ## Where each thing on it comes from
 ##
@@ -65,12 +83,45 @@ const ABILITY_LABELS := {
 ## sheet's own convention: a dash is not a zero.
 const NOTHING := "-"
 
+## The controls along the bottom of the sheet: what each is called and which key
+## it presses. The key is `PlayerControls`' own constant, so a button and the
+## keyboard cannot come to mean different things -- there is one binding and this
+## names it.
+##
+## `next` turns the ring of carried things, which is what every other control
+## here is aimed at. It is on the panel because a person operating the sheet with
+## a pointer should not have to reach for the keyboard to choose what they are
+## operating on.
+const CONTROLS := [
+	{"label": "next", "key": PlayerControls.KEY_HOLD},
+	{"label": "on", "key": PlayerControls.KEY_EQUIP},
+	{"label": "off", "key": PlayerControls.KEY_UNEQUIP},
+	{"label": "use", "key": PlayerControls.KEY_USE},
+	{"label": "drop", "key": PlayerControls.KEY_DROP},
+	{"label": "give", "key": PlayerControls.KEY_OFFER},
+]
+
 ## The characters this panel can show, in the simulation's own order. These are
 ## the simulation's objects, held by reference and never written to.
 var sheets: Array[Character] = []
 
-## Which of them is on screen. The interface's own state and the only state here.
+## Which of them is on screen. The interface's own state, as is `open`.
 var showing := 0
+
+## Whether the sheet is on screen at all. A run that asked for `--sheet` starts
+## open; a run that only asked to play starts shut and the person opens it.
+var open := true
+
+## The controls a person is driving with, or null in a run nobody is playing.
+## Read for one thing only -- which carried thing is in hand -- and never
+## written.
+var controls: PlayerControls = null
+
+## Where a button press goes: `func(keycode: int) -> void`, the shell's own input
+## path. Unset in a run with nobody driving, in which case the buttons are drawn
+## and do nothing, because what they would ask for is a choice for a character
+## nobody is choosing for.
+var on_key: Callable = Callable()
 
 var _name: Label
 var _paging: Label
@@ -88,6 +139,9 @@ var _heart_faces := {}
 var _carried_row: HBoxContainer
 var _carried_count: Label
 var _carried_names: VBoxContainer
+## The row of buttons along the bottom. Kept so that a run with no pointer in it
+## can press them the way a pointer would.
+var _control_row: HBoxContainer
 
 
 ## The tree is built here rather than in `_ready` so that the panel is a whole
@@ -120,6 +174,8 @@ func _init() -> void:
 	_carried_names = VBoxContainer.new()
 	_carried_names.add_theme_constant_override("separation", GAP)
 	column.add_child(_carried_names)
+	column.add_child(_spacer(SECTION_GAP - ROW_GAP))
+	column.add_child(_build_controls())
 	refresh()
 
 
@@ -141,6 +197,18 @@ func current() -> Character:
 	return sheets[showing]
 
 
+## Open the sheet or shut it. The interface's own state moving; the simulation is
+## not touched and does not know.
+func toggle() -> void:
+	open = not open
+
+
+## What is in hand, by name, or "" when nobody is driving. The one thing this
+## panel reads off the controls, and it is read afresh every frame.
+func picked() -> String:
+	return "" if controls == null else controls.holding
+
+
 ## Page to the next character, wrapping. The interface's own state moving; the
 ## simulation is not touched and does not know.
 func page(by: int) -> void:
@@ -153,7 +221,7 @@ func page(by: int) -> void:
 ## nothing cached here to invalidate, so there is nothing to decide.
 func refresh() -> void:
 	var sheet := current()
-	visible = sheet != null
+	visible = open and sheet != null
 	if sheet == null:
 		return
 
@@ -219,21 +287,29 @@ func _refresh_carried(sheet: Character) -> void:
 		icon.texture = _icon_for(entry)
 		plate.theme_type_variation = SproutTheme.SLOT_FULL
 		plate.tooltip_text = _name_of(entry)
+	var in_hand := picked()
 	for index in carried.size():
-		_write_carried_line(_carried_names.get_child(index), sheet, carried[index])
+		_write_carried_line(
+			_carried_names.get_child(index), sheet, carried[index], in_hand)
 
 
-## One carried thing on one line: what it is called, what tier it is, what level
-## it is, and the pack's own tick when it is being worn or held.
+## One carried thing on one line: whether it is the one the controls are aimed
+## at, what it is called, what tier it is, what level it is, and the pack's own
+## tick when it is being worn or held.
 ##
-## Every one of those four is read off the simulation's object at the moment the
-## line is written; none of them is stored here.
-static func _write_carried_line(row: Control, sheet: Character, entry: Variant) -> void:
+## Every one of those five is read at the moment the line is written -- four off
+## the simulation's object and one off the controls -- and none of them is stored
+## here.
+static func _write_carried_line(
+	row: Control, sheet: Character, entry: Variant, in_hand: String
+) -> void:
 	var behind := Inventory.item_of(entry)
-	(row.get_child(0) as Label).text = _name_of(entry)
-	(row.get_child(1) as Label).text = "" if behind == null else behind.rarity
-	(row.get_child(2) as Label).text = "" if behind == null else "l%d" % behind.level
-	row.get_child(3).visible = sheet.inventory.is_equipped(entry)
+	var called := _name_of(entry)
+	row.get_child(0).visible = in_hand != "" and called == in_hand
+	(row.get_child(1) as Label).text = called
+	(row.get_child(2) as Label).text = "" if behind == null else behind.rarity
+	(row.get_child(3) as Label).text = "" if behind == null else "l%d" % behind.level
+	row.get_child(4).visible = sheet.inventory.is_equipped(entry)
 
 
 ## The shape of one such line. Rebuilt only when the number of things carried
@@ -241,6 +317,10 @@ static func _write_carried_line(row: Control, sheet: Character, entry: Variant) 
 func _carried_line() -> Control:
 	var row := _row()
 	row.custom_minimum_size = Vector2(WIDTH - 32, SproutPack.FONT_CELL)
+	# The pack's own mark -- the one the play panel points at an aim with --
+	# shown on the line the controls are aimed at. Drawn always and hidden when it
+	# is not that line, so a row's shape does not change as the ring turns.
+	row.add_child(_sprite(SproutPack.icon(SproutPack.ICON_MARK)))
 	var called := Label.new()
 	called.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	called.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -361,6 +441,36 @@ func _build_scores() -> Control:
 		_scores[ability] = value
 		grid.add_child(cell)
 	return grid
+
+
+## The row of controls along the bottom: one button per entry of `CONTROLS`,
+## each of which presses that entry's key and nothing else.
+##
+## The whole of what a button does is in `press()`, which is two lines and holds
+## no rule: it hands a keycode to whoever wired `on_key` and stops there.
+func _build_controls() -> Control:
+	var row := _row()
+	_control_row = row
+	for entry in CONTROLS:
+		var button := Button.new()
+		button.text = SproutPack.drawable(String(entry["label"]))
+		button.custom_minimum_size = Vector2(0, SproutPack.CELL + 8)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.focus_mode = Control.FOCUS_NONE
+		var keycode := int(entry["key"])
+		button.pressed.connect(func() -> void: press(keycode))
+		row.add_child(button)
+	return row
+
+
+## Press one of the sheet's controls, as though the key had been pressed.
+##
+## Public so that a run with no pointer in it can exercise the wiring: the suite
+## calls this and asserts the shell was handed the key, which is the whole of
+## what a click does.
+func press(keycode: int) -> void:
+	if on_key.is_valid():
+		on_key.call(keycode)
 
 
 func _build_equipment() -> Control:

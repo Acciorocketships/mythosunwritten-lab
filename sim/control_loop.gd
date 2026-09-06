@@ -6,7 +6,7 @@ extends RefCounted
 ##
 ##   1. *"While an action is in progress"* -- an action costs ticks. What it
 ##      costs is the `occupies` column of `ActionCatalog.ROWS`, because a cost
-##      written here would be a thirteenth list of the twelve actions.
+##      written here would be a second list of the actions beside the table.
 ##   2. *"the agent re-evaluates at some frequency (it may change its mind, but
 ##      is biased toward continuing)"* -- the frequency is `REVIEW_EVERY` and the
 ##      bias is `CONTINUE_BIAS`. One constant each, used in one place each.
@@ -29,7 +29,7 @@ extends RefCounted
 ##
 ## ## An action in progress is carried out while it is in progress
 ##
-## For eleven of the twelve actions that is the whole story, because their effect
+## For every action but the walk that is the whole story, because their effect
 ## lands at a point and the span before it is time spent getting there: a blow
 ## interrupted did not land, a trade interrupted was never struck. A walk is the
 ## exception, and it is not a special case so much as what a journey is -- a

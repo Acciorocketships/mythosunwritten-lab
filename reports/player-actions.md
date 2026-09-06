@@ -38,45 +38,51 @@ examine            5  #2                     examine ok id=2 name=Hob kind=comma
 say               11  #2                     say ok shout=false heard_by=1
 say               17  -                      say ok shout=true heard_by=1
 trade_propose     22  #2                     trade_propose refused: Hob is out of reach (6.00 > 2.50)
-go_to             43  #2                     go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
-trade_propose     60  #2                     trade_propose ok to=2 give=1 give_money=0 want=0 want_money=2
-trade_deny        75  #2                     trade_deny ok from=2
-trade_accept      79  #2                     trade_accept refused: the offer from Hob was denied
-trade_accept      95  #2                     trade_accept ok from=2 took=1 took_money=0 gave=0 gave_money=4
-go_to            116  #4                     go_to ok at=(-478.808, 422.676) walked=3.6 steps=4
-pick_up          120  #4 with iron key       pick_up ok item=iron key from=4
-go_to            141  #5                     go_to ok at=(-482.939, 420.891) walked=4.5 steps=5
-interact         148  #5 with wool blanket   interact refused: a wool blanket is not what the chest opens with, so it is put to a check
-interact         155  #5 with iron key       interact ok target=5 opened=true used=iron key
-pick_up          159  #5 with silver ring    pick_up ok item=silver ring from=5
-drop             162  #5 with iron key       drop ok item=iron key into=5
-examine          167  silver ring            examine ok item=silver ring seen=common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [silver ring:4] silver ring
-drop             170  - with silver ring     drop ok item=silver ring into=6
-wait             176  -                      wait ok ticks=5 until=181
-jump             181  (-482.9, 417.9)        jump ok at=(-482.939, 417.891) gap=3.0 reach=3.75 dex=3
-jump             186  (-482.9, 405.9)        jump refused: 12.00 is further than DEX 3 jumps (3.75)
-go_to            207  offset (+0.0, -3.6)    go_to ok at=(-482.939, 414.291) walked=3.6 steps=4
-go_to            228  #3                     go_to ok at=(-451.902, 419.670) walked=31.5 steps=35
-attack           244  #3 with common sword   attack ok attack=cut cells=3 hits=1 dealt=3
+go_to             56  #2                     go_to ok at=(-476.400, 420.000) walked=0.0 steps=0
+trade_propose     73  #2                     trade_propose ok to=2 give=1 give_money=0 want=0 want_money=2
+trade_deny        88  #2                     trade_deny ok from=2
+trade_accept      92  #2                     trade_accept refused: the offer from Hob was denied
+trade_accept     108  #2                     trade_accept ok from=2 took=1 took_money=0 gave=0 gave_money=4
+go_to            129  #4                     go_to ok at=(-478.808, 422.676) walked=3.6 steps=4
+pick_up          133  #4 with iron key       pick_up ok item=iron key from=4
+go_to            154  #5                     go_to ok at=(-482.939, 420.891) walked=4.5 steps=5
+interact         161  #5 with wool blanket   interact refused: a wool blanket is not what the chest opens with, so it is put to a check
+interact         168  #5 with iron key       interact ok target=5 opened=true used=iron key
+pick_up          172  #5 with silver ring    pick_up ok item=silver ring from=5
+drop             175  #5 with iron key       drop ok item=iron key into=5
+examine          180  silver ring            examine ok item=silver ring seen=common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [silver ring:4] silver ring
+drop             183  - with silver ring     drop ok item=silver ring into=6
+equip            187  - with common boots    equip ok item=common boots slot=boots instead_of=- moves=2 attacks=2 defence=0
+unequip          190  - with common boots    unequip ok item=common boots slot=boots moves=1 attacks=2 defence=0
+use              194  - with mending draught use ok item=mending draught worth=8 mended=6 health=32 of=32
+wait             200  -                      wait ok ticks=5 until=205
+jump             205  (-482.9, 417.9)        jump ok at=(-482.939, 417.891) gap=3.0 reach=3.75 dex=3
+jump             210  (-482.9, 405.9)        jump refused: 12.00 is further than DEX 3 jumps (3.75)
+go_to            231  offset (+0.0, -3.6)    go_to ok at=(-482.939, 414.291) walked=3.6 steps=4
+go_to            252  #3                     go_to ok at=(-451.902, 419.670) walked=31.5 steps=35
+attack           268  #3 with common sword   attack ok attack=cut cells=3 hits=1 dealt=3
 
-24 actions performed, 4 of them refused, world at tick 244
+27 actions performed, 4 of them refused, world at tick 268
 ```
 
-All twelve rows of `ActionCatalog.ROWS` appear: `go_to`, `jump`, `attack`, `say`
-(targeted at tick 11 and shouted at 17), `trade_propose`, `trade_accept`,
-`trade_deny`, `pick_up`, `drop` (into a chest at 162 and on the ground at 170),
-`examine` (a character at 5 and a carried item at 167), `interact`, `wait`.
+Every row of `ActionCatalog.ROWS` appears: `go_to`, `jump`, `attack`, `say`
+(targeted and shouted), `trade_propose`, `trade_accept`, `trade_deny`,
+`pick_up`, `drop` (into a chest and on the ground), `examine` (a character and a
+carried item), `interact`, `wait` -- and the three the wardrobe added since,
+`equip`, `unequip` and `use`, which are written up in
+[reports/player-inventory.md](player-inventory.md).
 
 Every target in the "at" column is one the person picked out of the aim list,
 and the four sorts section 2.1 names are all there: a character (#2, #3), an item
 lying on the ground (#4, the pile), a container (#5, the chest), and a position
-(the two jumps and the walk).
+(the two jumps and the walk). The last three rows before the wait are aimed at
+something carried instead, which is what the wardrobe verbs take.
 
 The walk at tick 207 is `go_to`'s second shape rather than its first. A walk key
 is a direction and a length and never a place, so it writes its step under the
 row's `offset` key -- section 10's `MoveRelative(offset)` -- and the engine works
 out where that lands from where the character is standing when the walk starts.
-It is the same row, the same twelve-long catalogue, and the same pair of shapes a
+It is the same row, the same catalogue, and the same pair of shapes a
 language-model mind is offered; see `reports/position-space-evidence.txt`.
 
 ## Refused, in the engine's own words, four ways
@@ -102,11 +108,15 @@ run -- the person's own bargain is one Hob would not have, which a table of the
 person's actions cannot show, so it is read out of the loop's journal:
 
 ```
-t= 43  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
-t= 60  Hob    began trade_deny(target=1), 2 ticks
-t= 62  Hob    finished trade_deny(target=1) -> trade_deny ok from=1
-t= 78  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
+t= 27  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
+t= 76  Hob    began trade_deny(target=1), 2 ticks
+t= 78  Hob    finished trade_deny(target=1) -> trade_deny ok from=1
+t= 90  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
 ```
+
+The ticks in the table above moved when three wardrobe beats were added to the
+same run; the frames further down were photographed before that and their own
+schedules are printed with them.
 
 ## From the built shell, with synthetic input
 
@@ -201,9 +211,9 @@ into an action or put the choosing on screen -- `render/player_controls.gd`,
 none of them names `ActionEngine`, `ActionCatalog`, `REACH`, `SIGHT`, `VOICE`,
 `ENGAGE_RADIUS`, `JUMP_BASE`, `JUMP_PER_DEX`, `ARRIVE`, `MAX_STEPS`, `occupies`,
 `is_passable`, `is_qualified`, `holds_things`, `was_refused`, `can_attack` or
-`distance_to`. Every action they build is one of the catalogue's twelve
+`distance_to`. Every action they build is one of the catalogue's own
 constructors, and none of them reaches past those to `Action.of`, which takes
-any name at all and is how a thirteenth verb would get in.
+any name at all and is how an unlisted verb would get in.
 
 Three distances *are* named on the render side, and they are not rules: `STEP`
 is how far one press of a walk key sends you, `HOP` and `LEAP` how far a jump is

@@ -69,10 +69,19 @@ extends RefCounted
 ## exactly one later step, and until then each can be read on its own.
 class_name Item
 
-## The two kinds the design names. Lower case throughout: these are field values,
-## not class names, and nothing branches on them except a report's column.
+## The three kinds the design names. Section 2 gives a character "inventory
+## (weapons, armor, consumables, money -- tradeable/usable)", so a consumable is
+## an item like the other two and not a fourth representation. Lower case
+## throughout: these are field values, not class names.
+##
+## Only one rule anywhere reads `kind`, and it is not in this file: `ActionEngine`
+## refuses to use up anything that is not `KIND_CONSUMABLE`, because using a
+## thing up is the one operation whose whole point is that the item does not come
+## back. Everything else -- the budget, the gate, the slot -- is the same
+## arithmetic for all three.
 const KIND_WEAPON := "weapon"
 const KIND_ARMOUR := "armour"
+const KIND_CONSUMABLE := "consumable"
 
 ## Where a piece of gear is worn or held. The four body slots section 3.4 names,
 ## plus the hand, so that a whole loadout can be described without a second
@@ -87,11 +96,17 @@ const SLOT_HAND := "hand"
 ## order reads this.
 const ARMOUR_SLOTS := [SLOT_BOOTS, SLOT_LEGGINGS, SLOT_CHESTPLATE, SLOT_HELMET]
 
+## Where a thing that is neither worn nor held goes: nowhere. A draught is
+## carried and traded like anything else and cannot be put on, which
+## `Inventory.is_wearable` already reads off an empty slot -- so this is the name
+## of a value the inventory has always understood rather than a new rule.
+const SLOT_NONE := ""
+
 ## What it is called.
 var item_name: String = ""
 
-## `KIND_WEAPON` or `KIND_ARMOUR`. The one field that says which sort of gear
-## this is, and no rule in this file reads it.
+## `KIND_WEAPON`, `KIND_ARMOUR` or `KIND_CONSUMABLE`. The one field that says
+## which sort of thing this is, and no rule in this file reads it.
 var kind: String = KIND_WEAPON
 
 ## Where it is worn or held.
@@ -184,6 +199,28 @@ static func armour(
 	return from_shape(
 		KIND_ARMOUR, called, worn_in, at_level, of_rarity, read_against,
 		weights, effect_names, effect_weights
+	)
+
+
+## Something used up. It goes in no slot, so it cannot be worn or held, and its
+## whole budget is on the effects axis: a draught is what its effect is worth and
+## nothing else. Section 4 puts every ability on an item, and a consumable is the
+## one that spends itself when the ability is used.
+##
+## The shape is fixed here rather than asked of the caller for that reason: a
+## consumable with points on movement or defence would be points nobody can ever
+## read, because nothing wears it.
+static func consumable(
+	called: String,
+	at_level: int,
+	of_rarity: String,
+	read_against: String,
+	effect_names: Array[String] = [],
+	effect_weights: Array[int] = [],
+) -> Item:
+	return from_shape(
+		KIND_CONSUMABLE, called, SLOT_NONE, at_level, of_rarity, read_against,
+		[0, 0, 1] as Array[int], effect_names, effect_weights
 	)
 
 

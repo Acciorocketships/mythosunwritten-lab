@@ -353,7 +353,7 @@ static func _opening(
 		+ " driven by a person's choices written down in advance")
 	written.append("  channel    %s -- %s" % [channel.kind, channel.why])
 	written.append("  recording  %s" % channel.recorded)
-	written.append("  prompt     the twelve actions of the one list, the observation packet,")
+	written.append("  prompt     every action of the one list, the observation packet,")
 	written.append("             and what this character remembers -- every lesson it has kept")
 	written.append("             and the last few lines of its own log, with the three tools")
 	written.append("             that look further back, keep a new lesson and close a goal;")

@@ -46,7 +46,7 @@ var kind: String = ""
 var params: Dictionary = {}
 
 
-## An action of a kind with its parameters. The twelve constructors below are
+## An action of a kind with its parameters. The constructors below are
 ## all this, and callers use them rather than this, because a name spelled wrong
 ## here is caught at the catalogue and a name spelled wrong there is caught by
 ## the engine that does not exist.
@@ -77,6 +77,9 @@ static func constructors() -> Dictionary:
 		ActionCatalog.EXAMINE: Action.examine,
 		ActionCatalog.INTERACT: Action.interact,
 		ActionCatalog.WAIT: Action.wait,
+		ActionCatalog.EQUIP: Action.equip,
+		ActionCatalog.UNEQUIP: Action.unequip,
+		ActionCatalog.USE: Action.use,
 	}
 
 
@@ -188,6 +191,26 @@ static func interact(target: int, item: String = "") -> Action:
 ## Wait a number of ticks.
 static func wait(ticks: int) -> Action:
 	return of(ActionCatalog.WAIT, {"ticks": ticks})
+
+
+## Put a carried item on: wear it, or take it in hand. Named by the item, as
+## every other action that reaches into an inventory is, so a caller addresses
+## what it can read rather than a slot it has to work out.
+static func equip(item: String) -> Action:
+	return of(ActionCatalog.EQUIP, {"item": item})
+
+
+## Take a worn or held item off. It stays carried: taking your boots off is not
+## the same as leaving them behind.
+static func unequip(item: String) -> Action:
+	return of(ActionCatalog.UNEQUIP, {"item": item})
+
+
+## Use a carried consumable up. What it does is what its effect is worth, read
+## through the user's own ability score; that it is gone afterwards is the whole
+## difference between this and equipping something.
+static func use(item: String) -> Action:
+	return of(ActionCatalog.USE, {"item": item})
 
 
 # --- Reading a chosen action ----------------------------------------------

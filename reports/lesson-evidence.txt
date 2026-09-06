@@ -2,7 +2,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 does a lesson change what is chosen? seed=1234, 100 ticks watched
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-05 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
+  recording  recorded 2026-09-06 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
 
 the same moment, four times
@@ -11,7 +11,7 @@ the same moment, four times
   so the only thing that differs between the arms is what the character remembers
   what it lived through   7 things in its log before any lesson
 
-arm: no lesson -- prompt d23f02e17e83d00d, 7 things remembered
+arm: no lesson -- prompt a1fac88618de0162, 7 things remembered
   lesson kept: none
   what it remembers, as the prompt carried it:
     What you remember:
@@ -24,11 +24,10 @@ arm: no lesson -- prompt d23f02e17e83d00d, 7 things remembered
         - I saw Wren (#1), a commander, about 6m away.
         - I saw Wren (#1), a commander, about 7m away.
         - Wren (#1) shouted: "a fair bargain"
-  the model said:     say text="what bargain did you have in mind?" target=#1
-  which read back as: say(text="what bargain did you have in mind?" target=1)
-  note: this reply was recorded for another question: the prompt put here fingerprints d23f02e17e83d00d and the recorded one a2a5e1e44a3ae219
+  the model said:     say text=then let us trade target=#1
+  which read back as: say(text=then let us trade target=1)
 
-arm: the ground first -- prompt 007f410c30f58515, 8 things remembered
+arm: the ground first -- prompt 09603f85aa582981, 8 things remembered
   lesson kept: Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not.
   what it remembers, as the prompt carried it:
     What you remember:
@@ -42,11 +41,10 @@ arm: the ground first -- prompt 007f410c30f58515, 8 things remembered
         - I saw Wren (#1), a commander, about 6m away.
         - I saw Wren (#1), a commander, about 7m away.
         - Wren (#1) shouted: "a fair bargain"
-  the model said:     trade_accept target=#1
-  which read back as: trade_accept(target=1)
-  note: this reply was recorded for another question: the prompt put here fingerprints 007f410c30f58515 and the recorded one 94a5bd0a9b549d16
+  the model said:     recall about=pile #6
+  which read back as: -- nothing readable --
 
-arm: Rook, not Wren -- prompt f4bd0c56d98846d3, 8 things remembered
+arm: Rook, not Wren -- prompt 42e05814d5e686b2, 8 things remembered
   lesson kept: Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me.
   what it remembers, as the prompt carried it:
     What you remember:
@@ -60,11 +58,10 @@ arm: Rook, not Wren -- prompt f4bd0c56d98846d3, 8 things remembered
         - I saw Wren (#1), a commander, about 6m away.
         - I saw Wren (#1), a commander, about 7m away.
         - Wren (#1) shouted: "a fair bargain"
-  the model said:     recall about=bargain
-  which read back as: -- nothing readable --
-  note: this reply was recorded for another question: the prompt put here fingerprints f4bd0c56d98846d3 and the recorded one 4c8ce6a67beefb8d
+  the model said:     trade_propose target=#2 give_money=9
+  which read back as: trade_propose(target=2 give_money=9)
 
-arm: let them come -- prompt 9ca3161a945782f5, 8 things remembered
+arm: let them come -- prompt 282a40c81f9070c7, 8 things remembered
   lesson kept: The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me.
   what it remembers, as the prompt carried it:
     What you remember:
@@ -78,31 +75,30 @@ arm: let them come -- prompt 9ca3161a945782f5, 8 things remembered
         - I saw Wren (#1), a commander, about 6m away.
         - I saw Wren (#1), a commander, about 7m away.
         - Wren (#1) shouted: "a fair bargain"
-  the model said:     recall about=bargain or trade with Wren
-  which read back as: -- nothing readable --
-  note: this reply was recorded for another question: the prompt put here fingerprints 9ca3161a945782f5 and the recorded one 0e6dff84e0255831
+  the model said:     wait ticks=1
+  which read back as: wait(ticks=1)
 
 what the lessons changed
   two columns, because the two are different claims: a different action, and a different
   choice of any sort including the same action with other words in it
   arm                which action     chose                                          action     choice
-  no lesson          say at #1        say(text="what bargain did you have in mind?"… --         --
-  the ground first   trade_accept at #1 trade_accept(target=1)                         differs    differs
-  Rook, not Wren     --               -- nothing readable --                         differs    differs
-  let them come      --               -- nothing readable --                         differs    differs
+  no lesson          say at #1        say(text=then let us trade target=1)           --         --
+  the ground first   --               -- nothing readable --                         differs    differs
+  Rook, not Wren     trade_propose at #2 trade_propose(target=2 give_money=9)           differs    differs
+  let them come      wait at nobody   wait(ticks=1)                                  differs    differs
   3 of 3 lessons changed which action was chosen; 3 changed the choice at all
 
   keeping "Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."
-    with no lesson it chose  say(text="what bargain did you have in mind?" target=1)
-    with that one it chose   trade_accept(target=1)
-    which is a different action: trade_accept at #1 rather than say at #1
+    with no lesson it chose  say(text=then let us trade target=1)
+    with that one it chose   -- nothing readable --
+    which is a different action: -- rather than say at #1
 
   keeping "Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."
-    with no lesson it chose  say(text="what bargain did you have in mind?" target=1)
-    with that one it chose   -- nothing readable --
-    which is a different action: -- rather than say at #1
+    with no lesson it chose  say(text=then let us trade target=1)
+    with that one it chose   trade_propose(target=2 give_money=9)
+    which is a different action: trade_propose at #2 rather than say at #1
 
   keeping "The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."
-    with no lesson it chose  say(text="what bargain did you have in mind?" target=1)
-    with that one it chose   -- nothing readable --
-    which is a different action: -- rather than say at #1
+    with no lesson it chose  say(text=then let us trade target=1)
+    with that one it chose   wait(ticks=1)
+    which is a different action: wait at nobody rather than say at #1

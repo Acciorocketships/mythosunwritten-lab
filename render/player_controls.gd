@@ -23,7 +23,7 @@ extends RefCounted
 ##
 ## ## Aiming: the person picks a target, and the world says what there is to pick
 ##
-## Nine of the twelve actions need something to be aimed at, and what may be
+## Nine of the fifteen actions need something to be aimed at, and what may be
 ## aimed at is not this file's to decide. `Surroundings` is the world's answer --
 ## it is `Observation`, the same packet a language-model mind is handed, turned
 ## into plain rows -- and everything here does is walk along that list. So the
@@ -70,6 +70,19 @@ extends RefCounted
 ##     you carry, or nothing. **C** -- pick the next thing you can see inside
 ##     what you have aimed at. **B** -- pick the next thing to say. **-** and
 ##     **=** -- the coins in your next offer.
+##
+## The wardrobe, all of it aimed at what you are holding, which is the same ring
+## **F** turns and the same thing the character sheet marks:
+##
+##   * **1** put it on -- wear it, or take it in hand · **2** take it off, and go
+##     on carrying it · **3** use it up.
+##
+## What may be worn, what is already on, and what is a thing that gets used up
+## are all the simulation's answers: `Inventory` decides the first two and
+## `ActionEngine` the third, and none of the three is decided here. Pressing
+## **1** on a blanket builds the action and the engine refuses it, which is the
+## point -- an interface that greyed the key out would be a second, quieter copy
+## of the rule.
 ##
 ## Doing, all of it at what is aimed at:
 ##
@@ -163,6 +176,12 @@ const KEY_INTERACT := KEY_H
 const KEY_ATTACK := KEY_N
 const KEY_WAIT := KEY_M
 
+## The wardrobe. Digits rather than letters because the letters are spent, and
+## the three of them are one row under the hand.
+const KEY_EQUIP := KEY_1
+const KEY_UNEQUIP := KEY_2
+const KEY_USE := KEY_3
+
 ## Which way a character is left facing before it has been walked anywhere: away
 ## from the camera, which is up the screen.
 const FACING_AT_REST := Vector2(0.0, -1.0)
@@ -249,6 +268,21 @@ func press(keycode: int, view: Surroundings) -> Action:
 				note = "you are holding nothing to drop"
 				return null
 			return Action.drop(holding)
+		KEY_EQUIP:
+			if holding == EMPTY_HANDS:
+				note = "you are holding nothing to put on"
+				return null
+			return Action.equip(holding)
+		KEY_UNEQUIP:
+			if holding == EMPTY_HANDS:
+				note = "you are holding nothing to take off"
+				return null
+			return Action.unequip(holding)
+		KEY_USE:
+			if holding == EMPTY_HANDS:
+				note = "you are holding nothing to use"
+				return null
+			return Action.use(holding)
 	return _at_what_is_aimed(keycode, view)
 
 
@@ -442,6 +476,9 @@ static func bindings() -> PackedStringArray:
 		"L            look at what you are holding",
 		"Q            take the picked thing out of what you have aimed at",
 		"X            drop what you are holding",
+		"1            put on what you are holding",
+		"2            take off what you are holding",
+		"3            use up what you are holding",
 		"V            put what you are holding into what you have aimed at",
 		"T            say the picked line to what you have aimed at",
 		"Y            shout the picked line",

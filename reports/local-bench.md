@@ -221,15 +221,17 @@ static func _resolved_by(journal: PackedStringArray, who: String) -> int:
 
 A turn the world refused finishes, and so does a turn the catalogue faulted. This
 is not read off the code alone — the cloud replay that still ships prints it. Run
-`./run_agent.sh` against the checked-in recording and its journal carries
+`./run_agent.sh` against the recording of the day this was written carried
 
 ```
 t= 89  Rook   finished go_to() -> go_to refused: go_to needs target or offset
 ```
 
-which is one of Rook's $18$. That turn has no `began` line at all: it is chosen
+which was one of Rook's $18$. That turn has no `began` line at all: it is chosen
 and finished on tick $89$, taking no world time, and Rook is asked again on the
-same tick. So the column counts turns that ran to a finish, not turns that
+same tick. (The cloud recording has since been remade — see
+`reports/agent-cast.md` — so that exact line is no longer in the shipped
+transcript; the point it illustrates is about the column and not about the draw.) So the column counts turns that ran to a finish, not turns that
 changed the world, and an arm the catalogue faults heavily scores well on it. The
 measure that does mean the world changed is the engine's own **ok** verdict,
 which is the column beside it.
