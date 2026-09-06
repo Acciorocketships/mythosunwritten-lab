@@ -2051,6 +2051,7 @@ project, which takes a few seconds, and later runs do not.
 ./run_headless.sh --islands              # ...and every island in a square of the world
 ./run_headless.sh --settlements          # ...and every village, road and bridge in one
 ./run_headless.sh --scatter              # ...and everything grown or stood on the ground
+./run_headless.sh --enemies              # ...and every enemy the field places, ring by ring
 ./run_headless.sh --scenario market      # ...with a named cast set out and lived forward
 ./run_headless.sh --scenario market --frozen   # ...or photographed at a stated tick
 ./run_headless.sh --board                # ...and the tactical lattice, cell by cell
@@ -2284,15 +2285,27 @@ xvfb-run -a ./run_render.sh --seed 1234 --start -379.5 331.5 --paused --board \
 An ordinary run reports the world *and the people living in it*: a `cast` header
 naming everybody and which of them the world is looking through, then everything
 the control loop asked and everything the engine answered, at the tick it
-happened on.
+happened on, and -- indented under it -- everything the fights in the world wrote
+down.
 
 ```
-cast 3 following #1
+cast 4 following #1
   Pip     #1 commander band=1 at (0.000, 22.792, 0.000) hp=26/26 walking  <- followed
+  Scholar(-1,-1) #4 commander band=-1 at (-23.279, 34.340, -35.501) hp=26/26 walking
   ...
   t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
   t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
 ```
+
+The fourth of them is an enemy. Nobody mustered it: `sim/enemy_field.gd` places
+one at most per 64-unit cell as a function of the cell and the seed,
+`sim/enemy_streamer.gd` stands up the ones near you and drops the ones you have
+walked away from -- at most nine at once -- and `sim/enemy_mind.gd` decides for
+it through the same `Character.decide` seam the rest of the cast uses. A blow
+struck when no fight is on now begins one, so a fight can start because somebody
+chose to start it. See [reports/enemies.md](reports/enemies.md) for the level
+table, the bound, what the layer costs a tick, and a trace of a fight that began
+that way.
 
 `--scenario encounter` sets a whole fight out in the world before the first
 frame, and `--scenario encounter-island` puts the same cycle on a floating

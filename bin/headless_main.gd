@@ -37,7 +37,8 @@ func _initialize() -> void:
 			"usage: run_headless.sh [--seed N] [--ticks N] [--start X Z]"
 			+ " [--scenario NAME] [--frozen]"
 			+ " [--chunks] [--biomes] [--water] [--islands] [--settlements]"
-			+ " [--scatter] [--board] [--snap] [--board-sweep] [--assets]"
+			+ " [--scatter] [--enemies] [--board] [--snap] [--board-sweep]"
+			+ " [--assets]"
 			+ "\nscenarios: " + " ".join(Simulation.SCENARIOS)
 		)
 		quit(2)
@@ -85,6 +86,13 @@ func _initialize() -> void:
 		# with what it is, where it stands and how big it came out. It answers
 		# for the layer rather than for what got streamed.
 		for line in sim.scatter_report():
+			print(line)
+	if options["enemies"]:
+		# Every enemy the field places in a fixed square of the world, with how
+		# far from spawn it stands and the level it is actually stood up at. It
+		# answers for the field rather than for whatever a particular walk
+		# happened to meet.
+		for line in sim.enemy_report():
 			print(line)
 	if options["board"]:
 		# The tactical lattice over a fixed set of overlapping rectangles, cell
@@ -195,6 +203,7 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 		"islands": false,
 		"settlements": false,
 		"scatter": false,
+		"enemies": false,
 		"board": false,
 		"board_sweep": false,
 		"snap": false,
@@ -232,6 +241,9 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 				i += 1
 			"--scatter":
 				options["scatter"] = true
+				i += 1
+			"--enemies":
+				options["enemies"] = true
 				i += 1
 			"--board":
 				options["board"] = true

@@ -243,6 +243,10 @@ var walks: Dictionary = {}
 var asks_refused: Array[Dictionary] = []
 
 # One counter over everything in the scene.
+# What the beginning of a fight wrote and nobody has reported yet. See
+# `begin_fight` and `_drain_opening`.
+var _opening := PackedStringArray()
+
 var _next_id: int = 1
 var _next_check: int = 1
 
@@ -268,6 +272,35 @@ func add_actor(one: Combatant) -> Combatant:
 	one.settle(terrain) if terrain != null else null
 	actors.append(one)
 	return one
+
+
+## Take a character out of the world, and forget what the scene was keeping
+## about it. Returns whether it was there.
+##
+## What is forgotten is only the per-character bookkeeping -- the walk it was
+## part-way through, the counts of what it has done and been charged for. What
+## *happened* stays: what was said, what was struck and what was traded are
+## things that happened in the world, and a world that forgot them when somebody
+## left would be a world that could not be asked about its own past. Ids are
+## never handed out twice, so nothing a later character does can be confused with
+## what this one did.
+##
+## This is what the enemy layer drops somebody with when they have walked out of
+## everybody's reach. The fallen leave by their own path in `_drop_the_fallen`,
+## which is about a fight rather than about distance.
+func remove_actor(one: Combatant) -> bool:
+	if one == null:
+		return false
+	var at := actors.find(one)
+	if at < 0:
+		return false
+	actors.remove_at(at)
+	walks.erase(one.id)
+	idle_until.erase(one.id)
+	actions_taken.erase(one.id)
+	asks_taken.erase(one.id)
+	spent_until.erase(one.id)
+	return true
 
 
 ## Put an object in the world, out of the same counter.
@@ -348,6 +381,34 @@ static func name_of(thing: Variant) -> String:
 	if thing is WorldObject:
 		return thing.object_name
 	return "nothing"
+
+
+## The nearest living commander of another band than this one's, or null.
+##
+## A reading of who is standing where, like `piles_near` below, and not a rule
+## about anything: every mind in the project that has to pick somebody out asks
+## this, and what it does about the answer is the mind's own business. It is here
+## rather than in any one of them because two minds asking it two ways would be
+## two answers to "who is a stranger to me".
+##
+## Ties are broken by distance and then by id, so which of two equally near
+## strangers is named is decided the same way in every process.
+func nearest_of_another_band(actor: Combatant) -> Combatant:
+	if actor == null:
+		return null
+	var found: Combatant = null
+	var nearest := 0.0
+	for one in actors:
+		if one == actor or not one.is_commander() or not one.is_alive():
+			continue
+		if one.band == actor.band:
+			continue
+		var gap := actor.distance_to(one)
+		if found != null and (gap > nearest or (gap == nearest and one.id > found.id)):
+			continue
+		found = one
+		nearest = gap
+	return found
 
 
 ## Every pile lying within a distance of a position, nearest first and by id
@@ -445,9 +506,15 @@ func _forget_refusal(from_id: int, to_id: int) -> void:
 ## `over` is the snap-out. Nothing here formats anything; how a run announces a
 ## fight is the run's business.
 func fight_step() -> Dictionary:
+	# Whatever the beginning of a fight wrote and nobody has reported yet. It is
+	# usually empty and is filled in exactly one place -- `begin_fight` -- so a
+	# fight begun by a blow (`ActionEngine._attack`, between two calls to this)
+	# reaches the world's transcript by the same route as one begun by the
+	# pairing rule below.
+	var written := _drain_opening()
 	var turn := {
 		"began": null,
-		"lines": PackedStringArray(),
+		"lines": written,
 		"ended": false,
 		"over": PackedStringArray(),
 	}
@@ -456,7 +523,8 @@ func fight_step() -> Dictionary:
 			# The commander whose turn it is is part-way through the weapon
 			# action that turn will spend. Nothing is played until it lands.
 			return turn
-		turn["lines"] = fight.advance()
+		written.append_array(fight.advance())
+		turn["lines"] = written
 		if fight.finished:
 			turn["ended"] = true
 			turn["over"] = end_fight()
@@ -467,9 +535,19 @@ func fight_step() -> Dictionary:
 	if anchor == null:
 		return turn
 	turn["began"] = anchor
-	var started := begin_fight(anchor.id)
-	turn["lines"] = started.lines
+	begin_fight(anchor.id)
+	written.append_array(_drain_opening())
+	turn["lines"] = written
 	return turn
+
+
+# Everything the beginning of a fight wrote that has not been handed over yet,
+# taken rather than read: reporting it twice would put a snap-in in the world's
+# trace twice.
+func _drain_opening() -> PackedStringArray:
+	var written := _opening
+	_opening = PackedStringArray()
+	return written
 
 
 ## Begin a fight around one character: everyone near enough joins, the board is
@@ -486,6 +564,10 @@ func begin_fight(anchor_id: int) -> Encounter:
 		return null
 	var started := Encounter.begin(terrain, actors, anchor)
 	board_version += 1
+	# What the beginning wrote, held for whoever next asks `fight_step()`. Both
+	# ways into a fight go through this call, so both put the snap-in -- or the
+	# refusal -- into the world's transcript, at the tick it happened on.
+	_opening = started.lines.duplicate()
 	if started.refused:
 		# Nobody was seated and nobody was moved. The world carries on in real
 		# time and the refusal is on the record.

@@ -82,6 +82,7 @@ const NOT_A_FIGHT := [
 	{"path": "res://sim/check_prompt.gd", "may_name": ["Ability"]},
 	{"path": "res://sim/item_model.gd", "may_name": ["Item"]},
 	{"path": "res://sim/spawn_roll.gd", "may_name": ["Ability", "ItemFrontier"]},
+	{"path": "res://sim/enemy_field.gd", "may_name": ["ItemFrontier"]},
 ]
 
 ## The directory both structural checks read, all of it.
@@ -838,12 +839,17 @@ func _the_layer_stands_on_its_own() -> void:
 	# `sim/world_cast.gd` is the tenth and is `sim/scripted_encounter.gd`'s kind:
 	# it names an ability to roll the six scores of the handful of characters who
 	# live in an ordinary world, and forges nothing at all.
-	# `sim/item_model.gd` is the eleventh and is neither kind: it reads `Item` to
+	# `sim/enemy_field.gd` is the eleventh and is `sim/spawn_roll.gd`'s kind: it
+	# names the frontier to read how wide one ring of section 5's gradient is,
+	# which is how wide it makes a cell of its own lattice, and forges nothing.
+	# It is excused below and held to the narrower rule.
+	# `sim/item_model.gd` is the twelfth and is neither kind: it reads `Item` to
 	# ask which slot a thing is worn in, and answers with a name out of the asset
 	# catalog. It is excused below and held to the narrower rule.
 	equal(readers, PackedStringArray([
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
 		"res://sim/check_prompt.gd", "res://sim/commander.gd",
+		"res://sim/enemy_field.gd",
 		"res://sim/inventory.gd", "res://sim/item_model.gd",
 		"res://sim/scripted_actions.gd", "res://sim/scripted_check.gd",
 		"res://sim/scripted_encounter.gd",
@@ -851,6 +857,7 @@ func _the_layer_stands_on_its_own() -> void:
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
 		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
+		"res://sim/simulation.gd",
 		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",
 		"res://sim/world_cast.gd",
 	]), "and these files are the ones that read the item layer")

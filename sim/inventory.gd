@@ -197,6 +197,44 @@ func take_up(entry: Variant) -> bool:
 	return equip(entry)
 
 
+## Put on what is carried: the first thing carried for each empty slot, and
+## nothing already occupied.
+##
+## What a character is *wearing* is not part of what it was rolled with --
+## `SpawnRoll` fills an inventory and stops, because dressing is not rolling --
+## so somebody stood up out of a roll would otherwise walk about carrying its
+## armour in a sack, with no defence and no attack. This is the one call that
+## dresses them, and everybody who is stood up from a roll makes it.
+##
+## A held item is taken up as the shape the forge drew it as (`Weapon.for_item`),
+## so what it swings is the pattern that shape has and the numbers are the ones
+## its own budget bought. Taken up bare it would be `Weapon.around` -- a budget
+## with nothing to spend it swinging.
+##
+## First into a slot keeps it: which of two forged breastplates is worn is not
+## something this call has an opinion about, and the order things are carried in
+## is one every process reads the same way. Returns how many things went on.
+func dress() -> int:
+	var worn_now := 0
+	for entry in carried.duplicate():
+		if not is_wearable(entry):
+			continue
+		var slot := slot_of(entry)
+		if equipped_in(slot) != null:
+			continue
+		if slot != Item.SLOT_HAND or entry is Weapon:
+			if take_up(entry):
+				worn_now += 1
+			continue
+		var shaped := Weapon.for_item(item_of(entry))
+		if shaped == null:
+			continue
+		release(entry)
+		if take_up(shaped):
+			worn_now += 1
+	return worn_now
+
+
 ## Take off whatever is in a slot and return it. It stays carried: taking your
 ## boots off is not the same as leaving them behind.
 func unequip(slot: String) -> Variant:
@@ -268,6 +306,28 @@ func held() -> Weapon:
 	if entry is Weapon:
 		return entry
 	return Weapon.around(item_of(entry))
+
+
+## The name of the weapon this holds, or of the first weapon carried, or "" for
+## somebody carrying none.
+##
+## A *name*, because `Action.attack` names an item and `ActionEngine` derives
+## which of that item's attacks reaches -- section 10 spells the call
+## `Attack(target, weapon/attack-mode derived from item)`, so choosing the mode
+## anywhere but the engine would be half a resolution in the wrong place. Every
+## mind that swings asks this, for the reason they all ask one scene the same
+## question about who is nearby.
+func weapon_name() -> String:
+	var first := ""
+	for entry in carried:
+		var item := item_of(entry)
+		if item == null or item.kind != Item.KIND_WEAPON:
+			continue
+		if is_equipped(entry):
+			return item.item_name
+		if first == "":
+			first = item.item_name
+	return first
 
 
 # --- Money ----------------------------------------------------------------

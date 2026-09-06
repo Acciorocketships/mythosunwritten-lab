@@ -155,6 +155,49 @@ static func around(behind: Item) -> Weapon:
 	return weapon
 
 
+## The catalogue shape a word names, or null for a word that names none.
+##
+## The forge draws one of six words for a held item and the catalogue ships seven
+## shapes under nine names; this is the two vocabularies meeting, and it is the
+## same meeting `ItemModel.BY_SHAPE` records for what the thing looks like. A
+## sword and a dagger are both a blade -- to the eye by that table, and to the
+## hand by this one, where a blade swings as the sword because the sword is the
+## blade the catalogue writes in full.
+static func shaped_like(shape: String) -> Weapon:
+	match shape:
+		"blade", "sword":
+			return sword()
+		"dagger":
+			return dagger()
+		"spear":
+			return spear()
+		"bow":
+			return bow()
+		"staff":
+			return staff()
+		"flail":
+			return flail()
+		"buckler", "shield":
+			return shield()
+	return null
+
+
+## A forged item, held as the shape it was drawn as.
+##
+## This is the meeting `around()` above says the forge and the catalogue do not
+## yet have: an item whose shape was recorded swings as that shape, with every
+## number -- the damage of each attack and how long it waits -- read off the item
+## and gated by the wielder's ability score, exactly as `held()` reads them for a
+## shape forged at a level. An item with no shape recorded is still `around()`'s
+## case and still carries no attack, because there is still nothing to say what
+## pattern it would swing in.
+static func for_item(behind: Item) -> Weapon:
+	if behind == null:
+		return null
+	var shape := shaped_like(behind.shape)
+	return around(behind) if shape == null else from_item(shape, behind)
+
+
 ## How the effects axis is divided among the attacks: by the catalogue's own
 ## damage numbers, used as weights.
 ##

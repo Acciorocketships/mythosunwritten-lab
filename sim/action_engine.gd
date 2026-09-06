@@ -338,6 +338,10 @@ static func _jump(
 ## about the shape of the pattern rather than about which way somebody happened
 ## to be looking.
 ##
+## **A blow struck when no fight is on begins one.** That is `_open_the_fight`
+## below, and it is the reason a fight in this world can start because somebody
+## chose to start it rather than because two people drifted close together.
+##
 ## The blow itself is the match's. Everything below the derivation is handing the
 ## chosen index to `CombatMatch.attack`, which spends the turn's one weapon
 ## action and resolves it through the one damage seam.
@@ -352,7 +356,9 @@ static func _attack(
 	if target == actor:
 		return ActionOutcome.failed(action.kind, "nobody attacks themselves")
 	if scene.fight == null:
-		return ActionOutcome.failed(action.kind, "no fight is under way")
+		# There is no fight, so this blow is the beginning of one. See
+		# `_open_the_fight` below.
+		return _open_the_fight(scene, actor, target, action)
 	if not actor.fighting or not target.fighting:
 		return ActionOutcome.failed(action.kind, "%s is not on the board" % (
 			ActionScene.name_of(actor) if not actor.fighting
@@ -419,6 +425,61 @@ static func _attack(
 		"cells": swung["cells"],
 		"hits": (swung["hits"] as Array).size(),
 		"dealt": dealt,
+	})
+
+
+## A blow struck when no fight is on: the world snaps to a board around it.
+##
+## Section 1's world model is a real-time overworld where "the instant combat
+## begins the local area snaps to turn-based on a tactical grid". This is that
+## instant, and it is an *action* -- somebody chose to attack somebody else, and
+## the board is what the world answers with. Before this, an attack out of real
+## time was refused with "no fight is under way", and the only thing that could
+## start a fight was two commanders of different bands drifting close together
+## (`ActionScene.fight_step`). That rule is untouched and still holds; this adds
+## the other way in, which is the one a character can take deliberately.
+##
+## The board is anchored on the attacker, because a board is anchored on somebody
+## standing somewhere and the attacker is the one who chose. Everything about
+## seating, radius, span and turn order is `Encounter`'s, unchanged and not
+## reproduced here: this function reaches it through the one call
+## `ActionScene.begin_fight` that the pairing rule reaches it through.
+##
+## **The blow itself is not landed by this call.** Turn order is the match's, and
+## the attacker is not necessarily first; a swing resolved here would be a swing
+## outside the turn economy, which section 3.6 owns. So the action that starts a
+## fight is spent on starting it, and the attacker strikes on its own turn --
+## which is the next thing its decision function is asked for. What comes back
+## says exactly that, so a trace reads "the fight begins" rather than a damage
+## figure that did not happen.
+static func _open_the_fight(
+	scene: ActionScene, actor: Combatant, target: Combatant, action: Action
+) -> ActionOutcome:
+	if scene.terrain == null:
+		return ActionOutcome.failed(action.kind, "there is no ground to fight on")
+	if not actor.is_alive() or not target.is_alive():
+		return ActionOutcome.failed(action.kind, "%s is not standing" % (
+			ActionScene.name_of(actor) if not actor.is_alive()
+			else ActionScene.name_of(target)))
+	# Near enough to be on one board. `Encounter.joiners` takes everyone within
+	# that radius of the anchor, so a target inside it is on the board by
+	# construction and one outside it would be a fight begun without the person
+	# it was begun against.
+	var gap := actor.distance_to(target)
+	if gap > Encounter.JOIN_RADIUS:
+		return ActionOutcome.failed(action.kind, "%s is too far away to fight (%.2f > %.2f)" % [
+			ActionScene.name_of(target), gap, Encounter.JOIN_RADIUS,
+		])
+	var started := scene.begin_fight(actor.id)
+	if started == null or started.refused:
+		return ActionOutcome.failed(
+			action.kind, "the ground here will not hold a fight",
+			{"joined": 0 if started == null else started.members.size()})
+	return ActionOutcome.done(action.kind, {
+		"fight": "begins",
+		"against": target.id,
+		"anchor": actor.id,
+		"joined": started.members.size(),
 	})
 
 

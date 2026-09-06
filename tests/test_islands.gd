@@ -32,6 +32,10 @@ extends TestSuite
 class_name TestIslands
 
 const SEED := 11
+
+## The most ticks the walking-world check will step before giving up. Generous,
+## because the walk it is watching can be interrupted by a fight.
+const WALK_CAP := 600
 const FAR_AWAY := 900.0
 
 ## The seeds the shape checks run over. More than one, because the shape is
@@ -1076,22 +1080,34 @@ func _a_walking_world_keeps_its_islands_in_step() -> void:
 	var world := SimWorld.new(SEED)
 	check(world.island_streamer.loaded_count() > 0,
 		"a fresh world loaded no islands at all around its observer")
-	for i in 150:
+	# Walked until an island has been dropped rather than for a fixed number of
+	# ticks. The world has enemies in it now, so a walk can be interrupted by a
+	# fight for as long as a fight lasts, and how many ticks it takes to cover
+	# ground is no longer a property of the streamer. What is a property of the
+	# streamer is that a walk that goes far enough drops what it leaves behind,
+	# and that is what is asserted; the cap is here so a world that never dropped
+	# one fails rather than runs forever.
+	var walked := 0
+	for i in WALK_CAP:
 		world.step()
+		walked = i + 1
 		if i % 30 == 0:
 			_check_invariants(
 				world.island_streamer,
 				world.island_field,
 				Vector2(world.observer_x, world.observer_z),
 			)
+		if world.island_streamer.islands_built > world.island_streamer.loaded_count():
+			break
 	check(world.island_streamer.islands_built > world.island_streamer.loaded_count(),
-		"the walk never dropped an island: built %d, still loaded %d"
-		% [world.island_streamer.islands_built, world.island_streamer.loaded_count()])
+		"the walk never dropped an island in %d ticks: built %d, still loaded %d"
+		% [walked, world.island_streamer.islands_built,
+			world.island_streamer.loaded_count()])
 
 	# The world it walked to is the world a second run of the same seed walks to,
 	# islands included -- the digest folds them in.
 	var twin := SimWorld.new(SEED)
-	for i in 150:
+	for _tick in walked:
 		twin.step()
 	equal(twin.digest(), world.digest(),
 		"two identical walks reached different worlds")

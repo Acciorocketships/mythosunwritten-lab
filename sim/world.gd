@@ -10,7 +10,8 @@ extends RefCounted
 ## keeps the chunks near the observer built, one sheet of water lying over all
 ## of it, a sparse layer of floating islands above it, a sparse layer of villages
 ## and the roads between them cut into it, the flora and props scattered over the
-## lot, and a cast of characters living on top of all of it.
+## lot, a cast of characters living on top of all of it, and the enemies the
+## distance gradient puts around them.
 ##
 ## ## The world holds a cast, and asks it
 ##
@@ -81,6 +82,16 @@ var scatter_field: DecorationScatter = null
 ## Keeps the dressing of the chunks near the observer built, on the ground
 ## streamer's own rule, so dressing and ground appear and vanish together.
 var scatter_streamer: ScatterStreamer = null
+
+## Where the enemies of the world are. The last sparse field of the stack, and
+## the only one whose answer is a person rather than a piece of ground.
+var enemy_field: EnemyField = null
+
+## Keeps the enemies near the cast standing in the world, on the same near/far
+## rule everything else is streamed by. What it stands up is an ordinary
+## character in the world's own scene: same roster, same control loop, same
+## engine. See sim/enemy_streamer.gd for the bound on how many at once.
+var enemy_streamer: EnemyStreamer = null
 
 ## Builds the one sheet of water around the observer.
 var water_sheet_builder: WaterSheetBuilder = null
@@ -188,6 +199,8 @@ func reset(seed_value: int) -> void:
 	settlement_streamer = SettlementStreamer.new(settlement_field, path_network)
 	scatter_field = DecorationScatter.new(terrain)
 	scatter_streamer = ScatterStreamer.new(scatter_field)
+	enemy_field = EnemyField.new(terrain)
+	enemy_streamer = EnemyStreamer.new(enemy_field)
 	water_sheet_builder = WaterSheetBuilder.new(terrain)
 	combat_board_builder = CombatBoardBuilder.new(terrain)
 	_empty_the_cast()
@@ -252,6 +265,7 @@ func step() -> void:
 	var was_x := observer_x
 	var was_y := observer_y
 	var was_z := observer_z
+	_keep_the_view_on_somebody()
 	_look_through_the_followed()
 	observer_speed = Vector2(observer_x - was_x, observer_z - was_z).length()
 	observer_rise = observer_y - was_y
@@ -267,6 +281,10 @@ func step() -> void:
 func clear_cast() -> void:
 	_empty_the_cast()
 	follow_id = 0
+	# And nothing spawns onto a stage. An emptied world is one a scenario is
+	# about to fill with its own people, and an enemy walking into the middle of
+	# it would be this layer deciding what that scenario is about.
+	enemy_streamer.stop()
 
 
 ## Look through a character in the cast: the terrain streams around it and the
@@ -311,6 +329,30 @@ func _note_how_the_cast_moved(stood: Dictionary) -> void:
 		one.rose = one.y - was.y
 
 
+# Look through somebody else when the character the view was on is no longer in
+# the world.
+#
+# The view is a view *on a character*, and a character can be killed now that
+# there are enemies in the world. Left alone, the view would stand where that
+# character fell and the world would stop being built around anybody -- a world
+# that stops streaming because somebody lost a fight. So it moves to the
+# lowest-id living commander, which is a member of the cast for as long as one is
+# left, because the cast is stood up before anything else and ids are handed out
+# in order.
+#
+# Nobody followed stays nobody followed: `place_observer` means the view was put
+# somewhere on purpose, and this must not undo that. An empty world leaves the
+# view where it was, which is the same thing it has always done.
+func _keep_the_view_on_somebody() -> void:
+	if follow_id == 0 or followed() != null:
+		return
+	for one in combat.members:
+		if one.is_commander() and one.is_alive():
+			follow_id = one.id
+			return
+	follow_id = 0
+
+
 # Put the view where the followed character is standing, facing the way it just
 # moved. Nothing happens when nobody is followed.
 func _look_through_the_followed() -> void:
@@ -328,6 +370,13 @@ func _look_through_the_followed() -> void:
 # Build the ground, the islands, the villages and the dressing around the view,
 # and refresh the water under it.
 func _restream() -> void:
+	# The enemies first, because they are people rather than ground: somebody
+	# stood up on this tick is in the roster the next tick services, and somebody
+	# dropped is out of it before anything else is built around where it was.
+	# Whoever left is forgotten by the loop as well as by the scene, so a world
+	# that streams characters in and out for hours keeps no row per departure.
+	for id in enemy_streamer.update(combat.scene, observers()):
+		loop.forget(id)
 	terrain_streamer.update(observers())
 	island_streamer.update(observers())
 	settlement_streamer.update(observers())

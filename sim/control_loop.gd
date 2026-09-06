@@ -405,6 +405,28 @@ func _watch() -> Dictionary:
 	}
 
 
+## Forget everything the loop was keeping about a character who has left the
+## world.
+##
+## The loop remembers what each character is part-way through, how long it has
+## been serviced, whether it was waiting on a decision and which turn it last
+## chose on. All of that is about a character that is in the scene; a world that
+## streams characters in and out would otherwise accumulate a row per departure
+## for the rest of the run. The journal is deliberately untouched -- it is the
+## record of what happened, and what happened does not stop having happened.
+##
+## Ids are never handed out twice, so this can never forget the wrong character
+## or leave a later one reading a departed one's state.
+func forget(id: int) -> void:
+	_busy.erase(id)
+	_ticks.erase(id)
+	_resolved.erase(id)
+	_thinking.erase(id)
+	_chosen_on.erase(id)
+	_answers.erase(id)
+	_standing.erase(id)
+
+
 # --- Reading the loop -----------------------------------------------------
 
 

@@ -45,6 +45,7 @@ const SUITES := [
 	preload("res://tests/test_checks.gd"),
 	preload("res://tests/test_orchestrator.gd"),
 	preload("res://tests/test_fight_driver.gd"),
+	preload("res://tests/test_enemies.gd"),
 	preload("res://tests/test_turn_seam.gd"),
 	preload("res://tests/test_player_input.gd"),
 	preload("res://tests/test_player_actions.gd"),

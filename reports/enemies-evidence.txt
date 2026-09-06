@@ -1,0 +1,408 @@
+Enemies in the running game: where they are, what they are worth, what they cost,
+and a fight that began because one of them swung.
+
+Taken at cycle 195, on the commit that put the enemy layer in SimWorld.
+
+----------------------------------------------------------------------
+Command:  ./run_headless.sh --ticks 0 --enemies
+Every enemy the field places in a square of 441 cells around the world origin,
+each stood up through the same call the running world stands one up with, so the
+level in each row is the level the character sheet actually carries.
+----------------------------------------------------------------------
+
+
+seed 1234
+cast 4 following #1
+  Pip     #1 commander band=1 at (0.000, 22.792, 0.000) hp=26/26 walking  <- followed
+  Nettle  #2 commander band=1 at (-7.000, 23.752, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 23.483, -5.000) hp=26/26 walking
+  Scholar(-1,-1) #4 commander band=-1 at (-23.279, 34.340, -35.501) hp=26/26 walking
+tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 f8a37135def13eb4
+done ticks=0 chunks=32 built=32 final=f8a37135def13eb4
+enemies seed=1234 cell=64.0 spawn=48.0 keep=60.0 at_most=9 chance=0.62
+  enemy cell  -10,-10  at ( -602.307,  -618.106) d= 863.035 ring=13 level=14 scout    Scout(-10,-10)
+  enemy cell  -10,-9   at ( -616.224,  -556.226) d= 830.132 ring=12 level=13 scout    Scout(-10,-9)
+  enemy cell  -10,-8   at ( -599.796,  -492.498) d= 776.086 ring=12 level=13 guard    Guard(-10,-8)
+  enemy cell  -10,-7   at ( -592.353,  -405.337) d= 717.760 ring=11 level=12 scout    Scout(-10,-7)
+  enemy cell  -10,-6   at ( -596.629,  -357.027) d= 695.294 ring=10 level=11 guard    Guard(-10,-6)
+  enemy cell  -10,-5   at ( -621.326,  -293.021) d= 686.955 ring=10 level=11 herald   Herald(-10,-5)
+  enemy cell  -10,-4   at ( -612.057,  -209.912) d= 647.052 ring=10 level=11 scholar  Scholar(-10,-4)
+  enemy cell  -10,-3   at ( -606.870,  -157.513) d= 626.978 ring= 9 level=10 herald   Herald(-10,-3)
+  enemy cell  -10,-2   at ( -612.883,  -104.366) d= 621.706 ring= 9 level=10 guard    Guard(-10,-2)
+  enemy cell  -10,0    at ( -605.430,    18.183) d= 605.703 ring= 9 level=10 guard    Guard(-10,0)
+  enemy cell  -10,2    at ( -616.248,   173.965) d= 640.332 ring=10 level=11 herald   Herald(-10,2)
+  enemy cell  -10,3    at ( -617.618,   238.565) d= 662.092 ring=10 level=11 herald   Herald(-10,3)
+  enemy cell  -10,4    at ( -607.550,   293.210) d= 674.603 ring=10 level=11 scholar  Scholar(-10,4)
+  enemy cell  -10,6    at ( -604.493,   431.346) d= 742.611 ring=11 level=12 guard    Guard(-10,6)
+  enemy cell  -10,7    at ( -614.314,   491.703) d= 786.863 ring=12 level=13 guard    Guard(-10,7)
+  enemy cell   -9,-9   at ( -531.245,  -530.365) d= 750.672 ring=11 level=12 scout    Scout(-9,-9)
+  enemy cell   -9,-8   at ( -532.303,  -471.065) d= 710.809 ring=11 level=12 scholar  Scholar(-9,-8)
+  enemy cell   -9,-7   at ( -541.064,  -408.090) d= 677.708 ring=10 level=11 herald   Herald(-9,-7)
+  enemy cell   -9,-6   at ( -541.056,  -344.361) d= 641.348 ring=10 level=11 herald   Herald(-9,-6)
+  enemy cell   -9,-5   at ( -536.315,  -272.106) d= 601.394 ring= 9 level=10 scholar  Scholar(-9,-5)
+  enemy cell   -9,-4   at ( -555.109,  -213.534) d= 594.763 ring= 9 level=10 scout    Scout(-9,-4)
+  enemy cell   -9,-2   at ( -543.031,   -80.465) d= 548.960 ring= 8 level= 9 scout    Scout(-9,-2)
+  enemy cell   -9,0    at ( -543.256,    26.190) d= 543.887 ring= 8 level= 9 scout    Scout(-9,0)
+  enemy cell   -9,1    at ( -550.989,    93.191) d= 558.815 ring= 8 level= 9 scholar  Scholar(-9,1)
+  enemy cell   -9,3    at ( -548.696,   233.624) d= 596.362 ring= 9 level=10 scout    Scout(-9,3)
+  enemy cell   -9,4    at ( -536.937,   288.268) d= 609.426 ring= 9 level=10 scout    Scout(-9,4)
+  enemy cell   -9,6    at ( -538.808,   421.163) d= 683.880 ring=10 level=11 herald   Herald(-9,6)
+  enemy cell   -9,8    at ( -555.679,   545.927) d= 778.984 ring=12 level=13 scholar  Scholar(-9,8)
+  enemy cell   -9,10   at ( -543.004,   663.948) d= 857.718 ring=13 level=14 herald   Herald(-9,10)
+  enemy cell   -8,-10  at ( -464.183,  -602.654) d= 760.695 ring=11 level=12 guard    Guard(-8,-10)
+  enemy cell   -8,-6   at ( -491.317,  -336.340) d= 595.413 ring= 9 level=10 herald   Herald(-8,-6)
+  enemy cell   -8,-4   at ( -491.024,  -209.549) d= 533.869 ring= 8 level= 9 scholar  Scholar(-8,-4)
+  enemy cell   -8,-3   at ( -470.691,  -173.353) d= 501.599 ring= 7 level= 8 scout    Scout(-8,-3)
+  enemy cell   -8,-1   at ( -472.572,   -25.435) d= 473.256 ring= 7 level= 8 scholar  Scholar(-8,-1)
+  enemy cell   -8,0    at ( -469.208,    17.929) d= 469.551 ring= 7 level= 8 scout    Scout(-8,0)
+  enemy cell   -8,2    at ( -485.053,   165.262) d= 512.433 ring= 8 level= 9 herald   Herald(-8,2)
+  enemy cell   -8,3    at ( -470.718,   227.566) d= 522.840 ring= 8 level= 9 scholar  Scholar(-8,3)
+  enemy cell   -8,7    at ( -491.008,   472.171) d= 681.201 ring=10 level=11 scholar  Scholar(-8,7)
+  enemy cell   -8,8    at ( -477.468,   548.680) d= 727.341 ring=11 level=12 guard    Guard(-8,8)
+  enemy cell   -8,10   at ( -494.820,   665.632) d= 829.405 ring=12 level=13 scholar  Scholar(-8,10)
+  enemy cell   -7,-10  at ( -418.640,  -603.328) d= 734.347 ring=11 level=12 scout    Scout(-7,-10)
+  enemy cell   -7,-9   at ( -417.960,  -553.225) d= 693.360 ring=10 level=11 scout    Scout(-7,-9)
+  enemy cell   -7,-8   at ( -418.877,  -486.494) d= 641.977 ring=10 level=11 guard    Guard(-7,-8)
+  enemy cell   -7,-6   at ( -430.961,  -358.510) d= 560.586 ring= 8 level= 9 scout    Scout(-7,-6)
+  enemy cell   -7,-5   at ( -424.411,  -302.871) d= 521.398 ring= 8 level= 9 herald   Herald(-7,-5)
+  enemy cell   -7,-4   at ( -423.230,  -224.534) d= 479.103 ring= 7 level= 8 scout    Scout(-7,-4)
+  enemy cell   -7,-3   at ( -407.441,  -170.681) d= 441.747 ring= 6 level= 7 herald   Herald(-7,-3)
+  enemy cell   -7,0    at ( -405.008,    22.952) d= 405.658 ring= 6 level= 7 scout    Scout(-7,0)
+  enemy cell   -7,1    at ( -417.874,    90.194) d= 427.497 ring= 6 level= 7 scholar  Scholar(-7,1)
+  enemy cell   -7,2    at ( -400.261,   146.543) d= 426.243 ring= 6 level= 7 scholar  Scholar(-7,2)
+  enemy cell   -7,4    at ( -415.991,   295.361) d= 510.183 ring= 7 level= 8 scholar  Scholar(-7,4)
+  enemy cell   -7,5    at ( -407.926,   351.668) d= 538.585 ring= 8 level= 9 scholar  Scholar(-7,5)
+  enemy cell   -7,6    at ( -400.439,   418.879) d= 579.492 ring= 9 level=10 scout    Scout(-7,6)
+  enemy cell   -7,10   at ( -424.711,   687.548) d= 808.148 ring=12 level=13 scholar  Scholar(-7,10)
+  enemy cell   -6,-9   at ( -349.343,  -547.295) d= 649.286 ring=10 level=11 scholar  Scholar(-6,-9)
+  enemy cell   -6,-8   at ( -362.894,  -487.495) d= 607.737 ring= 9 level=10 herald   Herald(-6,-8)
+  enemy cell   -6,-7   at ( -338.468,  -424.055) d= 542.571 ring= 8 level= 9 herald   Herald(-6,-7)
+  enemy cell   -6,-4   at ( -344.598,  -225.753) d= 411.961 ring= 6 level= 7 guard    Guard(-6,-4)
+  enemy cell   -6,-3   at ( -345.257,  -174.879) d= 387.021 ring= 6 level= 7 herald   Herald(-6,-3)
+  enemy cell   -6,-2   at ( -363.978,   -93.084) d= 375.692 ring= 5 level= 6 scholar  Scholar(-6,-2)
+  enemy cell   -6,-1   at ( -366.746,   -45.067) d= 369.505 ring= 5 level= 6 herald   Herald(-6,-1)
+  enemy cell   -6,0    at ( -348.886,    38.569) d= 351.012 ring= 5 level= 6 herald   Herald(-6,0)
+  enemy cell   -6,2    at ( -352.297,   172.789) d= 392.389 ring= 6 level= 7 scout    Scout(-6,2)
+  enemy cell   -6,4    at ( -342.170,   301.323) d= 455.934 ring= 7 level= 8 herald   Herald(-6,4)
+  enemy cell   -6,5    at ( -337.331,   367.392) d= 498.767 ring= 7 level= 8 scout    Scout(-6,5)
+  enemy cell   -6,6    at ( -341.406,   426.915) d= 546.640 ring= 8 level= 9 scout    Scout(-6,6)
+  enemy cell   -6,7    at ( -356.048,   483.739) d= 600.644 ring= 9 level=10 scholar  Scholar(-6,7)
+  enemy cell   -6,8    at ( -356.963,   533.047) d= 641.531 ring=10 level=11 scout    Scout(-6,8)
+  enemy cell   -6,9    at ( -358.183,   601.807) d= 700.333 ring=10 level=11 herald   Herald(-6,9)
+  enemy cell   -6,10   at ( -337.949,   686.170) d= 764.878 ring=11 level=12 guard    Guard(-6,10)
+  enemy cell   -5,-9   at ( -281.688,  -555.001) d= 622.394 ring= 9 level=10 guard    Guard(-5,-9)
+  enemy cell   -5,-8   at ( -290.969,  -478.391) d= 559.930 ring= 8 level= 9 herald   Herald(-5,-8)
+  enemy cell   -5,-5   at ( -280.129,  -292.413) d= 404.942 ring= 6 level= 7 herald   Herald(-5,-5)
+  enemy cell   -5,-4   at ( -297.195,  -237.971) d= 380.729 ring= 5 level= 6 herald   Herald(-5,-4)
+  enemy cell   -5,-1   at ( -302.590,   -38.454) d= 305.023 ring= 4 level= 5 herald   Herald(-5,-1)
+  enemy cell   -5,2    at ( -299.105,   163.621) d= 340.934 ring= 5 level= 6 scholar  Scholar(-5,2)
+  enemy cell   -5,3    at ( -276.607,   224.446) d= 356.213 ring= 5 level= 6 herald   Herald(-5,3)
+  enemy cell   -5,5    at ( -286.448,   366.362) d= 465.052 ring= 7 level= 8 scholar  Scholar(-5,5)
+  enemy cell   -5,6    at ( -288.363,   431.952) d= 519.361 ring= 8 level= 9 scout    Scout(-5,6)
+  enemy cell   -5,7    at ( -292.601,   480.964) d= 562.976 ring= 8 level= 9 guard    Guard(-5,7)
+  enemy cell   -5,9    at ( -294.815,   619.479) d= 686.054 ring=10 level=11 herald   Herald(-5,9)
+  enemy cell   -5,10   at ( -276.725,   687.625) d= 741.219 ring=11 level=12 guard    Guard(-5,10)
+  enemy cell   -4,-10  at ( -210.283,  -603.317) d= 638.913 ring= 9 level=10 scholar  Scholar(-4,-10)
+  enemy cell   -4,-9   at ( -216.153,  -559.993) d= 600.262 ring= 9 level=10 scholar  Scholar(-4,-9)
+  enemy cell   -4,-6   at ( -215.241,  -367.717) d= 426.081 ring= 6 level= 7 herald   Herald(-4,-6)
+  enemy cell   -4,-5   at ( -210.995,  -274.335) d= 346.090 ring= 5 level= 6 herald   Herald(-4,-5)
+  enemy cell   -4,-4   at ( -222.682,  -213.666) d= 308.611 ring= 4 level= 5 scholar  Scholar(-4,-4)
+  enemy cell   -4,-3   at ( -223.937,  -167.452) d= 279.621 ring= 4 level= 5 herald   Herald(-4,-3)
+  enemy cell   -4,-2   at ( -226.752,   -81.479) d= 240.946 ring= 3 level= 4 guard    Guard(-4,-2)
+  enemy cell   -4,-1   at ( -211.053,   -39.650) d= 214.745 ring= 3 level= 4 scout    Scout(-4,-1)
+  enemy cell   -4,0    at ( -214.198,    23.122) d= 215.442 ring= 3 level= 4 scout    Scout(-4,0)
+  enemy cell   -4,2    at ( -223.830,   175.368) d= 284.348 ring= 4 level= 5 scout    Scout(-4,2)
+  enemy cell   -4,3    at ( -209.920,   239.387) d= 318.391 ring= 4 level= 5 herald   Herald(-4,3)
+  enemy cell   -4,5    at ( -228.039,   351.322) d= 418.843 ring= 6 level= 7 scout    Scout(-4,5)
+  enemy cell   -4,6    at ( -225.291,   430.947) d= 486.283 ring= 7 level= 8 guard    Guard(-4,6)
+  enemy cell   -4,7    at ( -234.821,   478.352) d= 532.880 ring= 8 level= 9 guard    Guard(-4,7)
+  enemy cell   -4,8    at ( -208.622,   536.273) d= 575.423 ring= 8 level= 9 guard    Guard(-4,8)
+  enemy cell   -4,9    at ( -233.512,   595.090) d= 639.266 ring= 9 level=10 scholar  Scholar(-4,9)
+  enemy cell   -3,-10  at ( -157.497,  -596.841) d= 617.272 ring= 9 level=10 scholar  Scholar(-3,-10)
+  enemy cell   -3,-8   at ( -164.927,  -479.038) d= 506.635 ring= 7 level= 8 guard    Guard(-3,-8)
+  enemy cell   -3,-6   at ( -155.109,  -340.206) d= 373.897 ring= 5 level= 6 scholar  Scholar(-3,-6)
+  enemy cell   -3,-3   at ( -157.189,  -146.910) d= 215.153 ring= 3 level= 4 herald   Herald(-3,-3)
+  enemy cell   -3,-2   at ( -149.867,   -98.297) d= 179.227 ring= 2 level= 3 scholar  Scholar(-3,-2)
+  enemy cell   -3,0    at ( -162.664,    26.250) d= 164.768 ring= 2 level= 3 scholar  Scholar(-3,0)
+  enemy cell   -3,2    at ( -165.246,   168.529) d= 236.026 ring= 3 level= 4 guard    Guard(-3,2)
+  enemy cell   -3,3    at ( -174.934,   215.775) d= 277.778 ring= 4 level= 5 scout    Scout(-3,3)
+  enemy cell   -3,5    at ( -147.756,   350.345) d= 380.228 ring= 5 level= 6 scholar  Scholar(-3,5)
+  enemy cell   -3,8    at ( -150.183,   539.574) d= 560.084 ring= 8 level= 9 scout    Scout(-3,8)
+  enemy cell   -3,9    at ( -168.137,   623.501) d= 645.773 ring=10 level=11 scout    Scout(-3,9)
+  enemy cell   -2,-10  at ( -102.821,  -609.539) d= 618.150 ring= 9 level=10 scout    Scout(-2,-10)
+  enemy cell   -2,-9   at ( -103.884,  -543.975) d= 553.806 ring= 8 level= 9 herald   Herald(-2,-9)
+  enemy cell   -2,-8   at (  -91.749,  -486.238) d= 494.819 ring= 7 level= 8 scholar  Scholar(-2,-8)
+  enemy cell   -2,-4   at ( -102.173,  -228.609) d= 250.403 ring= 3 level= 4 scholar  Scholar(-2,-4)
+  enemy cell   -2,-3   at (  -89.337,  -159.822) d= 183.096 ring= 2 level= 3 guard    Guard(-2,-3)
+  enemy cell   -2,-2   at (  -94.021,  -106.273) d= 141.894 ring= 2 level= 3 herald   Herald(-2,-2)
+  enemy cell   -2,-1   at (  -95.395,   -40.510) d= 103.640 ring= 1 level= 2 herald   Herald(-2,-1)
+  enemy cell   -2,0    at (  -95.668,    43.440) d= 105.068 ring= 1 level= 2 scholar  Scholar(-2,0)
+  enemy cell   -2,3    at (  -89.816,   233.051) d= 249.759 ring= 3 level= 4 scout    Scout(-2,3)
+  enemy cell   -2,4    at ( -109.137,   301.136) d= 320.302 ring= 5 level= 6 guard    Guard(-2,4)
+  enemy cell   -2,5    at (  -81.831,   343.825) d= 353.429 ring= 5 level= 6 scholar  Scholar(-2,5)
+  enemy cell   -2,7    at (  -89.707,   487.400) d= 495.587 ring= 7 level= 8 scholar  Scholar(-2,7)
+  enemy cell   -2,8    at (  -81.188,   528.687) d= 534.885 ring= 8 level= 9 scholar  Scholar(-2,8)
+  enemy cell   -2,9    at (  -93.645,   621.451) d= 628.467 ring= 9 level=10 scholar  Scholar(-2,9)
+  enemy cell   -1,-9   at (  -43.090,  -534.484) d= 536.218 ring= 8 level= 9 scout    Scout(-1,-9)
+  enemy cell   -1,-8   at (  -30.068,  -492.579) d= 493.496 ring= 7 level= 8 herald   Herald(-1,-8)
+  enemy cell   -1,-7   at (  -32.452,  -422.674) d= 423.918 ring= 6 level= 7 herald   Herald(-1,-7)
+  enemy cell   -1,-5   at (  -45.607,  -295.465) d= 298.965 ring= 4 level= 5 guard    Guard(-1,-5)
+  enemy cell   -1,-4   at (  -35.407,  -211.121) d= 214.070 ring= 3 level= 4 scout    Scout(-1,-4)
+  enemy cell   -1,-3   at (  -29.374,  -152.381) d= 155.186 ring= 2 level= 3 herald   Herald(-1,-3)
+  enemy cell   -1,-2   at (  -26.722,   -89.016) d=  92.941 ring= 1 level= 2 scholar  Scholar(-1,-2)
+  enemy cell   -1,-1   at (  -23.279,   -35.501) d=  42.453 ring= 0 level= 1 scholar  Scholar(-1,-1)
+  enemy cell   -1,3    at (  -24.907,   218.540) d= 219.954 ring= 3 level= 4 guard    Guard(-1,3)
+  enemy cell   -1,5    at (  -43.937,   345.224) d= 348.009 ring= 5 level= 6 scholar  Scholar(-1,5)
+  enemy cell   -1,6    at (  -28.896,   414.851) d= 415.856 ring= 6 level= 7 scout    Scout(-1,6)
+  enemy cell   -1,7    at (  -19.453,   495.941) d= 496.322 ring= 7 level= 8 scholar  Scholar(-1,7)
+  enemy cell   -1,8    at (  -33.586,   555.811) d= 556.825 ring= 8 level= 9 herald   Herald(-1,8)
+  enemy cell   -1,9    at (  -33.948,   607.726) d= 608.674 ring= 9 level=10 guard    Guard(-1,9)
+  enemy cell   -1,10   at (  -29.987,   674.590) d= 675.256 ring=10 level=11 scout    Scout(-1,10)
+  enemy cell    0,-9   at (   22.372,  -551.570) d= 552.023 ring= 8 level= 9 guard    Guard(0,-9)
+  enemy cell    0,-8   at (   30.196,  -465.285) d= 466.264 ring= 7 level= 8 guard    Guard(0,-8)
+  enemy cell    0,-7   at (   39.591,  -414.201) d= 416.089 ring= 6 level= 7 guard    Guard(0,-7)
+  enemy cell    0,-4   at (   16.033,  -239.205) d= 239.741 ring= 3 level= 4 herald   Herald(0,-4)
+  enemy cell    0,-3   at (   16.152,  -144.358) d= 145.259 ring= 2 level= 3 scholar  Scholar(0,-3)
+  enemy cell    0,-2   at (   34.398,   -82.056) d=  88.974 ring= 1 level= 2 scholar  Scholar(0,-2)
+  enemy cell    0,1    at (   37.935,    93.686) d= 101.075 ring= 1 level= 2 herald   Herald(0,1)
+  enemy cell    0,2    at (   26.769,   157.126) d= 159.390 ring= 2 level= 3 guard    Guard(0,2)
+  enemy cell    0,3    at (   31.533,   238.583) d= 240.658 ring= 3 level= 4 guard    Guard(0,3)
+  enemy cell    0,4    at (   17.984,   278.327) d= 278.908 ring= 4 level= 5 scout    Scout(0,4)
+  enemy cell    0,6    at (   42.570,   417.680) d= 419.844 ring= 6 level= 7 guard    Guard(0,6)
+  enemy cell    0,9    at (   39.399,   621.058) d= 622.306 ring= 9 level=10 guard    Guard(0,9)
+  enemy cell    1,-10  at (  103.231,  -596.010) d= 604.884 ring= 9 level=10 guard    Guard(1,-10)
+  enemy cell    1,-9   at (   94.052,  -544.274) d= 552.340 ring= 8 level= 9 guard    Guard(1,-9)
+  enemy cell    1,-7   at (  108.547,  -400.059) d= 414.524 ring= 6 level= 7 scholar  Scholar(1,-7)
+  enemy cell    1,-6   at (   97.913,  -354.081) d= 367.369 ring= 5 level= 6 scout    Scout(1,-6)
+  enemy cell    1,-5   at (   84.063,  -294.776) d= 306.528 ring= 4 level= 5 scholar  Scholar(1,-5)
+  enemy cell    1,-4   at (  106.888,  -217.186) d= 242.063 ring= 3 level= 4 guard    Guard(1,-4)
+  enemy cell    1,-3   at (  103.093,  -165.460) d= 194.949 ring= 3 level= 4 guard    Guard(1,-3)
+  enemy cell    1,0    at (  111.824,    18.994) d= 113.426 ring= 1 level= 2 scholar  Scholar(1,0)
+  enemy cell    1,1    at (  104.721,    92.499) d= 139.723 ring= 2 level= 3 scholar  Scholar(1,1)
+  enemy cell    1,2    at (   98.590,   159.974) d= 187.914 ring= 2 level= 3 herald   Herald(1,2)
+  enemy cell    1,3    at (   98.626,   231.619) d= 251.743 ring= 3 level= 4 herald   Herald(1,3)
+  enemy cell    1,5    at (   82.393,   344.535) d= 354.249 ring= 5 level= 6 guard    Guard(1,5)
+  enemy cell    1,7    at (   95.548,   473.326) d= 482.874 ring= 7 level= 8 herald   Herald(1,7)
+  enemy cell    1,9    at (   84.910,   617.516) d= 623.326 ring= 9 level=10 scout    Scout(1,9)
+  enemy cell    1,10   at (   82.148,   682.751) d= 687.675 ring=10 level=11 scholar  Scholar(1,10)
+  enemy cell    2,-9   at (  150.667,  -542.142) d= 562.689 ring= 8 level= 9 guard    Guard(2,-9)
+  enemy cell    2,-8   at (  173.886,  -469.554) d= 500.717 ring= 7 level= 8 scout    Scout(2,-8)
+  enemy cell    2,-5   at (  169.422,  -297.723) d= 342.553 ring= 5 level= 6 scout    Scout(2,-5)
+  enemy cell    2,-4   at (  166.043,  -231.098) d= 284.564 ring= 4 level= 5 scholar  Scholar(2,-4)
+  enemy cell    2,-1   at (  172.983,   -31.342) d= 175.800 ring= 2 level= 3 scout    Scout(2,-1)
+  enemy cell    2,2    at (  161.979,   149.727) d= 220.580 ring= 3 level= 4 herald   Herald(2,2)
+  enemy cell    2,3    at (  158.293,   235.886) d= 284.076 ring= 4 level= 5 scholar  Scholar(2,3)
+  enemy cell    2,4    at (  149.608,   280.481) d= 317.887 ring= 4 level= 5 herald   Herald(2,4)
+  enemy cell    2,5    at (  155.682,   351.925) d= 384.823 ring= 6 level= 7 guard    Guard(2,5)
+  enemy cell    2,7    at (  144.211,   482.963) d= 504.034 ring= 7 level= 8 herald   Herald(2,7)
+  enemy cell    2,8    at (  161.775,   552.381) d= 575.583 ring= 8 level= 9 guard    Guard(2,8)
+  enemy cell    2,9    at (  164.801,   598.148) d= 620.436 ring= 9 level=10 guard    Guard(2,9)
+  enemy cell    2,10   at (  153.179,   670.461) d= 687.737 ring=10 level=11 scout    Scout(2,10)
+  enemy cell    3,-9   at (  215.863,  -528.499) d= 570.884 ring= 8 level= 9 scout    Scout(3,-9)
+  enemy cell    3,-6   at (  229.175,  -348.736) d= 417.298 ring= 6 level= 7 scholar  Scholar(3,-6)
+  enemy cell    3,-5   at (  236.244,  -289.655) d= 373.779 ring= 5 level= 6 scholar  Scholar(3,-5)
+  enemy cell    3,-4   at (  210.925,  -221.520) d= 305.876 ring= 4 level= 5 guard    Guard(3,-4)
+  enemy cell    3,-3   at (  209.066,  -168.225) d= 268.344 ring= 4 level= 5 scout    Scout(3,-3)
+  enemy cell    3,2    at (  221.840,   147.353) d= 266.319 ring= 4 level= 5 scout    Scout(3,2)
+  enemy cell    3,3    at (  226.811,   237.090) d= 328.108 ring= 5 level= 6 herald   Herald(3,3)
+  enemy cell    3,4    at (  225.864,   278.972) d= 358.943 ring= 5 level= 6 scholar  Scholar(3,4)
+  enemy cell    3,6    at (  231.201,   415.168) d= 475.203 ring= 7 level= 8 guard    Guard(3,6)
+  enemy cell    4,-10  at (  302.754,  -610.682) d= 681.610 ring=10 level=11 scout    Scout(4,-10)
+  enemy cell    4,-9   at (  274.240,  -556.687) d= 620.571 ring= 9 level=10 herald   Herald(4,-9)
+  enemy cell    4,-8   at (  272.484,  -489.387) d= 560.131 ring= 8 level= 9 scout    Scout(4,-8)
+  enemy cell    4,-6   at (  299.603,  -346.897) d= 458.366 ring= 7 level= 8 guard    Guard(4,-6)
+  enemy cell    4,-5   at (  283.123,  -299.728) d= 412.305 ring= 6 level= 7 scholar  Scholar(4,-5)
+  enemy cell    4,-3   at (  279.490,  -158.154) d= 321.134 ring= 5 level= 6 scout    Scout(4,-3)
+  enemy cell    4,-2   at (  288.279,  -110.676) d= 308.794 ring= 4 level= 5 scholar  Scholar(4,-2)
+  enemy cell    4,-1   at (  300.818,   -43.414) d= 303.935 ring= 4 level= 5 herald   Herald(4,-1)
+  enemy cell    4,3    at (  287.826,   225.591) d= 365.698 ring= 5 level= 6 guard    Guard(4,3)
+  enemy cell    4,4    at (  289.318,   298.334) d= 415.581 ring= 6 level= 7 scholar  Scholar(4,4)
+  enemy cell    4,7    at (  288.658,   476.809) d= 557.378 ring= 8 level= 9 guard    Guard(4,7)
+  enemy cell    4,8    at (  280.214,   559.987) d= 626.184 ring= 9 level=10 scholar  Scholar(4,8)
+  enemy cell    4,9    at (  276.472,   599.105) d= 659.821 ring=10 level=11 scout    Scout(4,9)
+  enemy cell    5,-10  at (  353.386,  -609.125) d= 704.213 ring=11 level=12 scout    Scout(5,-10)
+  enemy cell    5,-9   at (  345.185,  -532.521) d= 634.611 ring= 9 level=10 herald   Herald(5,-9)
+  enemy cell    5,-7   at (  347.399,  -415.036) d= 541.240 ring= 8 level= 9 guard    Guard(5,-7)
+  enemy cell    5,-6   at (  362.785,  -340.714) d= 497.694 ring= 7 level= 8 guard    Guard(5,-6)
+  enemy cell    5,-5   at (  353.552,  -273.638) d= 447.076 ring= 6 level= 7 scholar  Scholar(5,-5)
+  enemy cell    5,-4   at (  351.554,  -232.901) d= 421.703 ring= 6 level= 7 scout    Scout(5,-4)
+  enemy cell    5,-3   at (  363.393,  -159.554) d= 396.878 ring= 6 level= 7 herald   Herald(5,-3)
+  enemy cell    5,-2   at (  357.524,  -104.087) d= 372.367 ring= 5 level= 6 scout    Scout(5,-2)
+  enemy cell    5,0    at (  360.998,    17.238) d= 361.410 ring= 5 level= 6 guard    Guard(5,0)
+  enemy cell    5,1    at (  337.410,    89.546) d= 349.090 ring= 5 level= 6 herald   Herald(5,1)
+  enemy cell    5,4    at (  342.946,   289.559) d= 448.839 ring= 7 level= 8 guard    Guard(5,4)
+  enemy cell    5,5    at (  359.871,   347.587) d= 500.323 ring= 7 level= 8 herald   Herald(5,5)
+  enemy cell    5,6    at (  351.926,   419.774) d= 547.779 ring= 8 level= 9 guard    Guard(5,6)
+  enemy cell    5,9    at (  358.312,   596.999) d= 696.272 ring=10 level=11 guard    Guard(5,9)
+  enemy cell    5,10   at (  339.609,   676.421) d= 756.888 ring=11 level=12 scout    Scout(5,10)
+  enemy cell    6,-10  at (  430.051,  -593.830) d= 733.197 ring=11 level=12 guard    Guard(6,-10)
+  enemy cell    6,-9   at (  428.490,  -550.738) d= 697.793 ring=10 level=11 scout    Scout(6,-9)
+  enemy cell    6,-6   at (  426.594,  -341.085) d= 546.188 ring= 8 level= 9 scout    Scout(6,-6)
+  enemy cell    6,-2   at (  415.703,   -83.211) d= 423.949 ring= 6 level= 7 scout    Scout(6,-2)
+  enemy cell    6,0    at (  405.991,    33.482) d= 407.369 ring= 6 level= 7 scholar  Scholar(6,0)
+  enemy cell    6,2    at (  404.022,   162.916) d= 435.632 ring= 6 level= 7 scholar  Scholar(6,2)
+  enemy cell    6,4    at (  406.872,   283.411) d= 495.850 ring= 7 level= 8 guard    Guard(6,4)
+  enemy cell    6,5    at (  427.714,   366.905) d= 563.524 ring= 8 level= 9 guard    Guard(6,5)
+  enemy cell    6,7    at (  415.063,   477.669) d= 632.807 ring= 9 level=10 scholar  Scholar(6,7)
+  enemy cell    6,8    at (  410.849,   550.930) d= 687.256 ring=10 level=11 scholar  Scholar(6,8)
+  enemy cell    6,9    at (  402.141,   607.313) d= 728.387 ring=11 level=12 guard    Guard(6,9)
+  enemy cell    7,-8   at (  491.096,  -467.019) d= 677.703 ring=10 level=11 herald   Herald(7,-8)
+  enemy cell    7,-6   at (  485.081,  -350.361) d= 598.378 ring= 9 level=10 guard    Guard(7,-6)
+  enemy cell    7,-5   at (  488.074,  -288.332) d= 566.879 ring= 8 level= 9 scholar  Scholar(7,-5)
+  enemy cell    7,-4   at (  469.268,  -227.838) d= 521.654 ring= 8 level= 9 herald   Herald(7,-4)
+  enemy cell    7,-2   at (  468.486,  -110.577) d= 481.358 ring= 7 level= 8 scout    Scout(7,-2)
+  enemy cell    7,-1   at (  478.126,   -37.806) d= 479.618 ring= 7 level= 8 scholar  Scholar(7,-1)
+  enemy cell    7,0    at (  472.393,    34.979) d= 473.686 ring= 7 level= 8 herald   Herald(7,0)
+  enemy cell    7,2    at (  494.078,   173.274) d= 523.581 ring= 8 level= 9 scout    Scout(7,2)
+  enemy cell    7,3    at (  488.559,   213.319) d= 533.099 ring= 8 level= 9 herald   Herald(7,3)
+  enemy cell    7,5    at (  471.589,   337.129) d= 579.700 ring= 9 level=10 herald   Herald(7,5)
+  enemy cell    7,6    at (  477.861,   409.343) d= 629.216 ring= 9 level=10 guard    Guard(7,6)
+  enemy cell    7,8    at (  464.169,   532.874) d= 706.688 ring=11 level=12 scout    Scout(7,8)
+  enemy cell    7,9    at (  478.040,   598.775) d= 766.195 ring=11 level=12 scout    Scout(7,9)
+  enemy cell    7,10   at (  494.129,   667.574) d= 830.553 ring=12 level=13 herald   Herald(7,10)
+  enemy cell    8,-10  at (  538.906,  -606.328) d= 811.205 ring=12 level=13 guard    Guard(8,-10)
+  enemy cell    8,-8   at (  546.532,  -475.320) d= 724.311 ring=11 level=12 guard    Guard(8,-8)
+  enemy cell    8,-7   at (  536.852,  -407.204) d= 673.813 ring=10 level=11 herald   Herald(8,-7)
+  enemy cell    8,-5   at (  532.052,  -276.776) d= 599.737 ring= 9 level=10 herald   Herald(8,-5)
+  enemy cell    8,-4   at (  558.503,  -215.679) d= 598.701 ring= 9 level=10 guard    Guard(8,-4)
+  enemy cell    8,-3   at (  546.255,  -154.227) d= 567.610 ring= 8 level= 9 scholar  Scholar(8,-3)
+  enemy cell    8,-2   at (  538.108,   -82.082) d= 544.332 ring= 8 level= 9 scholar  Scholar(8,-2)
+  enemy cell    8,1    at (  550.637,    82.442) d= 556.775 ring= 8 level= 9 scout    Scout(8,1)
+  enemy cell    8,2    at (  535.086,   162.055) d= 559.088 ring= 8 level= 9 scholar  Scholar(8,2)
+  enemy cell    8,3    at (  552.348,   218.051) d= 593.830 ring= 9 level=10 scout    Scout(8,3)
+  enemy cell    8,6    at (  559.480,   419.374) d= 699.208 ring=10 level=11 guard    Guard(8,6)
+  enemy cell    8,7    at (  558.396,   472.302) d= 731.351 ring=11 level=12 scholar  Scholar(8,7)
+  enemy cell    9,-10  at (  597.526,  -611.315) d= 854.835 ring=13 level=14 herald   Herald(9,-10)
+  enemy cell    9,-8   at (  602.623,  -483.547) d= 772.640 ring=12 level=13 scholar  Scholar(9,-8)
+  enemy cell    9,-6   at (  595.505,  -348.505) d= 689.987 ring=10 level=11 guard    Guard(9,-6)
+  enemy cell    9,-4   at (  609.397,  -239.583) d= 654.801 ring=10 level=11 guard    Guard(9,-4)
+  enemy cell    9,-3   at (  603.304,  -150.376) d= 621.763 ring= 9 level=10 scout    Scout(9,-3)
+  enemy cell    9,-1   at (  601.011,   -34.809) d= 602.018 ring= 9 level=10 scholar  Scholar(9,-1)
+  enemy cell    9,2    at (  601.622,   175.747) d= 626.766 ring= 9 level=10 scholar  Scholar(9,2)
+  enemy cell    9,4    at (  604.028,   294.804) d= 672.130 ring=10 level=11 guard    Guard(9,4)
+  enemy cell    9,5    at (  615.685,   367.894) d= 717.227 ring=11 level=12 scholar  Scholar(9,5)
+  enemy cell    9,6    at (  614.286,   415.823) d= 741.793 ring=11 level=12 scout    Scout(9,6)
+  enemy cell    9,7    at (  610.936,   487.910) d= 781.856 ring=12 level=13 herald   Herald(9,7)
+  enemy cell    9,9    at (  620.755,   621.635) d= 878.503 ring=13 level=14 scout    Scout(9,9)
+  enemy cell    9,10   at (  623.299,   659.306) d= 907.296 ring=14 level=15 herald   Herald(9,10)
+  enemy cell   10,-9   at (  684.698,  -555.885) d= 881.940 ring=13 level=14 herald   Herald(10,-9)
+  enemy cell   10,-7   at (  668.604,  -419.790) d= 789.465 ring=12 level=13 scout    Scout(10,-7)
+  enemy cell   10,-6   at (  675.507,  -336.654) d= 754.748 ring=11 level=12 guard    Guard(10,-6)
+  enemy cell   10,-3   at (  673.976,  -169.148) d= 694.877 ring=10 level=11 herald   Herald(10,-3)
+  enemy cell   10,-2   at (  663.752,   -82.035) d= 668.802 ring=10 level=11 herald   Herald(10,-2)
+  enemy cell   10,-1   at (  673.585,   -36.512) d= 674.574 ring=10 level=11 scholar  Scholar(10,-1)
+  enemy cell   10,0    at (  662.096,    33.077) d= 662.922 ring=10 level=11 scholar  Scholar(10,0)
+  enemy cell   10,2    at (  667.117,   151.634) d= 684.133 ring=10 level=11 guard    Guard(10,2)
+  enemy cell   10,3    at (  658.937,   213.380) d= 692.625 ring=10 level=11 scholar  Scholar(10,3)
+  enemy cell   10,4    at (  657.351,   273.221) d= 711.871 ring=11 level=12 herald   Herald(10,4)
+  enemy cell   10,6    at (  683.371,   410.973) d= 797.430 ring=12 level=13 guard    Guard(10,6)
+  enemy cell   10,8    at (  675.056,   557.385) d= 875.430 ring=13 level=14 scout    Scout(10,8)
+  enemy cell   10,10   at (  677.693,   661.894) d= 947.297 ring=14 level=15 scout    Scout(10,10)
+enemy-table ring distance level count
+  ring  0      0.0..64.0     level  1  1
+  ring  1     64.0..128.0    level  2  6
+  ring  2    128.0..192.0    level  3  10
+  ring  3    192.0..256.0    level  4  15
+  ring  4    256.0..320.0    level  5  17
+  ring  5    320.0..384.0    level  6  23
+  ring  6    384.0..448.0    level  7  25
+  ring  7    448.0..512.0    level  8  27
+  ring  8    512.0..576.0    level  9  40
+  ring  9    576.0..640.0    level 10  36
+  ring 10    640.0..704.0    level 11  37
+enemy-density cells=441 placed=278 share=0.630
+
+----------------------------------------------------------------------
+Command:  ./tools/measure_enemies.sh --ticks 300 --seeds "1234 7 11 42"
+The same world stepped twice, once with the layer and once with it switched off,
+so the difference is what the layer costs: standing enemies up, dropping them,
+and stepping the characters it stood up -- fights included.
+----------------------------------------------------------------------
+
+
+enemy cost: 300 ticks a world, cell=64.0 spawn=48.0 keep=60.0 at_most=9
+  seed      with us/tick   without us/tick    cost us/tick   most   mean   spawned  dropped   us/enemy/tick
+  1234           127488.8          102015.1         25473.8      2   1.34         2        1        19057.67
+  7               63040.7           51008.3         12032.4      2   1.21         2        0         9944.15
+  11              71599.1           55971.6         15627.5      2   1.31         5        5        11959.79
+  42              75216.8           59909.9         15306.9      3   1.11         4        0        13789.98
+
+----------------------------------------------------------------------
+Command:  ./run_headless.sh --seed 42 --ticks 40
+A fight that began because a character acted. At t=17 Guard(-1,0) -- an enemy the
+field placed in cell (-1,0), stood up by the streamer, decided for by its own
+rule through Character.decide -- carried out an attack on #2, and the engine
+answered by snapping a board in around it. Nothing declared the fight.
+----------------------------------------------------------------------
+
+
+seed 42
+cast 4 following #1
+  Pip     #1 commander band=1 at (0.000, 7.343, 0.000) hp=26/26 walking  <- followed
+  Nettle  #2 commander band=1 at (-7.000, 6.792, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 7.051, -5.000) hp=26/26 walking
+  Guard(-1,0) #4 commander band=-1 at (-32.498, 1.498, 28.688) hp=26/26 walking
+tick 0 chunks=32 islands=8 villages=1 roads=2 props=310 cover=28 cast=4 biome=twilight_marsh water=59 on_island=0 on_path=0.00 e8e9646d7b7c198d
+  t=  1  Pip    began go_to(target=(17.466, -4.351)), 20 ticks
+  t=  1  Nettle began go_to(target=(-21.834, 14.196)), 20 ticks
+  t=  1  Corin  began go_to(target=(-1.360, -21.427)), 20 ticks
+  t=  1  Guard(-1,0) began go_to(target=(-21.369, 17.912)), 20 ticks
+  t=  6  Pip    thought again at 5/20t, wanted the same thing
+  t=  6  Nettle thought again at 5/20t, wanted the same thing
+  t=  6  Corin  thought again at 5/20t, wanted the same thing
+  t=  6  Guard(-1,0) thought again at 5/20t, wanted the same thing
+tick 10 chunks=33 islands=8 villages=1 roads=2 props=315 cover=28 cast=4 biome=twilight_marsh water=59 on_island=0 on_path=0.00 7b08c40e950a8abb
+  t= 11  Pip    thought again at 10/20t, wanted the same thing
+  t= 11  Nettle thought again at 10/20t, wanted the same thing
+  t= 11  Corin  thought again at 10/20t, wanted the same thing
+  t= 11  Guard(-1,0) changed its mind at 10/20t, dropped go_to(target=(-21.369, 17.912)) for attack(target=2 item=rare staff)
+  t= 11  Guard(-1,0) began attack(target=2 item=rare staff), 6 ticks
+  t= 16  Pip    thought again at 15/20t, wanted the same thing
+  t= 16  Nettle thought again at 15/20t, wanted the same thing
+  t= 16  Corin  thought again at 15/20t, wanted the same thing
+  t= 16  Guard(-1,0) thought again at 5/6t, wanted the same thing
+  t= 17  Guard(-1,0) finished attack(target=2 item=rare staff) -> attack ok fight=begins against=2 anchor=4 joined=2
+  t= 17  Nettle interrupted (combat began), abandoned go_to(target=(-21.834, 14.196)) 16/20t
+  t= 17  Nettle began attack(target=4 item=legendary flail), 6 ticks
+    t= 17  snap-in around #4 at (-26.032, 3.831, 22.427) radius=24.0 span=30.0 storey=0 joined=2
+    t= 17  snap-in board f0d42c08df26e62d cells=441 standable=419 holes=22 cliffs=11
+    t= 17  snap-in #2 (-18.867, 12.157) -> cell (-7,4) centre (-19.500, 13.500) moved 1.485 rings=0
+    t= 17  snap-in #4 (-26.032, 22.427) -> cell (-9,7) centre (-25.500, 22.500) moved 0.537 rings=0
+    t= 17  board f0d42c08df26e62d cells=441 standable=419 holes=22 cliffs=11
+    t= 17  dice seed=1700990759 swing=92..108
+    t= 17  commanders 2
+    t= 17    #1 commander owner=1 level=1 hp=26/26 def=0 power=0
+    t= 17    #2 commander owner=2 level=1 hp=26/26 def=0 power=0
+    t= 17  round 1 turn #1 at (-7,4) facing=north hp=26/26 def=0 flail + boots(0/5) helmet(3/1)
+tick 20 chunks=38 islands=8 villages=1 roads=3 props=356 cover=28 cast=4 biome=twilight_marsh water=83 on_island=0 on_path=0.00 ec233d6d35d58359
+  t= 21  Pip    finished go_to(target=(17.466, -4.351)) -> go_to ok at=(17.466, -4.351) walked=18.0 steps=20
+  t= 21  Pip    began go_to(target=(33.569, -12.395)), 20 ticks
+  t= 21  Corin  finished go_to(target=(-1.360, -21.427)) -> go_to ok at=(-1.360, -21.427) walked=18.0 steps=20
+  t= 21  Corin  began go_to(target=(-7.979, -38.165)), 20 ticks
+  t= 22  Nettle thought again at 5/6t, wanted the same thing
+  t= 23  Nettle finished attack(target=4 item=legendary flail) -> attack refused: Guard(-1,0) is outside the pattern of a legendary flail from here
+    t= 23    move #1 (-7,4)->(-7,5)
+    t= 23    face #1 south
+    t= 23  round 1 turn #2 at (-9,7) facing=north hp=26/26 def=0 staff + chestplate(0/3) leggings(2/1)
+  t= 24  Guard(-1,0) began attack(target=2 item=rare staff), 6 ticks
+  t= 26  Pip    thought again at 5/20t, wanted the same thing
+  t= 26  Corin  thought again at 5/20t, wanted the same thing
+  t= 29  Guard(-1,0) thought again at 5/6t, wanted the same thing
+  t= 30  Guard(-1,0) finished attack(target=2 item=rare staff) -> attack refused: Nettle is outside the pattern of a rare staff from here
+    t= 30    move #2 (-9,7)->(-9,6)
+    t= 30    face #2 east
+    t= 30  round 2 turn #1 at (-7,5) facing=south hp=26/26 def=0 flail + boots(0/5) helmet(3/1)
+tick 30 chunks=35 islands=9 villages=1 roads=3 props=335 cover=28 cast=4 biome=twilight_marsh water=344 on_island=0 on_path=0.00 c30e0b8a0124c8a2
+  t= 31  Pip    thought again at 10/20t, wanted the same thing
+  t= 31  Nettle began attack(target=4 item=legendary flail), 6 ticks
+  t= 31  Corin  thought again at 10/20t, wanted the same thing
+  t= 36  Pip    thought again at 15/20t, wanted the same thing
+  t= 36  Nettle thought again at 5/6t, wanted the same thing
+  t= 36  Corin  thought again at 15/20t, wanted the same thing
+  t= 37  Nettle finished attack(target=4 item=legendary flail) -> attack refused: Guard(-1,0) is outside the pattern of a legendary flail from here
+    t= 37    move #1 (-7,5)->(-8,5)
+    t= 37    face #1 south
+    t= 37  round 2 turn #2 at (-9,6) facing=east hp=26/26 def=0 staff + chestplate(0/3) leggings(2/1)
+  t= 38  Guard(-1,0) began attack(target=2 item=rare staff), 6 ticks
+tick 40 chunks=41 islands=9 villages=1 roads=3 props=402 cover=28 cast=4 biome=twilight_marsh water=344 on_island=0 on_path=0.00 a35dadc9376186c3
+done ticks=40 chunks=41 built=47 final=a35dadc9376186c3

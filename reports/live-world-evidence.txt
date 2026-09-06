@@ -8,62 +8,115 @@ costs: the cast now moves on every tick of a walk instead of on its last, so the
 positions, the streaming counts and the per-tick fingerprints all move with it.
 The `finished go_to ... walked=18.0 steps=20` lines are unchanged, because the
 walk is the same walk taken in the same strides.
+Re-taken again at cycle 195, on the commit that put enemies in the running world.
+Three things moved with it: the cast is four rather than three, because the
+enemy layer stands one up near the origin on this seed and it is a character in
+the same roster as the rest; the cast now carries and wears forged gear, so the
+member lines list it; and the run now prints what the fights in the world wrote
+down, indented under the tick they happened on, which is why there are snap-in
+and turn lines in the middle of it.
 
 ----------------------------------------------------------------------
 
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 seed 1234
-cast 3 following #1
+cast 4 following #1
   Pip     #1 commander band=1 at (0.000, 22.792, 0.000) hp=26/26 walking  <- followed
   Nettle  #2 commander band=1 at (-7.000, 23.752, 4.000) hp=26/26 walking
   Corin   #3 commander band=1 at (6.000, 23.483, -5.000) hp=26/26 walking
-tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f60b62ef97420caa
+  Scholar(-1,-1) #4 commander band=-1 at (-23.279, 34.340, -35.501) hp=26/26 walking
+tick 0 chunks=32 islands=10 villages=1 roads=5 props=601 cover=22 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 f8a37135def13eb4
   t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
   t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
   t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+  t=  1  Scholar(-1,-1) began go_to(target=(-5.711, -39.422)), 20 ticks
   t=  6  Pip    thought again at 5/20t, wanted the same thing
   t=  6  Nettle thought again at 5/20t, wanted the same thing
   t=  6  Corin  thought again at 5/20t, wanted the same thing
-tick 10 chunks=33 islands=10 villages=1 roads=5 props=616 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 be9325e004ad5b2e
+  t=  6  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
+tick 10 chunks=33 islands=10 villages=1 roads=5 props=616 cover=22 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 899f164cad48a8da
   t= 11  Pip    thought again at 10/20t, wanted the same thing
   t= 11  Nettle thought again at 10/20t, wanted the same thing
   t= 11  Corin  thought again at 10/20t, wanted the same thing
+  t= 11  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
   t= 16  Pip    thought again at 15/20t, wanted the same thing
   t= 16  Nettle thought again at 15/20t, wanted the same thing
   t= 16  Corin  thought again at 15/20t, wanted the same thing
-tick 20 chunks=38 islands=10 villages=1 roads=5 props=727 cover=22 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f0ab5e25f311caec
+  t= 16  Scholar(-1,-1) changed its mind at 15/20t, dropped go_to(target=(-5.711, -39.422)) for go_to(target=(-8.921, -24.363))
+  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 20 ticks
+tick 20 chunks=38 islands=10 villages=1 roads=5 props=727 cover=22 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 1f8d975dd3b7b80a
   t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
   t= 21  Pip    began go_to(target=(34.154, 10.917)), 20 ticks
   t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
   t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
   t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
   t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
+  t= 21  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+    t= 25  snap-in around #3 at (-4.565, 26.152, -23.838) radius=24.0 span=30.0 storey=0 joined=2
+    t= 25  snap-in board 3f0a075395a10c6e cells=441 standable=441 holes=0 cliffs=72
+    t= 25  snap-in #3 (-4.565, -23.838) -> cell (-2,-8) centre (-4.500, -22.500) moved 1.340 rings=0
+    t= 25  snap-in #4 (-9.426, -30.370) -> cell (-4,-11) centre (-10.500, -31.500) moved 1.559 rings=0
+    t= 25  board 3f0a075395a10c6e cells=441 standable=441 holes=0 cliffs=72
+    t= 25  dice seed=783572729 swing=92..108
+    t= 25  commanders 2
+    t= 25    #1 commander owner=1 level=1 hp=26/26 def=0 power=0
+    t= 25    #2 commander owner=2 level=1 hp=26/26 def=0 power=0
+    t= 25  round 1 turn #1 at (-2,-8) facing=north hp=26/26 def=0 shield + boots(1/3) helmet(7/11) leggings(3/1)
   t= 26  Pip    thought again at 5/20t, wanted the same thing
   t= 26  Nettle thought again at 5/20t, wanted the same thing
-  t= 26  Corin  thought again at 5/20t, wanted the same thing
-tick 30 chunks=37 islands=11 villages=1 roads=5 props=767 cover=33 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 a4debf6680fbaec5
+  t= 26  Corin  thought again at 5/20t, kept go_to(target=(-11.335, -36.548)) over attack(target=4 item=common buckler)
+  t= 26  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+  t= 26  Corin  interrupted (combat began), abandoned go_to(target=(-11.335, -36.548)) 5/20t
+  t= 26  Corin  began attack(target=4 item=common buckler), 6 ticks
+  t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/20t
+tick 30 chunks=37 islands=11 villages=1 roads=5 props=767 cover=33 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 c108b828cbb453ea
   t= 31  Pip    thought again at 10/20t, wanted the same thing
   t= 31  Nettle thought again at 10/20t, wanted the same thing
-  t= 31  Corin  thought again at 10/20t, wanted the same thing
+  t= 31  Corin  thought again at 5/6t, wanted the same thing
+  t= 32  Corin  finished attack(target=4 item=common buckler) -> attack refused: Scholar(-1,-1) is outside the pattern of a common buckler from here
+    t= 32    move #1 (-2,-8)->(-2,-9)
+    t= 32    face #1 north
+    t= 32  round 1 turn #2 at (-4,-11) facing=north hp=26/26 def=0 spear + boots(1/7) chestplate(3/1) helmet(9/1)
+  t= 33  Scholar(-1,-1) began attack(target=3 item=common spear), 6 ticks
   t= 36  Pip    thought again at 15/20t, wanted the same thing
   t= 36  Nettle thought again at 15/20t, wanted the same thing
-  t= 36  Corin  thought again at 15/20t, wanted the same thing
-tick 40 chunks=39 islands=11 villages=1 roads=4 props=797 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 bdc4592e067a05eb
+  t= 38  Scholar(-1,-1) thought again at 5/6t, wanted the same thing
+  t= 39  Scholar(-1,-1) finished attack(target=3 item=common spear) -> attack refused: Corin is outside the pattern of a common spear from here
+    t= 39    move #2 (-4,-11)->(-3,-11)
+    t= 39    face #2 south
+    t= 39  round 2 turn #1 at (-2,-9) facing=north hp=26/26 def=0 shield + boots(1/3) helmet(7/11) leggings(3/1)
+  t= 40  Corin  began attack(target=4 item=common buckler), 6 ticks
+tick 40 chunks=39 islands=11 villages=1 roads=4 props=797 cover=35 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 64f9a1c50f4510dc
   t= 41  Pip    finished go_to(target=(34.154, 10.917)) -> go_to ok at=(34.154, 10.917) walked=18.0 steps=20
   t= 41  Pip    began go_to(target=(51.020, 17.205)), 20 ticks
   t= 41  Nettle finished go_to(target=(-31.155, 30.384)) -> go_to ok at=(-31.155, 30.384) walked=18.0 steps=20
   t= 41  Nettle began go_to(target=(-38.152, 46.968)), 20 ticks
-  t= 41  Corin  finished go_to(target=(-11.335, -36.548)) -> go_to ok at=(-11.335, -36.548) walked=18.0 steps=20
-  t= 41  Corin  began go_to(target=(-22.891, -50.349)), 20 ticks
+  t= 45  Corin  thought again at 5/6t, wanted the same thing
   t= 46  Pip    thought again at 5/20t, wanted the same thing
   t= 46  Nettle thought again at 5/20t, wanted the same thing
-  t= 46  Corin  thought again at 5/20t, wanted the same thing
-tick 50 chunks=38 islands=11 villages=1 roads=4 props=758 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.97 7f49374dc9430732
+  t= 46  Corin  finished attack(target=4 item=common buckler) -> attack refused: Scholar(-1,-1) is outside the pattern of a common buckler from here
+    t= 46    move #1 (-2,-9)->(-2,-10)
+    t= 46    face #1 north
+    t= 46  round 2 turn #2 at (-3,-11) facing=south hp=26/26 def=0 spear + boots(1/7) chestplate(3/1) helmet(9/1)
+  t= 47  Scholar(-1,-1) began attack(target=3 item=common spear), 6 ticks
+tick 50 chunks=38 islands=11 villages=1 roads=4 props=758 cover=35 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.97 d20ae8129e075741
   t= 51  Pip    thought again at 10/20t, wanted the same thing
   t= 51  Nettle thought again at 10/20t, wanted the same thing
-  t= 51  Corin  thought again at 10/20t, wanted the same thing
+  t= 52  Scholar(-1,-1) thought again at 5/6t, wanted the same thing
+  t= 53  Scholar(-1,-1) finished attack(target=3 item=common spear) -> attack refused: Corin is outside the pattern of a common spear from here
+    t= 53    move #2 (-3,-11)->(-2,-11)
+    t= 53    face #2 south
+    t= 53  round 3 turn #1 at (-2,-10) facing=north hp=26/26 def=0 shield + boots(1/3) helmet(7/11) leggings(3/1)
+  t= 54  Corin  began attack(target=4 item=common buckler), 6 ticks
   t= 56  Pip    thought again at 15/20t, wanted the same thing
   t= 56  Nettle thought again at 15/20t, wanted the same thing
-  t= 56  Corin  thought again at 15/20t, wanted the same thing
-tick 60 chunks=39 islands=11 villages=1 roads=4 props=764 cover=35 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 1f324a276c48ae94
-done ticks=60 chunks=39 built=52 final=1f324a276c48ae94
+  t= 59  Corin  thought again at 5/6t, wanted the same thing
+  t= 60  Corin  finished attack(target=4 item=common buckler) -> attack ok attack=shove cells=1 hits=1 dealt=0
+    t= 60    attack #1 shove cells=1 hits=1
+    t= 60      hit #1->#2 power=0 x100 swing=98 front def=0 dealt=0 hp=26/26 pushed to (-2,-12)
+    t= 60    move #1 (-2,-10)->(-2,-11)
+    t= 60    face #1 north
+    t= 60  round 3 turn #2 at (-2,-12) facing=south hp=26/26 def=0 spear + boots(1/7) chestplate(3/1) helmet(9/1)
+tick 60 chunks=39 islands=11 villages=1 roads=4 props=764 cover=35 cast=4 biome=deep_forest water=0 on_island=0 on_path=0.00 8d44585e13280441
+done ticks=60 chunks=39 built=52 final=8d44585e13280441

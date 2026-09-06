@@ -287,7 +287,12 @@ func _the_panel_reads_the_character_and_keeps_no_copy() -> void:
 
 func _the_source_hands_over_the_world_s_own_objects() -> void:
 	var sim := Simulation.new(SEED)
-	equal(SheetSource.sheets_in(sim.world).size(), WorldCast.CAST.size(),
+	# Everybody living in an ordinary world: the cast the world musters, plus
+	# whatever the enemy layer has stood up around it. Both are characters in the
+	# world's own roster and the source does not know the difference, which is
+	# the point of it.
+	equal(SheetSource.sheets_in(sim.world).size(),
+		WorldCast.CAST.size() + sim.world.enemy_streamer.standing_count(),
 		"an ordinary world should hand over the sheets of the cast living in it")
 	check(sim.begin_scenario(Simulation.SCENARIO_ENCOUNTER),
 		"the encounter scenario should have been set out")

@@ -62,8 +62,15 @@ func run() -> void:
 ## it, one loop over the roster's own scene, and a view on one of them.
 func _an_ordinary_world_holds_a_cast() -> void:
 	var world := SimWorld.new(SEED)
-	equal(world.combat.size(), WorldCast.CAST.size(),
+	# The ordinary cast, plus whatever the enemy layer has stood up around it.
+	# Both are the world's own doing and neither was asked for by a scenario;
+	# `sim/enemy_streamer.gd` states the bound on the second.
+	var wild := world.enemy_streamer.standing_count()
+	equal(world.combat.size(), WorldCast.CAST.size() + wild,
 		"an ordinary world should stand its own cast up")
+	check(wild <= EnemyStreamer.AT_MOST,
+		"more enemies stood up than the layer's stated bound of %d"
+		% EnemyStreamer.AT_MOST)
 	check(world.loop != null, "an ordinary world should have a control loop")
 	check(world.loop.scene == world.combat.scene,
 		"the loop should be over the world's own scene, not a scene beside it")
@@ -84,13 +91,21 @@ func _an_ordinary_world_holds_a_cast() -> void:
 			check(sheet.has_score(ability),
 				"%s has no %s recorded" % [sheet.character_name, ability])
 		named += 1
-	equal(named, WorldCast.CAST.size(), "every member should carry a sheet")
+	equal(named, WorldCast.CAST.size() + wild, "every member should carry a sheet")
 
-	# And they are one band, so an ordinary world is not a brawl.
+	# The people who live here are one band, so an ordinary world is not a
+	# brawl; the enemies around them are one other band, so they are not one
+	# either. Two bands at the most, and never one per character.
 	var bands := {}
+	var meadow := {}
 	for one in world.combat.members:
 		bands[one.band] = true
-	equal(bands.size(), 1, "the ordinary cast should be one band")
+		if one.band != EnemyStreamer.WILD_BAND:
+			meadow[one.band] = true
+	equal(meadow.size(), 1, "the ordinary cast should be one band")
+	check(bands.size() <= 2,
+		"an ordinary world should hold the meadow folk and the wild, not %d bands"
+		% bands.size())
 
 
 ## The proof the world is running: a character in it walks because its own
@@ -189,7 +204,7 @@ func _one_seed_is_one_life() -> void:
 	# The report says who is in the world and what they did in it, which is what
 	# makes it a report of a game rather than of a heightfield.
 	var report := "\n".join(first)
-	check(report.contains("cast %d following #" % WorldCast.CAST.size()),
+	check(report.contains("cast %d following #" % Simulation.new(SEED).world.combat.size()),
 		"the report does not say who is in the world")
 	check(report.contains("began %s(" % ActionCatalog.GO_TO),
 		"the report does not say what anybody chose")

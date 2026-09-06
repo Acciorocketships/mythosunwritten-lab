@@ -12,8 +12,13 @@ extends RefCounted
 ##
 ## ## The four steps of a turn, in order
 ##
-##   1. **Close.** Move to the reachable cell that is nearest the nearest enemy
-##      commander, and only if that is strictly nearer than standing still.
+##   1. **Close.** Move to a cell it could swing at the nearest enemy commander
+##      from, and failing that to the reachable cell nearest to it -- and only if
+##      that is strictly nearer than standing still. Standing still is right only
+##      when it can already strike from where it is: a commander that stopped as
+##      soon as it was *adjacent* would stop diagonally opposite somebody it can
+##      only strike in front of, and the fight would run to the round limit with
+##      neither of them able to reach.
 ##   2. **Turn.** Face the nearest enemy piece. Turning is free, so this costs
 ##      nothing and is done every turn.
 ##   3. **Swing.** Of the held weapon's attacks that are off cooldown, use the
@@ -23,9 +28,12 @@ extends RefCounted
 ##   4. **Send one minion.** Prefer a capture or a strike, commanders first;
 ##      failing that, step the minion that can get nearest an enemy commander.
 ##
-## Distance is Chebyshev on the lattice -- the number of king steps -- because
-## that is the metric a commander with boots actually moves in, and a chooser
-## measuring in a metric it cannot move in would walk into walls.
+## Distance is read as a pair -- king steps first, then city blocks (`_nearness`)
+## -- because the two halves of the board move in two different metrics: a
+## commander with a diagonal granted moves like a king, and one with nothing
+## granted moves one cardinal step, which can never cut a king distance to
+## somebody standing diagonally away. Reading only the first of the two is what
+## used to leave a bare commander standing still for a whole fight.
 ##
 ## ## Why it terminates
 ##
@@ -36,11 +44,6 @@ extends RefCounted
 ## why `Encounter` carries a stated round limit and reports having hit it, rather
 ## than this file promising something it cannot.
 class_name CombatPolicy
-
-## The distance beyond which "closer" stops being worth a move. A commander
-## already in contact does not shuffle: it stands and swings.
-const CONTACT := 1
-
 
 ## Play one whole turn of the active commander and end it.
 ##
@@ -66,18 +69,78 @@ static func _close(played: CombatMatch, me: Commander) -> void:
 	var quarry := _nearest_enemy_commander(played, me)
 	if quarry == null:
 		return
-	var here := _chebyshev(me.cell, quarry.cell)
-	if here <= CONTACT:
+	# Already able to strike from where it stands: it does not shuffle.
+	if _reaches_from(me, me.cell, quarry.cell):
 		return
 	var best := me.cell
-	var best_far := here
+	var best_near := _nearness(me.cell, quarry.cell)
+	var best_reaches := false
 	for cell in LegalMoves.moves_for(played.board, played.pieces, me):
-		var far := _chebyshev(cell, quarry.cell)
-		if far < best_far:
-			best_far = far
+		var near := _nearness(cell, quarry.cell)
+		var reaches := _reaches_from(me, cell, quarry.cell)
+		if reaches and not best_reaches:
+			# The first cell it could actually swing from beats any amount of
+			# merely being nearer.
+			best_reaches = true
+			best_near = near
+			best = cell
+			continue
+		if reaches == best_reaches and _closer(near, best_near):
+			best_near = near
 			best = cell
 	if best != me.cell:
 		played.move_commander(best)
+
+
+## How near one cell is to another, as the pair of distances a chooser has to
+## read together: king steps first, then city blocks.
+##
+## Chebyshev alone is the wrong metric for half the pieces on the board. It is
+## the number of *king* steps, and a commander only moves like a king once armour
+## has granted it a diagonal (section 3.4); with nothing granted it moves one
+## cardinal step, and no single cardinal step reduces the Chebyshev distance to
+## something standing diagonally away. A chooser reading only Chebyshev therefore
+## finds no move that is "strictly nearer", stands still, and the fight runs to
+## `Encounter`'s round limit with neither commander ever in reach -- which is
+## exactly what an ordinary world's first fight did on three seeds in ten.
+##
+## Reading the two together fixes it without changing what a king does: a
+## diagonal step still wins outright when it cuts the king distance, and a
+## cardinal step is taken when it cuts the walking distance at equal king
+## distance. Both fall to zero only at the target, so closing terminates.
+static func _nearness(from: Vector2i, to: Vector2i) -> Vector2i:
+	return Vector2i(_chebyshev(from, to), _manhattan(from, to))
+
+
+## Whether one nearness beats another: fewer king steps, then fewer city blocks.
+static func _closer(near: Vector2i, than: Vector2i) -> bool:
+	if near.x != than.x:
+		return near.x < than.x
+	return near.y < than.y
+
+
+## How many cardinal steps apart two cells are.
+static func _manhattan(from: Vector2i, to: Vector2i) -> int:
+	return absi(from.x - to.x) + absi(from.y - to.y)
+
+
+## Whether a commander standing on a cell could strike another cell with
+## something it is holding, at some facing.
+##
+## Cooldowns are deliberately not read: this decides where to *stand*, and a
+## pattern that is waiting a turn is still the pattern that will reach from
+## there. Every facing is tried because section 3.5 makes rotating free, which is
+## the same reading `ActionEngine._attack` takes when it derives which attack a
+## blow uses.
+static func _reaches_from(me: Commander, from: Vector2i, to: Vector2i) -> bool:
+	for index in me.attack_count():
+		var attack := me.attack_at(index)
+		if attack == null:
+			continue
+		for facing in 4:
+			if attack.cells_from(from, facing).has(to):
+				return true
+	return false
 
 
 static func _turn_to_face(played: CombatMatch, me: Commander) -> void:

@@ -104,12 +104,12 @@ static func forge(
 		return Item.armour(
 			called, shape, source_level, rarity, governing,
 			ItemBudget.shape(effects_share, movement_of_rest), names, weights,
-			looks_like
+			looks_like, shape
 		)
 	return Item.weapon(
 		called, source_level, rarity, governing,
 		ItemBudget.shape(effects_share, movement_of_rest), names, weights,
-		looks_like
+		looks_like, shape
 	)
 
 

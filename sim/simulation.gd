@@ -174,11 +174,19 @@ func run(ticks: int) -> PackedStringArray:
 	# chose what and what the engine answered, rather than only where the ground
 	# got to.
 	var said := world.loop.journal.size()
+	# And everything the fights in the world wrote down, at the tick they wrote
+	# it on. A fight is the loudest thing that happens in an ordinary world and
+	# it used to be missing from the report entirely: the journal says who chose
+	# to attack whom, and these say what the board did about it.
+	var fought := world.combat_lines.size()
 	for i in ticks:
 		step()
 		for at in range(said, world.loop.journal.size()):
 			lines.append("  " + world.loop.journal[at])
 		said = world.loop.journal.size()
+		for at in range(fought, world.combat_lines.size()):
+			lines.append("    t=%3d  %s" % [world.tick, world.combat_lines[at]])
+		fought = world.combat_lines.size()
 		var is_last := i == ticks - 1
 		if is_last or world.tick % TRACE_EVERY == 0:
 			lines.append(_trace_line())
@@ -504,6 +512,62 @@ func settlement_report(span: float = 900.0) -> PackedStringArray:
 			buildings, landmarks, roads, bridges, " ".join(splits),
 		]
 	)
+	return lines
+
+
+## Every enemy the field places inside a fixed square of world, with how far from
+## spawn it stands and the level it is actually stood up at; then the same as a
+## table, one row per ring of section 5's gradient.
+##
+## Like the biome, water, island and settlement reports, the square is fixed
+## rather than read off the streamer, so this answers for the field itself rather
+## than for whichever enemies happen to be standing. And the level is read off
+## the character sheet of an enemy the streamer really built, through the same
+## call the running world stands one up with, so the table says what the world
+## does rather than what a formula would.
+func enemy_report(rings: int = 10) -> PackedStringArray:
+	var lines := PackedStringArray()
+	var streamer := EnemyStreamer.new(world.enemy_field)
+	var stage := ActionScene.on(world.terrain)
+	lines.append(
+		"enemies seed=%d cell=%.1f spawn=%.1f keep=%.1f at_most=%d chance=%.2f" % [
+			world.world_seed, EnemyField.CELL,
+			EnemyStreamer.SPAWN_RADIUS, EnemyStreamer.KEEP_RADIUS,
+			EnemyStreamer.AT_MOST, EnemyField.CHANCE,
+		])
+	var per_ring := {}
+	var placed := 0
+	var reach := int(ceil(float(rings)))
+	var cells := (2 * reach + 1) * (2 * reach + 1)
+	for row in world.enemy_field.enemies_in_square(EnemyField.CELL * float(rings)):
+		var one := streamer.stand_up(stage, row)
+		if one == null:
+			continue
+		var sheet: Character = (one.piece as Commander).sheet
+		var distance := Vector2(float(row["x"]), float(row["z"])).length()
+		var ring := ItemFrontier.ring_at(distance)
+		lines.append("  enemy cell %4d,%-4d at (%9.3f, %9.3f) d=%8.3f ring=%2d level=%2d %-8s %s" % [
+			(row["cell"] as Vector2i).x, (row["cell"] as Vector2i).y,
+			float(row["x"]), float(row["z"]), distance, ring,
+			sheet.level, String(row["role"]), sheet.character_name,
+		])
+		var seen: Dictionary = per_ring.get(ring, {"count": 0, "level": sheet.level})
+		seen["count"] = int(seen["count"]) + 1
+		per_ring[ring] = seen
+		placed += 1
+	lines.append("enemy-table ring distance level count")
+	for ring in range(0, rings + 1):
+		if not per_ring.has(ring):
+			continue
+		var seen: Dictionary = per_ring[ring]
+		lines.append("  ring %2d  %7.1f..%-7.1f  level %2d  %d" % [
+			ring, ItemFrontier.distance_of_ring(ring),
+			ItemFrontier.distance_of_ring(ring + 1),
+			int(seen["level"]), int(seen["count"]),
+		])
+	lines.append("enemy-density cells=%d placed=%d share=%.3f" % [
+		cells, placed, 0.0 if cells == 0 else float(placed) / float(cells),
+	])
 	return lines
 
 

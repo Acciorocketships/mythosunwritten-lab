@@ -46,6 +46,16 @@ extends RefCounted
 ## A leg that the world refuses -- walked into water, blocked by a cliff -- still
 ## counts as an action carried out, so the next question is asked with a new
 ## heading and the walker turns away from what stopped it.
+##
+## ## And when somebody swings at them, they swing back
+##
+## A wanderer caught in a fight has one useful answer and the walk is not it: a
+## `go_to` from somebody on a board is refused, so a character that kept choosing
+## one would spend every turn of its own fight on a refusal. So the rule opens
+## with the same branch `EnemyMind` opens with -- strike at whoever of another
+## band is on the board with you -- reached through the same engine call. That is
+## the whole of what "the meadow folk defend themselves" amounts to; there is no
+## tactic in it and none is claimed.
 class_name WorldCast
 
 ## How far one leg of a wander covers, in world units.
@@ -83,6 +93,10 @@ const ARRIVED := ActionEngine.ARRIVE
 ## What the turns are hashed from, together with the character and the leg. The
 ## turn is the only number this rule draws at all.
 const WANDER_SEED := 0x57414c4b
+
+## How long somebody with nothing useful to do on a board waits before looking
+## again, in ticks. Short, because a turn spent waiting is a turn.
+const WATCHFUL := 2
 
 ## Who is in an ordinary world: a name, a level, what they look like, where they
 ## start relative to the world origin, and which way they set off.
@@ -152,6 +166,13 @@ static func muster(world: SimWorld) -> int:
 		one.band = first if first > 0 else one.id
 		var sheet := Character.make(String(row["name"]), int(row["level"]))
 		sheet.record_scores(ROLL)
+		# What they carry and what they have on. Forged by the frontier at their
+		# own level, exactly as an enemy's is, and put on by the one call that
+		# dresses anybody: somebody who lives in a world with enemies in it and
+		# has nothing to hold is not a character, it is food.
+		sheet.inventory.carry_all(ItemFrontier.carried_at_level(
+			world.world_seed, "cast/%s" % String(row["name"]), int(row["level"])))
+		sheet.inventory.dress()
 		sheet.decide = wandering(world.world_seed)
 		(one.piece as Commander).adopt(sheet)
 		one.settle(world.terrain)
@@ -176,6 +197,17 @@ static func wandering(seed_value: int) -> Callable:
 		func(scene: ActionScene, actor: Combatant) -> Action:
 			if scene == null or actor == null:
 				return null
+			if scene.is_fighting(actor):
+				# On a board, a walk is refused -- the board decides where a
+				# fighter goes -- and a character that answered with one anyway
+				# would spend its turn on a refusal. So it strikes at whoever of
+				# another band is on the board with it, which is the same branch
+				# `EnemyMind` opens with and reaches the engine the same way.
+				var mark := scene.nearest_of_another_band(actor)
+				var strikes := ActionScene.inventory_of(actor).weapon_name()
+				if mark == null or strikes == "":
+					return Action.wait(WATCHFUL)
+				return Action.attack(mark.id, strikes)
 			var leg := scene.actions_of(actor.id)
 			if int(walking["leg"]) != leg:
 				# A new leg: turn, and set off from wherever the last one left

@@ -138,6 +138,22 @@ var governing: String = Ability.STR
 ## same line are the same item to the arithmetic whatever they look like.
 var model: String = ""
 
+## What shape the forge drew it as -- one of its held shape words for a held
+## item, and the slot word for a worn one -- or "" for an item nobody drew a
+## shape for.
+##
+## The companion to `model` above and written at the same moment, for the other
+## half of the same reason. A shape is what an item *is*: it decides what the
+## thing looks like, which is `ItemModel`'s question, and it decides what
+## swinging it does, which is the held-item layer's. Before this was recorded the
+## shape survived only as a word inside the item's name and as the tag it
+## resolved to, so a forged item could be drawn as a bow and have no bow's
+## pattern to swing in.
+##
+## Like `model`, it is not part of the budget and no number depends on it, which
+## is why it is absent from `line()`.
+var shape: String = ""
+
 ## Points of the budget spent on ways of moving.
 var movement: int = 0
 
@@ -164,6 +180,7 @@ static func from_shape(
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
 	looks_like: String = "",
+	drawn_as: String = "",
 ) -> Item:
 	var item := Item.new()
 	item.item_name = called
@@ -173,6 +190,7 @@ static func from_shape(
 	item.rarity = of_rarity
 	item.governing = read_against
 	item.model = looks_like
+	item.shape = drawn_as
 
 	var parts := ItemBudget.split(
 		ItemBudget.total(of_rarity, item.level), weights
@@ -196,10 +214,11 @@ static func weapon(
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
 	looks_like: String = "",
+	drawn_as: String = "",
 ) -> Item:
 	return from_shape(
 		KIND_WEAPON, called, SLOT_HAND, at_level, of_rarity, read_against,
-		weights, effect_names, effect_weights, looks_like
+		weights, effect_names, effect_weights, looks_like, drawn_as
 	)
 
 
@@ -214,10 +233,11 @@ static func armour(
 	effect_names: Array[String] = [],
 	effect_weights: Array[int] = [],
 	looks_like: String = "",
+	drawn_as: String = "",
 ) -> Item:
 	return from_shape(
 		KIND_ARMOUR, called, worn_in, at_level, of_rarity, read_against,
-		weights, effect_names, effect_weights, looks_like
+		weights, effect_names, effect_weights, looks_like, drawn_as
 	)
 
 
