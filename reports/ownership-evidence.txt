@@ -1,0 +1,185 @@
+# Evidence: who owns a point (W-ownership-field)
+
+Every command below was run headless, with no window, no rendering, no
+network and no credential.
+
+== ./run_ownership.sh, twice, byte-identical ==
+sha256 of both: 4257d3d07fc8a0a5648ef851a4d800db7ed402640488d7bbb94c4104038cd5f0
+
+
+ownership seed=1234 ticks=160 grid=41x41 step=6.0 centred on (-480.0, 420.0)
+the probe is the ground between the two who traded, (-477.0, 416.0)
+
+1. the world it is measured on, after 160 ticks
+   carry is what one character's opinion is worth: status + level.
+   #1 Wren   level=2 status=2 carry=4 at (-476.1, 416.0)
+   #2 Rook   level=2 status=2 carry=4 at (-478.0, 416.0)
+   #4 Sable  level=3 status=3 carry=6 at (-424.5, 406.5)
+   #5 Odo    level=1 status=1 carry=2 at (-484.0, 514.0)
+   the graph: 2 edges, 10 happenings
+     #1 -> #2 sentiment +0.1525
+     #2 -> #1 sentiment +0.1525
+     #3 -> #4 sentiment -0.5891  (#3 has fallen: this opinion has no say)
+     #4 -> #3 sentiment -0.1405  (#3 has fallen: it can hold no ground)
+   the strongest thing anybody in this world feels about anybody still standing is +0.1525.
+
+2. the proximity shape and its temperature
+   swept with no radius at all, so the radius cannot confound it.
+   held is the share of the grid with an owner at threshold 0.050;
+   probe is the top score on the ground the two who traded stand on,
+   and kept is that as a share of the +0.1525 they actually feel --
+   how much of a claim survives being averaged with the neighbours.
+   the criterion: the warmest temperature that keeps at least 95% of it,
+   so the widest neighbourhood that still does not dilute a claim where it is strongest.
+   shape        T    held owners    probe    kept      p50      p90      max
+   softmin    3.0   41.5%      2   0.1525  100.0%   0.0005   0.1525   0.1525
+   softmin    6.0   43.0%      2   0.1525  100.0%   0.0080   0.1524   0.1525
+   softmin   12.0   44.4%      2   0.1497   98.1%   0.0279   0.1474   0.1500
+   softmin   24.0   48.4%      2   0.1296   84.9%   0.0474   0.1216   0.1303
+   softmin   48.0   54.4%      2   0.0972   63.7%   0.0546   0.0895   0.0977
+   softmin   96.0   60.5%      2   0.0744   48.8%   0.0551   0.0699   0.0746
+   nearness   3.0   51.3%      2   0.1517   99.4%   0.0515   0.0937   0.1512
+   nearness   6.0   51.3%      2   0.1494   97.9%   0.0515   0.0933   0.1491
+   nearness  12.0   51.3%      2   0.1412   92.6%   0.0517   0.0921   0.1416
+   nearness  24.0   52.5%      2   0.1191   78.1%   0.0522   0.0890   0.1221
+   nearness  48.0   54.8%      2   0.0863   56.6%   0.0539   0.0805   0.0935
+   nearness  96.0   62.0%      2   0.0638   41.8%   0.0548   0.0685   0.0711
+
+3. the radius, at softmin T=12.0
+   none/one/many is how much of the grid hears no entity, exactly
+   one, and two or more. The criterion: section 6 asks for an average,
+   and an average over one opinion is not one -- so the smallest
+   radius over which most of the sampled ground hears two or more.
+   differs is the share of points whose owner is not what an unbounded radius says.
+        R near/point     none      one     many     held   differs
+     20.0       0.08    93.9%     4.2%     1.9%     2.0%     43.4%
+     40.0       0.32    77.6%    14.2%     8.2%     7.8%     39.1%
+     60.0       0.71    57.6%    23.6%    18.9%    15.2%     30.7%
+     90.0       1.53    30.6%    26.5%    43.0%    25.3%     19.4%
+    120.0       2.60     7.3%    15.5%    77.2%    37.5%      7.3%   <- chosen
+    180.0       3.73     0.0%     0.0%   100.0%    44.5%      0.1%
+    240.0       4.00     0.0%     0.0%   100.0%    44.4%      0.0%
+    360.0       4.00     0.0%     0.0%   100.0%    44.4%      0.0%
+
+4. the threshold, against the top scores the grid actually holds
+   top score over the grid, by decile:
+     0.0000 0.0000 0.0000 0.0013 0.0035 0.0116 0.0374 0.0992 0.1417 0.1525 0.1525
+   the widest gap between neighbouring top scores: from 0.0847 to
+     0.0876, a gap of 0.0028, with 68.3% of the grid below it. There is
+     no valley to put a threshold in: the scores are a gradient, not two clumps.
+   so it is pinned from both ends instead, by two numbers the world itself gives:
+     a single honoured exchange between two strangers earns 0.25 x 0.20 = 0.0500
+       sentiment, which is the least a claim anybody has actually earned can be;
+     and the strongest claim this run reaches is 0.1497, on the ground
+       the two who traded stand on. A threshold above that owns nothing, ever.
+   threshold   neutral      held   owners
+       0.005     42.8%     57.2%        2
+       0.010     48.4%     51.6%        2
+       0.020     54.6%     45.4%        2
+       0.050     62.5%     37.5%        2   <- chosen
+       0.100     70.1%     29.9%        2
+       0.150     89.3%     10.7%        2
+       0.200    100.0%      0.0%        0
+       0.300    100.0%      0.0%        0
+
+5. status and level both enter, and each moves ownership on its own
+   the same run, four times. Rook's sheet is changed after the run and
+   before the question, so the world's history is identical in all four and
+   exactly one number differs at the moment of asking. Standing is pinned in
+   the level row, because an unassigned status tracks the level and would
+   otherwise move with it.
+   run             level status  carry     probe          cells  neutral
+   shipped             2      2      4    0.1497  #1:499 #2:131    62.5%
+   status +4           2      6      8    0.1511    #1:691 #2:5    58.6%
+   level +4            6      2      8    0.1511    #1:691 #2:5    58.6%
+   both +4             6      6     12    0.1516    #1:740 #2:4    55.7%
+
+6. what one question costs
+   1681 points on the grid; 4.00 entities looked at per point,
+   2.60 near enough to have a say on average, 4 at the most.
+   the whole world is looked at once per point and the near ones twice: once
+   for their weight, once per claimant for their opinion of it.
+   (pass --cost for the wall clock. No clock is read in here: nothing
+    under sim/ may read one, so the entry point times a sweep from
+    outside and this report is byte-identical across two processes.)
+
+== ./run_ownership.sh --cost, last line ==
+   the whole grid of 1681 points took 27.3 ms, 16.3 us a point.
+   (26.1 ms on an earlier run of the same command: the count is the
+    deterministic number, the clock is not.)
+
+== world fingerprints, before and after this work ==
+./run_headless.sh (seed 1234, 100 ticks)
+  before  tick 50 d20ae8129e075741   tick 100 32656f55cc5eeb1c   final 32656f55cc5eeb1c
+  after   tick 50 d20ae8129e075741   tick 100 32656f55cc5eeb1c   final 32656f55cc5eeb1c
+./run_scenario.sh (seed 1234, 160 ticks)
+  before  fingerprint 0a52522bc69b952e
+  after   fingerprint 0a52522bc69b952e
+
+== ./run_ownership_suite.sh ==
+PASS  ownership      55 checks
+
+== ./run_tests.sh ==
+PASS  rng            1325 checks
+PASS  determinism    15 checks
+PASS  terrain        32 checks
+PASS  streaming      4702 checks
+PASS  terrain_lod    59 checks
+PASS  mountains      3030 checks
+PASS  biomes         212 checks
+PASS  water          6358 checks
+PASS  islands        105334 checks
+PASS  island cover   4922 checks
+PASS  settlements    19829 checks
+PASS  scatter        295 checks
+PASS  combat board   25505 checks
+PASS  combat pieces  360 checks
+PASS  combat resolution 1754 checks
+PASS  combat snap    855 checks
+PASS  live world     82 checks
+PASS  layering       34 checks
+PASS  asset tags     1547 checks
+PASS  characters     1309 checks
+PASS  character sheet 109 checks
+PASS  items          168 checks
+PASS  inventory      90 checks
+PASS  drops          65 checks
+PASS  ground items   2508 checks
+PASS  effects        1474 checks
+PASS  actions        351 checks
+PASS  control loop   81 checks
+PASS  walk motion    93 checks
+PASS  observation    218 checks
+PASS  scenario       152 checks
+PASS  agent          1141 checks
+PASS  memory         106 checks
+PASS  goals          129 checks
+PASS  upkeep         95 checks
+PASS  tool budget    58 checks
+PASS  relationships  140 checks
+PASS  ownership      55 checks
+PASS  checks         118 checks
+PASS  orchestrator   282 checks
+PASS  fight driver   51 checks
+PASS  enemies        596 checks
+PASS  turn seam      23 checks
+PASS  player input   106 checks
+PASS  player actions 174 checks
+PASS  player inventory 57 checks
+PASS  player combat  73 checks
+PASS  window glow    11225 checks
+PASS  board overlay  21 checks
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+PASS  ui panel       157 checks
+PASS  ui readout     1523 checks
+all 56 suites passed (200184 checks)
+
+== ./run_tests.sh --layers-only ==
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check: OK -- res://sim names asset tags and no asset
