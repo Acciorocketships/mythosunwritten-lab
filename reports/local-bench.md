@@ -161,17 +161,26 @@ nothing when one call of it is a weight load.
 world` and `action mix, shipped run` are each copied cell-for-cell from the
 first table of `.lab/memory/files/local-bench-2026-09-05.md`, which is the raw
 pass; `nothing readable` is that file's `unreadable` column under a plainer
-name. All ten cloud cells re-derive independently from `net/model_recording.gd`,
-which is checked in: $101$ rows across its five tables, median $1.874$ s,
-maximum $56.894$ s, no empty reply, and the shipped run's action mix counted off
-its replies. The nine local rows have no artifact of their own left and are
-traceable to the evidence file only — which is the whole reason the eleventh
-column had to go.
+name. All ten cloud cells re-derive independently from `net/model_recording.gd`
+**as it stood at commit `424edcc`**: $101$ rows across its five tables, median
+$1.874$ s, maximum $56.894$ s, no empty reply, and the shipped run's action mix
+counted off its replies. That commit is named because the working tree no longer
+holds that pass: three of the recording's five tables were re-put on 2026-09-06
+when three verbs were added to the one list, and the file checked in today is a
+different draw ($101$ rows, median $1.746$ s, maximum $13.901$ s, none empty).
+The cloud row of this table is still re-derivable, from a file in the
+repository's history rather than from the one in the tree. The nine local rows
+have no artifact of their own left and are traceable to the evidence file only
+— which is the whole reason the eleventh column had to go.
 
-**The cloud baseline, quoted rather than asserted.** The recording checked in
-today holds $101$ replies from `z-ai/glm-5.3-flash` with a median of $1.874$ s
-and none empty. The $5.16$ s figure this comparison was planned against belongs
-to the *previous* shipped model, `anthropic/claude-fable-5`: $87$ replies,
+**The cloud baseline, quoted rather than asserted.** The recording this
+comparison was made against — the pass of 2026-09-05, at commit `424edcc` —
+holds $101$ replies from `z-ai/glm-5.3-flash` with a median of $1.874$ s and
+none empty. (The recording checked in today is the pass of 2026-09-06: also
+$101$ replies, also none empty, median $1.746$ s. Nothing in this comparison is
+re-taken against it, because a live pass per arm is what that would cost.) The
+$5.16$ s figure this comparison was planned against belongs to the *previous*
+shipped model, `anthropic/claude-fable-5`: $87$ replies,
 **$9$ of them empty**, median $5.161$ s. So the honest answer to "is a local
 model faster" is: yes, by roughly $10\times$ against what ships now and roughly
 $25\times$ against what shipped before — and no local arm returned a single
