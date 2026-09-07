@@ -29,7 +29,7 @@ row of `render/asset_library.gd`.
 
 | file | layer | what it added |
 |---|---|---|
-| `sim/asset_tags.gd` | sim | a `gear` category: twelve names, no models |
+| `sim/asset_tags.gd` | sim | a `gear` category: thirteen names, no models |
 | `sim/item_model.gd` | sim | the two-column table from a shape to a name |
 | `sim/item.gd` | sim | one field, `model`: the name an item goes by |
 | `sim/item_forge.gd` | sim | writes that field from the shape it drew |
@@ -90,10 +90,11 @@ about rarity, and this is the first place it can be judged rather than read.
 | `gear_boots`, `gear_leggings`, `gear_chestplate`, `gear_helmet` | placeholder — no free pack holds armour off a body |
 | `gear_bundle` | placeholder — see below; it is not a shape anything forges |
 
-Across the whole catalog that is **seventy tags, fifty-nine on an installed
-model and eleven on their placeholder**. Every row carries its placeholder
-underneath either way, so a checkout without the packs draws the coloured world
-rather than an empty one.
+Across the whole catalog `./run_assets.sh` now reports **seventy-one tags,
+sixty-three on an installed model and eight on their placeholder** (nine of the
+thirteen `gear` names are on a model; the four armour names are not). Every row
+carries its placeholder underneath either way, so a checkout without the packs
+draws the coloured world rather than an empty one.
 
 ---
 
@@ -108,9 +109,11 @@ The decision is the render layer's on purpose. The simulation's honest answer is
 that it does not know what a wool blanket looks like; the render layer's answer
 is that something has to be visible anyway.
 
-**Of the 31 items the five shipped scenarios put in the world, 6 take the
-fallback**  (37 out of six scenarios since the battle scenario landed, which is
-the encounter scenario counted a second time; the fallbacks are the same six): three brass lanterns, a wool blanket, an iron key and a silver ring.
+**Of the 37 items the six shipped scenarios put in the world, 6 take the
+fallback**: three brass lanterns, a wool blanket, an iron key and a silver ring.
+(It was 31 out of five when this was written; the battle scenario landed after,
+which is the encounter's cast counted a second time, so the total moved and the
+six fallbacks did not.)
 Every one of them is a hand-slot object with no gear shape — the numbers are in
 `tools/ground_items_probe.sh`, and both are compared against constants in
 `tests/test_ground_items.gd`, so an item added with no shape recorded fails a
@@ -177,20 +180,30 @@ One seeded run of the encounter scenario, seed 1234, photographed before and
 after. The amber commander is standing in the first frame and gone in the
 second, and where it stood there is a pair of boots.
 
-    ./run_render.sh --scenario encounter --camera -4 3 -5 --aim 1.2 \
+    xvfb-run -a ./run_render.sh --scenario encounter --camera -4 3 -5 --aim 1.2 \
         --screenshot-ticks "18:before.png,40:after.png"
 
 ![Three characters standing: the knight in front, the amber commander behind](assets/ground-drop-before.png)
 
 ![The amber commander is gone and its boots lie in the grass where it stood](assets/ground-drop-after.png)
 
-What the simulation says about that moment, read out of the same run headless:
+What the simulation says about that moment, printed by the same probe out of the
+same scenario at the same seed and the same tick, so the picture can be read as
+numbers rather than counted in pixels (`./tools/ground_items_probe.sh`, section
+five):
 
 ```
-ground #9 pile at (-478.50, -2.11, 418.50): [{"name":"common boots",
-  "rarity":"common","level":2,"model":"gear_boots"}]
-drawn common boots as gear_boots at (-478.50, 418.50) fallback=false
+=== the encounter, at the tick the report photographs it ===
+  seed=1234 ticks=40
+    #9 pile at (-481.50, -2.72, 421.50) holding 1
+    drawn common boots           as gear_boots       at (-481.50, 421.50)
 ```
+
+The two frames and that transcript were re-taken against the tree that ships
+today. They were first taken at `ee84eda`, where the same pile stood at
+`(-478.50, 418.50)`; the fight has since drifted three units because the world
+around it gained a cast (see the fingerprint note at the end), and it is still
+one pair of boots on the ground where the body was.
 
 It carried two things and one fell, which is the one-in-five rule doing what it
 does. `tools/ground_items_probe.sh` prints the other seeded run -- the skirmish
@@ -243,7 +256,7 @@ the ground at the start.
    turn up.
 3. An item with no shape recorded resolves to nothing and is drawn as the
    fallback; a named one is not.
-4. The shipped scenarios hold exactly 31 items and exactly 6 of them fall
+4. The shipped scenarios hold exactly 37 items and exactly 6 of them fall
    back.
 5. For piles of 1, 2, 3, 5, 8, 13 and 24, no two things land closer than the
    spacing, the heap stays inside $0.85\sqrt{n}$, and the first thing is at the
@@ -254,5 +267,51 @@ the ground at the start.
 7. An item picked up and dropped back is the same item by every number and is
    the same object.
 
-The two structure checks (`./run_tests.sh --layers-only`) pass: the simulation
-names no art and the render layer holds no piece of the fight.
+---
+
+## The structure checks, and the fingerprint
+
+`./run_tests.sh --layers-only` runs the checks that keep the layers apart. There
+were two when this work item was planned; there are four now, and all four pass:
+
+```
+layer check:      OK -- res://sim references nothing in the render layer
+combat check:     OK -- res://render draws the fight and holds none of it
+interface check:  OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check:      OK -- res://sim names asset tags and no asset
+```
+
+The fourth is the one this change is answerable to: it fails the build if any
+file under `sim/` ever names a pack, a scene or a texture path.
+
+### The fingerprint
+
+The world fingerprint is the digest of a hundred ticks of the seed-1234 world.
+**This change did not move it, and something after it did.** Measured commit by
+commit in a worktree, one run of `./run_headless.sh --seed 1234 --ticks 100` per
+checkout:
+
+| commit | what it was | fingerprint |
+|---|---|---|
+| `09764d8` | the commit before this one | `baac1b9efedf472a` |
+| `ee84eda` | **this work item** | `baac1b9efedf472a` |
+| `6d5c44a` | enemies in the running game | `32656f55cc5eeb1c` |
+| `8920039` | a fight a person plays | `32656f55cc5eeb1c` |
+| `82b750d` | who owns a point | `32656f55cc5eeb1c` |
+| `fe83708` | gear drawn from the packs | `32656f55cc5eeb1c` |
+| `7eefecb` | a blow the render layer can draw | `32656f55cc5eeb1c` |
+| `bd014e0` | today's HEAD | `32656f55cc5eeb1c` |
+
+**The reason it moved, and where:** at `6d5c44a`, the commit that made enemies
+stream into the running world. The tick-100 census either side of it is
+identical in every terrain term and differs in exactly one:
+
+```
+ee84eda  chunks=39 islands=12 villages=0 roads=4 props=598 cover=35 cast=3 ...
+6d5c44a  chunks=39 islands=12 villages=0 roads=4 props=598 cover=35 cast=5 ...
+```
+
+Same ground, same islands, same roads, same 598 props, same 35 pieces of cover —
+two more characters standing in it, which is what the enemy streamer was for.
+Nothing under the item layer or the render layer touched the world's generation,
+and the fingerprint has not moved since.

@@ -15,6 +15,9 @@ extends SceneTree
 ##      verdict came off.
 ##   4. **The round trip.** One item read before it is picked up and after it is
 ##      put back down, number by number.
+##   5. **The photographed drop.** The encounter scenario at the seed and the
+##      tick the report's two frames are taken on, so what the picture shows can
+##      be read as numbers rather than counted in pixels.
 ##
 ## Nothing here decides anything. Every number is read out of the layer that owns
 ## it -- `ItemModel` for a name, `ItemDrop` for a verdict, `Item.line()` for what
@@ -24,12 +27,18 @@ extends SceneTree
 const SEED := TestGroundItems.SEED
 const SKIRMISH_TICKS := ScriptedSkirmish.TICKS
 
+## The seed and the tick the report's `ground-drop-after.png` is taken on. The
+## before frame is tick 18; nothing has fallen by then, which is the point of it.
+const PHOTOGRAPH_SEED := 1234
+const PHOTOGRAPH_TICKS := 40
+
 
 func _initialize() -> void:
 	_the_table()
 	_the_fallback()
 	_the_drop()
 	_the_round_trip()
+	_the_photographed_drop()
 	quit()
 
 
@@ -153,4 +162,28 @@ func _the_round_trip() -> void:
 			print("    on the ground %s" % item.line())
 			print("    drawn as      %s" % ItemModel.of(item))
 			print("    same object   %s" % ("yes" if item == loot else "no"))
+	print("")
+
+
+func _the_photographed_drop() -> void:
+	print("=== the encounter, at the tick the report photographs it ===")
+	var sim := Simulation.new(PHOTOGRAPH_SEED)
+	if not sim.begin_scenario(Simulation.SCENARIO_ENCOUNTER):
+		print("  the encounter scenario would not stand up")
+		return
+	sim.run(PHOTOGRAPH_TICKS)
+	print("  seed=%d ticks=%d" % [PHOTOGRAPH_SEED, PHOTOGRAPH_TICKS])
+	var rows := sim.world.combat.ground_rows()
+	for row in rows:
+		print("    #%d %s at (%.2f, %.2f, %.2f) holding %d" % [
+			int(row["id"]), String(row["name"]),
+			float(row["x"]), float(row["y"]), float(row["z"]),
+			(row["items"] as Array).size(),
+		])
+	for placement in GroundItems.placements({"combat": {"ground": rows}}):
+		print("    drawn %-22s as %-16s at (%.2f, %.2f)%s" % [
+			String(placement["name"]), String(placement["tag"]),
+			float(placement["x"]), float(placement["z"]),
+			"  [fallback]" if bool(placement["fallback"]) else "",
+		])
 	print("")
