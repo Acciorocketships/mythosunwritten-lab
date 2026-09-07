@@ -63,7 +63,13 @@ const RANDOM_SOURCES := [
 ## without being part of a fight:
 ##
 ##   * the difficulty-class agent's prompt writer, which names an ability to put
-##     the six scores to a language model and to read one back;
+##     the six scores to a language model and to read one back, and the check
+##     record itself, which names two of them because section 6 writes the class
+##     of talking somebody round in terms of a listener's wisdom and the score it
+##     is tested against is charm;
+##   * the goodwill question's writer, which names an ability for the same reason
+##     the difficulty-class one does: it puts the six scores of the character
+##     being weighed in front of a model;
 ##   * the orchestrator's roller, which names an ability to roll the six of them
 ##     and the frontier to ask what the ground it is rolling for is worth and to
 ##     forge the gear that ground gives.
@@ -79,7 +85,9 @@ const RANDOM_SOURCES := [
 ## a narrower rule instead: it names what is listed for it here and no more of
 ## the item layer, so no rule about items can have moved into it.
 const NOT_A_FIGHT := [
+	{"path": "res://sim/ability_check.gd", "may_name": ["Ability"]},
 	{"path": "res://sim/check_prompt.gd", "may_name": ["Ability"]},
+	{"path": "res://sim/goodwill_prompt.gd", "may_name": ["Ability"]},
 	{"path": "res://sim/item_model.gd", "may_name": ["Item"]},
 	{"path": "res://sim/spawn_roll.gd", "may_name": ["Ability", "ItemFrontier"]},
 	{"path": "res://sim/enemy_field.gd", "may_name": ["ItemFrontier"]},
@@ -849,13 +857,24 @@ func _the_layer_stands_on_its_own() -> void:
 	# `sim/item_model.gd` is the twelfth and is neither kind: it reads `Item` to
 	# ask which slot a thing is worn in, and answers with a name out of the asset
 	# catalog. It is excused below and held to the narrower rule.
+	# `sim/ability_check.gd` and `sim/goodwill_prompt.gd` are the thirteenth and
+	# fourteenth, and are `sim/check_prompt.gd`'s kind: the first names two
+	# abilities because section 6 writes the class of talking somebody round in
+	# terms of a listener's wisdom against a speaker's charm, and the second names
+	# one to put the six scores of the character being weighed to a model. Both
+	# are excused below and held to the narrower rule.
+	# `sim/scripted_goodwill.gd` is the fifteenth and needs no excusing: it forges
+	# the three things its neighbours want, and it is a fight file like every
+	# other scripted run.
 	equal(readers, PackedStringArray([
+		"res://sim/ability_check.gd",
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
 		"res://sim/check_prompt.gd", "res://sim/commander.gd",
 		"res://sim/enemy_field.gd",
+		"res://sim/goodwill_prompt.gd",
 		"res://sim/inventory.gd", "res://sim/item_model.gd",
 		"res://sim/scripted_actions.gd", "res://sim/scripted_check.gd",
-		"res://sim/scripted_encounter.gd",
+		"res://sim/scripted_encounter.gd", "res://sim/scripted_goodwill.gd",
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",

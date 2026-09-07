@@ -35,7 +35,7 @@ $ ./tools/play_actions.sh
 seed 1234, driving #1
 verb            tick  at                     the engine's answer
 examine            5  #2                     examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
-say               11  #2                     say ok shout=false heard_by=1
+say               11  #2                     say ok shout=false heard_by=1 check=1 context=persuade:#2
 say               17  -                      say ok shout=true heard_by=1
 trade_propose     22  #2                     trade_propose refused: Hob is out of reach (6.00 > 2.50)
 go_to             56  #2                     go_to ok at=(-476.400, 420.000) walked=0.0 steps=0
@@ -149,7 +149,7 @@ follows in the middle of the frame and the panel is half the window wide.
 ```
 render-shell play t=2 aims at #2 Hob (character) 6.0 away · holding nothing / taking nothing / coins none / saying "well met"
 render-shell play t=13 examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
-render-shell play t=22 say(text=well met target=2) -> say ok shout=false heard_by=1
+render-shell play t=22 say(text=well met target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
 render-shell play t=32 say(text=well met) -> say ok shout=true heard_by=1
 render-shell play t=42 trade_propose(target=2 give=[] give_money=0 want=[] want_money=0) -> trade_propose refused: Hob is out of reach (6.00 > 2.50)
 render-shell play t=69 go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4

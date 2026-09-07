@@ -30,7 +30,7 @@ t=  5  Bram   finished wait(ticks=4) -> wait ok ticks=4 until=9
 t=  5  Bram   began wait(ticks=4), 4 ticks
 t=  5  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=9
 t=  5  Sable  began wait(ticks=4), 4 ticks
-t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1
+t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
 t=  6  Wren   began go_to(target=6), 20 ticks
 t=  6  Odo    thought again at 5/20t, wanted the same thing
 t=  6  Rook   interrupted (spoken to), abandoned wait(ticks=4) 1/4t
@@ -40,7 +40,7 @@ t=  9  Bram   began wait(ticks=4), 4 ticks
 t=  9  Sable  finished wait(ticks=4) -> wait ok ticks=4 until=13
 t=  9  Sable  began wait(ticks=4), 4 ticks
 t= 11  Wren   thought again at 5/20t, wanted the same thing
-t= 11  Rook   finished say(text=what will it be? target=1) -> say ok shout=false heard_by=1
+t= 11  Rook   finished say(text=what will it be? target=1) -> say ok shout=false heard_by=1 check=2 context=persuade:#1
 t= 11  Rook   began wait(ticks=4), 4 ticks
 t= 11  Odo    thought again at 10/20t, wanted the same thing
 t= 11  Wren   interrupted (spoken to), abandoned go_to(target=6) 5/20t
@@ -329,9 +329,11 @@ after 160 ticks
       #5 commander band=5 at (-484.000, -0.816, 514.000) hp=26/26 walking
         carries money=0 carried=[] worn=[]
       #7 pile at (-430.500, 1.275, 406.500) open [1 carried, 0 equipped, 0 money]
+      check #1 persuade:#2 -- raised
+      check #2 persuade:#1 -- raised
       said #1 to #2 "good morning" heard by [2]
       said #2 to #1 "what will it be?" heard by [1]
       said #1 aloud "a fair bargain" heard by [2]
       said #1 aloud "what was that noise?" heard by [2]
   reviews=53 changes=0 finished=91 attacked=0 combat began=2 spoken to=2
-  fingerprint 0a52522bc69b952e
+  fingerprint 5a6f0b6962de3d2e

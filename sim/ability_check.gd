@@ -40,8 +40,8 @@ extends RefCounted
 ## decision is. Nothing waits for it.
 class_name AbilityCheck
 
-## The one place in the world a check is raised from, named here so that a report
-## and a test can both say it without going looking.
+## The two places in the world a check is raised from, named here so that a
+## report and a test can both say them without going looking.
 ##
 ## `ActionEngine._interact` is section 2.1's generic interaction -- the lockpick
 ## hook. A character that offers a shut thing an item it is carrying which is not
@@ -51,20 +51,97 @@ class_name AbilityCheck
 ## raised for the attempt in between, and for nothing else.
 const HOOK := "ActionEngine._interact"
 
+## `ActionEngine._say` is section 6's other one: pure talk, which "can raise
+## sentiment but is deliberately hard". A line addressed to one character raises
+## a check on winning that character round. A shout raises none -- it is
+## addressed to nobody in particular, and there is no one person being won over
+## -- and neither does a line to anything that keeps no character sheet, because
+## the class below is read off one.
+##
+## The words are said either way. The check is about what they *earn*, not about
+## whether they were heard, so a persuasion that fails is a line of speech like
+## any other: it is heard, it is written into the world's record, and it moves
+## familiarity through `RelationshipGraph.heard` exactly as it always did.
+const TALK_HOOK := "ActionEngine._say"
+
+## The two sorts of check, which differ in one thing: who says how hard it is.
+##
+##   * `AT_A_THING` -- the lockpick hook. Nobody has written down how hard it is
+##     to lever an oak chest with a pry bar, so a model is asked, which is
+##     section 7's shape.
+##   * `AT_A_PERSON` -- the talk hook. Section 6 *does* write it down -- "CHA +
+##     roll vs a DC factoring WIS and max(status, level)" -- so there is nothing
+##     to ask. The class is `class_for_talk` below and the ability is `CHA`, both
+##     of them the engine's, and the judging call is not made at all.
+const AT_A_THING := "thing"
+const AT_A_PERSON := "person"
+
 ## The die the engine rolls. A twenty, as section 7's "ability score + roll" is
 ## written against.
 const DIE := 20
 
 ## The range of difficulty classes the engine will accept. A model that says
-## something outside it is bounded to it, and the record keeps both numbers.
+## something outside it is bounded to it, and the record keeps both numbers. A
+## class the engine works out for itself goes through the same bound, so there
+## is one range and not one per sort.
 const DC_LOWEST := 1
 const DC_HIGHEST := 30
+
+## The ability score a persuasion is tested against. Section 6 names it: "CHA +
+## roll".
+const TALK_ABILITY := Ability.CHA
+
+## Section 13's third open question, settled: the difficulty class of winning
+## somebody round by talking is
+##
+## $$\mathrm{DC} = \mathrm{TALK\_FLOOR}
+##   + \mathrm{WIS}(\text{the listener})
+##   + \max\big(\mathrm{status}(\text{the listener}),
+##               \mathrm{level}(\text{the listener})\big)$$
+##
+## bounded to the range above like any other class. Four things are decided in
+## that line, and each of them is section 6's own words or a reading of them.
+##
+##   * **It is the listener's wisdom and the listener's standing.** Section 6
+##     gives the terms but not whose they are. They are the one being talked at:
+##     wisdom is what sees through a line, and standing -- diplomatic or military,
+##     whichever is greater -- is how little this person needs anything from you.
+##     Reading them off the speaker would make a wise, powerful character
+##     *worse* at diplomacy, which is backwards.
+##   * **The greater of status and level, not the sum.** Section 6 wrote
+##     `max(status, level)`, and the reason it is the right shape is that the two
+##     are alternative kinds of standing rather than parts of one: a warlord of no
+##     rank and a herald of no army are each hard to impress, and neither is twice
+##     as hard as the other. (`OwnershipField.carry` adds them instead, and that
+##     is not an inconsistency: there the two are being *spent*, and both count.)
+##   * **The speaker's charm is on the other side of the comparison**, because
+##     section 6 puts it there: CHA plus the roll against the class. So charm is
+##     the lever and the class is what it is levering.
+##   * **`TALK_FLOOR` is 15**, which is what makes the whole thing hard. The
+##     criterion it was chosen against: a speaker whose charm exactly equals the
+##     listener's wisdom, against the least standing there is (level 1, no
+##     assigned status), must succeed on a quarter of the faces of the die. That
+##     comes to needing 16 or better on a d20, so the floor is
+##     $16 - 1 = 15$. Every point of the listener's wisdom or standing above the
+##     speaker's charm takes another face away, and against a wise character of
+##     rank the class reaches the bound, where only the highest faces are left.
+##
+## What makes talking hard is not this number alone, and it was not asked to do
+## the whole job. There is one attempt per person, ever -- `context` below is the
+## person and nothing else -- so the class decides what one attempt is worth
+## trying and the context decides that there is only the one. See
+## `sim/scripted_goodwill.gd`, which measures what the two come to together.
+const TALK_FLOOR := 15
 
 ## The states a check passes through.
 const RAISED := "raised"
 const JUDGED := "judged"
 const SETTLED := "settled"
 const LAPSED := "lapsed"
+
+## What `said_share` and `share` hold while nothing has been judged. Negative,
+## because `Goodwill` accepts nothing below nought.
+const NOTHING_JUDGED := -1.0
 
 ## How the verdict was arrived at.
 const BY_A_ROLL := "rolled"
@@ -103,6 +180,19 @@ static func beats(score: int, roll: int, difficulty: int) -> bool:
 	return score + roll >= difficulty
 
 
+## The class of winning one character round by talking, out of that character's
+## own sheet. See the note on `TALK_FLOOR` above for every term in it.
+##
+## Unbounded, exactly as a model's answer is unbounded before `bounded()` sees
+## it, so that the record can keep what the formula said beside what the engine
+## used and a class that ran past the range is visible rather than silent.
+static func class_for_talk(listener: Character) -> int:
+	if listener == null:
+		return TALK_FLOOR
+	return TALK_FLOOR + maxi(listener.score(Ability.WIS, 0), 0) \
+		+ maxi(maxi(listener.status(), listener.level), 0)
+
+
 # --- What one check is ----------------------------------------------------
 
 
@@ -120,8 +210,14 @@ var who_named: String = ""
 var target: int = 0
 var target_named: String = ""
 
-## What was offered.
+## What was offered, for a check at a thing. Empty for a check at a person:
+## nothing is held out in a conversation.
 var item: String = ""
+
+## Which sort of check this is: `AT_A_THING` or `AT_A_PERSON`. It decides one
+## thing only -- whether the class is asked for or worked out -- and every other
+## stage is the same for both.
+var sort: String = AT_A_THING
 
 ## The attempt in one line, as it is put to a model.
 var attempt: String = ""
@@ -130,10 +226,21 @@ var attempt: String = ""
 ## attempt is compared against. Two attempts with the same context are the same
 ## kind of attempt, and the second of them is not rolled for again.
 ##
-## The shape is the action, the kind of thing, and the thing offered -- so a
-## second oak chest pried at with the same bar is the same context, and a
-## strongbox is not. That is this project's definition of "similar", stated here
-## rather than judged anywhere.
+## For a check at a thing the shape is the action, the kind of thing, and the
+## thing offered -- so a second oak chest pried at with the same bar is the same
+## context, and a strongbox is not. That is this project's definition of
+## "similar", stated here rather than judged anywhere.
+##
+## For a check at a person the shape is **the person, and nothing else**. Two
+## attempts to win the same character round are the same attempt however
+## differently they are worded, so the second of them is settled out of memory
+## with no call and no roll, and it earns nothing further. That is where section
+## 6's "only truly novel diplomacy is even considered" lives: talking to somebody
+## you have already talked round, or already failed to talk round, is not novel,
+## and the words are not read to decide that -- which is deliberate, because a
+## rule that read the words would be a rule about what a character is allowed to
+## say. It is also what stops the obvious cheese, and `sim/scripted_goodwill.gd`
+## measures how much it stops.
 var context: String = ""
 
 ## Where it has got to.
@@ -161,6 +268,13 @@ var how: String = BY_A_ROLL
 ## the engine carried it out, and why not where it did not.
 var operations: Array[Dictionary] = []
 
+## What a model said one persuasion was worth and what the engine moved the edge
+## by, for a check at a person that passed. Both are kept for the reason both
+## classes are: what was asked for and what was allowed are two facts.
+## `NOTHING_JUDGED` while no amount has been judged at all.
+var said_share: float = NOTHING_JUDGED
+var share: float = NOTHING_JUDGED
+
 ## Anything the run should say about this check that is not in the numbers.
 var note: String = ""
 
@@ -181,6 +295,29 @@ static func raised_by(
 		actor_named, thing_named, thing_id, _an(offered), offered,
 	]
 	check.context = "interact:%s:%s" % [thing_named, offered]
+	return check
+
+
+## A check raised over talking one character round.
+##
+## No item, because nothing is held out; the words are in the attempt, and the
+## context is the listener alone -- see the note on `context`.
+static func raised_over(
+	check_id: int, at_tick: int, speaker_id: int, speaker_named: String,
+	listener_id: int, listener_named: String, said: String
+) -> AbilityCheck:
+	var check := AbilityCheck.new()
+	check.id = check_id
+	check.sort = AT_A_PERSON
+	check.raised_at = at_tick
+	check.who = speaker_id
+	check.who_named = speaker_named
+	check.target = listener_id
+	check.target_named = listener_named
+	check.attempt = "%s tries to win %s (#%d) round by saying \"%s\"" % [
+		speaker_named, listener_named, listener_id, said.strip_edges(),
+	]
+	check.context = "persuade:#%d" % listener_id
 	return check
 
 
@@ -209,28 +346,56 @@ func _sum_line() -> String:
 	return "%s %d + roll %d = %d vs dc %d" % [ability, score, roll, total, difficulty]
 
 
+## Whether this check is about winning a character round rather than working a
+## thing. Asked in three places -- which prompt is put, whether a judging call is
+## made at all, and whether a remembered success is carried out again -- and it
+## is a question about the check rather than about the hook, so it is here.
+func is_at_a_person() -> bool:
+	return sort == AT_A_PERSON
+
+
 ## The row kept in the character's memory, which is also what a later attempt of
 ## the same shape is settled from.
 func remembered_row() -> Dictionary:
 	var kept: Array[Dictionary] = []
-	for row in operations:
-		if bool(row.get("ok", false)):
-			kept.append({"line": String(row["line"]), "target": int(row.get("target", 0))})
+	# Nothing is kept for a check at a person, because there is nothing to carry
+	# out again: what a success there earned was earned once, from that one
+	# character, and the context *is* that character. Keeping the row would be
+	# keeping a way of being thanked twice for the same conversation.
+	if not is_at_a_person():
+		for row in operations:
+			if bool(row.get("ok", false)):
+				kept.append({
+					"line": String(row["line"]), "target": int(row.get("target", 0)),
+				})
 	return {
-		"text": "I %s the %s with %s %s: %s." % [
-			"worked" if passed else "failed to work", target_named, _an(item), item,
-			"it gave" if passed else "it held",
-		],
+		"text": _said_of_itself(),
 		"attempt": attempt,
+		"sort": sort,
 		"ability": ability,
 		"score": score,
 		"roll": roll,
 		"total": total,
 		"difficulty": difficulty,
 		"passed": passed,
+		"share": share,
+		"said_share": said_share,
 		"target": target,
 		"operations": kept,
 	}
+
+
+# What the character puts in its own first-person log about this check, which is
+# a sentence about what it tried and how it went and never about a number.
+func _said_of_itself() -> String:
+	if is_at_a_person():
+		return "I tried to win %s round with words: %s." % [
+			target_named, "they came round" if passed else "they did not",
+		]
+	return "I %s the %s with %s %s: %s." % [
+		"worked" if passed else "failed to work", target_named, _an(item), item,
+		"it gave" if passed else "it held",
+	]
 
 
 static func _an(word: String) -> String:

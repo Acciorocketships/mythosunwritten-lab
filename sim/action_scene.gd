@@ -218,6 +218,24 @@ var trades: Array[Dictionary] = []
 ## without reaching into the fight for it.
 var blows: Array[Dictionary] = []
 
+## Every goodwill this world has recorded being earned, in order:
+## `{"doer": id, "wanted_by": id, "share": float, "what": String, "tick": int}`.
+##
+## Section 6's two ways sentiment goes up, written down as things that happened
+## rather than applied where they were judged. A share reaches this list only
+## after a model has judged it and `Goodwill` has read it and bounded it, and a
+## share outside what the engine accepts is refused by `note_favour` and never
+## written at all.
+##
+## It exists for the same reason `said`, `trades` and `blows` do, and it is folded
+## into the relationship graph by the same path they are -- `CharacterUpkeep`,
+## from a mark the graph itself carries. The two desks that put the question to a
+## model therefore never touch the graph: they write down what was earned, and
+## what that *means* to an edge stays `sim/relationship_graph.gd`'s, exactly as
+## what a blow means does. `tests/test_relationships.gd` reads the source of every
+## model-facing file and fails if one of them names the graph at all.
+var favours: Array[Dictionary] = []
+
 ## Every relationship in this world: section 10's graph of edges between
 ## entities, held here because it is the world's and not any character's.
 ##
@@ -377,8 +395,8 @@ func remove_object(thing: WorldObject) -> bool:
 
 ## Raise an ability check on the world, because something in it warranted one.
 ##
-## `ActionEngine`'s to call, from the one hook named in `AbilityCheck.HOOK`, and
-## the whole of what the world does about a check: it writes down that one was
+## `ActionEngine`'s to call, from the hook named in `AbilityCheck.HOOK`, and the
+## whole of what the world does about a check: it writes down that one was
 ## attempted and returns. What class it is, what it is rolled against, whether it
 ## passes and what follows are all somebody else's, later.
 func raise_check(
@@ -387,6 +405,23 @@ func raise_check(
 	var check := AbilityCheck.raised_by(
 		_next_check, tick, actor.id, name_of(actor),
 		thing.id, thing.object_name, offered)
+	_next_check += 1
+	raised.append(check)
+	return check
+
+
+## Raise an ability check over talking one character round.
+##
+## The other of `ActionEngine`'s two hooks, `AbilityCheck.TALK_HOOK`, and the
+## same contract: the world writes down that it was attempted and returns. The
+## words themselves are said whatever comes of this -- the engine has already
+## written them into `said` and whoever heard them has heard them.
+func raise_talk_check(
+	speaker: Combatant, listener: Combatant, words: String
+) -> AbilityCheck:
+	var check := AbilityCheck.raised_over(
+		_next_check, tick, speaker.id, name_of(speaker),
+		listener.id, name_of(listener), words)
 	_next_check += 1
 	raised.append(check)
 	return check
@@ -909,6 +944,26 @@ func note_trade(
 		"gave": gave, "gave_money": gave_money,
 		"back": back, "back_money": back_money,
 	})
+
+
+## Write down one goodwill earned: who did the thing, who it was worth something
+## to, how much, and what happened.
+##
+## The one place this world says goodwill was earned. It refuses a share outside
+## the range the engine will move an edge by, so a number that got past neither
+## `Goodwill.read` nor `Goodwill.bounded` cannot be written down as though it had
+## -- and answers false, which is what the caller prints. Nothing here decides
+## what the share *does*; that is the graph's, at fold time.
+func note_favour(doer: int, wanted_by: int, share: float, what: String) -> bool:
+	if doer == wanted_by or doer == NOBODY or wanted_by == NOBODY:
+		return false
+	if share < Goodwill.LEAST or share > Goodwill.MOST:
+		return false
+	favours.append({
+		"doer": doer, "wanted_by": wanted_by, "share": share,
+		"what": what, "tick": tick,
+	})
+	return true
 
 
 ## Write down one blow the board has landed: who swung, who was hit, how much it

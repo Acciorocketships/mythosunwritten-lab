@@ -45,14 +45,14 @@ t=  4  Rook   began examine(target=6), 4 ticks
 t=  4  Bram   began say(text=Hail, traveler. Who are you? target=4), 5 ticks
 t=  4  Sable  began say(text=Hail, traveler. target=3), 5 ticks
 t=  4  Pell   began go_to(target=2), 20 ticks
-t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1
+t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
 t=  6  Wren   began go_to(target=6), 20 ticks
 t=  6  Rook   interrupted (spoken to), abandoned examine(target=6) 2/4t
 t=  6  Rook   began examine(target=6), 4 ticks
 t=  8  Odo    began go_to(offset=(3.000, 0.000)), 20 ticks
-t=  9  Bram   finished say(text=Hail, traveler. Who are you? target=4) -> say ok shout=false heard_by=1
+t=  9  Bram   finished say(text=Hail, traveler. Who are you? target=4) -> say ok shout=false heard_by=1 check=2 context=persuade:#4
 t=  9  Bram   has not decided yet, and waits in the world
-t=  9  Sable  finished say(text=Hail, traveler. target=3) -> say ok shout=false heard_by=1
+t=  9  Sable  finished say(text=Hail, traveler. target=3) -> say ok shout=false heard_by=1 check=3 context=persuade:#3
 t=  9  Sable  has not decided yet, and waits in the world
 t=  9  Pell   thought again at 5/20t, wanted the same thing
 t= 10  Rook   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0
@@ -64,11 +64,11 @@ t= 13  Rook   began say(text=good morning, Wren target=1), 5 ticks
 t= 13  Odo    thought again at 5/20t, wanted the same thing
 t= 14  Pell   thought again at 10/20t, wanted the same thing
 t= 16  Wren   thought again at 10/20t, wanted the same thing
-t= 17  Bram   finished say(text=Well met. What brings you this way? target=4) -> say ok shout=false heard_by=1
+t= 17  Bram   finished say(text=Well met. What brings you this way? target=4) -> say ok shout=false heard_by=1 check=4 context=persuade:#4
 t= 17  Bram   has not decided yet, and waits in the world
-t= 17  Sable  finished say(text=I am Sable, a traveler with a spear. What brings you here? target=3) -> say ok shout=false heard_by=1
+t= 17  Sable  finished say(text=I am Sable, a traveler with a spear. What brings you here? target=3) -> say ok shout=false heard_by=1 check=5 context=persuade:#3
 t= 17  Sable  has not decided yet, and waits in the world
-t= 18  Rook   finished say(text=good morning, Wren target=1) -> say ok shout=false heard_by=1
+t= 18  Rook   finished say(text=good morning, Wren target=1) -> say ok shout=false heard_by=1 check=6 context=persuade:#1
 t= 18  Rook   has not decided yet, and waits in the world
 t= 18  Odo    thought again at 10/20t, wanted the same thing
 t= 18  Wren   interrupted (spoken to), abandoned go_to(target=6) 12/20t
@@ -83,7 +83,7 @@ t= 23  Bram   has not decided yet, and waits in the world
 t= 23  Odo    thought again at 15/20t, wanted the same thing
 t= 24  Pell   finished go_to(target=2) -> go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
 t= 24  Pell   has not decided yet, and waits in the world
-t= 25  Sable  finished say(text=I am headed north, exploring this land. Are you from around here? target=3) -> say ok shout=false heard_by=1
+t= 25  Sable  finished say(text=I am headed north, exploring this land. Are you from around here? target=3) -> say ok shout=false heard_by=1 check=7 context=persuade:#3
 t= 25  Sable  has not decided yet, and waits in the world
 t= 26  Rook   finished say(text=a fine morning for it, Pell #7) -> say ok shout=true heard_by=2
 t= 26  Rook   has not decided yet, and waits in the world
@@ -96,24 +96,24 @@ t= 28  Odo    has not decided yet, and waits in the world
 t= 29  Rook   began say(text="and a fine morning to you both" target=1), 5 ticks
 t= 30  Pell   finished pick_up(item=brass lantern target=6) -> pick_up refused: the pile is out of reach (6.65 > 2.50)
 t= 30  Pell   has not decided yet, and waits in the world
-t= 31  Bram   finished say(text="I am Bram, a swordsman. I saw a pile of goods some ways east of here — care to look at it together?" target=4) -> say ok shout=false heard_by=1
+t= 31  Bram   finished say(text="I am Bram, a swordsman. I saw a pile of goods some ways east of here — care to look at it together?" target=4) -> say ok shout=false heard_by=1 check=8 context=persuade:#4
 t= 31  Bram   has not decided yet, and waits in the world
 t= 31  Sable  interrupted (spoken to), abandoned say(text="Just exploring northward, seeking new lands. Safe travels to you, Bram." target=3) 3/5t
 t= 31  Sable  began say(text="Just exploring northward, seeking new lands. Safe travels to you, Bram." target=3), 5 ticks
 t= 33  Wren   thought again at 15/20t, wanted the same thing
 t= 33  Pell   began say(text="a fine morning indeed, Rook" target=2), 5 ticks
-t= 34  Rook   finished say(text="and a fine morning to you both" target=1) -> say ok shout=false heard_by=1
+t= 34  Rook   finished say(text="and a fine morning to you both" target=1) -> say ok shout=false heard_by=1 check=9 context=persuade:#1
 t= 34  Rook   has not decided yet, and waits in the world
 t= 34  Bram   began go_to(target=6), 20 ticks
 t= 34  Wren   interrupted (spoken to), abandoned go_to(target=6) 16/20t
 t= 34  Wren   began go_to(target=6), 20 ticks
 t= 35  Odo    began go_to(offset=(0.000, -3.000)), 20 ticks
-t= 36  Sable  finished say(text="Just exploring northward, seeking new lands. Safe travels to you, Bram." target=3) -> say ok shout=false heard_by=1
+t= 36  Sable  finished say(text="Just exploring northward, seeking new lands. Safe travels to you, Bram." target=3) -> say ok shout=false heard_by=1 check=10 context=persuade:#3
 t= 36  Sable  has not decided yet, and waits in the world
 t= 36  Bram   interrupted (spoken to), abandoned go_to(target=6) 2/20t
 t= 36  Bram   began go_to(target=6), 20 ticks
 t= 37  Rook   began say(text="what brings you out this way?" target=1), 5 ticks
-t= 38  Pell   finished say(text="a fine morning indeed, Rook" target=2) -> say ok shout=false heard_by=1
+t= 38  Pell   finished say(text="a fine morning indeed, Rook" target=2) -> say ok shout=false heard_by=1 check=11 context=persuade:#2
 t= 38  Pell   has not decided yet, and waits in the world
 t= 38  Rook   interrupted (spoken to), abandoned say(text="what brings you out this way?" target=1) 1/5t
 t= 38  Rook   began say(text="what brings you out this way?" target=1), 5 ticks
@@ -122,7 +122,7 @@ t= 39  Sable  began say(text="A pile of goods east, you say? Lead the way, Bram 
 t= 40  Odo    thought again at 5/20t, wanted the same thing
 t= 41  Bram   thought again at 5/20t, wanted the same thing
 t= 41  Pell   began examine(target=6), 4 ticks
-t= 43  Rook   finished say(text="what brings you out this way?" target=1) -> say ok shout=false heard_by=1
+t= 43  Rook   finished say(text="what brings you out this way?" target=1) -> say ok shout=false heard_by=1 check=12 context=persuade:#1
 t= 43  Rook   has not decided yet, and waits in the world
 t= 43  Wren   interrupted (spoken to), abandoned go_to(target=6) 9/20t
 t= 43  Wren   began go_to(target=6), 20 ticks
@@ -137,7 +137,7 @@ t= 47  Sable  began say(text=A pile of goods, you say? Lead the way east — my 
 t= 48  Wren   thought again at 5/20t, wanted the same thing
 t= 48  Pell   began examine(target=6), 4 ticks
 t= 50  Odo    thought again at 15/20t, wanted the same thing
-t= 51  Rook   finished say(text="I asked first, Wren — what brings you out this way?" target=1) -> say ok shout=false heard_by=1
+t= 51  Rook   finished say(text="I asked first, Wren — what brings you out this way?" target=1) -> say ok shout=false heard_by=1 check=13 context=persuade:#1
 t= 51  Rook   has not decided yet, and waits in the world
 t= 51  Bram   thought again at 15/20t, wanted the same thing
 t= 51  Wren   interrupted (spoken to), abandoned go_to(target=6) 8/20t
@@ -191,7 +191,7 @@ t= 60  Pell   began examine(target=6), 4 ticks
 t= 62  Wren   thought again at 5/20t, wanted the same thing
       face #2 south
     round 2 turn #3 at (-157,138) facing=west hp=38/38 def=0 sword + boots(4/4)
-t= 63  Rook   finished say(text="still waiting on you, Wren — what brings you this way?" target=1) -> say ok shout=false heard_by=1
+t= 63  Rook   finished say(text="still waiting on you, Wren — what brings you this way?" target=1) -> say ok shout=false heard_by=1 check=14 context=persuade:#1
 t= 63  Bram   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=1.581
 t= 63  Bram   has not decided yet, and waits in the world
 t= 63  Odo    thought again at 5/20t, wanted the same thing
@@ -257,7 +257,7 @@ t= 78  Pell   thought again at 10/20t, wanted the same thing
       face #3 west
     round 6 turn #4 at (-160,139) facing=north hp=32/32 def=0 - + bare
 t= 80  Wren   thought again at 15/20t, wanted the same thing
-t= 80  Bram   finished say(text="Safe travels, Sable. I'll check that pile just here before moving on." target=4) -> say ok shout=false heard_by=1
+t= 80  Bram   finished say(text="Safe travels, Sable. I'll check that pile just here before moving on." target=4) -> say ok shout=false heard_by=1 check=15 context=persuade:#4
 t= 80  Sable  interrupted (spoken to), abandoned examine(target=6) 2/4t
 t= 80  Sable  began examine(target=6), 4 ticks
       face #4 north
@@ -269,7 +269,7 @@ t= 82  Odo    finished wait(ticks=1) -> wait ok ticks=1 until=83
 t= 82  Odo    has not decided yet, and waits in the world
       face #2 south
     round 7 turn #3 at (-157,138) facing=west hp=38/38 def=0 sword + boots(4/4)
-t= 83  Rook   finished say(text="well, if no one will talk, I'll have a look at that pile" target=1) -> say ok shout=false heard_by=1
+t= 83  Rook   finished say(text="well, if no one will talk, I'll have a look at that pile" target=1) -> say ok shout=false heard_by=1 check=16 context=persuade:#1
 t= 83  Bram   has not decided yet, and waits in the world
 t= 83  Pell   thought again at 15/20t, wanted the same thing
 t= 83  Wren   interrupted (spoken to), abandoned go_to(target=6) 18/20t
@@ -333,7 +333,7 @@ t= 98  Rook   began examine(target=6), 4 ticks
     round 11 turn #3 at (-157,138) facing=west hp=38/38 def=0 sword + boots(4/4)
 t= 99  Bram   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=1.581
 t= 99  Bram   has not decided yet, and waits in the world
-t= 99  Sable  finished say(text="Safe travels, Bram." target=3) -> say ok shout=false heard_by=1
+t= 99  Sable  finished say(text="Safe travels, Bram." target=3) -> say ok shout=false heard_by=1 check=17 context=persuade:#3
 t= 99  Sable  has not decided yet, and waits in the world
       face #3 west
     round 11 turn #4 at (-160,139) facing=north hp=32/32 def=0 - + bare
@@ -418,7 +418,7 @@ t=119  Sable  thought again at 10/20t, wanted the same thing
     round 16 turn #4 at (-160,139) facing=north hp=32/32 def=0 - + bare
       face #4 north
     round 17 turn #1 at (-158,138) facing=east hp=32/32 def=0 - + bare
-t=121  Pell   finished say(text=good morning, strangers — welcome to the market target=3) -> say ok shout=false heard_by=1
+t=121  Pell   finished say(text=good morning, strangers — welcome to the market target=3) -> say ok shout=false heard_by=1 check=18 context=persuade:#3
       face #1 east
     round 17 turn #2 at (-160,138) facing=south hp=32/32 def=0 - + bare
       face #2 south
@@ -463,7 +463,7 @@ t=132  Sable  began go_to(target=6), 20 ticks
     round 20 turn #1 at (-158,138) facing=east hp=32/32 def=0 - + bare
 t=133  Wren   finished trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0) -> trade_propose refused: Rook is out of reach (6.00 > 2.50)
 t=133  Wren   began wait(ticks=8), 8 ticks
-t=133  Pell   finished say(text="good morning, stranger — I'm Pell. Might you have a brass lantern to sell?" target=4) -> say ok shout=false heard_by=1
+t=133  Pell   finished say(text="good morning, stranger — I'm Pell. Might you have a brass lantern to sell?" target=4) -> say ok shout=false heard_by=1 check=19 context=persuade:#4
 t=133  Sable  interrupted (spoken to), abandoned go_to(target=6) 1/20t
 t=133  Sable  began go_to(target=6), 20 ticks
       face #1 east
@@ -529,7 +529,7 @@ t=150  Wren   finished say(text=a fair bargain) -> say ok shout=true heard_by=4
 t=150  Bram   thought again at 15/20t, wanted the same thing
       face #2 south
     round 24 turn #3 at (-157,138) facing=west hp=38/38 def=0 sword + boots(4/4)
-t=151  Rook   finished say(text="Pell, good to see you — anyone care to tell me what that pile over there is about?" target=7) -> say ok shout=false heard_by=1
+t=151  Rook   finished say(text="Pell, good to see you — anyone care to tell me what that pile over there is about?" target=7) -> say ok shout=false heard_by=1 check=20 context=persuade:#7
 t=151  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-478.600, 475.300) walked=2.7 steps=3
 t=151  Odo    has not decided yet, and waits in the world
 t=151  Pell   interrupted (spoken to), abandoned say(text="Anyone? I'm after a brass lantern — happy to pay." target=4) 3/5t
@@ -554,7 +554,7 @@ t=155  Bram   has not decided yet, and waits in the world
 t=156  Sable  began say(text="No lantern on me, Pell — just boots and a spear." target=7), 5 ticks
       face #4 north
     round 26 turn #1 at (-158,138) facing=east hp=32/32 def=0 - + bare
-t=157  Pell   finished say(text="Anyone? I'm after a brass lantern — happy to pay." target=4) -> say ok shout=false heard_by=1
+t=157  Pell   finished say(text="Anyone? I'm after a brass lantern — happy to pay." target=4) -> say ok shout=false heard_by=1 check=21 context=persuade:#4
 t=157  Sable  interrupted (spoken to), abandoned say(text="No lantern on me, Pell — just boots and a spear." target=7) 1/5t
 t=157  Sable  began say(text="No lantern on me, Pell — just boots and a spear." target=7), 5 ticks
       face #1 east
@@ -574,32 +574,32 @@ t=160  Pell   has not decided yet, and waits in the world
 the model cast's turns -- 70 questions across 5 characters, 67 chose an action
   who    turn asked answered  observed          the model said                 which read back as           what the engine answered
   Rook   1        1        4  61c4c589e491b02a  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0  (chosen again after 1 interruption)
-  Bram   1        1        4  e93b8c696aa47b56  say text=Hail, traveler. Who … say(text=Hail, traveler. Wh… say ok shout=false heard_by=1
-  Sable  1        1        4  60b5070aee3adb9b  say text=Hail, traveler. targ… say(text=Hail, traveler. ta… say ok shout=false heard_by=1
+  Bram   1        1        4  e93b8c696aa47b56  say text=Hail, traveler. Who … say(text=Hail, traveler. Wh… say ok shout=false heard_by=1 check=2 context=persuade:#4
+  Sable  1        1        4  60b5070aee3adb9b  say text=Hail, traveler. targ… say(text=Hail, traveler. ta… say ok shout=false heard_by=1 check=3 context=persuade:#3
   Odo    1        1        4  0cb1af14149ac60d  recall about=nothing           recall about=nothing         (a tool, not an action: 0 things came back)
   Pell   1        1        4  da01965695421602  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
   Odo    2        5        8  0cb1af14149ac60d  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-481.300, 472.000) walked=2.7 steps=3
-  Bram   2        9       12  a5565d0b4553dfba  say text=Well met. What bring… say(text=Well met. What bri… say ok shout=false heard_by=1
-  Sable  2        9       12  04ff79faf93ef276  say text=I am Sable, a travel… say(text=I am Sable, a trav… say ok shout=false heard_by=1
-  Rook   2       10       13  f94ee50c93e01494  say text=good morning, Wren t… say(text=good morning, Wren… say ok shout=false heard_by=1
+  Bram   2        9       12  a5565d0b4553dfba  say text=Well met. What bring… say(text=Well met. What bri… say ok shout=false heard_by=1 check=4 context=persuade:#4
+  Sable  2        9       12  04ff79faf93ef276  say text=I am Sable, a travel… say(text=I am Sable, a trav… say ok shout=false heard_by=1 check=5 context=persuade:#3
+  Rook   2       10       13  f94ee50c93e01494  say text=good morning, Wren t… say(text=good morning, Wren… say ok shout=false heard_by=1 check=6 context=persuade:#1
   Bram   3       17       20  0b6cf8ed6d98d037  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=26
-  Sable  3       17       20  77f227af355de719  say text=I am headed north, e… say(text=I am headed north,… say ok shout=false heard_by=1
+  Sable  3       17       20  77f227af355de719  say text=I am headed north, e… say(text=I am headed north,… say ok shout=false heard_by=1 check=7 context=persuade:#3
   Rook   3       18       21  949d26b7bf0b2563  say text=a fine morning for i… say(text=a fine morning for… say ok shout=true heard_by=2
-  Bram   4       23       26  2ec3487242ab5689  say text="I am Bram, a swords… say(text="I am Bram, a swor… say ok shout=false heard_by=1
+  Bram   4       23       26  2ec3487242ab5689  say text="I am Bram, a swords… say(text="I am Bram, a swor… say ok shout=false heard_by=1 check=8 context=persuade:#4
   Pell   2       24       27  6691baa39941b7bb  pick_up item=brass lantern ta… pick_up(item=brass lantern … pick_up refused: the pile is out of reach (6.65 > 2.50)
-  Sable  4       25       28  1285ec0c0bfb5683  say text="Just exploring nort… say(text="Just exploring no… say ok shout=false heard_by=1  (chosen again after 1 interruption)
-  Rook   4       26       29  54ccd819ac9c2216  say text="and a fine morning … say(text="and a fine mornin… say ok shout=false heard_by=1
+  Sable  4       25       28  1285ec0c0bfb5683  say text="Just exploring nort… say(text="Just exploring no… say ok shout=false heard_by=1 check=10 context=persuade:#3  (chosen again after 1 interruption)
+  Rook   4       26       29  54ccd819ac9c2216  say text="and a fine morning … say(text="and a fine mornin… say ok shout=false heard_by=1 check=9 context=persuade:#1
   Odo    3       28       31  c8739c0139aac4ef  explore east                   -- nothing readable --       (nothing was chosen)
-  Pell   3       30       33  a31c8ef97e89fc44  say text="a fine morning inde… say(text="a fine morning in… say ok shout=false heard_by=1
+  Pell   3       30       33  a31c8ef97e89fc44  say text="a fine morning inde… say(text="a fine morning in… say ok shout=false heard_by=1 check=11 context=persuade:#2
   Bram   5       31       34  decd107d90f7f0c4  go_to target=#6                go_to(target=6)              go_to ok at=(-469.122, 415.517) walked=32.4 steps=36  (chosen again after 1 interruption)
   Odo    4       32       35  c8739c0139aac4ef  go_to offset=(0.0, -3.0)       go_to(offset=(0.000, -3.000… go_to ok at=(-481.300, 469.300) walked=2.7 steps=3
-  Rook   5       34       37  1ad670f3e115a6a3  say text="what brings you out… say(text="what brings you o… say ok shout=false heard_by=1  (chosen again after 1 interruption)
+  Rook   5       34       37  1ad670f3e115a6a3  say text="what brings you out… say(text="what brings you o… say ok shout=false heard_by=1 check=12 context=persuade:#1  (chosen again after 1 interruption)
   Sable  5       36       39  bb0d71a5eb830f18  say text="A pile of goods eas… say(text="A pile of goods e… say refused: Bram is out of earshot (20.84 > 20.00)
   Pell   4       38       41  16616a5fc9391e43  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=6.652
-  Rook   6       43       46  15ae2b3d42452cce  say text="I asked first, Wren… say(text="I asked first, Wr… say ok shout=false heard_by=1
+  Rook   6       43       46  15ae2b3d42452cce  say text="I asked first, Wren… say(text="I asked first, Wr… say ok shout=false heard_by=1 check=13 context=persuade:#1
   Sable  6       44       47  4aca8a28873caacb  say text=A pile of goods, you… say(text=A pile of goods, y… say refused: Bram is out of earshot (27.98 > 20.00)
   Pell   5       45       48  7c0313c363ac6f0d  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=6.652
-  Rook   7       51       54  c8962c556f0d522c  say text="still waiting on yo… say(text="still waiting on … say ok shout=false heard_by=1  (chosen again after 1 interruption)
+  Rook   7       51       54  c8962c556f0d522c  say text="still waiting on yo… say(text="still waiting on … say ok shout=false heard_by=1 check=14 context=persuade:#1  (chosen again after 1 interruption)
   Sable  7       52       55  efab68bf61febfad  go_to target=#3                go_to(target=3)              go_to ok at=(-467.335, 415.180) walked=44.099 steps=49
   Pell   6       52       55  6466b88d0040a997  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.906  (chosen again after 1 interruption)
   Odo    5       55       58  36615dbb6f162d58  go_to offset=(0.0, 3.0)        go_to(offset=(0.000, 3.000)) go_to ok at=(-481.300, 472.000) walked=2.7 steps=3
@@ -607,8 +607,8 @@ the model cast's turns -- 70 questions across 5 characters, 67 chose an action
   Bram   7       63       67  311e8152a68a4227  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=1.581
   Pell   7       64       68  67839551647bea15  go_to target=#6                go_to(target=6)              go_to refused: the board decides where a fighter goes
   Rook   8       66       70  f1f816c7989998af  wait ticks=2                   wait(ticks=2)                wait ok ticks=2 until=74
-  Bram   8       71       75  352fd4c5df6d4770  say text="Safe travels, Sable… say(text="Safe travels, Sab… say ok shout=false heard_by=1
-  Rook   9       74       78  9c587ab0cd92632e  say text="well, if no one wil… say(text="well, if no one w… say ok shout=false heard_by=1
+  Bram   8       71       75  352fd4c5df6d4770  say text="Safe travels, Sable… say(text="Safe travels, Sab… say ok shout=false heard_by=1 check=15 context=persuade:#4
+  Rook   9       74       78  9c587ab0cd92632e  say text="well, if no one wil… say(text="well, if no one w… say ok shout=false heard_by=1 check=16 context=persuade:#1
   Sable  8       75       78  062a53e8b4a84904  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=3.756  (chosen again after 1 interruption)
   Odo    6       78       81  fa8682cd51a57fad  wait ticks=1                   wait(ticks=1)                wait ok ticks=1 until=83
   Odo    7       82       85  fa8682cd51a57fad  go_to offset=(0, 6)            go_to(offset=(0.000, 6.000)) go_to ok at=(-481.300, 478.000) walked=6.0 steps=7
@@ -616,7 +616,7 @@ the model cast's turns -- 70 questions across 5 characters, 67 chose an action
   Sable  9       84       87  e497eef77342fcdd  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=3.756
   Rook   10      86       90  9d020f0b4728db9c  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.517
   Pell   8       88       92  9695e27562c46368  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.906
-  Sable  10      91       94  4e4f051ff5223701  say text="Safe travels, Bram.… say(text="Safe travels, Bra… say ok shout=false heard_by=1
+  Sable  10      91       94  4e4f051ff5223701  say text="Safe travels, Bram.… say(text="Safe travels, Bra… say ok shout=false heard_by=1 check=17 context=persuade:#3
   Bram   10      91       95  f1798cfbdbde2a47  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=1.581
   Rook   11      94       98  7f95ddda64ea4648  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.517
   Pell   9       96      100  f4c0908f77a5152c  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.906
@@ -628,17 +628,17 @@ the model cast's turns -- 70 questions across 5 characters, 67 chose an action
   Sable  12     106      109  7a7123410bddc985  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
   Bram   12     107      111  6b6625f8273548bc  examine target=#6              examine(target=6)            examine refused: there is nothing with id 6
   Rook   13     110      114  b0ea538b26074ee2  go_to target=#6                go_to(target=6)              go_to refused: the board decides where a fighter goes
-  Pell   11     112      116  160ac4c53ff2bf0a  say text=good morning, strang… say(text=good morning, stra… say ok shout=false heard_by=1
+  Pell   11     112      116  160ac4c53ff2bf0a  say text=good morning, strang… say(text=good morning, stra… say ok shout=false heard_by=1 check=18 context=persuade:#3
   Bram   13     115      119  583c0d387725daf6  recall about=pile of goods ea… recall about=pile of goods … (a tool, not an action: 6 things came back)
   Bram   14     123      127  59eaae5d84b3515e  examine target=#6              examine(target=6)            examine refused: there is nothing with id 6
-  Pell   12     124      128  7432eab96fd6c463  say text="good morning, stran… say(text="good morning, str… say ok shout=false heard_by=1
+  Pell   12     124      128  7432eab96fd6c463  say text="good morning, stran… say(text="good morning, str… say ok shout=false heard_by=1 check=19 context=persuade:#4
   Odo    9      128      131  d63dec68d799e0cc  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-478.600, 475.300) walked=2.7 steps=3
   Sable  13     129      132  0a340f79096eb8a0  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6  (chosen again after 1 interruption)
   Bram   15     131      135  983c28974c1ea0d4  go_to target=#7                go_to(target=7)              go_to refused: the board decides where a fighter goes
   Rook   14     134      138  0621e114b4dae599  examine target=#6              examine(target=6)            examine refused: there is nothing with id 6
   Pell   13     136      140  e1985f247d93e987  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=146
-  Rook   15     142      146  652aef3a5c066866  say text="Pell, good to see y… say(text="Pell, good to see… say ok shout=false heard_by=1
-  Pell   14     144      148  5c962a07269df61d  say text="Anyone? I'm after a… say(text="Anyone? I'm after… say ok shout=false heard_by=1  (chosen again after 1 interruption)
+  Rook   15     142      146  652aef3a5c066866  say text="Pell, good to see y… say(text="Pell, good to see… say ok shout=false heard_by=1 check=20 context=persuade:#7
+  Pell   14     144      148  5c962a07269df61d  say text="Anyone? I'm after a… say(text="Anyone? I'm after… say ok shout=false heard_by=1 check=21 context=persuade:#4  (chosen again after 1 interruption)
   Odo    10     151      154  bf7ad0688e4464eb  go_to offset=(2.1, 0.0)        go_to(offset=(2.100, 0.000)) still running when the run ended
   Sable  14     153      156  300d788e65846163  say text="No lantern on me, P… say(text="No lantern on me,… still running when the run ended
   Rook   16     154      158  fdd8f4f2254beee1  say text="that 'fair bargain'… say(text="that 'fair bargai… still running when the run ended
@@ -869,6 +869,27 @@ after 160 ticks
         carries money=0 carried=[] worn=[]
       #7 commander band=1 at (-478.500, -2.106, 418.500) hp=32/32 cell (-160,139)
         carries money=9 carried=[] worn=[]
+      check #1 persuade:#2 -- raised
+      check #2 persuade:#4 -- raised
+      check #3 persuade:#3 -- raised
+      check #4 persuade:#4 -- raised
+      check #5 persuade:#3 -- raised
+      check #6 persuade:#1 -- raised
+      check #7 persuade:#3 -- raised
+      check #8 persuade:#4 -- raised
+      check #9 persuade:#1 -- raised
+      check #10 persuade:#3 -- raised
+      check #11 persuade:#2 -- raised
+      check #12 persuade:#1 -- raised
+      check #13 persuade:#1 -- raised
+      check #14 persuade:#1 -- raised
+      check #15 persuade:#4 -- raised
+      check #16 persuade:#1 -- raised
+      check #17 persuade:#3 -- raised
+      check #18 persuade:#3 -- raised
+      check #19 persuade:#4 -- raised
+      check #20 persuade:#7 -- raised
+      check #21 persuade:#4 -- raised
       said #1 to #2 "good morning" heard by [2]
       said #3 to #4 "Hail, traveler. Who are you?" heard by [4]
       said #4 to #3 "Hail, traveler." heard by [3]
@@ -893,7 +914,7 @@ after 160 ticks
       said #2 to #7 ""Pell, good to see you — anyone care to tell me what that pile over there is about?"" heard by [7]
       said #7 to #4 ""Anyone? I'm after a brass lantern — happy to pay."" heard by [4]
   reviews=63 changes=0 finished=71 attacked=0 combat began=3 spoken to=14
-  fingerprint 8335b2064451a66b
+  fingerprint b7ef4553d8a24b8f
 
 the first question in full -- 3548 characters, digest aae16d1fbba77319
 

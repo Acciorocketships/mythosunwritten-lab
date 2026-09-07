@@ -126,7 +126,7 @@ the walker is still walking after it.
 
 ```
   t=  3  Wren   began say(text=a word with you target=1), 5 ticks
-  t=  8  Wren   finished say(...) -> say ok shout=false heard_by=1
+  t=  8  Wren   finished say(...) -> say ok shout=false heard_by=1 check=1 context=persuade:#1
   t=  8  Rook   interrupted (spoken to), abandoned go_to(...) 7/20t
   Rook never arrived: still at (-480.000, 420.000)
 ```

@@ -519,9 +519,29 @@ static func _say(
 		"speaker": actor.id, "text": text, "to": to_id,
 		"shout": to_id == ActionCatalog.NOBODY, "heard_by": heard,
 	})
-	return ActionOutcome.done(action.kind, {
+	var said := {
 		"shout": to_id == ActionCatalog.NOBODY, "heard_by": heard.size(),
-	})
+	}
+
+	# --- The other hook. See `AbilityCheck.TALK_HOOK`. ---
+	#
+	# A line addressed to one character is an attempt to win that character
+	# round, and section 6 says that is possible but deliberately hard. So the
+	# engine raises a check on it and says so, and settling it is somebody
+	# else's, later. Nothing here waits for it and nothing here is refused by it:
+	# the words were said, they were heard, and they are already on the world's
+	# record above. What the check decides is only what they earn.
+	#
+	# A shout raises none -- it is addressed to nobody in particular -- and
+	# neither does a line to anything that keeps no sheet, because the class is
+	# read off one.
+	var listener := scene.actor_of(to_id)
+	if to_id != ActionCatalog.NOBODY and _sheet_of(listener) != null \
+			and _sheet_of(actor) != null:
+		var check := scene.raise_talk_check(actor, listener, text)
+		said["check"] = check.id
+		said["context"] = check.context
+	return ActionOutcome.done(action.kind, said)
 
 
 # --- trade ----------------------------------------------------------------

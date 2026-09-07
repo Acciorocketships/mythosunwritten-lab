@@ -118,6 +118,12 @@ static func settle(
 			continue
 		var answer := met(goal, scene, actor)
 		if not bool(answer["met"]):
+			# The world has looked at this one and said not yet, so the moment it
+			# said so is written on the goal. Nothing here reads it: it is for
+			# whatever later wants to know the window the goal was open over, and
+			# it is stamped here because this is the world's own looking and the
+			# only place there is one.
+			goal.open_at = scene.tick
 			continue
 		if goals.close(goal.id, String(answer["how"]), scene.tick):
 			closed.append({"goal": goal, "how": String(answer["how"])})

@@ -33,10 +33,10 @@ extends RefCounted
 ##     `Observation` of that character's own surroundings. What an observation
 ##     holds is `sim/observation.gd`'s business and what is worth writing down is
 ##     `sim/character_memory.gd`'s.
-##   * `RelationshipGraph.heard/traded/struck()` move the edges between whoever
+##   * `RelationshipGraph.heard/traded/favoured/struck()` move the edges between whoever
 ##     something has just passed between. Which field a blow moves, and by how
 ##     much, is `sim/relationship_graph.gd`'s and there is not a number of it
-##     here; what is here is the reading of the world's three records that says a
+##     here; what is here is the reading of the world's four records that says a
 ##     blow happened at all.
 ##
 ## What is left for this file is the cadence, which is the one thing a store's
@@ -63,8 +63,8 @@ extends RefCounted
 ## **The graph takes in everything the world has written down since it was last
 ## looked at, at every servicing.** Not once per character and not once per
 ## character *pair*: a happening has two ends and folding it per character would
-## fold it twice, so what is folded is the world's own three records --
-## `ActionScene.said`, `.trades` and `.blows` -- from wherever the graph had got
+## fold it twice, so what is folded is the world's own four records --
+## `ActionScene.said`, `.trades`, `.favours` and `.blows` -- from wherever the graph had got
 ## to, and the mark saying where that is lives on the graph. That is what makes
 ## it come to the same thing whoever is serviced, in whichever order, however
 ## many upkeeps a run happens to make: one thing that happened is one move of one
@@ -159,7 +159,7 @@ func serve(scene: ActionScene, actor: Combatant) -> Dictionary:
 ## Fold everything the world has written down since the graph last looked into
 ## the graph, and say how many edge-moves that came to.
 ##
-## The three loops below are the whole of it, and each of them reads one of the
+## The four loops below are the whole of it, and each of them reads one of the
 ## world's own records from the mark the graph itself carries. Nothing here
 ## decides what a happening *means*: every call is `RelationshipGraph`'s, and
 ## every number is that file's or the world's.
@@ -168,6 +168,11 @@ func serve(scene: ActionScene, actor: Combatant) -> Dictionary:
 ## people is four people who have now heard this character speak; the engine
 ## already worked out who those are and wrote them into `heard_by`, and there is
 ## no second opinion about earshot here any more than there is in an observation.
+##
+## The fourth record, `ActionScene.favours`, is section 6's goodwill: a share a
+## model judged, already read and bounded by `Goodwill` before it was written
+## down. It is folded here for the same reason the other three are, and it is why
+## the two desks that ask that question never name the relationship graph.
 func fold(scene: ActionScene) -> int:
 	if scene == null:
 		return 0
@@ -191,6 +196,14 @@ func fold(scene: ActionScene) -> int:
 			int(swapped["from"]), int(swapped["to"]),
 			int(swapped.get("gave", 0)), int(swapped.get("gave_money", 0)),
 			int(swapped.get("back", 0)), int(swapped.get("back_money", 0))
+		) != null:
+			moved += 1
+	while graph.favoured_taken < scene.favours.size():
+		var earned: Dictionary = scene.favours[graph.favoured_taken]
+		graph.favoured_taken += 1
+		if graph.favoured(
+			int(earned["doer"]), int(earned["wanted_by"]),
+			float(earned["share"]), String(earned["what"])
 		) != null:
 			moved += 1
 	while graph.struck_taken < scene.blows.size():

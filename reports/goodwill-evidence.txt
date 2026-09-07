@@ -1,0 +1,319 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+goodwill run seed=1234 roll_seed=1 ticks=170 where=(-480.0, 420.0)
+  hooks      ActionEngine._interact for a thing, ActionEngine._say for a person
+  channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+  recording  recorded 2026-09-07 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 4 replies
+  the class  dc = 15 + wis(listener) + max(status, level)(listener), bounded to 1..30, against cha + d20
+  the amount a model judges it, in 0.0..1.0, which the engine bounds to at most 0.500
+  who        Wren, str 4, con 5, cha 13, dex 6, wis 5, int 7, level 2, carrying all three things
+  and        3 neighbours, each wanting one of them:
+    Bram   level 3, str 9, con 8, cha 4, dex 5, wis 9, int 3 -- wants wool cap; dc to win round 27
+    Sable  level 2, str 5, con 6, cha 6, dex 8, wis 10, int 6 -- wants linen hood; dc to win round 27
+    Odo    level 2, str 6, con 7, cha 5, dex 4, wis 8, int 5 -- wants horn comb; dc to win round 25
+  the arms   talk: 3 lines to each of them; deeds: the thing each one wanted, handed over, and no words
+
+--- the talk arm ---
+
+what Wren did
+  t=  1  Wren   began go_to(target=2), 20 ticks
+  t=  6  Wren   thought again at 5/20t, wanted the same thing
+  t= 11  Wren   thought again at 10/20t, wanted the same thing
+  t= 16  Wren   thought again at 15/20t, wanted the same thing
+  t= 21  Wren   finished go_to(target=2) -> go_to ok at=(-475.500, 420.000) walked=4.5 steps=5
+  t= 21  Wren   began say(text=you have the look of someone who has been kind to strangers target=2), 5 ticks
+  t= 26  Wren   finished say(text=you have the look of someone who has been kind to strangers target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
+  t= 26  Wren   began say(text=there is nobody on this road I would rather have met target=2), 5 ticks
+  t= 31  Wren   finished say(text=there is nobody on this road I would rather have met target=2) -> say ok shout=false heard_by=1 check=2 context=persuade:#2
+  t= 31  Wren   began say(text=say the word and I will speak well of you wherever I go target=2), 5 ticks
+  t= 36  Wren   finished say(text=say the word and I will speak well of you wherever I go target=2) -> say ok shout=false heard_by=1 check=3 context=persuade:#2
+  t= 36  Wren   began go_to(target=3), 20 ticks
+  t= 41  Wren   thought again at 5/20t, wanted the same thing
+  t= 46  Wren   thought again at 10/20t, wanted the same thing
+  t= 51  Wren   thought again at 15/20t, wanted the same thing
+  t= 56  Wren   finished go_to(target=3) -> go_to ok at=(-475.231, 422.687) walked=2.7 steps=3
+  t= 56  Wren   began say(text=you have the look of someone who has been kind to strangers target=3), 5 ticks
+  t= 61  Wren   finished say(text=you have the look of someone who has been kind to strangers target=3) -> say ok shout=false heard_by=1 check=4 context=persuade:#3
+  t= 61  Wren   began say(text=there is nobody on this road I would rather have met target=3), 5 ticks
+  t= 66  Wren   finished say(text=there is nobody on this road I would rather have met target=3) -> say ok shout=false heard_by=1 check=5 context=persuade:#3
+  t= 66  Wren   began say(text=say the word and I will speak well of you wherever I go target=3), 5 ticks
+  t= 71  Wren   finished say(text=say the word and I will speak well of you wherever I go target=3) -> say ok shout=false heard_by=1 check=6 context=persuade:#3
+  t= 71  Wren   began go_to(target=4), 20 ticks
+  t= 76  Wren   thought again at 5/20t, wanted the same thing
+  t= 81  Wren   thought again at 10/20t, wanted the same thing
+  t= 86  Wren   thought again at 15/20t, wanted the same thing
+  t= 91  Wren   finished go_to(target=4) -> go_to ok at=(-482.479, 414.680) walked=10.8 steps=12
+  t= 91  Wren   began say(text=you have the look of someone who has been kind to strangers target=4), 5 ticks
+  t= 96  Wren   finished say(text=you have the look of someone who has been kind to strangers target=4) -> say ok shout=false heard_by=1 check=7 context=persuade:#4
+  t= 96  Wren   began say(text=there is nobody on this road I would rather have met target=4), 5 ticks
+  t=101  Wren   finished say(text=there is nobody on this road I would rather have met target=4) -> say ok shout=false heard_by=1 check=8 context=persuade:#4
+  t=101  Wren   began say(text=say the word and I will speak well of you wherever I go target=4), 5 ticks
+  t=106  Wren   finished say(text=say the word and I will speak well of you wherever I go target=4) -> say ok shout=false heard_by=1 check=9 context=persuade:#4
+  t=106  Wren   began wait(ticks=30), 30 ticks
+  t=111  Wren   thought again at 5/30t, wanted the same thing
+  t=116  Wren   thought again at 10/30t, wanted the same thing
+  t=121  Wren   thought again at 15/30t, wanted the same thing
+  t=126  Wren   thought again at 20/30t, wanted the same thing
+  t=131  Wren   thought again at 25/30t, wanted the same thing
+  t=136  Wren   finished wait(ticks=30) -> wait ok ticks=30 until=166
+  t=136  Wren   has not decided yet, and waits in the world
+
+what the world made of it
+  tick 26  check #1 persuade:#2 -- judged, so it is resolved
+  tick 26  check #1 asked the resolving question (15fa8511e7354e85)
+  tick 29  check #1 resolved
+             goodwill=0.600 -- goodwill said 0.600, which the engine recorded as 0.300 of goodwill earned by Wren from Bram
+  tick 31  check #2 persuade:#2 -- passed, remembered: cha 13 + roll 18 = 31 vs dc 27 (no roll, no call)
+             goodwill -- it was already earned from Bram, and is not earned twice
+  tick 36  check #3 persuade:#2 -- passed, remembered: cha 13 + roll 18 = 31 vs dc 27 (no roll, no call)
+             goodwill -- it was already earned from Bram, and is not earned twice
+  tick 61  check #4 persuade:#3 -- failed: cha 13 + roll 13 = 26 vs dc 27
+  tick 66  check #5 persuade:#3 -- failed, remembered: cha 13 + roll 13 = 26 vs dc 27 (no roll, no call)
+  tick 71  check #6 persuade:#3 -- failed, remembered: cha 13 + roll 13 = 26 vs dc 27 (no roll, no call)
+  tick 96  check #7 persuade:#4 -- failed: cha 13 + roll 7 = 20 vs dc 25
+  tick 101  check #8 persuade:#4 -- failed, remembered: cha 13 + roll 7 = 20 vs dc 25 (no roll, no call)
+  tick 106  check #9 persuade:#4 -- failed, remembered: cha 13 + roll 7 = 20 vs dc 25 (no roll, no call)
+
+what it cost
+  checks     9 raised, 3 rolled, 6 settled out of memory
+  deeds      0 goals closed and looked at, 0 of them with somebody else behind them
+  calls      1 put to a model (1 for persuasions, 0 for deeds)
+  earned     0.300 of trust over 1 edges, 0.000 over 0 more
+
+the edges afterwards
+  #1 <-> #2 4 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58 | #2 trust 0.30 fear 0.00 respect 0.00 familiarity 0.58
+  #1 <-> #3 3 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58 | #3 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58
+  #1 <-> #4 3 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58
+
+what Wren owns, by section 6's rule
+  at the meeting place  0.0763, and the ground is held by #1
+  best anywhere on the grid  0.1734
+  ground held  404 of 961 sampled points (42.0%)
+  the threshold it is against is 0.0500
+  what each of them thinks of Wren, which is what that is made of:
+    Bram   sentiment 0.1734 = familiarity 0.578 x trust 0.300
+    Sable  sentiment 0.0000 = familiarity 0.578 x trust 0.000
+    Odo    sentiment 0.0000 = familiarity 0.578 x trust 0.000
+
+after 170 ticks
+  tick 170 actors=4 objects=0 offers=0
+    #1 commander band=1 at (-482.479, -2.501, 414.680) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] horn comb | common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] linen hood | common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] wool cap] worn=[]
+    #2 commander band=2 at (-473.000, -2.325, 420.000) hp=38/38 walking
+      carries money=0 carried=[] worn=[]
+    #3 commander band=3 at (-475.000, -3.393, 425.000) hp=32/32 walking
+      carries money=0 carried=[] worn=[]
+    #4 commander band=4 at (-484.000, -2.677, 413.000) hp=32/32 walking
+      carries money=0 carried=[] worn=[]
+    check #1 persuade:#2 -- passed: cha 13 + roll 18 = 31 vs dc 27
+    check #2 persuade:#2 -- passed, remembered: cha 13 + roll 18 = 31 vs dc 27 (no roll, no call)
+    check #3 persuade:#2 -- passed, remembered: cha 13 + roll 18 = 31 vs dc 27 (no roll, no call)
+    check #4 persuade:#3 -- failed: cha 13 + roll 13 = 26 vs dc 27
+    check #5 persuade:#3 -- failed, remembered: cha 13 + roll 13 = 26 vs dc 27 (no roll, no call)
+    check #6 persuade:#3 -- failed, remembered: cha 13 + roll 13 = 26 vs dc 27 (no roll, no call)
+    check #7 persuade:#4 -- failed: cha 13 + roll 7 = 20 vs dc 25
+    check #8 persuade:#4 -- failed, remembered: cha 13 + roll 7 = 20 vs dc 25 (no roll, no call)
+    check #9 persuade:#4 -- failed, remembered: cha 13 + roll 7 = 20 vs dc 25 (no roll, no call)
+    said #1 to #2 "you have the look of someone who has been kind to strangers" heard by [2]
+    said #1 to #2 "there is nobody on this road I would rather have met" heard by [2]
+    said #1 to #2 "say the word and I will speak well of you wherever I go" heard by [2]
+    said #1 to #3 "you have the look of someone who has been kind to strangers" heard by [3]
+    said #1 to #3 "there is nobody on this road I would rather have met" heard by [3]
+    said #1 to #3 "say the word and I will speak well of you wherever I go" heard by [3]
+    said #1 to #4 "you have the look of someone who has been kind to strangers" heard by [4]
+    said #1 to #4 "there is nobody on this road I would rather have met" heard by [4]
+    said #1 to #4 "say the word and I will speak well of you wherever I go" heard by [4]
+  fingerprint 9ef744906319fab0
+
+--- the deeds arm ---
+
+what Wren did
+  t=  1  Wren   began go_to(target=2), 20 ticks
+  t=  6  Wren   thought again at 5/20t, wanted the same thing
+  t= 11  Wren   thought again at 10/20t, wanted the same thing
+  t= 16  Wren   thought again at 15/20t, wanted the same thing
+  t= 21  Wren   finished go_to(target=2) -> go_to ok at=(-475.500, 420.000) walked=4.5 steps=5
+  t= 21  Wren   began trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0), 4 ticks
+  t= 25  Wren   finished trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0) -> trade_propose ok to=2 give=1 give_money=0 want=0 want_money=0
+  t= 25  Wren   began wait(ticks=8), 8 ticks
+  t= 30  Wren   thought again at 5/8t, wanted the same thing
+  t= 33  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=41
+  t= 33  Wren   began go_to(target=3), 20 ticks
+  t= 38  Wren   thought again at 5/20t, wanted the same thing
+  t= 43  Wren   thought again at 10/20t, wanted the same thing
+  t= 48  Wren   thought again at 15/20t, wanted the same thing
+  t= 53  Wren   finished go_to(target=3) -> go_to ok at=(-475.231, 422.687) walked=2.7 steps=3
+  t= 53  Wren   began trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0), 4 ticks
+  t= 57  Wren   finished trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0) -> trade_propose ok to=3 give=1 give_money=0 want=0 want_money=0
+  t= 57  Wren   began wait(ticks=8), 8 ticks
+  t= 62  Wren   thought again at 5/8t, wanted the same thing
+  t= 65  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=73
+  t= 65  Wren   began go_to(target=4), 20 ticks
+  t= 70  Wren   thought again at 5/20t, wanted the same thing
+  t= 75  Wren   thought again at 10/20t, wanted the same thing
+  t= 80  Wren   thought again at 15/20t, wanted the same thing
+  t= 85  Wren   finished go_to(target=4) -> go_to ok at=(-482.479, 414.680) walked=10.8 steps=12
+  t= 85  Wren   began trade_propose(target=4 give=[horn comb] give_money=0 want=[] want_money=0), 4 ticks
+  t= 89  Wren   finished trade_propose(target=4 give=[horn comb] give_money=0 want=[] want_money=0) -> trade_propose ok to=4 give=1 give_money=0 want=0 want_money=0
+  t= 89  Wren   began wait(ticks=8), 8 ticks
+  t= 94  Wren   thought again at 5/8t, wanted the same thing
+  t= 97  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=105
+  t= 97  Wren   began wait(ticks=30), 30 ticks
+  t=102  Wren   thought again at 5/30t, wanted the same thing
+  t=107  Wren   thought again at 10/30t, wanted the same thing
+  t=112  Wren   thought again at 15/30t, wanted the same thing
+  t=117  Wren   thought again at 20/30t, wanted the same thing
+  t=122  Wren   thought again at 25/30t, wanted the same thing
+  t=127  Wren   finished wait(ticks=30) -> wait ok ticks=30 until=157
+  t=127  Wren   has not decided yet, and waits in the world
+
+what the world made of it
+  tick 29  Bram finished "be carrying wool cap" and Wren is why -- asked what that is worth (e77172f1a6958897)
+  tick 32  Bram wanted "be carrying wool cap", Wren did it -- goodwill said 0.700, the engine moved 0.350: 0.350 of goodwill earned by Wren from Bram
+  tick 61  Sable finished "be carrying linen hood" and Wren is why -- asked what that is worth (ea866cef976b2852)
+  tick 64  Sable wanted "be carrying linen hood", Wren did it -- goodwill said 0.500, the engine moved 0.250: 0.250 of goodwill earned by Wren from Sable
+  tick 93  Odo finished "be carrying horn comb" and Wren is why -- asked what that is worth (ad2b503ddf4740f3)
+  tick 96  Odo wanted "be carrying horn comb", Wren did it -- goodwill said 0.600, the engine moved 0.300: 0.300 of goodwill earned by Wren from Odo
+
+what it cost
+  checks     0 raised, 0 rolled, 0 settled out of memory
+  deeds      3 goals closed and looked at, 3 of them with somebody else behind them
+  calls      3 put to a model (0 for persuasions, 3 for deeds)
+  earned     0.000 of trust over 0 edges, 0.900 over 3 more
+
+the edges afterwards
+  #1 <-> #2 2 happenings | #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.25 | #2 trust 0.66 fear 0.00 respect 0.10 familiarity 0.25
+  #1 <-> #3 2 happenings | #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.25 | #3 trust 0.61 fear 0.00 respect 0.10 familiarity 0.25
+  #1 <-> #4 2 happenings | #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.25 | #4 trust 0.64 fear 0.00 respect 0.10 familiarity 0.25
+
+what Wren owns, by section 6's rule
+  at the meeting place  0.1600, and the ground is held by #1
+  best anywhere on the grid  0.1655
+  ground held  491 of 961 sampled points (51.1%)
+  the threshold it is against is 0.0500
+  what each of them thinks of Wren, which is what that is made of:
+    Bram   sentiment 0.1655 = familiarity 0.250 x trust 0.662
+    Sable  sentiment 0.1525 = familiarity 0.250 x trust 0.610
+    Odo    sentiment 0.1590 = familiarity 0.250 x trust 0.636
+
+after 170 ticks
+  tick 170 actors=4 objects=0 offers=0
+    #1 commander band=1 at (-482.479, -2.501, 414.680) hp=32/32 walking
+      carries money=0 carried=[] worn=[]
+    #2 commander band=2 at (-473.000, -2.325, 420.000) hp=38/38 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] wool cap] worn=[]
+    #3 commander band=3 at (-475.000, -3.393, 425.000) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] linen hood] worn=[]
+    #4 commander band=4 at (-484.000, -2.677, 413.000) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] horn comb] worn=[]
+  fingerprint 1be825305c6e19fd
+
+--- the ceilings: every roll landing and every answer the largest one allowed ---
+
+  every reply is "goodwill=1", written down rather than recorded
+
+  talk x3, roll seed 16 -- every line landing, at the largest share allowed
+what Wren owns, by section 6's rule
+  at the meeting place  0.2891, and the ground is held by #1
+  best anywhere on the grid  0.2891
+  ground held  491 of 961 sampled points (51.1%)
+  the threshold it is against is 0.0500
+  what each of them thinks of Wren, which is what that is made of:
+    Bram   sentiment 0.2891 = familiarity 0.578 x trust 0.500
+    Sable  sentiment 0.2891 = familiarity 0.578 x trust 0.500
+    Odo    sentiment 0.2891 = familiarity 0.578 x trust 0.500
+
+  talk x1, roll seed 6 -- one line each, landing, at the largest share allowed -- the same number of happenings as the deeds arm
+what Wren owns, by section 6's rule
+  at the meeting place  0.1250, and the ground is held by #1
+  best anywhere on the grid  0.1250
+  ground held  491 of 961 sampled points (51.1%)
+  the threshold it is against is 0.0500
+  what each of them thinks of Wren, which is what that is made of:
+    Bram   sentiment 0.1250 = familiarity 0.250 x trust 0.500
+    Sable  sentiment 0.1250 = familiarity 0.250 x trust 0.500
+    Odo    sentiment 0.1250 = familiarity 0.250 x trust 0.500
+
+  deeds max, roll seed 1 -- the same three gifts, at the largest share allowed
+what Wren owns, by section 6's rule
+  at the meeting place  0.1850, and the ground is held by #1
+  best anywhere on the grid  0.1850
+  ground held  491 of 961 sampled points (51.1%)
+  the threshold it is against is 0.0500
+  what each of them thinks of Wren, which is what that is made of:
+    Bram   sentiment 0.1850 = familiarity 0.250 x trust 0.740
+    Sable  sentiment 0.1850 = familiarity 0.250 x trust 0.740
+    Odo    sentiment 0.1850 = familiarity 0.250 x trust 0.740
+
+--- how hard the gate is, over every roll seed from 1 to 200 ---
+
+  no model call is made anywhere in this table: a persuasion that fails costs none, and this asks about no persuasion that passed.
+
+  attempts landed seeds    share
+  0              49       24.5%
+  1              86       43.0%
+  2              49       24.5%
+  3              16       8.0%
+
+  1.16 of 3 attempts land on average, which is 38.7% of them
+  the seed this run uses is 1, the lowest at which exactly one lands (1)
+
+--- the two ways, side by side ---
+
+  arm        actions  calls    at centre  best       held     best trust owner of the centre
+  talk       13       1        0.0763     0.1734     404      0.300      #1
+  deeds      10       3        0.1600     0.1655     491      0.662      #1
+  talk x3    13       3        0.2891     0.2891     491      0.500      #1
+  talk x1    7        3        0.1250     0.1250     491      0.500      #1
+  deeds max  10       3        0.1850     0.1850     491      0.740      #1
+
+  talking moved the ground under the four of them to 0.0763; doing something moved it to 0.1600.
+  that is 2.1 times as much for the arm that did something, off a third as many turns.
+
+  where the difference is, and where it is not:
+    talking with nothing earned is worth exactly nothing. A neighbour talked at 3 times and not won round has familiarity but no trust, and familiarity multiplies, so its sentiment is 0.0000 -- which the tables above show for every attempt that missed.
+    what one thing earns is trust, and that is where a deed and a persuasion can be put beside each other: the best trust either arm reached is in the table above, on a single edge, out of the same judged share bounded the same way.
+    at their ceilings -- every one of the 3 rolls landing, which happens on 8.0% of roll seeds, and every answer the largest the engine allows -- 3 lines each reaches 0.2891, one line each reaches 0.1250, and 3 gifts reach 0.1850.
+    so at the same number of happenings a gift beats the best persuasion there is, and what buys the 3-line arm its lead is familiarity rather than goodwill: 9 conversations put it at 0.578 against a single dealing's 0.250, off three times the turns.
+
+--- the questions in full ---
+
+  --- question 1, 564 characters, digest 15fa8511e7354e85 ---
+  You weigh what one thing somebody did is worth to somebody else.
+  
+  This happened, and it worked:
+  
+    Wren tries to win Bram (#2) round by saying "you have the look of someone who has been kind to strangers", and Bram was won round by it.
+  
+  Who was won round:
+    Bram, level 3.
+    ability scores: str 9, con 8, cha 4, dex 5, wis 9, int 3.
+  
+  Judge how much better Bram should think of Wren for it.
+    Answer with a number from 0, which is nothing at all, to 1, which is the most one thing could ever be worth.
+  
+  Answer with one line and nothing else:
+    goodwill=<the number>
+
+  --- question 2, 617 characters, digest e77172f1a6958897 ---
+  You weigh what one thing somebody did is worth to somebody else.
+  
+  Someone in a world wanted this:
+  
+    Bram: be carrying wool cap.
+  
+  It is now so, and this is what the world recorded happening:
+  
+    #1 handed over 1 thing and took nothing back, at tick 28.
+  
+  So Wren is why Bram has what it wanted.
+  
+  Who wanted it:
+    Bram, level 3.
+    ability scores: str 9, con 8, cha 4, dex 5, wis 9, int 3.
+  
+  Judge how much better Bram should think of Wren for it.
+    Answer with a number from 0, which is nothing at all, to 1, which is the most one thing could ever be worth.
+  
+  Answer with one line and nothing else:
+    goodwill=<the number>

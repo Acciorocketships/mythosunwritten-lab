@@ -16,28 +16,36 @@ extends RefCounted
 ##
 ## ## Nothing moves an edge but something that happened in the world
 ##
-## There are three writers on this file and each of them is the engine's own
+## There are four writers on this file and each of them is the engine's own
 ## record of a thing that actually happened:
 ##
-##   | writer     | the world's record it is folded from | what it is |
-##   |------------|--------------------------------------|------------|
-##   | `heard()`  | `ActionScene.said`                   | a line spoken, and who the engine says heard it |
-##   | `traded()` | `ActionScene.trades`                 | an exchange the engine honoured, gifts included |
-##   | `struck()` | `ActionScene.blows`                  | a blow the engine landed, and what it took |
+##   | writer       | the world's record it is folded from | what it is |
+##   |--------------|--------------------------------------|------------|
+##   | `heard()`    | `ActionScene.said`                   | a line spoken, and who the engine says heard it |
+##   | `traded()`   | `ActionScene.trades`                 | an exchange the engine honoured, gifts included |
+##   | `struck()`   | `ActionScene.blows`                  | a blow the engine landed, and what it took |
+##   | `favoured()` | `ActionScene.favours`                | section 6's two ways goodwill is earned -- see below |
 ##
-## Each of the three is written by `ActionEngine` on the one path that action
+## The first three are written by `ActionEngine` on the one path that action
 ## takes and by nothing else, so an edge cannot be moved by an intention, a
 ## claim, a proposal or a refusal -- only by an action the engine carried out. In
 ## particular a *proposed* trade moves nothing and a *denied* one moves nothing:
 ## an offer is a question, and questions are not what happened.
 ##
-## No model writes here. There is no operation in `WorldEffects` that names a
-## relationship, no tool in `ModelPrompt` that names one, and an answer that
-## names one is refused by the engine in the same words any unknown operation is
-## refused in -- shown on `./run_world.sh`. That is deliberate and it is the
-## whole point of the store being the world's: an edge is the record of what
-## happened, and a character that could write its own record could make anybody
-## love it by saying so.
+## No model writes here, and the fourth writer is no more of an exception than
+## the other three. It is folded from `ActionScene.favours`, which is the world's
+## own record of goodwill having been earned, written after a model judged a
+## number and `Goodwill` read it and bounded it. The two desks that put that
+## question to a model do not name this file at all -- they write the record and
+## stop -- so the path from a reply to an edge runs through exactly the same
+## place a blow's does. What a reply *says* -- that goodwill rose, that the two
+## are now friends -- moves nothing at all, because there is no path from prose
+## to this file. There is still no operation in `WorldEffects` that names a
+## relationship and no tool in `ModelPrompt` that names one; an answer that names
+## one is refused by the engine in the same words any unknown operation is
+## refused in, shown on `./run_world.sh`. That is the whole point of the store
+## being the world's: a character that could write its own record could make
+## anybody love it by saying so.
 ##
 ## ## The rules, one line each
 ##
@@ -55,6 +63,7 @@ extends RefCounted
 ##   | blow struck | the struck one's | fear | raise by the share of its full health the blow took |
 ##   | blow struck | the struck one's | trust | lower by `STRUCK_TRUST` |
 ##   | blow struck | the struck one's | respect | raise by `STRUCK_RESPECT` |
+##   | a deed, or a persuasion the engine rolled a success for | the one who wanted it, or the one won round | trust | raise by a share a model judged and the engine bounded |
 ##
 ## **Words move familiarity and nothing else, on purpose.** Section 6 says pure
 ## talk raising sentiment is "deliberately hard -- only truly novel diplomacy is
@@ -62,7 +71,19 @@ extends RefCounted
 ## with every "good morning" would be exactly the cheese that sentence forbids,
 ## and it would arrive before the check that is supposed to gate it. So talking
 ## does the one thing talking plainly does: the two now know each other somewhat.
-## Raising trust by *what was said* is a check, and it is the next work item.
+## Raising trust by *what was said* goes through `favoured()` below, and it gets
+## there only by way of a difficulty class the engine computed and a die the
+## engine rolled.
+##
+## **What `favoured()` decides here, and what it does not.** This file still
+## decides which field moves and at which end -- trust, at the end of the one who
+## wanted the thing or was won round, toward the one who did it -- and it still
+## decides the shape, which is `raise`, a share of what is left. What it does not
+## decide is the size of that share, and that is the one number in this file that
+## comes from outside. It arrives already read out of a reply and already bounded
+## by `Goodwill`, and it is refused here as well if it is outside what `Goodwill`
+## accepts, so the store cannot be moved by a number no reader of `Goodwill`
+## would have let through.
 ##
 ## **Being struck raises respect as well as fear.** A blow is a demonstration of
 ## what somebody can do, and respect here is a reading of capability rather than
@@ -138,6 +159,7 @@ const SAID_AT_MOST := 40
 var heard_taken: int = 0
 var traded_taken: int = 0
 var struck_taken: int = 0
+var favoured_taken: int = 0
 
 # Every edge, by `RelationshipEdge.key_for`. Insertion order, which is the order
 # the pairs first had anything to do with each other.
@@ -292,6 +314,34 @@ func struck(
 	edge.lower(struck_id, "trust", STRUCK_TRUST)
 	edge.raise(struck_id, "respect", STRUCK_RESPECT)
 	edge.note("#%d struck #%d for %d of %d" % [striker, struck_id, dealt, out_of])
+	return edge
+
+
+## A deed somebody wanted, or a persuasion the engine rolled a success for.
+##
+## `share` is the amount a model judged, already read and bounded by `Goodwill`;
+## anything outside what that file accepts is refused here and nothing moves,
+## which is what makes "the engine refuses anything outside what it accepts" a
+## fact about the store rather than about whoever happened to call it.
+##
+## One field moves and one end moves: the trust of the character that wanted the
+## thing, toward the character that brought it about. Not familiarity -- the
+## happening that earned it has already been folded in through one of the three
+## writers above, and counting it twice would make a gift worth more than a gift.
+## Not the doer's end at all: doing somebody a good turn tells you nothing new
+## about them.
+func favoured(
+	doer: int, wanted_by: int, share: float, what: String
+) -> RelationshipEdge:
+	if doer == wanted_by:
+		return null
+	if share < Goodwill.LEAST or share > Goodwill.MOST:
+		return null
+	var edge := _edge_for(doer, wanted_by)
+	edge.raise(wanted_by, "trust", share)
+	edge.note("#%d thought better of #%d by %s: %s" % [
+		wanted_by, doer, Goodwill.said_as(share), _clipped(what),
+	])
 	return edge
 
 

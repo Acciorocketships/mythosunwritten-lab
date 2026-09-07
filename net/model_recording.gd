@@ -40,7 +40,7 @@ extends RefCounted
 ##     number in this file that says something about the live path rather than
 ##     about the replay.
 ##
-## ## Five tables, recorded in one pass
+## ## Six tables, recorded in one pass
 ##
 ## `ROWS` answers the shipped run's questions, in the order it puts them.
 ## `LESSON_ROWS` answers the four questions `./run_lesson.sh` puts -- one moment
@@ -89,6 +89,11 @@ const CHECKS_RECORDED_ON := "2026-09-05"
 ## reason the difficulty-class one is: `./run_record.sh --live --world` puts only
 ## its questions and writes the other four back unchanged.
 const WORLD_RECORDED_ON := "2026-09-05"
+
+## When the goodwill table was recorded, which is its own date for the same
+## reason the other two are: `./run_record.sh --live --goodwill` puts only its
+## questions and writes the other five back unchanged.
+const GOODWILL_RECORDED_ON := "2026-09-07"
 
 ## The exchange. Rewritten by the recorder; see the note above.
 const ROWS := [
@@ -211,6 +216,14 @@ const WORLD_ROWS := [
 	{"prompt": "5a8f65cec544f29a", "reply": "name=Quickfoot Sable\ntraits=light-fingered, restless, soft-spoken\ntendencies=flees before fighting, trusts instinct over plans, avoids heavy burdens\nbackstory=Raised on the far edges of the nine rings, Quickfoot learned early that being the fastest in any crowd mattered more than being the strongest, and a lifetime of dodging consequences left more than one promise dropped behind them.", "ms": 2521},
 ]
 
+## The goodwill run's questions, on their own date above.
+const GOODWILL_ROWS := [
+	{"prompt": "15fa8511e7354e85", "reply": "goodwill=0.6", "ms": 2623},
+	{"prompt": "e77172f1a6958897", "reply": "goodwill=0.7", "ms": 3472},
+	{"prompt": "ea866cef976b2852", "reply": "goodwill=0.5", "ms": 4773},
+	{"prompt": "ad2b503ddf4740f3", "reply": "goodwill=0.6", "ms": 2332},
+]
+
 
 ## The whole recording as one thing to hand to a channel: the replies, a line
 ## saying where they came from, and which model said them.
@@ -243,6 +256,12 @@ static func world_exchange() -> Dictionary:
 	return {"rows": WORLD_ROWS, "from": world_provenance(), "model": MODEL}
 
 
+## The goodwill run's own exchange, in the same shape, and with its own date
+## on it.
+static func goodwill_exchange() -> Dictionary:
+	return {"rows": GOODWILL_ROWS, "from": goodwill_provenance(), "model": MODEL}
+
+
 ## How a provenance line names who answered: the model, and whether it was one
 ## running on the machine that recorded it. See `LOCAL` above.
 static func said_by() -> String:
@@ -263,10 +282,17 @@ static func check_provenance() -> String:
 	]
 
 
+## Where the goodwill replies came from.
+static func goodwill_provenance() -> String:
+	return "recorded %s from %s at %s, %d replies" % [
+		GOODWILL_RECORDED_ON, said_by(), ENDPOINT, GOODWILL_ROWS.size(),
+	]
+
+
 ## How many replies the recording holds.
 static func size() -> int:
 	return ROWS.size() + LESSON_ROWS.size() + GOAL_ROWS.size() \
-		+ CHECK_ROWS.size() + WORLD_ROWS.size()
+		+ CHECK_ROWS.size() + WORLD_ROWS.size() + GOODWILL_ROWS.size()
 
 
 ## One line saying where the replies came from, printed at the head of a run that

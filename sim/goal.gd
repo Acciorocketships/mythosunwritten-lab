@@ -73,6 +73,9 @@ const KINDS := [
 ## What a goal that has not been given a number holds.
 const UNNUMBERED := 0
 
+## What `open_at` holds while the world has not yet looked at this goal.
+const NEVER_LOOKED := -1
+
 
 ## Which goal this is, within the one set that holds it. Given out by `GoalSet`
 ## when the goal is added, and the number the character names when it closes one
@@ -106,6 +109,18 @@ var closed_by: String = ""
 
 ## Which tick it closed on, or -1.
 var closed_at: int = -1
+
+## The last tick at which the world looked at this goal and found it unmet.
+##
+## Written by `GoalCheck.settle()` -- the world's own looking -- and by nothing
+## else, so it is a fact about what the engine has said rather than about who was
+## deciding for the character at the time. `NEVER_LOOKED` while the world has not
+## looked at all, which is the honest starting answer for a goal of a kind the
+## engine cannot answer and for one added to a character nobody has serviced yet.
+##
+## What reads it is `Deed`, which needs to know the window a goal was open over
+## so that a dealing from long before it can never be credited with closing it.
+var open_at: int = NEVER_LOOKED
 
 
 ## A goal of any kind.

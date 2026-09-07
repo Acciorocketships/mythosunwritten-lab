@@ -16,7 +16,7 @@ extends TestSuite
 ##   3. **The sentiment term is the stated composite.** It is
 ##      $\mathrm{familiarity} \times (\mathrm{trust} - \mathrm{fear})$, respect is
 ##      not in it, and moving respect alone does not move it.
-##   4. **The world maintains them, whoever is deciding.** The three writers are
+##   4. **The world maintains them, whoever is deciding.** The four writers are
 ##      called from `sim/character_upkeep.gd` and from nowhere else under `sim/`
 ##      -- shown with a scan that is made to catch a planted call -- and a
 ##      character with no decision function at all still has its edges kept.
@@ -42,7 +42,7 @@ const THE_RULES := "res://sim/relationship_graph.gd"
 
 ## How a line of code moves a relationship, matched against code with comments
 ## and string literals stripped.
-const MOVES_AN_EDGE := [".heard(", ".traded(", ".struck("]
+const MOVES_AN_EDGE := [".heard(", ".traded(", ".struck(", ".favoured("]
 
 ## What a planted call looks like: the shape a driver would use if it kept the
 ## graph itself. The scan has to catch this for its silence to mean anything.
@@ -59,6 +59,9 @@ const MODEL_FACING := [
 	"res://sim/check_prompt.gd",
 	"res://sim/check_desk.gd",
 	"res://sim/ability_check.gd",
+	"res://sim/goodwill.gd",
+	"res://sim/goodwill_prompt.gd",
+	"res://sim/deed_desk.gd",
 ]
 
 ## How a line of code would name the graph at all.

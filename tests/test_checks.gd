@@ -10,12 +10,14 @@ extends TestSuite
 ##
 ## Seven claims:
 ##
-##   1. **Hook-triggered and one-off, not polled.** A check is raised in exactly
-##      one place in the whole simulation -- `AbilityCheck.HOOK`, read off the
-##      source -- and only for one situation there: an item the character carries
-##      that is not what the thing plainly opens with. Bare hands and the right
-##      item raise none. A world nobody attempts anything in raises none however
-##      long it is stepped, and costs no call.
+##   1. **Hook-triggered and one-off, not polled.** A check at a *thing* is raised
+##      in exactly one place in the whole simulation -- `AbilityCheck.HOOK`, read
+##      off the source -- and only for one situation there: an item the character
+##      carries that is not what the thing plainly opens with. Bare hands and the
+##      right item raise none. A world nobody attempts anything in raises none
+##      however long it is stepped, and costs no call. The other hook,
+##      `AbilityCheck.TALK_HOOK`, is section 6's and is `tests/test_goodwill.gd`'s;
+##      what is checked here is that there are two of them and no third.
 ##   2. **The agent picks both, and the engine does the arithmetic.** The class
 ##      and the ability score come out of the reply; the score comes off the
 ##      character's own sheet, the die out of a seeded stream, and the verdict out
@@ -152,6 +154,23 @@ func _one_hook_and_one_situation() -> void:
 	var named := AbilityCheck.HOOK.substr("ActionEngine.".length())
 	check(_read(RAISES).contains("static func %s(" % named),
 		"%s names a function %s does not declare" % [AbilityCheck.HOOK, RAISES])
+
+	# And there are two hooks in the whole simulation and no third: every place a
+	# check is raised from is one of the two functions the two constants name.
+	var hooks := PackedStringArray()
+	for line in _code_lines(RAISES):
+		if line.begins_with("static func "):
+			var head := line.substr("static func ".length())
+			hooks.append("ActionEngine." + head.substr(0, head.find("(")))
+	var raising_lines := _lines_holding([RAISES], ["scene.raise_check(", "scene.raise_talk_check("])
+	equal(raising_lines.size(), 2,
+		"a check is raised on %d lines of the engine, not two: %s" % [
+			raising_lines.size(), " | ".join(raising_lines),
+		])
+	check(hooks.has(AbilityCheck.HOOK) and hooks.has(AbilityCheck.TALK_HOOK),
+		"the two named hooks are not both functions of the engine")
+	not_equal(AbilityCheck.HOOK, AbilityCheck.TALK_HOOK,
+		"the two hooks are the same function")
 
 	# And only for one of the three ways an interaction with a shut thing can go.
 	var world := _bare()

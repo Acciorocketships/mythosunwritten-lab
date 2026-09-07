@@ -89,7 +89,7 @@ character would take them (the twelfth needs a board, and is section 3 below):
 
 ```
   Rook examine(target=2) -> examine ok id=2 name=Wren kind=commander health=unhurt fighting=false equipment=- distance=1.5
-  Rook say(text=well met target=2) -> say ok shout=false heard_by=1
+  Rook say(text=well met target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
   Rook say(text=anyone about?) -> say ok shout=true heard_by=1
   Rook go_to(target=3) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
   Rook pick_up(item=worn hatchet) -> pick_up ok item=worn hatchet from=3
