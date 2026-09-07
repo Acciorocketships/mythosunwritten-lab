@@ -20,7 +20,8 @@ extends Node3D
 ##   AnimationPlayer -- holds the shared clip library for the rig, and is the
 ##                      thing the tree drives.
 ##   AnimationTree   -- blends standing into walking into running on one number,
-##                      and lays a one-off (a jump, a hit) or a death over it.
+##                      and lays a one-off (a jump, a hit, a blow being struck)
+##                      or a death over it.
 ##   BoneAttachment3D x2 -- the two hand sockets, following `handslot.l` and
 ##                      `handslot.r` through the model's skeleton from outside it.
 ##
@@ -48,9 +49,31 @@ const CLIP_JUMP := "Jump_Full_Short"
 const CLIP_HIT := "Hit_A"
 const CLIP_DEATH := "Death_A"
 
-## Every clip this view can choose, in the order the rule reaches them. A test
-## walks it to check the library really holds all six.
+## The six clips the rule reaches out of a character's own motion, in the order
+## it reaches them. A test walks it to check the library really holds all six.
+##
+## Not every clip the rule can return: a character striking a blow plays the clip
+## `CharacterRig.MOTION_CLIPS` names for that blow's motion tag, and those live
+## in the rig's table beside the files they came out of rather than here. Six
+## names and one table is `clips()` below, which is what a test walks now.
 const CLIPS := [CLIP_IDLE, CLIP_WALK, CLIP_RUN, CLIP_JUMP, CLIP_HIT, CLIP_DEATH]
+
+## The three that are a character's own motion rather than something laid over
+## it. Everything else the rule can return is a one-off fired over these.
+const LOCOMOTION_CLIPS := [CLIP_IDLE, CLIP_WALK, CLIP_RUN]
+
+## What a `state` with no blow in it carries under `attack`: nothing.
+const NO_MOTION := ""
+
+
+## Every clip this view can choose: the six above and one per motion the rig's
+## table names, the fallback included.
+static func clips() -> PackedStringArray:
+	var every := PackedStringArray(CLIPS)
+	for clip in CharacterRig.motion_clips():
+		if not every.has(clip):
+			every.append(clip)
+	return every
 
 # --- Where the rule's thresholds sit -------------------------------------
 # All three are in world units per simulation tick, because that is the unit the
@@ -131,6 +154,14 @@ var _skeleton: Skeleton3D = null
 var _shown_clip := ""
 var _blend := 0.0
 
+# Which tick the blow now being drawn began on, out of the state handed in, or
+# -1 for a character that is not striking one. Kept for one reason: two blows in
+# a row with the same motion want the clip fired twice, and without this the
+# second one would be a clip that never changed and so never restarted. Still a
+# fact about the picture and still not a copy of the world -- apply() with the
+# same state ends with the same clip at the same point, whatever was here before.
+var _shown_at := -1
+
 
 # --- The rule ------------------------------------------------------------
 
@@ -144,6 +175,12 @@ var _blend := 0.0
 ##            walking, however fast it was going when it died.
 ##   hurt  -- true on the tick it takes damage. Beats motion, because being hit
 ##            interrupts what you were doing; that is what a hit reaction is.
+##   attack -- the motion tag of a blow this character is in the middle of
+##            striking, or "" for one that is not. Beats being hurt, and that
+##            ordering is the one judgement in this rule: a blow being struck is
+##            something happening on this tick, said by a record that names the
+##            tick it began on, while `hurt` off a board is a wound already
+##            taken. A character that is swinging swings.
 ##   jumped -- true on the tick a jump was resolved for it. Beats motion for the
 ##            same reason `rise` does, and is here beside it because a jump
 ##            across level ground rises by nothing at all and is still a jump.
@@ -160,6 +197,12 @@ var _blend := 0.0
 static func clip_for(state: Dictionary) -> String:
 	if not bool(state.get("alive", true)):
 		return CLIP_DEATH
+	var motion := String(state.get("attack", NO_MOTION))
+	if motion != NO_MOTION:
+		# Which clip a motion is, and what a motion nobody has written a clip for
+		# falls back to, is the rig table's answer -- the same table that says
+		# which files the clips came out of. This rule only asks.
+		return CharacterRig.clip_for_motion(motion)
 	if bool(state.get("hurt", false)):
 		return CLIP_HIT
 	if bool(state.get("jumped", false)):
@@ -290,14 +333,21 @@ func apply(state: Dictionary, delta: float) -> void:
 	_death_clip.animation = CLIP_DEATH
 	_tree.set("parameters/death/blend_amount", 1.0 if dead else 0.0)
 
-	if wanted == _shown_clip:
+	# When the blow began, so that a second blow with the same motion fires the
+	# clip again instead of being mistaken for the first one still running.
+	var began := int(state.get("attack_tick", -1))
+	if wanted == _shown_clip and began == _shown_at:
 		return
 	_shown_clip = wanted
+	_shown_at = began
 	if dead:
 		_tree.set("parameters/shot/request",
 			AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 		return
-	if wanted == CLIP_JUMP or wanted == CLIP_HIT:
+	if not LOCOMOTION_CLIPS.has(wanted):
+		# A jump, a hit reaction, or one of the rig table's motions: all three are
+		# something brief laid over whatever the character was already doing, and
+		# the one-off is the node that lays it there.
 		_shot_clip.animation = wanted
 		_tree.set("parameters/shot/request",
 			AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)

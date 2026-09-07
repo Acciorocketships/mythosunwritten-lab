@@ -13,10 +13,14 @@ extends RefCounted
 ## positions of its own -- so "the picture cannot affect the fight" is not a
 ## promise made in a comment. There is nothing here to affect it with.
 ##
-## The one thing this decides is *presentation*: which way round a model has to
-## be turned so that a piece facing north on the lattice looks north on screen.
-## That is a fact about the models, which is this layer's business, and it is the
-## same conversion `CharacterView.yaw_for_heading` already makes for a walker.
+## Two things are decided here, and both are *presentation*. Which way round a
+## model has to be turned so that a piece facing north on the lattice looks north
+## on screen -- a fact about the models, and the same conversion
+## `CharacterView.yaw_for_heading` already makes for a walker. And whether a blow
+## the record says was struck on some tick is still being struck now, which is a
+## question about how long the motion drawing it lasts and so about the clip: the
+## simulation says which motion and when, `CharacterRig` says how long, and the
+## subtraction is here.
 class_name CombatDiorama
 
 ## Which way a piece facing each of the lattice's four directions is walking, as
@@ -63,6 +67,9 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 			heading = heading_for_facing(int(row.get("facing", 0)))
 		var health := int(row.get("health", 1))
 		var most := maxi(1, int(row.get("max_health", 1)))
+		var swinging := striking(snapshot, int(row.get("id", 0)))
+		var motion := String(swinging[0])
+		var began := int(swinging[1])
 		made.append({
 			"id": int(row.get("id", 0)),
 			"tag": String(row.get("appearance", "")),
@@ -89,9 +96,52 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 				"jumped": bool(row.get("jumped", false)),
 				"alive": health > 0,
 				"hurt": health < most,
+				# And whether it is in the middle of striking a blow, out of the
+				# snapshot's own record of the blows struck: the motion tag the
+				# attack carried, and the tick the record says it began on.
+				"attack": motion,
+				"attack_tick": began,
 			},
 		})
 	return made
+
+
+## The motion a piece is in the middle of striking, out of the snapshot's record
+## of blows, and the tick that blow began on -- `["", -1]` for a piece that is
+## not striking one.
+##
+## Everything here is read out of the dictionary handed in. The blow already says
+## who struck it, which fight it belongs to, which motion it is and which tick it
+## began on -- `ActionScene.blows`, carried out by `CombatantRoster.blow_rows` --
+## and the one thing added is the comparison: a blow is still being struck while
+## fewer ticks have passed than the motion lasts. How long a motion lasts is the
+## render layer's own answer and lives in `CharacterRig.MOTION_CLIPS`, beside the
+## clip that plays it, because it *is* that clip's length.
+##
+## Only the striker's most recent blow is considered. A blow that has finished
+## does not fall back to the one before it: the character has stopped swinging,
+## not gone back to an older swing.
+static func striking(snapshot: Dictionary, id: int) -> Array:
+	var combat := _combat(snapshot)
+	var struck: Variant = combat.get("blows", [])
+	if not (struck is Array):
+		return [CharacterView.NO_MOTION, -1]
+	var tick_now := int(combat.get("tick", 0))
+	var here := int(combat.get("fights_begun", 0))
+	var rows: Array = struck
+	for at in range(rows.size() - 1, -1, -1):
+		var blow: Dictionary = rows[at]
+		if int(blow.get("from", 0)) != id:
+			continue
+		if int(blow.get("fight", 0)) != here:
+			continue
+		var motion := String(blow.get("animation", CharacterView.NO_MOTION))
+		var began := int(blow.get("tick", 0))
+		var since := tick_now - began
+		if since < 0 or since >= CharacterRig.motion_ticks(motion):
+			return [CharacterView.NO_MOTION, -1]
+		return [motion, began]
+	return [CharacterView.NO_MOTION, -1]
 
 
 static func _rows(snapshot: Dictionary) -> Array:

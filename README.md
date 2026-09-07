@@ -939,6 +939,60 @@ of inferring one from a cooldown — one blow, one record, one reading.
 What the record carries, where it is written, what moved and what did not, is in
 [reports/strike-record.md](reports/strike-record.md).
 
+## A motion per item
+
+Every attack in the catalogue has carried an **animation tag** since the
+composable effect base landed -- `lunge`, `slash`, `swing`, `shoot`, `cast`,
+`spin`, `bash`, seven names in `sim/asset_tags.gd` and not one of them a clip.
+Nothing drew them: the rig loaded two of its eight clip files and the animation
+rule branched on standing, walking, running, jumping, being hit and being dead.
+Now a blow is drawn with the motion it names.
+
+**Two more clip files, and a table between the two vocabularies.**
+`render/character_rig.gd` loads `CombatMelee` and `CombatRanged` beside the two
+it had -- 64 clips in one shared library instead of 24 -- and holds one row per
+motion tag saying which clip plays it and how many ticks that clip lasts:
+
+| tag | clip | ticks |
+|---|---|---|
+| lunge | Melee_1H_Attack_Stab | 32 |
+| slash | Melee_1H_Attack_Slice_Diagonal | 20 |
+| swing | Melee_1H_Attack_Slice_Horizontal | 28 |
+| shoot | Ranged_Bow_Release | 27 |
+| cast | Ranged_Magic_Shoot | 19 |
+| spin | Melee_2H_Attack_Spin | 48 |
+| bash | Melee_Block_Attack | 22 |
+| *(anything else)* | Melee_Unarmed_Attack_Punch_A | 24 |
+
+The other four files -- Tools, Simulation, Special, MovementAdvanced -- stay
+unloaded for the same reason all six used to: nothing produces the state that
+would choose one. The suite opens each of them and requires it to hold a clip
+the library does not, so "unloaded" is checked rather than asserted.
+
+**What it costs.** The two files that were added assemble in 10.6 ms and hold
+1.46 MiB; the four together take 19.4 ms and 2.18 MiB against the 9.4 ms and
+1.04 MiB the two loaded before. It is paid once: the first character mounted
+takes 25.2 ms and the second 0.3 ms, because the library is assembled on the
+first ask and shared after -- and the first ask is the shell's setup, before a
+frame is drawn.
+
+**The rule is still a pure function.** `CharacterView.clip_for()` gained one
+branch, above being hurt and below being dead: a character striking a blow is
+drawn with that blow's motion. What it reads is `attack`, the motion tag, which
+`CombatDiorama` puts in the state by comparing the world's clock with the tick
+the blow record says the blow began on. Nothing is remembered between frames and
+nothing is asked of the fight -- the snapshot is the whole input.
+
+```
+./run_attack_clips.sh           # just the attack-clip suite
+./tools/measure_clips.sh        # what the two combat files cost, and the motion table
+./tools/measure_swings.sh       # which motion each weapon plays, tick by tick
+xvfb-run -a ./tools/swing_sheet.sh --screenshot-ticks "6:six.png"
+```
+
+Seven weapons in one seeded run, each drawn with its own motion, and what the
+fallback is for, is in [reports/attack-clips.md](reports/attack-clips.md).
+
 ## What a character can see
 
 `./run_observation.sh` assembles section 10's **local, structured observation**
@@ -2550,6 +2604,9 @@ never has to be serialised for the world to be reproducible.
 ./run_turn.sh                   # a turn lasts as long as the weapon action that spends it
 ./run_strike.sh                 # the record of a blow: the same record from either hand
 ./run_strike_suite.sh           # just the strike-record suite
+./run_attack_clips.sh           # just the attack-clip suite: the table, the branch, the timing
+./tools/measure_clips.sh        # what the two combat clip files cost, and the motion table
+./tools/measure_swings.sh       # seven weapons in one seeded run, each with its own motion
 ./run_observation.sh            # what each of five characters can see, and how big the packet is
 ./run_observation_suite.sh      # just the observation suite
 ./run_agent.sh                  # every non-player character deciding through a model, in the same run

@@ -1,0 +1,199 @@
+W-attack-clips -- evidence
+generated 2026-09-07 03:21 UTC on 7eefecb plus this cycle's change
+
+=== ./tools/measure_clips.sh ===
+
+clip cost: base -- 2 file(s), 24 clips
+    Rig_Medium_General.glb
+    Rig_Medium_MovementBasic.glb
+  assembled in 9.4 ms
+  static memory +1.04 MiB (61.68 -> 62.72)
+
+
+clip cost: combat -- 2 file(s), 40 clips
+    Rig_Medium_CombatMelee.glb
+    Rig_Medium_CombatRanged.glb
+  assembled in 10.6 ms
+  static memory +1.46 MiB (61.68 -> 63.15)
+
+
+clip cost: all -- 4 file(s), 64 clips
+    Rig_Medium_General.glb
+    Rig_Medium_MovementBasic.glb
+    Rig_Medium_CombatMelee.glb
+    Rig_Medium_CombatRanged.glb
+  assembled in 19.4 ms
+  static memory +2.18 MiB (61.68 -> 63.87)
+
+when it is paid
+  character 1 mounted in   25.2 ms, libraries assembled so far: 1
+  character 2 mounted in    0.3 ms, libraries assembled so far: 1
+  character 3 mounted in    0.3 ms, libraries assembled so far: 1
+
+the motion table
+  tag      clip                                seconds   ticks
+  lunge    Melee_1H_Attack_Stab                  1.600      32
+  slash    Melee_1H_Attack_Slice_Diagonal        1.000      20
+  swing    Melee_1H_Attack_Slice_Horizontal      1.367      28
+  shoot    Ranged_Bow_Release                    1.333      27
+  cast     Ranged_Magic_Shoot                    0.933      19
+  spin     Melee_2H_Attack_Spin                  2.400      48
+  bash     Melee_Block_Attack                    1.067      22
+  (none)   Melee_Unarmed_Attack_Punch_A          1.167      24
+
+  0 of the catalogue's 8 attacks take the fallback
+
+=== ./tools/measure_swings.sh (blows elided to the first 20 rows) ===
+
+swings seed=1234 ticks=240 weapons=7 blows=111
+
+the blows
+   tick by       weapon   attack     motion  clip                                ticks
+      1 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+      2 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+      4 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+      5 Esk      bow      loose      shoot   Ranged_Bow_Release                     27
+      8 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     13 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     14 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     15 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     16 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     20 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     22 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     23 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+     26 Esk      bow      loose      shoot   Ranged_Bow_Release                     27
+     27 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     28 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     29 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     30 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     34 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     36 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     37 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     39 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+     41 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     42 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     43 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     44 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+     47 Esk      bow      loose      shoot   Ranged_Bow_Release                     27
+     48 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     50 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     51 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     55 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     56 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     57 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     58 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     62 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     64 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     65 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+     69 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     70 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     71 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     72 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     74 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+     76 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     78 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     79 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     83 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     84 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     85 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     86 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+     90 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     92 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+     93 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+     97 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+     98 Gale     shield   shove      bash    Melee_Block_Attack                     22
+     99 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    100 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+    104 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    106 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    107 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+    109 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+    111 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    112 Gale     shield   shove      bash    Melee_Block_Attack                     22
+    113 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    114 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+    118 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    120 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    121 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+    125 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    126 Gale     shield   shove      bash    Melee_Block_Attack                     22
+    127 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    128 Bryn     sword    cleave     swing   Melee_1H_Attack_Slice_Horizontal       28
+    132 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    134 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    135 Bryn     sword    cut        slash   Melee_1H_Attack_Slice_Diagonal         20
+    139 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    140 Gale     shield   shove      bash    Melee_Block_Attack                     22
+    141 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    143 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+    145 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    147 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    151 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    152 Gale     shield   shove      bash    Melee_Block_Attack                     22
+    153 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    157 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    159 Ash      spear    thrust     lunge   Melee_1H_Attack_Stab                   32
+    163 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    164 Gale     shield   shove      bash    Melee_Block_Attack                     22
+    168 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    171 Dell     staff    fireball   cast    Ranged_Magic_Shoot                     19
+    173 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    178 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    183 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    185 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    188 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    190 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    193 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    195 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    198 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    200 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    203 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    205 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    208 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    210 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    213 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    215 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    218 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    220 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    223 Finn     dagger   stab       slash   Melee_1H_Attack_Slice_Diagonal         20
+    225 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    229 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    233 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+    237 Cade     flail    sweep      spin    Melee_2H_Attack_Spin                   48
+  7 different weapons were used
+
+a swing tick by tick: Dell struck 'cast' on tick 143, and it lasts 19 ticks
+   tick motion  clip                               began on
+    142 -       Hit_A                              -
+    143 cast    Ranged_Magic_Shoot                 143
+    144 cast    Ranged_Magic_Shoot                 143
+    145 cast    Ranged_Magic_Shoot                 143
+    146 cast    Ranged_Magic_Shoot                 143
+    147 cast    Ranged_Magic_Shoot                 143
+    148 cast    Ranged_Magic_Shoot                 143
+    149 cast    Ranged_Magic_Shoot                 143
+    150 cast    Ranged_Magic_Shoot                 143
+    151 cast    Ranged_Magic_Shoot                 143
+    152 cast    Ranged_Magic_Shoot                 143
+    153 cast    Ranged_Magic_Shoot                 143
+    154 cast    Ranged_Magic_Shoot                 143
+    155 cast    Ranged_Magic_Shoot                 143
+    156 cast    Ranged_Magic_Shoot                 143
+    157 cast    Ranged_Magic_Shoot                 143
+    158 cast    Ranged_Magic_Shoot                 143
+    159 cast    Ranged_Magic_Shoot                 143
+    160 cast    Ranged_Magic_Shoot                 143
+    161 cast    Ranged_Magic_Shoot                 143
+    162 -       Hit_A                              -
+    163 -       Hit_A                              -
+
+every motion timed
+  117 comparisons against the tick the record names, 0 wrong
+  6 comparisons were skipped: the blow had left the snapshot's own
+  window of the last 8 blows before its motion was over, so there was
+  nothing left to draw it from. Seven commanders swinging is well past
+  what that window holds; a duel is not.
+
+what falls back
+  0 of the catalogue's 8 attacks have no clip of their own
+  a motion with no row plays Melee_Unarmed_Attack_Punch_A, which is a blow and is not standing still
