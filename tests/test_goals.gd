@@ -50,7 +50,8 @@ const MAKES_A_GOAL := ["Goal.of(", "Goal.unwritten("]
 ## The only files under `sim/` allowed to make one. Scenario setup, all three of
 ## them: the shipped run's own character, the controlled comparison's four arms,
 ## and the goodwill run's three neighbours, each of whom wants one thing so that
-## somebody else can turn out to have been why they got it. The machinery --
+## somebody else can turn out to have been why they got it -- wants the
+## territory run stages again, for the same reason. The machinery --
 ## `goal.gd`, `goal_set.gd`, `goal_check.gd`, `deed.gd`, `deed_desk.gd`, the
 ## prompt and the mind -- makes none, which is what "no quest is scripted" means
 ## here.
@@ -58,6 +59,7 @@ const MAY_MAKE_A_GOAL := [
 	"res://sim/scripted_agent.gd",
 	"res://sim/scripted_goal.gd",
 	"res://sim/scripted_goodwill.gd",
+	"res://sim/scripted_territory.gd",
 ]
 
 ## The file that declares `Goal` itself, which the scan skips. Inside the type,

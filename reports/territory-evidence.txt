@@ -1,0 +1,336 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+territory run seed=1234 ticks=340 where=(-480.0, 420.0)
+  channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+  recording  recorded 2026-09-07 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 4 replies
+  the rule   ownership per point by OwnershipField.at: softmin T=12.0 R=120.0 threshold=0.0500, untouched
+  who        Wren, level 2, carrying a common sword, the three wanted things and three small gifts
+  the rival  Rook, level 2, at the post (-480.0, 386.0), carrying six small gifts
+  and        3 neighbours, each wanting one thing:
+    Bram   level 3 -- wants wool cap
+    Sable  level 2 -- wants linen hood
+    Odo    level 2 -- wants horn comb
+  both runs open the same way: Rook gives each neighbour two small things and returns to the post; Wren waits on the green.
+  from tick 170 the runs differ in exactly one thing: which written
+  rule drives Wren -- _winning_fights walks to Rook and attacks until the rival
+  falls; _winning_hearts hands each neighbour the thing it wanted and one gift.
+  each is reproduced by ./run_territory.sh --arm fight | --arm friendship
+
+--- the fight run ---
+
+what Wren did (idle watch-waits elided; the run opens with 170 ticks of them)
+  t=173  Wren   began go_to(target=5), 20 ticks
+  t=178  Wren   thought again at 5/20t, wanted the same thing
+  t=183  Wren   thought again at 10/20t, wanted the same thing
+  t=188  Wren   thought again at 15/20t, wanted the same thing
+  t=193  Wren   finished go_to(target=5) -> go_to ok at=(-480.000, 387.600) walked=32.4 steps=36
+  t=193  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=198  Wren   thought again at 5/6t, wanted the same thing
+  t=199  Wren   finished attack(target=5 item=common sword) -> attack ok fight=begins against=5 anchor=1 joined=2
+  t=199  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=199  Wren   interrupted (combat began), abandoned attack(target=5 item=common sword) 0/6t
+  t=201  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=206  Wren   thought again at 5/6t, wanted the same thing
+  t=207  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=209  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=214  Wren   thought again at 5/6t, wanted the same thing
+  t=215  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=217  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=222  Wren   thought again at 5/6t, wanted the same thing
+  t=223  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=225  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=230  Wren   thought again at 5/6t, wanted the same thing
+  t=231  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=233  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=238  Wren   thought again at 5/6t, wanted the same thing
+  t=239  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=241  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=246  Wren   thought again at 5/6t, wanted the same thing
+  t=247  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=249  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=254  Wren   thought again at 5/6t, wanted the same thing
+  t=255  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=257  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=262  Wren   thought again at 5/6t, wanted the same thing
+  t=263  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=265  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=270  Wren   thought again at 5/6t, wanted the same thing
+  t=271  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=273  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=278  Wren   thought again at 5/6t, wanted the same thing
+  t=279  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=281  Wren   began attack(target=5 item=common sword), 6 ticks
+  t=286  Wren   thought again at 5/6t, wanted the same thing
+  t=287  Wren   finished attack(target=5 item=common sword) -> attack ok attack=cut cells=3 hits=1 dealt=3
+  t=288  Wren   began wait(ticks=30), 30 ticks
+  t=293  Wren   thought again at 5/30t, wanted the same thing
+  t=298  Wren   thought again at 10/30t, wanted the same thing
+  t=303  Wren   thought again at 15/30t, wanted the same thing
+  t=308  Wren   thought again at 20/30t, wanted the same thing
+  t=313  Wren   thought again at 25/30t, wanted the same thing
+  t=318  Wren   finished wait(ticks=30) -> wait ok ticks=30 until=348
+  t=318  Wren   began wait(ticks=30), 30 ticks
+  t=323  Wren   thought again at 5/30t, wanted the same thing
+  t=328  Wren   thought again at 10/30t, wanted the same thing
+  t=333  Wren   thought again at 15/30t, wanted the same thing
+  t=338  Wren   thought again at 20/30t, wanted the same thing
+
+the fight, turn by turn
+  snap-in around #1 at (-480.000, -0.593, 387.600) radius=24.0 span=30.0 storey=0 joined=2
+  snap-in board 8fab6025eacc2cfa cells=441 standable=433 holes=8 cliffs=10
+  snap-in #1 (-480.000, 387.600) -> cell (-160,129) centre (-478.500, 388.500) moved 1.749 rings=0
+  snap-in #5 (-480.000, 386.000) -> cell (-160,128) centre (-478.500, 385.500) moved 1.581 rings=0
+  board 8fab6025eacc2cfa cells=441 standable=433 holes=8 cliffs=10
+  dice seed=1769559226 swing=92..108
+  commanders 2
+    #1 commander owner=1 level=2 hp=32/32 def=0 power=0
+    #2 commander owner=2 level=2 hp=32/32 def=0 power=0
+  round 1 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    face #1 north
+  round 1 turn #2 at (-160,128) facing=north hp=32/32 def=0 - + bare
+    face #2 south
+  round 2 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=104 front def=0 dealt=3 hp=29/32
+    face #1 north
+  round 2 turn #2 at (-160,128) facing=south hp=29/32 def=0 - + bare
+    face #2 south
+  round 3 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=104 front def=0 dealt=3 hp=26/32
+    face #1 north
+  round 3 turn #2 at (-160,128) facing=south hp=26/32 def=0 - + bare
+    face #2 south
+  round 4 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=103 front def=0 dealt=3 hp=23/32
+    face #1 north
+  round 4 turn #2 at (-160,128) facing=south hp=23/32 def=0 - + bare
+    face #2 south
+  round 5 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=99 front def=0 dealt=3 hp=20/32
+    face #1 north
+  round 5 turn #2 at (-160,128) facing=south hp=20/32 def=0 - + bare
+    face #2 south
+  round 6 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=102 front def=0 dealt=3 hp=17/32
+    face #1 north
+  round 6 turn #2 at (-160,128) facing=south hp=17/32 def=0 - + bare
+    face #2 south
+  round 7 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=102 front def=0 dealt=3 hp=14/32
+    face #1 north
+  round 7 turn #2 at (-160,128) facing=south hp=14/32 def=0 - + bare
+    face #2 south
+  round 8 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=104 front def=0 dealt=3 hp=11/32
+    face #1 north
+  round 8 turn #2 at (-160,128) facing=south hp=11/32 def=0 - + bare
+    face #2 south
+  round 9 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=100 front def=0 dealt=3 hp=8/32
+    face #1 north
+  round 9 turn #2 at (-160,128) facing=south hp=8/32 def=0 - + bare
+    face #2 south
+  round 10 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=102 front def=0 dealt=3 hp=5/32
+    face #1 north
+  round 10 turn #2 at (-160,128) facing=south hp=5/32 def=0 - + bare
+    face #2 south
+  round 11 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=102 front def=0 dealt=3 hp=2/32
+    face #1 north
+  round 11 turn #2 at (-160,128) facing=south hp=2/32 def=0 - + bare
+    face #2 south
+  round 12 turn #1 at (-160,129) facing=north hp=32/32 def=0 sword + bare
+    attack #1 cut cells=3 hits=1
+      hit #1->#2 power=3 x100 swing=99 front def=0 dealt=3 hp=0/32 dead removed=1
+    commander #2 is out
+  over rounds=12 survivors=1 winner=#1
+  t=287  the fight is over; real time again
+  over turns=23 rounds=12 ending=decided survivors=1 fallen=1
+  snap-out #1 cell (-160,129) -> (-478.500, -0.703, 388.500) back to cell (-160,129) hp=32/32
+  snap-out #5 fell
+
+what the world made of it
+  nothing was raised and nothing closed
+  checks     0 raised, 0 rolled -- no word is spoken in either run
+  deeds      0 goals closed and looked at, 0 with somebody else behind them
+  calls      0 put to a model, 0.000 earned over 0 edges
+
+the edges afterwards
+  #2 <-> #5 2 happenings | #2 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #3 <-> #5 2 happenings | #3 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #4 <-> #5 2 happenings | #4 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #1 <-> #5 11 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.96 | #5 trust 0.00 fear 0.66 respect 0.96 familiarity 0.96
+
+at the parting, tick 170, fingerprint cba3f4c6f8cbd555
+after 340 ticks
+  tick 340 actors=4 objects=0 offers=0
+    #1 commander band=1 at (-478.500, -0.703, 388.500) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] horn comb | common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] linen hood | common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] wool cap | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [carved whistle:4] carved whistle | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [pressed flower:4] pressed flower | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [river pearl:4] river pearl | common weapon hand L2 P=8 mov=0 def=0 eff=8 str [sword:8] common sword] worn=[hand=common weapon hand L2 P=8 mov=0 def=0 eff=8 str [sword:8] common sword]
+    #2 commander band=1 at (-473.000, -2.325, 420.000) hp=38/38 walking
+      carries money=0 carried=[common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [clay bead:4] clay bead | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [tin whistle:4] tin whistle] worn=[]
+    #3 commander band=1 at (-475.000, -3.393, 425.000) hp=32/32 walking
+      carries money=0 carried=[common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [reed flute:4] reed flute | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [wax candle:4] wax candle] worn=[]
+    #4 commander band=1 at (-484.000, -2.677, 413.000) hp=32/32 walking
+      carries money=0 carried=[common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [birch spoon:4] birch spoon | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [tallow lamp:4] tallow lamp] worn=[]
+  fingerprint 185f4ed503ee5ccc
+
+--- the friendship run ---
+
+what Wren did (idle watch-waits elided; the run opens with 170 ticks of them)
+  t=173  Wren   began go_to(target=2), 20 ticks
+  t=178  Wren   thought again at 5/20t, kept go_to(target=2) over trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0)
+  t=183  Wren   changed its mind at 10/20t, dropped go_to(target=2) for trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0)
+  t=183  Wren   began trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0), 4 ticks
+  t=187  Wren   finished trade_propose(target=2 give=[wool cap] give_money=0 want=[] want_money=0) -> trade_propose ok to=2 give=1 give_money=0 want=0 want_money=0
+  t=191  Wren   began trade_propose(target=2 give=[pressed flower] give_money=0 want=[] want_money=0), 4 ticks
+  t=195  Wren   finished trade_propose(target=2 give=[pressed flower] give_money=0 want=[] want_money=0) -> trade_propose ok to=2 give=1 give_money=0 want=0 want_money=0
+  t=203  Wren   began go_to(target=3), 20 ticks
+  t=208  Wren   thought again at 5/20t, kept go_to(target=3) over trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0)
+  t=213  Wren   thought again at 10/20t, kept go_to(target=3) over trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0)
+  t=218  Wren   thought again at 15/20t, kept go_to(target=3) over trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0)
+  t=223  Wren   finished go_to(target=3) -> go_to ok at=(-475.231, 422.687) walked=2.7 steps=3
+  t=223  Wren   began trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0), 4 ticks
+  t=227  Wren   finished trade_propose(target=3 give=[linen hood] give_money=0 want=[] want_money=0) -> trade_propose ok to=3 give=1 give_money=0 want=0 want_money=0
+  t=231  Wren   began trade_propose(target=3 give=[river pearl] give_money=0 want=[] want_money=0), 4 ticks
+  t=235  Wren   finished trade_propose(target=3 give=[river pearl] give_money=0 want=[] want_money=0) -> trade_propose ok to=3 give=1 give_money=0 want=0 want_money=0
+  t=243  Wren   began go_to(target=4), 20 ticks
+  t=248  Wren   thought again at 5/20t, wanted the same thing
+  t=253  Wren   thought again at 10/20t, wanted the same thing
+  t=258  Wren   thought again at 15/20t, kept go_to(target=4) over trade_propose(target=4 give=[horn comb] give_money=0 want=[] want_money=0)
+  t=263  Wren   finished go_to(target=4) -> go_to ok at=(-482.479, 414.680) walked=10.8 steps=12
+  t=263  Wren   began trade_propose(target=4 give=[horn comb] give_money=0 want=[] want_money=0), 4 ticks
+  t=267  Wren   finished trade_propose(target=4 give=[horn comb] give_money=0 want=[] want_money=0) -> trade_propose ok to=4 give=1 give_money=0 want=0 want_money=0
+  t=271  Wren   began trade_propose(target=4 give=[carved whistle] give_money=0 want=[] want_money=0), 4 ticks
+  t=275  Wren   finished trade_propose(target=4 give=[carved whistle] give_money=0 want=[] want_money=0) -> trade_propose ok to=4 give=1 give_money=0 want=0 want_money=0
+  t=283  Wren   began wait(ticks=30), 30 ticks
+  t=288  Wren   thought again at 5/30t, wanted the same thing
+  t=293  Wren   thought again at 10/30t, wanted the same thing
+  t=298  Wren   thought again at 15/30t, wanted the same thing
+  t=303  Wren   thought again at 20/30t, wanted the same thing
+  t=308  Wren   thought again at 25/30t, wanted the same thing
+  t=313  Wren   finished wait(ticks=30) -> wait ok ticks=30 until=343
+  t=313  Wren   began wait(ticks=30), 30 ticks
+  t=318  Wren   thought again at 5/30t, wanted the same thing
+  t=323  Wren   thought again at 10/30t, wanted the same thing
+  t=328  Wren   thought again at 15/30t, wanted the same thing
+  t=333  Wren   thought again at 20/30t, wanted the same thing
+  t=338  Wren   thought again at 25/30t, wanted the same thing
+
+what the world made of it
+  tick 191  Bram finished "be carrying wool cap" and Wren is why -- asked what that is worth (3c0ff86d147df656)
+  tick 194  Bram wanted "be carrying wool cap", Wren did it -- goodwill said 0.600, the engine moved 0.300: 0.300 of goodwill earned by Wren from Bram
+  tick 231  Sable finished "be carrying linen hood" and Wren is why -- asked what that is worth (0de5452b5d764723)
+  tick 234  Sable wanted "be carrying linen hood", Wren did it -- goodwill said 0.700, the engine moved 0.350: 0.350 of goodwill earned by Wren from Sable
+  tick 271  Odo finished "be carrying horn comb" and Wren is why -- asked what that is worth (2303c7f2d0fc4a66)
+  tick 274  Odo wanted "be carrying horn comb", Wren did it -- goodwill said 0.500, the engine moved 0.250: 0.250 of goodwill earned by Wren from Odo
+  checks     0 raised, 0 rolled -- no word is spoken in either run
+  deeds      3 goals closed and looked at, 3 with somebody else behind them
+  calls      3 put to a model, 0.900 earned over 3 edges
+
+the replies, and where each came from
+  question 3c0ff86d147df656 answered "goodwill=0.6"
+    this reply was recorded for another question: the prompt put here fingerprints 3c0ff86d147df656 and the recorded one 15fa8511e7354e85
+  question 0de5452b5d764723 answered "goodwill=0.7"
+    this reply was recorded for another question: the prompt put here fingerprints 0de5452b5d764723 and the recorded one e77172f1a6958897
+  question 2303c7f2d0fc4a66 answered "goodwill=0.5"
+    this reply was recorded for another question: the prompt put here fingerprints 2303c7f2d0fc4a66 and the recorded one ea866cef976b2852
+
+the edges afterwards
+  #2 <-> #5 2 happenings | #2 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #3 <-> #5 2 happenings | #3 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #4 <-> #5 2 happenings | #4 trust 0.73 fear 0.00 respect 0.19 familiarity 0.44 | #5 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44
+  #1 <-> #2 3 happenings | #1 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44 | #2 trust 0.81 fear 0.00 respect 0.19 familiarity 0.44
+  #1 <-> #3 3 happenings | #1 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44 | #3 trust 0.82 fear 0.00 respect 0.19 familiarity 0.44
+  #1 <-> #4 3 happenings | #1 trust 0.36 fear 0.00 respect 0.19 familiarity 0.44 | #4 trust 0.80 fear 0.00 respect 0.19 familiarity 0.44
+
+at the parting, tick 170, fingerprint cba3f4c6f8cbd555
+after 340 ticks
+  tick 340 actors=5 objects=0 offers=0
+    #1 commander band=1 at (-482.479, -2.501, 414.680) hp=32/32 walking
+      carries money=0 carried=[common weapon hand L2 P=8 mov=0 def=0 eff=8 str [sword:8] common sword] worn=[hand=common weapon hand L2 P=8 mov=0 def=0 eff=8 str [sword:8] common sword]
+    #2 commander band=1 at (-473.000, -2.325, 420.000) hp=38/38 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] wool cap | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [clay bead:4] clay bead | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [pressed flower:4] pressed flower | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [tin whistle:4] tin whistle] worn=[]
+    #3 commander band=1 at (-475.000, -3.393, 425.000) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] linen hood | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [reed flute:4] reed flute | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [river pearl:4] river pearl | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [wax candle:4] wax candle] worn=[]
+    #4 commander band=1 at (-484.000, -2.677, 413.000) hp=32/32 walking
+      carries money=0 carried=[common armour helmet L1 P=4 mov=2 def=2 eff=0 dex [] horn comb | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [birch spoon:4] birch spoon | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [carved whistle:4] carved whistle | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [tallow lamp:4] tallow lamp] worn=[]
+    #5 commander band=1 at (-480.000, -0.483, 386.000) hp=32/32 walking
+      carries money=0 carried=[] worn=[]
+  fingerprint 509258cd2d28df0e
+
+--- ownership of the named points, before and after both runs ---
+
+  as staged, tick 0, every point: no owner and every score 0.0000 --
+  nobody has met anybody, and both runs print that world identically.
+  'before' is the shared world at the parting tick 170; each run's
+  survey of it is printed from its own process, so equality is evidence.
+
+  the parting surveys agree: yes
+
+  score is OwnershipField's, in [-1, 1]; owner needs > 0.0500.
+
+  point        | before (both runs)         | after the fight            | after the friendship      
+               | owner  Wren    Rook        | owner  Wren    Rook        | owner  Wren    Rook       
+  the green    | Rook   +0.0000 +0.2092 | nobody +0.0000 +0.0000 | Wren   +0.3442 +0.2414
+  Bram's door  | Rook   +0.0000 +0.2605 | nobody +0.0000 +0.0000 | Wren   +0.3476 +0.2744
+  Sable's door | Rook   +0.0000 +0.2559 | nobody +0.0000 +0.0000 | Wren   +0.3507 +0.2766
+  Odo's door   | Rook   +0.0000 +0.2484 | nobody +0.0000 +0.0000 | Wren   +0.3332 +0.2184
+  Rook's post  | Rook   +0.0000 +0.2528 | nobody +0.0000 +0.0000 | Rook   +0.0645 +0.2270
+  the far road | nobody +0.0000 +0.0000 | nobody +0.0000 +0.0000 | nobody +0.0000 +0.0000
+
+--- how the two paths compare, in numbers ---
+
+  over the 961 sampled points (reach 150, step 10):
+    at the parting         Bram holds 64, Rook holds 491
+    after the fight        nobody holds any of it
+    after the friendship   Bram holds 64, Rook holds 173, Wren holds 318
+
+  ground that changed hands between the parting and the end:
+    the fight moved 555 points; the friendship moved 318.
+    that is 0.57 points moved by the friendship for every one the fight moved.
+    the fight moved more ground than the rival himself held (491): claims
+    by others that rested on the fallen one's opinions fell with him.
+
+  named points that changed owner, parting -> end:
+    under the fight:      the green: Rook -> nobody; Bram's door: Rook -> nobody; Sable's door: Rook -> nobody; Odo's door: Rook -> nobody; Rook's post: Rook -> nobody
+    under the friendship: the green: Rook -> Wren; Bram's door: Rook -> Wren; Sable's door: Rook -> Wren; Odo's door: Rook -> Wren
+
+  at the green itself: Rook's claim went +0.2092 -> +0.0000 under the fight and
+  +0.2092 -> +0.2414 under the friendship; Wren's went +0.0000 -> +0.3442 by friendship
+  and +0.0000 -> +0.0000 by fighting.
+
+  the two paths shift ownership differently in kind: the fight vacates --
+  everything resting on the fallen rival's goodwill, his claims and his
+  opinions alike, goes neutral -- while the friendship captures: ground
+  changes owner where the deeds out-earn the incumbent, and stays his where
+  his own voice is still the nearest. The named-point flips above are the
+  two kinds, point by point.
+
+--- what this comparison does not isolate, named plainly ---
+
+  * the rival does not fight back. Rook is unarmed by scenario
+    choice, so 'winning the fight' is measured with no risk to the winner;
+    a fight against resistance costs health this run never charges.
+  * the judged amounts replay the goodwill run's recording by position;
+    the prompts differ from the recorded ones in tick stamps and cast ids,
+    and every reply says so above. A live model could judge differently.
+  * effort is equalised against the incumbent, not between the paths: six
+    exchanges answer six exchanges, while the fight spends one walk and a
+    few blows. The paths differ in cost as well as in kind, and this
+    run measures effect, not price.
+  * section 6's battle path is 'raising your level, removing rival owners';
+    only the removing is exercised. No rule raises a level on a kill yet,
+    so the level half of that sentence is not in this measurement.
+  * the incumbent's claim is built by the same trade machinery the
+    friendship uses, so 'before' is not independent of the hearts path;
+    it is the engine's only way to make anybody own anything.
