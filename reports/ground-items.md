@@ -315,3 +315,42 @@ Same ground, same islands, same roads, same 598 props, same 35 pieces of cover �
 two more characters standing in it, which is what the enemy streamer was for.
 Nothing under the item layer or the render layer touched the world's generation,
 and the fingerprint has not moved since.
+
+---
+
+## The whole suite, run to the end
+
+The one thing this report could not claim before is now measured: the full suite
+run to completion against the tree that ships, with nothing else running against
+the repo. Transcript in `reports/ground-items-suite-evidence.txt`, structure
+checks and fingerprint in `reports/ground-items-final-checks.txt`.
+
+| what was run | result |
+|---|---|
+| `./run_tests.sh` — every suite | **all 58 suites passed (201,583 checks)**, exit 0 |
+| of which `tests/test_ground_items.gd` | `PASS  ground items   2567 checks` |
+| `./run_tests.sh --layers-only` | all four structure checks **OK**, exit 0 |
+| `./run_headless.sh --seed 1234 --ticks 100` | `final=32656f55cc5eeb1c`, exit 0 |
+
+Three things are worth saying plainly about that run.
+
+**Nothing failed and nothing was skipped.** 58 of 58, zero failed suites, zero
+failed checks. The count of suites is the length of `SUITES` in
+`bin/test_main.gd`, and the run printed its own summary line rather than being
+tallied by hand.
+
+**The fingerprint is where the table above says it should be.** The seed-1234
+world at a hundred ticks digests to `32656f55cc5eeb1c`, the same value the last
+six commits carry, so it has still not moved since `6d5c44a` and the reason
+recorded there stands. The tick-100 census of this run —
+`chunks=39 islands=12 villages=0 roads=4 props=598 cover=35 cast=5` — is the
+same census, term for term.
+
+**Why it took as long as it did, and why that was not a code problem.** The run
+took about 55 minutes of wall clock for 58 suites. An earlier attempt in this
+cycle managed roughly ten suites in two and a half hours, and the difference was
+not the tests: an orphaned `headless_main.gd --seed 1234 --ticks 50` from a
+previous run had been sitting on the machine for 18 hours, blocked on a write to
+a pipe whose reader was gone. Clearing it let the suite run at its real speed.
+The remaining cost is honest and structural — roughly a dozen render suites boot
+a fresh engine per comparison, and those alone accounted for the last stretch.

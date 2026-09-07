@@ -31,3 +31,57 @@ PASS  character sheet 109 checks
 PASS  items          169 checks
 PASS  inventory      90 checks
 PASS  drops          65 checks
+PASS  ground items   2567 checks
+PASS  effects        1474 checks
+PASS  actions        351 checks
+PASS  control loop   81 checks
+PASS  walk motion    93 checks
+PASS  observation    218 checks
+PASS  scenario       152 checks
+PASS  agent          1141 checks
+PASS  memory         106 checks
+SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+          at: TestGoals._a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+          GDScript backtrace (most recent call first):
+              [0] _a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+              [1] run (res://tests/test_goals.gd:87)
+              [2] _initialize (res://bin/test_main.gd:76)
+PASS  goals          129 checks
+PASS  upkeep         95 checks
+PASS  tool budget    58 checks
+PASS  relationships  140 checks
+PASS  ownership      55 checks
+PASS  checks         118 checks
+PASS  orchestrator   282 checks
+PASS  fight driver   51 checks
+PASS  enemies        596 checks
+PASS  turn seam      23 checks
+PASS  strike record  299 checks
+PASS  attack clips   1009 checks
+PASS  player input   106 checks
+PASS  player actions 174 checks
+PASS  player inventory 57 checks
+PASS  player combat  73 checks
+        window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
+        window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
+PASS  window glow    11225 checks
+PASS  board overlay  21 checks
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+PASS  atmosphere     156 checks
+PASS  reflection     31 checks
+PASS  anti-alias     55 checks
+PASS  render shell   58 checks
+PASS  ui panel       157 checks
+PASS  ui readout     1524 checks
+
+all 58 suites passed (201583 checks)
+WARNING: 69 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2735)
+WARNING: 1048 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 67 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+ERROR: 3 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 16 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
