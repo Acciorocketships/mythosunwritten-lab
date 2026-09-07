@@ -2581,7 +2581,9 @@ never has to be serialised for the world to be reproducible.
 
 ```
 ./run_tests.sh                  # every suite, headless, exits 0 when all pass
+./run_tests.sh test_rng test_items  # only the suites named, by file stem
 ./run_tests.sh --layers-only    # just the three structure checks
+./run_runner_guard.sh           # the runner reports a suite that throws, hangs, or cannot be entered
 ./run_pieces.sh                 # just the combat-piece suite
 ./run_resolution.sh             # just the combat-resolution suite
 ./run_snap.sh                   # just the real-time-to-board snap suite
@@ -2797,6 +2799,40 @@ is a catalog tag with a visual, repoints a tag and checks that neither the
 world's fingerprint nor one byte of the simulation's sources moved, exercises
 the checker on offending lines that exist nowhere on disk, and runs a headless
 process to confirm it loaded no visual asset at all.
+
+### A suite that misbehaves is named, not waited on
+
+This engine gives a script no way to catch a runtime error and no way to ask
+afterwards whether one happened: an error abandons the function it was raised in
+and returns to that function's caller. Three consequences, and where each is
+answered.
+
+An error raised in the **runner's own frame** — a script in the list that turns
+out not to be a `TestSuite`, say — used to take `_initialize()` with it, and with
+it the summary and both `quit()` calls, leaving the process idling with nothing
+left to do. The runner now enters one suite per idle frame, so the engine calls
+it again on the next frame: the suite that did not come back is reported by name
+and the run carries on. That is `bin/test_main.gd`.
+
+An error raised **inside a suite** cannot be seen from in here at all. The caller
+resumes, the runner counts the checks that were made and prints `PASS`. The full
+58-suite run of cycle 194 did exactly that: it printed `PASS goals` for a suite
+that had thrown at `tests/test_goals.gd:320`, and exited 0. So `run_tests.sh`
+reads the engine's own `SCRIPT ERROR` line back out of the output and fails the
+run, naming the suite from the `RUN` line above it.
+
+A suite that **never returns** — an endless loop, or a child process that never
+exits — cannot be interrupted from inside the process either. `run_tests.sh`
+kills a run that has printed nothing for `RUN_TESTS_SILENCE` seconds (7200 by
+default, well past the slowest suite here) and says which suite it was in. The
+wait measures silence rather than total time, so an honest run of several hours
+is left alone.
+
+All three are why the runner names each suite before entering it. `tests/runner_fixtures/`
+holds one suite planted for each, and `./run_runner_guard.sh` runs the ordinary
+command over them — about a minute — requiring each run to end on its own, name
+the suite, and exit non-zero, with two ordinary runs either side to show a pass
+still exits 0 and a failed check still exits 1.
 
 ## What is here so far
 

@@ -3,6 +3,19 @@ extends SceneTree
 ## expectation failed.
 ##
 ## Run it with:  ./run_tests.sh
+##
+## Naming suites runs only those:  ./run_tests.sh test_rng test_items
+##
+## Suites run one per idle frame, not in one loop. GDScript cannot catch a
+## runtime error, and an error abandons the whole GDScript call chain back to
+## the engine call that entered it -- so a suite that reads past the end of an
+## array used to take `_initialize()` down with it, leaving the summary
+## unprinted, neither `quit()` reached, and the process idling forever. The
+## engine calls `_process()` again on the next frame either way, so one suite
+## per frame turns "that frame never came back" into a reported failure:
+## `_running` holds the name of the suite that was entered and is cleared only
+## when it returns.
+
 
 const SUITES := [
 	preload("res://tests/test_rng.gd"),
@@ -66,32 +79,110 @@ const SUITES := [
 ]
 
 
+## Where a named suite is looked for when one is named on the command line.
+const SUITE_DIR := "res://tests/%s.gd"
+
+## The suites this run will work through, and how far into them it has got.
+var _queue: Array = []
+var _index := 0
+
+## The suite that was entered and has not come back yet, "" between suites. A
+## non-empty value at the top of a frame is how a throw is detected.
+var _running := ""
+
+## How many suites this run set out to work through, including any named on the
+## command line that turned out not to exist.
+var _total_suites := 0
+
+var _total_checks := 0
+var _failed_suites := 0
+var _total_failures := 0
+
+
 func _initialize() -> void:
-	var total_checks := 0
-	var failed_suites := 0
-	var total_failures := 0
+	_queue = _selection()
+	_total_suites += _queue.size()
 
-	for suite_script in SUITES:
-		var suite: TestSuite = suite_script.new()
-		suite.run()
-		total_checks += suite.checks
-		if suite.failures.is_empty():
-			print("PASS  %-14s %d checks" % [suite.suite_name, suite.checks])
-		else:
-			failed_suites += 1
-			total_failures += suite.failures.size()
-			print("FAIL  %-14s %d checks, %d failed" % [
-				suite.suite_name, suite.checks, suite.failures.size(),
-			])
-			for failure in suite.failures:
-				print("        - %s" % failure)
 
+func _process(_delta: float) -> bool:
+	if _running != "":
+		# The previous frame entered this suite and the frame never finished:
+		# the engine abandoned it on a runtime error, printed above this line.
+		_failed_suites += 1
+		_total_failures += 1
+		print("FAIL  %-14s threw a runtime error (see the SCRIPT ERROR above)" % _running)
+		_running = ""
+
+	if _index >= _queue.size():
+		_report()
+		return true
+
+	var suite_script: Script = _queue[_index]
+	_index += 1
+	_run_one(suite_script)
+	return false
+
+
+## Enter one suite. Everything after the `suite.run()` call is skipped when the
+## suite throws, which is what leaves `_running` set for the next frame.
+func _run_one(suite_script: Script) -> void:
+	# Named by its file, before anything of it is loaded or entered: a suite that
+	# breaks the runner before it is even instantiated still has to be nameable.
+	_running = _script_label(suite_script)
+	print("RUN   %s" % _running)
+
+	var suite: TestSuite = suite_script.new()
+	suite.run()
+
+	_total_checks += suite.checks
+	if suite.failures.is_empty():
+		print("PASS  %-14s %d checks" % [suite.suite_name, suite.checks])
+	else:
+		_failed_suites += 1
+		_total_failures += suite.failures.size()
+		print("FAIL  %-14s %d checks, %d failed" % [
+			suite.suite_name, suite.checks, suite.failures.size(),
+		])
+		for failure in suite.failures:
+			print("        - %s" % failure)
+	_running = ""
+
+
+func _report() -> void:
 	print("")
-	if failed_suites == 0:
-		print("all %d suites passed (%d checks)" % [SUITES.size(), total_checks])
+	if _failed_suites == 0:
+		print("all %d suites passed (%d checks)" % [_total_suites, _total_checks])
 		quit(0)
 	else:
 		print("%d of %d suites failed (%d failed checks of %d)" % [
-			failed_suites, SUITES.size(), total_failures, total_checks,
+			_failed_suites, _total_suites, _total_failures, _total_checks,
 		])
 		quit(1)
+
+
+## Every suite, or just the ones named after `--` on the command line. A name is
+## a file stem under `tests/` ("test_rng") or a full `res://` path.
+func _selection() -> Array:
+	var names := OS.get_cmdline_user_args()
+	if names.is_empty():
+		return SUITES.duplicate()
+	var chosen: Array = []
+	for name in names:
+		var path := name if name.begins_with("res://") else SUITE_DIR % name
+		if not ResourceLoader.exists(path):
+			push_error("no such suite: %s" % path)
+			print("FAIL  %-14s no such suite (%s)" % [name, path])
+			_failed_suites += 1
+			_total_failures += 1
+			_total_suites += 1
+			continue
+		chosen.append(load(path))
+	return chosen
+
+
+## What to call a suite before it has been instantiated: its file stem.
+func _script_label(suite_script: Script) -> String:
+	var path := suite_script.resource_path
+	if path.is_empty():
+		return "unnamed"
+	return path.get_file().get_basename()

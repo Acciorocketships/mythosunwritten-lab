@@ -1,0 +1,178 @@
+Evidence for W-suite-runner: a suite that throws is a reported failure, not a hang.
+Recorded 2026-09-07T05:13:29Z against the tree that ships.
+
+================================================================
+1. ./run_runner_guard.sh -- the repeatable check, run in full
+================================================================
+
+=== a run where nothing is wrong still passes
+    $ timeout -s KILL 300 ./run_tests.sh test_rng test_asset_tags
+    | Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+    | 
+    | RUN   test_rng
+    | PASS  rng            1325 checks
+    | RUN   test_asset_tags
+    | PASS  asset tags     1576 checks
+    | 
+    | all 2 suites passed (2901 checks)
+    -> exit 0 after 11s
+
+=== a failed check is still a failed run
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/failing
+    | Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+    | 
+    | RUN   test_rng
+    | PASS  rng            1325 checks
+    | RUN   failing
+    | FAIL  failing        2 checks, 1 failed
+    |         - a check that does not hold, on purpose
+    |       expected: 2
+    |       actual:   1
+    | 
+    | 1 of 2 suites failed (1 failed checks of 1327)
+    -> exit 1 after 2s
+
+=== a suite that raises a runtime error below its run()
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing test_asset_tags
+    | Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+    | 
+    | RUN   test_rng
+    | PASS  rng            1325 checks
+    | RUN   throwing
+    | SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+    |           at: RunnerThrowingFixture._reads_past_the_end (res://tests/runner_fixtures/throwing.gd:28)
+    |           GDScript backtrace (most recent call first):
+    |               [0] _reads_past_the_end (res://tests/runner_fixtures/throwing.gd:28)
+    |               [1] run (res://tests/runner_fixtures/throwing.gd:22)
+    |               [2] _run_one (res://bin/test_main.gd:135)
+    |               [3] _process (res://bin/test_main.gd:122)
+    | PASS  throwing       2 checks
+    | RUN   test_asset_tags
+    | PASS  asset tags     1576 checks
+    | 
+    | all 3 suites passed (2903 checks)
+    | 
+    | run_tests: suite 'throwing' raised a runtime error (SCRIPT ERROR above).
+    | run_tests: the engine returned to the caller and the runner could not see it,
+    | run_tests: so the run is failed here whatever the summary said.
+    -> exit 1 after 11s
+
+=== a suite the runner itself cannot enter
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/not_a_suite test_asset_tags
+    | Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+    | 
+    | RUN   test_rng
+    | PASS  rng            1325 checks
+    | RUN   not_a_suite
+    | SCRIPT ERROR: Trying to assign value of type 'not_a_suite.gd' to a variable of type 'test_suite.gd'.
+    |           at: _run_one (res://bin/test_main.gd:134)
+    |           GDScript backtrace (most recent call first):
+    |               [0] _run_one (res://bin/test_main.gd:134)
+    |               [1] _process (res://bin/test_main.gd:122)
+    | FAIL  not_a_suite    threw a runtime error (see the SCRIPT ERROR above)
+    | RUN   test_asset_tags
+    | PASS  asset tags     1576 checks
+    | 
+    | 1 of 3 suites failed (1 failed checks of 2901)
+    | 
+    | run_tests: suite 'not_a_suite' raised a runtime error (SCRIPT ERROR above).
+    | run_tests: the engine returned to the caller and the runner could not see it,
+    | run_tests: so the run is failed here whatever the summary said.
+    -> exit 1 after 11s
+
+=== a suite that never returns and never says anything
+    $ env RUN_TESTS_SILENCE=20 timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/stalling
+    | Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+    | 
+    | RUN   test_rng
+    | PASS  rng            1325 checks
+    | RUN   stalling
+    | ./run_tests.sh: line 72: 2193900 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$OUT" 2>&1
+    | 
+    | run_tests: nothing printed for 20s while running suite 'stalling'.
+    | run_tests: the run was killed. Nothing inside the process could end it.
+    -> exit 2 after 23s
+
+runner guard OK: each of the three is named and none of them hangs
+
+================================================================
+2. The regression this came from, through the ordinary command:
+   $ ./run_tests.sh test_goals
+   The suite is not hung -- it boots two child engines at ~106s
+   each -- but it throws, and the runner used to print PASS for it.
+================================================================
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+RUN   test_goals
+SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+          at: TestGoals._a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+          GDScript backtrace (most recent call first):
+              [0] _a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+              [1] run (res://tests/test_goals.gd:87)
+              [2] _run_one (res://bin/test_main.gd:135)
+              [3] _process (res://bin/test_main.gd:122)
+PASS  goals          129 checks
+
+all 1 suites passed (129 checks)
+
+run_tests: suite 'test_goals' raised a runtime error (SCRIPT ERROR above).
+run_tests: the engine returned to the caller and the runner could not see it,
+run_tests: so the run is failed here whatever the summary said.
+
+real	5m22.791s
+user	5m21.932s
+sys	0m0.272s
+EXIT=1
+
+================================================================
+3. The same throw in the last full 58-suite run, before this item
+   (reports/ground-items-suite-evidence.txt, cycle 194): reported
+   as a pass, run exit 0.
+================================================================
+SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+          at: TestGoals._a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+          GDScript backtrace (most recent call first):
+              [0] _a_character_may_not_close_what_the_world_answers (res://tests/test_goals.gd:320)
+              [1] run (res://tests/test_goals.gd:87)
+              [2] _initialize (res://bin/test_main.gd:76)
+PASS  goals          129 checks
+PASS  upkeep         95 checks
+all 58 suites passed (201583 checks)
+
+================================================================
+4. Every stored run log in reports/ that contains a SCRIPT ERROR
+   line, i.e. the false-positive risk of failing a run on one:
+================================================================
+reports/ground-items-suite-evidence.txt:1
+reports/runner-guard-evidence.txt:2
+
+================================================================
+5. The four structure checks and the source-scanning suites, with
+   the new fixtures on disk.
+================================================================
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check: OK -- res://sim names asset tags and no asset
+layers exit=0
+
+$ ./run_tests.sh test_walk_motion test_items test_layering test_render_shell test_characters
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+RUN   test_walk_motion
+PASS  walk motion    93 checks
+RUN   test_items
+PASS  items          169 checks
+RUN   test_layering
+PASS  layering       34 checks
+RUN   test_render_shell
+PASS  render shell   58 checks
+RUN   test_characters
+PASS  characters     1310 checks
+
+all 5 suites passed (1664 checks)
+exit=0
+
+(The census in section 4 now also counts this file, which quotes the lines above.)
