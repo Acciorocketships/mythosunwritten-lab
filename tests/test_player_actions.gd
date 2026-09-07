@@ -71,6 +71,8 @@ const INTERFACE_FILES := [
 	"res://render/ui/play_panel.gd",
 	"res://render/ui/answer_panel.gd",
 	"res://render/ui/character_panel.gd",
+	"res://render/ui/dialogue_panel.gd",
+	"res://render/ui/trade_panel.gd",
 ]
 
 ## What none of them may name: the engine's own rules about how far a thing is,

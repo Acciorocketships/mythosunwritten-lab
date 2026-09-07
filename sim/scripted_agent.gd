@@ -337,6 +337,82 @@ static func played_with(
 	}
 
 
+## The tick the model run's opening conversation is photographed at: Wren and
+## Rook have exchanged greetings, Rook has shouted across the market, and the
+## quarrel has not yet snapped anybody onto a board.
+const DIALOGUE_FRAME := 35
+
+
+## Stand the shipped model run's cast in a world at a stated tick and stop, for
+## a photograph: the run is played headless to that tick with the channel
+## handed in -- the shipped one replays the recorded exchange -- and everybody
+## is stood where it left them, carrying the sheet it played them with, exactly
+## as `ScriptedScenario.muster` does for the scripted run.
+##
+## One thing is carried across that the scripted muster has no need of: what
+## has been *said*. The dialogue panel reads speech off the scene the world
+## holds, and a photograph of a conversation with the conversation missing
+## would be a photograph of nothing -- so every line of `scene.said` is brought
+## over with its ids rewritten to the ones the world gave the same characters.
+## The offers come too, for the same reason and the same way. Both are the
+## run's own records, moved and not invented.
+static func muster(
+	world: SimWorld, minds: ModelChannel, at_tick: int = DIALOGUE_FRAME
+) -> int:
+	world.clear_cast()
+	var played := played_with(minds, at_tick)
+	var scene: ActionScene = played["scene"]
+	var bands := {}
+	var ids := {}
+	var placed := 0
+	for one in scene.actors:
+		var sheet := _sheet(one)
+		if sheet == null:
+			continue
+		var stood := world.combat.add(Combatant.commander_at(
+			one.x, one.z, one.heading, 0.0, sheet.level, one.piece.appearance))
+		var side := ScriptedScenario.MARKET if sheet.character_name == PELL \
+			else ScriptedScenario._side_of(sheet.character_name)
+		if bands.has(side):
+			stood.band = int(bands[side])
+		else:
+			bands[side] = stood.id
+		(stood.piece as Commander).adopt(sheet)
+		stood.settle(world.terrain)
+		ids[one.id] = stood.id
+		placed += 1
+	for spoken in scene.said:
+		var heard := PackedInt32Array()
+		for id in PackedInt32Array(spoken["heard_by"]):
+			if ids.has(int(id)):
+				heard.append(int(ids[int(id)]))
+		world.combat.scene.said.append({
+			"speaker": int(ids.get(int(spoken["speaker"]), 0)),
+			"text": String(spoken["text"]),
+			"to": int(ids.get(int(spoken["to"]), ActionCatalog.NOBODY)),
+			"shout": bool(spoken["shout"]),
+			"heard_by": heard,
+		})
+	for offer in scene.offers:
+		if ids.has(int(offer["from"])) and ids.has(int(offer["to"])):
+			world.combat.scene.set_offer({
+				"from": int(ids[int(offer["from"])]),
+				"to": int(ids[int(offer["to"])]),
+				"give": PackedStringArray(offer["give"]),
+				"give_money": int(offer["give_money"]),
+				"want": PackedStringArray(offer["want"]),
+				"want_money": int(offer["want_money"]),
+			})
+	# The view looks through the person's character rather than standing beside
+	# the cast: a followed character is what the dialogue panel reads, and
+	# `place_observer` would set the following aside.
+	var person := _named(scene, PERSON)
+	var wren: int = 0 if person == null else int(ids.get(person.id, 0))
+	if wren != 0:
+		world.follow(wren)
+	return placed
+
+
 # --- The head of the transcript -------------------------------------------
 
 

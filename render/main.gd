@@ -707,7 +707,16 @@ func _ready() -> void:
 	# word on where the camera goes, which is what somebody typing both means and
 	# what the headless entry point does with the same pair.
 	var scenario := String(options["scenario"])
-	if not _sim.begin_scenario(scenario, options["frozen"]):
+	# The two scenarios with model-driven minds in them need a channel of
+	# replies, and where replies come from is the entry point's business, never
+	# the simulation's: the shell hands in the shipped recorded exchange, so
+	# these runs need no key, no network and no model.
+	var minds: ModelChannel = null
+	if scenario == Simulation.SCENARIO_BARGAIN:
+		minds = ModelChannel.for_run(ModelRecording.bargain_exchange())
+	elif scenario == Simulation.SCENARIO_AGENT:
+		minds = ModelChannel.for_run(ModelRecording.exchange())
+	if not _sim.begin_scenario(scenario, options["frozen"], minds):
 		printerr("render-shell unknown or unavailable --scenario %s" % scenario)
 	if options["start"]:
 		_sim.world.place_observer(options["start_x"], options["start_z"])
@@ -775,8 +784,16 @@ func _ready() -> void:
 			# keyboard is not guessing about it either.
 			print("render-shell keys Z            open or shut the character sheet")
 	_synthetic = _parse_input_script(String(options["input"]))
-	if options["sheet"] or options["readout"] or _playing:
-		_sheet_ui = PixelUi.build(options["sheet"], options["readout"], _playing)
+	# A person playing gets the trade and dialogue panels whether or not they
+	# asked, for the reason they get the sheet: an offer that cannot be read
+	# cannot be accepted, and a reply that cannot be read cannot be answered.
+	var with_dialogue: bool = options["dialogue"] or _playing
+	var with_trade: bool = options["trade"] or _playing
+	if options["sheet"] or options["readout"] or _playing \
+			or with_dialogue or with_trade:
+		_sheet_ui = PixelUi.build(
+			options["sheet"], options["readout"], _playing,
+			with_dialogue, with_trade)
 		if _sheet_ui == null:
 			printerr(
 				"render-shell --sheet/--readout: the Sprout Lands UI pack is not"
@@ -823,6 +840,21 @@ func _exit_tree() -> void:
 		print("render-shell readout scale=%d x=%d y=%d w=%d h=%d fight=%d" % [
 			_sheet_ui.art_scale, box.position.x, box.position.y,
 			box.size.x, box.size.y, 1 if readout.has_fight() else 0,
+		])
+	# The same line again for the dialogue and trade panels, in the same shape
+	# and for the same reason: tools/measure_ui.sh reads a rectangle off each
+	# and asks the saved frame whether it is made of whole art pixels.
+	if _sheet_ui != null and _sheet_ui.dialogue != null and _sheet_ui.dialogue.visible:
+		var words := _sheet_ui.geometry_of(_sheet_ui.dialogue)
+		print("render-shell dialogue scale=%d x=%d y=%d w=%d h=%d" % [
+			_sheet_ui.art_scale, words.position.x, words.position.y,
+			words.size.x, words.size.y,
+		])
+	if _sheet_ui != null and _sheet_ui.trade != null and _sheet_ui.trade.visible:
+		var table := _sheet_ui.geometry_of(_sheet_ui.trade)
+		print("render-shell trade scale=%d x=%d y=%d w=%d h=%d" % [
+			_sheet_ui.art_scale, table.position.x, table.position.y,
+			table.size.x, table.size.y,
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
 	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d frame_ms=%.2f timed=%d digest=%s" % [
@@ -2161,6 +2193,15 @@ func _sync_sheet() -> void:
 	# frame and keeps no copy of what it says.
 	if _sheet_ui.play != null:
 		_sheet_ui.play.watch(_sim.world, _sim.driven_id, _controls)
+	# The two reading panels follow whoever the run is about: the character
+	# being driven when somebody is playing, and otherwise the one the world is
+	# looking through -- a photographed scenario has a followed character and
+	# nobody driving. Both panels read the world again on every frame.
+	var read_id := _sim.driven_id if _playing else _sim.world.follow_id
+	if _sheet_ui.dialogue != null:
+		_sheet_ui.dialogue.watch(_sim.world, read_id)
+	if _sheet_ui.trade != null:
+		_sheet_ui.trade.watch(_sim.world, read_id)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:
@@ -2364,7 +2405,7 @@ func _parse_args() -> Dictionary:
 		"distant": true, "lod_levels": false, "lod_centre": false,
 		"lod_centre_x": 0.0, "lod_centre_z": 0.0,
 		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
-		"sheet": false, "readout": false,
+		"sheet": false, "readout": false, "dialogue": false, "trade": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
 		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
@@ -2476,6 +2517,18 @@ func _parse_args() -> Dictionary:
 				# -- which is what tests/test_ui_readout.gd checks by running
 				# both.
 				options["readout"] = true
+			"--dialogue":
+				# Put the dialogue panel on screen: what the followed character
+				# said and what it heard, read off the same observation a
+				# model-driven mind is handed. A run with --play gets it
+				# unasked, for the reason it gets the sheet.
+				options["dialogue"] = true
+			"--trade":
+				# Put the trade panel on screen: both sides of every proposal
+				# standing for the followed character, and the engine's answer
+				# to the last trade verb, quoted whole. A run with --play gets
+				# it unasked too.
+				options["trade"] = true
 			"--play":
 				# Hand the character the world is looking through over to
 				# whoever is at the keyboard: from here on its next action is

@@ -516,7 +516,15 @@ func _no_character_in_a_shipped_world_is_nameless() -> void:
 	var unrolled := 0
 	for named in Simulation.SCENARIOS:
 		var sim := Simulation.new(ScriptedScenario.SEED)
-		check(sim.begin_scenario(named),
+		# The two scenarios with model-driven minds need a channel handed in,
+		# exactly as the entry points hand one; the replies are the shipped
+		# recording's, so the mount is as reproducible as any other.
+		var minds: ModelChannel = null
+		if named == Simulation.SCENARIO_BARGAIN:
+			minds = ModelChannel.for_run(ModelRecording.bargain_exchange())
+		elif named == Simulation.SCENARIO_AGENT:
+			minds = ModelChannel.for_run(ModelRecording.exchange())
+		check(sim.begin_scenario(named, false, minds),
 			"the %s scenario could not be set out" % named)
 		var sheets := _sheets_in(sim.world)
 		check(sheets.size() > 0,

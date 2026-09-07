@@ -728,7 +728,9 @@ static func _drop(
 ## What comes back is what can be *observed* -- a name, a distance, how hurt
 ## somebody looks, what they have on, whether a chest is shut -- and not what the
 ## character sheet says. A shut chest reports that it is shut and nothing about
-## what is in it.
+## what is in it, and a character's pack is closed to the looker except across a
+## standing trade within reach, which is `Observation.carries_shown`'s rule and
+## reaches here through `observed_of`.
 static func _examine(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
@@ -752,7 +754,7 @@ static func _examine(
 		return ActionOutcome.failed(action.kind, "%s is out of sight (%.2f > %.2f)" % [
 			ActionScene.name_of(thing), gap, SIGHT,
 		])
-	var seen: Dictionary = observed_of(thing)
+	var seen: Dictionary = observed_of(thing, scene, actor)
 	seen["distance"] = snappedf(gap, 0.001)
 	return ActionOutcome.done(action.kind, seen)
 
@@ -1090,7 +1092,16 @@ static func _between(one: Combatant, other: Combatant) -> float:
 ## asks it of one thing a character has aimed at; `Observation` asks it of
 ## everything a character can see, which is section 10's observation. A second
 ## reading of "how hurt does that look" would be a second answer to it.
-static func observed_of(thing: Variant) -> Dictionary:
+##
+## `scene` and `looker` say who is doing the seeing, for the one field that
+## depends on it: what a character carries is shown only to somebody standing
+## across a trade from it within reach, which is `Observation.carries_shown` --
+## the rule lives there, beside the other rules about what a looker may see,
+## and this asks it rather than answering again. With neither handed in, the
+## answer is what it always was.
+static func observed_of(
+	thing: Variant, scene: ActionScene = null, looker: Combatant = null
+) -> Dictionary:
 	if thing is WorldObject:
 		return thing.observed()
 	var one := thing as Combatant
@@ -1109,6 +1120,8 @@ static func observed_of(thing: Variant) -> Dictionary:
 			var item := Inventory.item_of(pack.equipment()[slot])
 			worn.append("%s=%s" % [slot, "-" if item == null else item.item_name])
 		seen["equipment"] = " ".join(worn) if not worn.is_empty() else "-"
+		if Observation.carries_shown(scene, looker, one):
+			seen["carries"] = ", ".join(Observation.carried_names_of(one))
 	return seen
 
 

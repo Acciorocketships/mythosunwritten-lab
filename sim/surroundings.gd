@@ -11,9 +11,11 @@ extends RefCounted
 ##
 ## ## It is the observation, projected
 ##
-## Everything in `aims` comes out of `Observation.of()`, which is the same packet
+## Everything in `aims`, `offers` and `heard` comes out of `Observation.of()`,
+## which is the same packet
 ## a language-model mind is handed and is where "what is near enough", "what is
-## in line of sight" and "what has this character met" are all decided. Nothing
+## in line of sight", "what has this character met" and "which trades can be
+## seen" are all decided. Nothing
 ## here widens it: a thing this character cannot make out is not in the list, so
 ## an interface cycling through the list cannot aim at the whole world. Nothing
 ## here narrows it either -- every row the observation holds is offered, and what
@@ -114,7 +116,12 @@ static func of(scene: ActionScene, id: int) -> Surroundings:
 			"label": label,
 			"distance": float(row["distance"]),
 			"in_sight": bool(row["line_of_sight"]),
-			"inside": PackedStringArray(),
+			# What can be seen inside a character is the packet's own answer:
+			# nothing, except what a trading partner within reach is shown
+			# (`Observation.carries_shown`). The person picks a `want` off this
+			# list exactly as they pick out of an open chest.
+			"inside": PackedStringArray(row["carries"]) if row.has("carries") \
+				else PackedStringArray(),
 		})
 	for row in seen.objects:
 		var thing := scene.object_of(int(row["id"]))
@@ -129,18 +136,19 @@ static func of(scene: ActionScene, id: int) -> Surroundings:
 			"inside": PackedStringArray() if thing == null or not row["line_of_sight"] \
 				else thing.contents_seen(),
 		})
-	view._read_offers(scene, labels)
+	view._read_offers(seen, labels)
 	view._read_heard(seen)
 	return view
 
 
 # Every offer this character is on one side of, in the order they were made.
-func _read_offers(scene: ActionScene, labels: Dictionary) -> void:
-	for offer in scene.offers:
+# Read off the packet rather than the scene, because whether a standing trade
+# can be seen is `Observation`'s to say -- it says yes for a party to one --
+# and reading the scene here would be a second answer to it.
+func _read_offers(seen: Observation, labels: Dictionary) -> void:
+	for offer in seen.offers:
 		var from_id := int(offer["from"])
 		var to_id := int(offer["to"])
-		if from_id != driven_id and to_id != driven_id:
-			continue
 		var mine := from_id == driven_id
 		offers.append({
 			"mine": mine,

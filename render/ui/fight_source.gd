@@ -167,8 +167,38 @@ static func actions_in(standing: Object, turn: int) -> Array[Dictionary]:
 			"cooldown": waits,
 			"sprite": String(one.sprite_tag),
 			"animation": String(one.animation_tag),
+			# The cells the action reaches, exactly as the simulation holds
+			# them -- relative to an attacker facing north -- for the pattern
+			# glyph. A read of the shape, never a rule about it: what the
+			# pattern *does* stays the engine's answer.
+			"offsets": Array(one.offsets),
 		})
 	return rows
+
+
+## The minion types one commander has standing in the fight, in the roster's
+## own order: one entry per living minion, each the simulation's own name for
+## its kind.
+##
+## Which pieces exist and what kind each is come out of the snapshot; whose
+## each is takes one more dynamic hop through the roster's member, for the
+## reason every other hop here does -- the owner is the piece's own field, and
+## widening the snapshot to carry it would be a copy this file exists to avoid.
+static func minions_of(world: SimWorld, owner_id: int) -> PackedStringArray:
+	var kinds := PackedStringArray()
+	if world == null or world.combat == null:
+		return kinds
+	for row in world.combat.snapshot()["pieces"]:
+		if bool(row["commander"]):
+			continue
+		var member: Variant = world.combat.member_of(int(row["id"]))
+		if member == null:
+			continue
+		var piece: Variant = member.piece
+		if piece == null or int(piece.owner_id) != owner_id:
+			continue
+		kinds.append(String(row["kind"]))
+	return kinds
 
 
 ## The snapshot of everyone in the world and everything that has just happened

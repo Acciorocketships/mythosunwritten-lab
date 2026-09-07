@@ -26,11 +26,13 @@ extends SceneTree
 ##
 ## Each question is put `TRIES` times before its answer is taken as final.
 ##
-## ## `--cast`, `--checks`, `--world` and `--goodwill`
+## ## `--cast`, `--checks`, `--world`, `--goodwill` and `--bargain`
 ##
 ## With `--live --checks` only the difficulty-class run's questions are put, with
 ## `--live --world` only the orchestrator run's, with `--live --goodwill` only the
-## goodwill run's, and with `--live --cast` only the three tables the character
+## goodwill run's, with `--live --bargain` only the bargain run's (the trader's
+## questions while a person's written-down key presses buy the lantern off him,
+## `tests/test_bargain.gd`), and with `--live --cast` only the three tables the character
 ## runs read -- the shipped run, the lesson comparison and the goal comparison,
 ## which are recorded together because they put questions to the same sort of
 ## mind about the same characters. Whichever is asked for, every other table is
@@ -66,8 +68,9 @@ func _initialize() -> void:
 	var only_world := args.has("--world")
 	var only_cast := args.has("--cast")
 	var only_goodwill := args.has("--goodwill")
+	var only_bargain := args.has("--bargain")
 	var everything := not only_checks and not only_world and not only_cast \
-		and not only_goodwill
+		and not only_goodwill and not only_bargain
 	var credentials := ModelCall.credentials()
 	# Where this pass would go, rather than where the shipped recording came
 	# from. They are the same unless the environment names a local endpoint, and
@@ -80,7 +83,8 @@ func _initialize() -> void:
 	])
 	print("  credential %s" % credentials["why"])
 	print("  putting    %s" % _what_is_being_put(
-		everything, only_cast, only_checks, only_world, only_goodwill))
+		everything, only_cast, only_checks, only_world, only_goodwill,
+		only_bargain))
 	if not live:
 		print("  did nothing: pass --live to actually call the model")
 		print("")
@@ -104,10 +108,12 @@ func _initialize() -> void:
 		"goals": ModelRecording.GOAL_ROWS, "checks": ModelRecording.CHECK_ROWS,
 		"world": ModelRecording.WORLD_ROWS,
 		"goodwill": ModelRecording.GOODWILL_ROWS,
+		"bargain": ModelRecording.BARGAIN_ROWS,
 		"on": ModelRecording.RECORDED_ON,
 		"checks_on": ModelRecording.CHECKS_RECORDED_ON,
 		"world_on": ModelRecording.WORLD_RECORDED_ON,
 		"goodwill_on": ModelRecording.GOODWILL_RECORDED_ON,
+		"bargain_on": ModelRecording.BARGAIN_RECORDED_ON,
 	}
 	if everything or only_cast:
 		var channel := _fresh()
@@ -216,15 +222,37 @@ func _initialize() -> void:
 		rows["goodwill"] = gw.exchanges
 		rows["goodwill_on"] = Time.get_date_string_from_system(true)
 
+	# The bargain run's own questions, out of a channel of its own: the trader
+	# Hob's, while a person's written-down key presses buy the lantern off him.
+	# How many there are is the model's own pacing to decide.
+	if everything or only_bargain:
+		var market := _fresh()
+		var bought := TestBargain.play(market)
+		for line in (bought["world"] as SimWorld).loop.journal:
+			print("    | %s" % line)
+		print("  asked      %d questions for the bargain run, %d answered" % [
+			market.asked(), market.exchanges.size(),
+		])
+		var unanswered := _empty_in(market, "the bargain run")
+		if unanswered > 0:
+			_report_empty(unanswered)
+		if market.exchanges.is_empty():
+			printerr("  wrote nothing: the bargain exchange is empty")
+			quit(1)
+			return
+		rows["bargain"] = market.exchanges
+		rows["bargain_on"] = Time.get_date_string_from_system(true)
+
 	var written := _write(rows)
 	if written == "":
 		printerr("  could not write %s" % RECORDING)
 		quit(1)
 		return
-	print("  wrote      %s, %d replies, %d lesson, %d goal, %d check, %d world and %d goodwill replies" % [
+	print("  wrote      %s, %d replies, %d lesson, %d goal, %d check, %d world, %d goodwill and %d bargain replies" % [
 		RECORDING, (rows["main"] as Array).size(), (rows["lessons"] as Array).size(),
 		(rows["goals"] as Array).size(), (rows["checks"] as Array).size(),
 		(rows["world"] as Array).size(), (rows["goodwill"] as Array).size(),
+		(rows["bargain"] as Array).size(),
 	])
 	if everything or only_cast:
 		print("  now run:   ./run_agent.sh > reports/agent-evidence.txt")
@@ -236,6 +264,8 @@ func _initialize() -> void:
 		print("  now run:   ./run_world.sh > reports/world-evidence.txt")
 	if everything or only_goodwill:
 		print("  now run:   ./run_goodwill.sh > reports/goodwill-evidence.txt")
+	if everything or only_bargain:
+		print("  now run:   ./tools/bargain_actions.sh > reports/bargain-evidence.txt")
 	quit(0)
 
 
@@ -356,6 +386,11 @@ func _write(rows: Dictionary) -> String:
 	kept.append("## questions and writes the other five back unchanged.")
 	kept.append('const GOODWILL_RECORDED_ON := "%s"' % rows["goodwill_on"])
 	kept.append("")
+	kept.append("## When the bargain table was recorded, which is its own date for the same")
+	kept.append("## reason the others are: `./run_record.sh --live --bargain` puts only its")
+	kept.append("## questions and writes the other six back unchanged.")
+	kept.append('const BARGAIN_RECORDED_ON := "%s"' % rows["bargain_on"])
+	kept.append("")
 	kept.append("## The exchange. Rewritten by the recorder; see the note above.")
 	kept.append("const ROWS := [")
 	kept.append_array(_rows_of(rows["main"]))
@@ -384,6 +419,11 @@ func _write(rows: Dictionary) -> String:
 	kept.append("## The goodwill run's questions, on their own date above.")
 	kept.append("const GOODWILL_ROWS := [")
 	kept.append_array(_rows_of(rows["goodwill"]))
+	kept.append("]")
+	kept.append("")
+	kept.append("## The bargain run's questions, on their own date above.")
+	kept.append("const BARGAIN_ROWS := [")
+	kept.append_array(_rows_of(rows["bargain"]))
 	kept.append("]")
 	kept.append("")
 	kept.append("")
@@ -424,6 +464,12 @@ func _write(rows: Dictionary) -> String:
 	kept.append('\treturn {"rows": GOODWILL_ROWS, "from": goodwill_provenance(), "model": MODEL}')
 	kept.append("")
 	kept.append("")
+	kept.append("## The bargain run's own exchange, in the same shape, and with its own date")
+	kept.append("## on it.")
+	kept.append("static func bargain_exchange() -> Dictionary:")
+	kept.append('\treturn {"rows": BARGAIN_ROWS, "from": bargain_provenance(), "model": MODEL}')
+	kept.append("")
+	kept.append("")
 	kept.append("## How a provenance line names who answered: the model, and whether it was one")
 	kept.append("## running on the machine that recorded it. See `LOCAL` above.")
 	kept.append("static func said_by() -> String:")
@@ -451,10 +497,18 @@ func _write(rows: Dictionary) -> String:
 	kept.append("\t]")
 	kept.append("")
 	kept.append("")
+	kept.append("## Where the bargain replies came from.")
+	kept.append("static func bargain_provenance() -> String:")
+	kept.append('\treturn "recorded %s from %s at %s, %d replies" % [')
+	kept.append("\t\tBARGAIN_RECORDED_ON, said_by(), ENDPOINT, BARGAIN_ROWS.size(),")
+	kept.append("\t]")
+	kept.append("")
+	kept.append("")
 	kept.append("## How many replies the recording holds.")
 	kept.append("static func size() -> int:")
 	kept.append("\treturn ROWS.size() + LESSON_ROWS.size() + GOAL_ROWS.size() \\")
-	kept.append("\t\t+ CHECK_ROWS.size() + WORLD_ROWS.size() + GOODWILL_ROWS.size()")
+	kept.append("\t\t+ CHECK_ROWS.size() + WORLD_ROWS.size() + GOODWILL_ROWS.size() \\")
+	kept.append("\t\t+ BARGAIN_ROWS.size()")
 	kept.append("")
 	kept.append("")
 	kept.append("## One line saying where the replies came from, printed at the head of a run that")
@@ -497,10 +551,10 @@ static func _quoted(reply: String) -> String:
 # What this pass is putting to the model, in one line for the head of the run.
 static func _what_is_being_put(
 	everything: bool, only_cast: bool, only_checks: bool, only_world: bool,
-	only_goodwill: bool
+	only_goodwill: bool, only_bargain: bool
 ) -> String:
 	if everything:
-		return "every question of all six runs, in one pass"
+		return "every question of all seven runs, in one pass"
 	var which := "the character runs' questions only -- the shipped run, the" \
 		+ " lesson comparison and the goal comparison"
 	if only_checks:
@@ -509,6 +563,8 @@ static func _what_is_being_put(
 		which = "the orchestrator run's questions only"
 	elif only_goodwill:
 		which = "the goodwill run's questions only"
+	elif only_bargain:
+		which = "the bargain run's questions only"
 	elif not only_cast:
 		which = "nothing"
 	return which + "; every other table is written back unchanged"

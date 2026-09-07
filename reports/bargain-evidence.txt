@@ -1,0 +1,162 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234, driving #1, trader Hob driven by a model
+channel: the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+
+the same run from a shell:  ./run_render.sh --scenario bargain --play \
+    --input "1:b,2:tab,3:e,9:p,35:t,50:minus,52:o,60:c,61:minus,62:minus,63:minus,64:o,95:e,101:i,108:u,115:e"
+
+every key pressed, and what the controls were left holding:
+  t=1   B      chose -                                                          taking=- coins=0
+  t=2   Tab    chose -                                                          taking=- coins=0
+  t=3   E      chose examine(target=2)                                          taking=- coins=0
+  t=9   P      chose go_to(target=2)                                            taking=- coins=0
+  t=35  T      chose say(text=what will you take for it? target=2)              taking=- coins=0
+  t=50  Minus  chose -                                                          taking=- coins=-1
+  t=52  O      chose trade_propose(target=2 give=[] give_money=1 want=[] want_money=0) taking=- coins=-1
+  t=60  C      chose -                                                          taking=brass lantern coins=-1
+  t=61  Minus  chose -                                                          taking=brass lantern coins=-2
+  t=62  Minus  chose -                                                          taking=brass lantern coins=-3
+  t=63  Minus  chose -                                                          taking=brass lantern coins=-4
+  t=64  O      chose trade_propose(target=2 give=[] give_money=4 want=[brass lantern] want_money=0) taking=brass lantern coins=-4
+  t=95  E      chose examine(target=2)                                          taking=brass lantern coins=-4
+  t=101 I      chose trade_deny(target=2)                                       taking=brass lantern coins=-4
+  t=108 U      chose trade_accept(target=2)                                     taking=brass lantern coins=-4
+  t=115 E      chose examine(target=2)                                          taking=brass lantern coins=-4
+
+every answer the engine gave the person:
+  t=8   examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
+  t=36  go_to ok at=(-476.400, 420.000) walked=0.0 steps=0
+  t=41  say ok shout=false heard_by=1 check=2 context=persuade:#2
+  t=57  trade_propose ok to=2 give=0 give_money=1 want=0 want_money=0
+  t=69  trade_propose ok to=2 give=0 give_money=4 want=1 want_money=0
+  t=100 examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- carries= distance=2.4
+  t=104 trade_deny ok from=2
+  t=112 trade_accept refused: the offer from Hob was denied
+  t=120 examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=2.4
+
+the ticks either of the two was shown the other's pack, both directions:
+  t=28 to t=103; at t=28 the person was shown [brass lantern] and the trader [common boots, common sword, mending draught, wool blanket]
+
+what the whole world did about it, in the loop's own words:
+  t=  1  Fen    has not decided yet, and waits in the world
+  t=  1  Hob    has not decided yet, and waits in the world
+  t=  1  Rill   began wait(ticks=20), 20 ticks
+  t=  4  Fen    began examine(target=2), 4 ticks
+  t=  4  Hob    began examine(target=5), 4 ticks
+  t=  6  Rill   thought again at 5/20t, wanted the same thing
+  t=  8  Fen    finished examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
+  t=  8  Fen    has not decided yet, and waits in the world
+  t=  8  Hob    finished examine(target=5) -> examine ok id=5 name=chest kind=object shut=true needs=iron key distance=11.0
+  t=  8  Hob    has not decided yet, and waits in the world
+  t= 10  Fen    began go_to(target=2), 20 ticks
+  t= 11  Hob    began say(text=Fen, do you have any coins to spare? I need to raise some money. target=1), 5 ticks
+  t= 11  Rill   thought again at 10/20t, wanted the same thing
+  t= 15  Fen    thought again at 5/20t, wanted the same thing
+  t= 16  Hob    finished say(text=Fen, do you have any coins to spare? I need to raise some money. target=1) -> say ok shout=false heard_by=1 check=1 context=persuade:#1
+  t= 16  Hob    has not decided yet, and waits in the world
+  t= 16  Rill   thought again at 15/20t, wanted the same thing
+  t= 16  Fen    interrupted (spoken to), abandoned go_to(target=2) 6/20t
+  t= 16  Fen    began go_to(target=2), 20 ticks
+  t= 19  Hob    began wait(ticks=2), 2 ticks
+  t= 21  Fen    thought again at 5/20t, wanted the same thing
+  t= 21  Hob    finished wait(ticks=2) -> wait ok ticks=2 until=23
+  t= 21  Hob    has not decided yet, and waits in the world
+  t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
+  t= 21  Rill   began wait(ticks=20), 20 ticks
+  t= 24  Hob    began trade_propose(target=1 give=[brass lantern] want_money=6), 4 ticks
+  t= 26  Fen    thought again at 10/20t, wanted the same thing
+  t= 26  Rill   thought again at 5/20t, wanted the same thing
+  t= 28  Hob    finished trade_propose(target=1 give=[brass lantern] want_money=6) -> trade_propose ok to=1 give=1 give_money=0 want=0 want_money=6
+  t= 28  Hob    has not decided yet, and waits in the world
+  t= 31  Fen    thought again at 15/20t, wanted the same thing
+  t= 31  Hob    began examine(target=4), 4 ticks
+  t= 31  Rill   thought again at 10/20t, wanted the same thing
+  t= 35  Hob    finished examine(target=4) -> examine ok id=4 name=pile kind=pile shut=false holds=1 money=0 distance=7.211
+  t= 35  Hob    has not decided yet, and waits in the world
+  t= 36  Fen    finished go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=0.0 steps=0
+  t= 36  Fen    began say(text=what will you take for it? target=2), 5 ticks
+  t= 36  Rill   thought again at 15/20t, wanted the same thing
+  t= 38  Hob    began wait(ticks=3), 3 ticks
+  t= 41  Fen    finished say(text=what will you take for it? target=2) -> say ok shout=false heard_by=1 check=2 context=persuade:#2
+  t= 41  Fen    has not decided yet, and waits in the world
+  t= 41  Hob    finished wait(ticks=3) -> wait ok ticks=3 until=44
+  t= 41  Hob    has not decided yet, and waits in the world
+  t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
+  t= 41  Rill   began wait(ticks=20), 20 ticks
+  t= 44  Hob    began say(text="6 coins for the lantern" target=1), 5 ticks
+  t= 46  Rill   thought again at 5/20t, wanted the same thing
+  t= 49  Hob    finished say(text="6 coins for the lantern" target=1) -> say ok shout=false heard_by=1 check=3 context=persuade:#1
+  t= 49  Hob    has not decided yet, and waits in the world
+  t= 51  Rill   thought again at 10/20t, wanted the same thing
+  t= 52  Hob    began wait(ticks=1), 1 ticks
+  t= 53  Fen    began trade_propose(target=2 give=[] give_money=1 want=[] want_money=0), 4 ticks
+  t= 53  Hob    finished wait(ticks=1) -> wait ok ticks=1 until=54
+  t= 53  Hob    has not decided yet, and waits in the world
+  t= 56  Hob    began say(text="So, Fen, will you take it?" target=1), 5 ticks
+  t= 56  Rill   thought again at 15/20t, wanted the same thing
+  t= 57  Fen    finished trade_propose(target=2 give=[] give_money=1 want=[] want_money=0) -> trade_propose ok to=2 give=0 give_money=1 want=0 want_money=0
+  t= 57  Fen    has not decided yet, and waits in the world
+  t= 61  Hob    finished say(text="So, Fen, will you take it?" target=1) -> say ok shout=false heard_by=1 check=4 context=persuade:#1
+  t= 61  Hob    has not decided yet, and waits in the world
+  t= 61  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=81
+  t= 61  Rill   began wait(ticks=20), 20 ticks
+  t= 64  Hob    began trade_accept(target=1), 3 ticks
+  t= 65  Fen    began trade_propose(target=2 give=[] give_money=4 want=[brass lantern] want_money=0), 4 ticks
+  t= 66  Rill   thought again at 5/20t, wanted the same thing
+  t= 67  Hob    finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=1 gave=0 gave_money=0
+  t= 67  Hob    has not decided yet, and waits in the world
+  t= 69  Fen    finished trade_propose(target=2 give=[] give_money=4 want=[brass lantern] want_money=0) -> trade_propose ok to=2 give=0 give_money=4 want=1 want_money=0
+  t= 69  Fen    has not decided yet, and waits in the world
+  t= 70  Hob    began wait(ticks=3), 3 ticks
+  t= 71  Rill   thought again at 10/20t, wanted the same thing
+  t= 73  Hob    finished wait(ticks=3) -> wait ok ticks=3 until=76
+  t= 73  Hob    has not decided yet, and waits in the world
+  t= 76  Hob    began trade_accept(target=1), 3 ticks
+  t= 76  Rill   thought again at 15/20t, wanted the same thing
+  t= 79  Hob    finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=4 gave=1 gave_money=0
+  t= 79  Hob    has not decided yet, and waits in the world
+  t= 81  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=101
+  t= 81  Rill   began wait(ticks=20), 20 ticks
+  t= 82  Hob    began wait(ticks=1), 1 ticks
+  t= 83  Hob    finished wait(ticks=1) -> wait ok ticks=1 until=84
+  t= 83  Hob    has not decided yet, and waits in the world
+  t= 86  Hob    began wait(ticks=5), 5 ticks
+  t= 86  Rill   thought again at 5/20t, wanted the same thing
+  t= 91  Hob    finished wait(ticks=5) -> wait ok ticks=5 until=96
+  t= 91  Hob    has not decided yet, and waits in the world
+  t= 91  Rill   thought again at 10/20t, wanted the same thing
+  t= 96  Fen    began examine(target=2), 4 ticks
+  t= 96  Rill   thought again at 15/20t, wanted the same thing
+  t=100  Fen    finished examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- carries= distance=2.4
+  t=100  Fen    has not decided yet, and waits in the world
+  t=101  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=121
+  t=101  Rill   began wait(ticks=20), 20 ticks
+  t=102  Fen    began trade_deny(target=2), 2 ticks
+  t=102  Hob    began wait(ticks=5), 5 ticks
+  t=104  Fen    finished trade_deny(target=2) -> trade_deny ok from=2
+  t=104  Fen    has not decided yet, and waits in the world
+  t=106  Rill   thought again at 5/20t, wanted the same thing
+  t=107  Hob    finished wait(ticks=5) -> wait ok ticks=5 until=112
+  t=107  Hob    has not decided yet, and waits in the world
+  t=109  Fen    began trade_accept(target=2), 3 ticks
+  t=110  Hob    began wait(ticks=1), 1 ticks
+  t=111  Hob    finished wait(ticks=1) -> wait ok ticks=1 until=112
+  t=111  Hob    has not decided yet, and waits in the world
+  t=111  Rill   thought again at 10/20t, wanted the same thing
+  t=112  Fen    finished trade_accept(target=2) -> trade_accept refused: the offer from Hob was denied
+  t=112  Fen    has not decided yet, and waits in the world
+  t=116  Fen    began examine(target=2), 4 ticks
+  t=116  Rill   thought again at 15/20t, wanted the same thing
+  t=118  Hob    began wait(ticks=1), 1 ticks
+  t=119  Hob    finished wait(ticks=1) -> wait ok ticks=1 until=120
+  t=119  Hob    has not decided yet, and waits in the world
+  t=120  Fen    finished examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=2.4
+  t=120  Fen    has not decided yet, and waits in the world
+  t=121  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=141
+  t=121  Rill   began wait(ticks=20), 20 ticks
+  t=122  Hob    began wait(ticks=3), 3 ticks
+  t=125  Hob    finished wait(ticks=3) -> wait ok ticks=3 until=128
+  t=125  Hob    has not decided yet, and waits in the world
+  t=126  Rill   thought again at 5/20t, wanted the same thing
+  t=128  Hob    began trade_propose(target=1 give=[lantern] want_money=6), 4 ticks

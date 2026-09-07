@@ -47,16 +47,19 @@ const SIM_DIR := "res://sim"
 ## literals stripped, so a mention in prose does not count.
 const MAKES_A_GOAL := ["Goal.of(", "Goal.unwritten("]
 
-## The only files under `sim/` allowed to make one. Scenario setup, all three of
+## The only files under `sim/` allowed to make one. Scenario setup, all of
 ## them: the shipped run's own character, the controlled comparison's four arms,
-## and the goodwill run's three neighbours, each of whom wants one thing so that
+## the goodwill run's three neighbours, each of whom wants one thing so that
 ## somebody else can turn out to have been why they got it -- wants the
-## territory run stages again, for the same reason. The machinery --
+## territory run stages again, for the same reason -- and the bargain run's
+## trader, who wants to be carrying his purse plus his price so that selling
+## the lantern is his own idea. The machinery --
 ## `goal.gd`, `goal_set.gd`, `goal_check.gd`, `deed.gd`, `deed_desk.gd`, the
 ## prompt and the mind -- makes none, which is what "no quest is scripted" means
 ## here.
 const MAY_MAKE_A_GOAL := [
 	"res://sim/scripted_agent.gd",
+	"res://sim/scripted_bargain.gd",
 	"res://sim/scripted_goal.gd",
 	"res://sim/scripted_goodwill.gd",
 	"res://sim/scripted_territory.gd",

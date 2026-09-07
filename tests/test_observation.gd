@@ -26,6 +26,7 @@ func run() -> void:
 	_the_ground_is_the_combat_lattice()
 	_the_window_says_what_its_marks_mean()
 	_what_was_heard_is_the_engines_answer()
+	_a_trade_you_are_party_to_is_observable()
 	_nothing_global_is_in_it()
 	_recent_changes_are_read_off_the_world()
 	_it_is_the_same_for_the_same_surroundings()
@@ -318,6 +319,95 @@ func _what_was_heard_is_the_engines_answer() -> void:
 
 ## Nothing in the packet is anything a character standing there could not
 ## perceive. Checked as text, because the packet is what will be handed over.
+## A trade you are party to is observable, and it is observable the same way
+## from both ends: the offer itself is in either party's packet, and while it
+## stands within reach each party's row in the *other's* packet carries what it
+## carries. The claim is run in both directions rather than read off the code,
+## because the rule may not know or care who is driving either character.
+func _a_trade_you_are_party_to_is_observable() -> void:
+	var scene := _stage()
+	var wren := scene.actors[0]
+	var rook := scene.actors[1]
+	rook.x = wren.x + 1.0
+	rook.z = wren.z
+	ActionScene.inventory_of(wren).carry(_thing("wool blanket"))
+	ActionScene.inventory_of(wren).gain(5)
+	ActionScene.inventory_of(rook).carry(_thing("brass lantern"))
+	ActionScene.inventory_of(rook).carry(_thing("iron key"))
+
+	# Before anything is offered: no offers, no pack shown, and the printed
+	# packet has no offers section at all -- a packet with no trade on the table
+	# prints exactly what it always printed.
+	var before := Observation.of(scene, wren)
+	check(before.offers.is_empty(), "with nothing offered there is nothing on the table")
+	check(not _row_for(before.entities, rook.id).has("carries"),
+		"a pack is not observable from outside a trade")
+	check(not before.text().contains("offers"),
+		"a packet with no trade standing prints no offers section")
+
+	# A real offer, made through the engine: Wren asks Rook for the lantern.
+	var proposed := ActionEngine.resolve(scene, wren, Action.trade_propose(
+		rook.id, PackedStringArray(["wool blanket"]), 2,
+		PackedStringArray(["brass lantern"]), 0))
+	check(proposed.ok, "the offer should stand: %s" % proposed.line())
+
+	# Both parties see the offer, both halves, from either end.
+	var mine := Observation.of(scene, wren)
+	var theirs := Observation.of(scene, rook)
+	equal(mine.offers.size(), 1, "the proposer sees the trade standing")
+	equal(theirs.offers.size(), 1, "and so does the one it was put to")
+	check(bool(mine.offers[0]["yours"]) and not bool(theirs.offers[0]["yours"]),
+		"each end knows which side of it it is on")
+	for seen in [mine, theirs]:
+		var row: Dictionary = (seen as Observation).offers[0]
+		equal(PackedStringArray(row["give"]), PackedStringArray(["wool blanket"]),
+			"the given half is the proposer's, whoever is looking")
+		equal(PackedStringArray(row["want"]), PackedStringArray(["brass lantern"]),
+			"and so is the wanted half")
+		equal(int(row["give_money"]), 2, "with the coins each way")
+	check(mine.text().contains("offers     1 trade standing"),
+		"the printed packet says a trade is standing")
+	check(mine.text().contains("gives wool blanket + 2 coin, wants brass lantern"),
+		"and writes both halves out: %s" % mine.text())
+
+	# Within reach and across a standing trade, each is shown the other's pack
+	# -- sorted, because what is carried is a set and not a history.
+	equal(PackedStringArray(_row_for(mine.entities, rook.id)["carries"]),
+		PackedStringArray(["brass lantern", "iron key"]),
+		"the proposer is shown the counterparty's pack")
+	equal(PackedStringArray(_row_for(theirs.entities, wren.id)["carries"]),
+		PackedStringArray(["wool blanket"]),
+		"and the counterparty is shown the proposer's")
+
+	# An examine agrees with the packet, in both directions, because both ask
+	# the one rule.
+	var looked := ActionEngine.resolve(scene, wren, Action.examine(rook.id))
+	check(looked.ok and String(looked.detail["carries"]) == "brass lantern, iron key",
+		"an examine across the trade shows the pack: %s" % looked.line())
+	var looked_back := ActionEngine.resolve(scene, rook, Action.examine(wren.id))
+	check(looked_back.ok and String(looked_back.detail["carries"]) == "wool blanket",
+		"and shows it the other way round: %s" % looked_back.line())
+
+	# Out of reach the offer is still on the table but the wares are not.
+	rook.x = wren.x + ActionEngine.REACH * 3.0
+	var apart := Observation.of(scene, wren)
+	equal(apart.offers.size(), 1, "the offer stands however far apart the two drift")
+	check(not _row_for(apart.entities, rook.id).has("carries"),
+		"but the pack is shown only within reach")
+	rook.x = wren.x + 1.0
+
+	# Denied, the trade is off the table and the packs shut again, both ways.
+	var denied := ActionEngine.resolve(scene, rook, Action.trade_deny(wren.id))
+	check(denied.ok, "the denial should resolve: %s" % denied.line())
+	var after := Observation.of(scene, wren)
+	check(after.offers.is_empty(), "a denied offer is no longer on the table")
+	check(not _row_for(after.entities, rook.id).has("carries"),
+		"and the pack shuts with it")
+	check(not Observation.of(scene, rook).entities.any(
+		func(row: Dictionary) -> bool: return row.has("carries")),
+		"in both directions")
+
+
 func _nothing_global_is_in_it() -> void:
 	var scene := _stage()
 	scene.advance(37)

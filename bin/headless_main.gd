@@ -49,7 +49,16 @@ func _initialize() -> void:
 	# world's and puts the view where that cast is; --start then has the last word
 	# on where the view goes, which is what somebody typing both means.
 	var scenario := String(options["scenario"])
-	if not sim.begin_scenario(scenario, options["frozen"]):
+	# The two scenarios with model-driven minds need a channel of replies, and
+	# where replies come from is the entry point's business: the shipped
+	# recorded exchange, so a headless run of them still needs no key, no
+	# network and no model.
+	var minds: ModelChannel = null
+	if scenario == Simulation.SCENARIO_BARGAIN:
+		minds = ModelChannel.for_run(ModelRecording.bargain_exchange())
+	elif scenario == Simulation.SCENARIO_AGENT:
+		minds = ModelChannel.for_run(ModelRecording.exchange())
+	if not sim.begin_scenario(scenario, options["frozen"], minds):
 		printerr("headless unknown or unavailable --scenario %s" % scenario)
 		quit(2)
 		return

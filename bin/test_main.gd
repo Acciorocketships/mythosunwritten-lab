@@ -67,6 +67,7 @@ const SUITES := [
 	preload("res://tests/test_attack_clips.gd"),
 	preload("res://tests/test_player_input.gd"),
 	preload("res://tests/test_player_actions.gd"),
+	preload("res://tests/test_bargain.gd"),
 	preload("res://tests/test_player_inventory.gd"),
 	preload("res://tests/test_player_combat.gd"),
 	preload("res://tests/test_window_glow.gd"),
@@ -78,6 +79,7 @@ const SUITES := [
 	preload("res://tests/test_render_shell.gd"),
 	preload("res://tests/test_ui_panel.gd"),
 	preload("res://tests/test_ui_readout.gd"),
+	preload("res://tests/test_ui_exchange.gd"),
 ]
 
 

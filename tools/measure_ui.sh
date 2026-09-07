@@ -63,7 +63,7 @@ if [[ "$TICK" -gt 0 ]]; then
 fi
 
 OUT="$("$GODOT" --path . --resolution "$RESOLUTION" --fixed-fps 30 -- \
-	--seed 1234 --scenario "$SCENARIO" --sheet --readout \
+	--seed 1234 --scenario "$SCENARIO" --sheet --readout --dialogue --trade \
 	--screenshot "$FRAME" "${WAIT[@]}" "${EXTRA[@]}" 2>&1)" || {
 	echo "$OUT" >&2; exit 1
 }
@@ -76,7 +76,7 @@ if [[ -z "$LINE" ]]; then
 fi
 read -r SCALE X Y W H <<<"$(sed -E 's/.*scale=([0-9]+) x=(-?[0-9]+) y=(-?[0-9]+) w=([0-9]+) h=([0-9]+).*/\1 \2 \3 \4 \5/' <<<"$LINE")"
 
-grep -E '^render-shell (boot|sheet|readout) ' <<<"$OUT"
+grep -E '^render-shell (boot|sheet|readout|dialogue|trade) ' <<<"$OUT"
 exec env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . \
 	--script res://tools/measure_ui.gd -- \
 	--frame "$FRAME" --at "$X" "$Y" --size "$W" "$H" --scale "$SCALE"

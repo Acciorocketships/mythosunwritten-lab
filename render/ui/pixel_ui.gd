@@ -15,13 +15,15 @@ extends CanvasLayer
 ## one at 3, and a window too small for even that draws at 1 and lets the panel
 ## run off the bottom rather than shrinking it to a fraction.
 ##
-## ## Four panels, one theme
+## ## Six panels, one theme
 ##
 ## The character sheet sits in the top-left corner, the combat readout in the
-## top-right, and the two a person playing needs -- what they have aimed at and
-## what the world answered -- stack along the bottom left. They are asked for
+## top-right, the two a person playing needs -- what they have aimed at and
+## what the world answered -- stack along the bottom left, and the two they
+## read -- the trades standing and the dialogue heard -- stack along the
+## bottom right. They are asked for
 ## separately, so a run may have any of them, all of them or none. What they
-## may not have is three ideas of what the interface looks like, so the theme is
+## may not have is six ideas of what the interface looks like, so the theme is
 ## built once here and carried by the frame the panels sit in; no panel builds a
 ## style of its own and none names a file on disk.
 ##
@@ -53,6 +55,15 @@ var answer: AnswerPanel = null
 ## you did.
 var play: PlayPanel = null
 
+## The whole exchange of words the followed character can hear, or null in a
+## run that did not ask for it. Bottom-right, across from the play panel.
+var dialogue: DialoguePanel = null
+
+## Both sides of every trade standing for the followed character, and the
+## engine's answer to the last trade verb, or null in a run that did not ask
+## for it. Above the dialogue panel in the same corner.
+var trade: TradePanel = null
+
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
 var art_scale := 1
@@ -71,7 +82,8 @@ var _frame: MarginContainer = null
 ## operated from.
 static func build(
 	with_sheet: bool = true, with_readout: bool = false,
-	with_answer: bool = false,
+	with_answer: bool = false, with_dialogue: bool = false,
+	with_trade: bool = false,
 ) -> PixelUi:
 	var theme := SproutTheme.build()
 	if theme == null:
@@ -124,11 +136,39 @@ static func build(
 	below.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	below.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	down.add_child(below)
+
+	# The bottom of the window is a second row with its own two corners, like
+	# the top: the choosing panels stack bottom-left, the reading panels --
+	# the trades standing and the words heard -- stack bottom-right, and the
+	# space between is what holds the corners apart.
+	var bottom := HBoxContainer.new()
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom.size_flags_vertical = Control.SIZE_SHRINK_END
+	var choosing := VBoxContainer.new()
+	choosing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	choosing.size_flags_vertical = Control.SIZE_SHRINK_END
+	bottom.add_child(choosing)
+	var between := Control.new()
+	between.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	between.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom.add_child(between)
+	var reading := VBoxContainer.new()
+	reading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	reading.size_flags_vertical = Control.SIZE_SHRINK_END
+	bottom.add_child(reading)
 	if with_answer:
 		layer.play = PlayPanel.new()
-		down.add_child(layer.play)
+		choosing.add_child(layer.play)
 		layer.answer = AnswerPanel.new()
-		down.add_child(layer.answer)
+		choosing.add_child(layer.answer)
+	if with_trade:
+		layer.trade = TradePanel.new()
+		reading.add_child(layer.trade)
+	if with_dialogue:
+		layer.dialogue = DialoguePanel.new()
+		reading.add_child(layer.dialogue)
+	down.add_child(bottom)
 	layer._frame.add_child(down)
 	layer.add_child(layer._frame)
 	return layer

@@ -41,7 +41,10 @@ extends RefCounted
 ##     hands and is a real choice: an interaction with no item in it is refused
 ##     differently from one with the wrong item in it;
 ##   * what is being taken -- one of the things that can be seen inside whatever
-##     is aimed at.
+##     is aimed at: the contents of an open container, or, for a character shown
+##     across a standing trade within reach, what they carry -- and the same
+##     pick is the `want` half of the next offer, so asking for a named item is
+##     picking it and pressing the offer key.
 ##
 ## Two more are dialled rather than picked: which of a few things to say, and how
 ## many coins are in the next offer -- negative for coins given, positive for
@@ -317,9 +320,17 @@ func _at_what_is_aimed(keycode: int, view: Surroundings) -> Action:
 			var given := PackedStringArray()
 			if holding != EMPTY_HANDS:
 				given.append(holding)
+			# The fourth half of a trade, finally fillable: what is being taken
+			# is picked off what can be seen inside the aim, and a trading
+			# partner within reach shows its pack (`Observation.carries_shown`),
+			# so the same C ring that picks out of an open chest picks the item
+			# to ask for. Whether they still carry it is the engine's to answer.
+			var wanted := PackedStringArray()
+			if taking != "":
+				wanted.append(taking)
 			return Action.trade_propose(
 				aimed_id, given, maxi(0, -coins),
-				PackedStringArray(), maxi(0, coins))
+				wanted, maxi(0, coins))
 		KEY_ACCEPT:
 			return Action.trade_accept(aimed_id)
 		KEY_DENY:
@@ -482,7 +493,8 @@ static func bindings() -> PackedStringArray:
 		"V            put what you are holding into what you have aimed at",
 		"T            say the picked line to what you have aimed at",
 		"Y            shout the picked line",
-		"O            offer a trade to what you have aimed at",
+		"O            offer a trade: give what you hold and the given coins,"
+			+ " ask for what you have picked and the asked coins",
 		"U            accept the offer standing from it",
 		"I            deny the offer standing from it",
 		"H            interact with it, using what you are holding",

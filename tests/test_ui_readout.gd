@@ -319,12 +319,18 @@ func _the_panel_agrees_with(panel: CombatPanel, fight: Encounter, when: String) 
 		equal((row.get_child(1) as Label).text, one.attack_name,
 			"weapon action %d is named wrongly %s" % [index, when])
 		var ready_now := acting.can_attack(index, turn)
-		equal((row.get_child(3) as Label).text,
+		equal((row.get_child(4) as Label).text,
 			"ready" if ready_now else "%d" % acting.turns_until_ready(index, turn),
 			"weapon action '%s' reads the wrong state %s" % [one.attack_name, when])
 		equal((row.get_child(0) as TextureRect).texture,
 			EffectArt.sprite_of(one.sprite_tag),
 			"weapon action '%s' is drawn with the wrong sprite %s"
+			% [one.attack_name, when])
+		# The pattern glyph is generated from the shape the fight itself holds
+		# and cached by it, so the same shape must come back the same texture.
+		equal((row.get_child(2) as TextureRect).texture,
+			PixelIcons.pattern(Array(one.offsets)),
+			"weapon action '%s' is drawn with the wrong pattern glyph %s"
 			% [one.attack_name, when])
 
 

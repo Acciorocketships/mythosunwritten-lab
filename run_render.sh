@@ -6,6 +6,12 @@
 #
 #   ./run_render.sh --sheet --scenario encounter   # ...with the character sheet
 #   ./run_render.sh --readout --scenario encounter # ...with the combat readout
+#   ./run_render.sh --dialogue --trade --scenario agent
+#                # the shipped model run's opening conversation, stood still,
+#                # with the dialogue and trade panels reading it
+#   ./run_render.sh --scenario bargain --play
+#                # the play stage with the trader's mind a language model
+#                # (the shipped recording), for buying a named item off him
 #
 #   ./run_render.sh --play               # drive one of the characters yourself
 #   ./run_render.sh --play --journal     # ...and print what everybody chose

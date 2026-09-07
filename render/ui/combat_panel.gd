@@ -28,8 +28,13 @@ extends PanelContainer
 ##     acting now marked with the pack's exclamation and the rest with its plain
 ##     bar, each with a heart and how much health is behind it;
 ##   * **the weapon actions** of the commander whose turn it is: each one's own
-##     effect sprite, its name, and either the pack's tick for "available now" or
+##     effect sprite, its name, the glyph of the cells its pattern covers
+##     (`PixelIcons.pattern`, generated from the shape the simulation holds,
+##     north up), and either the pack's tick for "available now" or
 ##     its prohibition sign and a number for how many turns of cooldown are left;
+##   * **the minions** of the commander whose turn it is: one drawn icon per
+##     living piece, in the four kinds' own icons, so an army is read at a
+##     glance rather than counted off the board;
 ##   * **the last blow**, as the sprite of the action that struck it, playing the
 ##     animation that action names.
 ##
@@ -67,6 +72,10 @@ const ORDER_ROWS := 6
 ## How many weapon actions the action list draws. No item in the catalogue
 ## carries more than two, and a randomised one is not expected to carry four.
 const ACTION_ROWS := 4
+
+## How many minion icons the minion row draws before it stops. The count on
+## the heading is the truth either way, as with the turn order.
+const MINION_ICONS := 8
 
 ## The box the last blow is played inside, in art pixels: three cells across so
 ## a sprite that travels has somewhere to travel to, one cell tall.
@@ -147,6 +156,8 @@ var _order_head: Label
 var _order_rows: VBoxContainer
 var _action_head: Label
 var _action_rows: VBoxContainer
+var _minion_head: Label
+var _minion_row: HBoxContainer
 var _blow_head: Label
 var _blow_stage: Control
 var _blow_sprite: TextureRect
@@ -200,6 +211,10 @@ func _init() -> void:
 	column.add_child(_action_head)
 	_action_rows = _stack()
 	column.add_child(_action_rows)
+	_minion_head = _heading("minions")
+	column.add_child(_minion_head)
+	_minion_row = _row()
+	column.add_child(_minion_row)
 	column.add_child(_spacer(SECTION_GAP - ROW_GAP))
 	_blow_head = _heading("last blow")
 	column.add_child(_blow_head)
@@ -270,6 +285,7 @@ func refresh() -> void:
 
 	_refresh_order(on, order, acting)
 	_refresh_actions(FightSource.standing_in(on, acting), turn)
+	_refresh_minions(acting)
 	_refresh_blow()
 	_refresh_turn()
 
@@ -307,13 +323,36 @@ func _refresh_actions(standing: Object, turn: int) -> void:
 		(row.get_child(0) as TextureRect).texture = \
 			EffectArt.sprite_of(String(one["sprite"]))
 		(row.get_child(1) as Label).text = String(one["name"])
-		var ready_now := bool(one["ready"])
+		# The pattern glyph: the cells this action covers, generated from the
+		# shape the simulation holds and cached by it (render/ui/pixel_icons.gd).
 		(row.get_child(2) as TextureRect).texture = \
+			PixelIcons.pattern(one["offsets"])
+		var ready_now := bool(one["ready"])
+		(row.get_child(3) as TextureRect).texture = \
 			_faces["tick"] if ready_now else _faces["bar"]
-		var state := row.get_child(3) as Label
+		var state := row.get_child(4) as Label
 		state.text = "ready" if ready_now else "%d" % int(one["remaining"])
 		state.theme_type_variation = \
 			StringName("") if ready_now else StringName(SproutTheme.DIM_LABEL)
+
+
+## The minions of the commander whose turn it is, as one icon per living
+## piece: the four kinds' own drawn icons, read off the fight on this frame
+## like everything else. The whole section hides when there are none, which is
+## every fight the walkthroughs stage between commanders alone.
+func _refresh_minions(acting: int) -> void:
+	var kinds := FightSource.minions_of(world, acting)
+	_minion_head.visible = not kinds.is_empty()
+	_minion_row.visible = not kinds.is_empty()
+	if kinds.is_empty():
+		return
+	_minion_head.text = "minions %d" % kinds.size()
+	var wanted := mini(kinds.size(), MINION_ICONS)
+	if _minion_row.get_child_count() != wanted:
+		_fill(_minion_row, wanted, func() -> Control: return _sprite(null))
+	for index in wanted:
+		(_minion_row.get_child(index) as TextureRect).texture = \
+			PixelIcons.of(kinds[index])
 
 
 ## The last blow, and the animation the action that struck it names.
@@ -471,8 +510,9 @@ func _order_row() -> Control:
 	return row
 
 
-## One weapon action: its own effect sprite, its name, and whether it may be
-## used now or how many turns are left of its wait.
+## One weapon action: its own effect sprite, its name, the glyph of the cells
+## its pattern covers, and whether it may be used now or how many turns are
+## left of its wait.
 func _action_row() -> Control:
 	var row := _row()
 	row.custom_minimum_size = Vector2(WIDTH - 32, SproutPack.CELL)
@@ -482,6 +522,7 @@ func _action_row() -> Control:
 	called.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	called.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(called)
+	row.add_child(_sprite(null))
 	row.add_child(_sprite(null))
 	var state := Label.new()
 	state.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

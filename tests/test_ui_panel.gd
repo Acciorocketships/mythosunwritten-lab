@@ -207,7 +207,10 @@ func _there_is_an_icon_for_every_score_and_every_slot() -> void:
 		check(PixelIcons.has(ability), "no icon is drawn for the score '%s'" % ability)
 	for slot in Inventory.SLOT_ORDER:
 		check(PixelIcons.has(slot), "no icon is drawn for the slot '%s'" % slot)
-	equal(PixelIcons.names().size(), Ability.ALL.size() + Inventory.SLOT_ORDER.size(),
+	for kind in Minion.KINDS:
+		check(PixelIcons.has(kind), "no icon is drawn for the minion '%s'" % kind)
+	equal(PixelIcons.names().size(),
+		Ability.ALL.size() + Inventory.SLOT_ORDER.size() + Minion.KINDS.size(),
 		"there are icons drawn that nothing asks for, or the other way round")
 
 

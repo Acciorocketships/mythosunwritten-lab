@@ -151,8 +151,8 @@ func refresh() -> void:
 static func offer_line(offer: Dictionary) -> String:
 	return "%s -> %s: gives %s, wants %s" % [
 		String(offer["from"]), String(offer["to"]),
-		_half(PackedStringArray(offer["give"]), int(offer["give_money"])),
-		_half(PackedStringArray(offer["want"]), int(offer["want_money"])),
+		half_line(PackedStringArray(offer["give"]), int(offer["give_money"])),
+		half_line(PackedStringArray(offer["want"]), int(offer["want_money"])),
 	]
 
 
@@ -164,10 +164,11 @@ static func heard_line(said: Dictionary) -> String:
 	return "%s %s: \"%s\"" % [String(said["speaker"]), aimed, String(said["text"])]
 
 
-# One half of an offer: what is in it, and what it is worth in coin. "nothing"
-# for an empty half, which is section 2.1's gift -- a trade with nothing in
-# return -- and has to read as a half rather than as a blank.
-static func _half(items: PackedStringArray, money: int) -> String:
+## One half of an offer: what is in it, and what it is worth in coin. "nothing"
+## for an empty half, which is section 2.1's gift -- a trade with nothing in
+## return -- and has to read as a half rather than as a blank. Public because
+## the trade panel writes halves too, and two spellings of one would drift.
+static func half_line(items: PackedStringArray, money: int) -> String:
 	var written := PackedStringArray()
 	if not items.is_empty():
 		written.append(", ".join(items))

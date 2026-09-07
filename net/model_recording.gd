@@ -52,8 +52,11 @@ extends RefCounted
 ## question for each of those the engine then rolled a success on. `WORLD_ROWS`
 ## answers the orchestrator run's questions -- one every time it looks at the
 ## world, and one more every time a look spawned somebody and it was asked who
-## that is. They are five tables and not one because they are five runs; they are
-## written by one command, in one pass, so that they can never be a recording of
+## that is. `GOODWILL_ROWS` answers the goodwill run's, and `BARGAIN_ROWS` the
+## bargain run's -- the trader Hob's questions while a person buys a named item
+## off him (`sim/scripted_bargain.gd`). They are separate tables and not one
+## because they are separate runs; the groups that must agree are written by one
+## command, in one pass, so that they can never be a recording of
 ## five different days against five different prompts.
 ##
 ## Nothing here is a decision of this project's. The replies are the model's own
@@ -94,6 +97,11 @@ const WORLD_RECORDED_ON := "2026-09-05"
 ## reason the other two are: `./run_record.sh --live --goodwill` puts only its
 ## questions and writes the other five back unchanged.
 const GOODWILL_RECORDED_ON := "2026-09-07"
+
+## When the bargain table was recorded, which is its own date for the same
+## reason the others are: `./run_record.sh --live --bargain` puts only its
+## questions and writes the other six back unchanged.
+const BARGAIN_RECORDED_ON := "2026-09-07"
 
 ## The exchange. Rewritten by the recorder; see the note above.
 const ROWS := [
@@ -224,6 +232,32 @@ const GOODWILL_ROWS := [
 	{"prompt": "ad2b503ddf4740f3", "reply": "goodwill=0.6", "ms": 2332},
 ]
 
+## The bargain run's questions, on their own date above.
+const BARGAIN_ROWS := [
+	{"prompt": "ae72e92ed9acb6df", "reply": "examine target=#5", "ms": 3811},
+	{"prompt": "ba026dfcd2c95cd9", "reply": "say text=Fen, do you have any coins to spare? I need to raise some money. target=#1", "ms": 3183},
+	{"prompt": "3fab35d4afcdb2fb", "reply": "wait ticks=2", "ms": 3218},
+	{"prompt": "d132aa0445a47985", "reply": "trade_propose  target=#1  want_money=6  give=[brass lantern]", "ms": 2655},
+	{"prompt": "2332d4a083d8498f", "reply": "examine target=#4", "ms": 4384},
+	{"prompt": "2332d4a083d8498f", "reply": "wait ticks=3", "ms": 2069},
+	{"prompt": "b1e27d38e6b31732", "reply": "say text=\"6 coins for the lantern\" target=#1", "ms": 1988},
+	{"prompt": "f9b90672209782ea", "reply": "wait ticks=1", "ms": 3060},
+	{"prompt": "471af4347a19509a", "reply": "say text=\"So, Fen, will you take it?\" target=#1", "ms": 2580},
+	{"prompt": "ea3891a434d5e4e1", "reply": "trade_accept target=#1", "ms": 5417},
+	{"prompt": "f68ef28968e09826", "reply": "wait ticks=3", "ms": 3379},
+	{"prompt": "e043ba93113f4344", "reply": "trade_accept target=#1", "ms": 11830},
+	{"prompt": "428f5dd2c2a3cb3c", "reply": "wait ticks=1", "ms": 2049},
+	{"prompt": "059c9856552f5d52", "reply": "wait ticks=5", "ms": 1982},
+	{"prompt": "059c9856552f5d52", "reply": "done goal=1", "ms": 1632},
+	{"prompt": "059c9856552f5d52", "reply": "done goal=1", "ms": 11296},
+	{"prompt": "e77c5cdff934e1de", "reply": "wait ticks=5", "ms": 2196},
+	{"prompt": "d8b95d6fda03b81f", "reply": "wait  ticks=1", "ms": 1376},
+	{"prompt": "253bb52460e45be6", "reply": "done goal=1", "ms": 3624},
+	{"prompt": "d8b95d6fda03b81f", "reply": "wait ticks=1", "ms": 4975},
+	{"prompt": "c26c4b1bec2d0b7b", "reply": "wait  ticks=3", "ms": 6250},
+	{"prompt": "d8b95d6fda03b81f", "reply": "trade_propose  target=#1 give=[lantern] want_money=6", "ms": 2451},
+]
+
 
 ## The whole recording as one thing to hand to a channel: the replies, a line
 ## saying where they came from, and which model said them.
@@ -262,6 +296,12 @@ static func goodwill_exchange() -> Dictionary:
 	return {"rows": GOODWILL_ROWS, "from": goodwill_provenance(), "model": MODEL}
 
 
+## The bargain run's own exchange, in the same shape, and with its own date
+## on it.
+static func bargain_exchange() -> Dictionary:
+	return {"rows": BARGAIN_ROWS, "from": bargain_provenance(), "model": MODEL}
+
+
 ## How a provenance line names who answered: the model, and whether it was one
 ## running on the machine that recorded it. See `LOCAL` above.
 static func said_by() -> String:
@@ -289,10 +329,18 @@ static func goodwill_provenance() -> String:
 	]
 
 
+## Where the bargain replies came from.
+static func bargain_provenance() -> String:
+	return "recorded %s from %s at %s, %d replies" % [
+		BARGAIN_RECORDED_ON, said_by(), ENDPOINT, BARGAIN_ROWS.size(),
+	]
+
+
 ## How many replies the recording holds.
 static func size() -> int:
 	return ROWS.size() + LESSON_ROWS.size() + GOAL_ROWS.size() \
-		+ CHECK_ROWS.size() + WORLD_ROWS.size() + GOODWILL_ROWS.size()
+		+ CHECK_ROWS.size() + WORLD_ROWS.size() + GOODWILL_ROWS.size() \
+		+ BARGAIN_ROWS.size()
 
 
 ## One line saying where the replies came from, printed at the head of a run that

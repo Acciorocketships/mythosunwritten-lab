@@ -22,6 +22,9 @@ extends RefCounted
 ##   * **what was heard** -- the last few lines of speech this character could
 ##     hear, in the order they were spoken: who spoke, what was said, and
 ##     whether it was spoken to this character or shouted to everyone.
+##   * **what is on the table** -- every trade standing to or from this
+##     character, both halves written out. See "A trade you are party to is
+##     observable" below.
 ##   * **what has recently changed** -- this character's own last few state
 ##     transitions, in words, out of `ObservationTrail`.
 ##
@@ -84,6 +87,35 @@ extends RefCounted
 ## file's: a line spoken *to* somebody is heard by that somebody alone, so
 ## standing beside two people talking is not the same as hearing them. Changing
 ## that would be changing how `say` resolves, which is the engine's business.
+##
+## ## A trade you are party to is observable
+##
+## One rule, two consequences, both here because they are about what a character
+## may *see* and not about what one may do:
+##
+##   * **the offer itself.** Every trade standing to or from this character is in
+##     the packet, both halves written out. An offer is a question put to your
+##     face -- the engine refuses to let one be proposed from further than arm's
+##     reach -- and a character that could not see what it had been offered could
+##     never accept or deny anything. Before this section existed the person's
+##     projection (`sim/surroundings.gd`) read the scene's offers directly, so a
+##     person could observe a fact a model-driven character could not; the
+##     projection now reads this packet, and the two kinds of mind see the same
+##     thing.
+##   * **the counterparty's pack, within reach.** What is in somebody's bag is
+##     not observable from outside -- an entity row gives equipment and nothing
+##     else -- except from the one standing across a trade from them at arm's
+##     length, who is being shown the wares. While an offer stands between two
+##     characters, in either direction, and they are within `ActionEngine.REACH`,
+##     each one's entity row in the *other's* packet carries what it carries.
+##     `carries_shown` below is the whole rule, and `ActionEngine.observed_of`
+##     asks it too, so an `examine` and the packet cannot disagree.
+##
+## Both print only where they exist: a packet with no trade standing prints
+## exactly what it always printed. That is the same shape an object row's
+## `holds` and `needs` already have -- a fact that is not there has nothing to
+## print -- and it is what keeps the recorded model exchanges' questions the
+## questions that were recorded.
 class_name Observation
 
 ## How far away a thing can be and still appear in the observation, in world
@@ -189,6 +221,13 @@ var here := Vector2i.ZERO
 ## to this character or shouted. Filled from the engine's own `heard_by`.
 var heard: Array[Dictionary] = []
 
+## Every trade standing to or from this character, in the order they were made:
+## one dictionary per offer, with who proposed it to whom, whether this
+## character is the proposer, and both halves as the proposer wrote them --
+## items and money given, items and money wanted. See the note at the head of
+## this file: a trade you are party to is observable.
+var offers: Array[Dictionary] = []
+
 ## This character's own last few state transitions, in words, newest last.
 var recent := PackedStringArray()
 
@@ -232,6 +271,7 @@ static func of(
 	seen.here = CombatBoard.cell_of(actor.x, actor.z, seen.board.cell_size)
 	seen._gather(scene, actor)
 	seen._listen(scene, actor)
+	seen._trades(scene, actor)
 	if trail == null or not trail.watches(actor.id):
 		seen.recent_absent = UNWATCHED
 	else:
@@ -343,6 +383,10 @@ func _entity_row(
 	else:
 		row["equipment"] = null
 		row["equipment_absent"] = CARRIES_NOTHING
+	# Present only while the rule holds, like an object row's `holds`: what is
+	# not being shown is not a field of the packet. See the head of this file.
+	if carries_shown(scene, actor, one):
+		row["carries"] = carried_names_of(one)
 	if not scene.in_progress.is_valid():
 		row["doing"] = null
 		row["doing_absent"] = NOT_DRIVEN
@@ -501,6 +545,66 @@ func _speaker_name(
 	_name_field(row, actor, speaker)
 
 
+# --- What is on the table -------------------------------------------------
+
+
+# Every trade standing to or from this character, in the order they were made.
+# Both halves are the proposer's, whichever side this character is on, because
+# that is how the offer was made and how the engine will honour it.
+func _trades(scene: ActionScene, actor: Combatant) -> void:
+	for offer in scene.offers:
+		var from_id := int(offer["from"])
+		var to_id := int(offer["to"])
+		if from_id != actor.id and to_id != actor.id:
+			continue
+		offers.append({
+			"from": from_id,
+			"to": to_id,
+			"yours": from_id == actor.id,
+			"give": PackedStringArray(offer["give"]),
+			"give_money": int(offer["give_money"]),
+			"want": PackedStringArray(offer["want"]),
+			"want_money": int(offer["want_money"]),
+		})
+
+
+## Whether one character is shown what another carries: the two are within
+## `ActionEngine.REACH` of each other and an offer stands between them, in
+## either direction.
+##
+## The whole of the rule, and the one place it lives. `_entity_row` asks it for
+## the packet; `ActionEngine.observed_of` asks it for an examine; so a close
+## look and the ambient packet cannot come to different answers. It knows
+## nothing about who is driving either character, which is the point: a trader
+## learns exactly as much about the one across the stall as the one across the
+## stall learns about it.
+static func carries_shown(
+	scene: ActionScene, looker: Combatant, other: Combatant
+) -> bool:
+	if scene == null or looker == null or other == null or looker == other:
+		return false
+	if ActionScene.inventory_of(looker) == null \
+			or ActionScene.inventory_of(other) == null:
+		return false
+	if looker.distance_to(other) > ActionEngine.REACH:
+		return false
+	return not scene.offer_between(looker.id, other.id).is_empty() \
+		or not scene.offer_between(other.id, looker.id).is_empty()
+
+
+## What a character carries, by item name, sorted the way `self_carrying` is:
+## what is carried is a set, not a history, and two packets of the same pack
+## must read the same.
+static func carried_names_of(one: Combatant) -> PackedStringArray:
+	var names := []
+	var pack := ActionScene.inventory_of(one)
+	if pack != null:
+		for entry in pack.carried:
+			names.append(ObservationTrail.name_of_entry(entry))
+	names.sort()
+	return PackedStringArray(names)
+
+
 # --- Line of sight --------------------------------------------------------
 
 
@@ -574,6 +678,7 @@ func lines() -> PackedStringArray:
 		written.append_array(_object_lines(row))
 	written.append_array(ground_lines())
 	written.append_array(heard_lines())
+	written.append_array(offer_lines())
 	written.append("  recently   %s" % (
 		recent_absent if recent_absent != "" else "%d change%s" % [
 			recent.size(), "" if recent.size() == 1 else "s",
@@ -586,12 +691,17 @@ func lines() -> PackedStringArray:
 func _entity_lines(row: Dictionary) -> PackedStringArray:
 	var written := PackedStringArray()
 	var offset: Vector3 = row["offset"]
-	written.append("    #%-3d %-10s %-8s (%+.1f, %+.1f, %+.1f) %6.2f %-6s doing %-14s health %-10s wearing %s" % [
+	# What it carries appears only while the trade rule shows it, like an
+	# object's `holds`: see the head of this file.
+	var carries := ""
+	if row.has("carries"):
+		carries = " carrying %s" % ", ".join(PackedStringArray(row["carries"]))
+	written.append("    #%-3d %-10s %-8s (%+.1f, %+.1f, %+.1f) %6.2f %-6s doing %-14s health %-10s wearing %s%s" % [
 		row["id"], row["type"], _or_absent(row, "name"),
 		offset.x, offset.y, offset.z, row["distance"],
 		"seen" if row["line_of_sight"] else "unseen",
 		_or_absent(row, "doing"), _or_absent(row, "health"),
-		_or_absent(row, "equipment"),
+		_or_absent(row, "equipment"), carries,
 	])
 	var why := _absences(row, ["name", "doing", "health", "equipment"])
 	if why != "":
@@ -640,6 +750,43 @@ func heard_lines() -> PackedStringArray:
 		if why != "":
 			written.append("         not shown: %s" % why)
 	return written
+
+
+## The trades standing, oldest first: one line per offer, both halves written
+## out as the proposer wrote them. Printed only while at least one stands -- a
+## packet with no trade on the table prints exactly what it always printed; see
+## the head of this file.
+##
+## Either end is written as "you" for this character and as the id for the
+## other, because an id is what an answer -- an accept, a denial, a
+## counter-offer -- actually takes.
+func offer_lines() -> PackedStringArray:
+	var written := PackedStringArray()
+	if offers.is_empty():
+		return written
+	written.append("  offers     %d trade%s standing, oldest first" % [
+		offers.size(), "" if offers.size() == 1 else "s",
+	])
+	for row in offers:
+		written.append("    %s -> %s: gives %s, wants %s" % [
+			"you" if bool(row["yours"]) else "#%d" % int(row["from"]),
+			"#%d" % int(row["to"]) if bool(row["yours"]) else "you",
+			_half_line(row["give"], int(row["give_money"])),
+			_half_line(row["want"], int(row["want_money"])),
+		])
+	return written
+
+
+# One half of an offer: what is in it and what it is worth in coin. "nothing"
+# for an empty half, which is section 2.1's gift -- a trade with nothing in
+# return -- and has to read as a half rather than as a blank.
+static func _half_line(items: PackedStringArray, money: int) -> String:
+	var written := PackedStringArray()
+	if not items.is_empty():
+		written.append(", ".join(items))
+	if money > 0:
+		written.append("%d coin" % money)
+	return "nothing" if written.is_empty() else " + ".join(written)
 
 
 # Who said a line, as the listener would put it: itself as "you", anybody else by
@@ -735,7 +882,7 @@ static func glyph_of(on: CombatBoard, cell: Vector2i, standing_on: Vector2i) -> 
 ## count.
 func entry_count() -> int:
 	return entities.size() + objects.size() + WINDOW * WINDOW \
-		+ heard.size() + recent.size()
+		+ heard.size() + offers.size() + recent.size()
 
 
 ## How many characters of text the readable packet comes to, newlines included.

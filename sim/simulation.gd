@@ -33,13 +33,23 @@ const SCENARIO_MARKET := "market"
 const SCENARIO_QUARREL := "quarrel"
 const SCENARIO_PLAY := "play"
 const SCENARIO_BATTLE := "battle"
+const SCENARIO_BARGAIN := "bargain"
+const SCENARIO_AGENT := "agent"
 
 ## Every scenario there is, in a fixed order, for a report line and a usage
 ## message.
 const SCENARIOS := [
 	SCENARIO_ENCOUNTER, SCENARIO_ENCOUNTER_ISLAND,
 	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY, SCENARIO_BATTLE,
+	SCENARIO_BARGAIN, SCENARIO_AGENT,
 ]
+
+## Which scenarios need a channel of model replies to stand up at all. The
+## entry point builds one -- the render shell from the shipped recording, a
+## live run from a transport -- and hands it in; the simulation neither knows
+## nor cares where the replies come from, which is the same line
+## `sim/model_channel.gd` has always drawn.
+const SCENARIOS_WITH_MINDS := [SCENARIO_BARGAIN, SCENARIO_AGENT]
 
 var world: SimWorld = null
 
@@ -133,7 +143,9 @@ func driven_surroundings() -> Surroundings:
 ## the greeting, the trade and the quarrel happen in front of the camera.
 ##
 ## The two encounter scenarios were always live and take no notice of it.
-func begin_scenario(named: String, frozen: bool = false) -> bool:
+func begin_scenario(
+	named: String, frozen: bool = false, minds: ModelChannel = null
+) -> bool:
 	match named:
 		SCENARIO_NONE:
 			return true
@@ -177,6 +189,20 @@ func begin_scenario(named: String, frozen: bool = false) -> bool:
 			# `frozen` -- a stage nobody is standing on is not a picture worth
 			# taking.
 			return ScriptedPlay.muster(world) > 0
+		SCENARIO_BARGAIN:
+			# The play stage with the trader's mind on the channel handed in:
+			# the stage a person buys a named item from a model-driven trader
+			# on. Lived, never frozen, for the play stage's reason.
+			if minds == null:
+				return false
+			return ScriptedBargain.muster(world, minds) > 0
+		SCENARIO_AGENT:
+			# The shipped model run -- five of six characters deciding through
+			# the channel handed in -- played headless to its dialogue frame
+			# and stood still, words and all, for a photograph.
+			if minds == null:
+				return false
+			return ScriptedAgent.muster(world, minds) > 0
 	return false
 
 
