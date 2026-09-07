@@ -72,6 +72,32 @@ var round_number: int = 1
 ## they happened.
 var lines := PackedStringArray()
 
+## Which tick of the world outside the board this match is being played on.
+##
+## The board counts in turns and the world counts in ticks, and a blow struck on
+## it has to be able to say which tick it began on -- a swing cannot be drawn
+## without knowing when it started. Nothing in this class reads it: it is set by
+## `ActionScene.advance`, the one place the world's clock moves, and by
+## `ActionScene.begin_fight` for a board that appears part-way through a tick. A
+## match nobody drives leaves it at zero, which is the honest answer for a fight
+## that is not happening in any world.
+var world_tick: int = 0
+
+## Every blow struck in this match that nobody has taken away yet, oldest first.
+##
+## The one place the board says a blow happened, whoever asked for it: the same
+## row is appended whether the turn was taken by a person through `BoardTurn`, by
+## a character's own decision function through `ActionEngine`, or by the
+## stand-in `CombatPolicy` plays for a commander nobody is driving. All three
+## spend a weapon action through `attack()` below, so there is one record and not
+## three.
+##
+## Ids in here are the board's -- piece ids -- because that is what this class
+## counts in. `ActionScene` takes them away with `take_struck()`, puts them into
+## the id space the world names people in, and writes them into its own `blows`.
+## A match nobody drains simply keeps them.
+var struck: Array[Dictionary] = []
+
 # Commander ids in turn order, and the slot the active one sits in.
 var _order := PackedInt32Array()
 var _slot: int = 0
@@ -213,8 +239,58 @@ func attack(index: int) -> Dictionary:
 	])
 	for hit in outcome["hits"]:
 		_write("    " + CombatResolution.describe_strike(hit))
+	struck.append(_blow_of(me, index, outcome))
 	_reap()
 	return outcome
+
+
+## Take every blow struck since the last time they were taken, leaving none.
+##
+## Taken rather than read, for the same reason `Encounter.unreported` takes its
+## lines: a blow reported twice is two blows in whatever reads them.
+func take_struck() -> Array[Dictionary]:
+	var taken := struck
+	struck = []
+	return taken
+
+
+# One blow, written down with everything the world outside the board needs to say
+# it happened and everything a render layer needs to draw it.
+#
+# Nothing here is worked out: the cells are the ones the resolution step already
+# covered, the facing and the cell are the commander's own, and the three tags --
+# what the effect looks like, what it looks like happening, and whether it lands
+# where it is aimed or crosses the ground to get there -- are the attack's own,
+# out of `AssetTags`' vocabulary. This class invents no fact about a blow.
+#
+# The target is the first piece the pattern found, in the lattice's own order, and
+# `hits` says how many it found in all. A swing that found nobody is still a blow:
+# something happened, it is drawn, and it names no target.
+func _blow_of(me: Commander, index: int, outcome: Dictionary) -> Dictionary:
+	var attack := me.attack_at(index)
+	var hits: Array = outcome["hits"]
+	var dealt := 0
+	for hit in hits:
+		dealt += int(hit.get("dealt", 0))
+	var first: Dictionary = hits[0] if not hits.is_empty() else {}
+	return {
+		"attacker": me.id,
+		"target": int(first.get("target", PieceMap.NO_PIECE)),
+		"attack": String(attack.attack_name),
+		"dealt": dealt,
+		"out_of": int(first.get("max_health", 0)),
+		"hits": hits.size(),
+		"facing": me.facing,
+		"from_cell": me.cell,
+		"to_cell": first.get("cell", me.cell),
+		"cells": (outcome["covered"] as Array[Vector2i]).duplicate(),
+		"sprite": String(attack.sprite_tag),
+		"animation": String(attack.animation_tag),
+		"movement": String(attack.movement),
+		"cooldown": attack.cooldown,
+		"round": turn_number(me.id),
+		"tick": world_tick,
+	}
 
 
 ## The one minion activation: one of this commander's minions, for one move or

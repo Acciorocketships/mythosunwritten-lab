@@ -318,6 +318,11 @@ func _refresh_actions(standing: Object, turn: int) -> void:
 
 ## The last blow, and the animation the action that struck it names.
 ##
+## Every word and every tag on the strip comes out of the world's own record of
+## the blow, carried out in the snapshot (`FightSource.blow_in`): what the action
+## was called, who struck it, which art says what it is and which motion says it
+## happened. Nothing here reaches into the fight for any of it.
+##
 ## The sprite's pose comes out of `EffectArt.pose_of` for that animation tag, at
 ## the phase the panel's own clock is at. Nothing about the pose is decided here:
 ## the seven animations differ from each other in the table and nowhere else.
@@ -331,7 +336,7 @@ func _refresh_blow() -> void:
 		return
 	var animation := String(blow["animation"])
 	_blow_sprite.texture = EffectArt.sprite_of(String(blow["sprite"]))
-	_blow_label.text = "%s  %s" % [String(blow["name"]), String(blow["by"])]
+	_blow_label.text = "%s  %s" % [String(blow["attack"]), String(blow["by"])]
 
 	var seconds := EffectArt.seconds_of(animation)
 	var phase := 0.0 if seconds <= 0.0 else fmod(_played, seconds) / seconds

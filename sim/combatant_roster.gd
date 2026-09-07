@@ -40,6 +40,11 @@ class_name CombatantRoster
 const REAL_TIME := "real-time"
 const FIGHTING := "fighting"
 
+## How many of the most recent blows the snapshot carries. More than a fight
+## lands in the time any of them is worth drawing for, and small enough that a
+## snapshot taken every frame stays a handful of rows.
+const BLOWS_SHOWN := 8
+
 ## Where the fight is actually held, and where everyone in it stands.
 ##
 ## The roster is a scene with a real-time walk on top: combatants are its actors,
@@ -176,6 +181,9 @@ func snapshot() -> Dictionary:
 		})
 	return {
 		"phase": phase(),
+		# The world's clock, so that whoever is drawing a blow can tell how long
+		# ago it landed without keeping a clock of its own.
+		"tick": scene.tick,
 		# The same fact as the phase, as a plain flag, so that a viewer never has
 		# to name one of this layer's constants to know whether a fight is on.
 		"fighting": fight != null,
@@ -189,7 +197,28 @@ func snapshot() -> Dictionary:
 		"anchor_z": 0.0 if fight == null else fight.anchor_z,
 		"pieces": rows,
 		"ground": ground_rows(),
+		"blows": blow_rows(),
 	}
+
+
+## The most recent blows struck in this world, oldest first: the scene's own
+## record of them, carried out to whoever is drawing rather than reached for.
+##
+## This is the row `ActionScene.blows` holds, copied deeply because the arrays in
+## it share their storage when assigned, exactly as the chunk geometry and the
+## water sheet are copied. Nothing is added to it and nothing is worked out: how
+## long a swing lasts, what a `blade` looks like and which way an arrow flies are
+## the render layer's answers, and this layer has never heard of any of them.
+##
+## Only the last `BLOWS_SHOWN` are carried. A world that has been fighting for an
+## hour has thousands of them and nothing drawing it has any use for the old
+## ones; what is old enough to have been drawn is old enough to be left behind.
+func blow_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	var struck := scene.blows
+	for at in range(maxi(0, struck.size() - BLOWS_SHOWN), struck.size()):
+		rows.append(struck[at].duplicate(true))
+	return rows
 
 
 ## One row per thing standing in the world that is not a character: where it is,

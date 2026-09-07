@@ -34,12 +34,20 @@ extends RefCounted
 ## simulation's own answers, asked through its own methods
 ## (`can_attack`, `turns_until_ready`), never worked out again here.
 ##
-## One consequence is worth stating because the readout leans on it. An action
-## used on turn `t` with a cooldown of `c` becomes ready on `t + c`, so on turn
-## `t` itself it reads exactly `c` turns remaining -- its whole cooldown, which
-## no other reading of it can produce. That is how the readout knows which blow
-## was struck this round without remembering anything: the action whose remaining
-## cooldown equals its own full cooldown is the one that was just spent.
+## ## The blow itself comes the other way, through the snapshot
+##
+## Whose turn it is and what their weapons are ready for are read live, as above.
+## The blow that was struck is not: the simulation writes every blow down as it
+## lands (`ActionScene.blows`) and carries the most recent ones out in the
+## snapshot this shell already receives, so `blow_in` below is a read of a
+## dictionary and asks the fight nothing at all.
+##
+## That is what the rest of this milestone needs. A cooldown can say that an
+## action was spent this round; it cannot say which way the striker was facing,
+## which cells the blow covered, where it started, where it landed or which tick
+## it began on -- and a swing cannot be animated, nor an arrow launched, without
+## those. So there is one record of a blow, the simulation writes it, and this
+## reads it.
 class_name FightSource
 
 ## What a fight's round is when there is no fight.
@@ -129,15 +137,16 @@ static func health_in(on: Object, id: int) -> Vector2i:
 ##
 ## Each row is
 ##
-##     {"name", "ready", "remaining", "cooldown", "sprite", "animation",
-##      "struck"}
+##     {"name", "ready", "remaining", "cooldown", "sprite", "animation"}
 ##
 ## and every value in it is read out of the simulation at the moment the row is
 ## made: whether the action may be used now, how many turns until it may be, how
 ## long its wait is in this commander's hands, and the two tags saying what it
-## looks like and what it looks like happening. `struck` is the reading set out
-## at the head of this file -- the whole cooldown remaining, which only the turn
-## it was spent on produces.
+## looks like and what it looks like happening.
+##
+## These rows say what a commander *may* do. Which blow was actually struck is
+## `blow_in` below, off the world's own record of it, and not a second reading of
+## a cooldown -- one blow, one record.
 ##
 ## Nothing keeps these rows. They are made when the panel asks and dropped when
 ## it has drawn them.
@@ -158,51 +167,65 @@ static func actions_in(standing: Object, turn: int) -> Array[Dictionary]:
 			"cooldown": waits,
 			"sprite": String(one.sprite_tag),
 			"animation": String(one.animation_tag),
-			"struck": left > 0 and left == waits,
 		})
 	return rows
 
 
-## The weapon action most recently resolved in the fight, or an empty dictionary
-## when nothing on the board has been struck within its own cooldown.
+## The snapshot of everyone in the world and everything that has just happened
+## to them, as the simulation hands it out.
 ##
-## Read rather than remembered, and read out of the cooldowns themselves. An
-## action with `r` turns left of a wait of `c` was spent `c - r` rounds ago, so
-## the most recent blow still on record is the smallest of those differences
-## across every commander -- with the turn order breaking a tie backwards from
-## whoever is acting now, because the commander who acted least recently ago is
-## the one nearest behind the active one.
+## The same dictionary `render/main.gd` already draws the world from; taking it
+## here rather than reaching into the fight is the whole of why the blow below
+## can be read without naming anything of the combat layer.
+static func snapshot_of(world: SimWorld) -> Dictionary:
+	if world == null or world.combat == null:
+		return {}
+	return world.combat.snapshot()
+
+
+## The most recent blow still worth showing, out of a snapshot, or an empty
+## dictionary when there is none.
 ##
-## An action that is ready again keeps no record of when it was last used, so it
-## is not a candidate: a blow is visible for as many rounds as the action that
-## struck it waits, and no longer. Returns the row `actions_in` makes, with how
-## many rounds ago it landed and the striker's name and id added.
+## **Every value in what comes back is read out of the dictionary handed in.**
+## Nothing here asks the fight anything: who struck, what they struck with, which
+## way they were facing, which cells the pattern covered, where the blow started
+## and where it landed, which art and which motion say so, whether it crossed the
+## ground to get there and which tick it began on are all the simulation's own
+## record of the blow, carried out in the snapshot (`ActionScene.blows`, through
+## `CombatantRoster.blow_rows`). That is what the three items after this one need
+## -- a swing cannot be animated off a cooldown and an arrow cannot be launched
+## off one.
+##
+## Two things are added, both of them arithmetic on numbers in the same
+## dictionary: `rounds_ago`, the rounds between the round the blow was struck on
+## and the round being played, and `ticks_ago`, the same in the world's own
+## clock, which is what an animation is timed against.
+##
+## Only the fight now on the board is considered, and only a blow struck within
+## the wait of the action that struck it -- which is the reading the readout has
+## always shown: a blow is the fight's most recent for as many rounds as its
+## action waits, and no longer.
+static func blow_in(snapshot: Dictionary) -> Dictionary:
+	if not bool(snapshot.get("fighting", false)):
+		return {}
+	var struck: Array = snapshot.get("blows", [])
+	var round_now := int(snapshot.get("round", NO_ROUND))
+	var tick_now := int(snapshot.get("tick", 0))
+	var here := int(snapshot.get("fights_begun", 0))
+	for at in range(struck.size() - 1, -1, -1):
+		var blow: Dictionary = struck[at]
+		if int(blow.get("fight", 0)) != here:
+			continue
+		var ago := round_now - int(blow.get("round", 0))
+		if ago < 0 or ago >= int(blow.get("cooldown", 1)):
+			continue
+		var showing := blow.duplicate(true)
+		showing["rounds_ago"] = ago
+		showing["ticks_ago"] = tick_now - int(blow.get("tick", 0))
+		return showing
+	return {}
+
+
+## The same blow, for a caller holding the world rather than a snapshot of it.
 static func last_blow(world: SimWorld) -> Dictionary:
-	var on := fight_in(world)
-	var state := state_in(world)
-	if on == null or state == null:
-		return {}
-	var order := order_of(state)
-	if order.is_empty():
-		return {}
-	var turn := round_of(state)
-	var at := order.find(active_of(state))
-	if at < 0:
-		at = 0
-	var best := {}
-	var soonest := -1
-	for step in range(order.size()):
-		var id := order[posmod(at - step, order.size())]
-		for row in actions_in(standing_in(on, id), turn):
-			var left := int(row["remaining"])
-			if left <= 0:
-				continue
-			var ago := int(row["cooldown"]) - left
-			if soonest >= 0 and ago >= soonest:
-				continue
-			soonest = ago
-			best = row.duplicate()
-			best["rounds_ago"] = ago
-			best["by"] = name_in(on, id)
-			best["by_id"] = id
-	return best
+	return blow_in(snapshot_of(world))

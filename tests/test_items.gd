@@ -828,7 +828,10 @@ func _the_layer_stands_on_its_own() -> void:
 	# `sim/scripted_skirmish.gd` is the fifth: the second action-surface run
 	# forges the three weapons its patrol and its stranger fight with.
 	# `sim/scripted_turn.gd` is the sixth: the turn/action seam's duel forges the
-	# two spears whose blows the rule is about. `sim/scripted_encounter.gd` is the
+	# two spears whose blows the rule is about, and `sim/scripted_strike.gd` is of
+	# that same kind: the record-of-a-blow run forges the one spear both of its
+	# commanders strike with, so that the two records can be read against each
+	# other field by field. `sim/scripted_encounter.gd` is the
 	# seventh and joined for a different reason: it names an ability to *roll* its
 	# three commanders' six scores, not to forge anything -- the scores an item's
 	# gate is read against are named in the same vocabulary the item names.
@@ -856,6 +859,7 @@ func _the_layer_stands_on_its_own() -> void:
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
+		"res://sim/scripted_strike.gd",
 		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
 		"res://sim/simulation.gd",
 		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",

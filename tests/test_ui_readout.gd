@@ -328,9 +328,15 @@ func _the_panel_agrees_with(panel: CombatPanel, fight: Encounter, when: String) 
 			% [one.attack_name, when])
 
 
-## The reading the last-blow strip rests on, checked against the fight's own
-## transcript rather than against itself: an action whose whole wait is still on
-## it was spent this round, and the transcript names which action that was.
+## The last-blow strip, checked against the fight's own transcript rather than
+## against itself: the blow the strip shows is the weapon action the fight wrote
+## down on this very round.
+##
+## The strip no longer infers which blow was struck from a cooldown -- the
+## simulation writes every blow down as it lands and carries the most recent ones
+## out in the snapshot, and `FightSource.blow_in` reads that. So what is checked
+## here is that the record and the transcript say the same thing about the same
+## round, which is the claim that reading ever rested on.
 func _a_whole_wait_still_on_an_action_means_it_was_spent_this_round() -> void:
 	var sim := _fighting_world()
 	var on: Encounter = sim.world.combat.fight
@@ -362,14 +368,18 @@ func _a_whole_wait_still_on_an_action_means_it_was_spent_this_round() -> void:
 
 	var blow := FightSource.last_blow(sim.world)
 	check(not blow.is_empty(),
-		"a weapon action resolved and the cooldowns showed no blow: %s" % struck)
+		"a weapon action resolved and the record showed no blow: %s" % struck)
 	if blow.is_empty():
 		return
 	equal(int(blow["rounds_ago"]), 0,
 		"the blow struck on this very round did not read as struck this round")
-	check(struck.contains(String(blow["name"])),
-		"the cooldowns name '%s' as the last blow; the fight wrote '%s'"
-		% [String(blow["name"]), struck.strip_edges()])
+	check(struck.contains(String(blow["attack"])),
+		"the record names '%s' as the last blow; the fight wrote '%s'"
+		% [String(blow["attack"]), struck.strip_edges()])
+	# And it came out of the snapshot rather than off the fight: the same reading,
+	# asked of the dictionary the render layer already holds.
+	equal(FightSource.blow_in(FightSource.snapshot_of(sim.world)), blow,
+		"the blow read from the world is not the blow read from its snapshot")
 	check(EffectArt.has_sprite(String(blow["sprite"])),
 		"the blow's sprite tag '%s' has no row" % String(blow["sprite"]))
 	check(EffectArt.has_motion(String(blow["animation"])),

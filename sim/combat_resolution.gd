@@ -103,6 +103,10 @@ static func strike(
 		"kind": STRIKE,
 		"attacker": attacker.id,
 		"target": target.id,
+		# Where the target was standing when it was struck, read before anything
+		# shoves it: `pushed_to` says where it ended up and this says where it
+		# was hit, and a blow that has to be drawn needs the second.
+		"cell": target.cell,
 		"power": power,
 		"multiplier": multiplier,
 		"swing": swing,
@@ -274,6 +278,11 @@ static func commander_attack(
 		"attacker": commander.id,
 		"attack": attack.attack_name,
 		"cells": cells.size(),
+		# The cells themselves, and not just how many there were. They are worked
+		# out here to find the targets, so handing them back costs nothing and is
+		# the only place they can be had without asking the pattern a second time
+		# -- which, the attack having just been spent, would answer differently.
+		"covered": cells,
 		"hits": hits,
 	}
 

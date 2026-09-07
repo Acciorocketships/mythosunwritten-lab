@@ -1,0 +1,101 @@
+The record of a blow: the same record whether a person struck it or a character
+deciding for itself did.
+
+Command:  ./run_strike.sh
+Reproduces byte for byte in any process on this seed: the same command run twice
+into two files diffs clean.
+Taken at cycle 203, on the commit that widened the blow record.
+
+Alder's turns are taken by hand through BoardTurn -- turn until the spear covers
+somebody, swing, and end the turn a tick later. Briar has a decision function
+that chooses attack and nothing else, serviced by ControlLoop and answered by
+ActionEngine. Both spend their weapon action through CombatMatch.attack, which is
+the one place a blow is written down.
+
+
+the record of a blow seed=1234 ticks=60
+
+the fight: Alder played by hand, Briar by its own decision function
+  t=  1  Alder  has not decided yet, and waits in the world
+    snap-in around #1 at (-483.000, -2.495, 420.000) radius=24.0 span=30.0 storey=0 joined=2
+    snap-in board 388410b822eb4988 cells=441 standable=401 holes=40 cliffs=42
+    snap-in #1 (-483.000, 420.000) -> cell (-161,140) centre (-481.500, 421.500) moved 2.121 rings=0
+    snap-in #2 (-477.000, 420.000) -> cell (-159,140) centre (-475.500, 421.500) moved 2.121 rings=0
+    board 388410b822eb4988 cells=441 standable=401 holes=40 cliffs=42
+    dice seed=2550331813 swing=92..108
+    commanders 2
+      #1 commander owner=1 level=3 hp=38/38 def=0 power=0
+      #2 commander owner=2 level=3 hp=38/38 def=0 power=0
+    round 1 turn #1 at (-161,140) facing=north hp=38/38 def=0 spear + bare
+    by hand: Alder swung facing=east
+      face #1 east
+      attack #1 thrust cells=2 hits=1
+        hit #1->#2 power=12 x150 swing=92 flank def=0 dealt=17 hp=21/38
+    by hand: Alder ended the turn
+  t= 12  Briar  began attack(target=1 item=common spear), 6 ticks
+  t= 17  Briar  thought again at 5/6t, wanted the same thing
+  t= 18  Briar  finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+    round 1 turn #2 at (-159,140) facing=north hp=21/38 def=0 spear + bare
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=100 front def=0 dealt=12 hp=26/38
+      face #2 west
+    round 2 turn #1 at (-161,140) facing=east hp=26/38 def=0 spear + bare
+    by hand: Alder swung facing=east
+      attack #1 thrust cells=2 hits=1
+        hit #1->#2 power=12 x100 swing=98 front def=0 dealt=12 hp=9/38
+    by hand: Alder ended the turn
+  t= 22  Briar  began attack(target=1 item=common spear), 6 ticks
+  t= 27  Briar  thought again at 5/6t, wanted the same thing
+  t= 28  Briar  finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+    round 2 turn #2 at (-159,140) facing=west hp=9/38 def=0 spear + bare
+      attack #2 thrust cells=2 hits=1
+        hit #2->#1 power=12 x100 swing=100 front def=0 dealt=12 hp=14/38
+      face #2 west
+    round 3 turn #1 at (-161,140) facing=east hp=14/38 def=0 spear + bare
+    by hand: Alder swung facing=east
+      attack #1 thrust cells=2 hits=1
+        hit #1->#2 power=12 x100 swing=101 front def=0 dealt=12 hp=0/38 dead removed=1
+      commander #2 is out
+    by hand: Alder ended the turn
+    over rounds=3 survivors=1 winner=#1
+    over turns=5 rounds=3 ending=decided survivors=1 fallen=1
+    snap-out #1 cell (-161,140) -> (-481.500, -2.720, 421.500) back to cell (-161,140) hp=14/38
+    snap-out #2 fell
+
+the same record from either hand
+  field        Alder (a person)             Briar (its own choice)      
+  from         1                            2                           
+  by           Alder                        Briar                       
+  to           2                            1                           
+  tick         10                           18                          
+  round        1                            1                           
+  fight        1                            1                           
+  dealt        17                           12                          
+  out_of       38                           38                          
+  hits         1                            1                           
+  attack       thrust                       thrust                      
+  facing       1                            3                           
+  from_cell    (-161,140)                   (-159,140)                  
+  to_cell      (-159,140)                   (-161,140)                  
+  cells        (-160,140) (-159,140)        (-161,140) (-160,140)       
+  sprite       point                        point                       
+  animation    lunge                        lunge                       
+  movement     instant                      instant                     
+  cooldown     1                            1                           
+  same fields: yes
+
+every blow in the run (5)
+   tick  round struck by attack     dealt  sprite   animation  movement
+     10      1 Alder    thrust      17/38 point    lunge      instant
+     18      1 Briar    thrust      12/38 point    lunge      instant
+     20      2 Alder    thrust      12/38 point    lunge      instant
+     28      2 Briar    thrust      12/38 point    lunge      instant
+     30      3 Alder    thrust      12/38 point    lunge      instant
+
+what leaves the simulation, in the snapshot
+  tick=31 round=3 fighting=yes fights_begun=1 blows=5
+  #1 -> #2 thrust from (-161,140) to (-159,140) over 2 cells, lunge at tick 10
+  #2 -> #1 thrust from (-159,140) to (-161,140) over 2 cells, lunge at tick 18
+  #1 -> #2 thrust from (-161,140) to (-159,140) over 2 cells, lunge at tick 20
+  #2 -> #1 thrust from (-159,140) to (-161,140) over 2 cells, lunge at tick 28
+  #1 -> #2 thrust from (-161,140) to (-159,140) over 2 cells, lunge at tick 30

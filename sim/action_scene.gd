@@ -78,6 +78,12 @@ class_name ActionScene
 ## that reads it is here, and reading it from anywhere else is naming this file.
 const ENGAGE_RADIUS := 9.0
 
+## The id no character has: what a blow that found nobody says it struck.
+const NOBODY := 0
+
+## The facing of a blow that does not say which way its striker was turned.
+const NO_FACING := -1
+
 ## The ground, for walking on and settling onto. May be null: a scene with no
 ## terrain is a bare stage, which is what the failure cases and the interface
 ## checks are played on, and every rule that needs the ground says so.
@@ -176,10 +182,40 @@ var said: Array[Dictionary] = []
 ## "have traded with #2" out of this and never out of the character.
 var trades: Array[Dictionary] = []
 
-## Every blow the engine has landed through an `attack`, in order:
-## `{"from": id, "to": id, "tick": int, "dealt": int, "out_of": int}`. The
-## world's own record of a blow struck, written by `ActionEngine` on the one path
-## an attack takes.
+## Every blow struck in this world, in order, and everything about it that can be
+## said without looking at it.
+##
+## One row per weapon action resolved on a board, whoever spent it -- a person
+## taking a turn by hand, a character's own decision function, or the stand-in
+## the board plays for a commander nobody drives. All three spend it through
+## `CombatMatch.attack`, which writes the row; this file takes the rows off the
+## match (`_take_blows`), puts the ids into the world's own id space and appends
+## them here. So there is one record of a blow and not one per driver.
+##
+## Each row is
+##
+##     {"from", "to", "by", "tick", "round", "fight",
+##      "dealt", "out_of", "hits", "attack",
+##      "facing", "from_cell", "to_cell", "cells",
+##      "sprite", "animation", "movement", "cooldown"}
+##
+## -- who struck (`from`, and `by` for what they are called), who was struck
+## (`to`, `NOBODY` for a swing that found nobody) and how much of their full
+## health it took, which way the striker was facing, where they stood, where the
+## target stood, every cell the pattern covered, and the three things the attack
+## already knew about itself: which art says what it is, which motion says it
+## happened, and whether it landed where it was aimed or crossed the ground to
+## get there. The last three are tags out of `AssetTags` -- names, never paths.
+##
+## `tick` is the tick the blow began on, which is what a render layer starts an
+## animation from; `round` and `cooldown` are counted in turns, and a blow is the
+## fight's most recent for as many rounds as the action that struck it waits.
+##
+## Two things read it. `CharacterUpkeep` folds it into the relationship graph,
+## and nothing there decides what a blow *means* -- that is
+## `sim/relationship_graph.gd`'s. And `CombatantRoster.snapshot()` carries the
+## most recent rows out to whoever is drawing the world, so a swing can be drawn
+## without reaching into the fight for it.
 var blows: Array[Dictionary] = []
 
 ## Every relationship in this world: section 10's graph of edges between
@@ -523,6 +559,19 @@ func _forget_refusal(from_id: int, to_id: int) -> void:
 ## `over` is the snap-out. Nothing here formats anything; how a run announces a
 ## fight is the run's business.
 func fight_step() -> Dictionary:
+	# Anything struck between this call and the last one -- by a person taking a
+	# turn by hand, or by a character's own decision function, both of which spend
+	# a weapon action outside this call.
+	_take_blows()
+	var turn := _fight_turn()
+	# And anything struck in the turn just played.
+	_take_blows()
+	return turn
+
+
+# The turn itself. Separated from `fight_step` above only so that the blows are
+# taken on both sides of it whichever way out of it is taken.
+func _fight_turn() -> Dictionary:
 	# Whatever the beginning of a fight wrote and nobody has reported yet. It is
 	# usually empty and is filled in exactly one place -- `begin_fight` -- so a
 	# fight begun by a blow (`ActionEngine._attack`, between two calls to this)
@@ -603,6 +652,8 @@ func begin_fight(anchor_id: int) -> Encounter:
 		return started
 	fight = started
 	fights_begun += 1
+	if started.match_state != null:
+		started.match_state.world_tick = tick
 	return started
 
 
@@ -611,6 +662,10 @@ func begin_fight(anchor_id: int) -> Encounter:
 func end_fight() -> PackedStringArray:
 	if fight == null:
 		return PackedStringArray()
+	# Whatever the last turn struck, before the board it was struck on is put
+	# away: the ids are only translatable while the fight that seated them is
+	# still here.
+	_take_blows()
 	var written := fight.conclude()
 	_drop_the_fallen()
 	fight_lines.append_array(fight.lines)
@@ -755,6 +810,12 @@ static func kill_label(one: Combatant) -> String:
 ## a `wait` has something to be counted against.
 func advance(ticks: int = 1) -> int:
 	tick += maxi(0, ticks)
+	# The board counts in turns and has no clock of its own. It is told where the
+	# clock is, here, in the one place the clock moves, so that a blow struck on
+	# it carries the tick it began on rather than the tick somebody got round to
+	# reading it on.
+	if fight != null and fight.match_state != null:
+		fight.match_state.world_tick = tick
 	return tick
 
 
@@ -850,19 +911,66 @@ func note_trade(
 	})
 
 
-## Write down one blow the engine has landed: who swung, who was hit, how much it
-## took and how much that character has at full. `ActionEngine`'s to call, on the
-## one path an attack takes.
+## Write down one blow the board has landed: who swung, who was hit, how much it
+## took and how much that character has at full, and -- in `about` -- everything
+## else the blow already knew about itself.
+##
+## The one place this world says a blow happened. `_take_blows` calls it with the
+## row `CombatMatch` wrote; a caller that has only the four numbers may leave
+## `about` out, and every field it does not carry takes the value that means
+## "this blow does not say". Either way every row has the same keys, so nothing
+## reading them has to ask which caller wrote it.
 ##
 ## Here for the same reason `trades` is: the world needs to be able to say what
-## has happened in it without holding whatever made it happen. What reads it is
-## `CharacterUpkeep`, folding it into the relationship graph; nothing else does,
-## and nothing here decides what a blow *means*.
-func note_blow(from_id: int, to_id: int, dealt: int, out_of: int) -> void:
+## has happened in it without holding whatever made it happen.
+func note_blow(
+	from_id: int, to_id: int, dealt: int, out_of: int, about: Dictionary = {}
+) -> void:
+	var covered: Array[Vector2i] = []
+	for cell in about.get("cells", []):
+		covered.append(cell)
 	blows.append({
-		"from": from_id, "to": to_id, "tick": tick,
+		"from": from_id, "to": to_id,
+		"by": String(about.get("by", "")),
+		"tick": int(about.get("tick", tick)),
+		"round": int(about.get("round", 0)),
+		"fight": fights_begun,
 		"dealt": dealt, "out_of": out_of,
+		"hits": int(about.get("hits", 0)),
+		"attack": String(about.get("attack", "")),
+		"facing": int(about.get("facing", NO_FACING)),
+		"from_cell": about.get("from_cell", Vector2i.ZERO) as Vector2i,
+		"to_cell": about.get("to_cell", Vector2i.ZERO) as Vector2i,
+		"cells": covered,
+		"sprite": String(about.get("sprite", "")),
+		"animation": String(about.get("animation", "")),
+		"movement": String(about.get("movement", Attack.INSTANT)),
+		"cooldown": int(about.get("cooldown", Attack.EVERY_TURN)),
 	})
+
+
+# Take every blow the board has struck since this was last asked, and write each
+# one down as the world's own.
+#
+# The ids are translated here and only here: the match counts in piece ids and
+# the world counts in the ids it hands its actors, and this is the one seam
+# between the two -- `Encounter.by_piece` is the fight's own map from one to the
+# other, asked rather than reproduced.
+func _take_blows() -> void:
+	if fight == null or fight.match_state == null:
+		return
+	for row in fight.match_state.take_struck():
+		var striker: Combatant = fight.by_piece.get(int(row["attacker"]), null)
+		if striker == null:
+			continue
+		var hurt: Combatant = fight.by_piece.get(int(row["target"]), null)
+		var about := row.duplicate()
+		about["by"] = name_of(striker)
+		note_blow(
+			striker.id,
+			NOBODY if hurt == null else hurt.id,
+			int(row["dealt"]), int(row["out_of"]), about
+		)
 
 
 # --- Description ----------------------------------------------------------

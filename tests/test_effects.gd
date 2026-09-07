@@ -510,7 +510,7 @@ func _no_code_asks_which_item_it_is_holding() -> void:
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
-		"res://sim/scripted_turn.gd",
+		"res://sim/scripted_strike.gd", "res://sim/scripted_turn.gd",
 	]), "and only the files that set a scenario up name a weapon at all")
 
 	# Broken, three times. Each scan is run again over a line that does not exist

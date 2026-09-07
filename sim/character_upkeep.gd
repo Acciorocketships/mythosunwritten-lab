@@ -196,6 +196,11 @@ func fold(scene: ActionScene) -> int:
 	while graph.struck_taken < scene.blows.size():
 		var blow: Dictionary = scene.blows[graph.struck_taken]
 		graph.struck_taken += 1
+		# A swing that found nobody is on the world's record -- something happened
+		# and whatever draws the world draws it -- but it is nothing between two
+		# people, and there is nobody for the other end of an edge.
+		if int(blow["to"]) == ActionScene.NOBODY:
+			continue
 		if graph.struck(
 			int(blow["from"]), int(blow["to"]),
 			int(blow["dealt"]), int(blow["out_of"])

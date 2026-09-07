@@ -416,10 +416,12 @@ static func _attack(
 	var dealt := 0
 	for hit in swung["hits"]:
 		dealt += int(hit.get("dealt", 0))
-	# The world's own record of the blow, on the one path an attack takes. What
-	# it means to the two of them is `RelationshipGraph`'s and is worked out
-	# nowhere near here.
-	scene.note_blow(actor.id, target.id, dealt, target.piece.max_health())
+	# The blow is not written down here. Every weapon action spent on a board --
+	# this one, one a person spends by hand through `BoardTurn`, one the board's
+	# own stand-in spends for a commander nobody drives -- goes through
+	# `CombatMatch.attack`, which records it; `ActionScene` takes the record off
+	# the board and writes it into `blows`. Writing it here as well would put this
+	# blow in the world twice and every other blow in once.
 	return ActionOutcome.done(action.kind, {
 		"attack": swung["attack"],
 		"cells": swung["cells"],

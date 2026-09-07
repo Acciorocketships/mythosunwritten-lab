@@ -893,6 +893,52 @@ the run where both answer, because turns nobody answered cost a single tick each
 The rule, the two rejected alternatives and what each was rejected on, is in
 [reports/turn-action-seam.md](reports/turn-action-seam.md).
 
+## The record of a blow
+
+A blow is the one thing in this world that has to be *drawn*, and the world's
+record of one used to say who hit whom for how much. That is enough to work out
+what two people are to each other; it is not enough to draw anything. A swing is
+a motion and needs to know which motion and when it began; an arrow is a thing
+crossing the ground and needs a cell to leave from and a cell to arrive at.
+
+The record now carries all of it, and nothing in it was invented: `sim/attack.gd`
+already knew the sprite tag, the animation tag and whether the effect lands where
+it is aimed or travels, and the board already knew the facing, the cells and the
+turn. One row per weapon action resolved:
+
+| field | what it says |
+|---|---|
+| `from`, `by`, `to` | who struck, what they are called, who was struck (`0` for a swing that found nobody) |
+| `dealt`, `out_of`, `hits` | what it took, of how much, and how many it found |
+| `attack`, `cooldown` | the effect's name, and how many turns it waits |
+| `facing`, `from_cell`, `to_cell`, `cells` | which way the striker was turned, where they stood, where it landed, and every cell the pattern covered |
+| `sprite`, `animation`, `movement` | which art says what it is, which motion says it happened, and whether it was instant or a projectile |
+| `tick`, `round`, `fight` | the tick it began on, the round it was struck in, and which fight |
+
+**One record, whoever struck it.** Three things can spend a weapon action — a
+person taking a turn by hand through `BoardTurn`, a character's own decision
+function through `ActionEngine`, and `CombatPolicy`, the stand-in the board plays
+for a commander nobody drives — and all three go through `CombatMatch.attack`,
+which is the one place a blow is written down. `ActionScene` takes the rows off
+the board, puts the ids into the world's own id space and appends them to
+`blows`. The suite does not take that on trust: it scans every source file under
+`sim/` and `render/` for anything that publishes a blow and finds one file for
+each shape of publication.
+
+**And it leaves through the snapshot.** `CombatantRoster.snapshot()` carries the
+most recent rows out beside the pieces and the ground, so the render layer reads
+a swing out of a dictionary it already receives rather than reaching into the
+fight for it. The combat readout's last-blow strip now reads that record instead
+of inferring one from a cooldown — one blow, one record, one reading.
+
+```
+./run_strike.sh                 # the same record from either hand, side by side
+./run_strike_suite.sh           # just this suite
+```
+
+What the record carries, where it is written, what moved and what did not, is in
+[reports/strike-record.md](reports/strike-record.md).
+
 ## What a character can see
 
 `./run_observation.sh` assembles section 10's **local, structured observation**
@@ -2502,6 +2548,8 @@ never has to be serialised for the world to be reproducible.
 ./run_scenario_suite.sh         # just the character-scenario suite
 ./run_skirmish.sh               # a patrol of two and one stranger: the scene drives its own fight
 ./run_turn.sh                   # a turn lasts as long as the weapon action that spends it
+./run_strike.sh                 # the record of a blow: the same record from either hand
+./run_strike_suite.sh           # just the strike-record suite
 ./run_observation.sh            # what each of five characters can see, and how big the packet is
 ./run_observation_suite.sh      # just the observation suite
 ./run_agent.sh                  # every non-player character deciding through a model, in the same run
