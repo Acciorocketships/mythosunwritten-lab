@@ -80,6 +80,7 @@ const SUITES := [
 	preload("res://tests/test_ui_panel.gd"),
 	preload("res://tests/test_ui_readout.gd"),
 	preload("res://tests/test_ui_exchange.gd"),
+	preload("res://tests/test_ui_territory.gd"),
 ]
 
 

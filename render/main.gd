@@ -790,10 +790,10 @@ func _ready() -> void:
 	var with_dialogue: bool = options["dialogue"] or _playing
 	var with_trade: bool = options["trade"] or _playing
 	if options["sheet"] or options["readout"] or _playing \
-			or with_dialogue or with_trade:
+			or with_dialogue or with_trade or options["territory"]:
 		_sheet_ui = PixelUi.build(
 			options["sheet"], options["readout"], _playing,
-			with_dialogue, with_trade)
+			with_dialogue, with_trade, options["territory"])
 		if _sheet_ui == null:
 			printerr(
 				"render-shell --sheet/--readout: the Sprout Lands UI pack is not"
@@ -855,6 +855,12 @@ func _exit_tree() -> void:
 		print("render-shell trade scale=%d x=%d y=%d w=%d h=%d" % [
 			_sheet_ui.art_scale, table.position.x, table.position.y,
 			table.size.x, table.size.y,
+		])
+	if _sheet_ui != null and _sheet_ui.territory != null and _sheet_ui.territory.visible:
+		var ground := _sheet_ui.geometry_of(_sheet_ui.territory)
+		print("render-shell territory scale=%d x=%d y=%d w=%d h=%d" % [
+			_sheet_ui.art_scale, ground.position.x, ground.position.y,
+			ground.size.x, ground.size.y,
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
 	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d frame_ms=%.2f timed=%d digest=%s" % [
@@ -2202,6 +2208,8 @@ func _sync_sheet() -> void:
 		_sheet_ui.dialogue.watch(_sim.world, read_id)
 	if _sheet_ui.trade != null:
 		_sheet_ui.trade.watch(_sim.world, read_id)
+	if _sheet_ui.territory != null:
+		_sheet_ui.territory.watch(_sim.world, read_id)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:
@@ -2406,6 +2414,7 @@ func _parse_args() -> Dictionary:
 		"lod_centre_x": 0.0, "lod_centre_z": 0.0,
 		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
 		"sheet": false, "readout": false, "dialogue": false, "trade": false,
+		"territory": false,
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
 		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
@@ -2529,6 +2538,15 @@ func _parse_args() -> Dictionary:
 				# to the last trade verb, quoted whole. A run with --play gets
 				# it unasked too.
 				options["trade"] = true
+			"--territory":
+				# Put the territory readout on screen: how the followed
+				# character stands with the characters it knows of, and who
+				# owns the point it is standing on -- the simulation's own
+				# ownership rule asked on the frame each picture is drawn. It
+				# reads and writes nothing back, so the world's fingerprint is
+				# the same with it and without it -- which is what
+				# tests/test_ui_territory.gd checks by running both.
+				options["territory"] = true
 			"--play":
 				# Hand the character the world is looking through over to
 				# whoever is at the keyboard: from here on its next action is

@@ -11,8 +11,11 @@
 #   ./tools/measure_ui.sh --icons reports/assets/drawn-icons.png   # no display needed
 #   ./tools/measure_ui.sh --effects reports/assets/effect-art.png  # no display needed
 #
-# --panel says which of the two panels is measured. Either way both are drawn,
-# so one frame can be looked at and measured twice.
+# --panel says which of the panels is measured. By default every panel is
+# drawn, so one frame can be looked at and measured several times; --only asks
+# the shell for the measured panel alone, for a combination that does not fit
+# a 320-art-pixel-tall window all at once (an open sheet leaves no room under
+# it for the reading stack).
 #
 # Everything after the recognised options goes to the render shell unchanged, so
 # a frame can be aimed anywhere a run of ./run_render.sh can.
@@ -35,6 +38,7 @@ FRAME=""
 KEEP=""
 SCENARIO="encounter"
 PANEL="sheet"
+ONLY=0
 TICK=0
 RESOLUTION="1280x720"
 EXTRA=()
@@ -43,6 +47,7 @@ while [[ $# -gt 0 ]]; do
 		--keep) KEEP="$2"; shift 2 ;;
 		--scenario) SCENARIO="$2"; shift 2 ;;
 		--panel) PANEL="$2"; shift 2 ;;
+		--only) ONLY=1; shift ;;
 		--tick) TICK="$2"; shift 2 ;;
 		--resolution) RESOLUTION="$2"; shift 2 ;;
 		*) EXTRA+=("$1"); shift ;;
@@ -62,8 +67,13 @@ if [[ "$TICK" -gt 0 ]]; then
 	WAIT=(--screenshot-tick "$TICK")
 fi
 
+PANELS=(--sheet --readout --dialogue --trade --territory)
+if [[ "$ONLY" == 1 ]]; then
+	PANELS=("--$PANEL")
+fi
+
 OUT="$("$GODOT" --path . --resolution "$RESOLUTION" --fixed-fps 30 -- \
-	--seed 1234 --scenario "$SCENARIO" --sheet --readout --dialogue --trade \
+	--seed 1234 --scenario "$SCENARIO" "${PANELS[@]}" \
 	--screenshot "$FRAME" "${WAIT[@]}" "${EXTRA[@]}" 2>&1)" || {
 	echo "$OUT" >&2; exit 1
 }
@@ -76,7 +86,7 @@ if [[ -z "$LINE" ]]; then
 fi
 read -r SCALE X Y W H <<<"$(sed -E 's/.*scale=([0-9]+) x=(-?[0-9]+) y=(-?[0-9]+) w=([0-9]+) h=([0-9]+).*/\1 \2 \3 \4 \5/' <<<"$LINE")"
 
-grep -E '^render-shell (boot|sheet|readout|dialogue|trade) ' <<<"$OUT"
+grep -E '^render-shell (boot|sheet|readout|dialogue|trade|territory) ' <<<"$OUT"
 exec env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . \
 	--script res://tools/measure_ui.gd -- \
 	--frame "$FRAME" --at "$X" "$Y" --size "$W" "$H" --scale "$SCALE"

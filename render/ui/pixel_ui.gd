@@ -15,15 +15,15 @@ extends CanvasLayer
 ## one at 3, and a window too small for even that draws at 1 and lets the panel
 ## run off the bottom rather than shrinking it to a fraction.
 ##
-## ## Six panels, one theme
+## ## Seven panels, one theme
 ##
 ## The character sheet sits in the top-left corner, the combat readout in the
 ## top-right, the two a person playing needs -- what they have aimed at and
-## what the world answered -- stack along the bottom left, and the two they
-## read -- the trades standing and the dialogue heard -- stack along the
-## bottom right. They are asked for
+## what the world answered -- stack along the bottom left, and the ones they
+## read -- the standing and the ground, the trades standing and the dialogue
+## heard -- stack along the bottom right. They are asked for
 ## separately, so a run may have any of them, all of them or none. What they
-## may not have is six ideas of what the interface looks like, so the theme is
+## may not have is seven ideas of what the interface looks like, so the theme is
 ## built once here and carried by the frame the panels sit in; no panel builds a
 ## style of its own and none names a file on disk.
 ##
@@ -64,6 +64,11 @@ var dialogue: DialoguePanel = null
 ## for it. Above the dialogue panel in the same corner.
 var trade: TradePanel = null
 
+## How the followed character stands with the characters it knows of and who
+## owns the point it is standing on, or null in a run that did not ask for it.
+## Top of the reading stack in the same corner.
+var territory: TerritoryPanel = null
+
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
 var art_scale := 1
@@ -83,7 +88,7 @@ var _frame: MarginContainer = null
 static func build(
 	with_sheet: bool = true, with_readout: bool = false,
 	with_answer: bool = false, with_dialogue: bool = false,
-	with_trade: bool = false,
+	with_trade: bool = false, with_territory: bool = false,
 ) -> PixelUi:
 	var theme := SproutTheme.build()
 	if theme == null:
@@ -162,6 +167,9 @@ static func build(
 		choosing.add_child(layer.play)
 		layer.answer = AnswerPanel.new()
 		choosing.add_child(layer.answer)
+	if with_territory:
+		layer.territory = TerritoryPanel.new()
+		reading.add_child(layer.territory)
 	if with_trade:
 		layer.trade = TradePanel.new()
 		reading.add_child(layer.trade)

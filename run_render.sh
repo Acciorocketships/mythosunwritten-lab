@@ -12,6 +12,10 @@
 #   ./run_render.sh --scenario bargain --play
 #                # the play stage with the trader's mind a language model
 #                # (the shipped recording), for buying a named item off him
+#   ./run_render.sh --territory --scenario market
+#                # the market run with the territory readout: how the followed
+#                # character stands with everyone it knows, and who owns the
+#                # ground it is standing on -- watch the trade flip the ground
 #
 #   ./run_render.sh --play               # drive one of the characters yourself
 #   ./run_render.sh --play --journal     # ...and print what everybody chose
