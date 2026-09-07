@@ -313,10 +313,23 @@ func _a_character_may_not_close_what_the_world_answers() -> void:
 	equal(sheet.goals.refusals.size(), 1, "an allowed closing was recorded as refused")
 
 	# A number that is not a goal closes nothing and breaks nothing.
+	#
+	# The character spends a turn on an action first, and that is not decoration.
+	# `done` is one of the three asks that cost the world no time, and a character
+	# gets `ToolBudget.FREE` of those between the turns it spends on actions: the
+	# two closings above have used both, so a third ask in a row is refused by the
+	# world for its own reason -- the budget -- and never reaches the goal layer at
+	# all. The free ones come back the moment the world carries an action out for
+	# the character, which is what this is. What is being checked here is the goal
+	# layer's answer to a number that names nothing, not how many looks a mind is
+	# given; the budget is `tests/test_tool_budget.gd`'s rule to check.
+	ActionEngine.resolve(scene, rook, Action.wait(1))
 	var third := _mind_saying("done goal=9")
 	_ask(third, scene, rook)
 	equal(GoalCheck.closings_of(sheet.goals).size(), 1,
 		"closing a goal that is not there closed something")
+	equal(String(third.turns[0]["refused"]), GoalCheck.NO_SUCH_GOAL,
+		"the refusal the character was told did not come from the goal layer")
 	equal(String(sheet.goals.refusals[1]["why"]), GoalCheck.NO_SUCH_GOAL,
 		"closing a goal that is not there was refused for some other reason")
 
