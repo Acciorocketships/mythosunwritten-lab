@@ -101,6 +101,10 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 				# attack carried, and the tick the record says it began on.
 				"attack": motion,
 				"attack_tick": began,
+				# And what it has on, by slot, as the catalog names the
+				# simulation already carries. Passed through untouched: which
+				# hand a thing hangs in is CharacterView's decision.
+				"equipped": row.get("equipped", {}),
 			},
 		})
 	return made

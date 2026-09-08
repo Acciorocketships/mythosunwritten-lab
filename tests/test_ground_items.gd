@@ -41,14 +41,15 @@ const FORGED := 400
 ## `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll call.
 const SHIPPED_FALLBACKS := 6
 
-## And how many items the six scenarios ship altogether, for the same reason:
+## And how many items the scenarios ship altogether, for the same reason:
 ##
 ## Six rather than five since the battle scenario landed, which is the encounter
 ## scenario with the camera on one of the two who fight -- so its six items are
 ## the encounter's six, counted a second time because it is a second scenario a
-## person can be handed.
+## person can be handed. Up nine more since the armoury landed: one forged
+## weapon per catalogue shape on the rack, and the changer's sword and shield.
 ## a fallback count means nothing without the total it is out of.
-const SHIPPED_ITEMS := 37
+const SHIPPED_ITEMS := 46
 
 ## How many of the catalog's gear names are drawn by a model out of an installed
 ## pack, and how many are still the primitives written in code.

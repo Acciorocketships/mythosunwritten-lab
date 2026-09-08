@@ -494,7 +494,10 @@ func _no_code_asks_which_item_it_is_holding() -> void:
 				reading.append(where)
 			if _hands_out_a_weapon(code):
 				handing_files[path] = true
-				if not code.contains("wield("):
+				# Into a hand or into a pack, but into somebody's keeping on
+				# the line it is made: the armoury's changer carries the shield
+				# it will swap to, which is a handover exactly as a wield is.
+				if not code.contains("wield(") and not code.contains("carry("):
 					handing.append(where)
 
 	equal(branching, PackedStringArray(),
@@ -506,7 +509,8 @@ func _no_code_asks_which_item_it_is_holding() -> void:
 	var handed_out := PackedStringArray(handing_files.keys())
 	handed_out.sort()
 	equal(handed_out, PackedStringArray([
-		"res://sim/scripted_actions.gd", "res://sim/scripted_encounter.gd",
+		"res://sim/scripted_actions.gd", "res://sim/scripted_armoury.gd",
+		"res://sim/scripted_encounter.gd",
 		"res://sim/scripted_loop.gd", "res://sim/scripted_match.gd",
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",

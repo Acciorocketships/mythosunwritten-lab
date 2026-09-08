@@ -28,9 +28,12 @@ extends Node3D
 ## The model is a *child*, swapped by set_model() and rewired when the swap
 ## lands. That is what makes changing which adventurer a character is cost one
 ## line rather than a second animation setup, and it is why the player and the
-## tree are above the model in the tree rather than inside it. Nothing is
-## socketed yet -- weapons wait for W-items -- but the sockets follow the hands
-## from the moment a model arrives, so equipping one later is `add_child`.
+## tree are above the model in the tree rather than inside it. What hangs in
+## the sockets is read off the snapshot on every apply(), exactly as the clip
+## is: the state says which catalog name is equipped in which slot, and
+## `held_in_hands()` below -- a pure function, like `clip_for()` -- says which
+## of the two hands that name goes in. Nothing about it is remembered between
+## frames; what a socket holds is read off the socket itself.
 class_name CharacterView
 
 ## The scene this class is the script of. Whoever wants a character instantiates
@@ -123,6 +126,51 @@ const SHOT_FADE := 0.15
 ## The bones the two sockets follow. Part of the shared 23-bone rig, which is why
 ## the same two names work on a knight and on a skeleton alike.
 const SOCKET_BONES := {"HandLeft": "handslot.l", "HandRight": "handslot.r"}
+
+## The two sockets by the hand they are: a weapon goes in the right hand and a
+## shield on the left arm, which is a fact about how people hold things and so
+## about the picture, decided here and never in the simulation.
+const LEFT_HAND := "HandLeft"
+const RIGHT_HAND := "HandRight"
+
+## The catalog names that are a shield rather than a weapon, and so hang on the
+## left. One name today; a second shield model would be one more entry.
+const SHIELD_TAGS := [AssetTags.GEAR_BUCKLER]
+
+## The name under which a mounted item remembers what it is -- written on the
+## node itself, so "what is in the socket" is a question the scene answers and
+## no member of this view has to.
+const HELD_META := "held_tag"
+
+## Why a held model is mounted with the identity transform, measured rather
+## than assumed (./tools/measure_held.sh):
+##
+## The slot bones sit in the rig's T-pose at (±0.883, 1.049, 0) with basis
+## x->(-1,0,0), y->(0,0,1), z->(0,1,0) on every character measured -- the
+## socket's own +Y is the character's forward and its +Z the character's up.
+## Every held model in the table is authored in exactly that frame, grip at the
+## model's origin: the blade lies along +Y spanning -0.366..1.409, the dagger
+## -0.225..0.981, the spear -0.548..0.915, the staff -0.900..1.254 and the
+## flail -0.399..0.704; the bow lies along Z (-0.992..0.992), which the socket
+## turns upright; and the buckler's face is the 0.883-unit disc in XY with its
+## boss out at +Z 0.187. Sizes are the artists' own, 1.1-2.2 units against the
+## rig's 2.5, so nothing is scaled either. A test re-measures all of this, so a
+## repointed row that breaks the convention fails the build instead of drawing
+## a sword through somebody's arm.
+
+
+## Which of the two hand sockets each equipped catalog name hangs in.
+##
+## `equipped` is the snapshot's slot->tag dictionary. Only the hand slot is
+## drawn -- worn armour has no socket -- and the one judgement here is which
+## hand: a shield is carried on the left arm and everything else is wielded in
+## the right. A pure function, like `clip_for()`: the same slots give the same
+## hands whatever this view has drawn before.
+static func held_in_hands(equipped: Dictionary) -> Dictionary:
+	var tag := String(equipped.get(Item.SLOT_HAND, ""))
+	if tag != "" and SHIELD_TAGS.has(tag):
+		return {LEFT_HAND: tag, RIGHT_HAND: ""}
+	return {LEFT_HAND: "", RIGHT_HAND: tag}
 
 ## Which tag this view is currently wearing, or "" for one with no model yet.
 var model_tag := ""
@@ -322,6 +370,12 @@ func apply(state: Dictionary, delta: float) -> void:
 		_tree.active = true
 	var wanted := clip_for(state)
 
+	# The hands follow the snapshot exactly as the clip does, and before the
+	# early returns below so a character whose clip did not change still swaps
+	# what it is holding on the tick the snapshot says so.
+	var slots: Variant = state.get("equipped", {})
+	_hold(held_in_hands(slots if slots is Dictionary else {}))
+
 	# The locomotion axis follows the speed whatever else is happening, so a
 	# character that was running when it was hit is running again when the hit
 	# finishes, without the hit having had to remember it.
@@ -372,6 +426,49 @@ func model() -> Node3D:
 ## The skeleton the sockets are following, or null.
 func skeleton() -> Skeleton3D:
 	return _skeleton
+
+
+## The catalog name mounted in a socket right now, or "" for an empty hand.
+##
+## Read off the socket's own children rather than off any member, because there
+## is no member: what a hand holds is a fact about the picture, kept in the
+## picture, and this is how both apply() and the tests read it back.
+func held_tag(socket_name: String) -> String:
+	var socket := get_node_or_null(NodePath(socket_name)) as BoneAttachment3D
+	if socket == null:
+		return ""
+	for child in socket.get_children():
+		return String(child.get_meta(HELD_META, ""))
+	return ""
+
+
+## Make the two sockets hold what the snapshot says and nothing else.
+##
+## `wanted` is `held_in_hands()`'s answer: socket name -> tag, "" for empty.
+## A socket already holding the wanted tag is left alone -- that is a fact read
+## off the socket itself, not a copy kept here -- and any other content is
+## removed before the wanted model goes in, so a swap can never leave the old
+## item hanging behind the new one. The model is mounted with the identity
+## transform; the measured note above held_in_hands() is why that is correct.
+func _hold(wanted: Dictionary) -> void:
+	for socket_name in SOCKET_BONES:
+		var socket := get_node_or_null(NodePath(socket_name)) as BoneAttachment3D
+		if socket == null:
+			continue
+		var tag := String(wanted.get(socket_name, ""))
+		if held_tag(socket_name) == tag:
+			continue
+		for child in socket.get_children():
+			socket.remove_child(child)
+			child.queue_free()
+		if tag == "":
+			continue
+		var built := AssetLibrary.build(tag)
+		if built == null:
+			push_error("CharacterView: '%s' has no visual to hold" % tag)
+			continue
+		built.set_meta(HELD_META, tag)
+		socket.add_child(built)
 
 
 ## Advance the blend tree by hand, for a caller with no frame loop -- a test, or

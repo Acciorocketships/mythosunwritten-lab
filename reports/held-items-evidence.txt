@@ -1,0 +1,20 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234, 8 on the stage
+
+the rack, before anything is stepped:
+  who      holds (sim)      snapshot tag   right socket   left socket   
+  Sword    common sword     gear_blade     gear_blade     -             
+  Spear    common spear     gear_spear     gear_spear     -             
+  Dagger   common dagger    gear_dagger    gear_dagger    -             
+  Bow      common bow       gear_bow       gear_bow       -             
+  Staff    common staff     gear_staff     gear_staff     -             
+  Flail    common flail     gear_flail     gear_flail     -             
+  Shield   common shield    gear_buckler   -              gear_buckler  
+  Hazel    common sword     gear_blade     gear_blade     -             
+
+the changer, wherever the snapshot's hand changes:
+  t=1   hand slot gear_blade     right socket gear_blade     left socket -
+  t=16  hand slot gear_buckler   right socket -              left socket gear_buckler
+  t=34  hand slot gear_blade     right socket gear_blade     left socket -
+  t=51  hand slot -              right socket -              left socket -

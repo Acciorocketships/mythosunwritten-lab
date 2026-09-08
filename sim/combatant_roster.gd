@@ -178,6 +178,11 @@ func snapshot() -> Dictionary:
 			"max_health": one.piece.max_health(),
 			"cell_x": one.piece.cell.x,
 			"cell_y": one.piece.cell.y,
+			# What it has on, as catalog names by slot -- the same sort of
+			# answer as the `appearance` above and the `model` on a ground
+			# item row. Empty for anyone with nothing equipped, and for a
+			# minion, which carries no inventory at all.
+			"equipped": equipped_tags(one),
 		})
 	return {
 		"phase": phase(),
@@ -262,6 +267,28 @@ func ground_rows() -> Array[Dictionary]:
 			row["items"] = lying
 		rows.append(row)
 	return rows
+
+
+## Which catalog name is worn or held in each of a combatant's occupied slots.
+##
+## The same rule the piece rows and the ground rows follow: every value is a
+## name the simulation already holds, and what a `gear_blade` looks like is the
+## render layer's table's business. `Inventory` answers what is equipped where,
+## `ItemModel` answers which name that item is drawn under, and this only walks
+## the one and asks the other. A slot whose item resolves to no name is left
+## out, because the empty string is `ItemModel`'s honest "nothing drawable" and
+## a viewer has no use for a slot it cannot draw.
+static func equipped_tags(one: Combatant) -> Dictionary:
+	var tags := {}
+	var pack := ActionScene.inventory_of(one)
+	if pack == null:
+		return tags
+	var equipment := pack.equipment()
+	for slot in equipment:
+		var tag := ItemModel.of(Inventory.item_of(equipment[slot]))
+		if tag != ItemModel.NOTHING:
+			tags[slot] = tag
+	return tags
 
 
 ## One line per combatant, in id order. What a report prints and what a test

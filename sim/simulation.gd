@@ -35,13 +35,14 @@ const SCENARIO_PLAY := "play"
 const SCENARIO_BATTLE := "battle"
 const SCENARIO_BARGAIN := "bargain"
 const SCENARIO_AGENT := "agent"
+const SCENARIO_ARMOURY := "armoury"
 
 ## Every scenario there is, in a fixed order, for a report line and a usage
 ## message.
 const SCENARIOS := [
 	SCENARIO_ENCOUNTER, SCENARIO_ENCOUNTER_ISLAND,
 	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY, SCENARIO_BATTLE,
-	SCENARIO_BARGAIN, SCENARIO_AGENT,
+	SCENARIO_BARGAIN, SCENARIO_AGENT, SCENARIO_ARMOURY,
 ]
 
 ## Which scenarios need a channel of model replies to stand up at all. The
@@ -203,6 +204,11 @@ func begin_scenario(
 			if minds == null:
 				return false
 			return ScriptedAgent.muster(world, minds) > 0
+		SCENARIO_ARMOURY:
+			# Every held shape in somebody's hands and one character changing
+			# gear on a schedule. Lived, never frozen: the changes are the
+			# point, and they happen in front of the camera.
+			return ScriptedArmoury.muster(world) > 0
 	return false
 
 
