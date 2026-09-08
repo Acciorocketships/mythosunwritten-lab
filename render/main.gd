@@ -576,6 +576,15 @@ var _choice_mark := ""
 var _piece_views := {}
 var _pieces_drawn := 0
 
+## One drawable per blow still crossing the board, keyed by `BlowFlights`' own
+## key -- which blow it is. The same bookkeeping-and-nothing-else contract as
+## `_piece_views`: which cells a flight is between, what it wears and how far
+## across it is are all read off the snapshot's blow record on the frame they
+## are drawn, so throwing this away and rebuilding it from the same snapshot
+## draws the identical picture.
+var _flight_views := {}
+var _flights_launched := 0
+
 ## One drawable per item lying on the ground, keyed by `GroundItems`' own key --
 ## which object it is in and which place in it -- so a pile that gains or loses
 ## something costs one add or one free rather than a rebuild.
@@ -1342,6 +1351,7 @@ func _sync_views() -> void:
 	_sync_board(snapshot)
 	_sync_choice()
 	_sync_combat(snapshot)
+	_sync_flights(snapshot)
 	_sync_ground(snapshot)
 	_sync_sheet()
 
@@ -2261,6 +2271,43 @@ func _build_piece_view(row: Dictionary) -> Node3D:
 		return null
 	add_child(model)
 	return model
+
+
+## Put whatever is flying on screen: one drawable per blow of the record whose
+## effect is still crossing the board, between the cell it left and the cell it
+## landed on.
+##
+## The same three steps every other layer gets -- drop what has landed, launch
+## what is new, move the rest -- keyed by the blow the flight belongs to. What
+## flies, from where to where, wearing which art and how far across it is are
+## all `BlowFlights.flights()`, a pure function of the snapshot's own blow
+## record; by the time a row exists here the blow has been resolved and written
+## down, so nothing this draws can reach the fight. An instant blow never gets
+## a row, so a swing launches nothing.
+func _sync_flights(snapshot: Dictionary) -> void:
+	var rows := BlowFlights.flights(snapshot)
+	var still_flying := {}
+	for row in rows:
+		still_flying[String(row["key"])] = true
+	for key in _flight_views.keys():
+		if not still_flying.has(key):
+			(_flight_views[key] as Node3D).queue_free()
+			_flight_views.erase(key)
+
+	for row in rows:
+		var key := String(row["key"])
+		var view: FlightView = _flight_views.get(key, null)
+		if view == null:
+			view = FlightView.new()
+			add_child(view)
+			view.launch(
+				row["from_cell"], row["to_cell"],
+				String(row["sprite"]), String(row["animation"]),
+				float(row["from_height"]), float(row["to_height"]),
+			)
+			_flight_views[key] = view
+			_flights_launched += 1
+		view.show_phase(float(row["phase"]))
 
 
 ## Put what is lying on the ground on screen: one drawable per item, where the

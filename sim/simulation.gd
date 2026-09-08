@@ -36,13 +36,14 @@ const SCENARIO_BATTLE := "battle"
 const SCENARIO_BARGAIN := "bargain"
 const SCENARIO_AGENT := "agent"
 const SCENARIO_ARMOURY := "armoury"
+const SCENARIO_VOLLEY := "volley"
 
 ## Every scenario there is, in a fixed order, for a report line and a usage
 ## message.
 const SCENARIOS := [
 	SCENARIO_ENCOUNTER, SCENARIO_ENCOUNTER_ISLAND,
 	SCENARIO_MARKET, SCENARIO_QUARREL, SCENARIO_PLAY, SCENARIO_BATTLE,
-	SCENARIO_BARGAIN, SCENARIO_AGENT, SCENARIO_ARMOURY,
+	SCENARIO_BARGAIN, SCENARIO_AGENT, SCENARIO_ARMOURY, SCENARIO_VOLLEY,
 ]
 
 ## Which scenarios need a channel of model replies to stand up at all. The
@@ -209,6 +210,12 @@ func begin_scenario(
 			# gear on a schedule. Lived, never frozen: the changes are the
 			# point, and they happen in front of the camera.
 			return ScriptedArmoury.muster(world) > 0
+		SCENARIO_VOLLEY:
+			# An archer, a mage and a swordsman on one board: the fight whose
+			# blows travel, so a watcher sees arrows and bolts cross the ground
+			# where every other scenario's blows land instantly. Lived, never
+			# frozen -- a flight is a thing that happens, not a pose.
+			return ScriptedVolley.muster(world)
 	return false
 
 

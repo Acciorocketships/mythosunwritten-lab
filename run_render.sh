@@ -17,6 +17,10 @@
 #                # character stands with everyone it knows, and who owns the
 #                # ground it is standing on -- watch the trade flip the ground
 #
+#   ./run_render.sh --scenario volley
+#                # an archer, a mage and a swordsman: the fight whose blows
+#                # travel, so arrows and bolts visibly cross the board
+#
 #   ./run_render.sh --play               # drive one of the characters yourself
 #   ./run_render.sh --play --journal     # ...and print what everybody chose
 #

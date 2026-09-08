@@ -38,7 +38,7 @@ func _initialize() -> void:
 			+ " [--scenario NAME] [--frozen]"
 			+ " [--chunks] [--biomes] [--water] [--islands] [--settlements]"
 			+ " [--scatter] [--enemies] [--board] [--snap] [--board-sweep]"
-			+ " [--assets]"
+			+ " [--assets] [--digest]"
 			+ "\nscenarios: " + " ".join(Simulation.SCENARIOS)
 		)
 		quit(2)
@@ -125,6 +125,11 @@ func _initialize() -> void:
 		# answers for a whole world having been generated and stepped.
 		for line in _asset_report():
 			print(line)
+	if options["digest"]:
+		# The same fingerprint the render shell's stop line carries, printed in
+		# the same `digest=` spelling, so the two runs are compared by grepping
+		# one word out of each.
+		print("digest=%s" % sim.world.digest())
 	quit(0)
 
 
@@ -217,6 +222,10 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 		"board_sweep": false,
 		"snap": false,
 		"assets": false,
+		# Print the world's digest after the run: the same fingerprint the
+		# render shell reports at its stop line, so a headless run and a
+		# rendered run of one seed can be compared state for state.
+		"digest": false,
 		# Which named scenario to set out, and whether to photograph it rather
 		# than live it. Empty means the ordinary world and the cast that lives
 		# in it.
@@ -265,6 +274,9 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 				i += 1
 			"--assets":
 				options["assets"] = true
+				i += 1
+			"--digest":
+				options["digest"] = true
 				i += 1
 			"--frozen":
 				options["frozen"] = true

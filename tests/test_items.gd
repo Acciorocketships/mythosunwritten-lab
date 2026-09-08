@@ -865,7 +865,9 @@ func _the_layer_stands_on_its_own() -> void:
 	# are excused below and held to the narrower rule.
 	# `sim/scripted_goodwill.gd` is the fifteenth and needs no excusing: it forges
 	# the three things its neighbours want, and it is a fight file like every
-	# other scripted run.
+	# other scripted run. `sim/scripted_volley.gd` is the sixteenth and the same
+	# kind: it forges the bow, the wand and the sword its three commanders loose
+	# at each other, so a watchable run has blows that travel.
 	equal(readers, PackedStringArray([
 		"res://sim/ability_check.gd",
 		"res://sim/action_engine.gd", "res://sim/armour.gd", "res://sim/character.gd",
@@ -880,7 +882,8 @@ func _the_layer_stands_on_its_own() -> void:
 		"res://sim/scripted_play.gd",
 		"res://sim/scripted_scenario.gd", "res://sim/scripted_skirmish.gd",
 		"res://sim/scripted_strike.gd", "res://sim/scripted_territory.gd",
-		"res://sim/scripted_turn.gd", "res://sim/scripted_world.gd",
+		"res://sim/scripted_turn.gd", "res://sim/scripted_volley.gd",
+		"res://sim/scripted_world.gd",
 		"res://sim/simulation.gd",
 		"res://sim/spawn_roll.gd", "res://sim/weapon.gd",
 		"res://sim/world_cast.gd",

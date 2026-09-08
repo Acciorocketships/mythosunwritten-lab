@@ -32,14 +32,17 @@ class_name TestGroundItems
 const SEED := 4321
 const FORGED := 400
 
-## How many of the items the six shipped scenarios put in the world resolve to
+## How many of the items the shipped scenarios put in the world resolve to
 ## no name of their own and are therefore drawn as `GroundItems.FALLBACK_TAG`.
 ##
 ## Written down rather than merely counted, so that an item added with no shape
 ## recorded moves a number a test compares instead of quietly becoming another
-## anonymous bundle on the ground. The report beside it is
-## `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll call.
-const SHIPPED_FALLBACKS := 6
+## anonymous bundle on the ground. The seventh is the volley's wand: a composed
+## weapon whose shape word no model table row has earned, so it lies down as
+## the anonymous bundle exactly as the rule says it must. The report beside it
+## is `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll
+## call.
+const SHIPPED_FALLBACKS := 7
 
 ## And how many items the scenarios ship altogether, for the same reason:
 ##
@@ -48,8 +51,10 @@ const SHIPPED_FALLBACKS := 6
 ## the encounter's six, counted a second time because it is a second scenario a
 ## person can be handed. Up nine more since the armoury landed: one forged
 ## weapon per catalogue shape on the rack, and the changer's sword and shield.
+## Up three more since the volley landed: the archer's bow, the mage's wand and
+## the swordsman's sword.
 ## a fallback count means nothing without the total it is out of.
-const SHIPPED_ITEMS := 46
+const SHIPPED_ITEMS := 49
 
 ## How many of the catalog's gear names are drawn by a model out of an installed
 ## pack, and how many are still the primitives written in code.
