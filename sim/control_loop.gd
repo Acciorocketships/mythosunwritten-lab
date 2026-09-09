@@ -156,6 +156,7 @@ var _changes: int = 0
 var _interruptions: Dictionary = {}
 var _chosen_on: Dictionary = {}
 var _answers: Dictionary = {}
+var _answered: int = 0
 var _standing: Dictionary = {}
 
 
@@ -294,13 +295,7 @@ func _complete(one: Combatant, doing: Activity) -> void:
 	_busy.erase(one.id)
 	var outcome := ActionEngine.resolve(scene, one, doing.action)
 	_resolved[one.id] = actions_of(one.id) + 1
-	_answers[one.id] = {
-		"tick": scene.tick,
-		"action": doing.action.line(),
-		"line": outcome.line(),
-		"reason": outcome.reason,
-		"ok": outcome.ok,
-	}
+	_write_answer(one.id, doing.action, outcome)
 	_count(FINISHED)
 	_note(one, "%s %s -> %s" % [FINISHED, doing.action.line(), outcome.line()])
 	if _can_act(one) and _may_choose(one):
@@ -458,7 +453,7 @@ func is_thinking(id: int) -> bool:
 
 
 ## What the engine last answered a character, or an empty dictionary for one it
-## has never answered: `{tick, action, line, reason, ok}`.
+## has never answered: `{tick, serial, action, line, reason, ok, settled}`.
 ##
 ## Every string in it is the engine's, verbatim -- `Action.line()` for what was
 ## chosen and `ActionOutcome.line()` for what came of it, which for a refusal
@@ -473,6 +468,67 @@ func is_thinking(id: int) -> bool:
 func answer_of(id: int) -> Dictionary:
 	var answer: Variant = _answers.get(id, null)
 	return {} if answer == null else (answer as Dictionary).duplicate()
+
+
+## Offer a character something to do at a moment of somebody else's choosing, and
+## hand back whatever the world says about it straight away.
+##
+## A choice a person makes arrives at a moment nobody can write down in advance
+## -- that is `LiveChoice`'s whole reason for existing -- and the world picks it
+## up the next time that character may choose. Off a board that is the next tick,
+## and there is nothing here to say. On one it is the character's next turn,
+## which may be many ticks away and, while the person is holding their own turn
+## open, may never come at all. A choice that sits in a holder that long is a
+## choice nobody has been answered about, and section 2.1's returned reason is
+## addressed to whoever chose.
+##
+## So the world answers what it already knows the answer to, and there are two
+## such things.
+##
+##   * The action is one the world refuses whatever happens next --
+##     `ActionEngine.refused_before_it_begins`. That answer is **settled**: the
+##     world is done with the action, and the choice is not left standing for a
+##     turn that would only refuse it again.
+##   * The action is one a board has not got to yet, because a board rations
+##     choosing to the turn (`_may_choose`) and this is not this character's
+##     turn, or is and has been spent. That answer is **not settled**: the
+##     choice stands, the board takes it up when the turn comes round, and what
+##     the world says here is why it has not been taken up so far.
+##
+## Nothing is resolved either way, nothing moves and no action is counted. Every
+## sentence is `ActionEngine`'s, written where the resolver writes it, so the
+## person is told the same thing a moment early rather than a second thing.
+##
+## Returns the answer as `answer_of` reads it, or an empty dictionary when the
+## world has nothing to say at all and the choice simply stands.
+func offered(id: int, action: Action) -> Dictionary:
+	var one := scene.actor_of(id)
+	if one == null or action == null:
+		return {}
+	var refused := ActionEngine.refused_before_it_begins(scene, one, action)
+	if refused != null:
+		_write_answer(id, action, refused, true)
+		_note(one, "was answered %s -> %s before it began"
+			% [action.line(), refused.line()])
+		return answer_of(id)
+	var waiting := _not_taken_up_yet(one)
+	if waiting == "":
+		return {}
+	_write_answer(id, action, ActionOutcome.failed(action.kind, waiting), false)
+	_note(one, "chose %s, which the board has not taken up: %s" % [action.line(), waiting])
+	return answer_of(id)
+
+
+# Why a board has not taken a character's choice up, or "" when nothing is
+# stopping it. The reading of `_may_choose` said out loud: off a board there is
+# nothing to say, on one's own unspent turn there is nothing to say, and the two
+# remaining cases are the two sentences the engine writes for them.
+func _not_taken_up_yet(one: Combatant) -> String:
+	if scene.fight == null or not one.fighting or _may_choose(one):
+		return ""
+	if scene.fight.active_member() != one:
+		return ActionEngine.out_of_turn(one)
+	return ActionEngine.turn_already_spent(one)
 
 
 ## Every count the loop keeps: how many mid-action re-evaluations happened, how
@@ -492,6 +548,32 @@ func change_rate() -> float:
 
 
 # --- The furniture --------------------------------------------------------
+
+
+# Write down what the world said to a character. The one place an answer row is
+# made, so `_complete` and `offered` cannot drift into two shapes of one row.
+#
+# `serial` counts the answers the loop has given anybody, so that a watcher can
+# tell a fresh answer from the one it read last time without comparing ticks --
+# two answers on one tick are two answers, and a character asked the same thing
+# twice is refused twice.
+func _write_answer(
+	id: int, action: Action, outcome: ActionOutcome, settled: bool = true
+) -> void:
+	_answered += 1
+	_answers[id] = {
+		"tick": scene.tick,
+		"serial": _answered,
+		"action": action.line(),
+		"line": outcome.line(),
+		"reason": outcome.reason,
+		"ok": outcome.ok,
+		# Whether the world is done with the action. A resolution always is; the
+		# one thing that is not is `offered` telling somebody why a board has not
+		# taken their choice up yet, which is an answer about a choice that is
+		# still standing and may yet be carried out.
+		"settled": settled,
+	}
 
 
 # Call a character's own decision function. The whole of what this file knows

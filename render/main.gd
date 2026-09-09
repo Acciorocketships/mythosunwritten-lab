@@ -549,6 +549,11 @@ var _board_relief := 0.0
 ## the overlay without needing a screen to look at.
 var _board_cells := 0
 var _board_holes := 0
+## Whether this run keeps the lattice up all the time. True for a run that asked
+## for it with --board, which is what a survey of the squares wants; false for a
+## play run, where the lattice is a board and a board is a thing that arrives
+## when a fight does and goes away with it.
+var _lattice_always := false
 ## Which board the lattice overlay was last drawn for, so it is rebuilt when the
 ## fight puts a different one under it.
 var _board_fight := -1
@@ -650,9 +655,12 @@ var _journal_said := 0
 ## and the board going away are each said once, with the tick.
 var _was_fighting := false
 
-## Which tick of the answer to the driven character has already been printed, so
-## one answer is said once.
-var _answer_said := -1
+## Which answer to the driven character has already been printed, by the loop's
+## own count of the answers it has given -- `ControlLoop.answer_of`'s `serial`.
+## Counted rather than dated so that one answer is said once and two answers are
+## said twice, whether or not they fell on the same tick: a person refused the
+## same thing twice has been refused twice.
+var _answer_said := 0
 
 ## Key presses to make on behalf of a person who is not there: `{tick, keycode}`
 ## rows out of `--input`, fed through the engine's own input queue on the tick
@@ -746,7 +754,12 @@ func _ready() -> void:
 			_reflection.anti_aliasing = String(options["mirror_aa"])
 	if String(options["trace"]) != "":
 		_build_trace(String(options["trace"]))
-	if options["board"]:
+	# Built for a run that asked for the lattice and for one that asked to play.
+	# A play run does not keep it up: `_sync_board` draws it while a fight is on
+	# and puts it away when the fight is, because a lattice over the meadow is
+	# what a board looks like when there is no board.
+	_lattice_always = options["board"]
+	if options["board"] or options["play"]:
 		_board_view = MeshInstance3D.new()
 		_board_material = StandardMaterial3D.new()
 		_board_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -798,10 +811,16 @@ func _ready() -> void:
 	# cannot be accepted, and a reply that cannot be read cannot be answered.
 	var with_dialogue: bool = options["dialogue"] or _playing
 	var with_trade: bool = options["trade"] or _playing
-	if options["sheet"] or options["readout"] or _playing \
+	# And the combat readout, for the same reason again: a fight that starts by
+	# itself in the running world is a fight nobody asked for, and a turn that
+	# cannot be read cannot be taken. The panel hides itself when no fight is on
+	# -- `CombatPanel.refresh` -- so a play run with no fight in it looks exactly
+	# as it did before.
+	var with_readout: bool = options["readout"] or _playing
+	if options["sheet"] or with_readout or _playing \
 			or with_dialogue or with_trade or options["territory"]:
 		_sheet_ui = PixelUi.build(
-			options["sheet"], options["readout"], _playing,
+			options["sheet"], with_readout, _playing,
 			with_dialogue, with_trade, options["territory"])
 		if _sheet_ui == null:
 			printerr(
@@ -1057,7 +1076,13 @@ func _drive(keycode: int) -> bool:
 			_sim.world.tick, String(view.place["kind"]), String(view.place["id"]),
 			float(view.place["distance"]),
 		])
-	_sim.driven.choose(chosen)
+	# Offered rather than simply put in the holder: an action the world already
+	# refuses -- walking or jumping while a board holds the character -- is
+	# answered on the spot instead of standing in the holder until a turn that
+	# may never come to it. The answer is the engine's own and reaches the screen
+	# through `_say_what_happened` and the answer panel, as every other answer
+	# does; nothing is decided here. See `Simulation.drive`.
+	_sim.drive(chosen)
 	print("render-shell play t=%d chose %s" % [_sim.world.tick, chosen.line()])
 	return true
 
@@ -1262,11 +1287,11 @@ func _say_what_happened() -> void:
 	if not _playing:
 		return
 	var answer := _sim.driven_answer()
-	if answer.is_empty() or int(answer["tick"]) == _answer_said:
+	if answer.is_empty() or int(answer["serial"]) == _answer_said:
 		return
-	_answer_said = int(answer["tick"])
+	_answer_said = int(answer["serial"])
 	print("render-shell play t=%d %s -> %s" % [
-		_answer_said, String(answer["action"]), String(answer["line"]),
+		int(answer["tick"]), String(answer["action"]), String(answer["line"]),
 	])
 
 
@@ -1989,6 +2014,16 @@ func _sync_board(snapshot: Dictionary) -> void:
 	_board_cell = here
 	_board_lifted = lifted
 	_board_fight = fight_board
+	# A run that did not ask for the squares gets them only while a fight is on,
+	# and gets them taken away when it ends. The overworld is not a board and
+	# must not be drawn as one; a fight is, from the tick it begins.
+	if fight_board < 0 and not _lattice_always:
+		_board_view.mesh = null
+		_board_surface = {}
+		_board_reach = Rect2()
+		_board_cells = 0
+		_board_holes = 0
+		return
 	# Asked for only now: reading a board is tens of milliseconds, and the
 	# lattice is fixed to the world, so walking about inside one cell does not
 	# move a single square and there is nothing to redraw. What comes back is a

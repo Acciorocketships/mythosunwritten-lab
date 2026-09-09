@@ -133,6 +133,17 @@ const MOTION_CLIPS := {
 	AssetTags.ANIM_BASH: {"clip": "Melee_Block_Attack", "ticks": 22},
 }
 
+## How long the flinch lasts, in ticks: `CharacterView.CLIP_HIT`'s own length at
+## the rate above, by the same measurement every row of the table is written
+## from, and checked against the assembled library by the same test.
+##
+## Here for the same reason a motion's length is: a blow the record says landed
+## on some tick is landing *now* for as long as the clip that draws it runs, and
+## the length of a clip is this layer's answer and only this layer's. The
+## simulation says which tick a blow landed on and on whom; the subtraction is
+## `CombatDiorama.struck`.
+const HIT_TICKS := 14
+
 ## What a motion with no row above plays instead: a punch.
 ##
 ## An attack whose tag this table has never heard of still happened, and the one

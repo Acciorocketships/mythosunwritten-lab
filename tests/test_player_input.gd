@@ -34,6 +34,15 @@ extends TestSuite
 ##   7. **The person's character is drawn and animated like everybody else.** It
 ##      is a row of the same diorama, wearing a model, and the clip it plays
 ##      follows what the world says it is doing.
+##   8. **A key pressed while a board holds the character is answered, every
+##      time.** A person whose character has been drawn onto a board is only
+##      asked for a choice on its own turn, and while it is holding that turn
+##      open it is never asked again -- so a real-time choice used to sit in the
+##      holder and nobody was ever told anything. Now the world answers it at
+##      once, in the resolver's own sentence, and answers the next one too. A
+##      choice the board has merely not got to yet is answered as well and is
+##      left standing, so nothing is taken away from the person to say it. And
+##      the panel does not show an answer belonging to a different action.
 class_name TestPlayerInput
 
 ## The seed every claim here is played on: the world the headless run reports,
@@ -51,6 +60,10 @@ const CARRY_TICKS := 30
 
 ## Long enough for a jump, which costs 4.
 const JUMP_TICKS := 12
+
+## Long enough for the encounter scenario's two commanders to walk together and
+## for the board to be built under them.
+const FIGHT_TICKS := 400
 
 ## What a live decision function and the file it reads may not name. Keys,
 ## devices, screens and the render layer: the whole vocabulary of how a choice
@@ -76,6 +89,7 @@ func run() -> void:
 	_every_control_is_an_action_the_catalogue_already_offers()
 	_a_refusal_comes_back_in_the_engines_own_words()
 	_the_person_is_drawn_and_animated_like_everybody_else()
+	_a_key_pressed_on_a_board_is_answered_every_time()
 
 
 # --- 1: one of the four ---------------------------------------------------
@@ -358,6 +372,96 @@ func _the_person_is_drawn_and_animated_like_everybody_else() -> void:
 		if leapt:
 			break
 	check(leapt, "none of the four hops was allowed, so the jump was never drawn")
+
+
+# --- 8: a key pressed on a board is answered every time --------------------
+
+
+## The measured case, played out: a person whose character has been drawn onto a
+## board presses a movement key, and presses it again, and again.
+##
+## Before this the first press was answered -- it happened to fall on a turn the
+## character could still choose on -- and every one after it was silent, because
+## a character holding its own turn open is never asked again and a choice that
+## is never asked for is never answered. The count below is the whole claim:
+## three presses, three answers, three different ones.
+func _a_key_pressed_on_a_board_is_answered_every_time() -> void:
+	var game := Simulation.new(SEED)
+	ScriptedEncounter.muster_played(game.world)
+	check(game.hand_over_followed(), "the encounter should hand a commander over")
+	var id := game.driven_id
+	var fighting := false
+	for _step in FIGHT_TICKS:
+		game.step()
+		if game.world.combat.fight != null and game.world.combat.member_of(id).fighting:
+			fighting = true
+			break
+	check(fighting, "the scenario should put the driven character on a board")
+	if not fighting:
+		return
+
+	# Whatever the world had already said before the board arrived is not what
+	# this claim is about; what matters is that every press after it is answered.
+	var before := int(game.driven_answer().get("serial", 0))
+	var here := Vector2(game.world.combat.member_of(id).x, game.world.combat.member_of(id).z)
+	var answers: Array[Dictionary] = []
+	for step in 3:
+		var walk := Action.go_to(here + Vector2(float(step) + 1.0, 0.0))
+		var said := game.drive(walk)
+		check(not said.is_empty(),
+			"press %d on the board was taken and not answered" % (step + 1))
+		if said.is_empty():
+			return
+		answers.append(said)
+		equal(String(said["action"]), walk.line(),
+			"the answer to press %d names a different action" % (step + 1))
+		check(not bool(said["ok"]),
+			"walking the world while a board holds you should be refused")
+		equal(String(said["reason"]), ActionEngine.THE_BOARD_SAYS,
+			"the refusal should be the engine's own sentence")
+		# And the choice is not left standing for a turn that will not take it.
+		check(game.driven.waiting(),
+			"press %d was answered and then left standing in the holder" % (step + 1))
+
+	var serials := {}
+	for said in answers:
+		serials[int(said["serial"])] = true
+		check(int(said["serial"]) > before,
+			"an answer given after the board arrived carries an older count")
+	equal(serials.size(), 3, "three presses should be three answers, not one repeated")
+
+	# And a choice the board has simply not got to yet is answered too -- and is
+	# left standing, because the board will take it up when the turn comes.
+	var me := game.world.combat.member_of(id)
+	var stood := game.drive(Action.wait(2))
+	if game.world.combat.fight.active_member() != me:
+		check(not stood.is_empty(),
+			"a choice made on somebody else's turn was taken and never answered")
+		if not stood.is_empty():
+			equal(String(stood["reason"]), ActionEngine.out_of_turn(me),
+				"the world should say whose turn it is, in the engine's own words")
+			equal(bool(stood["settled"]), false,
+				"a choice the board may still take up is not settled")
+	check(not game.driven.waiting(),
+		"a choice the board may still take up was taken out of the holder")
+
+	# And the panel does not show an answer belonging to an earlier action. A
+	# choice the world has not spoken about yet stands with nothing under it.
+	if not SproutPack.is_installed():
+		return
+	var panel := AnswerPanel.new()
+	panel.watch(game.world, id, game.driven)
+	panel.refresh()
+	var showing := game.driven_answer()
+	if String(showing.get("action", "")) == game.driven.line():
+		equal(panel._answer_label.text, SproutPack.drawable(String(showing["line"])),
+			"the panel should be showing what the world said about the standing choice")
+	game.driven.choose(Action.examine(0))
+	panel.refresh()
+	equal(panel._answer_label.text, "",
+		"the panel kept an answer belonging to an action the world has not answered")
+	equal(panel._answer_icon.visible, false,
+		"the panel kept a tick belonging to an action the world has not answered")
 
 
 # --- The furniture --------------------------------------------------------

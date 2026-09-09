@@ -315,6 +315,16 @@ func _the_table_is_checked_against_the_catalog() -> void:
 		equal(CharacterRig.motion_ticks(String(tag)), wanted,
 			"the motion '%s' says its clip lasts a different number of ticks than the clip does (%.3fs)"
 				% [str(tag), seconds])
+	# And the flinch, which is not a motion tag's clip but is measured the same
+	# way and for the same reason: `CombatDiorama.struck` draws a blow landing
+	# for exactly this long, so a number that had drifted from the clip would
+	# leave a character flinching after the flinch was over.
+	if library.has_animation(CharacterView.CLIP_HIT):
+		equal(CharacterRig.HIT_TICKS,
+			CharacterRig.ticks_for_seconds(
+				library.get_animation(CharacterView.CLIP_HIT).length),
+			"the flinch says it lasts a different number of ticks than '%s' does"
+				% CharacterView.CLIP_HIT)
 	# And the fallback, held to exactly the same two conditions.
 	var spare := String(CharacterRig.FALLBACK_MOTION["clip"])
 	check(library.has_animation(spare),
@@ -441,18 +451,22 @@ func _every_weapon_plays_its_own_motion(played: Dictionary) -> void:
 ## frames the render layer would have drawn rather than against the rule asked in
 ## the abstract.
 ##
-## One thing is deliberately not required, and it is a real limit rather than a
-## looser claim. The snapshot carries the last few blows of the whole world, not
-## one per striker, so in a crowd a blow can be pushed out of it while its motion
-## is still meant to be running -- and a render layer reading only the snapshot
-## cannot draw what it was not handed. Every frame therefore says which of the
-## striker's blows the snapshot still carried, and a blow that had been dropped
-## is counted rather than checked. `dropped_early()` below reports that count,
-## and `tools/measure_swings.sh` prints it.
+## Every comparison the run offers is made. The snapshot used to carry the last
+## few blows of the whole world, so in a crowd a blow could be pushed out of it
+## while its motion was still meant to be running -- seven commanders swinging
+## did it to 6 of this run's 123 comparisons -- and a render layer reading only
+## the snapshot cannot draw what it was not handed. The window is now each
+## fighter's own last few blows (`CombatantRoster.BLOWS_EACH`), which no crowd
+## can empty, so a comparison skipped for want of a record is a failure rather
+## than a limit. Every frame still says which of the striker's blows the snapshot
+## carried, and that is what the count below is read from.
 func _the_motion_runs_while_the_blow_does(played: Dictionary) -> void:
 	var timed := timings(played)
 	check(int(timed["checked"]) > 0,
 		"no blow in the run could be timed against its own record")
+	equal(int(timed["dropped"]), 0,
+		"%d comparison(s) could not be made: the blow had left the snapshot before its own motion was over"
+			% int(timed["dropped"]))
 	for failure in timed["failures"]:
 		check(false, String(failure))
 

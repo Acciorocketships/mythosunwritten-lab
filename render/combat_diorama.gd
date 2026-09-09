@@ -13,14 +13,15 @@ extends RefCounted
 ## positions of its own -- so "the picture cannot affect the fight" is not a
 ## promise made in a comment. There is nothing here to affect it with.
 ##
-## Two things are decided here, and both are *presentation*. Which way round a
-## model has to be turned so that a piece facing north on the lattice looks north
-## on screen -- a fact about the models, and the same conversion
-## `CharacterView.yaw_for_heading` already makes for a walker. And whether a blow
-## the record says was struck on some tick is still being struck now, which is a
-## question about how long the motion drawing it lasts and so about the clip: the
-## simulation says which motion and when, `CharacterRig` says how long, and the
-## subtraction is here.
+## Three things are decided here, and all three are *presentation*. Which way
+## round a model has to be turned so that a piece facing north on the lattice
+## looks north on screen -- a fact about the models, and the same conversion
+## `CharacterView.yaw_for_heading` already makes for a walker. Whether a blow the
+## record says was struck on some tick is still being struck now. And whether a
+## blow the record says landed on some tick is still landing now. The last two
+## are one question asked twice, and it is a question about how long the clip
+## drawing it lasts: the simulation says which motion, on whom and when,
+## `CharacterRig` says how long, and the subtraction is here.
 class_name CombatDiorama
 
 ## Which way a piece facing each of the lattice's four directions is walking, as
@@ -66,7 +67,6 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 		if fighting and commander:
 			heading = heading_for_facing(int(row.get("facing", 0)))
 		var health := int(row.get("health", 1))
-		var most := maxi(1, int(row.get("max_health", 1)))
 		var swinging := striking(snapshot, int(row.get("id", 0)))
 		var motion := String(swinging[0])
 		var began := int(swinging[1])
@@ -95,7 +95,12 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 				# the world knows which action it resolved and says.
 				"jumped": bool(row.get("jumped", false)),
 				"alive": health > 0,
-				"hurt": health < most,
+				# And whether a blow is landing on it right now, out of the same
+				# record the swing above comes out of. Not "it has less health
+				# than it started with": that is a wound already taken, and it
+				# stays true for the rest of the fight, so a commander scratched
+				# once would flinch on every tick it was doing nothing else.
+				"hurt": struck(snapshot, int(row.get("id", 0))) >= 0,
 				# And whether it is in the middle of striking a blow, out of the
 				# snapshot's own record of the blows struck: the motion tag the
 				# attack carried, and the tick the record says it began on.
@@ -146,6 +151,42 @@ static func striking(snapshot: Dictionary, id: int) -> Array:
 			return [CharacterView.NO_MOTION, -1]
 		return [motion, began]
 	return [CharacterView.NO_MOTION, -1]
+
+
+## The tick a blow landed on a piece, while the flinch that draws it is still
+## running -- `-1` for a piece nothing is hitting right now.
+##
+## The same shape as `striking` above and for the same reason: the record says
+## who was hit and on which tick (`ActionScene.note_blow`'s `to` and `tick`), and
+## the one thing added here is the comparison against how long the flinch lasts,
+## which is `CharacterRig.HIT_TICKS` and is this layer's own answer because it is
+## a clip's length.
+##
+## Only a blow that actually took something off counts. A swing that reached and
+## did no damage happened, and the one it was aimed at has nothing to flinch
+## from -- `dealt` is the world's own word for how much it took, and this reads
+## it rather than working it out from two health figures.
+##
+## Only the most recent such blow is considered, as with a swing: a character is
+## flinching from the blow that just landed, not from the one before it.
+static func struck(snapshot: Dictionary, id: int) -> int:
+	var combat := _combat(snapshot)
+	var blows: Variant = combat.get("blows", [])
+	if not (blows is Array):
+		return -1
+	var tick_now := int(combat.get("tick", 0))
+	var here := int(combat.get("fights_begun", 0))
+	var rows: Array = blows
+	for at in range(rows.size() - 1, -1, -1):
+		var blow: Dictionary = rows[at]
+		if int(blow.get("to", 0)) != id or int(blow.get("dealt", 0)) <= 0:
+			continue
+		if int(blow.get("fight", 0)) != here:
+			continue
+		var landed := int(blow.get("tick", 0))
+		var since := tick_now - landed
+		return -1 if since < 0 or since >= CharacterRig.HIT_TICKS else landed
+	return -1
 
 
 static func _rows(snapshot: Dictionary) -> Array:

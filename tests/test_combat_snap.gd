@@ -70,6 +70,7 @@ func run() -> void:
 	_an_empty_roster_is_nothing_at_all()
 	_two_processes_play_the_same_cycle()
 	_the_render_layer_draws_the_fight_out_of_the_snapshot()
+	_a_flinch_is_a_blow_landing_and_not_a_wound_already_taken()
 
 
 # --- 1 and 2: the arithmetic ---------------------------------------------
@@ -562,6 +563,62 @@ func _the_render_layer_draws_the_fight_out_of_the_snapshot() -> void:
 		"north is -z, which is a heading of -pi/2")
 	equal(CombatDiorama.heading_for_facing(PieceGeometry.SOUTH), PI * 0.5, "south is +z")
 	equal(CombatDiorama.heading_for_facing(PieceGeometry.WEST), PI, "west is -x")
+
+
+## What the diorama draws as a blow landing is a blow landing.
+##
+## `hurt` used to be "has less health than it started with", which is a wound
+## already taken: true for the rest of the fight once anybody had been scratched,
+## so a wounded commander flinched on every tick it was not doing something else.
+## It is now read off the same record the swing is -- who was hit, on which tick,
+## and for how much -- and it lasts as long as the flinch's own clip and no
+## longer.
+##
+## A made-up snapshot rather than a played fight, because the claim is about a
+## pure function of one dictionary and every case can be put to it directly.
+func _a_flinch_is_a_blow_landing_and_not_a_wound_already_taken() -> void:
+	var landed := 100
+	var made := func(now: int) -> Dictionary:
+		return {"combat": {
+			"fighting": true, "tick": now, "fights_begun": 1,
+			"pieces": [{"id": 7, "health": 3, "max_health": 10, "commander": true}],
+			"blows": [{
+				"from": 4, "to": 7, "fight": 1, "tick": landed, "dealt": 2,
+				"animation": AssetTags.ANIM_SLASH,
+			}],
+		}}
+	equal(CombatDiorama.struck(made.call(landed), 7), landed,
+		"a blow landing on the tick it landed on is landing now")
+	equal(CombatDiorama.struck(made.call(landed + CharacterRig.HIT_TICKS - 1), 7), landed,
+		"a blow should still be landing on the last tick its flinch runs")
+	equal(CombatDiorama.struck(made.call(landed + CharacterRig.HIT_TICKS), 7), -1,
+		"a blow should stop landing when its flinch is over")
+	equal(CombatDiorama.struck(made.call(landed - 1), 7), -1,
+		"a blow has not landed before the tick it landed on")
+	equal(CombatDiorama.struck(made.call(landed), 4), -1,
+		"the one who swung is not the one the blow landed on")
+
+	# The wound is still there long after the flinch, and the flinch is over.
+	var later: Dictionary = made.call(landed + CharacterRig.HIT_TICKS)
+	var wounded: Dictionary = (later["combat"]["pieces"] as Array)[0]
+	check(int(wounded["health"]) < int(wounded["max_health"]),
+		"the piece should still be carrying the wound, so the two differ")
+	var drawn := CombatDiorama.placements(later)
+	equal(bool((drawn[0]["state"] as Dictionary)["hurt"]), false,
+		"a wound already taken was drawn as a blow landing now")
+	equal(CharacterView.clip_for(drawn[0]["state"]), CharacterView.CLIP_IDLE,
+		"a wounded commander with nothing hitting it should be standing still")
+	var now := CombatDiorama.placements(made.call(landed))
+	equal(bool((now[0]["state"] as Dictionary)["hurt"]), true,
+		"a blow landing now was not drawn as one")
+	equal(CharacterView.clip_for(now[0]["state"]), CharacterView.CLIP_HIT,
+		"a commander a blow is landing on should be flinching")
+
+	# A swing that took nothing off is not something to flinch from.
+	var missed: Dictionary = made.call(landed)
+	((missed["combat"]["blows"] as Array)[0] as Dictionary)["dealt"] = 0
+	equal(CombatDiorama.struck(missed, 7), -1,
+		"a blow that took nothing off should not be flinched from")
 
 
 # --- Helpers --------------------------------------------------------------

@@ -126,9 +126,12 @@ func _every_motion_timed(played: Dictionary) -> void:
 	for failure in timed["failures"]:
 		print("    %s" % String(failure))
 	print("  %d comparisons were skipped: the blow had left the snapshot's own" % int(timed["dropped"]))
-	print("  window of the last %d blows before its motion was over, so there was" % CombatantRoster.BLOWS_SHOWN)
-	print("  nothing left to draw it from. Seven commanders swinging is well past")
-	print("  what that window holds; a duel is not.")
+	print("  window -- each fighter's last %d blows struck and last %d taken --" % [
+		CombatantRoster.BLOWS_EACH, CombatantRoster.BLOWS_EACH,
+	])
+	print("  before its motion was over, so there was nothing left to draw it")
+	print("  from. Counted per fighter, only that fighter's own later blows can")
+	print("  push one out, so a crowd cannot; this should read 0.")
 
 
 func _what_falls_back() -> void:

@@ -40,10 +40,21 @@ class_name CombatantRoster
 const REAL_TIME := "real-time"
 const FIGHTING := "fighting"
 
-## How many of the most recent blows the snapshot carries. More than a fight
-## lands in the time any of them is worth drawing for, and small enough that a
-## snapshot taken every frame stays a handful of rows.
-const BLOWS_SHOWN := 8
+## How many of a fighter's own most recent blows the snapshot carries: the last
+## eight it struck, and the last eight it took.
+##
+## Counted per fighter rather than over the world, and that is the whole of the
+## rule. A window over the world empties of a fighter's own blow whenever enough
+## *other* fighters strike, so what a crowded fight can push out of the record is
+## the thing a fighter is in the middle of doing -- and whoever is drawing the
+## fight has nothing left to draw it from. Counted per fighter, a blow can only
+## be pushed out by that same fighter's own later blows, and a fighter strikes
+## at most once a turn: eight of them is its last eight turns, by which time it
+## has struck eight further blows and is plainly no longer doing this one.
+##
+## Nothing here is measured in anything the render layer knows. How long a swing
+## is drawn for is that layer's own answer and this file has never heard of it.
+const BLOWS_EACH := 8
 
 ## Where the fight is actually held, and where everyone in it stands.
 ##
@@ -215,14 +226,47 @@ func snapshot() -> Dictionary:
 ## long a swing lasts, what a `blade` looks like and which way an arrow flies are
 ## the render layer's answers, and this layer has never heard of any of them.
 ##
-## Only the last `BLOWS_SHOWN` are carried. A world that has been fighting for an
-## hour has thousands of them and nothing drawing it has any use for the old
-## ones; what is old enough to have been drawn is old enough to be left behind.
+## Only the blows of the fight under way are carried, and of those only each
+## fighter's last `BLOWS_EACH` -- the last it struck and the last it took, which
+## are two counts and not one, because a blow says something about the one who
+## swung it and something else about the one it landed on. A world that has been
+## fighting for an hour has thousands of them and nothing reading them has any
+## use for a finished fight or for a fighter's ninth-oldest swing.
+##
+## Walked newest first so that "the last eight" is decided before anything is
+## copied, and handed back oldest first, which is the order the scene wrote them
+## in and the order everything reading them expects.
 func blow_rows() -> Array[Dictionary]:
-	var rows: Array[Dictionary] = []
 	var struck := scene.blows
-	for at in range(maxi(0, struck.size() - BLOWS_SHOWN), struck.size()):
-		rows.append(struck[at].duplicate(true))
+	var swung := {}
+	var taken := {}
+	var newest_first: Array[Dictionary] = []
+	var here := fights_begun
+	for at in range(struck.size() - 1, -1, -1):
+		var blow: Dictionary = struck[at]
+		# And of the fight under way only. Blows are written down in the order
+		# they land, so the first one from an older fight is the end of what is
+		# worth carrying: a fight that is over is over, and everything reading
+		# these rows already throws away a blow from a fight that is not this
+		# one. This is also what keeps the window small in a world that has been
+		# fighting all day.
+		if int(blow.get("fight", 0)) != here:
+			break
+		var from_id := int(blow.get("from", 0))
+		var to_id := int(blow.get("to", 0))
+		# How many of this striker's blows, and how many of this target's, are
+		# newer than this one. Counted over every blow rather than over the ones
+		# kept, so "the last eight it struck" means the last eight it struck and
+		# not the last eight of its that something else kept.
+		var by_striker := int(swung.get(from_id, 0))
+		var on_target := int(taken.get(to_id, 0))
+		swung[from_id] = by_striker + 1
+		taken[to_id] = on_target + 1
+		if by_striker < BLOWS_EACH or on_target < BLOWS_EACH:
+			newest_first.append(blow.duplicate(true))
+	var rows: Array[Dictionary] = []
+	for at in range(newest_first.size() - 1, -1, -1):
+		rows.append(newest_first[at])
 	return rows
 
 

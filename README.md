@@ -2419,6 +2419,17 @@ person and only for a person (`ActionScene.hands`), and a transcript written
 across ticks needed one seam to reach the world's
 (`Encounter.unreported()`).
 
+A fight nobody asked for draws itself the same way. `--play` alone builds the
+lattice and the readout, and a fight that begins by itself in the running world
+brings both up on the tick the board arrives and takes both away when it ends;
+and every key pressed while a board holds you comes back with the world's own
+answer, every time rather than only the first. `ControlLoop.offered` is what says
+it: an action a board takes over is answered the moment it is chosen instead of
+standing in the holder until a turn that may never come, and an action the board
+has merely not got to yet is answered *and* left standing.
+[reports/fight-drawn.md](reports/fight-drawn.md) has the frames, the log lines
+and the two ways a fight used to be drawn wrongly that it also closes.
+
 `--start X Z` and `--paused` work here too: the first aims the camera at a place,
 the second holds the world still so a capture can wait for the renderer to settle
 without the observer walking away underneath it.
@@ -2463,6 +2474,15 @@ board's own height for a hole. It reads the board out of the simulation and draw
 it; the world's fingerprint is the same with it and without it, which the stop
 line shows by carrying `board=441/139` against `board=0/0` beside an unchanged
 digest. The three board images above were taken with it:
+
+A run somebody is **playing** draws the same lattice without being asked, and
+only while a fight is on. `--play` builds the overlay and `--board` is what keeps
+it up: with `--play` alone the meadow is a meadow, the squares appear on the tick
+the board does — `render-shell fight t=26 the board appears` — and they are taken
+away again when the fight ends. A fight that begins by itself in the running
+world used to be invisible, because both the lattice and the combat readout were
+built only for the run that had asked for them by name; both are now built for a
+play run too, and the readout hides itself when there is no fight to read.
 
 ```
 xvfb-run -a ./run_render.sh --seed 29 --start 196 182 --paused --board \

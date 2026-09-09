@@ -69,6 +69,7 @@ func run() -> void:
 	_both_hands_write_the_same_record(run)
 	_the_render_side_reads_it_out_of_a_dictionary()
 	_the_snapshot_carries_it(run)
+	_the_window_is_each_fighters_own()
 	_there_is_one_record_and_not_two()
 	_the_tags_are_the_attacks_own(run)
 	_the_run_is_the_same_twice()
@@ -198,9 +199,16 @@ func _the_snapshot_carries_it(run: Dictionary) -> void:
 	check(snapshot.has("blows"), "the snapshot carries no blows at all")
 	var rows: Array = snapshot.get("blows", [])
 	check(not rows.is_empty(), "the snapshot carried no blow from a fought fight")
-	check(rows.size() <= CombatantRoster.BLOWS_SHOWN,
-		"the snapshot carried %d blows, more than the %d it may"
-		% [rows.size(), CombatantRoster.BLOWS_SHOWN])
+	# The window is bounded by the fighters in the fight and not by any count
+	# over the world -- see `_the_window_is_each_fighters_own` below, which puts
+	# the rule itself to `blow_rows()` blow by blow.
+	var fighters := {}
+	for row in rows:
+		fighters[int(row["from"])] = true
+		fighters[int(row["to"])] = true
+	check(rows.size() <= 2 * CombatantRoster.BLOWS_EACH * maxi(1, fighters.size()),
+		"the snapshot carried %d blows, past what a window of %d each for %d fighters holds"
+		% [rows.size(), CombatantRoster.BLOWS_EACH, fighters.size()])
 	if rows.is_empty():
 		return
 	for field in FIELDS:
@@ -212,6 +220,65 @@ func _the_snapshot_carries_it(run: Dictionary) -> void:
 	(rows[-1]["cells"] as Array).clear()
 	check(not (blows[-1]["cells"] as Array).is_empty(),
 		"the snapshot handed out the world's own array rather than a copy")
+
+
+# --- 3c. The window is each fighter's own ----------------------------------
+
+
+## What `blow_rows()` carries, put to it blow by blow.
+##
+## The rule is stated in the simulation's own terms -- the last `BLOWS_EACH` each
+## fighter *struck* and the last `BLOWS_EACH` each fighter *took* -- and this is
+## that sentence written twice, once as the code under test and once here as the
+## expectation, over a record built by hand so that every case is reachable: one
+## fighter striking far more than the window holds, a crowd striking around it,
+## and a fighter that only ever takes blows.
+##
+## The case it exists for is the crowd. The old window was the last eight blows
+## of the whole world, so seven commanders swinging could push a fighter's own
+## blow out of the record while that fighter was still in the middle of striking
+## it, and nothing drawing the fight had anything left to draw from. Below, the
+## crowd strikes twenty blows after the archer's and the archer's is still there.
+func _the_window_is_each_fighters_own() -> void:
+	var roster := CombatantRoster.new()
+	var scene := roster.scene
+	var archer := 11
+	var target := 12
+	scene.note_blow(archer, target, 1, 10, {"tick": 1, "attack": "the archer's own"})
+	for step in 20:
+		scene.note_blow(20 + step, 21 + step, 1, 10, {"tick": 2 + step, "attack": "crowd"})
+	var rows := roster.blow_rows()
+	var kept := false
+	for row in rows:
+		if String(row["attack"]) == "the archer's own":
+			kept = true
+	check(kept,
+		"twenty blows by twenty other fighters pushed the archer's own out of the record")
+
+	# And a fighter's own ninth-oldest is pushed out by its own later blows,
+	# which is the whole of what does push anything out.
+	var again := CombatantRoster.new()
+	for step in CombatantRoster.BLOWS_EACH + 3:
+		again.scene.note_blow(archer, target, 1, 10, {"tick": step, "attack": "swing %d" % step})
+	var mine := again.blow_rows()
+	var ticks := []
+	for row in mine:
+		ticks.append(int(row["tick"]))
+	equal(mine.size(), CombatantRoster.BLOWS_EACH,
+		"a fighter striking the same character %d times should leave %d rows, not %d"
+			% [CombatantRoster.BLOWS_EACH + 3, CombatantRoster.BLOWS_EACH, mine.size()])
+	equal(ticks[0], 3, "the oldest row kept should be the %dth from the end"
+		% CombatantRoster.BLOWS_EACH)
+	equal(ticks[-1], CombatantRoster.BLOWS_EACH + 2, "the newest row kept should be the newest blow")
+
+	# The two counts are two counts: a fighter that only ever takes blows keeps
+	# its last BLOWS_EACH of them, however many strikers there were.
+	var struck_at := CombatantRoster.new()
+	for step in CombatantRoster.BLOWS_EACH + 4:
+		struck_at.scene.note_blow(30 + step, target, 1, 10, {"tick": step})
+	var taken := struck_at.blow_rows()
+	equal(taken.size(), CombatantRoster.BLOWS_EACH + 4,
+		"every one of those blows is its own striker's newest, so all of them are kept")
 
 
 # --- 4. One record and not two --------------------------------------------

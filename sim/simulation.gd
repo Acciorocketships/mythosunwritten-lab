@@ -109,6 +109,32 @@ func driven_line() -> String:
 	return "nobody is driving" if driven == null else driven.line()
 
 
+## Put what the person driving has chosen where their character's decision
+## function will read it, and hand back whatever the world says about it now.
+##
+## The one way in for a choice made by hand, and it decides nothing: it offers
+## the action to the world (`ControlLoop.offered`) and does what the world's
+## answer says. An action the world has already refused for good -- walking or
+## jumping while a board holds the character, or acting at all when there is
+## nobody there to act -- is answered on the spot and not stood up, because a
+## choice standing in the holder for an answer that has already been given is a
+## key that was taken and never answered. An action a board has simply not got to
+## yet is answered *and* stands: the person is told why nothing has happened, and
+## the board takes the choice up when the turn comes round. Anything else stands
+## exactly as it did before and the world's control loop picks it up on its next
+## tick.
+##
+## Returns the answer the world gave, in `driven_answer()`'s shape, or an empty
+## dictionary when the choice now stands and the world has yet to speak.
+func drive(what: Action) -> Dictionary:
+	if driven == null or driven_id == 0 or world.loop == null:
+		return {}
+	var said := world.loop.offered(driven_id, what)
+	if said.is_empty() or not bool(said.get("settled", true)):
+		driven.choose(what)
+	return said
+
+
 ## What the engine last answered the character being driven, or an empty
 ## dictionary. The loop's own record, forwarded, so an entry point has one place
 ## to ask; every string in it is the engine's own wording. See

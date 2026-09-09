@@ -258,10 +258,17 @@ func _the_grass_hears_about_the_board_through_the_walkers_own_uniforms() -> void
 
 ## A render shell with a world under it, standing where it is told to stand. It
 ## is never added to a scene tree, so nothing here needs a screen.
+##
+## Standing in for a `--board` run, which is what every claim in this file is
+## about: the lattice over the ground the observer happens to be standing on,
+## with no fight anywhere near it. A play run builds the same overlay and draws
+## it only while a fight is on, so a shell that did not say which kind of run it
+## was would put the board away before this file could look at it.
 func _shell(at: Vector2) -> Node:
 	var shell := RenderShell.new()
 	shell._sim = Simulation.new(SEED)
 	shell._sim.world.place_observer(at.x, at.y)
+	shell._lattice_always = true
 	_shells.append(shell)
 	return shell
 

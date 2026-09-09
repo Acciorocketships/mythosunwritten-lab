@@ -24,6 +24,11 @@
 #   ./run_render.sh --play               # drive one of the characters yourself
 #   ./run_render.sh --play --journal     # ...and print what everybody chose
 #
+# A fight that starts by itself while you are playing draws itself: the tactical
+# lattice appears under it and the combat readout opens beside it, both on the
+# tick the board arrives, and both go away when the fight is over. The overworld
+# is not latticed the rest of the time -- that is what --board is for.
+#
 # Needs a display. Escape quits, Space pauses, R restarts on the next seed, and
 # Z opens or shuts the character sheet while you play.
 #

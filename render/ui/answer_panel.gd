@@ -28,6 +28,11 @@ extends PanelContainer
 ## step. Throw the panel away, rebuild it from the same world and it says the
 ## same thing.
 ##
+## That is also why the answer row can go blank while the choice row is not. The
+## panel shows the world's answer to the choice it is showing; a choice the world
+## has not answered yet has no answer, and the last one the world happened to
+## give about something else is not it.
+##
 ## ## Sizes
 ##
 ## In pixels of the art, before the whole interface is scaled up by a whole
@@ -124,6 +129,15 @@ func refresh() -> void:
 
 	var answer := _answer()
 	var said := SproutPack.drawable(String(answer.get("line", "")))
+	# An answer belongs to the choice it answered. While a *different* choice is
+	# standing -- one made since, that the world has not got to yet -- the older
+	# answer is not drawn, because a green tick sitting under an action the world
+	# has said nothing about reads as though that action had succeeded. Compared
+	# by the two lines rather than by any counter kept here: both are the
+	# simulation's own, `Action.line()` on one side and the loop's copy of the
+	# same line on the other, so the comparison holds nothing.
+	if not choice.waiting() and String(answer.get("action", "")) != choice.line():
+		said = ""
 	_answer_label.text = said
 	_answer_icon.visible = said != ""
 	_answer_label.visible = said != ""

@@ -70,6 +70,17 @@ const MAX_STEPS := 400
 const JUMP_BASE := 1.5
 const JUMP_PER_DEX := 0.75
 
+## The actions a board takes over from the world around it, and what the world
+## says when one of them is chosen by somebody sitting on one.
+##
+## A fighter is seated on a cell and moves by cells, so walking and jumping about
+## the overworld are not its to choose while the fight lasts. Named here once
+## because two questions are asked of the same rule: `_go_to` and `_jump` below
+## ask it when they resolve, and `refused_before_it_begins` asks it for a caller
+## that needs the same answer at the moment the action is chosen.
+const THE_BOARD_DECIDES := [ActionCatalog.GO_TO, ActionCatalog.JUMP]
+const THE_BOARD_SAYS := "the board decides where a fighter goes"
+
 
 ## Every action, and the one function that resolves it.
 ##
@@ -155,6 +166,51 @@ static func _cannot_act(scene: ActionScene, actor: Combatant) -> String:
 	return ""
 
 
+## What the world already answers a chosen action, before any of it is carried
+## out -- or null when it has nothing to say in advance and the action has to be
+## resolved to be answered.
+##
+## Resolving is what answers an action, and this is not a second way of doing it:
+## nothing here moves anything, spends anything or counts anything, and every
+## sentence it returns is a sentence `resolve()` would have returned for the same
+## action in the same world. It exists for the one caller that cannot wait for
+## the resolution -- a person choosing for a character the board is holding,
+## whose choice would otherwise sit in the holder until a turn that may be many
+## ticks away, or that the person is themselves holding open. See
+## `ControlLoop.offered`.
+##
+## The two things the world knows in advance are the two above: that there is
+## nobody here to act at all, and that the action is one a board takes over from
+## the character sitting on it.
+static func refused_before_it_begins(
+	scene: ActionScene, actor: Combatant, action: Action
+) -> ActionOutcome:
+	if scene == null or actor == null or action == null:
+		return null
+	var refusal := _cannot_act(scene, actor)
+	if refusal != "":
+		return ActionOutcome.failed(action.kind, refusal)
+	if scene.is_fighting(actor) and THE_BOARD_DECIDES.has(action.kind):
+		return ActionOutcome.failed(action.kind, THE_BOARD_SAYS)
+	return null
+
+
+## What the world says to somebody acting out of the turn a board is running, and
+## to somebody whose own turn is open and already spent.
+##
+## Two sentences, each written once. `_attack` below refuses with the first when
+## it resolves, and `ControlLoop.offered` says both to whoever has just chosen
+## something a board is not going to take from them yet -- so what a person is
+## told the moment they press a key and what the resolver would have told them
+## are the same words, not two accounts of one rule.
+static func out_of_turn(one: Combatant) -> String:
+	return "it is not %s's turn" % ActionScene.name_of(one)
+
+
+static func turn_already_spent(one: Combatant) -> String:
+	return "%s has already spent this turn" % ActionScene.name_of(one)
+
+
 # --- go to ----------------------------------------------------------------
 
 
@@ -189,7 +245,7 @@ static func _go_to(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
 	if scene.is_fighting(actor):
-		return ActionOutcome.failed(action.kind, "the board decides where a fighter goes")
+		return ActionOutcome.failed(action.kind, THE_BOARD_SAYS)
 	var leg := walk_under_way(scene, actor, action)
 	while leg.stride(actor, scene.terrain, _stride_of(actor), MAX_STEPS):
 		pass
@@ -289,7 +345,7 @@ static func _jump(
 	scene: ActionScene, actor: Combatant, action: Action
 ) -> ActionOutcome:
 	if scene.is_fighting(actor):
-		return ActionOutcome.failed(action.kind, "the board decides where a fighter goes")
+		return ActionOutcome.failed(action.kind, THE_BOARD_SAYS)
 	var to := action.target_position()
 	var gap := _distance_from(actor, to)
 	var dexterity := _sheet_of(actor).score(Ability.DEX, 0)
@@ -365,7 +421,7 @@ static func _attack(
 			else ActionScene.name_of(target)))
 	var match_state := scene.fight.match_state
 	if match_state.active_id() != actor.piece.id:
-		return ActionOutcome.failed(action.kind, "it is not %s's turn" % ActionScene.name_of(actor))
+		return ActionOutcome.failed(action.kind, out_of_turn(actor))
 
 	var pack := ActionScene.inventory_of(actor)
 	var entry: Variant = _carried_named(pack, wanted)

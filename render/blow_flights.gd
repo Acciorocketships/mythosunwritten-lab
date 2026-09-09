@@ -31,11 +31,12 @@ extends RefCounted
 ##     reads the swing's length from. So the arrow leaves when the bow's
 ##     release starts and lands when it ends, and there is no second clock.
 ##
-## One caveat, shared with the swing: the snapshot carries only the last few
-## blows of the whole world, so in a very crowded fight a blow's row can leave
-## the record while its flight is midway. The flight ends with the row, exactly
+## One caveat, shared with the swing: the record a flight is drawn from is the
+## snapshot's, and the snapshot carries each fighter's last few blows rather than
+## all of them (`CombatantRoster.BLOWS_EACH`). A flight whose row has been pushed
+## out by that many later blows *from the same archer* ends with the row, exactly
 ## as the swing does -- the picture does not keep a copy of the fight to finish
-## the crossing from.
+## the crossing from. A crowd cannot do it, because the count is per fighter.
 class_name BlowFlights
 
 ## The one value of the record's movement vocabulary that means the effect
