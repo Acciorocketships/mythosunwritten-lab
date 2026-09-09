@@ -161,6 +161,29 @@ exchange and drags every report that quotes it — the date, the model, the repl
 count, the replies themselves — so it is a deliberate call rather than a side
 effect of a movement fix, and it is left to be made.
 
+### Since closed
+
+That call has been made, under `W-observation-rerecord` (commits `6c79f56` and
+`c8c351f`, `reports/observation-position.md`). Two things came of it that belong
+on this page.
+
+The recording was re-made, not made immune. The packet now says where a
+character stands in whole world units rather than to three decimal places, and
+the coarser grain was measured against exactly the collapse in the table above:
+it comes out 15 of 71 either way. No way of writing a position saves a recording
+from a change in how far a character has got by the time it is asked, because
+the character then remembers a different number of things and different
+characters are asked at different moments. What re-recording bought is a
+recording that answers the questions this world puts; the class of change that
+will break it again is named rather than papered over.
+
+With that in the tree, the full run is green with this change in it:
+`reports/goal-refusal-full-suite.log` — 65 `RUN` lines matched by 65 `PASS`
+lines, `PASS  walk motion    93 checks` and `PASS  agent          1069 checks`
+among them, `all 65 suites passed (204835 checks)`, exit 0. So the visible cost
+quoted above — `1 of 51 suites failed` — is spent, and this page's last open
+item with it.
+
 ## Reproducing everything above
 
 ```

@@ -264,3 +264,146 @@ is reported here rather than taken.
 Everything else in the suite passes: 50 of 51 suites, including the new `walk
 motion` suite (93 checks) and `control loop` (78). `./run_tests.sh --layers-only`
 passes.
+
+
+================================================================================
+9. THE CLOSING RUN (cycle 3654)
+================================================================================
+
+Section 8 above left one thing open: the full suite failed one check, the agent
+suite's recorded-replies check, because this change moved every prompt and the
+shipped recording keys a reply to the fingerprint of the prompt that asked it.
+That repair was W-observation-rerecord's and the certifying run W-goal-refusal's.
+Both have since landed. This section closes the line and shows the numbers it is
+closed on; nothing in sim/walk.gd or tests/test_walk_motion.gd was touched to do
+it.
+
+  $ git log --oneline --follow -- sim/walk.gd tests/test_walk_motion.gd
+  e68c45f A walk is taken over the ticks it costs, not in one step at the end of them
+
+  -> one commit each: the mover and its suite are byte-identical at HEAD
+     (5cc400f) to what shipped.
+
+--------------------------------------------------------------------------------
+9a. The full run, with this change in the tree
+--------------------------------------------------------------------------------
+
+reports/goal-refusal-full-suite.log, committed at 0583727 so it outlives the
+sandbox that produced it. Counted back out of the committed file:
+
+  $ grep -c '^RUN' reports/goal-refusal-full-suite.log            65
+  $ grep -c '^PASS' reports/goal-refusal-full-suite.log           65
+  $ grep -c '^FAIL' reports/goal-refusal-full-suite.log            0
+  $ grep -c '^SCRIPT ERROR' reports/goal-refusal-full-suite.log    0
+  $ grep -E 'suites (passed|failed)' reports/goal-refusal-full-suite.log
+  144:all 65 suites passed (204835 checks)
+
+Exit status 0, read back by W-goal-refusal from `lab progress status
+goal-refusal-full-suite`: state done, pid 2608644 exited, note exit code 0.
+
+The two suites this item turns on, in that run:
+
+  66:RUN   test_walk_motion
+  67:PASS  walk motion    93 checks      <- this item's own suite
+  72:RUN   test_agent
+  73:PASS  agent          1069 checks    <- the check that was failing at e68c45f
+  70:RUN   test_scenario
+  71:PASS  scenario       160 checks     <- the interrupted walk transcript
+
+Before, at e68c45f: `1 of 51 suites failed (1 failed check of 196501)`.
+After: 65 of 65 passed, 204835 checks, 0 failed.
+
+That the run covered a tree containing this change is not assumed from dates; it
+is read off the log's own contents. The log lists `test_walk_motion`, which
+exists only from e68c45f; `PASS goals 133 checks`, which is the count only from
+3351e23; and `PASS agent 1069 checks`, which is the count only after the live
+re-record at 6c79f56/c8c351f. The latest of those is c8c351f, and 0583727 -- the
+commit that adds the log -- is its child. So the certifying tree is c8c351f, and:
+
+  $ git merge-base --is-ancestor e68c45f 0583727 && echo yes
+  yes
+  $ git rev-list --count e68c45f..0583727
+  26
+
+Nothing under sim/, render/, tests/, bin/ or net/ has changed since that tree:
+
+  $ git diff --name-only c8c351f..HEAD | grep -v '^reports/'
+  tools/critic_fallback_recount*      (4 files + uids)
+  tools/critic_item_privilege_probe*  (4 files + uids)
+
+-- ten new standalone review tools under tools/, and nothing else. Those matter
+here for one reason: claim 5 of this item's suite, the one-mover scan, reads
+every .gd file under sim/, render/, bin/, net/, tools/ AND tests/, so files added
+under tools/ after the certifying run are files that scan had not seen. Checked
+rather than assumed, at HEAD:
+
+  $ ./run_tests.sh test_walk_motion
+  RUN   test_walk_motion
+  PASS  walk motion    93 checks
+  all 1 suites passed (93 checks)
+  EXIT=0
+
+Same 93 checks as in the certifying run. There is still one mover.
+
+--------------------------------------------------------------------------------
+9b. The caveat on that run, restated rather than left to be found
+--------------------------------------------------------------------------------
+
+The certifying run outlived the sandbox TMPDIR of the cycle that launched it, so
+run_tests.sh's closing guard -- `grep -q '^SCRIPT ERROR' "$OUT"`, which exists
+because this engine reports a thrown suite as a pass -- read a mktemp transcript
+that had been deleted under it. The log's final line is that failure:
+
+  grep: /tmp/lab-sbx-uw2643gp/tmp/tmp.gDlawHVH8V: No such file or directory
+
+So the guard could not have failed the run whatever the output held. It was
+re-done by hand against the captured log, twice: by W-goal-refusal at cycle 3650
+and again here (the `grep -c '^SCRIPT ERROR'` above, 0 matches, over the same
+text the guard would have read). The green run is real; the sleeping guard is a
+separate defect, recorded as M-a-supervised-run-outlives-its-tmpdir-and-loses-
+the-runners-guard and scheduled as W-suite-transcript. The run is also after
+74a9855, so the standing "a green run before 74a9855 may be a false pass" caveat
+does not reach it.
+
+--------------------------------------------------------------------------------
+9c. Both structure checks, re-run at HEAD, alone
+--------------------------------------------------------------------------------
+
+  $ ./run_tests.sh --layers-only
+  layer check: OK -- res://sim references nothing in the render layer
+  combat check: OK -- res://render draws the fight and holds none of it
+  interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+  asset check: OK -- res://sim names asset tags and no asset
+  EXIT=0
+
+  $ ./tools/readme_model_numbers.sh
+  readme model numbers: 48 checks OK -- README.md agrees with the transcripts
+  EXIT=0
+
+--------------------------------------------------------------------------------
+9d. Committed and pushed
+--------------------------------------------------------------------------------
+
+  $ git merge-base --is-ancestor e68c45f origin/main && echo yes
+  yes
+  $ git rev-list --count origin/main..main
+  0
+
+The change is e68c45f, "A walk is taken over the ticks it costs, not in one step
+at the end of them", on origin/main.
+
+--------------------------------------------------------------------------------
+9e. What re-recording did and did not buy
+--------------------------------------------------------------------------------
+
+Worth stating here because section 8's table invites the wrong conclusion. The
+packet now says where a character stands in whole world units rather than to
+three decimal places, and W-observation-rerecord measured the coarser grain
+against exactly the collapse in section 8: 15 of 71 under three decimals and 15
+of 71 under whole units, the tactical cell, or any coarsening of the offsets,
+distances and trail. The recording was re-made, not made immune. No way of
+writing a position saves a recording from a change in how far a character has
+got by the time it is asked -- the character then remembers a different number
+of things, and different characters are asked at different moments. That class
+is named in M-no-position-representation-saves-a-recording-from-a-movement-change
+rather than papered over.
