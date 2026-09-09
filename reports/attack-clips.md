@@ -270,6 +270,6 @@ in another had previously lost that file, and with it the guard.)
 |---|---|
 | `ffe7d4e` | the clips, the table, the branch, the suite and this write-up |
 | `bd014e0` | the resource ids the engine writes beside new files |
-| this one | the closing checks above and the full-suite log |
+| `9e2216f` | the closing checks above and the full-suite log |
 
 Pushed to `origin/main`.
