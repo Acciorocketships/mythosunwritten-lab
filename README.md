@@ -1053,8 +1053,8 @@ climb; ! the edge of a drop; . ground to walk on; ? not read`. It says what a
 mark *is* and never what may be done about it.
 
 **Measured, because it has to fit in a context.** Fifteen observations off the
-shipped scenario at seed 1234, at ticks 1, 66 and 80: **a typical one is 1,113
-characters and 51 entries**, 859 at the smallest and 1,225 at the largest — 250
+shipped scenario at seed 1234, at ticks 1, 66 and 80: **a typical one is 1,118
+characters and 55 entries**, 847 at the smallest and 1,224 at the largest — 255
 characters more than before the legend and the speech, which is what those two
 cost. Its 7×7 window of ground with its legend is 558 of those characters;
 printing the whole 28×28 board the observation was read from would cost 4,608,
@@ -1065,6 +1065,17 @@ identical bytes.
 ./run_observation.sh            # fifteen packets, and how big each one came to
 ./run_observation_suite.sh      # just the observation suite
 ```
+
+**Where the character itself stands is in whole world units.** The packet opens
+with `you … at (-478, -2, 416) facing 0.00 in the world`, and that is the one
+absolute position in it — everything else is an offset from it. It stays absolute
+because `go_to target=` and `jump target=` take absolute positions and a character
+not told where it is cannot name a place near itself; it is said to the nearest
+whole unit because nothing in the packet or the catalogue can read a millimetre,
+and because a recorded model reply is keyed to the sha256 of the prompt that asked
+it, so every digit printed there is a digit that has to come out the same for the
+recording to go on answering. What that grain buys and, measured, what it does not
+is [reports/observation-position.md](reports/observation-position.md).
 
 The whole of it, with the tables and the ground picture, is in
 [reports/observation.md](reports/observation.md).
@@ -1086,73 +1097,75 @@ Rook  #2  Bram #3  Sable #4  Odo #5  Pell #7   driven by a model
 Nothing in the run is scripted any more except where people stand. The four
 written rules the earlier version had — a stall to mind, a quarrel from tick 55,
 a walk away — are gone, and what happens after tick 0 is what five models chose.
-In the shipped run Pell walks to Rook and then asks Rook once and Wren three
-times, over ninety ticks, where a brass lantern is to be found, and is offered the
-wrong thing — *"I don't have a brass lantern, Pell, but I do have a silk cloak I'd
-sell for 9 coins."*; Wren, the one character a person drives, takes that lantern
-out of the market pile at tick 54 and offers Rook twelve coins for its silk cloak;
-and Bram and Sable introduce themselves, agree to travel together, and close
-within nine units of each other, at which
-point the tactical
-board snaps in under them because that is the engagement rule and not anybody's
-decision. Pell reaches afterwards for a pile that is no longer
+In the shipped run Pell walks to Rook and then asks after a brass lantern six
+times over the next hundred and thirty ticks — of Rook, of Bram twice, of Wren
+twice — and is answered, truthfully and uselessly, *"I do not know, Pell. Perhaps
+ask Wren, or we might search the pile east of here."* and then *"The pile seems
+gone now, Pell. We may need to look elsewhere."*; Wren, the one character a person
+drives, takes that lantern out of the market pile at tick 57 and offers Rook
+twelve coins for its silk cloak, which the engine refuses because Rook is three
+units away and reach is two and a half; and Bram, of another band, walks
+twenty-nine units to that same pile and arrives beside them, at which point the
+tactical board snaps in under all four because that is the engagement rule and not
+anybody's decision. Rook reaches afterwards for a pile that is no longer
 there — *"there is nothing with id 6"*, the engine's own sentence, because Wren
 emptied it and nothing told it — and that line costs its character one
-turn and no more.
+turn and no more. Odo, alone forty units north of everybody, shouts four times
+into an empty field and is told *"nobody talks to themselves"*.
 
 **The model chooses and never resolves.** Its prompt is the actions of the
 one list, read out of `ActionCatalog.ROWS`, the observation packet above, what the
 character remembers, and what it is after — and no rule about distance, reach,
 cost, damage or possibility. The suite searches a real prompt for all of those and
-finds none. Eleven of the run's seventy-four resolutions are refusals, in the
+finds none. Sixteen of the run's sixty-six resolutions are refusals, in the
 engine's own words, and they read the same for the person as for a model.
 
-**Several answers are outstanding at once, and none of them queue.** 68 of the
+**Several answers are outstanding at once, and none of them queue.** 66 of the
 run's 160 ticks had more than one question pending, five at the most. Across every
 wait each of the other five characters was serviced for exactly the wait's ticks.
 The longest span, grouped by how many other answers were outstanding across it, is
-`0:3 1:4 2:4 3:4 4:3` — a channel serving questions in turn would make one put
+`0:4 1:4 2:4 3:4 4:4` — a channel serving questions in turn would make one put
 with five others pending take about eighteen ticks.
 
-**What it costs, which is the number the milestone turns on.** 71 model calls over
-160 ticks — 0.444 a tick. `ControlLoop` steps the world at twenty ticks a second,
-so an hour of play is 72,000 ticks and comes to **31,950 calls an hour for five
-characters, about 6,390 each**. Section 12's distance-based back-off and
+**What it costs, which is the number the milestone turns on.** 65 model calls over
+160 ticks — 0.406 a tick. `ControlLoop` steps the world at twenty ticks a second,
+so an hour of play is 72,000 ticks and comes to **29,250 calls an hour for five
+characters, about 5,850 each**. Section 12's distance-based back-off and
 speculative next action are still deferred: at this cast size the run is
 recordable and replayable without either.
 
 **Being asked again mid-action is not a new call.** The loop asks a decision
-function again every five ticks while an action runs. Of 335 asks across the five
-minds, 71 put a question (21.2%): 61 were answered out of the choice the mind was
-already holding — section 2.2's bias toward continuing — and 203 were polls of a
-question already outstanding. 52 mid-action re-evaluations against 71 calls.
+function again every five ticks while an action runs. Of 248 asks across the five
+minds, 65 put a question (26.2%): 49 were answered out of the choice the mind was
+already holding — section 2.2's bias toward continuing — and 134 were polls of a
+question already outstanding. 35 mid-action re-evaluations against 65 calls.
 
 **No credential, and no network, anywhere but one command.** `./run_tests.sh`,
 `./run_agent.sh`, `./run_lesson.sh`, `./run_goal.sh`, `./run_check.sh` and
 `./run_world.sh` replay a
-recorded exchange, so two processes print the same bytes. The 87 replies of the
+recorded exchange, so two processes print the same bytes. The 81 replies of the
 first three, the 4 of the difficulty-class run and the 10 of the orchestrator run
-were all put to **`z-ai/glm-5.3-flash`** over `openrouter.ai` and are checked in
-verbatim; the character-run tables were re-put on 2026-09-06, when three actions
-were added to the one list and the prompt they are keyed to changed, and the
-other two were written back unchanged from the pass of 2026-09-05. **Not one of
-the hundred and one was declined, and not one came back empty** — every question
-either pass put was answered with something, and nothing in the shipped
-transcript is a silence.
+were all put to **`z-ai/glm-5.3-flash`** over `openrouter.ai` once, on 2026-09-09,
+and are checked in verbatim; the character-run tables were re-put that day, when
+the packet stopped saying where a character stands to three decimal places and
+the prompt they are keyed to changed, and the other two were written back
+unchanged from the pass of 2026-09-05. **Not one of the ninety-five was declined,
+and not one came back empty** — every question either pass put was answered with
+something, and nothing in the shipped transcript is a silence.
 
 That is a fact about this provider and this draw rather than about the prompt.
 It is not a fact about the provider before it: the model that answered every
 recording made before 2026-09-05 declined nine of *that* pass's character-run
 questions under its own content policy, so the machinery for a silence stays and
 the suite still exercises it — an answer a provider declines
-closes its own question rather than stranding the character, which at a hundred
-and one questions a pass is the difference between a recording that can be made
+closes its own question rather than stranding the character, which at ninety-five
+questions a pass is the difference between a recording that can be made
 and one that cannot. A replayed reply is matched to its question by the prompt's
 fingerprint rather than by position, because a recording is written in the order
 answers *arrive* and a character in a fight is not serviced every tick.
 
-**What a call costs, in seconds and in money.** Those hundred and one calls took a
-median of **1.874 seconds** each — 0.574 at the fastest, 56.894 at the slowest — and
+**What a call costs, in seconds and in money.** Those ninety-five calls took a
+median of **2.091 seconds** each — 1.194 at the fastest, 6.83 at the slowest — and
 this model is priced at **$0.075 per million prompt tokens and $0.25 per million
 completion tokens**, against **$10 and $50 per million** for the model the project
 called before it. A character's answer is one line of 7 to 18 completion tokens.
@@ -1219,7 +1232,7 @@ replays it, and no report can quote it as the other thing:
 
 ```
 recording  recorded ... from a local model, qwen3:4b-instruct at http://127.0.0.1:11435/v1/chat/completions, N replies
-recording  recorded 2026-09-06 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 87 replies
+recording  recorded 2026-09-09 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 81 replies
 ```
 
 **Two things about the server that will otherwise cost an hour.** They are facts
@@ -1300,27 +1313,28 @@ and the prompts are identical outside their `What you remember` block.
 
 | what it had kept | what it chose |
 |---|---|
-| nothing | `say(text=then let us trade target=1)` |
-| *"…I have been slow to go and look at what is lying on the ground here…"* | `recall about=pile #6` — a tool, so *— nothing readable —* |
-| *"…Rook is the only one here who has ever actually traded with me."* | `trade_propose(target=2 give_money=9)` |
-| *"…the one who shouted had already turned away…"* | `wait(ticks=1)` |
+| nothing | `say(text=a fair bargain indeed, friends target=1)` |
+| *"…I have been slow to go and look at what is lying on the ground here…"* | `say(text="what bargain do you offer?" target=1)` |
+| *"…Rook is the only one here who has ever actually traded with me."* | `go_to(target=2)` |
+| *"…the one who shouted had already turned away…"* | `recall about=trade` — a tool, so *— nothing readable —* |
 
 All three lessons changed the choice, and the run reports *which action* and *the
-choice at all* as two columns because they are two claims. On this draw all three
-also changed which action: with nothing kept the character proposed trading to
-Wren, the one who shouts; having kept that Rook is the only one who actually
-trades, it put its coins to Rook instead; having kept that answering a shout
-leaves you talking to nobody, it waited; and having kept that the ground does not
-wait, it answered with a *tool* rather than an action. A `recall` is a look back
-through its own memory, which this harness puts one question and reads one action
-back from, so that arm shows nothing readable and the run says so rather than
-scoring it as a choice.
+choice at all* as two columns because they are two claims. On this draw two of the
+three also changed which action: with nothing kept the character answered Wren's
+shout with an agreeable line; having kept that the ground does not wait, it still
+answered Wren but asked what the bargain actually was, which is the same action
+said in other words; having kept that Rook is the only one who actually trades, it
+walked to Rook instead; and having kept that answering a shout leaves you talking
+to nobody, it answered with a *tool* rather than an action. A `recall` is a look
+back through its own memory, which this harness puts one question and reads one
+action back from, so that arm shows nothing readable and the run says so rather
+than scoring it as a choice.
 
 **How much memory there is, measured rather than guessed.** Across the shipped
 160-tick run the character whose store the run prints in full — Pell — came to
-hold **27 things in 1,247 characters**, of which a packet carries **483 (39%)** —
-every lesson and the last eight events. The last question put was 4,988
-characters, **628 of them (13%)** what it remembers. Nothing here is near needing
+hold **34 things in 1,719 characters**, of which a packet carries **601 (35%)** —
+every lesson and the last eight events. The last question put was 3,434
+characters, **319 of them (9%)** what it remembers. Nothing here is near needing
 an index.
 
 **And every character remembers, not only the ones a model drives.** Both stores
@@ -1329,8 +1343,8 @@ the sheet declares — the memory and the goal set — are maintained by
 runs it for everybody it services and `DecisionSource.drive` runs it before every
 choice it asks for, in both cases before `Character.decide` is read and with
 nothing to branch on if either wanted to. `ModelMind` reads both stores and fills
-neither. In the shipped run the character a person drives ends with **23
-remembered events**, against 6 to 26 for the five whose minds are models; before
+neither. In the shipped run the character a person drives ends with **24
+remembered events**, against 11 to 36 for the five whose minds are models; before
 this it ended with none, because the only call site was inside the model layer.
 
 A character takes in its surroundings **once for every action the world has
@@ -1436,17 +1450,17 @@ identical outside the `What you are after` block.
 
 | what it was after | what it chose |
 |---|---|
-| nothing | `recall about=bargain` — a tool, so *— nothing readable —* |
+| nothing | `say(text=then let us trade, Wren target=1)` |
 | be at (-471.0, 416.0) | `go_to(target=(-471.000, 416.000))` |
-| have traded with #2 | `trade_propose(target=2 want_money=9)` |
-| be thought well of in this market | `say(text=a fair bargain indeed, friend Wren target=1)` |
+| have traded with #2 | `trade_propose(target=2 give=[] give_money=9 want=[] want_money=0)` |
+| be thought well of in this market | `trade_propose(target=1 give_money=5)` |
 
 All three changed *which action* was chosen and all three changed the choice. The
-position arm stood at `(-476.0, 422.0)`, was after `(-471.0, 416.0)` — `7.8`
-away, as the world told it — and answered by naming that exact position; the
-trade arm proposed to the one character the goal named. The arm with no goal
-reached for a *tool* instead of an action, so there is no action there to compare
-against and the run says so.
+position arm stood at `(-476, 422)`, was after `(-471.0, 416.0)` — `7.8` away, as
+the world told it — and answered `go_to target=(-471, 416)`, naming that exact
+position in the whole units the packet says its own position in; the trade arm
+proposed to the one character the goal named, and the arm after being thought well
+of offered coins to the one who had just shouted about a bargain.
 
 **And in the shipped run, unprompted.** Pell starts after three things, stated as
 scenario setup. Its first move is to walk to the character its most pressing goal
@@ -1458,13 +1472,12 @@ t= 10    be beside #2         closed by the world: #2 is 1.8 away
 ```
 
 The second — carrying the brass lantern — it chased for the rest of the run and
-did not get. Wren took that lantern out of the market pile and the pile went out
-of the world with it, so Pell's reach for it came back `examine refused: there is
-nothing with id 6`, the engine's own sentence. Nothing told Pell that and nothing
-hinted where the lantern went, so it asked after one out loud and looked at the
-pile four separate times before the ground under the market turned into a
-tactical board and `go_to refused: the board decides where a fighter goes` took
-even walking to it away. The goal is still open at the end and the table says so.
+did not get. Wren took that lantern out of the market pile at tick 57 and the pile
+went out of the world with it, so the next reach for it came back `examine
+refused: there is nothing with id 6`, the engine's own sentence. Nothing told Pell
+that and nothing hinted where the lantern went, so it went on asking after one out
+loud — six times, of three different people — and was told by one of them that the
+pile seemed to be gone. The goal is still open at the end and the table says so.
 
 **The world closes goals for every character, not only for the ones a model
 drives.** Wren, the character a person drives through choices written down in
@@ -1550,10 +1563,10 @@ are models, with numbers of the same order:
 
 ```
 who    driven by with     trust    fear   respect   familiarity  sentiment
-Wren   a person  Rook      0.00    0.00      0.00          0.92      +0.00
-Wren   a person  Pell      0.00    0.00      0.00          0.25      +0.00
-Rook   a model   Wren      0.00    0.00      0.00          0.92      +0.00
-Bram   a model   Sable     0.00    0.00      0.00          0.92      +0.00
+Wren   a person  Rook      0.00    0.00      0.00          0.68      +0.00
+Wren   a person  Pell      0.00    0.00      0.00          0.58      +0.00
+Rook   a model   Wren      0.00    0.00      0.00          0.68      +0.00
+Bram   a model   Sable     0.00    0.00      0.00          0.25      +0.00
 Odo    a model   nothing has passed between it and anybody
 ```
 

@@ -1,0 +1,80 @@
+what the shipped run's questions did across the walk-motion change
+
+Two worktrees, one command each, seventy-one questions each:
+  424edcc  the commit before the walk-motion change
+  e68c45f  the walk-motion change
+Each question is matched against the multiset of the other tree's prompt
+digests, which is what sim/model_channel.gd's _row_for does when it looks
+for the row recorded for this very prompt.
+
+what the packet says about a position                                      answered
+as it was: three decimal places                                            15 of 71
+whole world units (what ships now)                                         15 of 71
+the tactical cell, 3.0 units                                               15 of 71
+whole units, and entity offsets and distances with them                    15 of 71
+cell grain, and entity offsets and distances with them                     15 of 71
+cell grain, entity offsets, and the trail's own distances                  15 of 71
+
+and the ceiling, which is what no representation of a position can pass:
+the trail and the remembered lines deleted outright                        29 of 71
+  ...and every number in the whole packet replaced by a letter             48 of 71
+
+what is left over: pairing each question with the nearest one the same
+character was asked before the change, with every position in the packet
+already coarsened to the cell and the trail's distances rounded, the lines
+that still differ, by shape and by how many pairs they differ in
+
+   101  - I saw Wren (#N), a commander, about Nm away.
+    82  lately     the last N of N things you remember
+    74  moved Nm north
+    66  moved Nm east
+    51  dropped Nm
+    48  you        commander level N status N hp N/N at (N, N, N) facing N
+    40  recently   N changes
+    34  - I moved Nm east.
+    30  - I dropped Nm.
+    26  - I moved Nm north.
+    25  .N   .N   .N   .N   .N   .N   .N
+    19  - I saw Pell (#N), a commander, about Nm away.
+    19  - I climbed Nm.
+    16  #N   commander  Wren     (N, N, N)      N seen   doing go_to      
+
+what the checked-in recording answers, before and after, in the tree that ships
+  ./tools/recorded_replies.sh, which replays and calls nothing
+
+  before the change, against the recording of 2026-09-06
+    shipped run         79 rows,  71 questions,  71 recorded for them,   0 by position,   0 unanswered,   8 rows never claimed
+    lesson comparison    4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    goal comparison      4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    bargain run         22 rows,  22 questions,  22 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    all four           101 questions, 101 with a reply recorded for them
+
+  with the change and the recording of 2026-09-06 still in place
+    shipped run         79 rows,  70 questions,   0 recorded for them,  70 by position,   0 unanswered,   9 rows never claimed
+    lesson comparison    4 rows,   4 questions,   0 recorded for them,   4 by position,   0 unanswered,   0 rows never claimed
+    goal comparison      4 rows,   4 questions,   0 recorded for them,   4 by position,   0 unanswered,   0 rows never claimed
+    bargain run         22 rows,  22 questions,   0 recorded for them,  22 by position,   0 unanswered,   0 rows never claimed
+    all four           100 questions,   0 with a reply recorded for them
+
+  after the live re-record of 2026-09-09
+    shipped run         73 rows,  65 questions,  65 recorded for them,   0 by position,   0 unanswered,   8 rows never claimed
+    lesson comparison    4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    goal comparison      4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    bargain run         18 rows,  19 questions,  18 recorded for them,   0 by position,   1 unanswered,   0 rows never claimed
+    all four            92 questions,  91 with a reply recorded for them
+
+what the live pass cost
+  OPENROUTER_API_KEY=... ./run_record.sh --live --cast
+    asked      75 questions for the shipped run, 73 answered
+    asked      4 questions for the lesson comparison, 4 answered
+    asked      4 questions for the goal comparison, 4 answered
+    wrote      res://net/model_recording.gd, 73 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 22 bargain replies
+  OPENROUTER_API_KEY=... ./run_record.sh --live --bargain
+    asked      19 questions for the bargain run, 18 answered
+    wrote      res://net/model_recording.gd, 73 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 18 bargain replies
+  102 calls in all, 99 of them written down. Not one came back empty.
+
+the seed-1234 world fingerprint, before and after
+  ./run_headless.sh --seed 1234 --ticks 100
+  before  final=32656f55cc5eeb1c
+  after   final=32656f55cc5eeb1c

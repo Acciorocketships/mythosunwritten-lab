@@ -174,25 +174,25 @@ and finds nothing.
 ## How much memory there is
 
 Measured on the shipped run (`./run_agent.sh`, seed 1234, 160 ticks), on Pell,
-the character the run prints the store of in full, over its 20 turns:
+the character the run prints the store of in full, over its 13 turns:
 
 | | |
 |---|---|
-| entries | **27** — 27 events, 0 lessons |
-| by kind | 15 things seen, 7 lines of speech, 5 state changes |
-| characters held | **1,247** |
-| characters a packet carries | **483 of 1,247 (39%)** — every lesson and the last 8 events |
-| the memory block in the last question | **628 characters of 4,988 (13%)** |
-| tools the model used | 0 recalls, 0 lessons written — Bram and Odo used one each |
+| entries | **34** — 34 events, 0 lessons |
+| by kind | 15 things seen, 12 lines of speech, 7 state changes |
+| characters held | **1,719** |
+| characters a packet carries | **601 of 1,719 (35%)** — every lesson and the last 8 events |
+| the memory block in the last question | **319 characters of 3,434 (9%)** |
+| tools the model used | 2 recalls, 0 lessons written — nobody else reached for either |
 
 The stop condition on this item was the other direction — stop and report if the
-memory outgrew what a context can carry — and it did not fire: 1,247 characters
-against a question already 4,988 characters long is not a retrieval problem, and
+memory outgrew what a context can carry — and it did not fire: 1,719 characters
+against a question already 3,434 characters long is not a retrieval problem, and
 the recent-plus-query split has barely begun to carry weight. The number to watch
-is *characters held*; a packet carries 39% of it here, and the fraction falls as
+is *characters held*; a packet carries 35% of it here, and the fraction falls as
 the store grows, which is exactly the trend that would eventually be the evidence
 for an index. It is not evidence for one yet: `recall` was reached for twice in
-the whole six-character run, and a linear walk over twenty-seven entries costs
+the whole six-character run, and a linear walk over thirty-four entries costs
 nothing.
 
 Two honest notes about that table:
@@ -202,15 +202,15 @@ Two honest notes about that table:
   a mind through `recall about=lantern` and `learn text=…` against a real store
   and checks that the query found a real entry, that the lesson landed on the
   character's own sheet, and that the mind then went back to choosing an action.
-  On the recording that ships, Bram and Odo reached for `recall` once each and
-  nobody wrote a lesson; earlier recordings of the same run had Pell recalling
-  twice, and one before that had Odo writing a lesson and Pell recalling seven
+  On the recording that ships, Pell reached for `recall` twice and nobody wrote a
+  lesson; an earlier recording of the same run had Bram and Odo recalling once
+  each, and one before that had Odo writing a lesson and Pell recalling seven
   times. Which of those a given draw does is the model's business; that it *can*
   is this step's.
 * **The log does not hold what an `examine` told the character.** An action's
   outcome is not in the observation packet — the packet carries state
   transitions, and examining changes no state — so it cannot come in through the
-  one door. In the shipped run that shows in the questions: four of the seventy
+  one door. In the shipped run that shows in the questions: five of the sixty-four
   turns were put off an observation identical to the one before. A
   character that wants to keep what it learned that way has `learn`. Widening the
   door would have cost the perception check above, which is worth more.

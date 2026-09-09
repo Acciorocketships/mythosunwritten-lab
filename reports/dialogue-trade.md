@@ -87,7 +87,7 @@ The bargain run: the play stage byte for byte — same cast, gear, pile, chest,
 seed 1234 — with the trader Hob deciding through a language model
 (`sim/scripted_bargain.gd`), replaying a recorded exchange
 (`net/model_recording.gd`, `BARGAIN_ROWS`: glm-5.3-flash over openrouter,
-recorded 2026-09-07, the same model and endpoint as every other shipped
+recorded 2026-09-09, the same model and endpoint as every other shipped
 table). Hob is staged wanting to be carrying 10 coins — his opening purse plus
 the price he has always asked — and nothing tells him to sell, at what price,
 or to whom. The person is driven by a written-down script of key presses at

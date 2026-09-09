@@ -29,6 +29,7 @@ func run() -> void:
 	_a_trade_you_are_party_to_is_observable()
 	_nothing_global_is_in_it()
 	_recent_changes_are_read_off_the_world()
+	_where_you_stand_is_said_in_whole_units()
 	_it_is_the_same_for_the_same_surroundings()
 	_the_shipped_run_is_measured()
 	_no_model_and_no_new_dependency()
@@ -124,6 +125,62 @@ func _a_name_is_known_or_it_is_not() -> void:
 	var theirs := Observation.of(scene, stranger)
 	equal(_row_for(theirs.entities, wren.id)["name"], "Wren",
 		"and the same edge is read from the other end")
+
+
+
+## Where a character stands is in the packet, in world coordinates, said to the
+## nearest whole unit.
+##
+## Both halves matter and they pull against each other. It has to be *there*,
+## because `go_to target=` and `jump target=` take an absolute position and a
+## character that is not told where it is cannot name a place near itself. It
+## has to be *coarse*, because a recorded model reply is keyed to the sha256 of
+## the prompt that asked it (`net/model_recording.gd`), so every digit printed
+## here is a digit that has to come out the same for a recording to keep
+## answering. Three decimals of a world unit is a millimetre, which nothing in
+## the packet or the catalogue can read or act on.
+##
+## The grain is checked as a grain: a character that shifts by less than half a
+## unit writes the same line, and one that walks a whole unit does not.
+func _where_you_stand_is_said_in_whole_units() -> void:
+	var scene := _stage()
+	var wren := scene.actors[0]
+	# Stood on a whole unit first, so that the shifts below are shifts within one
+	# unit and not a test that happens to straddle a rounding boundary.
+	wren.x = roundf(wren.x)
+	var stood_at := wren.x
+	var was := _you_line(Observation.of(scene, wren))
+	check(was.contains("at (%d, " % roundi(stood_at)),
+		"the packet says where the character stands, in world coordinates: %s" % was)
+	check(not _position_in(was).contains("."),
+		"and says it in whole units, with no fraction of one: %s" % was)
+
+	wren.x = stood_at + 0.4
+	equal(_you_line(Observation.of(scene, wren)), was,
+		"a character that has shifted 0.4 of a unit writes the same line")
+	wren.x = stood_at - 0.4
+	equal(_you_line(Observation.of(scene, wren)), was,
+		"and so does one that has shifted 0.4 the other way")
+
+	wren.x = stood_at + 2.0
+	not_equal(_you_line(Observation.of(scene, wren)), was,
+		"a character two units away does not: where it stands is still reported")
+	wren.x = stood_at
+
+
+# What is between the brackets of a "you" line: the position and nothing else.
+func _position_in(line: String) -> String:
+	var opens := line.find("at (")
+	var closes := line.find(")", opens)
+	return "" if opens < 0 or closes < 0 else line.substr(opens, closes - opens)
+
+
+# The one line of a packet that says where the looker itself is standing.
+func _you_line(seen: Observation) -> String:
+	for line in seen.lines():
+		if line.begins_with("  you "):
+			return line
+	return ""
 
 
 # --- Seeing -------------------------------------------------------------

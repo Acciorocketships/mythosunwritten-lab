@@ -116,6 +116,48 @@ extends RefCounted
 ## `holds` and `needs` already have -- a fact that is not there has nothing to
 ## print -- and it is what keeps the recorded model exchanges' questions the
 ## questions that were recorded.
+##
+## ## Where you stand is said in whole world units
+##
+## The packet keeps the character's own position, and keeps it in the frame it
+## has always been in: absolute world coordinates, which is the frame every
+## position the catalogue accepts is written in. It is said to the nearest whole
+## unit -- `at (-478, -2, 416)` -- and not to three decimal places, which is
+## where it used to be said.
+##
+## **Why it stays at all.** With the ground legend in the packet a model began
+## choosing positions for the first time, and in the checked-in goal comparison
+## a character standing at (-476, 422), told it is after being at
+## (-471.0, 416.0), answers `go_to target=(-471, 416)`. A character not told
+## where it stands cannot name a place near itself in the only frame
+## `go_to target=` and `jump target=` will read.
+##
+## **Why the three decimals went.** Three decimals of a world unit is a
+## millimetre, and nothing in this packet or in the catalogue can use one. The
+## character's own remembered lines already speak in whole metres ("about 6m
+## away"), the trail in tenths ("moved 4.5m north"), the ground in cells of
+## three units, and the shortest move any action makes is a stride of
+## `ActionEngine.STEP`. The extra digits were the float's own printout, not
+## something anybody could read or act on -- and every one of them was a digit
+## that had to be reproduced exactly for a recorded reply to still answer the
+## question it was recorded for. See `net/model_recording.gd`: a reply is keyed
+## to the sha256 of the prompt that asked it.
+##
+## **What the coarser grain is measured to buy, and what it does not.** It buys
+## immunity to a change that moves a character by less than half a unit without
+## changing anything it then does -- ground resampled a hair differently, a
+## placement rounded elsewhere, arithmetic re-associated. It does *not* buy
+## immunity to a change in how far a character has got by the time it is asked:
+## the walk-motion change (e68c45f) spread a `go_to` over the ticks it costs, so
+## the cast is metres from where it used to be on every tick and remembers a
+## different number of things about the journey, and that is a different run
+## putting different questions. Measured over the shipped run's 71 questions
+## across that change, the coarser grain recovers none of the 56 that were lost;
+## deleting the trail and the remembered lines outright and replacing every
+## number in the whole packet with a letter still recovers only 33 of them.
+## `reports/observation-position.md` carries both numbers. A recording survives
+## a change to how a position is *written*; nothing makes one survive a change to
+## where the world has got to.
 class_name Observation
 
 ## How far away a thing can be and still appear in the observation, in world
@@ -658,9 +700,11 @@ func lines() -> PackedStringArray:
 	written.append("observation for #%d %s" % [
 		self_id, "-" if self_name == "" else self_name,
 	])
-	written.append("  you        %s level %d status %d hp %d/%d at (%.3f, %.3f, %.3f) facing %.2f %s" % [
+	# Whole world units, not three decimals: see "Where you stand is said in
+	# whole world units" at the head of this file.
+	written.append("  you        %s level %d status %d hp %d/%d at (%d, %d, %d) facing %.2f %s" % [
 		self_type, self_level, self_status, self_health, self_max_health,
-		self_x, self_y, self_z, self_heading,
+		roundi(self_x), roundi(self_y), roundi(self_z), self_heading,
 		"on the board" if self_on_board else "in the world",
 	])
 	written.append("  carrying   %s (%d coins)" % [

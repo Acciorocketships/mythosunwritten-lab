@@ -166,8 +166,10 @@ name. All ten cloud cells re-derive independently from `net/model_recording.gd`
 $1.874$ s, maximum $56.894$ s, no empty reply, and the shipped run's action mix
 counted off its replies. That commit is named because the working tree no longer
 holds that pass: three of the recording's five tables were re-put on 2026-09-06
-when three verbs were added to the one list, and the file checked in today is a
-different draw ($101$ rows, median $1.746$ s, maximum $13.901$ s, none empty).
+when three verbs were added to the one list, and again on 2026-09-09 when the
+packet stopped saying where a character stands to three decimal places, and the
+file checked in today is a different draw ($95$ rows, median $2.091$ s, maximum
+$6.83$ s, none empty).
 The cloud row of this table is still re-derivable, from a file in the
 repository's history rather than from the one in the tree. The nine local rows
 have no artifact of their own left and are traceable to the evidence file only
@@ -176,8 +178,8 @@ have no artifact of their own left and are traceable to the evidence file only
 **The cloud baseline, quoted rather than asserted.** The recording this
 comparison was made against — the pass of 2026-09-05, at commit `424edcc` —
 holds $101$ replies from `z-ai/glm-5.3-flash` with a median of $1.874$ s and
-none empty. (The recording checked in today is the pass of 2026-09-06: also
-$101$ replies, also none empty, median $1.746$ s. Nothing in this comparison is
+none empty. (The recording checked in today is the pass of 2026-09-09: $95$
+replies, also none empty, median $2.091$ s. Nothing in this comparison is
 re-taken against it, because a live pass per arm is what that would cost.) The
 $5.16$ s figure this comparison was planned against belongs to the *previous*
 shipped model, `anthropic/claude-fable-5`: $87$ replies,

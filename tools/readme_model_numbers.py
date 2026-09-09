@@ -71,8 +71,16 @@ cast_rows = len(rows_of("ROWS")) + len(rows_of("LESSON_ROWS")) + len(rows_of("GO
 check_rows = len(rows_of("CHECK_ROWS"))
 world_rows = len(rows_of("WORLD_ROWS"))
 all_rows = cast_rows + check_rows + world_rows
-ms = sorted(int(x) for x in re.findall(r'"ms"\s*:\s*(\d+)', recording))
-assert len(ms) == all_rows, "every row carries a millisecond column"
+# The timings the README quotes are the five tables the six replaying commands
+# read, which is what the passage they sit in is about. The goodwill and the
+# bargain tables are their own passes with their own dates, and the README
+# quotes neither, so neither is in this median.
+ms = sorted(
+    int(x)
+    for name in ("ROWS", "LESSON_ROWS", "GOAL_ROWS", "CHECK_ROWS", "WORLD_ROWS")
+    for x in re.findall(r'"ms"\s*:\s*(\d+)', "\n".join(rows_of(name)))
+)
+assert len(ms) == all_rows, "every row of those five tables carries a millisecond column"
 median_s = statistics.median(ms) / 1000.0
 recorded_on = re.search(r'^const RECORDED_ON := "([^"]+)"', recording, re.M).group(1)
 

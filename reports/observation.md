@@ -49,7 +49,7 @@ measurement rather than the opinion.
 | cell size | 3.0 world units (the lattice's own, `CombatBoard.CELL_SIZE`) |
 | printed window | 7×7 cells = 21×21 world units |
 | board actually built | 28×28 cells = 84×84 world units, out to `NEARBY` = 40.0 |
-| terrain's share of a typical packet | 558 of 1,113 characters, 50% (173 of those are the legend) |
+| terrain's share of a typical packet | 558 of 1,118 characters, 50% (173 of those are the legend) |
 | one walking step (`ActionEngine.STEP`) | 0.9 world units — a cell is about three steps |
 
 The coarseness costs nothing where it would matter, because **entity positions
@@ -131,6 +131,15 @@ The six reasons a field can be absent:
 | `nothing is driving this scene` | nobody is deciding, so no action is under way to see |
 | `nothing has been watching this character` | an observation assembled with no trail |
 | `it is no longer in the world` | the name of somebody who spoke and has since fallen |
+
+### Where you stand, in whole world units
+
+The packet's first line says where the looking character itself is, in absolute
+world coordinates, to the nearest whole unit — `you … at (-478, -2, 416) facing
+0.00 in the world`. It is the only absolute position in the packet; every other
+place in it is an offset from that one. Why it stays, why it is coarse, and the
+measurement of what the coarseness buys and does not buy, are in
+[observation-position.md](observation-position.md).
 
 A line from the run, with an absence and its reason:
 
@@ -247,25 +256,25 @@ per character:
 
 | tick | who | entities | objects | cells | recent | entries | characters |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | #1 Wren | 1 | 1 | 49 | 0 | 51 | 1058 |
-| 1 | #2 Rook | 1 | 1 | 49 | 0 | 51 | 1059 |
-| 1 | #3 Bram | 1 | 1 | 49 | 0 | 51 | 1197 |
-| 1 | #4 Sable | 1 | 0 | 49 | 0 | 50 | 1113 |
-| 1 | #5 Odo | 0 | 0 | 49 | 0 | 49 | 859 |
-| 66 | #1 Wren | 1 | 0 | 49 | 6 | 58 | 1192 |
-| 66 | #2 Rook | 1 | 0 | 49 | 2 | 54 | 1093 |
-| 66 | #3 Bram | 1 | 0 | 49 | 0 | 50 | 1112 |
-| 66 | #4 Sable | 1 | 0 | 49 | 0 | 50 | 1113 |
-| 66 | #5 Odo | 0 | 0 | 49 | 2 | 51 | 899 |
-| 80 | #1 Wren | 1 | 0 | 49 | 6 | 59 | 1225 |
-| 80 | #2 Rook | 1 | 0 | 49 | 2 | 55 | 1130 |
-| 80 | #3 Bram | 1 | 0 | 49 | 3 | 53 | 1182 |
-| 80 | #4 Sable | 1 | 0 | 49 | 3 | 53 | 1189 |
-| 80 | #5 Odo | 0 | 0 | 49 | 2 | 51 | 899 |
+| 1 | #1 Wren | 1 | 1 | 49 | 0 | 51 | 1046 |
+| 1 | #2 Rook | 1 | 1 | 49 | 0 | 51 | 1047 |
+| 1 | #3 Bram | 1 | 1 | 49 | 0 | 51 | 1185 |
+| 1 | #4 Sable | 1 | 0 | 49 | 0 | 50 | 1101 |
+| 1 | #5 Odo | 0 | 0 | 49 | 0 | 49 | 847 |
+| 66 | #1 Wren | 1 | 0 | 49 | 6 | 58 | 1182 |
+| 66 | #2 Rook | 1 | 0 | 49 | 2 | 54 | 1081 |
+| 66 | #3 Bram | 1 | 0 | 49 | 6 | 56 | 1224 |
+| 66 | #4 Sable | 1 | 0 | 49 | 5 | 55 | 1214 |
+| 66 | #5 Odo | 0 | 0 | 49 | 6 | 55 | 963 |
+| 80 | #1 Wren | 1 | 0 | 49 | 6 | 59 | 1215 |
+| 80 | #2 Rook | 1 | 0 | 49 | 2 | 55 | 1118 |
+| 80 | #3 Bram | 1 | 0 | 49 | 6 | 56 | 1173 |
+| 80 | #4 Sable | 1 | 0 | 49 | 6 | 56 | 1179 |
+| 80 | #5 Odo | 0 | 0 | 49 | 6 | 55 | 963 |
 
-**A typical observation in the shipped scenario is 1,113 characters and 51
-entries** — 859 at the smallest (Odo alone in a field with nothing to report) and
-1,225 at the largest. The 49 cells of ground are the same in every one of them,
+**A typical observation in the shipped scenario is 1,118 characters and 55
+entries** — 847 at the smallest (Odo alone in a field with nothing to report) and
+1,224 at the largest. The 49 cells of ground are the same in every one of them,
 because the window is fixed. (The `entries` column counts heard lines too, which
 is why a packet can hold 59 entries at tick 80 where it held 56 before.)
 
@@ -274,11 +283,17 @@ the same seed as the measurement before them:
 
 | | before | now | growth |
 |---|---:|---:|---:|
-| a typical observation, in characters | 863 | 1,113 | +250, +29% |
-| the smallest | 610 | 859 | +249 |
-| the largest | 948 | 1,225 | +277 |
-| a typical observation, in entries | 51 | 51 | 0 |
-| the whole walkthrough, in bytes | 14,532 | 18,639 | +4,107 |
+| a typical observation, in characters | 863 | 1,118 | +255, +30% |
+| the smallest | 610 | 847 | +237 |
+| the largest | 948 | 1,224 | +276 |
+| a typical observation, in entries | 51 | 55 | +4 |
+| the whole walkthrough, in bytes | 14,532 | 18,857 | +4,325 |
+
+(The `now` column is the walkthrough as it stands today, which is two changes
+past the one this table was first written for: a walk is taken a stride a tick,
+so a character's trail holds more small moves than it did, and the packet says
+where the character itself stands in whole world units rather than to three
+decimal places, which takes twelve characters off every packet.)
 
 Nearly all of it is fixed cost paid once per packet: the legend line is 173
 characters and the reworded heading another 30, so the block of ground grew by
@@ -332,10 +347,11 @@ and every one of them is named in the packet that carries it.
 An observation is a pure function of the world state and the observing
 character. The walkthrough plays its run twice inside one process and compares
 all fifteen fingerprints; and two whole processes on one seed print **identical
-bytes** — 18,639 of them. The fingerprint of the fifteen observations at seed
-1234 is `ebe23cc51093bba6`; at seed 7 it is `fa28210761e583e6`. (Both moved when
-the packet grew, which is the point of a fingerprint; the world's own
-`d178d38879097c1c` did not.)
+bytes** — 18,857 of them. The fingerprint of the fifteen observations at seed
+1234 is `1519d67981511097`; at seed 7 it is `85f59e858a4abd1f`. (Both moved when
+the packet grew, and both moved again when a walk became a stride a tick and when
+the position line lost its three decimal places, which is the point of a
+fingerprint; the world's own `32656f55cc5eeb1c` on seed 1234 did not.)
 
 ## What did not move
 

@@ -82,12 +82,16 @@ and the same answer: the simulation is given what it needs and fetches nothing.
 **A live call was made, and the exchange has been re-recorded from scratch every
 time the questions changed.** A prompt change makes every old reply an answer to
 a question nobody asks any more, so the recording is not patched, it is re-made.
-The recording the tree holds today was made on 2026-09-05: `OPENROUTER_API_KEY`
-was present, the machine could reach the network, and `./run_record.sh --live`
-put every question of all five runs to **`z-ai/glm-5.3-flash`** at
-`https://openrouter.ai/api/v1/chat/completions`. **101 replies came back, not one
-of them declined and not one of them empty**, and they are checked in as
-`ModelRecording`'s five tables verbatim — including the answers the world then
+The recording the tree holds today was made in two passes against the same model
+at the same endpoint: the difficulty-class and orchestrator tables on 2026-09-05,
+and the three character tables again on 2026-09-09, when the observation packet
+stopped saying where a character stands to three decimal places and the prompt
+they are keyed to changed. `OPENROUTER_API_KEY` was present, the machine could
+reach the network, and `./run_record.sh --live` put every question of the runs it
+was asked for to **`z-ai/glm-5.3-flash`** at
+`https://openrouter.ai/api/v1/chat/completions`. **95 replies stand in those five
+tables, not one of them declined and not one of them empty**, and they are checked
+in as `ModelRecording`'s five tables verbatim — including the answers the world then
 refused, which were not edited out. Which model answers and why, with the
 comparison the choice came out of, is [reports/model.md](model.md).
 
@@ -125,7 +129,7 @@ into them:
   against the provider this project used then: one of the four recording attempts
   was blocked by that provider's usage policy, said so, and wrote nothing rather
   than recording a silence. It has not fired once against the model that answers
-  now — the pass that ships came back with 101 replies and no silence at all —
+  now — the passes that ship came back with 95 replies and no silence at all —
   which is a fact about the provider and not about the path, so the path stays.
 * **The recorder used to drop functions out of the file it rewrites.** It
   regenerated everything below the marker in `net/model_recording.gd` but never

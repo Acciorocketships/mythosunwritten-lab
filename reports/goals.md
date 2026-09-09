@@ -209,6 +209,6 @@ own and over the whole prompt, and finds nothing in either.
 | layer, combat, interface and asset checks | pass |
 
 The recording has been re-made live since this step was written, most recently on
-2026-09-04: 77 replies for the shipped run, 4 for the lesson comparison and 4 for
+2026-09-09: 73 replies for the shipped run, 4 for the lesson comparison and 4 for
 the goal comparison, all from `z-ai/glm-5.3-flash` in one pass. Not one of them
 was declined and not one came back empty.

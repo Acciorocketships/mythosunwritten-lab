@@ -183,7 +183,7 @@ that line out of `ModelCall.MODEL`, not because anyone typed it:
 
 ```
 const MODEL       := "z-ai/glm-5.3-flash"
-const RECORDED_ON := "2026-09-06"
+const RECORDED_ON := "2026-09-09"
 ```
 
 Two rules follow, and both matter for anything written about this project.
@@ -207,12 +207,13 @@ Measured on this machine: `ollama` $0.17.4$ with an RTX 4090, three non-thinking
 $3$–$4$ billion parameter models answered the shipped run's own prompt in $115$
 to $175$ ms warm, and drove a full $160$-tick run at a median of $0.15$ to
 $0.25$ s a decision. The baseline to set that against is the recording that
-ships, not the one that used to: the $101$ replies checked in today have a
-median of $1.746$ s a call, a fastest of $1.194$ s and a slowest of $13.901$ s,
-so a local arm is roughly $10$ times the median and costs nothing. (Those three
-numbers are the draw of 2026-09-06 re-derived off the recording's own
-millisecond column; the pass before it read $1.874$, $0.574$ and $56.894$, and
-the arm comparison further down was measured against that one.) (The $5.16$ s
+ships, not the one that used to: the $95$ replies checked in today have a
+median of $2.091$ s a call, a fastest of $1.194$ s and a slowest of $6.83$ s,
+so a local arm is roughly $12$ times the median and costs nothing. (Those three
+numbers are the draw of 2026-09-09 re-derived off the recording's own
+millisecond column; the pass before it read $1.746$, $1.194$ and $13.901$, the
+one before that $1.874$, $0.574$ and $56.894$, and the arm comparison further
+down was measured against the last of those.) (The $5.16$ s
 median quoted elsewhere in this page is fable's, from the pass that lost.)
 
 Two of the local arms are *thinking* models and could not answer through the
@@ -308,26 +309,29 @@ the ticks it costs (`e68c45f`), so the position every prompt carries differs on
 nearly every tick, and `equip`, `unequip` and `use` were added to the one list
 (`09764d8`), whose rows are the prompt's whole menu. After the first of those,
 $15$ of the run's $71$ questions still matched a recorded row and $56$ did not,
-and one check of the suite failed on it; the pass of 2026-09-06 that ships now
-settled both. Almost nothing about it matches the glm column above:
+and one check of the suite failed on it; the pass of 2026-09-06 settled both. A
+fifth pass followed on 2026-09-09, when the packet stopped saying where a
+character stands to three decimal places
+([observation-position.md](observation-position.md)) and every question changed
+again. Almost nothing about any of them matches the glm column above:
 
-| the same model, the same settings | 2026-09-03 | 2026-09-04 | 2026-09-05 | 2026-09-06 (ships) |
-|---|---|---|---|---|
-| replies recorded, all five tables | 108 | 99 | 101 | 101 |
-| replies empty | 0 | 0 | 0 | 0 |
-| turns in the 160-tick character run | 81 | 69 | 69 | 70 |
-| turns the engine ruled on — it acted, refused or faulted | not comparable | 61 | 67 | 68 |
-| turns the world refused | 17 | not re-derived | 3 | 14 |
-| turns that named a place | 3, all refused | 13, none out of reach | 13, none out of reach | 7, none out of reach |
-| orchestrator operations named / carried out | 9 / 5 | 11 / 9 | 13 / 11 | 13 / 11, not re-put |
-| characters spawned | 2 | 6 | 5 | 5, not re-put |
-| the prompt's own example coordinate copied | 5 | 10 | **0** | **0** |
+| the same model, the same settings | 2026-09-03 | 2026-09-04 | 2026-09-05 | 2026-09-06 | 2026-09-09 (ships) |
+|---|---|---|---|---|---|
+| replies recorded, all five tables | 108 | 99 | 101 | 101 | 95 |
+| replies empty | 0 | 0 | 0 | 0 | 0 |
+| turns in the 160-tick character run | 81 | 69 | 69 | 70 | 64 |
+| turns the engine ruled on — it acted, refused or faulted | not comparable | 61 | 67 | 68 | 61 |
+| turns the world refused | 17 | not re-derived | 3 | 14 | 12 |
+| turns that named a place | 3, all refused | 13, none out of reach | 13, none out of reach | 7, none out of reach | 7, none out of reach |
+| orchestrator operations named / carried out | 9 / 5 | 11 / 9 | 13 / 11 | 13 / 11, not re-put | 13 / 11, not re-put |
+| characters spawned | 2 | 6 | 5 | 5, not re-put | 5, not re-put |
+| the prompt's own example coordinate copied | 5 | 10 | **0** | **0** | **0** |
 
-Only three of the five tables were re-put on 2026-09-06: `./run_record.sh --live
---cast` puts the character, lesson and goal questions and writes the
-difficulty-class and orchestrator tables back unchanged, which is why the last
-column's orchestrator cells are the pass of 2026-09-05 and are marked as such
-rather than quoted as new measurements.
+Only three of the five tables were re-put on 2026-09-06 and on 2026-09-09:
+`./run_record.sh --live --cast` puts the character, lesson and goal questions and
+writes the difficulty-class and orchestrator tables back unchanged, which is why
+the last two columns' orchestrator cells are the pass of 2026-09-05 and are
+marked as such rather than quoted as new measurements.
 
 The row that used to sit here reading *turns the engine resolved — 57 | 61 | 67*
 has been repaired, because its own three cells were not one measurement. The
@@ -337,23 +341,22 @@ $67$ were turns the engine ruled on at all, refusals included. The two later
 cells are one measure and stay; the first is struck rather than converted,
 because converting it would mean re-deriving a pass whose recording was
 overwritten by the two that came after. Replaying the checked-in recording with
-`./run_agent.sh` decomposes the shipped column exactly: of $70$ turns, $53$ the
-engine ruled `ok`, $14$ the world refused, $1$ the catalogue faulted, $2$ asked
-a tool instead of acting — so $68$ is $53 + 14 + 1$, and the ok-and-finished count
-underneath it is $49$, the other $4$ still running when the clock stopped. (The
-column before it decomposed the same way: $63 + 3 + 1 + 2 = 69$, with $59$
-finished.)
+`./run_agent.sh` decomposes the shipped column exactly: of $64$ turns, $49$ the
+engine ruled `ok`, $12$ the world refused, $2$ asked a tool instead of acting and
+$1$ answered with nothing a reader could take an action from — so $61$ is
+$49 + 12$, and the ok-and-finished count underneath it is $46$, the other $3$
+still running when the clock stopped. (The column before it decomposed as
+$53 + 14 + 1 + 2 = 70$, with $49$ finished.)
 
-**The refusals rose from $3$ to $14$, and they are the world's answers rather
-than the model's mistakes.** Counted off the transcript's own lines: $7$ are
-*"there is nothing with id 6"* — the market pile, which the person's character
-empties on tick $108$ by taking the last thing in it, asked after by four
-characters between ticks $110$ and $153$; $3$ are *"the board decides where a
-fighter goes"*, a character inside a fight asking to walk; $2$ are a line spoken
-out of earshot; $1$ a pile out of reach; $1$ a sword the pile does not hold. A
-recording is one draw, so this is a fact about this draw and not a trend: in the
-draw before it the same pile was emptied on tick $54$ and the cast spent its
-later turns elsewhere.
+**The refusals are the world's answers rather than the model's mistakes.**
+Counted off the transcript's own lines: $5$ are a line spoken out of earshot;
+$4$ are *"nobody talks to themselves"* — Odo, forty units north of everybody,
+shouting at its own id; $1$ is *"there is nothing with id 6"*, the market pile
+the person's character empties on tick $60$; $1$ is *"the board decides where a
+fighter goes"*, a character inside a fight asking to walk; $1$ is a trade
+proposed to somebody out of arm's reach. A recording is one draw, so this is a
+fact about this draw and not a trend: in the draw before it seven of fourteen
+refusals were the emptied pile.
 
 Every pass is honest. None is a constant. This is the rule above, shown rather
 than asserted. The last column is the one line that is not a draw: the example
@@ -413,28 +416,22 @@ it costs, once because hostiles stream into the running world.
   character*, added a column carrying the engine's own `ok` verdict as a share of
   each arm's turns, disclosed that a faster arm is asked more often in the same
   $160$ ticks, and withdrew the recommendation those two sentences carried.
-* **The prose has fallen behind again, and the script that watches for it is
-  the thing saying so.** `tools/readme_model_numbers.sh` re-derives $48$ of the
-  README's model-layer values off the transcripts that hold them and fails when
-  the prose disagrees. It printed *48 checks OK* when this page last said so; on
-  this tree it prints **11 of 48 checks FAILED**. Run at each of the seven
-  commits since, it first fails at `09764d8` — the commit that re-put three of
-  the recording's five tables — so the numbers left behind are the previous
-  draw's: the README still says a median of $1.874$ s where the recording gives
-  $1.746$, $335$ asks where the transcript gives $278$, eleven refusals of
-  seventy-four resolutions where it gives eighteen of seventy-one, and the
-  person's character taking the lantern on tick $54$ where it now happens on
-  tick $105$. Ten of the eleven are numbers of that kind. The eleventh is not a
-  number at all: the check looks for the sentence *"once, on <date>, and are
-  checked in verbatim"*, and that sentence was rewritten into two clauses when
-  the recording became two passes of different dates, so the check fails on
-  wording it can no longer find. Re-taking the prose, and making that one check
-  read the tree rather than a sentence shape, is work this page reports rather
-  than does. Fable is still named nowhere in the tree but the two comparisons
-  that judged it. One page is deliberately a draw behind: `reports/agent-live-evidence.txt`
-  is the transcript of a live pass on 2026-09-04 ($85$ replies), not a replay of
-  the $101$-reply recording checked in today, and regenerating it would
-  cost another live call.
+* **The prose had fallen behind, the script that watches for it had stopped
+  watching, and both are fixed.** `tools/readme_model_numbers.sh` re-derives
+  $48$ of the README's model-layer values off the transcripts that hold them and
+  fails when the prose disagrees. When this page last reported on it, it printed
+  **11 of 48 checks FAILED**. It then stopped printing anything at all: the
+  goodwill and bargain tables were added to `net/model_recording.gd` and the
+  script's own assertion that every row it timed carried a millisecond column
+  began to fire, so it aborted before checking a single value and the prose
+  drifted unwatched. The assertion now counts the five tables the README's
+  passage is actually about, which is what it always meant, and every one of the
+  $48$ values has been re-taken off the transcripts of the pass of 2026-09-09.
+  It prints *48 checks OK*. Fable is still named nowhere in the tree but the two
+  comparisons that judged it. One page is deliberately a draw behind:
+  `reports/agent-live-evidence.txt` is the transcript of a live pass on
+  2026-09-04 ($85$ replies), not a replay of the $95$-reply recording checked in
+  today, and regenerating it would cost another live call.
 Two things this page listed as open have since been closed, and are recorded
 here so the list is not read as current: a line the catalogue cannot read now
 counts as an action attempted, so it costs one turn rather than the rest of the

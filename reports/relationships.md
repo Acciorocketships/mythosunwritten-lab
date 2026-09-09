@@ -329,10 +329,11 @@ carries a field of that name.
 
   Those four are the move *this* work made, and they are left as they were
   measured. Three of them have since moved again for an unrelated reason — the
-  model recording was re-made on 2026-09-05 against a changed prompt, so the
-  three runs that replay it now end at `550e14813932bf8c` (`./run_check.sh`),
-  `37bd8b92ef92dd5d` (`./run_world.sh`) and `5bc35efd0901430d`
-  (`./run_agent.sh`). `./run_scenario.sh` replays no model reply and is still at
+  model recording has been re-made against a changed prompt three times since, on
+  2026-09-05, 2026-09-06 and 2026-09-09, so the three runs that replay it now end
+  at `550e14813932bf8c` (`./run_check.sh`), `37bd8b92ef92dd5d`
+  (`./run_world.sh`) and `e8bc40990d06f8b9` (`./run_agent.sh`).
+  `./run_scenario.sh` replays no model reply and is still at
   `2810e3d79c9c7ece`.
 
 * **One behavioural move on the agent run, and it is the one the work asks for.**
