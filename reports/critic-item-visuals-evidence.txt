@@ -1,0 +1,435 @@
+The critic's re-runs for W-item-visuals-review, cycle 3652.
+Every command below was run at HEAD a1bba8a on 2026-09-09T14:25:10Z.
+
+==============================================================
+1. Does anything under sim/ name a model, a scene, a clip or a
+   texture?  A scan, not a hand-written list.
+==============================================================
+
+-- 1a. every file the milestone's eight commits touched
+   (9332ab7 fe83708 7eefecb 4703310 ffe7d4e bd014e0 41c2aaa 856b582
+    plus the closing commits 9e2216f a1bba8a)
+   files touched: 130, of which under sim/: 15
+     sim/action_engine.gd
+     sim/action_scene.gd
+     sim/asset_tags.gd
+     sim/character_upkeep.gd
+     sim/combat_match.gd
+     sim/combat_resolution.gd
+     sim/combatant_roster.gd
+     sim/item_model.gd
+     sim/scripted_armoury.gd
+     sim/scripted_armoury.gd.uid
+     sim/scripted_strike.gd
+     sim/scripted_strike.gd.uid
+     sim/scripted_volley.gd
+     sim/scripted_volley.gd.uid
+     sim/simulation.gd
+
+-- 1b. asset-path scan over the WHOLE sim/ tree (wider than the touched set)
+   grep -rInE "res://|assets/|\.(gltf|glb|tscn|tres|png|jpg|jpeg|svg|ogg|wav|ttf|fbx|obj|material|mesh|anim|import|res)([^A-Za-z_]|$)|preload\(|ResourceLoader|load\(\"" sim/
+     sim/world.gd:5:## nodes, no scenes, no meshes and no reference to anything under res://render.
+   ^ one hit, and it is the rule written down in a comment, not a path.
+
+-- 1c. every clip name render/character_rig.gd can return, searched under sim/
+     (no hits)
+
+-- 1d. every asset-shaped string literal anywhere under render/, searched under sim/
+     81 asset paths named in render/; of those, found under sim/:
+     0
+
+==============================================================
+2. The four drawing paths, followed back to where the data
+   comes from.
+==============================================================
+
+  (a) HELD ITEM
+      sim/inventory.gd equipment()
+        -> sim/combatant_roster.gd:281 equipped_tags()  [ItemModel.of, slot -> tag]
+        -> sim/combatant_roster.gd:185  piece row key "equipped"
+        -> render/combat_diorama.gd:107 state["equipped"]  (passed through untouched)
+        -> render/character_view.gd:167 held_in_hands()   (pure; AssetTags.GEAR_BUCKLER, Item.SLOT_HAND)
+        -> render/character_view.gd:453 _hold() -> AssetLibrary.build(tag)
+      data source: the snapshot dictionary. No simulation object is touched.
+
+  (b) MOTION
+      sim/combat_match.gd:269 _blow_of()  ["animation": attack.animation_tag]
+        -> sim/action_scene.gd:987 note_blow() -> ActionScene.blows
+        -> sim/combatant_roster.gd blow_rows() -> snapshot["blows"]
+        -> render/combat_diorama.gd:128 striking()   (world clock vs blow["tick"])
+        -> render/combat_diorama.gd:102 state["attack"], state["attack_tick"]
+        -> render/character_view.gd:245 clip_for() -> CharacterRig.clip_for_motion()
+      data source: the snapshot dictionary. No simulation object is touched.
+
+  (c) PROJECTILE
+      the same blow record as (b)
+        -> render/blow_flights.gd:64 flights(snapshot)   (pure; movement=="projectile")
+        -> render/main.gd:2287 _sync_flights() -> FlightView.launch()
+        -> render/flight_art.gd BODIES[sprite tag]
+      data source: the snapshot dictionary. Heights come from the snapshot's own
+      piece rows (_height_of / _height_at). No simulation object is touched.
+
+  (d) INVENTORY ICON  -- a different seam, deliberately
+      render/ui/sheet_source.gd sheets_in()/sheet_of()
+        -> a LIVE sim/character.gd Character handle out of world.combat
+        -> render/ui/character_panel.gd _refresh_carried/_refresh_equipment
+           and render/ui/play_panel.gd:219 (the hand row)
+        -> ItemModel.of(Inventory.item_of(entry)) -> PixelIcons.gear(tag)
+      data source: the simulation's own objects, read on the frame drawn.
+      This is the panel layer's own documented contract, not the diorama's:
+      read-only, no copy kept, and covered by the "combat check" structure test
+      (LayerCheck.FORBIDDEN_IN_RENDER deliberately excludes Character).
+      W-inventory-icons widened it by one call (SheetSource.sheet_of, new in
+      856b582) so the play panel's hand row could get the item and not its name.
+
+-- 2a. what the three diorama files actually name from the simulation
+   --- render/combat_diorama.gd
+     119:## began on -- `ActionScene.blows`, carried out by `CombatantRoster.blow_rows` --
+   --- render/character_view.gd
+     138:const SHIELD_TAGS := [AssetTags.GEAR_BUCKLER]
+     170:	var tag := String(equipped.get(Item.SLOT_HAND, ""))
+   --- render/character_rig.gd
+     53:## -- Tools, Simulation, Special, MovementAdvanced -- stay unloaded for the same
+     127:	AssetTags.ANIM_LUNGE: {"clip": "Melee_1H_Attack_Stab", "ticks": 32},
+     128:	AssetTags.ANIM_SLASH: {"clip": "Melee_1H_Attack_Slice_Diagonal", "ticks": 20},
+     129:	AssetTags.ANIM_SWING: {"clip": "Melee_1H_Attack_Slice_Horizontal", "ticks": 28},
+     130:	AssetTags.ANIM_SHOOT: {"clip": "Ranged_Bow_Release", "ticks": 27},
+     131:	AssetTags.ANIM_CAST: {"clip": "Ranged_Magic_Shoot", "ticks": 19},
+     132:	AssetTags.ANIM_SPIN: {"clip": "Melee_2H_Attack_Spin", "ticks": 48},
+     133:	AssetTags.ANIM_BASH: {"clip": "Melee_Block_Attack", "ticks": 22},
+     190:	for tag in AssetTags.ANIMATIONS:
+   --- render/blow_flights.gd
+     5:## hangs off: `CombatantRoster.snapshot()` carries the world's own record of
+     42:## crossed the ground on its way -- `Attack.PROJECTILE`'s own spelling, read
+   --- render/flight_art.gd
+     10:## vocabulary -- `AssetTags.EFFECT_SPRITES`, the same six names the simulation
+     45:	AssetTags.EFFECT_ARROW: {
+     49:	AssetTags.EFFECT_BOLT: {
+     53:	AssetTags.EFFECT_FLAME: {
+     57:	AssetTags.EFFECT_POINT: {
+     61:	AssetTags.EFFECT_BLADE: {
+     65:	AssetTags.EFFECT_IMPACT: {
+     161:	for tag in AssetTags.EFFECT_SPRITES:
+     171:	for tag in AssetTags.EFFECT_SPRITES:
+     182:		if not AssetTags.is_effect_sprite(tag):
+   --- render/flight_view.gd
+   ^ AssetTags, Item.SLOT_HAND and Attack.PROJECTILE's spelling: vocabulary,
+     not objects. Nothing in the three 3-D paths holds a simulation handle.
+
+-- 2b. the four structure checks at HEAD
+     layer check: OK -- res://sim references nothing in the render layer
+     combat check: OK -- res://render draws the fight and holds none of it
+     interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+     asset check: OK -- res://sim names asset tags and no asset
+     exit 0
+
+==============================================================
+3. Is there one blow record, or two channels?  A scan for
+   everything that publishes a blow.
+==============================================================
+
+-- 3a. every append into a blows array outside tests/
+     sim/combat_match.gd:242:	struck.append(_blow_of(me, index, outcome))
+     sim/action_scene.gd:987:	blows.append({
+
+-- 3b. every definition and every call of note_blow, outside tests/
+     sim/action_scene.gd:981:func note_blow(
+     sim/action_scene.gd:1024:		note_blow(
+
+-- 3c. every caller of CombatMatch.attack(), which is what writes the row
+     sim/scripted_match.gd:200:			played.attack(int(decision[1]))
+     sim/board_turn.gd:225:	var swung := match_state.attack(index)
+     sim/combat_policy.gd:176:		played.attack(best_index)
+     sim/action_engine.gd:413:	var swung := match_state.attack(chosen)
+
+     Reading of the above: one writer on the board (CombatMatch.attack ->
+     _blow_of -> struck), one writer in the world (ActionScene.note_blow ->
+     blows), one drain between them (ActionScene._take_blows -> take_struck).
+     The three surfaces that can spend a weapon action -- a person's turn
+     (sim/board_turn.gd:225), a character's own decision function
+     (sim/action_engine.gd:413) and the board's stand-in for a commander
+     nobody drives (sim/combat_policy.gd:176) -- all call the same
+     CombatMatch.attack. sim/scripted_match.gd:200 is a walkthrough doing the
+     same. There is no second channel.
+
+==============================================================
+4. The same weapon in two hands: two records and two drawn
+   results, side by side.  ./tools/critic_item_privilege_probe.sh
+==============================================================
+
+the same weapon in two hands, and the same picture out the other end
+
+=== melee: common spear, seed=1234 ticks=60 ===
+  the record
+    field        Alder (a person)             Briar (its own choice)      
+    by           Alder                        Briar                       
+    attack       thrust                       thrust                      
+    sprite       point                        point                       
+    animation    lunge                        lunge                       
+    movement     instant                      instant                     
+    cooldown     1                            1                           
+    hits         1                            1                           
+    from         1                            2                           
+    to           2                            1                           
+    tick         10                           18                          
+    round        1                            1                           
+    fight        1                            1                           
+    dealt        17                           12                          
+    out_of       38                           38                          
+    facing       1                            3                           
+    from_cell    (-161, 140)                  (-159, 140)                 
+    to_cell      (-159, 140)                  (-161, 140)                 
+    keys        identical
+    the three tags and the movement agree: yes
+  what the render layer drew, on the tick each record says its blow began
+                 Alder (a person)             Briar (its own choice)      
+    tag          knight                       knight                      
+    motion                                    lunge                       
+    clip         Idle_A                       Melee_1H_Attack_Stab        
+    hands        { "HandLeft": "", "HandRight": "gear_spear" } { "HandLeft": "", "HandRight": "gear_spear" }
+    motion_tick  -1                           18                          
+    drawn the same way: NO
+  how long each was drawn swinging, and what flew
+    #1 struck at tick 10, motion lunge, its clip runs 32 ticks
+      drawn swinging on ticks 11..20 (10 of them, the record promises 32)
+      first drawn 1 tick(s) after the tick the record names
+      a flight in the air on ticks none (0 of them)
+    #2 struck at tick 18, motion lunge, its clip runs 32 ticks
+      drawn swinging on ticks 18..27 (10 of them, the record promises 32)
+      first drawn 0 tick(s) after the tick the record names
+      a flight in the air on ticks none (0 of them)
+
+=== ranged: common bow, seed=1234 ticks=60 ===
+  the record
+    field        Alder (a person)             Briar (its own choice)      
+    by           Alder                        Briar                       
+    attack       loose                        loose                       
+    sprite       arrow                        arrow                       
+    animation    shoot                        shoot                       
+    movement     projectile                   projectile                  
+    cooldown     3                            3                           
+    hits         1                            1                           
+    from         1                            2                           
+    to           2                            1                           
+    tick         10                           18                          
+    round        1                            1                           
+    fight        1                            1                           
+    dealt        18                           26                          
+    out_of       38                           38                          
+    facing       0                            0                           
+    from_cell    (-164, 139)                  (-157, 140)                 
+    to_cell      (-157, 140)                  (-164, 139)                 
+    keys        identical
+    the three tags and the movement agree: yes
+  what the render layer drew, on the tick each record says its blow began
+                 Alder (a person)             Briar (its own choice)      
+    tag          knight                       knight                      
+    motion                                    shoot                       
+    clip         Idle_A                       Ranged_Bow_Release          
+    hands        { "HandLeft": "", "HandRight": "gear_bow" } { "HandLeft": "", "HandRight": "gear_bow" }
+    motion_tick  -1                           18                          
+    drawn the same way: NO
+  how long each was drawn swinging, and what flew
+    #1 struck at tick 10, motion shoot, its clip runs 27 ticks
+      drawn swinging on ticks 11..36 (26 of them, the record promises 27)
+      first drawn 1 tick(s) after the tick the record names
+      a flight in the air on ticks 11..36 (26 of them)
+      the flight leaves at phase 0.038 and lands at phase 1.000 (0 is the archer, 1 the target)
+    #2 struck at tick 18, motion shoot, its clip runs 27 ticks
+      drawn swinging on ticks 18..44 (27 of them, the record promises 27)
+      first drawn 0 tick(s) after the tick the record names
+      a flight in the air on ticks 18..44 (27 of them)
+      the flight leaves at phase 0.000 and lands at phase 1.000 (0 is the archer, 1 the target)
+
+=== a blow that found nobody: common bow, 6.0 units apart ===
+  the record: #1 struck at tick 10, loose/arrow/projectile, hits=0, to=0 (NOBODY)
+  from_cell (-161, 140)   to_cell (-161, 140)   -- the same cell: yes
+  the render layer draws a flight for it on 26 ticks
+  and it crosses from (-161, 140) to (-161, 140) -- distance 0 cells
+
+-- 4b. and ./run_strike.sh, the work's own side-by-side, re-run at HEAD
+     the same record from either hand
+       field        Alder (a person)             Briar (its own choice)      
+       from         1                            2                           
+       by           Alder                        Briar                       
+       to           2                            1                           
+       tick         10                           18                          
+       round        1                            1                           
+       fight        1                            1                           
+       dealt        17                           12                          
+       out_of       38                           38                          
+       hits         1                            1                           
+       attack       thrust                       thrust                      
+       facing       1                            3                           
+       from_cell    (-161,140)                   (-159,140)                  
+       to_cell      (-159,140)                   (-161,140)                  
+       cells        (-160,140) (-159,140)        (-161,140) (-160,140)       
+       sprite       point                        point                       
+       animation    lunge                        lunge                       
+       movement     instant                      instant                     
+       cooldown     1                            1                           
+       same fields: yes
+
+-- 4c. and the EARLIER review's own privilege probe, unchanged, re-run at HEAD
+     tools/godot/godot4 --headless --path . --script res://tools/critic_privilege_probe.gd
+     === A -- one action, three decision functions, one engine
+       [same] go_to -- go_to ok at=(-476.400, 420.000) walked=3.6 steps=4 | 0e5b59c725433786
+       [same] jump -- jump ok at=(-478.000, 420.000) gap=2.0 reach=4.5 dex=4 | a177e256d60b0199
+       [same] attack -- attack ok fight=begins against=2 anchor=1 joined=2 | 6af4ecaf8d57d324
+       [same] say -- say ok shout=false heard_by=1 check=1 context=persuade:#2 | e3b0ad8f0af2d5f2
+       [same] trade_propose -- trade_propose ok to=2 give=0 give_money=5 want=0 want_money=0 | 929bd517f2b35497
+       [same] trade_accept -- trade_accept refused: Wren has offered nothing | 89260e04690ddf34
+       [same] trade_deny -- trade_deny refused: Wren has offered nothing | 89260e04690ddf34
+       [same] pick_up -- pick_up refused: there is no worn hatchet within reach | 89260e04690ddf34
+       [same] drop -- drop ok item=lockpick into=5 | 3d2f99263e5c2bea
+       [same] examine -- examine ok item=lockpick seen=common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [lockpick:4] lockpick | 89260e04690ddf34
+       [same] interact -- interact refused: chest is out of reach (10.00 > 2.50) | 89260e04690ddf34
+       [same] wait -- wait ok ticks=3 until=3 | 9f0105f282000271
+       [0] actions whose outcome moved with the decider -- nothing on `decide` reached the engine
+     === B -- one list of choices, two kinds of decision function, one loop
+       [0] lines that differ -- the loop cannot tell the two apart
+       [405f28442b9b2127 / 405f28442b9b2127] scene fingerprints -- same world change
+     === C -- the whole scenario with the person driven by a program
+       [0] lines that differ -- the one person in the run is not privileged by the loop
+     === D -- what the board reads off a person and off a program
+       [same] level -- 8
+       [same] health -- 68
+       [same] max health -- 68
+       [same] status -- 8
+       [same] defence -- 6
+       [same] move grants -- 4
+       [same] loadout -- sword + boots(4/28) chestplate(16/16) helmet(0/32) leggings(8/24)
+       [same] attacks -- 2
+       [same] first attack damage -- 12
+       [same] attack cells -- [(-1, -1), (0, -1), (1, -1)]
+       [0] numbers that differ -- the board reads the same commander either way
+     === E -- what is handed to a decision function, and who reads it
+       [2] arguments a decision function is called with -- func(scene, actor) -> Action; the scene and the actor it is choosing for: the same two objects
+     === F -- the ordinary world with one of its cast driven by a person
+       [0] asked at the same tick: lines that differ -- the world cannot tell a person from a program
+       [c5f956c9407f8a77 / c5f956c9407f8a77] asked at the same tick: world fingerprints -- same world
+       [c5f956c9407f8a77 / c5f956c9407f8a77] the person pressing late: world fingerprints -- same world
+
+==============================================================
+5. The fallback numbers, counted again rather than quoted.
+   ./tools/critic_fallback_recount.sh  (an independent walk)
+==============================================================
+
+the fallback counts, re-counted
+
+1. motions with no clip of their own
+   0 of the catalogue's 8 attacks take the fallback motion (claimed 0 of 8)
+   agrees: yes
+   motion tags in the simulation's vocabulary: 7, without a clip: none
+
+2. effect tags with no flying body of their own
+   0 of the 10 shipped attacks take the fallback body (claimed 0 of 10)
+   agrees: yes
+
+3. gear tags and the faces they are drawn with
+   13 gear tags (claimed 13); 13 distinct faces behind them
+   gear tags with no face at all: none
+   faces used by more than one tag: none
+   agrees on the tag count: yes
+
+4. items the shipped scenarios hold that resolve to no tag
+   encounter           6 items, 0 fall back
+   encounter-island    4 items, 0 fall back
+   market              6 items, 1 fall back
+   quarrel             6 items, 1 fall back
+   play                9 items, 4 fall back
+   battle              6 items, 0 fall back
+   bargain            unavailable
+   agent              unavailable
+   armoury             9 items, 0 fall back
+   volley              3 items, 1 fall back
+   7 of 49 shipped items take the fallback (claimed 7 of 49)
+   agrees: yes
+
+-- 5b. and the work's own tool for the flight bodies, re-run
+  hunting bow  arrow          sprite=arrow   projectile body
+  wand         magic missile  sprite=bolt    projectile body
+
+0 of 10 shipped attacks take the fallback body
+
+-- 5c. eight faces drawn new in 856b582, five reusing sheet art
+     new faces added: 8
+     13 gear tags - 8 new = 5 reusing hand/boots/leggings/chestplate/helmet
+
+==============================================================
+6. Two things found, both reproducible.
+==============================================================
+  (i)  A blow a person spends is drawn one tick after the tick the record
+       names it began on; a model-driven character's is drawn on it.
+       Reproduce: ./tools/critic_item_privilege_probe.sh, section "ranged".
+       #1 (a person, through BoardTurn) is drawn swinging on ticks 11..36 --
+       26 of the 27 the record promises -- and its arrow leaves at phase
+       0.038 rather than 0.000.  #2 (its own decision function, through
+       ActionEngine) is drawn 18..44, 27 of 27, leaving at phase 0.000.
+       Cause: a person spends the weapon action outside the tick, so the row
+       is stamped with the clock's current reading and only reaches
+       ActionScene.blows at the next _take_blows() (sim/action_scene.gd:600),
+       by which time the clock has moved on.  Nothing branches on who
+       decided: the record's keys are identical and the drawing code is the
+       same.  The earlier review already recorded the same one-tick offset one
+       layer down ("the person pressing late", section F of
+       tools/critic_privilege_probe.gd), so this is that known property's
+       cost in the picture, not something this milestone introduced.
+       Smallest change: drain the board at the end of a hand-spent action --
+       call ActionScene._take_blows() where the hand path returns -- so a
+       hand-spent blow reaches `blows` on the tick it names.
+
+  (ii) A projectile blow that found nobody draws an arrow that never leaves
+       the archer.  sim/combat_match.gd:285 writes to_cell as
+       first.get("cell", me.cell), so a swing that hit nothing has
+       to_cell == from_cell; render/blow_flights.gd copies both endpoints
+       verbatim (correctly -- it must not second-guess the simulation), so
+       the flight is zero-length and stands on the archer for the whole
+       motion.  Reproduce: ./tools/critic_item_privilege_probe.sh, section
+       "a blow that found nobody" -- 26 ticks (1.3 s at twenty ticks a
+       second) of an arrow crossing 0 cells.  Only a person can produce it:
+       BoardTurn.swing spends the action wherever the piece faces, while
+       ActionEngine refuses an attack whose pattern does not cover the named
+       target and CombatPolicy._swing only swings when covered > 0.
+       Smallest change: in BlowFlights.flights(), do not make a flight for a
+       row whose to_cell equals its from_cell.
+
+==============================================================
+7. Checked and found sound -- stated rather than left silent.
+==============================================================
+  * Nothing under sim/ names a model, a scene, a clip or a texture. Section 1:
+    a scan of the whole sim/ tree (wider than the 15 sim/ files the milestone's
+    commits touched), the fifteen clip names the render layer's motion table can
+    return, and all 81 asset paths named anywhere under render/. One hit, and it
+    is sim/world.gd:5 stating the rule in a comment. The asset structure check
+    agrees.
+  * The three 3-D drawing paths -- held item, motion, projectile -- read the
+    snapshot dictionary and nothing else. Section 2 follows each back to its
+    source and section 2a lists every simulation name the six files use: only
+    AssetTags, Item.SLOT_HAND and Attack.PROJECTILE's spelling. No simulation
+    object is held or asked.
+  * The fourth path, the inventory icon, reads live Character/Inventory objects
+    by the panel layer's own long-standing and structure-checked contract --
+    read-only, nothing cached. W-inventory-icons widened it by one call and said
+    so. Naming it here so it is on the record, not as a defect.
+  * One blow record, not two. Section 3: one append on the board, one in the
+    world, one drain between, and the three surfaces that spend a weapon action
+    all call the same CombatMatch.attack.
+  * The two records carry identical keys and identical tags whoever struck, and
+    the two are drawn by the same code with the same hands and the same clip.
+    Section 4, run twice (this review's probe and the work's own ./run_strike.sh),
+    and section 4c re-runs the earlier review's own privilege probe unchanged:
+    zero differing lines in all of its sections.
+  * All four fallback numbers re-counted from the shipped catalogue and the
+    shipped scenarios and all four agree: 0 of 8 attacks take the fallback
+    motion, 0 of 10 the fallback flying body, 7 of 49 shipped items the tied
+    parcel, and 13 of 13 gear tags have a face (8 drawn new, 5 reusing sheet
+    art). Section 5.
+  * All four structure checks pass at HEAD, exit 0. Section 2b.
+
+  Caveat on this run's conditions: an unrelated `./run_tests.sh` begun before
+  this cycle (pid 3253240, parent `bash ./run_tests.sh`) was running throughout.
+  It was left alone. Every command above is its own process and none of them
+  writes to the repository, so the readings are unaffected; the full-suite
+  number this review does not re-run is the one committed at
+  reports/attack-clips-full-suite.log.
