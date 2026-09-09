@@ -117,15 +117,20 @@ const HOB_MONEY := 6
 
 ## How many points of health Fen starts down.
 ##
-## Stage dressing, and the one piece of it that needs explaining. The stage has
-## to hold one of everything a person can do, and the one thing it could not
-## otherwise hold is a reason to drink: nothing in this world can wound the
-## person. Rill closes and strikes, but the moment two commanders come within
-## `ActionScene.ENGAGE_RADIUS` the fight snaps onto a board, and a commander on a
-## board has no way to walk across it -- there is no board-move action yet -- so
-## whoever the snap left out of reach stays out of reach. Until there is one, a
-## character who has never been scratched is a character whose draught is
-## furniture.
+## Stage dressing, and the one piece of it that needs explaining: the stage has
+## to hold one of everything a person can do, and a draught is not a thing to
+## drink until there is something to mend. Starting Fen down by exactly what one
+## draught is worth makes the wardrobe's third verb reachable on the first tick
+## rather than only after a fight has gone badly.
+##
+## This comment used to go on to say that nothing in this world could wound the
+## person -- that the snap onto a board left the two out of each other's reach
+## and there was no board-move action to close it. Both halves of that stopped
+## being true when W-player-combat gave a turn its step: `render/board_controls.gd`
+## picks a cell and steps onto it, and a playtest of this very stage watched Rill
+## close and land one (`attack ok attack=thrust cells=2 hits=1 dealt=16`, taking
+## Fen from 32 to 16). The constant stays for the reason above, which never
+## depended on that.
 const FEN_SCRATCHED := 6
 
 ## Where the pile and the chest lie, as offsets from `WHERE`, and what the chest

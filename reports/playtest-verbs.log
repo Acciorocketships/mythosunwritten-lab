@@ -1,0 +1,258 @@
+=== playtest session: verbs
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --journal --input 6:tab,8:e,14:p,36:b,38:t,46:y,54:f,56:l,62:equal,64:o,72:u,78:i,84:h,92:j,98:k,104:g,126:m,130:c,132:q,138:x,144:v,150:n --screenshot-ticks 20:reports/assets/playtest-verbs-t20.png,60:reports/assets/playtest-verbs-t60.png,100:reports/assets/playtest-verbs-t100.png,156:reports/assets/playtest-verbs-t156.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --journal --input 6:tab,8:e,14:p,36:b,38:t,46:y,54:f,56:l,62:equal,64:o,72:u,78:i,84:h,92:j,98:k,104:g,126:m,130:c,132:q,138:x,144:v,150:n --screenshot-ticks 20:reports/assets/playtest-verbs-t20.png,60:reports/assets/playtest-verbs-t60.png,100:reports/assets/playtest-verbs-t100.png,156:reports/assets/playtest-verbs-t156.png (without --input/--screenshot-ticks)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
+Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
+Failed to create secure directory (/run/user/1000/pulse): Read-only file system
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5705:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+WARNING: All audio drivers failed, falling back to the dummy driver.
+     at: initialize (servers/audio/audio_server.cpp:258)
+
+render-shell play driving=#1
+render-shell keys WASD/arrows  walk one step (3.6 units)
+render-shell keys G            go to the nearest named place
+render-shell keys J            hop (3.0 units)
+render-shell keys K            leap (12.0 units, further than an ordinary DEX reaches)
+render-shell keys Tab          aim at the next thing in sight
+render-shell keys F            hold the next thing you carry, or nothing
+render-shell keys C            pick the next thing inside what you have aimed at
+render-shell keys B            pick the next thing to say
+render-shell keys - / =        the coins in your next offer (given / asked)
+render-shell keys P            go to what you have aimed at
+render-shell keys E            examine what you have aimed at
+render-shell keys L            look at what you are holding
+render-shell keys Q            take the picked thing out of what you have aimed at
+render-shell keys X            drop what you are holding
+render-shell keys 1            put on what you are holding
+render-shell keys 2            take off what you are holding
+render-shell keys 3            use up what you are holding
+render-shell keys V            put what you are holding into what you have aimed at
+render-shell keys T            say the picked line to what you have aimed at
+render-shell keys Y            shout the picked line
+render-shell keys O            offer a trade: give what you hold and the given coins, ask for what you have picked and the asked coins
+render-shell keys U            accept the offer standing from it
+render-shell keys I            deny the offer standing from it
+render-shell keys H            interact with it, using what you are holding
+render-shell keys N            attack it with what you are holding
+render-shell keys M            wait (5 ticks)
+render-shell keys [            pick the next cell you may step onto
+render-shell keys ]            step onto it
+render-shell keys ;            pick the next of your minions
+render-shell keys '            pick the next cell that minion may go to
+render-shell keys \            send it there
+render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
+render-shell keys 8 / 9        turn a quarter left or right (free)
+render-shell keys 0            end your turn
+render-shell keys Z            open or shut the character sheet
+render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=13283 motes=588 sheet=2/3 aa=msaa4+fxaa
+  t=  1  Fen    has not decided yet, and waits in the world
+  t=  1  Hob    began wait(ticks=4), 4 ticks
+  t=  1  Rill   began wait(ticks=20), 20 ticks
+  t=  5  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Hob    began wait(ticks=4), 4 ticks
+  t=  6  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=8 aims at #2 Hob (character) 6.0 away · holding nothing / taking nothing / coins none / saying "well met"
+render-shell play t=8 chose examine(target=2)
+  t=  9  Fen    began examine(target=2), 4 ticks
+  t=  9  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=13
+  t=  9  Hob    began wait(ticks=4), 4 ticks
+  t= 11  Rill   thought again at 10/20t, wanted the same thing
+  t= 13  Fen    finished examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
+  t= 13  Fen    has not decided yet, and waits in the world
+  t= 13  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=17
+  t= 13  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=13 examine(target=2) -> examine ok id=2 name=Hob kind=commander health=unhurt fighting=false equipment=- distance=6.0
+  t= 16  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=16 chose go_to(target=2)
+  t= 17  Fen    began go_to(target=2), 20 ticks
+  t= 17  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=21
+  t= 17  Hob    began wait(ticks=4), 4 ticks
+  t= 21  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=25
+  t= 21  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
+  t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
+  t= 21  Rill   began wait(ticks=20), 20 ticks
+render-shell screenshot t=21 reports/assets/playtest-verbs-t20.png
+  t= 22  Fen    thought again at 5/20t, wanted the same thing
+  t= 25  Hob    finished trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4) -> trade_propose ok to=1 give=1 give_money=0 want=0 want_money=4
+  t= 25  Hob    began wait(ticks=4), 4 ticks
+  t= 26  Rill   thought again at 5/20t, wanted the same thing
+  t= 27  Fen    thought again at 10/20t, wanted the same thing
+  t= 29  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=33
+  t= 29  Hob    began wait(ticks=4), 4 ticks
+  t= 31  Rill   thought again at 10/20t, wanted the same thing
+  t= 32  Fen    thought again at 15/20t, wanted the same thing
+  t= 33  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=37
+  t= 33  Hob    began wait(ticks=4), 4 ticks
+  t= 36  Rill   thought again at 15/20t, wanted the same thing
+  t= 37  Fen    finished go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+  t= 37  Fen    has not decided yet, and waits in the world
+  t= 37  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=41
+  t= 37  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=37 go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+render-shell play t=37 aims at #2 Hob (character) 2.4 away · holding nothing / taking nothing / coins none / saying "what will you take for it?"
+render-shell play t=40 chose say(text=what will you take for it? target=2)
+  t= 41  Fen    began say(text=what will you take for it? target=2), 5 ticks
+  t= 41  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=45
+  t= 41  Hob    began wait(ticks=4), 4 ticks
+  t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
+  t= 41  Rill   began wait(ticks=20), 20 ticks
+  t= 45  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=49
+  t= 45  Hob    began wait(ticks=4), 4 ticks
+  t= 46  Fen    finished say(text=what will you take for it? target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
+  t= 46  Fen    has not decided yet, and waits in the world
+  t= 46  Rill   thought again at 5/20t, wanted the same thing
+  t= 46  Hob    interrupted (spoken to), abandoned wait(ticks=4) 1/4t
+  t= 46  Hob    began say(text=a fair price is a fair price target=1), 5 ticks
+render-shell play t=46 say(text=what will you take for it? target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
+render-shell play t=48 chose say(text=what will you take for it?)
+  t= 49  Fen    began say(text=what will you take for it?), 5 ticks
+  t= 51  Hob    finished say(text=a fair price is a fair price target=1) -> say ok shout=false heard_by=1 check=2 context=persuade:#1
+  t= 51  Hob    began wait(ticks=4), 4 ticks
+  t= 51  Rill   thought again at 10/20t, wanted the same thing
+  t= 51  Fen    interrupted (spoken to), abandoned say(text=what will you take for it?) 2/5t
+  t= 51  Fen    began say(text=what will you take for it?), 5 ticks
+  t= 55  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=59
+  t= 55  Hob    began wait(ticks=4), 4 ticks
+  t= 56  Fen    finished say(text=what will you take for it?) -> say ok shout=true heard_by=1
+  t= 56  Fen    has not decided yet, and waits in the world
+  t= 56  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=56 say(text=what will you take for it?) -> say ok shout=true heard_by=1
+render-shell play t=56 aims at #2 Hob (character) 2.4 away · holding common boots / taking nothing / coins none / saying "what will you take for it?"
+render-shell play t=56 chose examine(target=common boots)
+  t= 57  Fen    began examine(target=common boots), 4 ticks
+  t= 59  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=63
+  t= 59  Hob    began wait(ticks=4), 4 ticks
+  t= 61  Fen    finished examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
+  t= 61  Fen    has not decided yet, and waits in the world
+  t= 61  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=81
+  t= 61  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=61 examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
+render-shell screenshot t=61 reports/assets/playtest-verbs-t60.png
+  t= 63  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=67
+  t= 63  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=64 aims at #2 Hob (character) 2.4 away · holding common boots / taking nothing / coins you ask 1 / saying "what will you take for it?"
+render-shell play t=64 chose trade_propose(target=2 give=[common boots] give_money=0 want=[] want_money=1)
+  t= 65  Fen    began trade_propose(target=2 give=[common boots] give_money=0 want=[] want_money=1), 4 ticks
+  t= 66  Rill   thought again at 5/20t, wanted the same thing
+  t= 67  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=71
+  t= 67  Hob    began wait(ticks=4), 4 ticks
+  t= 69  Fen    finished trade_propose(target=2 give=[common boots] give_money=0 want=[] want_money=1) -> trade_propose ok to=2 give=1 give_money=0 want=0 want_money=1
+  t= 69  Fen    has not decided yet, and waits in the world
+render-shell play t=69 trade_propose(target=2 give=[common boots] give_money=0 want=[] want_money=1) -> trade_propose ok to=2 give=1 give_money=0 want=0 want_money=1
+  t= 71  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=75
+  t= 71  Hob    began trade_deny(target=1), 2 ticks
+  t= 71  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=72 chose trade_accept(target=2)
+  t= 73  Fen    began trade_accept(target=2), 3 ticks
+  t= 73  Hob    finished trade_deny(target=1) -> trade_deny ok from=1
+  t= 73  Hob    began wait(ticks=4), 4 ticks
+  t= 76  Fen    finished trade_accept(target=2) -> trade_accept ok from=2 took=1 took_money=0 gave=0 gave_money=4
+  t= 76  Fen    has not decided yet, and waits in the world
+  t= 76  Rill   thought again at 15/20t, wanted the same thing
+  t= 77  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=81
+  t= 77  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=76 trade_accept(target=2) -> trade_accept ok from=2 took=1 took_money=0 gave=0 gave_money=4
+render-shell play t=79 chose trade_deny(target=2)
+  t= 80  Fen    began trade_deny(target=2), 2 ticks
+  t= 81  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=85
+  t= 81  Hob    began wait(ticks=4), 4 ticks
+  t= 81  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=101
+  t= 81  Rill   began wait(ticks=20), 20 ticks
+  t= 82  Fen    finished trade_deny(target=2) -> trade_deny refused: Hob has offered nothing
+  t= 82  Fen    has not decided yet, and waits in the world
+render-shell play t=82 trade_deny(target=2) -> trade_deny refused: Hob has offered nothing
+  t= 85  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=89
+  t= 85  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=85 chose interact(target=2 item=common boots)
+  t= 86  Fen    began interact(target=2 item=common boots), 6 ticks
+  t= 86  Rill   thought again at 5/20t, wanted the same thing
+  t= 89  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=93
+  t= 89  Hob    began wait(ticks=4), 4 ticks
+  t= 91  Fen    thought again at 5/6t, wanted the same thing
+  t= 91  Rill   thought again at 10/20t, wanted the same thing
+  t= 92  Fen    finished interact(target=2 item=common boots) -> interact refused: Hob is a character: talk or trade
+  t= 92  Fen    has not decided yet, and waits in the world
+  t= 93  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=97
+  t= 93  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=92 interact(target=2 item=common boots) -> interact refused: Hob is a character: talk or trade
+render-shell play t=93 chose jump(target=(-476.400, 417.000))
+  t= 94  Fen    began jump(target=(-476.400, 417.000)), 4 ticks
+  t= 96  Rill   thought again at 15/20t, wanted the same thing
+  t= 97  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=101
+  t= 97  Hob    began wait(ticks=4), 4 ticks
+  t= 98  Fen    finished jump(target=(-476.400, 417.000)) -> jump ok at=(-476.400, 417.000) gap=3.0 reach=3.75 dex=3
+  t= 98  Fen    has not decided yet, and waits in the world
+render-shell play t=98 jump(target=(-476.400, 417.000)) -> jump ok at=(-476.400, 417.000) gap=3.0 reach=3.75 dex=3
+render-shell play t=98 chose jump(target=(-476.400, 405.000))
+  t= 99  Fen    began jump(target=(-476.400, 405.000)), 4 ticks
+  t=101  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=105
+  t=101  Hob    began wait(ticks=4), 4 ticks
+  t=101  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=121
+  t=101  Rill   began wait(ticks=20), 20 ticks
+render-shell screenshot t=101 reports/assets/playtest-verbs-t100.png
+  t=103  Fen    finished jump(target=(-476.400, 405.000)) -> jump refused: 12.00 is further than DEX 3 jumps (3.75)
+  t=103  Fen    has not decided yet, and waits in the world
+render-shell play t=103 jump(target=(-476.400, 405.000)) -> jump refused: 12.00 is further than DEX 3 jumps (3.75)
+render-shell play t=104 place landmark l-4,3 at 46.4 away
+render-shell play t=104 chose go_to(target=(-447.453, 453.325))
+  t=105  Fen    began go_to(target=(-447.453, 453.325)), 20 ticks
+  t=105  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=109
+  t=105  Hob    began wait(ticks=4), 4 ticks
+  t=106  Rill   thought again at 5/20t, wanted the same thing
+  t=109  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=113
+  t=109  Hob    began wait(ticks=4), 4 ticks
+  t=110  Fen    thought again at 5/20t, wanted the same thing
+  t=111  Rill   thought again at 10/20t, wanted the same thing
+  t=113  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=117
+  t=113  Hob    began wait(ticks=4), 4 ticks
+  t=115  Fen    thought again at 10/20t, wanted the same thing
+  t=116  Rill   thought again at 15/20t, wanted the same thing
+  t=117  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=121
+  t=117  Hob    began wait(ticks=4), 4 ticks
+  t=120  Fen    thought again at 15/20t, wanted the same thing
+  t=121  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=125
+  t=121  Hob    began wait(ticks=4), 4 ticks
+  t=121  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=141
+  t=121  Rill   began go_to(target=1), 20 ticks
+  t=125  Fen    finished go_to(target=(-447.453, 453.325)) -> go_to refused: the way to the position is blocked
+  t=125  Fen    has not decided yet, and waits in the world
+  t=125  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=129
+  t=125  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=125 go_to(target=(-447.453, 453.325)) -> go_to refused: the way to the position is blocked
+  t=126  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=127 chose wait(ticks=5)
+  t=128  Fen    began wait(ticks=5), 5 ticks
+  t=129  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=133
+  t=129  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=130 aims at #2 Hob (character) 16.0 away · holding common boots / taking nothing / coins you ask 1 / saying "what will you take for it?"
+render-shell fight t=133 the board appears
+  t=131  Rill   thought again at 10/20t, wanted the same thing
+  t=133  Fen    finished wait(ticks=5) -> wait ok ticks=5 until=138
+  t=133  Fen    has not decided yet, and waits in the world
+  t=133  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=137
+  t=133  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=133 wait(ticks=5) -> wait ok ticks=5 until=138
+render-shell play t=133 nothing is picked out of what you have aimed at
+  t=134  Hob    interrupted (combat began), abandoned wait(ticks=4) 1/4t
+  t=134  Rill   interrupted (combat began), abandoned go_to(target=1) 13/20t
+render-shell play t=138 chose drop(item=common boots)
+  t=139  Fen    began drop(item=common boots), 2 ticks
+  t=141  Fen    finished drop(item=common boots) -> drop ok item=common boots into=6
+render-shell play t=141 drop(item=common boots) -> drop ok item=common boots into=6
+render-shell play t=146 chose drop(item=common boots target=2)
+render-shell play t=152 chose attack(target=2 item=common boots)
+render-shell screenshot t=157 reports/assets/playtest-verbs-t156.png
+render-shell sheet scale=2 x=16 y=16 w=574 h=748 sheets=3 showing=0
+render-shell dialogue scale=2 x=676 y=396 w=596 h=236
+render-shell trade scale=2 x=676 y=274 w=596 h=114
+render-shell stop tick=160 frames=60 views=41 handles=81 far=122 fartris=16352 farbuilt=131 farcorners=8544 faruse=6 islands=33 water=3 grass=17603 drawn=12934 patches=40 isles=2 motes=595 lights=0 orbs=0 board=0/0 pieces=3 mirror=60 frame_ms=0.00 timed=0 digest=1aef496357580a3e
