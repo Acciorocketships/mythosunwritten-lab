@@ -33,8 +33,19 @@ if [[ "${1:-}" == "--layers-only" ]]; then
 fi
 
 SILENCE="${RUN_TESTS_SILENCE:-7200}"
-OUT="$(mktemp)"
-STALLED="$(mktemp)"
+
+# The transcript belongs to the run, not to the shell that launched it. A full
+# suite takes hours and routinely outlives the sandbox its launching cycle sat
+# in, and $TMPDIR points inside that sandbox; a transcript written there is
+# unlinked mid-run when the sandbox is torn down, and the closing checks below
+# then read a path that is gone. So it is kept beside the checkout the run is
+# testing, which outlives any one launching shell. RUN_TESTS_RUNDIR overrides
+# the location -- ./run_runner_guard.sh uses it to delete a transcript on
+# purpose. The EXIT trap still removes both files when the run ends normally.
+RUNDIR="${RUN_TESTS_RUNDIR:-$PWD/.testruns}"
+mkdir -p "$RUNDIR"
+OUT="$(mktemp "$RUNDIR/transcript.XXXXXXXX")"
+STALLED="$(mktemp "$RUNDIR/stalled.XXXXXXXX")"
 trap 'rm -f "$OUT" "$STALLED"' EXIT
 
 env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" \
@@ -77,6 +88,25 @@ wait "$echoer" 2>/dev/null || true
 # when the first runtime error came out. Both read the runner's own RUN lines.
 last_named() { awk '/^RUN   /{s=substr($0, 7)} END{print (s == "" ? "no suite yet" : s)}' "$OUT"; }
 errored_in() { awk '/^RUN   /{s=substr($0, 7)} /^SCRIPT ERROR/{print (s == "" ? "no suite yet" : s); exit}' "$OUT"; }
+
+# Neither closing check can be run on a file that is not there, and a check
+# that could not be run is not a check that passed: `grep` on a missing path
+# exits 2, which an `if` reads as "no match", and `[[ -s ]]` on one is simply
+# false. Both would turn a run with a runtime error in it, or a run killed for
+# silence, into a clean exit 0. So a transcript that has gone missing under the
+# run is a failure of the run, named and loud.
+readable_or_fail() {
+	local path="$1" what="$2"
+	[[ -f "$path" && -r "$path" ]] && return 0
+	echo "" >&2
+	echo "run_tests: the run's $what is missing or unreadable: $path" >&2
+	echo "run_tests: it was written at the start of this run and is gone now, so" >&2
+	echo "run_tests: neither the runtime-error check nor the stall check could be" >&2
+	echo "run_tests: run. Nothing can be concluded about this run; it is failed here." >&2
+	exit 2
+}
+readable_or_fail "$OUT" "transcript"
+readable_or_fail "$STALLED" "stall flag"
 
 if [[ -s "$STALLED" ]]; then
 	echo ""

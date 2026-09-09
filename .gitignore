@@ -49,3 +49,9 @@ __pycache__/
 # Windows "downloaded from the internet" marks, written by WSL next to every
 # file the user copied across. Not ours and not content.
 *:Zone.Identifier
+
+# Where ./run_tests.sh keeps the transcript and stall flag of a run in progress,
+# beside the checkout rather than in the launching shell's $TMPDIR, so that a
+# run outliving the sandbox that started it still has the files its closing
+# checks read. The runner's own EXIT trap removes them when a run ends.
+.testruns/

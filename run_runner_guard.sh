@@ -8,7 +8,10 @@
 # planted to break the runner in one of the three ways this engine allows, and
 # requires of each run that it ends on its own, names the suite it was in, and
 # exits non-zero. Two ordinary runs bracket them: one where everything passes
-# and one where a check fails, to show those are unchanged.
+# and one where a check fails, to show those are unchanged. Two more delete the
+# runner's own transcript and stall flag under a running run, the way a sandbox
+# teardown does to a run that outlives the cycle that launched it, and require
+# that a check which could not be read fails the run instead of passing it.
 #
 # Takes about two minutes. The suites it borrows are the two cheapest real ones.
 set -uo pipefail
@@ -17,7 +20,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 WAIT="${RUNNER_GUARD_WAIT:-300}"
 STALL_WAIT="${RUNNER_GUARD_STALL_WAIT:-20}"
 LOG="$(mktemp)"
-trap 'rm -f "$LOG"' EXIT
+# Somewhere we can reach the runner's own transcript and stall flag, so the two
+# checks at the end can delete them on purpose.
+RUNDIR="$(mktemp -d)"
+trap 'rm -f "$LOG"; rm -rf "$RUNDIR"' EXIT
 
 failed=0
 note() { echo "  GUARD FAIL: $1" >&2; failed=1; }
@@ -77,9 +83,39 @@ attempt "a suite that never returns and never says anything" \
 has '^RUN   stalling$' "the stalling suite was not named before it ran"
 has "suite 'stalling'" "the run does not say which suite it was in when it stopped"
 
+# Delete every file matching $1 in the run directory, over and over, for as long
+# as the run lasts. Repeating rather than deleting once means that whatever the
+# runner writes last is still followed by a deletion, so the file is reliably
+# gone by the time the closing checks look for it.
+keep_deleting() {
+	( for (( tick = 0; tick < $2; tick++ )); do
+		rm -f "$RUNDIR"/$1 2>/dev/null
+		sleep 0.05
+	  done ) &
+	deleter=$!
+}
+
+keep_deleting 'transcript.*' 1200
+attempt "a run whose transcript is deleted under it" \
+	env RUN_TESTS_RUNDIR="$RUNDIR" \
+	timeout -s KILL "$WAIT" ./run_tests.sh test_rng runner_fixtures/throwing
+kill "$deleter" 2>/dev/null || true
+[[ $status -ne 0 ]] || note "the transcript vanished under a run that threw, and it exited 0"
+has "transcript is missing or unreadable" "the run does not name the transcript it could not read"
+
+keep_deleting 'stalled.*' 1200
+attempt "a run killed for silence whose stall flag is deleted under it" \
+	env RUN_TESTS_SILENCE="$STALL_WAIT" RUN_TESTS_RUNDIR="$RUNDIR" \
+	timeout -s KILL "$WAIT" ./run_tests.sh test_rng runner_fixtures/stalling
+kill "$deleter" 2>/dev/null || true
+[[ $status -ne 0 ]] || note "a run was killed for silence with its flag deleted, and it exited 0"
+(( elapsed >= STALL_WAIT )) || note "the run ended too soon to have been killed by the watchdog"
+has "stall flag is missing or unreadable" "the run does not name the stall flag it could not read"
+
 echo ""
 if [[ $failed -eq 0 ]]; then
-	echo "runner guard OK: each of the three is named and none of them hangs"
+	echo "runner guard OK: each of the three is named, none of them hangs, and a"
+	echo "runner guard OK: check that could not be read fails the run"
 	exit 0
 fi
 echo "runner guard FAILED"
