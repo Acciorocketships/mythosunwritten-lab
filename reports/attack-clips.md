@@ -206,3 +206,70 @@ the fifteen clip names this table can return and finds none, which is the half o
 the rule `tests/asset_check.gd` cannot see — a clip name is not a path, so a
 simulation that named `Melee_1H_Attack_Stab` would pass the asset check and still
 know what a swing looks like. All four structure checks pass.
+
+## The closing checks, run at HEAD
+
+The four structure checks — `./run_tests.sh --layers-only`, exit 0:
+
+```
+layer check:     OK -- res://sim references nothing in the render layer
+combat check:    OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check:     OK -- res://sim names asset tags and no asset
+```
+
+The simulation, unchanged and unmoved — `./run_headless.sh --seed 1234 --ticks 40 --assets`,
+exit 0:
+
+```
+tick 40 ... biome=deep_forest water=0 on_island=0 on_path=0.00 64f9a1c50f4510dc
+done ticks=40 chunks=39 built=45 final=64f9a1c50f4510dc
+assets visual-files  found=5339  loaded=0
+assets render-scripts found=35   loaded=0
+```
+
+**Fingerprint `64f9a1c50f4510dc`**, and the simulation loaded none of the 5339
+picture files and none of the 35 render scripts to produce it.
+
+### The full suite, green
+
+The one line this item could not close when the work landed was the suite: it
+could not *finish* on this repository, for a reason that had nothing to do with
+these clips — `tests/test_goals.gd:320` read past the end of an array, which on
+this engine abandons the function and leaves the runner idling. That was fixed
+under its own item. The suite was then run again here, at `HEAD`, whole and with
+nothing removed:
+
+```
+lab progress run attack-clips-full-suite --log reports/attack-clips-full-suite.log -- ./run_tests.sh
+  → state done, pid 3129304 exited, note exit code 0
+
+all 65 suites passed (204835 checks)
+```
+
+68.5 minutes, `reports/attack-clips-full-suite.log`, committed so the numbers
+outlive the sandbox that produced them. 65 `RUN` lines, 65 `PASS` lines, no
+`FAIL` line, and **no `SCRIPT ERROR` line** — which matters here, because a
+`SCRIPT ERROR` is the one failure this engine will not report and the runner
+greps for by hand. The two lines this item is answerable for:
+
+```
+line  77: PASS  goals          133 checks     <- the suite that used to abort the run
+line 103: PASS  attack clips  1009 checks     <- the suite this item added
+```
+
+The runner's own grep for `SCRIPT ERROR` ran this time rather than dying with its
+temporary file: the job was launched with `TMPDIR` pointed at a directory that
+outlives the sandbox's, so the guard that turns a silent runtime error into a
+failed run was actually in force. (A supervised run started in one cycle and read
+in another had previously lost that file, and with it the guard.)
+
+### Committed
+
+| commit | what |
+|---|---|
+| `ffe7d4e` | the clips, the table, the branch, the suite and this write-up |
+| `bd014e0` | the resource ids the engine writes beside new files |
+| this one | the closing checks above and the full-suite log |
+
+Pushed to `origin/main`.
