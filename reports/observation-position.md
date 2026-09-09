@@ -117,34 +117,73 @@ The two classes, stated plainly:
 The prompt changed, so the recording had to be made again. Before the change the
 checked-in recording answered $101$ of $101$ questions across the four tables
 whose prompts carry an observation packet; with the change and the old recording
-still in place it answered $0$ of $100$; after the live pass it answers $91$ of
-$92$.
+still in place it answered $0$ of $100$; after the live passes it answers $93$ of
+$93$.
 
 | | before | with the change, old recording | after the re-record |
 |---|---|---|---|
-| questions the four runs put | 101 | 100 | 92 |
-| questions with a reply recorded for them | **101** | **0** | **91** |
+| questions the four runs put | 101 | 100 | 93 |
+| questions with a reply recorded for them | **101** | **0** | **93** |
 | questions answered by position instead | 0 | 100 | 0 |
-| questions with nothing at all | 0 | 0 | 1 |
+| questions with nothing at all | 0 | 0 | 0 |
 
-The one question with nothing is the bargain run's last: the recorder asked $19$
-and $18$ came back before that run's clock stopped, so the nineteenth is asked on
-replay and answered by nobody, which the transcript says and the character waits
-through. `./run_agent.sh` prints identical bytes on two processes and matches
+`./run_agent.sh` prints identical bytes on two processes and matches
 `reports/agent-evidence.txt`; the seed-1234 world fingerprint is
 `32656f55cc5eeb1c` before and after, unchanged, because an observation is a
 reading and changes nothing in the world.
 
-Two passes of the one command that touches the network:
+Three passes of the one command that touches the network, one of them thrown
+away:
 
 ```
 OPENROUTER_API_KEY=... ./run_record.sh --live --cast      # 83 calls
-OPENROUTER_API_KEY=... ./run_record.sh --live --bargain   # 19 calls
+OPENROUTER_API_KEY=... ./run_record.sh --live --bargain   # 19 calls, discarded
+OPENROUTER_API_KEY=... ./run_record.sh --live --bargain   # 20 calls, ships
 ```
 
-$102$ calls in all, $99$ of them written down, not one of them empty. The
+$122$ calls in all, $101$ of them checked in, not one of them empty. The
 difficulty-class, orchestrator and goodwill tables carry no observation packet
 and were written back unchanged, keeping their own dates.
+
+### The bargain table was recorded twice, and here is why
+
+The first bargain draw did not close the sale. Hob proposed `give=[brass lantern]
+want_money=8` on tick 4 from six units away, the engine refused it — *"Fen is out
+of reach (6.00 > 2.50)"* — and he spent the remaining hundred and twenty ticks
+examining the pile. `tests/test_bargain.gd` hard-asserts the end-to-end purchase,
+so six of its checks failed: the trader should have accepted a bargain, the
+lantern should be in the person's pack, the person paid the price, the trader no
+longer carries it, the sale closed what the trader was after, and the pack is
+shut again. The pass was made a second time and that draw closed the sale, and
+that is what ships.
+
+That is a recording chosen on the outcome of a test, so it is stated here rather
+than buried. Two things follow from it.
+
+It is not the position line. With this same packet and the *old* 2026-09-07
+bargain rows replayed by position, the run closes the sale and the suite passes
+with $74$ checks — the world still allows the purchase, and the first draw of the
+day simply did not make it. Nothing about the coarser position stopped Hob from
+walking to Fen; walking to Fen is `go_to target=#1` and needs no coordinate at
+all.
+
+One more thing fell out of the re-take, and it is not about positions at all: the
+dialogue panel over the new bargain draw is **0.6715% off-grid** where it has
+always been 0.0000%, because Hob's line contains an em dash, the pixel font has
+no glyph for one, and the engine draws its own missing-glyph box whose edges land
+between pixels. Measured, reported in
+[dialogue-trade.md](dialogue-trade.md), and left standing rather than
+re-recorded away.
+
+It is a real problem with the test. A suite that hard-asserts an end-to-end
+purchase carried out by a language model makes re-recording that one table a
+lottery with the suite's colour as the prize, and it will be re-recorded every
+time this prompt changes. What the run should be asserting is the *machinery* —
+that a pack is shown exactly while a trade stands, that a keyboard can name an
+item in an ask, that a refusal reads the same for both kinds of mind — none of
+which needs the model to succeed at haggling. Filed as a finding rather than
+fixed here, because the action catalogue and the bargain suite are outside this
+item's boundary.
 
 ## Reproducing everything above
 

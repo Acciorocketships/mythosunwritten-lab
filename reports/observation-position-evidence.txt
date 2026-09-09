@@ -60,19 +60,43 @@ what the checked-in recording answers, before and after, in the tree that ships
     shipped run         73 rows,  65 questions,  65 recorded for them,   0 by position,   0 unanswered,   8 rows never claimed
     lesson comparison    4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
     goal comparison      4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
-    bargain run         18 rows,  19 questions,  18 recorded for them,   0 by position,   1 unanswered,   0 rows never claimed
-    all four            92 questions,  91 with a reply recorded for them
+    bargain run         20 rows,  20 questions,  20 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    all four            93 questions,  93 with a reply recorded for them
 
-what the live pass cost
+what the live passes cost, all three of them, including the one discarded
   OPENROUTER_API_KEY=... ./run_record.sh --live --cast
     asked      75 questions for the shipped run, 73 answered
     asked      4 questions for the lesson comparison, 4 answered
     asked      4 questions for the goal comparison, 4 answered
     wrote      res://net/model_recording.gd, 73 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 22 bargain replies
-  OPENROUTER_API_KEY=... ./run_record.sh --live --bargain
+  OPENROUTER_API_KEY=... ./run_record.sh --live --bargain          (discarded, see below)
     asked      19 questions for the bargain run, 18 answered
-    wrote      res://net/model_recording.gd, 73 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 18 bargain replies
-  102 calls in all, 99 of them written down. Not one came back empty.
+    wrote      res://net/model_recording.gd, ... and 18 bargain replies
+  OPENROUTER_API_KEY=... ./run_record.sh --live --bargain          (ships)
+    asked      20 questions for the bargain run, 20 answered
+    wrote      res://net/model_recording.gd, 73 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 20 bargain replies
+  122 calls in all, 101 of them checked in. Not one came back empty.
+
+why the second bargain pass was made, said plainly
+  The first bargain draw of 2026-09-09 did not close the sale: Hob proposed
+  `give=[brass lantern] want_money=8` at tick 4 from six units away, the engine
+  refused it -- "Fen is out of reach (6.00 > 2.50)" -- and he spent the rest of
+  the run examining the pile. tests/test_bargain.gd hard-asserts an end-to-end
+  purchase, so six of its checks failed:
+    the trader should have accepted a bargain
+    the lantern should be in the person's pack
+    the person paid the price
+    and the trader no longer carries it
+    the sale closed what the trader was after: 6 coins
+    with no trade standing the pack is shut again
+  The pass was made again and the second draw closed the sale. That is a
+  recording chosen on the outcome of a test, and it is recorded here rather than
+  buried: it says nothing about the position line and everything about a suite
+  that asserts what a language model will manage. Evidence that the packet is
+  not what stopped the sale: with this same packet and the OLD (2026-09-07)
+  bargain rows replayed by position, the run closes the sale and the suite
+  passes with 74 checks -- the world still allows the purchase; the first draw
+  simply did not make it.
 
 the seed-1234 world fingerprint, before and after
   ./run_headless.sh --seed 1234 --ticks 100

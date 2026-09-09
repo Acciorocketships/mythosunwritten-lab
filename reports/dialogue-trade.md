@@ -101,20 +101,20 @@ The arc, from the run's own record:
 | tick | what happened |
 |---|---|
 | 8 | the person examines Hob: `equipment=- distance=6.0` — his equipment and **no pack**. There is no way to name the lantern. |
-| 11–16 | Hob (model): "Fen, do you have any coins to spare? I need to raise some money." |
-| 24–28 | Hob proposes his own bargain: `give=[brass lantern] want_money=6` |
+| 39–46 | Hob (model): "Fen, do you have any coins to spare? I need 10." |
+| 49–54 | Hob: "I have this brass lantern, six coins' worth — would you trade?" |
 | 36–41 | the person says "what will you take for it?" |
-| 44–49 | Hob: "6 coins for the lantern" |
-| 53–57 | the person opens a trade of their own: `give_money=1, want nothing` — an offer may hold almost nothing |
+| 57–61 | Hob proposes his own bargain: `give=[brass lantern] want_money=6` |
+| 53–58 | the person opens a trade of their own: `give_money=1, want nothing` — an offer may hold almost nothing |
 | 60 | the trade stands, so Hob within reach shows his pack: the **C** key picks `brass lantern` out of it |
 | 64–69 | the keyboard builds the ask: `trade_propose give_money=4 want=[brass lantern]` |
 | 64–67 | Hob accepts the 1-coin opener as the gift it was: `took_money=1` |
-| 76–79 | **Hob accepts the named ask: `took=0 took_money=4 gave=1`** — the lantern is in the person's pack |
+| 78–81 | **Hob accepts the named ask: `took=0 took_money=4 gave=1`** — the lantern is in the person's pack |
 | 101–104 | the person denies Hob's leftover counter-offer: `trade_deny ok from=2` |
 | 108–112 | the person tries to take it back anyway: `trade_accept refused: the offer from Hob was denied` — the engine's own refusal wording |
 | 115–120 | the closing examine: `equipment=- distance=2.4` and no pack — with no trade standing, the window is shut again |
 
-Both directions of the rule are in the same run: from tick 28 to tick 103 the
+Both directions of the rule are in the same run: from tick 58 to tick 103 the
 person was shown `[brass lantern]` and the model-driven trader was shown
 `[common boots, common sword, mending draught, wool blanket]` — the trader
 learned exactly as much about the person as the person learned about it. The
@@ -123,9 +123,15 @@ goal (6 → 11 ≥ 10). Two replays print identical bytes
 (`tests/test_bargain.gd`, `_two_runs_print_the_same_bytes`).
 
 The recording is a draw of the model, and the claims are written for the draw
-that shipped: an earlier recording pass had Hob attack the person with the
-lantern and derail into a fight — that pass was discarded by re-recording, not
-edited, because a recording is generated and never written by hand.
+that shipped. Two earlier passes were discarded by re-recording, not edited,
+because a recording is generated and never written by hand: one had Hob attack
+the person with the lantern and derail into a fight, and the first pass of
+2026-09-09 had Hob propose the trade from six units away, be refused for reach,
+and spend the rest of the run examining the pile — no sale at all. That second
+discard is worth naming for what it exposes rather than for what it fixed: this
+suite hard-asserts an end-to-end purchase made by a language model, so
+re-recording this one table is a lottery with the suite's colour as the prize.
+See `reports/observation-position.md`.
 
 ## 4. The dialogue panel
 
@@ -276,13 +282,32 @@ each new panel's interior:
 | dialogue, 4 lines of speech | dialogue-agent.png | 122,080 | **0 = 0.0000%** | 18,528 | **0 = 0.0000%** |
 | trade, resting | dialogue-agent.png | 43,680 | **0 = 0.0000%** | 3,410 | **0 = 0.0000%** |
 | trade, two offers standing | bargain run at tick 72 | 150,080 | **0 = 0.0000%** | 18,428 | **0 = 0.0000%** |
-| dialogue, the haggle | bargain run at tick 72 | 157,920 | **0 = 0.0000%** | 22,400 | **0 = 0.0000%** |
+| dialogue, the haggle | bargain run at tick 72 | 132,160 | **0 = 0.0000%** | 20,848 | 140 = 0.6715% |
 | readout, minion icons and pattern glyphs | readout-icons.png | 144,400 | **0 = 0.0000%** | 14,210 | **0 = 0.0000%** |
 
 Every colour in every interior is the pack's own or one of `PixelIcons`'
-three; every change of colour falls on a multiple of the interface scale. The
-rectangles come off the shell's own exit lines (`render-shell dialogue ...`,
-`render-shell trade ...`), the same way the first two panels were measured.
+three; every change of colour falls on a multiple of the interface scale — with
+one exception, measured here and not smoothed over. The rectangles come off the
+shell's own exit lines (`render-shell dialogue ...`, `render-shell trade ...`),
+the same way the first two panels were measured.
+
+**The one off-grid figure, and what it is.** The dialogue panel over the bargain
+run of 2026-09-09 is 0.6715% off-grid: 140 of its 20,848 colour edges do not
+fall on a multiple of the interface scale. The cause is one character. Hob's
+second line is *"I have this brass lantern, six coins' worth — would you
+trade?"*, and the pixel font has no glyph for an em dash, so the engine draws its
+own missing-glyph box with the codepoint `2014` in tiny hex digits inside it —
+visible in `assets/trade-standing.png`, and drawn by the engine's own fallback
+rather than by the pack, which is why its edges land between pixels. The palette
+number is still 0.0000%, because the box is drawn in the pack's own colour.
+
+This is a fact about *text a language model wrote*, not about the panel: models
+produce em dashes and typographic quotes constantly, and any of them reaching a
+panel does this. It is left standing and reported rather than fixed by
+re-recording until a draw has no em dash in it, which would be choosing the
+evidence. The two honest fixes are a font fallback that is itself on-grid, or
+folding the characters the pack has no glyph for down to ones it does before
+they reach a label. Neither is this page's step.
 
 ## 9. What did not change, and the checks
 
