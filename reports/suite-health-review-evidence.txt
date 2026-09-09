@@ -1,0 +1,329 @@
+Independent check that a green run can be believed again
+W-suite-health-review, cycle 3658, critic, 2026-09-09
+
+Everything below was run here, not quoted from the items under review. Anything
+that was checked and found sound is said so, in the same words as anything that
+was not.
+
+
+0. WHERE THESE RAN, AND WHY THAT MATTERS
+----------------------------------------
+A full ./run_tests.sh probe run was already in progress in the working tree when
+this review started: pid 3822670, launched 16:34:41 at HEAD b55f766, transcript
+at .testruns/transcript.1jcODQC5. Planting a throwing suite into tests/ while
+that run walked the tree could have changed its result, and five suites scan the
+source tree. So every planted-error run below was made in a `cp -a` copy of the
+checkout at b55f766 under the session scratchpad, and the working tree was left
+alone. `git status --porcelain` in the copy was empty before and after every one
+of them.
+
+    $ git -C <copy> rev-parse --short HEAD
+    b55f766
+
+
+1. A PLANTED SCRIPT ERROR IN A THROWAWAY SUITE FAILS THE RUN
+------------------------------------------------------------
+Planted: tests/critic_fixtures/critic_throwing.gd -- a TestSuite whose run()
+calls a helper that reads one past the end of an Array[Dictionary]. That is the
+shape of the false pass in reports/ground-items-suite-evidence.txt, which holds
+at line 43 "SCRIPT ERROR: Out of bounds get index '1' (on base:
+'Array[Dictionary]')" from tests/test_goals.gd:320, at line 49
+"PASS  goals          129 checks", and at line 78 "all 58 suites passed
+(201583 checks)".
+
+    $ ./run_tests.sh test_rng critic_fixtures/critic_throwing test_asset_tags
+    EXIT=1  elapsed=12s
+
+    RUN   test_rng
+    PASS  rng            1325 checks
+    RUN   critic_throwing
+    SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+              at: CriticThrowingFixture._reads_past_the_end (res://tests/critic_fixtures/critic_throwing.gd:20)
+              GDScript backtrace (most recent call first):
+                  [0] _reads_past_the_end (res://tests/critic_fixtures/critic_throwing.gd:20)
+                  [1] run (res://tests/critic_fixtures/critic_throwing.gd:14)
+                  [2] _run_one (res://bin/test_main.gd:142)
+                  [3] _process (res://bin/test_main.gd:129)
+    PASS  critic throw   2 checks
+    RUN   test_asset_tags
+    PASS  asset tags     1576 checks
+
+    all 3 suites passed (2903 checks)
+
+    run_tests: suite 'critic_throwing' raised a runtime error (SCRIPT ERROR above).
+    run_tests: the engine returned to the caller and the runner could not see it,
+    run_tests: so the run is failed here whatever the summary said.
+
+The middle of that output is the point. The engine still prints PASS for a suite
+that aborted mid-method, and the runner still prints "all 3 suites passed". The
+in-process runner is fooled exactly as it was in cycle 194 -- that has not been
+fixed and, per the engine's behaviour, cannot be. What has changed is that the
+shell wrapper reads the engine's own SCRIPT ERROR line back and fails the run,
+naming the suite it came from. The false pass cannot recur silently.
+
+Removed afterwards: rm -rf tests/critic_fixtures; git status --porcelain empty.
+
+
+2. AN ERROR IN THE RUNNER'S OWN FRAME IS BOUNDED AND NAMED
+----------------------------------------------------------
+Planted: tests/critic_fixtures/critic_not_a_suite.gd -- a RefCounted, so the
+runner's own `var suite: TestSuite = suite_script.new()` throws in the runner's
+frame rather than in a suite's. That is the frame that used to be _initialize()
+and used to idle forever.
+
+    $ timeout 300 ./run_tests.sh test_rng critic_fixtures/critic_not_a_suite test_asset_tags
+    EXIT=1  elapsed=12s        (a hang would have shown as 124 at 300s)
+
+    RUN   critic_not_a_suite
+    SCRIPT ERROR: Trying to assign value of type 'critic_not_a_suite.gd' to a variable of type 'test_suite.gd'.
+    FAIL  critic_not_a_suite threw a runtime error (see the SCRIPT ERROR above)
+    RUN   test_asset_tags
+    PASS  asset tags     1576 checks
+
+    1 of 3 suites failed (1 failed checks of 2901)
+
+Bounded, named, the run carried on to the next suite, the summary printed, and
+no godot process was left behind. The repeatable demonstration W-suite-runner
+left behind also still runs, end to end, at HEAD:
+
+    $ ./run_runner_guard.sh          # in the copy, ~87s
+    a run where nothing is wrong still passes                        -> exit 0 after 12s
+    a failed check is still a failed run                             -> exit 1 after  3s
+    a suite that raises a runtime error below its run()              -> exit 1 after 11s
+    a suite the runner itself cannot enter                           -> exit 1 after 12s
+    a suite that never returns and never says anything               -> exit 2 after 23s
+    a run whose transcript is deleted under it                       -> exit 2 after  3s
+    a run killed for silence whose stall flag is deleted under it    -> exit 2 after 23s
+    runner guard OK: each of the three is named, none of them hangs, and a
+    runner guard OK: check that could not be read fails the run
+
+
+3. WAS THE CERTIFIED RUN GUARDED AT ALL, AND IS THE HOLE CLOSED
+---------------------------------------------------------------
+Settled by running both sides rather than by reading the finding.
+
+(a) The pre-fix runner, with the transcript deleted under it. run_tests.sh as of
+    f17e074 wrote its transcript with a bare `mktemp`, i.e. into $TMPDIR.
+
+    $ TMPDIR=/tmp/c3fake ./run_tests_prefix.sh test_rng critic_fixtures/critic_throwing test_asset_tags
+      (with `rm -rf /tmp/c3fake` fired 4s into an 11s run)
+    EXIT=0  elapsed=11s
+
+    all 3 suites passed (2903 checks)
+    grep: /tmp/c3fake/tmp.ZYaYqzuSeY: No such file or directory
+
+    A run containing a SCRIPT ERROR exits 0, and its last line is the same shape
+    as the last line of reports/goal-refusal-full-suite.log:
+    "grep: /tmp/lab-sbx-uw2643gp/tmp/tmp.gDlawHVH8V: No such file or directory".
+
+    So the answer is plain: the certified run was NOT independently guarded. Its
+    closing grep could not have failed it whatever the output held.
+
+(b) The same shape at HEAD b55f766, where the transcript lives in .testruns/
+    beside the checkout and $TMPDIR is irrelevant to it.
+
+    $ TMPDIR=/tmp/c3fake3 ./run_tests.sh test_rng critic_fixtures/critic_throwing test_asset_tags
+      (same deletion, same timing)
+    EXIT=1
+    run_tests: suite 'critic_throwing' raised a runtime error (SCRIPT ERROR above).
+
+(c) And the belt, in case the run's own directory is destroyed:
+
+    $ RUN_TESTS_RUNDIR=/tmp/c3fake2 ./run_tests.sh test_rng critic_fixtures/critic_throwing test_asset_tags
+      (with `rm -rf /tmp/c3fake2` 4s in)
+    EXIT=2
+    all 3 suites passed (2903 checks)
+    run_tests: the run's transcript is missing or unreadable: /tmp/c3fake2/transcript.MyYR9Yu3
+    run_tests: ... Nothing can be concluded about this run; it is failed here.
+
+The hole is closed both ways.
+
+
+4. WHAT THE CERTIFIED LOG ITSELF SAYS, RE-READ
+-----------------------------------------------
+    $ grep -c '^RUN   ' reports/goal-refusal-full-suite.log        65
+    $ grep -c '^PASS  ' reports/goal-refusal-full-suite.log        65
+    $ grep -c '^FAIL'   reports/goal-refusal-full-suite.log         0
+    $ grep -c 'SCRIPT ERROR' reports/goal-refusal-full-suite.log    0   (unanchored)
+    line  77: PASS  goals          133 checks
+    line 144: all 65 suites passed (204835 checks)
+
+One precision. The exit status is not in the log; the log's own last line is the
+failed grep. It comes from the job record, .lab/progress/goal-refusal-full-suite.json:
+`"state": "done", "pid": 2608644, "note": "exit code 0"`, started_at 07:20:08,
+updated_at 08:29:14, so the run took 69 minutes.
+
+Nothing else ran beside it. Every file in the tree modified inside 07:20:08 ->
+08:29:15 is the log, its job record, and Lab's own episode files for three
+non-engine cycles (3635 debugger, 3636 auditor, 3639 reporter). No commit landed
+inside the window either -- c8c351f is 07:13:38 and 0583727 is 08:31:39 -- so the
+tree did not change under the run, and the run was made at c8c351f, which has
+both 74a9855 (the runner) and 3351e23 (the goals fix) as ancestors.
+
+Two further full runs of the same day corroborate it, and both of those had a
+live guard -- their logs end normally, with no failed grep:
+
+    reports/attack-clips-full-suite.log   08:51 -> 10:00   all 65 suites passed (204835 checks)   exit 0
+    reports/goal-refusal-full-suite.log   07:20 -> 08:29   all 65 suites passed (204835 checks)   exit 0  (guard dead)
+    reports/playtest-full-suite.log       14:57 -> 16:14   all 65 suites passed (204835 checks)   exit 0
+
+Three independent runs, the same 65 suites and the same 204835 checks, two of
+them guarded. The census the runner's own false-positive risk rests on also
+re-checks out: of every stored log and evidence file under reports/, exactly one
+holds a ^SCRIPT ERROR line -- ground-items-suite-evidence.txt, the bug itself --
+plus runner-guard-evidence.txt, whose two are planted on purpose.
+
+
+5. THE RE-RECORDED EXCHANGE, RE-DERIVED
+----------------------------------------
+Recomputed rather than quoted:
+
+    $ ./tools/recorded_replies.sh
+    shipped run         73 rows,  65 questions,  65 recorded for them,   0 by position,   0 unanswered,   8 rows never claimed
+    lesson comparison    4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    goal comparison      4 rows,   4 questions,   4 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    bargain run         20 rows,  20 questions,  20 recorded for them,   0 by position,   0 unanswered,   0 rows never claimed
+    all four            93 questions,  93 with a reply recorded for them
+
+93 of 93, which is what W-observation-rerecord reported. The row counts in
+net/model_recording.gd add up the same way from the file itself: ROWS 73,
+GOAL 4, LESSON 4, BARGAIN 20 = the 101 replies that pass checked in, plus
+CHECK 4, WORLD 10 and GOODWILL 4 left from earlier dates = 119 rows, none of
+them empty.
+
+The placeholder rule holds across the shipped set. Every angle-bracket slot in
+sim/model_prompt.gd, sim/orchestrator_prompt.gd and sim/check_prompt.gd names
+what goes in it -- "#<id>", "(<x>, <z>)", "(<x from here>, <z from here>)",
+"<what you mean>", "<a whole number>", "[<a name>, <another name>]",
+"<whole number>", "<one of the six>", "<what they are called, one or two words>".
+A regex for any slot containing a digit, over those three files and all four
+shipped transcripts, returns nothing at all. The settled position line is visibly
+in the shipped prompt:
+
+    reports/agent-evidence.txt:994       you  commander level 2 status 2 hp 32/32 at (-478, -2, 416) facing 0.00
+    reports/agent-live-evidence.txt:679  you  commander level 2 status 2 hp 32/32 at (-478.000, -2.352, 416.000) facing 0.00
+
+The README checker that had been silently checking nothing is genuinely checking
+again, tested by perturbation rather than by running it once:
+
+    $ ./tools/readme_model_numbers.sh
+    readme model numbers: 48 checks OK -- README.md agrees with the transcripts
+    $ sed -i 's/, 81 replies/, 82 replies/' README.md && ./tools/readme_model_numbers.sh
+    readme model numbers: 1 of 48 checks FAILED
+      - the sample cloud provenance line, as the run prints it
+        looked for: 'recorded 2026-09-09 from z-ai/glm-5.3-flash at ... 81 replies'
+    EXIT=1                                       (README restored, copy clean)
+
+
+6. THE GOALS DECISION, READ AGAINST ITS OWN JUSTIFICATION
+---------------------------------------------------------
+The claim under review is that a third `done` in a row being refused is the
+design and not a regression. 1a5ca1e's own commit message says what it set out to
+stop: "recall, learn and done cost the world no time and answer on the tick they
+are asked, so a mind that chooses one is asked again immediately against the
+world it was already standing in front of", and sim/tool_budget.gd's head names
+the same three as the class being priced. `done` is inside the rule as written,
+from the first line of it. Exempting `done` would be redesigning the budget to
+keep an assertion, which is what the debugger said and it is right.
+
+The idiom matches too:
+
+    tests/test_tool_budget.gd:135   ActionEngine.resolve(scene, one, Action.wait(1))
+    tests/test_goals.gd (3351e23)   ActionEngine.resolve(scene, rook, Action.wait(1))
+
+And the test came out stronger, not weaker. It keeps the old assertion that
+sheet.goals.refusals[1]["why"] is GoalCheck.NO_SUCH_GOAL and adds that the
+refusal the character was actually told is the goal layer's, not the budget's --
+so a budget swallowing this case again fails by name instead of by an
+out-of-bounds read.
+
+The goal suite was re-run here rather than taken from the certified log:
+
+    $ ./run_goal_suite.sh            # in the copy, at b55f766
+    Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+    PASS  goals          133 checks
+
+No SCRIPT ERROR line. The same 133 the certified run's line 77 reports.
+
+
+7. ONE RESIDUAL, FOUND HERE AND NOT PREVIOUSLY RECORDED
+-------------------------------------------------------
+Thirty-four of the sixty-five suites boot a second engine with OS.execute, at 40
+call sites in all (test_goals:609, test_checks:656, test_turn_seam:226,
+test_grass four times, and so on). Those children are SceneTree scripts
+of exactly the shape the old runner had: all 54 entry points under bin/ extend
+SceneTree, do their work in _initialize() and call quit() at the end of it. A runtime error in one of them therefore abandons _initialize() before the
+quit(), and the child never exits. Demonstrated on a scratch child of that shape
+rather than inferred from the code:
+
+    $ cat tools/critic_child.gd        # extends SceneTree; _initialize() reads rows[1] then quit(0)
+    $ timeout 30 godot4 --headless --path . --script res://tools/critic_child.gd
+    child EXIT=124  elapsed=30s
+    child: started
+    SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+    (`child: finished` never printed; the process was still alive at 30s)
+
+What that costs a real run: the parent suite blocks inside OS.execute, the run
+prints nothing, and the wrapper's silence watchdog ends it -- after
+RUN_TESTS_SILENCE, which defaults to 7200 seconds. So it is bounded and reported
+and is never a false pass, which is the property this milestone was after. But
+the "waited on forever" half of the original complaint still exists one level
+down, at two hours a time. The suites already assert `equal(int(code), 0)` on
+their children, so launching them under `timeout` would turn those two hours into
+a named failed check in seconds. Nothing here is broken; this is a cheap
+improvement, recorded so it is not re-discovered by waiting for it.
+
+
+8. THE TWO DISCLOSURES, JUDGED
+-------------------------------
+(a) The bargain draw that ships was the second one run (I-fb01a6a5b407).
+
+Confirmed by reading tests/test_bargain.gd. Six of its checks live in one method,
+_the_model_driven_trader_answered_and_the_item_arrived (lines 194-217): the
+trader accepted a bargain, the lantern is in the person's pack, the person paid
+the price, the trader no longer carries it, the sale closed what the trader was
+after, and the pack is shut again. Every one of those is a claim about what one
+language-model draw happened to do. The other methods -- the pack was shown, the
+ask was built from the keyboard, the trader learned exactly as much, a proposal
+was denied in the engine's own words, two replays print the same bytes -- are
+claims about machinery and hold whatever the model says.
+
+So the suite's colour does turn on which draw was kept, for six of its checks,
+and the kept draw was kept because those checks passed. That is selection on the
+outcome of the test and it should be said plainly. Two things keep it from
+undermining the milestone. It is disclosed, twice and in the sharpest available
+words -- reports/observation-position.md's section "The bargain table was
+recorded twice, and here is why", and reports/dialogue-trade.md:125-134, which
+says outright that "re-recording this one table is a lottery with the suite's
+colour as the prize". And the disclosure is falsifiable and was tested by its
+author: with the same coarsened packet and the old 2026-09-07 rows replayed by
+position, the sale closes and the suite passes, so the packet is not what stopped
+it. A green run is therefore believable for what this suite demonstrates about
+the machinery, and the six end-to-end checks should be read as a statement about
+one draw until they are split.
+
+(b) The collapse the re-record was scheduled to repair had already been repaired
+four commits earlier (I-ade9ce281b4a).
+
+The question routed here was whether a recorded-replies count that can be
+repaired as a side effect of an unrelated re-record is a check that means
+anything. It is, but only one thing: it is a drift detector, not a quality
+measure. It answers "does the checked-in recording still answer the questions
+this run puts", and any live re-record restores it to all-of-them by
+construction. That is why 09764d8 repaired it as a side effect: 09764d8 added
+three rows to the action catalogue and re-recorded live for its own reason. That
+is the detector working, not a fluke. What it cannot do is fail after a
+re-record, so it can never be evidence that a new draw is a good draw -- which is
+exactly the gap the bargain suite falls into.
+
+The consequence for the item is real but narrow: W-observation-rerecord's
+scheduling premise ("the one failing check in the whole suite today") was four
+commits stale, and the milestone description that repeated it was wrong. The work
+itself stands: the position line was settled on its own merits, and the
+measurement the item was asked for came back negative and was reported as
+negative -- no representation of a position recovers any of the 56 questions the
+walk-motion change cost, so the class of change that still invalidates a
+recording is any change to how far a character has got when it is asked. A
+negative result reported as negative is the opposite of the failure this
+milestone was about.
