@@ -81,11 +81,13 @@ the frame's dark interior, so every one of these is a cream one.
 | 4 | tick | cream column 3, row 2 | a weapon action that may be used now |
 | 5 | prohibition sign | cream column 5, row 2 | a weapon action still cooling down |
 
-The tick and the prohibition sign do double duty: the character sheet already
-uses them for a carried thing that is worn and one that goes in no slot at all.
-They are named for what they are on the sheet rather than for either use, so
-`SproutPack.ICON_TICK` and `SproutPack.ICON_BAR` are the constants and the sheet's
-older `ICON_WORN` and `ICON_NO_SLOT` are aliases of them.
+The tick does double duty: the character sheet uses it for a carried thing that
+is worn. Both are named for what they are on the sheet rather than for one use
+of them, so `SproutPack.ICON_TICK` and `SproutPack.ICON_BAR` are the constants
+and the sheet's older `ICON_WORN` is an alias of the first. (There was an
+`ICON_NO_SLOT` alias too, for a carried thing that went in no slot at all; a
+carried row shows the thing's own drawn face now — see §3a of `reports/ui.md` —
+so the sheet has no use for the sign and the alias is gone.)
 
 ### From the pack's other art
 

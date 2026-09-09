@@ -14,7 +14,12 @@ extends TestSuite
 ##      still draws, in grey, so this asks the theme for each entry by name.
 ##   4. **The panel is a view and not a copy.** A score written on the character
 ##      after the panel was built shows on the panel, and the panel has no field
-##      holding one. This is the claim the whole design rests on.
+##      holding one. This is the claim the whole design rests on. What a row
+##      *shows* is part of the same claim: a carried row and a filled equipment
+##      slot show the item's own drawn face, resolved through the simulation's
+##      own `sim/item_model.gd` on the frame it is drawn -- and so does the play
+##      panel's hand row, which is the one row of that panel naming a carried
+##      thing.
 ##   5. **A headless run loads no interface at all** -- no texture, no font, not
 ##      one script of render/ui/ -- and the panel changes nothing about the
 ##      world it is drawn over.
@@ -41,6 +46,8 @@ func run() -> void:
 	_every_drawn_icon_is_sixteen_by_sixteen_in_three_colours()
 	_there_is_an_icon_for_every_score_and_every_slot()
 	_the_panel_reads_the_character_and_keeps_no_copy()
+	_a_row_shows_the_items_own_face()
+	_the_hand_row_shows_what_is_held()
 	_the_source_hands_over_the_world_s_own_objects()
 	_a_headless_run_loads_no_interface()
 	_the_panel_changes_nothing_about_the_world()
@@ -80,7 +87,7 @@ func _the_pack_is_unpacked_and_every_region_fits() -> void:
 			"%s did not come back at the size it was asked for" % cut[2])
 
 	for named in [SproutPack.ICON_STAR, SproutPack.ICON_CROWN, SproutPack.ICON_COIN,
-			SproutPack.ICON_WORN, SproutPack.ICON_NO_SLOT]:
+			SproutPack.ICON_WORN]:
 		var icon := SproutPack.icon(named)
 		check(icon != null and icon.get_width() == SproutPack.CELL
 			and icon.get_height() == SproutPack.CELL,
@@ -200,8 +207,17 @@ func _every_drawn_icon_is_sixteen_by_sixteen_in_three_colours() -> void:
 			"the icon '%s' did not come out one cell square" % named)
 
 
-## Every score and every slot has an icon, because the panel asks for one by the
-## simulation's own name and a missing one would draw as nothing at all.
+## How many of the drawn icons exist only for the gear faces: the eight of
+## `PixelIcons.GEAR`'s thirteen rows that do not reuse an icon already on the
+## sheet (the four armour slots and the hand's sword carry five tags between
+## them). Written down so an icon drawn for nothing, or a face quietly dropped,
+## moves a number a test compares.
+const GEAR_ONLY_ICONS := 8
+
+
+## Every score, every slot, every minion and every gear tag has an icon, because
+## the panel asks for one by the simulation's own name and a missing one would
+## draw as nothing at all.
 func _there_is_an_icon_for_every_score_and_every_slot() -> void:
 	for ability in Ability.ALL:
 		check(PixelIcons.has(ability), "no icon is drawn for the score '%s'" % ability)
@@ -210,8 +226,38 @@ func _there_is_an_icon_for_every_score_and_every_slot() -> void:
 	for kind in Minion.KINDS:
 		check(PixelIcons.has(kind), "no icon is drawn for the minion '%s'" % kind)
 	equal(PixelIcons.names().size(),
-		Ability.ALL.size() + Inventory.SLOT_ORDER.size() + Minion.KINDS.size(),
+		Ability.ALL.size() + Inventory.SLOT_ORDER.size() + Minion.KINDS.size()
+		+ GEAR_ONLY_ICONS,
 		"there are icons drawn that nothing asks for, or the other way round")
+
+	# Every gear tag the catalog has -- not just the ones `ItemModel` hands out
+	# today -- resolves to a drawn face, and no row of the face table points at
+	# a tag the catalog has dropped or an icon nobody drew.
+	var gear_tags := AssetTags.in_category(AssetTags.GEAR)
+	for tag in gear_tags:
+		check(PixelIcons.GEAR.has(tag), "no face is named for the gear tag '%s'" % tag)
+		var named := String(PixelIcons.GEAR.get(tag, ""))
+		check(PixelIcons.has(named),
+			"the face '%s' named for '%s' is not drawn" % [named, tag])
+		check(PixelIcons.gear(tag) != null, "the gear tag '%s' drew nothing" % tag)
+	equal(PixelIcons.GEAR.size(), gear_tags.size(),
+		"the face table has rows for tags the catalog does not have")
+
+	# And every tag `ItemModel` can actually resolve an item to is among them,
+	# so nothing a scenario ships can ask for a face that is not there.
+	for tag in ItemModel.tags():
+		check(PixelIcons.GEAR.has(tag),
+			"'%s' can be an item's answer and has no face" % tag)
+
+	# An item that resolves to nothing shows the wrapped parcel -- the same
+	# honest answer, by name, that the ground gives an unnamed item.
+	check(PixelIcons.gear(ItemModel.NOTHING) == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
+		"a thing with no tag should show the parcel")
+	check(PixelIcons.gear("gear_axe") == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
+		"a tag nobody drew should show the parcel, not a hole")
+	equal(String(PixelIcons.GEAR.get(GroundItems.FALLBACK_TAG, "")),
+		PixelIcons.GEAR_FALLBACK,
+		"the bag's parcel and the ground's bundle should be the same picture")
 
 
 # --- The panel is a view --------------------------------------------------
@@ -270,10 +316,11 @@ func _the_panel_reads_the_character_and_keeps_no_copy() -> void:
 	equal(panel._carried_names.get_child_count(), 1,
 		"a thing picked up by the character did not appear on the panel")
 	# Child 0 of a carried line is the mark saying which one the controls are
-	# aimed at; the name is the one after it and the "worn" tick is the last.
-	equal((panel._carried_names.get_child(0).get_child(1) as Label).text, "oak cloak",
+	# aimed at, child 1 the thing's own face; the name is the one after that
+	# and the "worn" tick is the last.
+	equal((panel._carried_names.get_child(0).get_child(2) as Label).text, "oak cloak",
 		"the panel did not read the name off the item the character is carrying")
-	check(panel._carried_names.get_child(0).get_child(4).visible,
+	check(panel._carried_names.get_child(0).get_child(5).visible,
 		"the panel did not notice the item was put on")
 	equal(panel._equipment[Item.SLOT_CHESTPLATE].theme_type_variation,
 		StringName(SproutTheme.SLOT_FULL),
@@ -286,6 +333,134 @@ func _the_panel_reads_the_character_and_keeps_no_copy() -> void:
 			"the panel has a field of its own called '%s'" % field)
 
 	layer.free()
+
+
+## A carried row and an equipment slot show the thing's own face -- the drawn
+## face of the tag `sim/item_model.gd` resolves it to -- read off the
+## simulation's object on the frame it is drawn. A thing that resolves to no
+## tag shows the wrapped parcel, and a dagger and a helmet are visibly two
+## different things in the bag, which is the whole reason the faces exist.
+func _a_row_shows_the_items_own_face() -> void:
+	if not SproutPack.is_installed():
+		return
+	var layer := PixelUi.build()
+	if layer == null:
+		return
+	var sheet := Character.make("Wren", 3)
+	var dagger := Item.new()
+	dagger.item_name = "iron dagger"
+	dagger.kind = Item.KIND_WEAPON
+	dagger.slot = Item.SLOT_HAND
+	dagger.model = AssetTags.GEAR_DAGGER
+	var helmet := Item.new()
+	helmet.item_name = "iron helmet"
+	helmet.kind = Item.KIND_ARMOUR
+	helmet.slot = Item.SLOT_HELMET
+	var blanket := Item.new()
+	blanket.item_name = "wool blanket"
+	sheet.inventory.carry(dagger)
+	sheet.inventory.carry(helmet)
+	sheet.inventory.carry(blanket)
+	var panel := layer.panel
+	panel.show_sheets([sheet] as Array[Character])
+	panel.refresh()
+
+	# The bag's slot row: the dagger's own face, the helmet's own face, and the
+	# parcel for the blanket nobody recorded a shape for.
+	var faces: Array[Texture2D] = []
+	for index in 3:
+		var plate: PanelContainer = panel._carried_row.get_child(index)
+		faces.append((plate.get_child(0).get_child(0) as TextureRect).texture)
+	check(faces[0] == PixelIcons.gear(AssetTags.GEAR_DAGGER),
+		"the carried dagger does not show the dagger's face")
+	check(faces[1] == PixelIcons.gear(AssetTags.GEAR_HELMET),
+		"the carried helmet does not show the helmet's face")
+	check(faces[0] != faces[1],
+		"a dagger and a helmet look identical in the bag")
+	check(faces[2] == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
+		"a thing with no shape recorded does not show the parcel")
+	# And each carried line carries the same face beside the name.
+	for index in 3:
+		var line := panel._carried_names.get_child(index)
+		check((line.get_child(1) as TextureRect).texture == faces[index],
+			"line %d does not carry the same face as its slot" % index)
+
+	# The hand slot shows what could go there while empty, and the thing itself
+	# once it is held -- read off the same object, on the frame after it moved,
+	# with nothing told and nothing cached.
+	var hand: PanelContainer = panel._equipment[Item.SLOT_HAND]
+	var hand_icon := hand.get_child(0).get_child(0) as TextureRect
+	check(hand_icon.texture == PixelIcons.of(Item.SLOT_HAND),
+		"an empty hand slot should show the slot's own icon")
+	check(sheet.inventory.equip(dagger), "the dagger should be holdable")
+	panel.refresh()
+	check(hand_icon.texture == PixelIcons.gear(AssetTags.GEAR_DAGGER),
+		"the hand slot did not show the dagger being held")
+	sheet.inventory.unequip(Item.SLOT_HAND)
+	panel.refresh()
+	check(hand_icon.texture == PixelIcons.of(Item.SLOT_HAND),
+		"the hand slot kept the dagger's face after it was put away")
+
+	layer.free()
+
+
+## The play panel's hand row carries the held thing's own face too, for the same
+## reason the sheet's rows do: three of that panel's four marks are about the
+## row, and the hand row names one carried thing.
+##
+## Read off the world's own `Character` under the id being driven, on the frame
+## the row is written, through the one file the interface reaches for a sheet
+## with. Bare hands keep the row's star, because bare hands are a choice and
+## not a thing.
+func _the_hand_row_shows_what_is_held() -> void:
+	if not SproutPack.is_installed():
+		return
+	var sim := Simulation.new(SEED)
+	check(sim.begin_scenario(Simulation.SCENARIO_ENCOUNTER),
+		"the encounter scenario should have been set out")
+	var driven := 0
+	for row in (sim.world.combat.snapshot()["pieces"] as Array):
+		if bool(row["commander"]):
+			driven = int(row["id"])
+			break
+	check(driven != 0, "the encounter put no commander in the world to drive")
+	if driven == 0:
+		return
+	var sheet := SheetSource.sheet_of(sim.world, driven)
+	check(sheet != null, "the source found no sheet under the id being driven")
+	if sheet == null:
+		return
+	# The same object the world is holding, as `sheets_in` hands over: writing
+	# on it is writing on the world's, which is why nothing here writes.
+	check(SheetSource.sheet_of(sim.world, driven) == sheet,
+		"asking twice gave two different objects, so one of them is a copy")
+	check(SheetSource.sheet_of(sim.world, 0) == null,
+		"an id nobody stands under should hand back nothing")
+
+	var panel := PlayPanel.new()
+	var controls := PlayerControls.new()
+	panel.watch(sim.world, driven, controls)
+	# Bare hands: the row's own star, which is what the other three rows carry.
+	check(panel.held_face() == SproutPack.icon(SproutPack.ICON_STAR),
+		"an empty hand should keep the row's own mark")
+	# And each thing the scenario gave this character, held in turn, shows its
+	# own face -- the face of the tag the simulation resolves it to, and the
+	# parcel for a thing whose shape nobody recorded.
+	var seen := 0
+	for entry in sheet.inventory.carried:
+		controls.holding = ObservationTrail.name_of_entry(entry)
+		var tag := ItemModel.of(Inventory.item_of(entry))
+		check(panel.held_face() == PixelIcons.gear(tag),
+			"holding '%s' did not show the face of '%s'" % [controls.holding, tag])
+		check(panel.held_face() != null, "a held thing drew nothing")
+		seen += 1
+	check(seen > 0, "the encounter's driven character carries nothing to hold")
+	# A name nothing in the bag answers to -- a thing given away between the
+	# press and the frame -- is the row's mark again rather than a stale face.
+	controls.holding = "a thing nobody has"
+	check(panel.held_face() == SproutPack.icon(SproutPack.ICON_STAR),
+		"a name the bag does not answer to should not draw a face")
+	panel.free()
 
 
 func _the_source_hands_over_the_world_s_own_objects() -> void:

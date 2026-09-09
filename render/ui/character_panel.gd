@@ -40,10 +40,14 @@ extends PanelContainer
 ## Every rectangle drawn is either the pack's or this project's own art, and
 ## reports/ui.md lists them one by one. In short: the frame, the slots, the
 ## buttons, the hearts and the font are the pack's; the star, the crown, the coin
-## and the tick are off the pack's generic icon sheet; and the eleven icons the
-## pack has no equivalent for -- one per ability score, one per equipment slot --
-## are drawn in render/ui/pixel_icons.gd on the same sixteen-pixel cell in the
-## pack's own three colours.
+## and the tick are off the pack's generic icon sheet; and the icons the pack has
+## no equivalent for -- one per ability score, one per equipment slot, and one
+## face per gear tag an item can resolve to -- are drawn in
+## render/ui/pixel_icons.gd on the same sixteen-pixel cell in the pack's own
+## three colours. Which face a carried or worn thing shows is the simulation's
+## own answer (`sim/item_model.gd`), asked through `PixelIcons.gear()`; a thing
+## that resolves to no tag shows the wrapped parcel, exactly as it does on the
+## ground.
 ##
 ## ## Sizes
 ##
@@ -266,6 +270,12 @@ func _refresh_equipment(sheet: Character) -> void:
 		plate.theme_type_variation = \
 			SproutTheme.SLOT_FULL if filled else SproutTheme.SLOT_EMPTY
 		plate.tooltip_text = slot if not filled else _name_of(worn[slot])
+		# A filled slot shows the worn thing's own face -- a sword in the hand
+		# is a sword, a dagger a dagger -- and an empty one shows the slot's,
+		# which is what could go there. Read off the object every frame, like
+		# everything else on the sheet.
+		var icon: TextureRect = plate.get_child(0).get_child(0)
+		icon.texture = _icon_for(worn[slot]) if filled else PixelIcons.of(slot)
 
 
 func _refresh_carried(sheet: Character) -> void:
@@ -294,10 +304,10 @@ func _refresh_carried(sheet: Character) -> void:
 
 
 ## One carried thing on one line: whether it is the one the controls are aimed
-## at, what it is called, what tier it is, what level it is, and the pack's own
-## tick when it is being worn or held.
+## at, the thing's own face, what it is called, what tier it is, what level it
+## is, and the pack's own tick when it is being worn or held.
 ##
-## Every one of those five is read at the moment the line is written -- four off
+## Every one of those six is read at the moment the line is written -- five off
 ## the simulation's object and one off the controls -- and none of them is stored
 ## here.
 static func _write_carried_line(
@@ -306,10 +316,11 @@ static func _write_carried_line(
 	var behind := Inventory.item_of(entry)
 	var called := _name_of(entry)
 	row.get_child(0).visible = in_hand != "" and called == in_hand
-	(row.get_child(1) as Label).text = called
-	(row.get_child(2) as Label).text = "" if behind == null else behind.rarity
-	(row.get_child(3) as Label).text = "" if behind == null else "l%d" % behind.level
-	row.get_child(4).visible = sheet.inventory.is_equipped(entry)
+	(row.get_child(1) as TextureRect).texture = _icon_for(entry)
+	(row.get_child(2) as Label).text = called
+	(row.get_child(3) as Label).text = "" if behind == null else behind.rarity
+	(row.get_child(4) as Label).text = "" if behind == null else "l%d" % behind.level
+	row.get_child(5).visible = sheet.inventory.is_equipped(entry)
 
 
 ## The shape of one such line. Rebuilt only when the number of things carried
@@ -321,6 +332,9 @@ func _carried_line() -> Control:
 	# shown on the line the controls are aimed at. Drawn always and hidden when it
 	# is not that line, so a row's shape does not change as the ring turns.
 	row.add_child(_sprite(SproutPack.icon(SproutPack.ICON_MARK)))
+	# The thing's own face, beside its name: what is *written* here every frame
+	# is `_write_carried_line`'s, off the entry at this line that frame.
+	row.add_child(_sprite(null))
 	var called := Label.new()
 	called.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	called.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -351,13 +365,16 @@ static func _name_of(entry: Variant) -> String:
 	return NOTHING
 
 
-## The icon for a carried thing: the icon of the slot it goes in, or the pack's
-## own "no" sign for something that goes in no slot at all.
+## The icon for a carried thing: the item's own face.
+##
+## The item resolves to a catalog tag through `sim/item_model.gd` -- the same
+## table, asked the same way, as when the thing lies on the ground
+## (`render/ground_items.gd`) or hangs in a rig's hand (`sim/combatant_roster.gd`)
+## -- and the tag's drawn face comes back. An item that resolves to nothing is
+## the wrapped parcel, `PixelIcons.GEAR_FALLBACK`, exactly as it is on the
+## ground: visibly a thing, visibly not identified.
 static func _icon_for(entry: Variant) -> Texture2D:
-	var slot := Inventory.slot_of(entry)
-	if PixelIcons.has(slot):
-		return PixelIcons.of(slot)
-	return SproutPack.icon(SproutPack.ICON_NO_SLOT)
+	return PixelIcons.gear(ItemModel.of(Inventory.item_of(entry)))
 
 
 # --- Building the tree ----------------------------------------------------

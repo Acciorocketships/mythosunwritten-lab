@@ -9,12 +9,22 @@ extends RefCounted
 ## reports/ui.md and reports/dialogue-trade.md name which, one by one.
 ##
 ## Two kinds of drawn icon live here. The named ones (`ART`) are sixteen rows
-## of source each: the six ability scores, the five equipment slots, and the
-## four minion types, keyed by the simulation's own names. The attack-pattern
-## glyphs (`pattern()`) are *generated*, because they cannot be a table: a
-## weapon's reach is data on the item -- randomised weapons carry patterns
-## nobody drew -- so the glyph is built from the shape itself, a mini-board on
-## the same sixteen-pixel cell.
+## of source each: the six ability scores, the five equipment slots, the four
+## minion types, and the faces of the gear an inventory row shows -- keyed by
+## the simulation's own names. The attack-pattern glyphs (`pattern()`) are
+## *generated*, because they cannot be a table: a weapon's reach is data on the
+## item -- randomised weapons carry patterns nobody drew -- so the glyph is
+## built from the shape itself, a mini-board on the same sixteen-pixel cell.
+##
+## The gear faces are addressed through `gear()`, which takes the catalog tag
+## `sim/item_model.gd` resolves an item to. Thirteen tags are covered by eight
+## icons drawn here (dagger, spear, bow, staff, flail, buckler, draught,
+## bundle) and five that were already on the sheet -- the four armour slots and
+## the hand's sword, which is what a blade is. A tag with no row -- an item
+## nobody recorded a shape for, or a tag added later before its icon -- is
+## drawn as the wrapped parcel, the same honest answer the ground gives
+## (`render/ground_items.gd`'s `gear_bundle`): visibly a thing, visibly not
+## identified.
 ##
 ## ## The idiom, made literal
 ##
@@ -57,6 +67,10 @@ const CELL := SproutPack.CELL
 ##   hand -- a sword, because the hand slot is what a weapon is held in
 ##   toadstool -- a spotted mushroom · cat -- an eared face, whiskerless
 ##   ent -- a tree on its trunk · frog -- a wide face with raised eyes
+##   dagger -- a short blade, all guard and pommel · spear -- a leaf on a shaft
+##   bow -- an arc against its string · staff -- a rod under a headpiece
+##   flail -- a ball chained to a handle · buckler -- a round face with a boss
+##   draught -- a stoppered bottle of something · bundle -- a tied parcel
 const ART := {
 	"str": [
 		"................",
@@ -328,7 +342,179 @@ const ART := {
 		"................",
 		"................",
 	],
+	"dagger": [
+		"................",
+		"................",
+		"................",
+		".......oo.......",
+		"......ollo......",
+		"......ollo......",
+		"......omlo......",
+		"......omlo......",
+		"......omlo......",
+		"....oolllloo....",
+		"....ollllllo....",
+		"....oolllloo....",
+		"......ollo......",
+		"......olo.......",
+		"......oo........",
+		"................",
+	],
+	"spear": [
+		".......oo.......",
+		"......ollo......",
+		"......ollo......",
+		".....ollllo.....",
+		".....ollllo.....",
+		"......ollo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......ommo......",
+		"......oooo......",
+	],
+	"bow": [
+		"................",
+		".....ooooo......",
+		"....ollllloo....",
+		"...ollooolllo...",
+		"..ollo...ooolo..",
+		"..olo.......oo..",
+		".ollo........o..",
+		".olo.........o..",
+		".olo.........o..",
+		".ollo........o..",
+		"..olo.......oo..",
+		"..ollo...ooolo..",
+		"...ollooolllo...",
+		"....ollllloo....",
+		".....ooooo......",
+		"................",
+	],
+	"staff": [
+		"................",
+		".....oooo.......",
+		"....ollllo......",
+		"....olmmlo......",
+		"....ollllo......",
+		".....oooo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......omo.......",
+		"......ooo.......",
+		"................",
+	],
+	"flail": [
+		"................",
+		".........oooo...",
+		"........ollllo..",
+		".......olllmlo..",
+		"........ollllo..",
+		".........oooo...",
+		"........o.......",
+		".......o........",
+		"......o.........",
+		".....oo.........",
+		"....omlo........",
+		"....omlo........",
+		"....omlo........",
+		"....omlo........",
+		"....oooo........",
+		"................",
+	],
+	"buckler": [
+		"................",
+		"................",
+		".....oooooo.....",
+		"....ollllllo....",
+		"...ollllllllo...",
+		"...olllmmlllo...",
+		"..olllmmmmlllo..",
+		"..olllmmmmlllo..",
+		"...olllmmlllo...",
+		"...ollllllllo...",
+		"....ollllllo....",
+		".....oooooo.....",
+		"................",
+		"................",
+		"................",
+		"................",
+	],
+	"draught": [
+		"................",
+		"......oooo......",
+		"......ommo......",
+		"......ollo......",
+		"......ollo......",
+		".....ollllo.....",
+		"....ollllllo....",
+		"....olmmmmlo....",
+		"....olmmmmlo....",
+		"....olmmmmlo....",
+		"....olmmmmlo....",
+		".....ommmmo.....",
+		"......oooo......",
+		"................",
+		"................",
+		"................",
+	],
+	"bundle": [
+		"................",
+		"................",
+		"................",
+		"..oooooooooooo..",
+		"..ollllmmllllo..",
+		"..ollllmmllllo..",
+		"..ollllmmllllo..",
+		"..ommmmmmmmmmo..",
+		"..ommmmmmmmmmo..",
+		"..ollllmmllllo..",
+		"..ollllmmllllo..",
+		"..ollllmmllllo..",
+		"..oooooooooooo..",
+		"................",
+		"................",
+		"................",
+	],
 }
+
+## Which drawn icon each of the catalog's gear tags is shown as, keyed by the
+## tags themselves (`AssetTags.GEAR_*`) so a tag renamed there cannot leave a
+## stale key here. Five rows point at art the sheet already had -- the four
+## armour slots, and the hand's sword for a blade -- because a boot's face and
+## a boots-slot's face are the same fact drawn once.
+const GEAR := {
+	AssetTags.GEAR_BLADE: "hand",
+	AssetTags.GEAR_DAGGER: "dagger",
+	AssetTags.GEAR_SPEAR: "spear",
+	AssetTags.GEAR_BOW: "bow",
+	AssetTags.GEAR_STAFF: "staff",
+	AssetTags.GEAR_FLAIL: "flail",
+	AssetTags.GEAR_BUCKLER: "buckler",
+	AssetTags.GEAR_BOOTS: "boots",
+	AssetTags.GEAR_LEGGINGS: "leggings",
+	AssetTags.GEAR_CHESTPLATE: "chestplate",
+	AssetTags.GEAR_HELMET: "helmet",
+	AssetTags.GEAR_DRAUGHT: "draught",
+	AssetTags.GEAR_BUNDLE: "bundle",
+}
+
+## What a piece of gear no tag answers for is shown as: the wrapped parcel,
+## the same answer the ground gives (`render/ground_items.gd` lays an unnamed
+## item down as `gear_bundle`). One decision, made twice in the same words, so
+## a wool blanket in the bag and a wool blanket at your feet are the same
+## honest picture.
+const GEAR_FALLBACK := "bundle"
 
 # Built once each, on first ask. An icon is sixteen rows of source and costs a
 # 256-pixel image to make; making it twice would be waste rather than a bug, but
@@ -351,6 +537,15 @@ static func of(named: String) -> Texture2D:
 ## Whether an icon is drawn for a name.
 static func has(named: String) -> bool:
 	return ART.has(named)
+
+
+## The face of one piece of gear, by the catalog tag `sim/item_model.gd`
+## resolves an item to -- and the wrapped parcel for a tag with no row, which
+## is also what `ItemModel.NOTHING` lands on. Never null: an inventory row
+## always shows *something*, and what it shows for a thing nobody drew is
+## visibly a parcel rather than invisibly a hole.
+static func gear(tag: String) -> Texture2D:
+	return of(String(GEAR.get(tag, GEAR_FALLBACK)))
 
 
 ## Every name there is an icon for, in the order they are written above.

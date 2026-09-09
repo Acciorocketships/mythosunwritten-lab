@@ -96,8 +96,8 @@ engine's grey.
 
 ## 3. Every icon in the panel, one by one
 
-Twenty-one things are drawn on the panel. Ten come out of the pack; eleven the
-pack has no equivalent for and this project drew.
+Twenty-eight things are drawn on the panel. Nine come out of the pack; nineteen
+the pack has no equivalent for and this project drew.
 
 ### From the pack's generic icon sheet
 
@@ -111,17 +111,21 @@ the frame's dark interior, so every one of these is a cream one.
 | 2 | crown | cream column 5, row 1 | the status |
 | 3 | coin (`$`) | cream column 1, row 1 | the money |
 | 4 | tick | cream column 3, row 2 | a carried thing that is being worn or held |
-| 5 | prohibition sign | cream column 5, row 2 | a carried thing that goes in no slot at all |
+
+(A prohibition sign used to sit here as row 5, marking a carried thing that goes
+in no slot. A carried row shows the thing's own face now — §3a — and a thing
+with no face shows the drawn parcel, the same answer the ground gives, so the
+sign has no use on this panel any more.)
 
 ### From the pack's other art
 
 | # | thing | pack file | where |
 | --- | --- | --- | --- |
-| 6 | heart, full | `hearts.png` | `0,0 16×16` |
-| 7 | heart, half | `hearts.png` | `16,0 16×16` |
-| 8 | heart, empty | `hearts.png` | `32,0 16×16` |
-| 9 | the frame, the slots, the buttons | see §2 | |
-| 10 | the font | `pixel_font.ttf` | |
+| 5 | heart, full | `hearts.png` | `0,0 16×16` |
+| 6 | heart, half | `hearts.png` | `16,0 16×16` |
+| 7 | heart, empty | `hearts.png` | `32,0 16×16` |
+| 8 | the frame, the slots, the buttons | see §2 | |
+| 9 | the font | `pixel_font.ttf` | |
 
 ### Drawn here, in the same sixteen-pixel idiom
 
@@ -137,27 +141,151 @@ shade, `l` lit), not a binary, so a change to one shows in a diff as the shape i
 changes — and so nothing about them touches the pack's redistribution line: they
 are this project's own art, derived from no pack file.
 
-![The eleven icons drawn for this panel](assets/drawn-icons.png)
+![Every icon this project drew, on the pack's cell in its three colours — this
+panel's nineteen, and the dialogue panel's four minion faces beside
+them](assets/drawn-icons.png)
 
 | # | icon | drawn as | why it exists |
 | --- | --- | --- | --- |
-| 11 | `str` | a barbell | the pack has no ability-score icons at all |
-| 12 | `con` | a shield | " |
-| 13 | `cha` | a face | " |
-| 14 | `dex` | an arrow | " |
-| 15 | `wis` | an eye | " |
-| 16 | `int` | an open book | " |
-| 17 | `helmet` | a great helm | the pack has no equipment-slot icons either |
-| 18 | `chestplate` | a breastplate | " |
-| 19 | `leggings` | trousers | " |
-| 20 | `boots` | a boot | " |
-| 21 | `hand` | a sword | the hand slot is what a weapon is held in |
+| 10 | `str` | a barbell | the pack has no ability-score icons at all |
+| 11 | `con` | a shield | " |
+| 12 | `cha` | a face | " |
+| 13 | `dex` | an arrow | " |
+| 14 | `wis` | an eye | " |
+| 15 | `int` | an open book | " |
+| 16 | `helmet` | a great helm | the pack has no equipment-slot icons either |
+| 17 | `chestplate` | a breastplate | " |
+| 18 | `leggings` | trousers | " |
+| 19 | `boots` | a boot | " |
+| 20 | `hand` | a sword | the hand slot is what a weapon is held in |
+| 21 | `dagger` | a short blade, all guard and pommel | a carried row shows the item's own face — §3a |
+| 22 | `spear` | a leaf on a shaft | " |
+| 23 | `bow` | an arc against its string | " |
+| 24 | `staff` | a rod under a headpiece | " |
+| 25 | `flail` | a ball chained to a handle | " |
+| 26 | `buckler` | a round face with a boss | " |
+| 27 | `draught` | a stoppered bottle | " |
+| 28 | `bundle` | a tied parcel | the face of a thing that resolves to no face — §3a |
 
-They are keyed by the simulation's own names — `Ability.ALL` and
-`Inventory.SLOT_ORDER` — so the panel asks for an icon with the string the sheet
-already uses and there is no second vocabulary to keep in step.
-`tests/test_ui_panel.gd` checks that there is exactly one icon per score and per
-slot, and none spare.
+They are keyed by the simulation's own names — `Ability.ALL`,
+`Inventory.SLOT_ORDER`, and for the gear faces the tags of
+`sim/item_model.gd` — so the panel asks for an icon with the string the
+simulation already uses and there is no second vocabulary to keep in step.
+`tests/test_ui_panel.gd` checks that there is exactly one icon per score, per
+slot, per minion and per gear face, and none spare.
+
+### 3a. A carried row shows the item, not a generic mark
+
+What sits in a carried slot, on a carried line and in a filled equipment slot
+is the *item's own face*: the drawn face of the catalog tag the simulation
+itself resolves the item to (`sim/item_model.gd`, the same table that says what
+the thing looks like on the ground and in a rig's hand). A sword shows the
+sword, a dagger the dagger, a helmet the great helm — a sword and a helmet are
+two different things in the bag now. An empty equipment slot still shows the
+slot's own icon, which is what could go there.
+
+Of the two ways to get an item's picture onto a row — draw a sixteen-pixel
+face per tag, or render the item's 3D model small to a texture — the faces are
+drawn. The reason is the seam this whole report is about: a drawn face is made
+of the pack's own three colours on the pack's own cell and is measured by the
+same off-palette and off-grid numbers as everything else (§4), where a
+render-to-texture of a lit, shaded mesh is off-palette *by construction* and
+would need a live viewport, which a headless run must not have. The cost of the
+choice is eight new icons drawn (nos. 21–28 above); the other five of the
+thirteen gear tags reuse art already on the sheet — the four armour slots and
+the hand's sword, because a boot's face and a boots-slot's face are the same
+fact drawn once.
+
+An item that resolves to *no* tag — an iron key, a wool blanket, anything whose
+shape nobody recorded — shows the tied parcel (`bundle`), by the same rule and
+in the same words as `render/ground_items.gd` lays such a thing on the ground.
+Seven of the forty-nine items the shipped scenarios put in the world take that
+fallback (`tests/test_ground_items.gd` pins both numbers; the panel resolves
+through the identical function, `ItemModel.of` over `Inventory.item_of`, so
+the count is the same count).
+
+#### 3a-i. The bag, photographed
+
+The fullest bag any shipped scenario holds is Fen's, in the `play` scenario:
+four carried things and a fifth in hand. Every one of the five shows its own
+face, and one of them is the fallback:
+
+![Fen's sheet in the play scenario: four carried things with four different
+faces — a sword, a boot, a bottle and a parcel — and the sword's face again in
+the hand slot](assets/inventory-faces.png)
+
+```
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/inventory-faces.png \
+        --scenario play --tick 40 --resolution 1280x950 --play --input "20:f"
+render-shell sheet scale=2 x=16 y=16 w=574 h=748 sheets=3 showing=0
+
+frame          reports/assets/inventory-faces.png (1280x950)
+panel          at 16,16 size 574x748, interface scale 2
+measured       at 34,34 size 538x712 (inside the frame's rails)
+palette        66 colours: the pack's own files plus PixelIcons' three
+distinct       16 colours over 383056 pixels
+off-palette    0 of 383056 = 0.0000%
+edges          42192 changes of colour along rows and columns
+off-grid       0 of 42192 = 0.0000%
+```
+
+Row by row: the **common sword** shows the cruciform blade (`gear_blade`, the
+tag the forge wrote on the item), the **common boots** the boot
+(`gear_boots`, resolved from the slot rather than said), the **mending
+draught** the stoppered bottle (`gear_draught`, said by the item), and the
+**wool blanket** the tied parcel — because a blanket is a hand-slot item with
+no shape recorded, and the render layer's honest answer to that is a parcel.
+The window is 1280×950 rather than the usual 720 because this sheet with its
+control row is 748 screen pixels tall and a panel taller than the frame cannot
+be measured; the interface scale is 2 either way, because the scale is one step
+per 320 art pixels of window height and both 720 and 950 are two of those.
+
+The encounter's own sheet, the frame at the head of this report, is the same
+thing with less in the bag — the hand slot holds the spear's own face and the
+carried lines carry a boot and a spear, not two identical marks:
+
+```
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png --tick 60
+panel          at 16,16 size 574x676, interface scale 2
+off-palette    0 of 344320 = 0.0000%
+edges          34124 changes of colour along rows and columns
+off-grid       0 of 34124 = 0.0000%
+```
+
+Two frames, four zeros: 0.0000% off-palette and 0.0000% off-grid on both. The
+seam is held by construction — a face is sixteen rows of the pack's own three
+colours, laid on a `TextureRect` at exactly its own size inside an interface
+scaled by a whole number with nearest-neighbour filtering — and the numbers are
+what says so rather than an eye.
+
+And the run underneath is untouched: the same seed headless
+(`./run_headless.sh --seed 1234 --ticks 61 --scenario encounter`) still ends at
+the world digest `547bea5152b0e035`, and the rendered encounter with every panel
+up reaches the same one.
+
+#### 3a-ii. The fourth panel's hand row
+
+`render/ui/play_panel.gd` — the panel a person chooses with — carries one
+sixteen-pixel mark per row, and three of its four are marks about the *row*:
+what is aimed at, an offer standing, a line overheard. The fourth is not like
+them, because it names one carried thing, so it shows that thing's face by the
+same rule the sheet's rows do:
+
+![The play panel, bottom-left of the frame: the boot's own face beside "holding
+common boots", where the row used to carry a star](assets/play-hand-face.png)
+
+```
+$ xvfb-run -a "$GODOT" --path . --resolution 1280x720 --fixed-fps 30 -- \
+        --seed 1234 --scenario play --play --input "3:tab,4:f" \
+        --screenshot reports/assets/play-hand-face.png --screenshot-tick 10
+render-shell play driving=#1
+```
+
+Bare hands keep the row's own star, because bare hands are a choice rather than
+an item. Getting a face needs the item and not its name, and the observation
+packet this panel otherwise quotes carries names — so this one fact is read
+through `render/ui/sheet_source.gd`, the same live `Character` handle the sheet
+reads, asked on the frame the row is written and kept nowhere.
 
 ---
 
@@ -212,21 +340,26 @@ rails, where every pixel is pack art, drawn art or type):
 ### The result
 
 ```
-$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png --tick 60
 render-shell boot seed=1234 chunks=32 far=1 fartris=160 islands=10 grass=12594 motes=588 sheet=2/3 aa=msaa4+fxaa
-render-shell sheet scale=2 x=16 y=16 w=520 h=604 sheets=2 showing=0
+render-shell sheet scale=2 x=16 y=16 w=574 h=676 sheets=2 showing=0
 
 frame          reports/assets/character-sheet.png (1280x720)
-panel          at 16,16 size 520x604, interface scale 2
-measured       at 34,34 size 484x568 (inside the frame's rails)
+panel          at 16,16 size 574x676, interface scale 2
+measured       at 34,34 size 538x640 (inside the frame's rails)
 palette        66 colours: the pack's own files plus PixelIcons' three
-distinct       16 colours over 274912 pixels
-off-palette    0 of 274912 = 0.0000%
-edges          25634 changes of colour along rows and columns
-off-grid       0 of 25634 = 0.0000%
+distinct       16 colours over 344320 pixels
+off-palette    0 of 344320 = 0.0000%
+edges          34124 changes of colour along rows and columns
+off-grid       0 of 34124 = 0.0000%
 ```
 
-Sixteen colours over a quarter of a million pixels, every one of them the pack's,
+(The numbers above are the current frame's — re-measured with the gear faces
+of §3a on screen, controls row and all; the first measurement of this panel,
+before the controls and the faces, was 0.0000% of 274 912 pixels and 0.0000%
+of 25 634 edges, and every re-measurement since has held both zeros.)
+
+Sixteen colours over a third of a million pixels, every one of them the pack's,
 and not one edge off the grid. That is what "integer scale with nearest-neighbour
 filtering" means when it is true.
 
@@ -284,6 +417,11 @@ on any one character:
 | --- | --- | --- | --- | --- | --- |
 | `encounter` | — (unnamed) | yes | none rolled | boots and a weapon, both worn | none |
 | `market`, `quarrel` | Wren, Rook, Bram, Sable, Odo | yes | none rolled | empty | none |
+| `play` | Fen, Hob, Rill | yes | all six rolled | four carried, a sword in hand | 20 |
+
+The `play` row is the one that fills the sheet, which is why §3a photographs
+that scenario rather than this section's: it is the walkthrough written for a
+person to drive, so its cast was given something to do everything *with*.
 
 An unrolled score is **not** a zero, and the sheet is explicit about that (zero
 is a real score — a character with six of them can wear nothing usefully), so the

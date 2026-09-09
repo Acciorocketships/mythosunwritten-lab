@@ -58,3 +58,29 @@ static func sheets_in(world: SimWorld) -> Array[Character]:
 		if sheet is Character:
 			found.append(sheet)
 	return found
+
+
+## The character sheet the world is holding under one id, or null.
+##
+## The same handle `sheets_in` hands over, asked for one person instead of all
+## of them: the roster's own member under that id, and the `Character` it is.
+## Reached for by the play panel, which knows who is being driven by id and has
+## to show what that person is *holding* rather than what it is called -- and a
+## picture of a held thing is a question about the item, which only the item
+## itself can answer.
+##
+## Null for an id nobody stands under, for a minion (which has no sheet) and
+## for a world with no roster in it. As with `sheets_in`, the hop through the
+## member is dynamic on purpose: the type between the roster and the sheet is
+## one of the combat layer's own.
+static func sheet_of(world: SimWorld, id: int) -> Character:
+	if world == null or world.combat == null or id == 0:
+		return null
+	var stood: Variant = world.combat.member_of(id)
+	if stood == null:
+		return null
+	var standing: Variant = stood.piece
+	if standing == null:
+		return null
+	var sheet: Variant = standing.sheet
+	return sheet if sheet is Character else null

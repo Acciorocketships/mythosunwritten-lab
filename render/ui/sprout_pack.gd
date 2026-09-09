@@ -111,13 +111,15 @@ const ICON_COIN := Vector2i(1, 1)
 
 ## The tick and the prohibition sign. Both do double duty and are therefore
 ## named for what they are on the sheet rather than for one use of them: on the
-## character sheet they mark a carried thing that is worn and one that goes in
-## no slot, and on the combat readout they mark a weapon action that may be used
-## now and one that is still cooling down.
+## character sheet the tick marks a carried thing that is worn, and on the
+## combat readout the two mark a weapon action that may be used now and one
+## that is still cooling down. (The sign used to also mark a carried thing that
+## goes in no slot; a carried row shows the thing's own face now, and a thing
+## with no face shows the drawn parcel instead -- see
+## render/ui/pixel_icons.gd's gear table.)
 const ICON_TICK := Vector2i(3, 2)
 const ICON_BAR := Vector2i(5, 2)
 const ICON_WORN := ICON_TICK
-const ICON_NO_SLOT := ICON_BAR
 
 ## The exclamation mark and the plain horizontal bar, which the readout uses for
 ## the commander whose turn it is and for the ones waiting their turn.

@@ -1,0 +1,129 @@
+Evidence for W-inventory-icons -- an inventory row that shows the item, not a
+generic mark. Implementer run, cycle 3633. Every block is a command run from
+the project root.
+
+==============================================================================
+1. The decision, and its cost as a number
+==============================================================================
+Drawn sixteen-pixel faces, one per gear tag -- not the item's own model
+rendered small to a texture. The reason is the seam the panel has been held to
+since it existed: a drawn face is three of the pack's own colours on the pack's
+own 16-pixel cell, so the two numbers that police the seam (off-palette pixels,
+off-grid colour changes) stay at zero by construction. A lit, shaded mesh
+rendered to a texture is off-palette by construction, and it would need a live
+viewport, which the project's "a headless run loads no interface" claim forbids.
+
+  icons drawn                8  (dagger spear bow staff flail buckler
+                                 draught bundle)
+  gear tags covered         13  (AssetTags.in_category(AssetTags.GEAR))
+  tags reusing sheet art     5  (gear_blade -> hand's sword; gear_boots,
+                                 gear_leggings, gear_chestplate, gear_helmet
+                                 -> the four armour-slot icons)
+  tag with no row           ->  the tied parcel, PixelIcons.GEAR_FALLBACK,
+                                 the same answer render/ground_items.gd gives
+                                 an unnamed item on the ground
+
+==============================================================================
+2. How many shipped items take the fallback
+==============================================================================
+7 of 49. Pinned as constants in tests/test_ground_items.gd
+(SHIPPED_FALLBACKS := 7, SHIPPED_ITEMS := 49) and counted by
+TestGroundItems.shipped_tally(), which walks every scenario the shell can set
+out, reads every actor's inventory and every ground object, and resolves each
+item with ItemModel.of -- the identical call the panel makes through
+Inventory.item_of, so it is the same count.
+
+==============================================================================
+3. The bag, photographed: the fullest one any scenario ships
+==============================================================================
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/inventory-faces.png \
+        --scenario play --tick 40 --resolution 1280x950 --play --input "20:f"
+render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=13283 motes=588 sheet=2/3 aa=msaa4+fxaa
+render-shell sheet scale=2 x=16 y=16 w=574 h=748 sheets=3 showing=0
+
+frame          reports/assets/inventory-faces.png (1280x950)
+panel          at 16,16 size 574x748, interface scale 2
+measured       at 34,34 size 538x712 (inside the frame's rails)
+palette        66 colours: the pack's own files plus PixelIcons' three
+distinct       16 colours over 383056 pixels
+off-palette    0 of 383056 = 0.0000%
+edges          42192 changes of colour along rows and columns
+off-grid       0 of 42192 = 0.0000%
+
+Fen carries four things and holds a fifth, and every one shows its own face:
+  common sword      gear_blade    (the tag the forge wrote on the item)
+  common boots      gear_boots    (resolved from the slot, nobody said it)
+  mending draught   gear_draught  (said by the item)
+  wool blanket      -- fallback   (a hand-slot item with no shape recorded)
+The hand slot carries the sword's face; the four empty slots carry their own.
+
+==============================================================================
+4. The encounter's sheet, re-measured with the faces on it
+==============================================================================
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png --tick 60
+render-shell boot seed=1234 chunks=32 far=1 fartris=160 islands=10 grass=12594 motes=588 sheet=2/3 aa=msaa4+fxaa
+render-shell sheet scale=2 x=16 y=16 w=574 h=676 sheets=2 showing=0
+
+frame          reports/assets/character-sheet.png (1280x720)
+panel          at 16,16 size 574x676, interface scale 2
+measured       at 34,34 size 538x640 (inside the frame's rails)
+palette        66 colours: the pack's own files plus PixelIcons' three
+distinct       16 colours over 344320 pixels
+off-palette    0 of 344320 = 0.0000%
+edges          34124 changes of colour along rows and columns
+off-grid       0 of 34124 = 0.0000%
+
+==============================================================================
+5. The play panel's hand row
+==============================================================================
+$ xvfb-run -a "$GODOT" --path . --resolution 1280x720 --fixed-fps 30 -- \
+        --seed 1234 --scenario play --play --input "3:tab,4:f" \
+        --screenshot reports/assets/play-hand-face.png --screenshot-tick 10
+render-shell play driving=#1
+...
+render-shell stop tick=11 ... digest=944e0c51df60a997
+
+The hand row of render/ui/play_panel.gd carries the boot's own face beside
+"holding common boots"; the other three rows keep their marks, which are marks
+about the row and not about a thing.
+
+==============================================================================
+6. The world underneath is untouched
+==============================================================================
+$ ./run_headless.sh --seed 1234 --ticks 61 --scenario encounter
+tick 61 chunks=32 islands=10 villages=0 roads=2 props=402 cover=15 cast=4 biome=meadow water=286 on_island=0 on_path=0.00 547bea5152b0e035
+done ticks=61 chunks=32 built=64 final=547bea5152b0e035
+
+$ xvfb-run -a "$GODOT" --path . --resolution 1280x720 --fixed-fps 30 -- \
+        --seed 1234 --scenario encounter --sheet --readout --dialogue --trade \
+        --territory --screenshot /tmp/enc.png --screenshot-tick 60
+render-shell stop tick=61 ... digest=547bea5152b0e035
+
+The same digest headless and rendered with all five panels up.
+
+==============================================================================
+7. The structure checks
+==============================================================================
+$ ./run_tests.sh --layers-only
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check: OK -- res://sim names asset tags and no asset
+
+==============================================================================
+8. The whole suite, headless
+==============================================================================
+$ ./run_tests.sh
+all 65 suites passed (204930 checks)
+
+  PASS  ui panel       285 checks
+
+Of those, the new ones are: a face for every gear tag the catalog has and no
+icon spare; the parcel, by name, for a tag nobody drew and for
+ItemModel.NOTHING; the bag's parcel and the ground's bundle being the same
+picture; a carried row and a carried slot showing the item's own face with a
+dagger and a helmet visibly different; a filled equipment slot showing the worn
+thing and an empty one the slot's own icon; and the play panel's hand row
+showing what is held. Each panel claim is proved the way the earlier ones were
+-- move the simulation's object, refresh, and read the panel, with nothing told
+and nothing cached.

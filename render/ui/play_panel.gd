@@ -32,6 +32,21 @@ extends PanelContainer
 ## The one thing on it that is not the simulation's is the line of speech the
 ## person has picked, which is `PlayerControls`' -- an interface with no text
 ## field in it yet offers a few things to say. See that file.
+##
+## ## The four marks, and the one of them that is a thing
+##
+## Each row carries one sixteen-pixel mark off the pack's generic sheet, and
+## three of the four are marks about the *row* rather than about anything in
+## it: what is aimed at, an offer, a line overheard. The hand row is not like
+## them -- it names one carried thing -- so it carries that thing's own face,
+## the drawn face of the tag `sim/item_model.gd` resolves the item to, exactly
+## as a carried row on the character sheet does. Bare hands are a choice rather
+## than an item, so an empty hand keeps the row's own star.
+##
+## Getting a face needs the item and not its name, and the observation packet
+## carries names; so this is the one fact on the panel read through
+## `render/ui/sheet_source.gd` instead -- the same live `Character` handle the
+## sheet reads, asked on the frame the row is drawn, with nothing kept.
 class_name PlayPanel
 
 ## How wide the panel is, in art pixels. As wide as the answer panel, because
@@ -68,6 +83,9 @@ var driven_id := 0
 
 var _aim: Label
 var _hand: Label
+## The mark at the head of the hand row, which is the held thing's own face.
+## The rectangle is kept; what is *in* it is written afresh every frame.
+var _hand_face: TextureRect
 var _offers: Array[Label] = []
 var _heard: Array[Label] = []
 var _faces := {}
@@ -95,7 +113,9 @@ func _init() -> void:
 	_aim = _sentence()
 	column.add_child(_labelled(_faces["mark"], _aim))
 	_hand = _sentence()
-	column.add_child(_labelled(_faces["star"], _hand))
+	var hand_row := _labelled(_faces["star"], _hand)
+	_hand_face = hand_row.get_child(0) as TextureRect
+	column.add_child(hand_row)
 	for _each in OFFERS:
 		var offer := _sentence()
 		_offers.append(offer)
@@ -127,6 +147,7 @@ func refresh() -> void:
 	var view := world.surroundings_of(driven_id)
 	_aim.text = SproutPack.drawable(_aim_text(view))
 	_hand.text = SproutPack.drawable(controls.holding_line())
+	_hand_face.texture = held_face()
 	var offers := view.offers
 	for index in _offers.size():
 		var at := offers.size() - _offers.size() + index
@@ -175,6 +196,28 @@ static func half_line(items: PackedStringArray, money: int) -> String:
 	if money > 0:
 		written.append("%d coin" % money)
 	return "nothing" if written.is_empty() else " + ".join(written)
+
+
+## The face of whatever is being held: the drawn face of the tag the simulation
+## resolves that item to, the parcel for a thing whose shape nobody recorded,
+## and the row's own star for bare hands.
+##
+## Read off the live `Character` on the frame it is asked, with nothing kept:
+## the held thing is named by `PlayerControls.holding`, which is a name out of
+## the observation packet, so it is matched back to the object it names with
+## the packet's own naming function (`ObservationTrail.name_of_entry`) rather
+## than with a second spelling of one.
+func held_face() -> Texture2D:
+	if controls == null or controls.holding == PlayerControls.EMPTY_HANDS:
+		return _faces["star"]
+	var sheet := SheetSource.sheet_of(world, driven_id)
+	if sheet == null:
+		return _faces["star"]
+	for entry in sheet.inventory.carried:
+		if ObservationTrail.name_of_entry(entry) != controls.holding:
+			continue
+		return PixelIcons.gear(ItemModel.of(Inventory.item_of(entry)))
+	return _faces["star"]
 
 
 # What is aimed at, and what can be seen inside it.
