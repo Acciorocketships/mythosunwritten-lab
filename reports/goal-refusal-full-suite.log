@@ -1,0 +1,154 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+RUN   test_rng
+PASS  rng            1325 checks
+RUN   test_determinism
+PASS  determinism    15 checks
+RUN   test_terrain
+PASS  terrain        32 checks
+RUN   test_streaming
+PASS  streaming      4702 checks
+RUN   test_terrain_lod
+PASS  terrain_lod    59 checks
+RUN   test_mountains
+PASS  mountains      3030 checks
+RUN   test_biomes
+PASS  biomes         212 checks
+RUN   test_water
+PASS  water          6358 checks
+RUN   test_islands
+        islands: candidate bound ruled out 515 of 968 asks, 213 had an island
+        islands: cell gate matched the ungated scan on 10800 asks, 1958 with an island, building 317 cells against 1984
+PASS  islands        105334 checks
+RUN   test_island_cover
+        island cover: 11 overlapping storey pairs, 33 things in the laps, 0 coincidences
+        island cover: 4509 placements over 4 seeds -- 0 hovering, 0 past the lip, 0 in water, 0 on a face
+        island cover: 194 islands over 4 seeds -- 58 with a basin, 58 overflowing, 58 dipping below their own rim, 0 boundary samples below it
+PASS  island cover   4922 checks
+RUN   test_settlements
+        settlements: 20 of 110 villages (18.2%) sited by the shore rule over 8 seeds
+        settlements: 36 wide upper storeys swept, 4 spots the old padded rule let through
+PASS  settlements    19829 checks
+RUN   test_scatter
+PASS  scatter        295 checks
+RUN   test_combat_board
+PASS  combat board   25505 checks
+RUN   test_combat_pieces
+PASS  combat pieces  360 checks
+RUN   test_combat_resolution
+PASS  combat resolution 1754 checks
+RUN   test_combat_snap
+PASS  combat snap    855 checks
+RUN   test_live_world
+PASS  live world     82 checks
+RUN   test_layering
+PASS  layering       34 checks
+RUN   test_asset_tags
+PASS  asset tags     1576 checks
+RUN   test_characters
+PASS  characters     1310 checks
+RUN   test_character_sheet
+PASS  character sheet 109 checks
+RUN   test_items
+PASS  items          179 checks
+RUN   test_inventory
+PASS  inventory      90 checks
+RUN   test_drops
+PASS  drops          65 checks
+RUN   test_ground_items
+PASS  ground items   2567 checks
+RUN   test_effects
+PASS  effects        1474 checks
+RUN   test_actions
+PASS  actions        351 checks
+RUN   test_control_loop
+PASS  control loop   81 checks
+RUN   test_walk_motion
+PASS  walk motion    93 checks
+RUN   test_observation
+PASS  observation    248 checks
+RUN   test_scenario
+PASS  scenario       160 checks
+RUN   test_agent
+PASS  agent          1069 checks
+RUN   test_memory
+PASS  memory         106 checks
+RUN   test_goals
+PASS  goals          133 checks
+RUN   test_upkeep
+PASS  upkeep         95 checks
+RUN   test_tool_budget
+PASS  tool budget    58 checks
+RUN   test_relationships
+PASS  relationships  149 checks
+RUN   test_ownership
+PASS  ownership      55 checks
+RUN   test_checks
+PASS  checks         121 checks
+RUN   test_goodwill
+PASS  goodwill       130 checks
+RUN   test_territory
+PASS  territory      41 checks
+RUN   test_orchestrator
+PASS  orchestrator   282 checks
+RUN   test_fight_driver
+PASS  fight driver   51 checks
+RUN   test_enemies
+PASS  enemies        596 checks
+RUN   test_turn_seam
+PASS  turn seam      23 checks
+RUN   test_strike_record
+PASS  strike record  299 checks
+RUN   test_attack_clips
+PASS  attack clips   1009 checks
+RUN   test_flights
+PASS  flights        2107 checks
+RUN   test_held_items
+PASS  held items     149 checks
+RUN   test_player_input
+PASS  player input   106 checks
+RUN   test_player_actions
+PASS  player actions 212 checks
+RUN   test_bargain
+PASS  bargain        46 checks
+RUN   test_player_inventory
+PASS  player inventory 57 checks
+RUN   test_player_combat
+PASS  player combat  73 checks
+RUN   test_window_glow
+        window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
+        window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
+PASS  window glow    11225 checks
+RUN   test_board_overlay
+PASS  board overlay  21 checks
+RUN   test_grass
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+RUN   test_atmosphere
+PASS  atmosphere     156 checks
+RUN   test_reflection
+PASS  reflection     31 checks
+RUN   test_anti_aliasing
+PASS  anti-alias     55 checks
+RUN   test_render_shell
+PASS  render shell   58 checks
+RUN   test_ui_panel
+PASS  ui panel       285 checks
+RUN   test_ui_readout
+PASS  ui readout     1527 checks
+RUN   test_ui_exchange
+PASS  ui exchange    555 checks
+RUN   test_ui_territory
+PASS  ui territory   63 checks
+
+all 65 suites passed (204835 checks)
+WARNING: 75 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2735)
+WARNING: 1070 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 67 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+ERROR: 7 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 16 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+grep: /tmp/lab-sbx-uw2643gp/tmp/tmp.gDlawHVH8V: No such file or directory
