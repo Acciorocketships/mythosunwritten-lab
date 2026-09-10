@@ -1180,7 +1180,7 @@ code.
 
 This report is also committed to the repository as `reports/playable.md`, so it
 survives independently of the generated view; this edition's text was committed
-and pushed to `origin/main` as `PENDING_HASH`. The write-ups it draws on are
+and pushed to `origin/main` as `f6670c8`. The write-ups it draws on are
 `reports/playtest.md` (the second pass), the independent check's own working in
 `.lab/memory/files/playable-review-cycle3701-evidence.md`, and the change
 write-ups `reports/board-overlay.md`, `reports/walk-pace.md`,
