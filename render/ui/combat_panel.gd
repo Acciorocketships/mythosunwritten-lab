@@ -124,6 +124,7 @@ const CONTROLS := [
 		{"label": "goes", "key": BoardControls.KEY_PICK_MINION_CELL},
 		{"label": "send", "key": BoardControls.KEY_SEND},
 		{"label": "end", "key": BoardControls.KEY_END_TURN},
+		{"label": "leave", "key": BoardControls.KEY_LEAVE},
 	],
 ]
 

@@ -152,7 +152,7 @@ static func _rays(
 			if standing != null:
 				# A piece ends the ray whether or not it can be taken. That is
 				# the whole of what "blockable" means for a Cat and an Ent.
-				if taking and standing.owner_id != piece.owner_id:
+				if taking and standing.opposes(piece):
 					cells.append(to)
 				break
 			if not taking:
@@ -162,9 +162,14 @@ static func _rays(
 
 
 ## Whether a destination cell admits this piece: empty when it is moving, held by
-## somebody else's piece when it is taking.
+## a piece on another side when it is taking.
+##
+## Another *side*, not another owner: two commanders who came onto one board from
+## one band share a side, and a minion may not take a piece it is fighting
+## alongside. On a board where nobody was told about bands the two readings are
+## the same answer -- see `Piece.side`.
 static func _admits(pieces: PieceMap, piece: Piece, to: Vector2i, taking: bool) -> bool:
 	var standing := pieces.piece_at(to)
 	if taking:
-		return standing != null and standing.owner_id != piece.owner_id
+		return standing != null and standing.opposes(piece)
 	return standing == null

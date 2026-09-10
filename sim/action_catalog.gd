@@ -26,7 +26,11 @@ extends RefCounted
 ##     against the design without opening the design.
 ##   * `calls` -- section 10's call-surface spellings. Several may share a row:
 ##     `MoveTo`, `MoveRelative`, `Roam` and `Flee` are four ways of saying "go
-##     to", and a row is the action, not the phrasing.
+##     to", and a row is the action, not the phrasing. All four are makeable: a
+##     `go_to` aimed away from what is coming *is* fleeing, and it is refused only
+##     to somebody a board is already holding, who leaves by spending a turn on
+##     leaving (`BoardTurn.leave`) rather than by walking. So the column names no
+##     call that nothing can make.
 ##   * `occupies` -- how many ticks carrying the action out costs. Section 2.2
 ##     says an action is "in progress" and re-evaluated while it runs, which is
 ##     only meaningful if an action takes time; this column is the time it takes.

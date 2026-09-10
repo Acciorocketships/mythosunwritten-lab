@@ -236,6 +236,56 @@ func hand_turn_over() -> PackedStringArray:
 	return _turn_is_over()
 
 
+## One combatant walks out of the fight: off the board, back into the world, and
+## no longer in this encounter.
+##
+## The third way a turn ends, and the only way out of a fight that is not being
+## carried out of it. A fight used to be a thing that could only be survived --
+## a fighter's `go_to` is refused because the board decides where a fighter goes,
+## and nothing else offered a way off -- so two commanders neither of whom could
+## reach the other were in it forever. Leaving is asked on your own turn and
+## costs that turn, which is the whole of what it costs; the turn economy of
+## section 3.6 is untouched, because a turn spent leaving buys none of its three
+## things and the one who spent it is not there to spend them.
+##
+## The commander comes off the board with its minions, by the same king rule that
+## takes them off when it falls (`CombatMatch.withdraw`) -- but it is alive, so it
+## is put back into the world at the position its last cell corresponds to,
+## exactly as a survivor of a fight that ended is, and it is dropped from
+## `members` so that it is neither a survivor nor one of the fallen. Nothing it
+## carries is spilled: it walked away.
+##
+## Returns what this wrote, and writes nothing when there is nobody there to
+## leave or it is not their turn -- the match says so in its own words and
+## `last_refusal` carries them back.
+func leave(one: Combatant) -> PackedStringArray:
+	if finished or match_state == null or one == null:
+		return PackedStringArray()
+	var standing := match_state.pieces.piece_of(one.piece.id)
+	if standing == null or not members.has(one):
+		return PackedStringArray()
+	var cell := standing.cell
+	if not match_state.withdraw(one.piece.id):
+		# Nothing happened, so nothing is written *here*. The match wrote its own
+		# refusal into its own transcript and `last_refusal` carries the sentence
+		# back; the next `unreported()` copies the line across like any other. It
+		# must not be returned as this call's own writing, because whoever asked
+		# reads "something was written" as "it was done" -- which is how a
+		# refused leave would report itself as a successful one.
+		return PackedStringArray()
+	var back := CombatSnap.world_of(board, cell)
+	one.x = back.x
+	one.y = back.y
+	one.z = back.z
+	one.fighting = false
+	members.erase(one)
+	by_piece.erase(one.piece.id)
+	lines.append("snap-out #%d left the fight, cell (%d,%d) -> (%.3f, %.3f, %.3f)" % [
+		one.id, cell.x, cell.y, back.x, back.y, back.z,
+	])
+	return _turn_is_over()
+
+
 ## Mark everything written so far as already handed to the world.
 ##
 ## Called by whoever took a fight's opening lines out of `lines` directly --
@@ -371,6 +421,23 @@ func conclude() -> PackedStringArray:
 ## commander its own owner as it is added -- so a minion's `owner_id` can only be
 ## filled in once its commander has an id. That ordering is the whole reason
 ## there are two passes here.
+##
+## ## The band comes onto the board with the piece
+##
+## The world sorts characters into bands and the engagement rule reads them:
+## a fight begins between two commanders *of different bands*. The board had no
+## word for a band, and a `PieceMap` makes every commander its own owner, so two
+## commanders who walked into one fight on the same side arrived on it as two
+## sides. That is not a rounding error: on the play stage a person who walked
+## east into a brawler took the trader standing beside them onto the board as an
+## enemy, and eleven rounds of the only sensible play beat that trader to death.
+## The fight could not end any other way, because a match is over when one
+## *commander* is left.
+##
+## So each commander's `side_id` is the first commander of its band to be seated,
+## and its band's minions are commanded by that same one. A band with one
+## commander in it -- which is every fight the suite plays and every fight the
+## world held before this -- gets its own id back and nothing changes.
 func _seat(placed: Dictionary) -> void:
 	var pieces := PieceMap.new()
 	var band_owner := {}
@@ -379,13 +446,18 @@ func _seat(placed: Dictionary) -> void:
 			continue
 		one.piece.cell = placed[one.id]
 		pieces.add(one.piece)
-		band_owner[one.band] = one.piece.id
+		# The first commander of a band names it. Taking the last would make the
+		# side a fight is on depend on who happened to be seated last.
+		if not band_owner.has(one.band):
+			band_owner[one.band] = one.piece.id
+		one.piece.side_id = int(band_owner[one.band])
 		by_piece[one.piece.id] = one
 	for one in members:
 		if one.is_commander():
 			continue
 		one.piece.cell = placed[one.id]
 		one.piece.owner_id = int(band_owner.get(one.band, Piece.NO_OWNER))
+		one.piece.side_id = one.piece.owner_id
 		pieces.add(one.piece)
 		by_piece[one.piece.id] = one
 	match_state = CombatMatch.start(

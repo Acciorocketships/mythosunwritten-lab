@@ -1,10 +1,13 @@
 extends RefCounted
 ## The turn a person takes on the board: what is left of it, what is legal, and
-## the five things that spend it.
+## the six things that spend it.
 ##
 ## `sim/live_choice.gd` is where a person's choice goes in real time; this is the
 ## same seam for the other half of the world, where the unit of choice is a turn
-## rather than a tick. It exists because the turn economy of section 3.6 does not
+## rather than a tick. It is also where a person leaves a fight, because leaving
+## is a turn spent and there was no other unit to spend it out of.
+##
+## It exists because the turn economy of section 3.6 does not
 ## fit through one `Action`: a turn buys a move, one weapon action and one minion
 ## activation, and `ControlLoop` lets a character choose once per turn, on
 ## purpose, because one that could choose twice would be spending a turn twice.
@@ -22,6 +25,7 @@ extends RefCounted
 ##     `Commander.can_attack` and `Commander.turns_until_ready`;
 ##   * where a minion may go -- `LegalMoves.destinations`, which is its move
 ##     cells and its capture cells together;
+##   * what leaving a fight does -- `Encounter.leave`;
 ##   * what is left of the turn -- `CombatMatch.has_moved`, `has_acted` and
 ##     `has_spent_minion`, which are the flags the match refuses out of.
 ##
@@ -32,7 +36,7 @@ extends RefCounted
 ##
 ## ## Every refusal is the match's own sentence
 ##
-## The five doers hand back `{"ok": bool, "reason": String}`, and `reason` is
+## The six doers hand back `{"ok": bool, "reason": String}`, and `reason` is
 ## `CombatMatch.last_refusal` -- the same words the match wrote into the fight's
 ## transcript. Nothing here decides that a move is illegal, that an attack is on
 ## cooldown or that a minion is not yours; it asks and repeats the answer.
@@ -194,7 +198,7 @@ func minion_cells(id: int) -> Array[Vector2i]:
 	return LegalMoves.destinations(match_state.board, match_state.pieces, minion)
 
 
-# --- The five things that spend it -----------------------------------------
+# --- The six things that spend it ------------------------------------------
 
 
 ## Step onto a cell. Spends the turn's move.
@@ -240,6 +244,23 @@ func send(id: int, to: Vector2i) -> Dictionary:
 ## around a board that is standing still.
 func finish() -> Dictionary:
 	fight.hand_turn_over()
+	return {"ok": true, "reason": ""}
+
+
+## Walk out of the fight. Spends the turn, and there is no next one.
+##
+## The way out, and the sixth thing a turn can be spent on -- though it buys none
+## of the three, because whoever spends it is off the board before the turn comes
+## round again. Everything about what leaving does is the fight's
+## (`Encounter.leave`); this asks and repeats the answer, as the five above do.
+func leave() -> Dictionary:
+	fight.leave(member)
+	# Whether it happened is read off the one thing leaving changes -- the
+	# character is no longer in a fight -- rather than off how much the fight
+	# wrote, because a refusal writes a line too and counting lines would read
+	# that line as a success.
+	if member.fighting:
+		return {"ok": false, "reason": match_state.last_refusal}
 	return {"ok": true, "reason": ""}
 
 

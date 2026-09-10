@@ -48,7 +48,9 @@
 # and waits. On your turn [ picks the next cell you may step onto and ] steps
 # onto it, ; picks one of your minions, ' picks where it goes and \ sends it,
 # 4 5 6 7 use the first to fourth weapon action, 8 and 9 turn you a quarter left
-# or right for free, and 0 ends your turn. The readout draws what is on offer --
+# or right for free, 0 ends your turn, and . walks you out of the fight
+# altogether -- off the board where you stand, alive, back into real time.
+# The readout draws what is on offer --
 # where you may go in green, what your weapons cover in rose -- and the buttons
 # along its bottom press the same keys.
 #

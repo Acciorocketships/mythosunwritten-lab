@@ -1142,6 +1142,8 @@ static func _the_key_named(keycode: int) -> String:
 			return "turn right"
 		BoardControls.KEY_END_TURN:
 			return "end the turn"
+		BoardControls.KEY_LEAVE:
+			return "leave the fight"
 	return "pick"
 
 

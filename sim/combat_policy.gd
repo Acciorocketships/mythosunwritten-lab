@@ -167,7 +167,7 @@ static func _swing(played: CombatMatch, me: Commander) -> void:
 		var covered := 0
 		for cell in LegalMoves.attack_cells_on(played.board, me, index, turn):
 			var standing := played.pieces.piece_at(cell)
-			if standing != null and standing.owner_id != me.owner_id:
+			if standing != null and standing.opposes(me):
 				covered += 1
 		if covered > best_covered:
 			best_covered = covered
@@ -188,7 +188,7 @@ static func _send_a_minion(played: CombatMatch, me: Commander) -> void:
 		for cell in LegalMoves.destinations(played.board, played.pieces, minion):
 			var standing := played.pieces.piece_at(cell)
 			var score := 0
-			if standing != null and standing.owner_id != me.owner_id:
+			if standing != null and standing.opposes(me):
 				score = 2 if standing.is_commander() else 1
 			var far := 0 if quarry == null else -_chebyshev(cell, quarry.cell)
 			if score > best_score or (score == best_score and far > best_far):
@@ -231,8 +231,12 @@ static func _nearest_enemy_piece(played: CombatMatch, me: Commander, from: Vecto
 	return _nearest(played, me, from, false)
 
 
-## The nearest piece not owned by `me`, walking the map in id order so an exact
-## tie goes to the lower id.
+## The nearest piece on another side from `me`, walking the map in id order so an
+## exact tie goes to the lower id.
+##
+## Another side rather than another owner, so that a rule playing a turn does not
+## close on somebody it came to the fight with. On a board of two commanders the
+## two readings are the same answer -- see `Piece.side`.
 static func _nearest(
 	played: CombatMatch, me: Commander, from: Vector2i, commanders_only: bool
 ) -> Piece:
@@ -240,7 +244,7 @@ static func _nearest(
 	var best := 0
 	for id in played.pieces.ids():
 		var piece := played.pieces.piece_of(id)
-		if piece == null or piece.owner_id == me.owner_id:
+		if piece == null or not piece.opposes(me):
 			continue
 		if commanders_only and not piece.is_commander():
 			continue

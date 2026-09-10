@@ -7,10 +7,19 @@ extends RefCounted
 ## Turn order is the commanders' ids, ascending, and a round is one pass down
 ## that list. Nothing anywhere counts to two, so nothing has to be changed to
 ## play three, or seven: the same loop that alternates two commanders rotates
-## seven, and `round_number` advances when the pass wraps. Section 3.8's "no
-## predefined teams" needs no support here because there is nothing here to
-## support -- targeting and capture are decided one attacker against one target,
-## by comparing two owner ids, and this class never groups an owner with another.
+## seven, and `round_number` advances when the pass wraps.
+##
+## ## Sides are read, never predefined
+##
+## Section 3.8's "no predefined teams" is still exactly what this class does: it
+## groups nobody. What it now *reads* is the side a piece says it is on
+## (`Piece.side`), which is the piece's own id unless somebody seated it with a
+## band -- so a fight of two commanders is two sides here as it always was, and a
+## fight two allies walked into together is one side and one enemy rather than
+## three enemies. The grouping is the world's, made at the snap
+## (`Encounter._seat`); all that happens here is that `is_over()` counts sides
+## instead of heads, because two commanders standing together at the end have
+## nothing left to settle.
 ##
 ## ## What one turn buys
 ##
@@ -172,14 +181,40 @@ func turn_number(_id: int) -> int:
 	return round_number
 
 
-## Whether the match has reached a conclusion: one commander left, or none.
+## Which sides are still in the match, ascending. One entry per side, however
+## many commanders are standing on it.
+##
+## A side is a piece's own id on every board that was never told about bands,
+## so on such a board this is the commanders themselves and every sentence below
+## says exactly what it said before. See `Piece.side`.
+func sides() -> PackedInt32Array:
+	var found := PackedInt32Array()
+	for id in _order:
+		var piece := pieces.piece_of(id)
+		if piece == null:
+			continue
+		if not found.has(piece.side()):
+			found.append(piece.side())
+	found.sort()
+	return found
+
+
+## Whether the match has reached a conclusion: one side left, or none.
+##
+## Counted in sides rather than in commanders because two commanders who came
+## onto the board together have nothing left to settle once everybody else is
+## down -- and a match that went on counting heads would wait for one of them to
+## kill the other. On a board where every commander is its own side, which is
+## every board that was never told about bands, one side left *is* one commander
+## left and this is the same test it was.
 func is_over() -> bool:
-	return _order.size() <= 1
+	return sides().size() <= 1
 
 
-## The last commander standing, or 0 while more than one is left.
+## The side that is left, or 0 while more than one is.
 func winner() -> int:
-	return _order[0] if _order.size() == 1 else 0
+	var left := sides()
+	return left[0] if left.size() == 1 else 0
 
 
 # --- The three things a turn buys -----------------------------------------
@@ -319,6 +354,39 @@ func activate_minion(id: int, to: Vector2i) -> Dictionary:
 	_write("  minion " + CombatResolution.describe(outcome))
 	_reap()
 	return outcome
+
+
+## Leave the fight: this commander comes off the board, taking its minions with
+## it, and its turn is over.
+##
+## The one way out of a match that is not being carried out of it. Nothing here
+## is a fourth thing a turn buys -- a turn that ends in leaving buys nothing at
+## all, because whoever spent it is no longer in the fight to have spent it. What
+## it costs is the turn itself: leaving is asked on your own turn and passes the
+## board on, exactly as ending a turn does.
+##
+## The commander and its minions leave together through the king rule's own one
+## operation (`PieceMap.kill`), because a piece whose commander has walked away is
+## the same piece with no king that section 3.3 removes. They are not dead: their
+## health is untouched, `Encounter.leave` puts the character back into the world
+## at the cell it was standing on, and `Encounter.fallen()` does not name them.
+##
+## Refused, and nothing changed, when it is not this commander's turn or there is
+## nobody standing there to leave.
+func withdraw(id: int) -> bool:
+	var piece := pieces.piece_of(id)
+	if piece == null or not piece.is_commander():
+		_refused("leave", id, "not a commander in this fight")
+		return false
+	if id != _active:
+		_refused("leave", id, "it is not #%d's turn" % id)
+		return false
+	_write("  leave #%d (%d,%d)" % [id, piece.cell.x, piece.cell.y])
+	pieces.kill(id)
+	_reap()
+	last_refusal = ""
+	end_turn()
+	return true
 
 
 ## End the turn and pass to the next commander, wrapping into the next round.

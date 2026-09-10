@@ -34,6 +34,21 @@ var id: int = 0
 ## comparison and includes the commander itself.
 var owner_id: int = NO_OWNER
 
+## Which side it fights for, or `NO_OWNER` when it fights for nobody but itself.
+##
+## An owner is who commands a piece; a side is who it is *with*. On a board of
+## two commanders those are the same answer, which is why this is unset almost
+## everywhere and `side()` below falls back to the owner: a board nobody has told
+## about sides plays exactly the fight it played before.
+##
+## They come apart the moment two commanders who are on one side in the world
+## walk into one fight together. The world has bands (`Combatant.band`), the
+## board had no word for them, and a `PieceMap` makes every commander its own
+## owner -- so a trader who came along with you was, on the board, somebody to
+## kill. `Encounter._seat` is where the world's band is written in here, and it
+## is the only place that writes it.
+var side_id: int = NO_OWNER
+
 ## Where it stands.
 var cell := Vector2i.ZERO
 
@@ -172,6 +187,26 @@ func stat_line() -> String:
 		id, kind_name(), owner_id, level, health, max_health(),
 		defence(), attack_power(),
 	]
+
+
+## Which side this piece is on: the band it was seated with, or itself.
+##
+## Read rather than compared directly, because "unset" has to mean "its own
+## side" for every board that was never told about bands -- which is every board
+## in the suite, every scenario with two commanders in it, and every fight the
+## world held before this existed.
+func side() -> int:
+	return owner_id if side_id == NO_OWNER else side_id
+
+
+## Whether two pieces are on opposite sides.
+##
+## The one question a chooser asks about somebody else's piece, in one place, so
+## that "is that an enemy" cannot be answered two ways. It is not asked by the
+## resolution step: an attack burns whatever is standing in its pattern, own
+## minions included, and that rule is `CombatResolution`'s and is untouched.
+func opposes(other: Piece) -> bool:
+	return other != null and side() != other.side()
 
 
 ## What `line()` prints for a facing. Overridden by the piece that has one.

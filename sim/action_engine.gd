@@ -78,6 +78,15 @@ const JUMP_PER_DEX := 0.75
 ## because two questions are asked of the same rule: `_go_to` and `_jump` below
 ## ask it when they resolve, and `refused_before_it_begins` asks it for a caller
 ## that needs the same answer at the moment the action is chosen.
+##
+## It says where a fighter goes, and it has never said that a fighter is stuck.
+## Two things move a piece on a board and neither is here: the turn itself
+## (`CombatMatch.move_commander`, which is what a person's step key and the
+## board's own stand-in chooser both spend), and walking out of the fight
+## altogether (`CombatMatch.withdraw`, a turn spent leaving). Section 10 spells
+## `go_to` four ways and one of them is `Flee`; in real time that is exactly this
+## action, aimed away from whatever is coming, and on a board it is a turn spent
+## leaving rather than a walk this file would have to invent.
 const THE_BOARD_DECIDES := [ActionCatalog.GO_TO, ActionCatalog.JUMP]
 const THE_BOARD_SAYS := "the board decides where a fighter goes"
 

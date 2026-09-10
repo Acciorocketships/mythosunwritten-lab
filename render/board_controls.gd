@@ -38,6 +38,11 @@ extends RefCounted
 ##   * **`8` / `9`** -- turn a quarter to the left or the right. Free: it spends
 ##     none of the three, and the cells a weapon covers move with it.
 ##   * **`0`** -- end your turn and pass the board on.
+##   * **`.`** -- leave the fight. You come off the board where you stand, your
+##     minions come with you, and you are back in the world in real time. It
+##     costs the turn and there is no next one, which is the whole of what
+##     running away costs: `Encounter.leave` decides all of it and this only
+##     presses the key.
 ##
 ## ## What is picked is kept by identity
 ##
@@ -66,6 +71,15 @@ const SWING_KEYS := [KEY_4, KEY_5, KEY_6, KEY_7]
 const KEY_TURN_LEFT := KEY_8
 const KEY_TURN_RIGHT := KEY_9
 const KEY_END_TURN := KEY_0
+
+## Leaving the fight altogether.
+##
+## Its own key rather than a shape of one of the others, because it is the only
+## press on the board that ends somebody's fight rather than spending part of it.
+## `.` because it is the one key next to the turn keys that means nothing in real
+## time, so a person cannot leave a fight by pressing something they meant for
+## the world.
+const KEY_LEAVE := KEY_PERIOD
 
 ## What no cell is: a pick that has not been made. A real cell can be anything,
 ## including the origin, so "none" is a flag rather than a coordinate.
@@ -97,7 +111,7 @@ static func binds(keycode: int) -> bool:
 		return true
 	return [
 		KEY_PICK_CELL, KEY_STEP, KEY_PICK_MINION, KEY_PICK_MINION_CELL,
-		KEY_SEND, KEY_TURN_LEFT, KEY_TURN_RIGHT, KEY_END_TURN,
+		KEY_SEND, KEY_TURN_LEFT, KEY_TURN_RIGHT, KEY_END_TURN, KEY_LEAVE,
 	].has(keycode)
 
 
@@ -140,6 +154,8 @@ func press(keycode: int, turn: BoardTurn) -> Dictionary:
 			return turn.turn_right()
 		KEY_END_TURN:
 			return turn.finish()
+		KEY_LEAVE:
+			return turn.leave()
 	return {}
 
 
@@ -271,4 +287,5 @@ static func bindings() -> PackedStringArray:
 		"4 5 6 7      use the first, second, third or fourth weapon action",
 		"8 / 9        turn a quarter left or right (free)",
 		"0            end your turn",
+		".            leave the fight and go back to real time",
 	])
