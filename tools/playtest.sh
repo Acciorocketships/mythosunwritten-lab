@@ -18,6 +18,7 @@
 #   ./tools/playtest.sh left      # W-fight-end: the same fight, walked out of
 #   ./tools/playtest.sh leaving   # W-fight-cooloff: leaving one, said on screen
 #   ./tools/playtest.sh cooloff   # W-fight-cooloff: the same fight, and it stays over
+#   ./tools/playtest.sh sentences # W-panel-sentences: what the panels print, in English
 #   ./tools/playtest.sh whole     # everything in one seed, one run
 #   ./tools/playtest.sh all
 #
@@ -373,6 +374,28 @@ session_cooloff() {
 		--screenshot-ticks "150:$A/playtest-cooloff-t150.png,240:$A/playtest-cooloff-t240.png,260:$A/playtest-cooloff-t260.png,300:$A/playtest-cooloff-t300.png,500:$A/playtest-cooloff-t500.png,790:$A/playtest-cooloff-t790.png"
 }
 
+session_sentences() {
+	# What the panels print, read as English. Four presses that put a different
+	# kind of choice on the answer panel's top row -- a spoken line, a walk, a
+	# trade and an attack -- each photographed a tick or two after the press,
+	# while the choice is still standing and the world has not finished with it.
+	#
+	# The last press is K, a leap further than an ordinary DEX reaches, so the
+	# engine refuses it and says why. Two frames follow it: one just after, where
+	# the answer says how many ticks ago it was given, and one long after, where
+	# it has stopped being drawn altogether. That pair is the whole of the third
+	# defect -- an answer nobody can date reads as the answer to the last key.
+	run sentences --seed $SEED --scenario play --play --journal \
+		--camera 0 5 10 --aim 1 \
+		--input "6:tab,8:w,20:b,22:t,34:f,36:c,40:o,54:n,70:k" \
+		--screenshot-ticks "10:$A/playtest-sentences-walk.png,27:$A/playtest-sentences-said.png,42:$A/playtest-sentences-trade.png,58:$A/playtest-sentences-attack.png,74:$A/playtest-sentences-fresh.png,150:$A/playtest-sentences-stale.png"
+	# And the board's own line: what is picked, on the readout, with nothing
+	# picked yet and then with both rings on something.
+	run sentences-board --seed $SEED --scenario battle --play --readout --board \
+		--journal --input "16:bracketleft,20:semicolon,22:apostrophe" \
+		--screenshot-ticks "15:$A/playtest-sentences-step-none.png,18:$A/playtest-sentences-step.png,24:$A/playtest-sentences-step-both.png"
+}
+
 session_whole() {
 	# Everything in one run and one seed: walk, every kind of action, the
 	# inventory, a fight the world starts by itself played from the keyboard and
@@ -425,11 +448,12 @@ case "${1:-all}" in
 	left) session_left ;;
 	leaving) session_leaving ;;
 	cooloff) session_cooloff ;;
+	sentences) session_sentences ;;
 	whole) session_whole ;;
 	all)
 		session_board; session_live; session_input; session_verbs; session_walk
 		session_pace; session_bag; session_fit; session_items; session_enemy
 		session_fight; session_ended; session_beaten; session_left
-		session_leaving; session_cooloff; session_whole ;;
+		session_leaving; session_cooloff; session_sentences; session_whole ;;
 	*) echo "no such session: $1" >&2; exit 2 ;;
 esac

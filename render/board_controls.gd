@@ -260,18 +260,50 @@ static func marks(turn: BoardTurn, picked: BoardControls) -> Dictionary:
 	}
 
 
-## What is picked, in one line, for a readout and for a trace: the cell the next
-## step would go to, and which minion would be sent where.
+## What the two rings are picked on, when neither has anything on it.
+##
+## Not a refusal and not a sentence about the fight: the board has been asked
+## nothing, so it has answered nothing. It says that the person has not yet
+## picked what a press would spend, which is the one thing the keyboard decides
+## by itself -- see `LayerCheck.RENDER_NOTES` for where that line is drawn.
+const NOTHING_PICKED := "nothing picked yet"
+
+
+## What is picked, as a sentence, for a readout and for a trace: where the next
+## step would go, and which minion would be sent where.
+##
+## It used to read `step none no unit to none`, which is this object's fields
+## printed in a row. A pixel font draws the brackets round a cell as bare
+## vertical strokes and the comma inside them as a full stop, so even the case
+## that had something in it -- `step (-161,138) no unit to none` -- was four
+## values and no sentence.
 func picked_line() -> String:
-	return "step %s %s to %s" % [
-		_cell_line(has_cell, cell),
-		"no unit" if minion_id == 0 else "#%d" % minion_id,
-		_cell_line(has_minion_cell, minion_cell),
-	]
+	return step_line(has_cell, cell, minion_id, has_minion_cell, minion_cell)
 
 
-static func _cell_line(picked: bool, at: Vector2i) -> String:
-	return "none" if not picked else "(%d,%d)" % [at.x, at.y]
+## The same, from the five things it is made of.
+##
+## Pure, and taken apart from the object so that a test can pin every shape of
+## the sentence -- both rings empty, one picked, a minion with nowhere to go --
+## with no board, no turn and no window anywhere.
+static func step_line(
+	stepping: bool, to_cell: Vector2i,
+	unit_id: int, sending: bool, to_minion_cell: Vector2i
+) -> String:
+	var clauses := PackedStringArray()
+	if stepping:
+		clauses.append("stepping to %s" % _cell_line(to_cell))
+	if unit_id != 0:
+		clauses.append("sending #%d to %s" % [unit_id, _cell_line(to_minion_cell)] \
+			if sending else "nowhere picked yet for #%d" % unit_id)
+	return NOTHING_PICKED if clauses.is_empty() else " and ".join(clauses)
+
+
+# One cell of the lattice, written without the brackets and the comma the pack's
+# font cannot draw. `SproutPack.drawable()` swaps those for something legible on
+# the panel that draws this, and a cell written this way needs no swapping.
+static func _cell_line(at: Vector2i) -> String:
+	return "%d by %d" % [at.x, at.y]
 
 
 ## What a person may press on the board and what it does, one line each, printed

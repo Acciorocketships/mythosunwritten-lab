@@ -7,18 +7,34 @@ extends PanelContainer
 ## is addressed to whoever chose, and once whoever chose is a person the reason
 ## has to reach a screen or it has not been returned to anybody.
 ##
-## ## It quotes; it does not phrase
+## ## It quotes the answer; it re-words the choice
 ##
-## Every sentence on this panel is the simulation's own. What was chosen is
-## `Action.line()`, and what came of it is `ActionOutcome.line()`, both carried
-## out of `ControlLoop.answer_of` unchanged -- through `SproutPack.drawable()`,
-## which swaps the handful of characters the art's font has no glyph for and
-## changes no word. There is no table of friendly
-## wordings here, no rewriting of "12.00 is further than DEX 3 jumps (3.75)" into
-## something an interface author preferred, and no sentence written on this side
-## of the line at all except the two labels that say which row is which and the
-## resting line that says nobody has chosen anything yet. If the engine changes
-## how it refuses a jump, this panel says the new thing without being touched.
+## The answer row is the simulation's own sentence and nothing else.
+## `ActionOutcome.line()`, carried out of `ControlLoop.answer_of` unchanged --
+## through `SproutPack.drawable()`, which swaps the handful of characters the
+## art's font has no glyph for and changes no word. There is no table of friendly
+## wordings for it, no rewriting of "12.00 is further than DEX 3 jumps (3.75)"
+## into something an interface author preferred. If the engine changes how it
+## refuses a jump, this panel says the new thing without being touched.
+##
+## The choice row is the one place that is not a quotation, and it is not one
+## because `Action.line()` is a call rather than a sentence: in this font
+## `say(text="what will you take for it?")` draws as
+## `SAYITEXT="WHAT WILL YOU TAKE FOR IT?"I`, brackets as bare strokes and the
+## comma as a full stop. `render/ui/action_sentence.gd` writes the same choice as
+## English, out of the action's own kind and parameters and nothing else -- it
+## reads no world, decides nothing, and cannot say why anything did or did not
+## happen. The simulation's own spelling is untouched and is still what the
+## journal, the traces and the comparison below are written in.
+##
+## ## An answer says how old it is, and stops being shown
+##
+## An answer used to sit on this panel for ever. A refusal from two hundred ticks
+## ago, still drawn under a fresh choice, reads as the answer to the key just
+## pressed. So two things: the age of the answer is drawn beside it, in the
+## world's own ticks, and once it is older than `ANSWER_LIFE` it is not drawn at
+## all. Both are one pure function, `age_line()`, so the whole of the rule is one
+## thing a test can pin.
 ##
 ## ## It is a view, and it holds nothing
 ##
@@ -63,6 +79,15 @@ const WIDTH := 296
 ## for every refusal the engine currently writes at this width.
 const ANSWER_LINES := 2
 
+## How many ticks an answer goes on being drawn for.
+##
+## The longest thing a person can choose is a walk, and a walk is charged the
+## strides it takes up to twenty ticks (`ActionCatalog`'s `go_to` row), so this
+## is three of the longest actions there are: an answer stays through whatever it
+## answered and a good pause after it, and a refusal nobody can still connect to
+## a key they pressed goes away rather than standing in for the next one.
+const ANSWER_LIFE := 60
+
 ## The gaps, in art pixels: eighths of the art's own cell, as on the other
 ## panels.
 const GAP := 2
@@ -84,6 +109,10 @@ var driven_id := 0
 var _chose_label: Label
 var _answer_icon: TextureRect
 var _answer_label: Label
+## How old the answer under it is, in the world's own ticks. Its own row rather
+## than a tail on the answer's own line, because the answer is a quotation and
+## this is not part of it.
+var _age_label: Label
 var _faces := {}
 
 
@@ -117,6 +146,12 @@ func _init() -> void:
 	_answer_label = _sentence()
 	answer_row.add_child(_answer_label)
 	column.add_child(answer_row)
+
+	_age_label = Label.new()
+	_age_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_age_label.theme_type_variation = StringName(SproutTheme.DIM_LABEL)
+	_age_label.custom_minimum_size = Vector2(WIDTH - SproutPack.CELL - GAP, 0)
+	column.add_child(_age_label)
 	refresh()
 
 
@@ -155,6 +190,8 @@ func refresh() -> void:
 		_answer_label.text = ""
 		_answer_label.visible = false
 		_answer_icon.visible = false
+		_age_label.text = ""
+		_age_label.visible = false
 		return
 	# Then what the world says about having walked out of a fight, for as long as
 	# that is still the last thing that happened. Asked before the holder for the
@@ -170,8 +207,14 @@ func refresh() -> void:
 		_answer_label.text = ""
 		_answer_label.visible = false
 		_answer_icon.visible = false
+		_age_label.text = ""
+		_age_label.visible = false
 		return
-	_chose_label.text = RESTING if choice.waiting() else SproutPack.drawable(choice.line())
+	# The choice, as a sentence rather than as the call the simulation writes it
+	# down as. `render/ui/action_sentence.gd` is handed the standing action and
+	# nothing else, so what is drawn here is a pure function of what was chosen.
+	_chose_label.text = RESTING if choice.waiting() else SproutPack.drawable(
+		ActionSentence.of(choice.standing()))
 	_chose_label.theme_type_variation = StringName(
 		SproutTheme.DIM_LABEL) if choice.waiting() else StringName("")
 
@@ -186,9 +229,18 @@ func refresh() -> void:
 	# same line on the other, so the comparison holds nothing.
 	if not choice.waiting() and String(answer.get("action", "")) != choice.line():
 		said = ""
+	# And how long ago the world said it, which is the other half of the same
+	# question: an answer with nothing to date it reads as the answer to the last
+	# key pressed however old it is. Past `ANSWER_LIFE` there is no age to draw
+	# and the row goes with it.
+	var aged := "" if said == "" else age_line(now_tick(), int(answer.get("tick", 0)))
+	if aged == "":
+		said = ""
 	_answer_label.text = said
 	_answer_icon.visible = said != ""
 	_answer_label.visible = said != ""
+	_age_label.text = aged
+	_age_label.visible = said != ""
 	if said == "":
 		return
 	var refused := not bool(answer.get("ok", true))
@@ -202,6 +254,32 @@ func refresh() -> void:
 ## down. An empty dictionary before it has answered anything.
 func last_answer() -> Dictionary:
 	return _answer()
+
+
+## How old an answer given on one tick is when read on another, in words -- and
+## "" for one so old it should not be drawn at all.
+##
+## The whole of the rule in one pure function, so that "says how old it is" and
+## "stops being shown" are one decision rather than two that could disagree. A
+## negative age cannot happen in a run -- the loop's clock and the world's move
+## together -- and is read as "just now" rather than as a number nobody could
+## make sense of.
+static func age_line(now: int, then: int) -> String:
+	var ago := maxi(0, now - then)
+	if ago > ANSWER_LIFE:
+		return ""
+	if ago == 0:
+		return "just now"
+	if ago == 1:
+		return "1 tick ago"
+	return "%d ticks ago" % ago
+
+
+## Which tick the world is on, or zero with no world to ask. The clock the
+## answer's own `tick` was written against: `ControlLoop` stamps it off the
+## scene, and the scene and the world advance on the same step.
+func now_tick() -> int:
+	return 0 if world == null else world.tick
 
 
 ## What the world says has become of the character being driven -- the engine's

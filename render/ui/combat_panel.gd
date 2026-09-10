@@ -73,6 +73,11 @@ const ORDER_ROWS := 6
 ## carries more than two, and a randomised one is not expected to carry four.
 const ACTION_ROWS := 4
 
+## How many lines of the picked sentence are drawn. At this width a line holds
+## about twenty-two letters, and the longest shape of the sentence -- a step and
+## a minion, both with a cell -- runs to three of them.
+const PICKED_LINES := 3
+
 ## How many minion icons the minion row draws before it stops. The count on
 ## the heading is the truth either way, as with the turn order.
 const MINION_ICONS := 8
@@ -238,8 +243,15 @@ func _init() -> void:
 	_spent_rows = _stack()
 	column.add_child(_spent_rows)
 	_picked_label = Label.new()
-	_picked_label.theme_type_variation = SproutTheme.DIM_LABEL
-	_picked_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	# The panel's ordinary text colour, not the dimmed one. What is picked is
+	# what the next press spends, so it is the one line in this section a person
+	# actually has to be able to read -- and the dim tan it used to be drawn in
+	# is the colour of the frame's own rails, a shade off the brown it sits on.
+	# It is also wrapped rather than trimmed: at this width the old line ran past
+	# the panel and ended in an ellipsis, which is a sentence that has not been
+	# said.
+	_picked_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_picked_label.max_lines_visible = PICKED_LINES
 	column.add_child(_picked_label)
 	for row in CONTROLS:
 		var buttons := _build_controls(row)
@@ -448,7 +460,7 @@ func _refresh_turn() -> void:
 		state.theme_type_variation = \
 			StringName(SproutTheme.DIM_LABEL) if spent else StringName("")
 	_picked_label.text = SproutPack.drawable(
-		"nothing picked" if picked == null else picked.picked_line())
+		BoardControls.NOTHING_PICKED if picked == null else picked.picked_line())
 
 
 # --- Building the tree ----------------------------------------------------
