@@ -170,7 +170,94 @@ asset check: OK -- res://sim names asset tags and no asset
 No panel gained or lost a control, and nothing under `render/` decides anything
 or holds any simulation state: the change is the rule that picks one number.
 
-## 7. What this does not fix
+## 7. The suite, and the ten failures this item's own run recorded
+
+The full headless suite passes on the tip. `reports/walk-pace-full-suite-2.log`,
+run on 35ff3f0 and committed as f398dcc, ends:
+
+```
+all 67 suites passed (212360 checks)
+```
+
+`grep -c '^FAIL'` over that file returns 0, and `ui fit` reads `100 checks`
+(line 146). 35ff3f0 carries this change: `git merge-base --is-ancestor d29342c
+35ff3f0` succeeds, as does the same test against `HEAD`.
+
+This item's own suite run, `reports/window-fit-full-suite.log`, was started at
+01:18 and ended at 02:32 with `10 of 67 suites failed (11 failed checks of
+212157)`. All ten pass in the later log. They are not ten separate problems:
+they are one, and it is worth naming rather than leaving to a green run to
+bury.
+
+**The cause: the suite ran against a tree that was being edited underneath it.**
+The walk-pace work — a person walks at everybody's speed — was in progress in
+the same working tree while this suite ran; it was committed at 03:34 as
+ac63731, an hour after the suite ended. Every one of the ten failures is a
+comparison between something made before that edit and something made after it.
+
+| suite | the failed check | which side was stale |
+|---|---|---|
+| scenario | the checked-in transcript is not what the command prints | `reports/scenario-evidence.txt`, regenerated in ac63731 |
+| agent | the run ran out of recorded replies; the transcript is not what the command prints | `net/model_recording.gd` and `reports/agent-evidence.txt`, both regenerated in ac63731 |
+| memory | the checked-in transcript is not what the command prints | `reports/lesson-evidence.txt`, regenerated in ac63731 |
+| goals | the checked-in transcript is not what the command prints | `reports/goal-evidence.txt`, regenerated in ac63731 |
+| checks | `reports/check-evidence.txt` is not what `run_check.sh` prints | `reports/check-evidence.txt`, regenerated in ac63731 |
+| goodwill | `reports/goodwill-evidence.txt` is not what `run_goodwill.sh` prints | `reports/goodwill-evidence.txt`, regenerated in ac63731 |
+| orchestrator | `reports/world-evidence.txt` is not what `run_world.sh` prints | `reports/world-evidence.txt`, regenerated in ac63731 |
+| grass | the shell with grass reached a different world from a headless run of seed 5 at tick 30 | neither file: two live runs of different code, below |
+| atmosphere | the shell with the atmosphere reached a different world from a headless run of seed 5 at tick 30 | the same pair as grass |
+| render shell | rendering changed the simulation: the shell and a headless run of seed 5 reached different worlds at tick 40 | the same, at tick 40 |
+
+Seven of the ten are checked-in evidence: a transcript or the recorded model
+replies, written down before the walk change and compared against a command that
+ran after it. `git show --stat ac63731` lists every one of those files.
+
+### The three that said a rendered run and a headless run reached different worlds
+
+These three had no stored constant on either side, so "the file was stale" is
+not available as an answer. Each compares **two live runs**:
+`tests/test_grass.gd:1326` builds `Simulation.new(SEED)` inside the suite's own
+process and compares its digest against one parsed from a **freshly spawned**
+`run_render.sh` subprocess. The suite process loaded its copy of the simulation
+scripts when it booted at 01:18; each subprocess re-reads the project from disk
+at the moment it launches. A tree edited between those two moments puts
+different code on the two sides of the comparison.
+
+That is what happened, and the digests say so exactly. Running the same seed
+headless at the commit this item shipped and at the tip that carries the walk
+change reproduces both halves of every failure:
+
+```
+# at d29342c -- the tree as it stood when the suite booted
+$ ./run_headless.sh --seed 5 --ticks 30   ->  final=f85dd3ddf8976d8f
+$ ./run_headless.sh --seed 5 --ticks 40   ->  final=75d6ba3593d74f6f
+
+# at the tip, carrying ac63731 -- the tree as it stood when the shell launched
+$ ./run_headless.sh --seed 5 --ticks 30   ->  final=df77c1ef028a476e
+$ ./run_headless.sh --seed 5 --ticks 40   ->  final=4bb70ebd6ac5b32c
+```
+
+| the failed check | expected (in-process, suite booted 01:18) | actual (subprocess, launched late in the same run) |
+|---|---|---|
+| grass, tick 30 | `f85dd3ddf8976d8f` = **d29342c** | `df77c1ef028a476e` = **ac63731** |
+| atmosphere, tick 30 | `f85dd3ddf8976d8f` = **d29342c** | `df77c1ef028a476e` = **ac63731** |
+| render shell, tick 40 | `75d6ba3593d74f6f` = **d29342c** | `4bb70ebd6ac5b32c` = **ac63731** |
+
+Both sides of all three failures are accounted for by a code version, and by the
+one the timestamps predict: the older code in the long-lived suite process, the
+newer code in the subprocess it spawned an hour later. Nothing about rendering
+is implicated. The grass suite's other digest check in the same function — shell
+against shell, `--no-grass` against grass — passed in that very run, which is
+the signature: two subprocesses launched moments apart read the same code as
+each other, and only the comparison that crossed the process boundary in time
+disagreed. On a tree that holds still, all three pass: they do in
+`reports/walk-pace-full-suite-2.log`, lines 128, 130 and 136.
+
+The lesson is about how this project buys evidence, not about this change: a
+suite that spawns subprocesses is comparing the tree at two different moments,
+so a full suite run has to be given a tree nobody is editing.
+
+## 8. What this does not fix
 
 The panels a play run builds want about 644x685 art pixels between them at their
 fullest, and no window this game is played in has room for two of that, so the
