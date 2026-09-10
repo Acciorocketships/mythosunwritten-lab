@@ -28,6 +28,11 @@ extends TestSuite
 ##      both halves of an offer with the items and the coins each way.
 ##   6. **The controls hold nothing the world does not.** What is aimed at is
 ##      kept by id, so a thing that walks out of sight stops being aimed at.
+##   7. **The keyboard refuses nothing the world allows.** An unarmed blow -- the
+##      one choice the attack key used to answer by itself -- is built from the
+##      keys and made straight out of the catalogue in two worlds off one seed,
+##      and the two reach the same answer. And the condition has one wording in
+##      the tree rather than three.
 class_name TestPlayerActions
 
 ## The seed and the stage: the play scenario, on the same measured meadow every
@@ -103,6 +108,8 @@ func run() -> void:
 	_what_can_be_aimed_at_is_what_can_be_observed()
 	_the_interface_invents_no_verb_and_holds_no_rule()
 	_an_aim_is_kept_by_id_and_not_by_position()
+	_the_keyboard_refuses_nothing_the_world_allows()
+	_one_condition_has_one_wording()
 
 
 # --- 1: one seeded run, every verb -----------------------------------------
@@ -595,3 +602,123 @@ static func _code_of(path: String) -> String:
 		var at := line.find("#")
 		kept.append(line if at < 0 else line.substr(0, at))
 	return "\n".join(kept)
+
+
+# --- 7: the keyboard refuses nothing the world allows -----------------------
+
+
+## The one choice a person could not make and everybody else could.
+##
+## Pressing the attack key with nothing in hand used to be answered by
+## `render/player_controls.gd` with a sentence of its own, and no action was ever
+## built -- while the same choice handed to the simulation directly began an
+## unarmed fight. So this is played twice off one seed: once with the choice
+## built by the attack key, once with the same choice taken off the catalogue by
+## hand, and the two runs are compared. Nothing else differs between them.
+##
+## Hob is the target because he stands six units from the person at the start,
+## well inside `Encounter.JOIN_RADIUS`, and is of the same band -- so no fight has
+## begun by itself and the blow is the thing that starts one.
+func _the_keyboard_refuses_nothing_the_world_allows() -> void:
+	var by_key := _unarmed_blow(true)
+	var by_hand := _unarmed_blow(false)
+
+	equal(String(by_key["note"]), "",
+		"the attack key wrote a refusal of its own: %s" % by_key["note"])
+	var pressed: Action = by_key["action"]
+	check(pressed != null,
+		"the attack key built no action for a blow the world allows")
+	if pressed == null:
+		return
+	var taken: Action = by_hand["action"]
+	equal(pressed.kind, taken.kind, "the key should build the catalogue's verb")
+	equal(pressed.target_id(), taken.target_id(),
+		"the key should aim the blow at who was aimed at")
+	equal(String(pressed.param("item", "")), String(taken.param("item", "")),
+		"bare hands from the keys should be the bare hands the catalogue takes")
+
+	var key_answer: Dictionary = by_key["answer"]
+	var hand_answer: Dictionary = by_hand["answer"]
+	check(not key_answer.is_empty(),
+		"the world never answered the blow chosen from the keys")
+	check(not hand_answer.is_empty(),
+		"the world never answered the blow chosen off the catalogue")
+	if key_answer.is_empty() or hand_answer.is_empty():
+		return
+	equal(String(key_answer["line"]), String(hand_answer["line"]),
+		"the same choice made two ways should reach one answer")
+	check(bool(key_answer["ok"]),
+		"an unarmed blow the world allows was refused: %s" % key_answer["line"])
+	check(String(key_answer["line"]).contains("fight"),
+		"an unarmed blow should have begun a fight: %s" % key_answer["line"])
+
+
+# Play one seeded world up to a single unarmed blow at Hob and hand back what
+# was chosen, what the interface said about it, and what the world answered.
+# `from_the_keys` is the only difference between the two runs.
+static func _unarmed_blow(from_the_keys: bool) -> Dictionary:
+	var world := SimWorld.new(SEED)
+	ScriptedPlay.muster(world)
+	var id := world.follow_id
+	var choice := WorldCast.hand_over(world, id)
+	var hob := ScriptedPlay.id_of(world.combat.scene, HOB)
+	var made := {"action": null, "note": "", "answer": {}}
+	if choice == null or hob == 0:
+		return made
+
+	if from_the_keys:
+		var controls := PlayerControls.new()
+		var view := world.surroundings_of(id)
+		for _each in view.aims.size() + 1:
+			controls.press(PlayerControls.KEY_AIM, view)
+			if controls.aimed_id == hob:
+				break
+		# Nothing in hand, which is where the hold ring starts and is a choice.
+		made["action"] = controls.press(
+			PlayerControls.KEY_ATTACK, world.surroundings_of(id))
+		made["note"] = controls.note
+	else:
+		made["action"] = Action.attack(hob, PlayerControls.EMPTY_HANDS)
+	if made["action"] == null:
+		return made
+
+	choice.choose(made["action"])
+	var was := int((world.loop.answer_of(id) as Dictionary).get("tick", -1))
+	for _tick in PATIENCE:
+		world.step()
+		var answer := world.loop.answer_of(id)
+		if answer.is_empty() or int(answer["tick"]) == was:
+			continue
+		made["answer"] = answer
+		return made
+	return made
+
+
+## One condition, one wording, and one copy of it in the tree.
+##
+## The sentence is `CombatResolution.empty_handed`, which is where a weapon
+## action is actually spent. It is written in one file and quoted everywhere
+## else; the two sentences that used to answer the same situation -- the attack
+## key's own, and `no such attack` for a commander holding nothing -- are gone.
+##
+## `no such attack` itself is still in the tree and is meant to be: it now
+## answers a different question, which is a weapon asked for an attack it does
+## not have.
+func _one_condition_has_one_wording() -> void:
+	var wording := CombatResolution.empty_handed("").strip_edges()
+	check(wording != "", "the empty-handed sentence should not be empty")
+	var carrying := PackedStringArray()
+	var inventing := PackedStringArray()
+	for directory in [LayerCheck.SIM_DIR, LayerCheck.RENDER_DIR]:
+		for path in LayerCheck._files_under(directory):
+			var code := FileAccess.get_file_as_string(path)
+			if code.contains(wording):
+				carrying.append(path)
+			if code.contains("holding nothing to attack with"):
+				inventing.append(path)
+	equal(carrying.size(), 1,
+		"the empty-handed sentence should be written in one file, found it in: %s"
+			% str(carrying))
+	equal(inventing.size(), 0,
+		"a second sentence for the same condition is still in the tree: %s"
+			% str(inventing))

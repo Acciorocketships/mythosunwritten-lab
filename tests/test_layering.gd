@@ -1,12 +1,13 @@
 extends TestSuite
 ## The layer split is a deliverable, so it is tested like one.
 ##
-## Three rules are checked, and each of them twice: that it holds right now, and
+## Four rules are checked, and each of them twice: that it holds right now, and
 ## that the checker would actually notice if it stopped holding -- a check that
 ## can never fail is worth nothing. The rules are the simulation not knowing the
-## render layer exists, the render layer holding no piece of the fight, and the
+## render layer exists, the render layer holding no piece of the fight, the
 ## interface naming its art in one table and never falling back to the engine's
-## own theme or typeface.
+## own theme or typeface, and the keyboard inventing no sentence about why
+## something did not happen.
 class_name TestLayering
 
 
@@ -22,6 +23,8 @@ func run() -> void:
 	_combat_checker_catches_a_held_piece()
 	_interface_names_its_art_in_one_table()
 	_interface_checker_catches_a_default()
+	_the_keyboard_invents_no_refusal()
+	_note_checker_catches_an_invented_sentence()
 
 
 func _simulation_layer_is_clean() -> void:
@@ -154,3 +157,63 @@ func _interface_checker_catches_a_default() -> void:
 	equal(LayerCheck.first_ui_match(
 		"const SHEET := ROOT + \"ui_sheet.png\"", LayerCheck.UI_TABLE), "",
 		"the table itself must be allowed to name the pack's files")
+
+
+## The keyboard invents no refusal.
+##
+## Every sentence a person reads about why something did not happen is the
+## simulation's own answer, quoted; the only sentences the render layer may write
+## for itself are the ones in `LayerCheck.RENDER_NOTES`, which are about what the
+## person has not yet picked and about nothing the world decides.
+##
+## This is the structural half of the rule. The behavioural half -- that an
+## unarmed attack chosen from the keys reaches the same answer as the same choice
+## made straight out of the action catalogue -- is in tests/test_player_input.gd.
+func _the_keyboard_invents_no_refusal() -> void:
+	var files := LayerCheck._files_under(LayerCheck.NOTE_DIR)
+	check(files.size() >= 3,
+		"expected the checker to find the render sources, found %d file(s)"
+		% files.size())
+	var violations := LayerCheck.run_notes()
+	var report := PackedStringArray()
+	for violation in violations:
+		report.append(LayerCheck.format_note_violation(violation))
+	check(violations.is_empty(),
+		"render/ writes sentences of its own:\n      %s" % "\n      ".join(report))
+
+
+func _note_checker_catches_an_invented_sentence() -> void:
+	# The one this rule was written for, and three of the shapes it could come
+	# back in.
+	var offending_lines := [
+		"\t\t\t\tnote = \"you are holding nothing to attack with\"",
+		"\tnote := \"it is not your turn on a board\"",
+		"\tvar said := \"it is not your turn on a board\"",
+		"\tnote = \"that chest is shut\"",
+	]
+	for line in offending_lines:
+		not_equal(LayerCheck.first_note_match(line), "",
+			"the note checker should have flagged: %s" % line.strip_edges())
+
+	# Sentences that are on the list, a field being cleared, and -- the case that
+	# matters most -- a sentence that came out of the simulation rather than out
+	# of this layer.
+	var innocent_lines := [
+		"\t\tnote = \"nothing is aimed at\"",
+		"\t\tnote = \"you are holding nothing to drop\"",
+		"\tnote = \"\"",
+		"\tvar said := _sim.no_turn_because()",
+		"\tvar said := String(answered.get(\"reason\", \"\"))",
+		"\tnote = _board_controls.note",
+		"\tvar footnote = \"drawn from the pack\"",
+	]
+	for line in innocent_lines:
+		equal(LayerCheck.first_note_match(LayerCheck._strip_comment(line)), "",
+			"the note checker should not have flagged: %s" % line.strip_edges())
+
+	# And the list is the whole of what may be said: every sentence on it is
+	# accepted, so a rule that quietly accepted everything would still fail the
+	# offending lines above.
+	for said in LayerCheck.RENDER_NOTES:
+		equal(LayerCheck.first_note_match("\tnote = \"%s\"" % said), "",
+			"a listed sentence should be allowed: %s" % said)

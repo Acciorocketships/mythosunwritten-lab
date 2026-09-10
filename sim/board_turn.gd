@@ -93,6 +93,50 @@ static func of(scene: ActionScene, actor_id: int) -> BoardTurn:
 	return turn
 
 
+## Why there is no turn standing for one character, in the world's own words,
+## and "" when there is one.
+##
+## The other half of `of()` above. `of()` answers null for four different
+## situations and null says nothing about which; this says which, and it says it
+## in sentences the world already owns rather than in a sentence written for a
+## screen. It exists because the interface had one of its own -- "it is not your
+## turn on a board" -- and printed it for all four, so somebody who had been
+## beaten, somebody who had walked out of a fight and somebody standing in an
+## empty field with no board anywhere were all told to wait for a turn.
+##
+## The four, in the order they are asked, which is most-final first:
+##
+##   1. beaten -- `ActionScene.defeat_of`, which is `ActionEngine.is_down`;
+##   2. walked out of the fight -- `ActionScene.departure_of`, which is
+##      `ActionEngine.left_the_fight`;
+##   3. not on a board at all -- `ActionEngine.not_on_the_board`, the same
+##      sentence a blow aimed at somebody who is not in the fight is refused
+##      with;
+##   4. on a board, and it is somebody else's turn -- `ActionEngine.out_of_turn`.
+##
+## Nothing here phrases anything. Every branch returns a sentence some other file
+## wrote, which is the whole point: a person reads what a rule-driven character
+## would be answered, in the same words.
+static func why_none(scene: ActionScene, actor_id: int) -> String:
+	if of(scene, actor_id) != null:
+		return ""
+	if scene == null or actor_id == 0:
+		return ActionEngine.not_on_board_line("nobody")
+	var beaten := scene.defeat_of(actor_id)
+	if beaten != "":
+		return beaten
+	var left := scene.departure_of(actor_id)
+	if left != "":
+		return left
+	var one := scene.actor_of(actor_id)
+	var on_a_board := scene.fight != null and not scene.fight.finished \
+		and one != null and one.fighting
+	if not on_a_board:
+		return ActionEngine.not_on_board_line(
+			ActionScene.name_of(one) if one != null else "#%d" % actor_id)
+	return ActionEngine.out_of_turn(one)
+
+
 # --- What is left of the turn ---------------------------------------------
 
 

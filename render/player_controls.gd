@@ -219,6 +219,18 @@ var facing := FACING_AT_REST
 ## asked to resolve, and is quoted on the answer panel; this is the interface
 ## saying that the person has not yet picked what the action needs -- nothing was
 ## aimed at, nothing is being held -- so no action was built at all.
+##
+## The line between the two is not left to judgment. Every sentence this file and
+## `render/board_controls.gd` may write is listed in `LayerCheck.RENDER_NOTES`,
+## and `tests/test_layering.gd` fails on any that is not, so adding one is an
+## edit to that list and a reader can see the whole of what the keyboard is
+## allowed to say in one place. The test that separates the two cases is whether
+## the simulation could answer the question at all: it has no word for "you have
+## not aimed at anything", because aiming happens at the keys and nowhere else,
+## and it has every word for whether a blow may be struck.
+##
+## The attack key is why the rule is enforced rather than trusted. It used to
+## refuse an empty-handed blow here, and the world allows one.
 var note := ""
 
 
@@ -340,9 +352,13 @@ func _at_what_is_aimed(keycode: int, view: Surroundings) -> Action:
 		KEY_INTERACT:
 			return Action.interact(aimed_id, holding)
 		KEY_ATTACK:
-			if holding == EMPTY_HANDS:
-				note = "you are holding nothing to attack with"
-				return null
+			# Bare hands are handed straight on. Whether a blow with nothing in
+			# it is possible is the world's answer and not this file's: out of
+			# real time it begins a fight (`ActionEngine._open_the_fight`), and
+			# on a board it is refused in the world's own words
+			# (`CombatResolution.empty_handed`). This key used to answer it here
+			# instead, which made an unarmed attack the one choice a rule-driven
+			# or model-driven character could make and a person could not.
 			return Action.attack(aimed_id, holding)
 	return null
 

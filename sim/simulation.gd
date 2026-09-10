@@ -103,6 +103,19 @@ func driven_turn() -> BoardTurn:
 	return null if driven_id == 0 else BoardTurn.of(world.combat.scene, driven_id)
 
 
+## Why there is no turn for the person driving to spend, in the world's own
+## words, and "" when there is one.
+##
+## `driven_turn()` above answers null for four unrelated situations; this is the
+## world saying which of them it is, and the sentence is always one the world
+## already wrote for that situation -- see `BoardTurn.why_none`. Forwarded here
+## for the same reason `driven_turn()` is: an entry point asks the simulation and
+## does not reach into the fight, and it never has to phrase a refusal to fill
+## the gap.
+func no_turn_because() -> String:
+	return BoardTurn.why_none(world.combat.scene, driven_id)
+
+
 ## What the person driving has chosen and not yet had carried out, in one line,
 ## for a trace or a readout. "nobody is driving" in a run with no person in it.
 func driven_line() -> String:

@@ -46,6 +46,39 @@ const CAPTURE := "capture"
 const STRIKE := "strike"
 
 
+## What the world says to anybody who spends a weapon action with nothing in
+## hand, wherever they spend it from.
+##
+## One condition, one sentence, written here because this is the layer where a
+## weapon action is actually spent and it is the lowest one that owns the
+## condition. It is public so that `ActionEngine` quotes it for a blow chosen in
+## real time rather than phrasing the same refusal a second time -- and so that
+## the keyboard quotes neither, because the keyboard asks. Before this the same
+## situation had three answers: `no such attack` here, a sentence of the
+## interface's own on the attack key, and nothing at all from the engine.
+##
+## The subject is named by whoever calls, because naming a character is not this
+## layer's job: a board knows a piece and its sheet, and the action layer knows
+## a combatant and `ActionScene.name_of`. The *wording* is the thing that must
+## not be copied, and it is not.
+static func empty_handed(called: String) -> String:
+	return "%s has nothing in hand to attack with" % called
+
+
+## What a commander standing on a board is called, for the sentence above.
+##
+## The board's own naming and nothing more: the character sheet's name when it
+## has one, and the piece's number when it has not. `ActionScene.name_of` is the
+## action layer's answer to the same question and cannot be reached from here --
+## it is a layer above -- and the two agree wherever a character has a name,
+## which is everywhere a person can see.
+static func called_on_the_board(commander: Commander) -> String:
+	if commander == null:
+		return "nobody"
+	return commander.sheet.character_name if commander.sheet.character_name != "" \
+		else "#%d" % commander.id
+
+
 # --- The tactical layer ---------------------------------------------------
 
 
@@ -248,6 +281,13 @@ static func commander_attack(
 	turn: int,
 	fight_seed: int = Damage.NO_DIE,
 ) -> Dictionary:
+	# Nothing in hand is its own condition and not "the weapon has no such
+	# attack": a commander with empty hands has no attacks at all, and saying
+	# there is no attack numbered N is answering a question nobody asked. The
+	# sentence is `empty_handed` above, which is also what a blow chosen in real
+	# time is refused with, so the situation has one wording wherever it is met.
+	if commander.weapon == null:
+		return {"ok": false, "reason": empty_handed(called_on_the_board(commander))}
 	var attack := commander.attack_at(index)
 	if attack == null:
 		return {"ok": false, "reason": "no such attack"}

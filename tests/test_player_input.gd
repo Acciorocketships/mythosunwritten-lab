@@ -43,6 +43,11 @@ extends TestSuite
 ##      choice the board has merely not got to yet is answered as well and is
 ##      left standing, so nothing is taken away from the person to say it. And
 ##      the panel does not show an answer belonging to a different action.
+##   9. **"it is not your turn on a board" is answered only when there is a
+##      board.** The shell used to print that sentence -- its own, not the
+##      world's -- whenever there was no turn to spend, which included standing
+##      in an open field with no board anywhere. The world is asked instead, and
+##      it answers each of the situations in the sentence it already had for it.
 class_name TestPlayerInput
 
 ## The seed every claim here is played on: the world the headless run reports,
@@ -91,6 +96,7 @@ func run() -> void:
 	_a_refusal_comes_back_in_the_engines_own_words()
 	_the_person_is_drawn_and_animated_like_everybody_else()
 	_a_key_pressed_on_a_board_is_answered_every_time()
+	_there_is_no_board_and_the_world_says_so()
 
 
 # --- 1: one of the four ---------------------------------------------------
@@ -463,6 +469,71 @@ func _a_key_pressed_on_a_board_is_answered_every_time() -> void:
 		"the panel kept an answer belonging to an action the world has not answered")
 	equal(panel._answer_icon.visible, false,
 		"the panel kept a tick belonging to an action the world has not answered")
+
+
+# --- 9: there is no board, and the world says so ---------------------------
+
+
+## Why there is no turn to spend is the world's answer, and it is a different
+## answer in each situation.
+##
+## `Simulation.driven_turn()` comes back null for four unrelated reasons and null
+## says nothing about which. The shell used to fill the gap with one sentence of
+## its own -- "it is not your turn on a board" -- so a person nowhere near a
+## fight was told to wait for a turn on one. Now `Simulation.no_turn_because()`
+## answers, out of `BoardTurn.why_none`, and every branch of it is a sentence
+## some file of the simulation already wrote.
+func _there_is_no_board_and_the_world_says_so() -> void:
+	# No fight anywhere in the world: the answer says that, and says it about the
+	# person by name.
+	var quiet := Simulation.new(SEED)
+	check(quiet.hand_over_followed(), "the world should hand a character over")
+	quiet.step()
+	equal(quiet.driven_turn(), null, "there should be no board in an ordinary world")
+	var standing := quiet.world.combat.member_of(quiet.driven_id)
+	check(standing != null, "the person's character should be in the world")
+	if standing == null:
+		return
+	equal(quiet.no_turn_because(), ActionEngine.not_on_the_board(standing),
+		"with no board anywhere the world should say there is no board")
+	check(not quiet.no_turn_because().contains("turn"),
+		"a person with no board should not be told to wait for a turn: %s"
+			% quiet.no_turn_because())
+
+	# On a board: the person holding the turn is asked nothing, and everybody
+	# else on that board is told whose turn it is, in the engine's own sentence.
+	var game := Simulation.new(SEED)
+	ScriptedEncounter.muster_played(game.world)
+	check(game.hand_over_followed(), "the encounter should hand a commander over")
+	var id := game.driven_id
+	var fighting := false
+	for _step in FIGHT_TICKS:
+		game.step()
+		var one := game.world.combat.member_of(id)
+		if game.world.combat.fight != null and one != null and one.fighting \
+				and game.driven_turn() != null:
+			fighting = true
+			break
+	check(fighting, "the scenario should put the driven character on a board")
+	if not fighting:
+		return
+	equal(game.no_turn_because(), "",
+		"somebody holding a turn open should not be told why they have none")
+
+	# The other side of the same board: on it, and waiting for its go.
+	var scene := game.world.combat.scene
+	var waiting: Combatant = null
+	for one in game.world.combat.fight.members:
+		if one.id != id and one.fighting:
+			waiting = one
+			break
+	check(waiting != null, "there should be somebody on the other side of the board")
+	if waiting == null:
+		return
+	equal(BoardTurn.why_none(scene, waiting.id), ActionEngine.out_of_turn(waiting),
+		"on a board it should be the engine's sentence about whose turn it is")
+	check(BoardTurn.why_none(scene, waiting.id).contains("turn"),
+		"somebody who is on a board should be told about a turn")
 
 
 # --- The furniture --------------------------------------------------------

@@ -97,6 +97,7 @@ func run() -> void:
 	_the_scripted_match_plays_the_same_way_every_time()
 	_two_processes_play_the_same_match()
 	_no_level_gap_breaks_the_two_layers()
+	_nothing_in_hand_is_its_own_condition()
 
 
 # --- The fixture ----------------------------------------------------------
@@ -1544,6 +1545,44 @@ func _no_level_gap_breaks_the_two_layers() -> void:
 
 
 # --- Helpers --------------------------------------------------------------
+
+
+## Nothing in hand and "no such attack" are two different situations, and the
+## board answers them differently.
+##
+## They used to be one answer. A commander with empty hands has no attacks at
+## all, so every weapon-action key it pressed came back "no such attack" -- which
+## says the weapon has no attack numbered that, and there is no weapon. The
+## sentence for the real condition is `CombatResolution.empty_handed`, and it is
+## the same one a blow chosen in real time on a board is refused with, so the
+## situation has one wording wherever it is met.
+func _nothing_in_hand_is_its_own_condition() -> void:
+	var board := _board()
+	var pieces := PieceMap.new()
+	var armed := _commander(pieces, Vector2i(6, 6), 3, Weapon.sword(), [])
+	_commander(pieces, Vector2i(6, 5), 3, Weapon.spear(), [])
+
+	# A weapon asked for an attack it does not carry: still "no such attack",
+	# because that is what is actually the matter.
+	var missing := CombatResolution.commander_attack(board, pieces, armed, 9, 1)
+	equal(bool(missing["ok"]), false, "a weapon has no ninth attack")
+	equal(String(missing["reason"]), "no such attack",
+		"a weapon asked past its attacks should say so")
+
+	# The same commander with nothing in hand, asked for the attack it had a
+	# moment ago.
+	armed.unequip(Item.SLOT_HAND)
+	equal(armed.weapon, null, "the hand should be empty")
+	equal(armed.attack_count(), 0, "empty hands should carry no attack")
+	var bare := CombatResolution.commander_attack(board, pieces, armed, 0, 2)
+	equal(bool(bare["ok"]), false, "an empty-handed weapon action is refused")
+	equal(String(bare["reason"]),
+		CombatResolution.empty_handed(CombatResolution.called_on_the_board(armed)),
+		"an empty-handed weapon action should say what is actually the matter")
+	not_equal(String(bare["reason"]), String(missing["reason"]),
+		"nothing in hand and no such attack are two different situations")
+	check(String(bare["reason"]).contains("nothing in hand"),
+		"the sentence should name the condition: %s" % bare["reason"])
 
 
 func _board() -> CombatBoard:

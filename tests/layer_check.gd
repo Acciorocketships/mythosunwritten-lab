@@ -8,10 +8,13 @@ extends RefCounted
 ## panel landed includes the whole vocabulary of an interface: a CanvasLayer, a
 ## Control, a theme, a font, a widget.
 ##
-## Two narrower rules live here too, both about the render layer rather than the
+## Three narrower rules live here too, all about the render layer rather than the
 ## simulation. `run_render()` says the shell may draw the fight and may hold none
 ## of it. `run_ui()` says the interface names its art in one table and never
-## reaches for the engine's own theme or typeface.
+## reaches for the engine's own theme or typeface. `run_notes()` says the
+## keyboard invents no sentence about why something did not happen: every one it
+## may write is enumerated in `RENDER_NOTES`, and everything else is the
+## simulation's own answer, quoted.
 ##
 ## Comments are stripped before scanning, so prose like this can discuss the
 ## render layer without tripping the check; string literals are kept, so a path
@@ -105,6 +108,69 @@ const UI_DEFAULTS := [
 ]
 
 
+## The directories whose source may put a sentence in front of a person.
+##
+## The whole render layer: `render/player_controls.gd` and
+## `render/board_controls.gd` write the notes, `render/main.gd` prints them, and
+## the panels under `render/ui/` draw them.
+const NOTE_DIR := "res://render"
+
+## The fields a sentence a person reads is written into. A string literal
+## assigned to one of these is the keyboard speaking in its own voice; anything
+## else -- a sentence read out of a snapshot, an outcome's `reason`, a value
+## handed back by the simulation -- is the world speaking and is not matched.
+const NOTE_FIELDS := ["note", "said"]
+
+## Every sentence the render layer is allowed to author, and the whole of it.
+##
+## The rule this list enforces: **a sentence about why something did not happen
+## belongs to the layer that decided it did not happen.** The simulation decides
+## whether a blow may be struck, whether a chest may be opened, whether a leap
+## reaches and whose turn it is, so those sentences are the simulation's and the
+## keyboard quotes them. What is left over is the only thing the keyboard decides
+## by itself: whether the person has yet *picked* what an action needs. Aiming,
+## holding and picking a cell happen at the keys and the simulation has no word
+## for them, because it has never been asked a question it could answer.
+##
+## So each line below is a statement about the interface's own three rings, and
+## none is a statement about the world. The list is closed on purpose: adding a
+## sentence is an edit here, in front of this note, rather than a line typed into
+## a `match` arm where nobody sees it. That is the difference between a rule and
+## a convention, and the reason this check exists at all is that the convention
+## had already been broken once -- `"you are holding nothing to attack with"`
+## sat on the attack key while the world was starting unarmed fights for
+## everybody else.
+##
+## Two lines are near the edge and are kept deliberately. "you have no minions on
+## the board" and "that minion has nowhere to go" read as facts about a fight,
+## and they are: they are facts the interface has just read *out of* the turn the
+## simulation handed it, and what they say is that there is nothing on the ring
+## to pick. They decide nothing. If either ever becomes a reason a key was
+## refused rather than a reason a ring is empty, it belongs on the other side of
+## this line.
+const RENDER_NOTES := [
+	# Aiming, holding and picking: the interface's own three rings.
+	"nothing is aimed at",
+	"nothing is picked out of what you have aimed at",
+	"there is nothing in sight to aim at",
+	"you are holding nothing to look at",
+	"you are holding nothing to drop",
+	"you are holding nothing to put on",
+	"you are holding nothing to take off",
+	"you are holding nothing to use",
+	"you are holding nothing to put in",
+	# What the surroundings packet had nothing in for the place key to walk to.
+	"nowhere named is within reach",
+	# The board's rings: a cell, a minion, and a cell for that minion.
+	"no cell to step onto is picked",
+	"no minion and cell are picked",
+	"no minion is picked",
+	"there is nowhere to step onto",
+	"you have no minions on the board",
+	"that minion has nowhere to go",
+]
+
+
 ## Returns a list of violations. An empty list means the split holds.
 ## Each violation is {"file": String, "line": int, "match": String, "text": String}.
 static func run() -> Array[Dictionary]:
@@ -127,6 +193,77 @@ static func run_render() -> Array[Dictionary]:
 	for path in _files_under(RENDER_DIR):
 		violations.append_array(_scan_render_file(path))
 	return violations
+
+
+## The rule about sentences: the keyboard invents none the simulation owns.
+##
+## Scans the render layer for a string literal written into one of `NOTE_FIELDS`
+## and fails on any that is not in `RENDER_NOTES`. See that constant for what the
+## line between the two is and why it is drawn there.
+static func run_notes() -> Array[Dictionary]:
+	var violations: Array[Dictionary] = []
+	for path in _files_under(NOTE_DIR):
+		var text := FileAccess.get_file_as_string(path)
+		if text.is_empty() and FileAccess.get_open_error() != OK:
+			push_error("LayerCheck: cannot read %s" % path)
+			continue
+		var lines := text.split("\n")
+		for index in lines.size():
+			var raw: String = lines[index]
+			var code := _strip_comment(raw)
+			if code.strip_edges().is_empty():
+				continue
+			var hit := first_note_match(code)
+			if hit != "":
+				violations.append({
+					"file": path, "line": index + 1, "match": hit,
+					"text": raw.strip_edges(),
+				})
+	return violations
+
+
+## The first sentence a line of render-layer source writes that it may not, or
+## "".
+##
+## Matches `note = "..."`, `note := "..."` and the same for every name in
+## `NOTE_FIELDS`. An empty literal is clearing the field and says nothing to
+## anybody; a sentence built out of anything but a bare literal -- a format, a
+## value read from the world -- is not the keyboard's own voice and is not
+## matched.
+static func first_note_match(code: String) -> String:
+	for field in NOTE_FIELDS:
+		var said := _literal_written_to(code, field)
+		if said == "" or RENDER_NOTES.has(said):
+			continue
+		return said
+	return ""
+
+
+# The string literal a line writes into a named field, or "" for a line that
+# writes none. Deliberately narrow: the field name on its own, one of the two
+# assignment operators, and then a literal that is the whole of the right-hand
+# side. Anything else is a sentence the render layer did not write by itself.
+static func _literal_written_to(code: String, field: String) -> String:
+	var body := code.strip_edges()
+	if body.begins_with("var "):
+		body = body.substr(4).strip_edges()
+	for operator in [":=", "="]:
+		if not body.begins_with(field + " " + operator + " "):
+			continue
+		var rest := body.substr(field.length() + operator.length() + 2).strip_edges()
+		if rest.length() < 2 or not rest.begins_with("\"") \
+			or not rest.ends_with("\"") or rest.substr(1, rest.length() - 2).contains("\""):
+			return ""
+		return rest.substr(1, rest.length() - 2)
+	return ""
+
+
+## Human-readable one-line summary of a sentence the keyboard should not own.
+static func format_note_violation(violation: Dictionary) -> String:
+	return "%s:%d writes a sentence of its own, '%s' -- ask the simulation, or add it to LayerCheck.RENDER_NOTES with its reason  ->  %s" % [
+		violation["file"], violation["line"], violation["match"],
+		violation["text"],
+	]
 
 
 ## The interface's own rule: one table names the art, and nothing reaches for the

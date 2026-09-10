@@ -276,6 +276,22 @@ static func fight_is_over(other: Combatant) -> String:
 	return "the fight with %s is over" % ActionScene.name_of(other)
 
 
+## What the world says about somebody who is not standing on a board.
+##
+## One sentence, written once, in the same way as the ones above. It was already
+## the refusal `_attack` gave a blow aimed at somebody who is not in the fight;
+## it is public now because the keyboard needs it too. A person pressing a board
+## key while no board holds them used to be told "it is not your turn on a
+## board", which is a sentence about a board they are not on and was the
+## interface's own -- see `BoardTurn.why_none`.
+static func not_on_the_board(one: Combatant) -> String:
+	return not_on_board_line(ActionScene.name_of(one))
+
+
+static func not_on_board_line(called: String) -> String:
+	return "%s is not on the board" % called
+
+
 # --- go to ----------------------------------------------------------------
 
 
@@ -520,13 +536,23 @@ static func _attack(
 		# `_open_the_fight` below.
 		return _open_the_fight(scene, actor, target, action)
 	if not actor.fighting or not target.fighting:
-		return ActionOutcome.failed(action.kind, "%s is not on the board" % (
-			ActionScene.name_of(actor) if not actor.fighting
-			else ActionScene.name_of(target)))
+		return ActionOutcome.failed(action.kind, not_on_the_board(
+			actor if not actor.fighting else target))
 	var match_state := scene.fight.match_state
 	if match_state.active_id() != actor.piece.id:
 		return ActionOutcome.failed(action.kind, out_of_turn(actor))
 
+	# Nothing in hand, on a board. The blow that *begins* a fight is allowed
+	# bare-handed and is answered above, before this; once there is a board, a
+	# blow is a weapon action and there is no weapon to spend one from. That is
+	# the same condition the board itself meets when a weapon-action key is
+	# pressed by empty hands, so it is answered in the same words --
+	# `CombatResolution.empty_handed`, which is where the wording lives. Without
+	# this the sentence came out of the name lookup below as "<name> carries no
+	# ", which names no item because there was none.
+	if wanted == "":
+		return ActionOutcome.failed(
+			action.kind, CombatResolution.empty_handed(ActionScene.name_of(actor)))
 	var pack := ActionScene.inventory_of(actor)
 	var entry: Variant = _carried_named(pack, wanted)
 	if entry == null:

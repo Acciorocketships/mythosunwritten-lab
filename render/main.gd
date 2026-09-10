@@ -1118,25 +1118,17 @@ func _drive_the_board(keycode: int) -> bool:
 		return false
 	var turn := _sim.driven_turn()
 	if turn == null:
-		# There is no turn to spend. Which of the two reasons that is is the
-		# world's answer and not this file's: a character that has been beaten
-		# is out of the fight and will never be asked for another turn, and
-		# telling them it is somebody else's turn is telling them to wait for
-		# one. So the world is asked what has become of them and its own
-		# sentence is quoted when it has one. See `FightSource.defeat_in`.
-		var beaten := FightSource.defeat_of(_sim.world, _sim.driven_id)
-		# And the other reason there is no turn to spend that is not about whose
-		# turn it is: they walked off the board. Telling somebody who left a
-		# fight that it is not their turn on a board is telling them to wait for
-		# one on a board they are not on. The world's own sentence again --
-		# `ActionEngine.left_the_fight`, through `ActionScene.departure_of`.
-		var left := FightSource.departure_of(_sim.world, _sim.driven_id)
-		var said := "it is not your turn on a board"
-		if beaten != "":
-			said = beaten
-		elif left != "":
-			said = left
-		print("render-shell play t=%d %s" % [_sim.world.tick, said])
+		# There is no turn to spend, and which of the four reasons that is is
+		# the world's answer rather than this file's. This shell used to hold
+		# one sentence of its own -- "it is not your turn on a board" -- and
+		# print it whenever the world had not handed it something better, so
+		# somebody standing in an empty field with no board anywhere was told to
+		# wait for a turn on one. Now the world is asked and its own sentence is
+		# quoted, which is what a beaten character, a character that walked out
+		# of a fight and a character who is simply not in one are each told.
+		# See `Simulation.no_turn_because` and `BoardTurn.why_none`.
+		print("render-shell play t=%d %s" % [
+			_sim.world.tick, _sim.no_turn_because()])
 		return true
 	var answered := _board_controls.press(keycode, turn)
 	if _board_controls.note != "":
