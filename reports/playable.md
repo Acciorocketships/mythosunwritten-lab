@@ -557,9 +557,11 @@ the shipped one there is nothing to look at.
 
 ## 11. What is still not playable
 
-Sixteen defects were found by driving each component and judging it. Four have
-since been fixed and are shown above. These are the ones still open, each with a
-way to reproduce it.
+Sixteen defects were found by driving each component and judging it. One was
+fixed inside the playtest itself, and seven have been fixed since — they are
+sections 3 to 9 above. These eight are still open, each with a way to reproduce
+it, and the last row is the action catalogue working as designed rather than a
+fault.
 
 | what a player runs into | where it is shown |
 |---|---|
@@ -608,12 +610,16 @@ repeated here rather than left in the old document:
 
 **The current standing of the suite is honestly incomplete, and that matters for
 reading this page.** The last full run to certify a green tree was
-`all 65 suites passed (204835 checks)` at the playtest's commit. Since then four
-changes have landed. Three of them ran the suites they touch and pass. The whole
-suite on the newest tip — the walk-pace change — **was still running while this
-was written**, into `reports/walk-pace-full-suite.log`. So the four fixes in
-sections 3 through 9 rest on their own targeted evidence and on the structure
-checks, and not yet on a certifying whole-suite run.
+`all 65 suites passed (204835 checks)`, taken at the commit that drew the fight.
+Three changes have landed since: the one that made a walked-into fight finishable,
+the window fix and the walk-pace fix. The first of those ran the whole suite and
+came back `1 of 66 suites failed (2 failed checks of 212057)` — one recorded
+conversation with a language model that had recorded the very behaviour the fix
+corrected, so it necessarily went stale; that recording was made afresh during the
+walk-pace work. The whole suite on the newest tip **was still running while this
+page was written**, into `reports/walk-pace-full-suite.log`. So sections 3 through
+9 rest on their own targeted evidence, on sixteen suites run individually, and on
+the four structure checks — and not yet on a certifying whole-suite run.
 
 ---
 
@@ -722,7 +728,7 @@ code.
   re-judged from frames by a pass that was not trying to prove them.
 * **The certifying whole-suite run for the newest tip is still in flight**, as
   section 12 says.
-* **Nine defects from the first playtest are still open**, listed in section 11.
+* **Eight defects from the first playtest are still open**, listed in section 11.
 * **The four keyboard-feel judgements are unmade** and can only be made by
   somebody with a display.
 * **No single seed exercises everything**, so "the whole game in one run" is two
