@@ -156,3 +156,47 @@ place, facing the same way, so the shell stops on the same digest.
 | `reports/scenario-evidence.txt` | `fingerprint 5a6f0b6962de3d2e` | `fingerprint c78c9c18a8c57e41` | the written-down plan's walks were 3.6 and 8.1 units and were charged twenty ticks each; the run now gets through the same plan 28 ticks sooner. `finished=91`, `changes=0`, `combat began=2` and `spoken to=2` are unchanged — the same actions in the same order. `reviews` falls from 53 to 48, because a review happens every five ticks *inside* an action and there are fewer idle ticks inside a walk to have one in. |
 | `reports/check-evidence.txt` | `fingerprint 550e14813932bf8c` | `fingerprint 7d809c8c4e961180` | the difficulty-class run walks to four chests, 3.6 to 6.3 units apiece; the fourth check lands at tick 56 instead of 105. |
 | `reports/goodwill-evidence.txt` | `fingerprint 1be825305c6e19fd` | `fingerprint c63f2c54b8085339` | the same: the errand-runner's walks are 2.7 to 4.5 units. One prompt digest moves with it, because the prompt says at which tick a thing was handed over. |
+
+## What it cost elsewhere
+
+Two things had to move with it, and both are named rather than folded in.
+
+**The model recording.** The shipped model run asks its characters for a
+decision whenever one is free, so cheaper actions mean more questions in the
+same 160 ticks: 64 became 72, against a table of 73 rows, and one character's
+fifteenth question found its positional fallback row already spent —
+`the recording holds 73 replies and this is question 15, so there is nothing to
+answer with`. That is the standing case for a live pass, written down in the
+project's own recording decision: *budget a live `./run_record.sh --live` pass
+for every change to movement, to action costs, or to servicing order.* One was
+spent — `./run_record.sh --live --cast`, 83 replies recorded 2026-09-10 against
+the same shipped model, every other table written back unchanged — and
+`reports/agent-evidence.txt`, `reports/lesson-evidence.txt` and
+`reports/goal-evidence.txt` were regenerated from it. The re-recorded run asks 78
+questions and waits on none.
+
+**One fixture.** `ScriptedWorld`'s written-down plan — five stops, each a walk,
+a look and a wait — used to fill the orchestrator run's 150 ticks on its own.
+It now finishes at tick 99, and the run's whole point is that the character keeps
+acting while the world's dungeon master is thinking, so a character standing
+about at tick 120 is the claim failing for a reason that has nothing to do with
+the claim. The plan's last entry is now a wait as long as the run rather than one
+of eight ticks. Nothing else in the fixture moved.
+
+## The checks
+
+```
+$ ./run_tests.sh --layers-only
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check: OK -- res://sim names asset tags and no asset
+```
+
+Committed and pushed as `ac63731`. The whole suite is running headless as the
+job `walk-pace-suite`, into `reports/walk-pace-full-suite.log`; the suites this
+change reaches were run first and pass — control loop (138), walk motion (93),
+actions (351), player input (130), turn seam (23), scenario (160), agent (1238),
+checks (121), goals (133), goodwill (130), memory (106), orchestrator (282), and
+the three that compare a rendered run against a headless one at the same seed:
+render shell (58), atmosphere (156), grass (886).
