@@ -454,9 +454,9 @@ found it.** The font the interface is drawn in writes a zero with a slash
 through it. At two-times the slash and the ring around it are two pixels apart
 and the digit reads; at one-times they are one pixel apart, the slash fills the
 middle, and a $0$ is indistinguishable from an $8$. In
-`assets/playtest-ended-t301.png` the counts read `TRADES 8` and `DIALOGUE 8` on a
+the frame `playtest-ended-t301.png` the counts read `TRADES 8` and `DIALOGUE 8` on a
 frame where both are zero — the reviewer only caught it because the line
-underneath said `NO TRADE STANDING` — and in `assets/playtest-items-pile-t26.png`
+underneath said `NO TRADE STANDING` — and in `playtest-items-pile-t26.png`
 the readout's `0.4 AWAY` reads as `8.4 AWAY`, which is a distance a player would
 act on. Health, coins, round numbers and every count in the game are drawn in
 that font. It is a misreading rather than a strain, and the smallest fix is to
@@ -1180,7 +1180,8 @@ code.
 
 This report is also committed to the repository as `reports/playable.md`, so it
 survives independently of the generated view; this edition's text was committed
-and pushed to `origin/main` as `f6670c8`. The write-ups it draws on are
+and pushed to `origin/main` as `f6670c8`, with the two small commits after it —
+one naming that hash here, one settling two frame references and this sentence. The write-ups it draws on are
 `reports/playtest.md` (the second pass), the independent check's own working in
 `.lab/memory/files/playable-review-cycle3701-evidence.md`, and the change
 write-ups `reports/board-overlay.md`, `reports/walk-pace.md`,
