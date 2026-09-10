@@ -60,9 +60,11 @@ class_name WorldCast
 
 ## How far one leg of a wander covers, in world units.
 ##
-## Chosen against `ActionCatalog`'s own cost of a `go_to`, which is 20 ticks:
+## Chosen against `ActionCatalog`'s own ceiling for a `go_to`, which is 20 ticks:
 ## eighteen units over twenty ticks is 0.9 units a tick, which is exactly the
-## rate the placeholder observer used to walk at. So the ordinary world moves
+## rate the placeholder observer used to walk at. A walk now costs the strides it
+## takes rather than the ceiling flat (`ControlLoop.occupies`), and a leg of
+## exactly twenty strides costs exactly what it always did. So the ordinary world moves
 ## across the ground at the speed it always did -- the difference is that it now
 ## moves because somebody chose to walk, and the streaming figures a run reports
 ## stay comparable with every run taken before this one.

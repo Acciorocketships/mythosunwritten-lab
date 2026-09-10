@@ -6,7 +6,10 @@ extends TestSuite
 ##   1. **An action occupies ticks.** A committed action has not happened yet:
 ##      the world is unchanged for every tick of its span and changes on the tick
 ##      the span runs out. What each action costs is the catalogue's own column,
-##      and the catalogue refuses a row that costs nothing.
+##      and the catalogue refuses a row that costs nothing. A walk is the one
+##      action whose column is a ceiling rather than a price: it costs the
+##      strides it has to take, so a walker walks on every tick it is charged
+##      for, whether the walk is a person's step or the world's own leg.
 ##   2. **The cadence is one named constant.** The re-evaluations land exactly on
 ##      multiples of `ControlLoop.REVIEW_EVERY` -- computed from the constant
 ##      here, never typed -- and the constant is declared once under `sim/`, used
@@ -82,6 +85,7 @@ func _init() -> void:
 
 func run() -> void:
 	_an_action_occupies_ticks()
+	_a_walk_costs_the_strides_it_takes()
 	_every_action_costs_at_least_one_tick()
 	_the_cadence_lands_on_the_constant()
 	_the_cadence_is_one_constant_in_one_place()
@@ -127,6 +131,72 @@ func _an_action_occupies_ticks() -> void:
 	check(_carries(rook, HATCHET),
 		"on the tick after the last of them the hatchet is carried")
 	equal(loop.actions_of(rook.id), 1, "and exactly one action was resolved")
+
+
+## A walk costs the ground it crosses, up to the row's ceiling.
+##
+## Three lengths, all of them measured in the strides `Walk.stride` takes: a
+## person's step key, the world's own wandering leg, and a walk further than one
+## action may occupy. The first is the case this claim was written for -- a short
+## walk charged the full twenty was four ticks of walking and sixteen of standing
+## still -- and the second is the one that must not have moved, because it is
+## what every character the world drives itself walks.
+func _a_walk_costs_the_strides_it_takes() -> void:
+	var ceiling := ActionCatalog.occupies_of(ActionCatalog.GO_TO)
+	var stride := ActionEngine.STEP
+	equal(ControlLoop.occupies(Action.go_to_offset(Vector2(0.0, -stride * 4.0))), ceiling,
+		"asked with no world at all, a walk still costs what its row says")
+
+	for strides in [4, 20, 40]:
+		var scene := _bare_scene()
+		var rook: Combatant = scene.actors[0]
+		# Aimed a whole number of strides off, so the length asked for is the
+		# length walked and every stride of it is a full one.
+		var reach := stride * float(strides)
+		var walk := Action.go_to_offset(Vector2(reach, 0.0))
+		var wanted := mini(strides, ceiling)
+		equal(ControlLoop.occupies(walk, scene, rook), wanted,
+			"a walk of %d strides costs %d ticks" % [strides, wanted])
+
+		_sheet(rook).decide = DecisionSource.recorded([walk])
+		var loop := ControlLoop.on(scene, SEED)
+		loop.step()
+		equal(_began_line(loop), "began %s, %d ticks" % [walk.line(), wanted],
+			"and the loop charged it that")
+
+		var was := Vector2(rook.x, rook.z)
+		for tick in wanted - 1:
+			loop.step()
+			var now := Vector2(rook.x, rook.z)
+			equal(snappedf(was.distance_to(now), 0.001), snappedf(stride, 0.001),
+				"the walker covered a stride on tick %d of the %d it was charged"
+					% [tick + 1, wanted])
+			was = now
+		# The last tick of the span is also the tick the engine answers on. A walk
+		# that fits inside the ceiling covers one more stride and has arrived; one
+		# aimed further than a single action may occupy has the rest of it walked
+		# off in the resolution, which is what it did before any of this and is
+		# not this claim.
+		loop.step()
+		if strides <= ceiling:
+			equal(snappedf(was.distance_to(Vector2(rook.x, rook.z)), 0.001),
+				snappedf(stride, 0.001),
+				"and a stride on the last tick of the span, the tick it is answered on")
+			equal(snappedf(rook.x, 0.001), snappedf(ROOK_AT.x + stride * float(strides), 0.001),
+				"having walked every stride it was charged for and no more")
+		equal(loop.actions_of(rook.id), 1,
+			"the walk was resolved on the last tick of its own span")
+
+	# What a person's step key costs, in the shape the keyboard sends it. The
+	# whole of this claim in one line: the ground covered divided by the ticks
+	# charged is the stride, and not a fifth of it.
+	var keyboard := _bare_scene()
+	var walker: Combatant = keyboard.actors[0]
+	var pressed := PlayerControls.walk(PlayerControls.FACING_AT_REST)
+	var span := ControlLoop.occupies(pressed, keyboard, walker)
+	equal(span, 4, "a press of a walk key costs four ticks")
+	equal(snappedf(PlayerControls.STEP / float(span), 0.001), snappedf(stride, 0.001),
+		"which is %.3f units a tick, the speed everybody else walks at" % stride)
 
 
 ## Every row of the one list costs at least one tick, and the catalogue's own
@@ -536,6 +606,16 @@ func _measure_at(bias: float) -> ControlLoop:
 	loop.continue_bias = bias
 	loop.run(ScriptedLoop.MEASURE_TICKS)
 	return loop
+
+
+# The loop's own line for the action a character has just committed to, with the
+# name and the tick stripped off, or "" if it has not committed to one.
+static func _began_line(loop: ControlLoop) -> String:
+	for line in loop.journal:
+		var at := line.find("began ")
+		if at >= 0:
+			return line.substr(at)
+	return ""
 
 
 static func _sheet(one: Combatant) -> Character:

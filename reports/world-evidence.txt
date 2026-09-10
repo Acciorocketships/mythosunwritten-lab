@@ -38,56 +38,58 @@ what the character did, which nothing here chose for it
   t=  1  Rook   began say(text=anyone about? I have rope and a lantern to trade), 5 ticks
   t=  5  scout #4 has not decided yet, and waits in the world
   t=  6  Rook   finished say(text=anyone about? I have rope and a lantern to trade) -> say ok shout=true heard_by=1
-  t=  6  Rook   began go_to(target=(-474.000, 422.000)), 20 ticks
-  t= 11  Rook   thought again at 5/20t, wanted the same thing
-  t= 16  Rook   thought again at 10/20t, wanted the same thing
-  t= 21  Rook   thought again at 15/20t, wanted the same thing
-  t= 26  Rook   finished go_to(target=(-474.000, 422.000)) -> go_to ok at=(-474.023, 421.992) walked=6.3 steps=7
-  t= 26  Rook   began examine(target=2), 4 ticks
-  t= 30  Rook   finished examine(target=2) -> examine ok id=2 name=oak chest kind=object shut=false holds=0 money=9 distance=1.992
-  t= 30  Rook   began wait(ticks=6), 6 ticks
-  t= 35  Rook   thought again at 5/6t, wanted the same thing
+  t=  6  Rook   began go_to(target=(-474.000, 422.000)), 7 ticks
+  t= 11  Rook   thought again at 5/7t, wanted the same thing
+  t= 13  Rook   finished go_to(target=(-474.000, 422.000)) -> go_to ok at=(-474.023, 421.992) walked=6.3 steps=7
+  t= 13  Rook   began examine(target=2), 4 ticks
+  t= 17  Rook   finished examine(target=2) -> examine ok id=2 name=oak chest kind=object shut=false holds=0 money=9 distance=1.992
+  t= 17  Rook   began wait(ticks=6), 6 ticks
+  t= 22  Rook   thought again at 5/6t, wanted the same thing
+  t= 23  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=29
+  t= 23  Rook   began go_to(target=(-484.000, 424.000)), 11 ticks
+  t= 28  Rook   thought again at 5/11t, wanted the same thing
+  t= 33  Rook   thought again at 10/11t, wanted the same thing
+  t= 34  Rook   finished go_to(target=(-484.000, 424.000)) -> go_to refused: the way to the position is blocked
+  t= 34  Rook   began examine(target=3), 4 ticks
   t= 35  scout #6 has not decided yet, and waits in the world
-  t= 36  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=42
-  t= 36  Rook   began go_to(target=(-484.000, 424.000)), 20 ticks
-  t= 41  Rook   thought again at 5/20t, wanted the same thing
-  t= 46  Rook   thought again at 10/20t, wanted the same thing
-  t= 51  Rook   thought again at 15/20t, wanted the same thing
-  t= 56  Rook   finished go_to(target=(-484.000, 424.000)) -> go_to refused: the way to the position is blocked
-  t= 56  Rook   began examine(target=3), 4 ticks
-  t= 60  Rook   finished examine(target=3) -> examine ok id=3 name=hazel crate kind=object shut=false holds=0 money=0 distance=4.861
-  t= 60  Rook   began wait(ticks=6), 6 ticks
-  t= 65  Rook   thought again at 5/6t, wanted the same thing
+  t= 38  Rook   finished examine(target=3) -> examine ok id=3 name=hazel crate kind=object shut=false holds=0 money=0 distance=4.861
+  t= 38  Rook   began wait(ticks=6), 6 ticks
+  t= 43  Rook   thought again at 5/6t, wanted the same thing
+  t= 44  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=50
+  t= 44  Rook   began go_to(target=(-478.000, 414.000)), 10 ticks
+  t= 49  Rook   thought again at 5/10t, wanted the same thing
+  t= 54  Rook   finished go_to(target=(-478.000, 414.000)) -> go_to ok at=(-478.114, 414.480) walked=9.0 steps=10
+  t= 54  Rook   began wait(ticks=6), 6 ticks
+  t= 59  Rook   thought again at 5/6t, wanted the same thing
+  t= 60  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=66
+  t= 60  Rook   began go_to(target=(-472.000, 418.000)), 8 ticks
+  t= 65  Rook   thought again at 5/8t, wanted the same thing
   t= 65  herald #8 has not decided yet, and waits in the world
-  t= 66  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=72
-  t= 66  Rook   began go_to(target=(-478.000, 414.000)), 20 ticks
-  t= 71  Rook   thought again at 5/20t, wanted the same thing
-  t= 76  Rook   thought again at 10/20t, wanted the same thing
-  t= 81  Rook   thought again at 15/20t, wanted the same thing
-  t= 86  Rook   finished go_to(target=(-478.000, 414.000)) -> go_to ok at=(-478.114, 414.480) walked=9.0 steps=10
-  t= 86  Rook   began wait(ticks=6), 6 ticks
-  t= 91  Rook   thought again at 5/6t, wanted the same thing
-  t= 92  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=98
-  t= 92  Rook   began go_to(target=(-472.000, 418.000)), 20 ticks
+  t= 68  Rook   finished go_to(target=(-472.000, 418.000)) -> go_to ok at=(-472.000, 418.000) walked=7.055 steps=8
+  t= 68  Rook   began wait(ticks=6), 6 ticks
+  t= 73  Rook   thought again at 5/6t, wanted the same thing
+  t= 74  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=80
+  t= 74  Rook   began go_to(target=(-482.000, 416.000)), 11 ticks
+  t= 79  Rook   thought again at 5/11t, wanted the same thing
+  t= 84  Rook   thought again at 10/11t, wanted the same thing
+  t= 85  Rook   finished go_to(target=(-482.000, 416.000)) -> go_to ok at=(-481.708, 416.058) walked=9.9 steps=11
+  t= 85  Rook   began wait(ticks=6), 6 ticks
+  t= 90  Rook   thought again at 5/6t, wanted the same thing
+  t= 91  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=97
+  t= 91  Rook   began wait(ticks=150), 150 ticks
   t= 95  herald #9 has not decided yet, and waits in the world
-  t= 97  Rook   thought again at 5/20t, wanted the same thing
-  t=102  Rook   thought again at 10/20t, wanted the same thing
-  t=107  Rook   thought again at 15/20t, wanted the same thing
-  t=112  Rook   finished go_to(target=(-472.000, 418.000)) -> go_to ok at=(-472.000, 418.000) walked=7.055 steps=8
-  t=112  Rook   began wait(ticks=6), 6 ticks
-  t=117  Rook   thought again at 5/6t, wanted the same thing
-  t=118  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=124
-  t=118  Rook   began go_to(target=(-482.000, 416.000)), 20 ticks
-  t=123  Rook   thought again at 5/20t, wanted the same thing
+  t= 96  Rook   thought again at 5/150t, wanted the same thing
+  t=101  Rook   thought again at 10/150t, wanted the same thing
+  t=106  Rook   thought again at 15/150t, wanted the same thing
+  t=111  Rook   thought again at 20/150t, wanted the same thing
+  t=116  Rook   thought again at 25/150t, wanted the same thing
+  t=121  Rook   thought again at 30/150t, wanted the same thing
   t=125  scout #12 has not decided yet, and waits in the world
-  t=128  Rook   thought again at 10/20t, wanted the same thing
-  t=133  Rook   thought again at 15/20t, wanted the same thing
-  t=138  Rook   finished go_to(target=(-482.000, 416.000)) -> go_to ok at=(-481.708, 416.058) walked=9.9 steps=11
-  t=138  Rook   began wait(ticks=6), 6 ticks
-  t=143  Rook   thought again at 5/6t, wanted the same thing
-  t=144  Rook   finished wait(ticks=6) -> wait ok ticks=6 until=150
-  t=144  Rook   began wait(ticks=8), 8 ticks
-  t=149  Rook   thought again at 5/8t, wanted the same thing
+  t=126  Rook   thought again at 35/150t, wanted the same thing
+  t=131  Rook   thought again at 40/150t, wanted the same thing
+  t=136  Rook   thought again at 45/150t, wanted the same thing
+  t=141  Rook   thought again at 50/150t, wanted the same thing
+  t=146  Rook   thought again at 55/150t, wanted the same thing
 
 what the orchestrator did, as it happened
   tick 1  looked at the world (b77c1f0f47dd07fa)
@@ -96,24 +98,24 @@ what the orchestrator did, as it happened
   tick 4  did       open target=#3 -- the hazel crate came open
   tick 4  did       place kind=stone at=(-470.0, 415.0) -- a stone now stands at (-470.000, 415.000) as #5
   tick 7  wrote     #4 is Vesper Quick, and the six numbers it was rolled with are untouched
-  tick 31  looked at the world (1ce5fe114cf96571)
+  tick 31  looked at the world (f0d18ad54356095a)
   tick 34  did       spawn role=scout at=(-478.0, 416.0) -- a scout was rolled for ground of difficulty 10 and stands at (-478.000, 416.000) as #6, with no one written into it yet
   tick 34  #6 is rolled and standing: str 8 con 9 cha 6 dex 13 wis 9 int 9 -- asked who that is (1814df89cf7d67f9)
   tick 34  did       spill target=#2 -- 0 things and 9 coins out of the oak chest onto pile #7
   tick 37  wrote     #6 is Quickfoot Sable, and the six numbers it was rolled with are untouched
-  tick 61  looked at the world (82746f9a1990768f)
+  tick 61  looked at the world (b1d8cb4f3627d712)
   tick 64  did       spawn role=herald at=(-472.0, 419.0) -- a herald was rolled for ground of difficulty 10 and stands at (-472.000, 419.000) as #8, with no one written into it yet
   tick 64  #8 is rolled and standing: str 7 con 8 cha 15 dex 7 wis 6 int 11 -- asked who that is (f5a7da6002a96f8d)
   tick 64  would not open target=#5 -- the stone is already open
   tick 64  did       move target=#7 to=(-475.0, 418.0) -- the pile was shoved 2.24 to (-475.000, 418.000)
   tick 67  wrote     #8 is Veylin Brightvoice, and the six numbers it was rolled with are untouched
-  tick 91  looked at the world (3a94ebb7269d8ddb)
+  tick 91  looked at the world (3a01cdb331b35a83)
   tick 94  did       spawn role=herald at=(-474.0, 416.0) -- a herald was rolled for ground of difficulty 10 and stands at (-474.000, 416.000) as #9, with no one written into it yet
   tick 94  #9 is rolled and standing: str 7 con 9 cha 15 dex 6 wis 6 int 11 -- asked who that is (b4e30dfb88bdb990)
   tick 94  did       place kind=chest at=(-479.0, 421.0) -- a chest now stands at (-479.000, 421.000) as #10
   tick 94  would not open target=#9 -- there is nothing with id 9 to change
   tick 97  wrote     #9 is Vessalius Goldtongue, and the six numbers it was rolled with are untouched
-  tick 121  looked at the world (15dd761d6d21bae0)
+  tick 121  looked at the world (88573e6adb8efbdb)
   tick 124  did       place kind=chest at=(-468.0, 420.0) -- a chest now stands at (-468.000, 420.000) as #11
   tick 124  did       spawn role=scout at=(-466.0, 417.0) -- a scout was rolled for ground of difficulty 10 and stands at (-466.000, 417.000) as #12, with no one written into it yet
   tick 124  #12 is rolled and standing: str 6 con 9 cha 8 dex 15 wis 9 int 6 -- asked who that is (5a8f65cec544f29a)
@@ -231,7 +233,7 @@ nothing waited for it
   ticks      150 asked for, 150 advanced
   thinking   30 of those ticks had a question outstanding, the longest run of them 6 ticks
   meanwhile  the character was part-way through an action on 30 of those 30 ticks and stood idle on none of them
-  and it     carried out 13 actions over the run, 4 of them landing on a tick the orchestrator was thinking
+  and it     carried out 13 actions over the run, 3 of them landing on a tick the orchestrator was thinking
   left over  0 questions outstanding when the run ended
 
 what it cost
@@ -261,7 +263,7 @@ after 150 ticks
     #10 chest at (-479.000, -2.107, 421.000) open [0 carried, 0 equipped, 0 money]
     #11 chest at (-468.000, -2.440, 420.000) open [0 carried, 0 equipped, 0 money]
     said #1 aloud "anyone about? I have rope and a lantern to trade" heard by [4]
-  fingerprint 37bd8b92ef92dd5d
+  fingerprint bc54a5f08e521560
 
 the questions in full
 

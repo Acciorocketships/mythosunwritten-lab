@@ -101,10 +101,12 @@ class_name PlayerControls
 ## How far one press of a walk key carries, in world units.
 ##
 ## A fifth of `WorldCast.LEG`, which is how far the wandering rule sends a
-## character on one `go_to`. A walk costs the same twenty ticks whatever its
-## length -- that is `ActionCatalog`'s cost for the action, not a cost per unit
-## -- so this is the trade between a press that goes somewhere and a press that
-## overshoots what the person was aiming at.
+## character on one `go_to`: four strides where the world's own leg is twenty.
+## A press is therefore a short walk rather than a cheap one -- a walk costs the
+## ticks it takes to walk (`ControlLoop.occupies`), so a person covers the ground
+## at the speed everybody else covers it and this length is only the trade
+## between a press that goes somewhere and a press that overshoots what the
+## person was aiming at.
 const STEP := WorldCast.LEG / 5.0
 
 ## How far a hop goes, in world units. Inside the reach of an ordinary

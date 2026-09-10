@@ -144,7 +144,11 @@ func _spreading_it_moved_nobody() -> void:
 		func(_scene: ActionScene, _actor: Combatant) -> Action:
 			return Action.go_to(NEAR))
 	var loop := ControlLoop.on(spread, SEED)
-	loop.run(ActionCatalog.occupies_of(ActionCatalog.GO_TO) + 1)
+	# Its own span and the tick it is committed on, not the catalogue's ceiling:
+	# a walk costs the strides it takes (`ControlLoop.occupies`), so running on
+	# past it would answer for the *next* walk this rule asks for -- a walk of no
+	# strides at all, from a character that has arrived.
+	loop.run(ControlLoop.occupies(Action.go_to(NEAR), spread, walker) + 1)
 	var answer := loop.answer_of(walker.id)
 
 	var at_once := _bare_scene()

@@ -64,7 +64,8 @@ const NOTICE := 40.0
 ## `WATCHFUL` ticks until the mark is close enough to strike.
 ##
 ## Holding rather than walking is what makes the blow the opener. A walk is a
-## twenty-tick commitment (`ActionCatalog`'s cost of a `go_to`) and section 2.2's
+## commitment of up to twenty ticks (`ActionCatalog`'s ceiling for a `go_to`, and
+## a closing walk from `NOTICE` to `STANDOFF` is most of it) and section 2.2's
 ## control loop is biased towards continuing one, so a hunter still walking when
 ## its mark came into range would keep walking until the two of them were close
 ## enough for `ActionScene.fight_step`'s engagement rule to start the fight

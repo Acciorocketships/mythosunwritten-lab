@@ -27,56 +27,48 @@ two prompts, two calls
     spill  target=#<id>           -- everything inside an open thing ends up on the ground beside it
 
 what the character did
-  t=  1  Rook   began go_to(target=2), 20 ticks
-  t=  6  Rook   thought again at 5/20t, wanted the same thing
-  t= 11  Rook   thought again at 10/20t, wanted the same thing
-  t= 16  Rook   thought again at 15/20t, wanted the same thing
-  t= 21  Rook   finished go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
-  t= 21  Rook   began interact(target=2 item=iron pry bar), 6 ticks
-  t= 26  Rook   thought again at 5/6t, wanted the same thing
-  t= 27  Rook   finished interact(target=2 item=iron pry bar) -> interact refused: a iron pry bar is not what the oak chest opens with, so it is put to a check
-  t= 27  Rook   began go_to(target=3), 20 ticks
-  t= 32  Rook   thought again at 5/20t, wanted the same thing
-  t= 37  Rook   thought again at 10/20t, wanted the same thing
-  t= 42  Rook   thought again at 15/20t, wanted the same thing
-  t= 47  Rook   finished go_to(target=3) -> go_to ok at=(-474.590, 426.034) walked=6.3 steps=7
-  t= 47  Rook   began interact(target=3 item=iron pry bar), 6 ticks
-  t= 52  Rook   thought again at 5/6t, wanted the same thing
-  t= 53  Rook   finished interact(target=3 item=iron pry bar) -> interact refused: a iron pry bar is not what the oak chest opens with, so it is put to a check
-  t= 53  Rook   began go_to(target=4), 20 ticks
-  t= 58  Rook   thought again at 5/20t, wanted the same thing
-  t= 63  Rook   thought again at 10/20t, wanted the same thing
-  t= 68  Rook   thought again at 15/20t, wanted the same thing
-  t= 73  Rook   finished go_to(target=4) -> go_to ok at=(-484.137, 420.985) walked=10.8 steps=12
-  t= 73  Rook   began interact(target=4 item=whittling knife), 6 ticks
-  t= 78  Rook   thought again at 5/6t, wanted the same thing
-  t= 79  Rook   finished interact(target=4 item=whittling knife) -> interact refused: a whittling knife is not what the hazel crate opens with, so it is put to a check
-  t= 79  Rook   began go_to(target=5), 20 ticks
-  t= 84  Rook   thought again at 5/20t, wanted the same thing
-  t= 89  Rook   thought again at 10/20t, wanted the same thing
-  t= 94  Rook   thought again at 15/20t, wanted the same thing
-  t= 99  Rook   finished go_to(target=5) -> go_to ok at=(-485.599, 413.935) walked=7.2 steps=8
-  t= 99  Rook   began interact(target=5 item=whittling knife), 6 ticks
-  t=104  Rook   thought again at 5/6t, wanted the same thing
-  t=105  Rook   finished interact(target=5 item=whittling knife) -> interact refused: a whittling knife is not what the hazel crate opens with, so it is put to a check
-  t=105  Rook   began wait(ticks=4), 4 ticks
-  t=109  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=113
-  t=109  Rook   has not decided yet, and waits in the world
+  t=  1  Rook   began go_to(target=2), 4 ticks
+  t=  5  Rook   finished go_to(target=2) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+  t=  5  Rook   began interact(target=2 item=iron pry bar), 6 ticks
+  t= 10  Rook   thought again at 5/6t, wanted the same thing
+  t= 11  Rook   finished interact(target=2 item=iron pry bar) -> interact refused: a iron pry bar is not what the oak chest opens with, so it is put to a check
+  t= 11  Rook   began go_to(target=3), 7 ticks
+  t= 16  Rook   thought again at 5/7t, wanted the same thing
+  t= 18  Rook   finished go_to(target=3) -> go_to ok at=(-474.590, 426.034) walked=6.3 steps=7
+  t= 18  Rook   began interact(target=3 item=iron pry bar), 6 ticks
+  t= 23  Rook   thought again at 5/6t, wanted the same thing
+  t= 24  Rook   finished interact(target=3 item=iron pry bar) -> interact refused: a iron pry bar is not what the oak chest opens with, so it is put to a check
+  t= 24  Rook   began go_to(target=4), 12 ticks
+  t= 29  Rook   thought again at 5/12t, wanted the same thing
+  t= 34  Rook   thought again at 10/12t, wanted the same thing
+  t= 36  Rook   finished go_to(target=4) -> go_to ok at=(-484.137, 420.985) walked=10.8 steps=12
+  t= 36  Rook   began interact(target=4 item=whittling knife), 6 ticks
+  t= 41  Rook   thought again at 5/6t, wanted the same thing
+  t= 42  Rook   finished interact(target=4 item=whittling knife) -> interact refused: a whittling knife is not what the hazel crate opens with, so it is put to a check
+  t= 42  Rook   began go_to(target=5), 8 ticks
+  t= 47  Rook   thought again at 5/8t, wanted the same thing
+  t= 50  Rook   finished go_to(target=5) -> go_to ok at=(-485.599, 413.935) walked=7.2 steps=8
+  t= 50  Rook   began interact(target=5 item=whittling knife), 6 ticks
+  t= 55  Rook   thought again at 5/6t, wanted the same thing
+  t= 56  Rook   finished interact(target=5 item=whittling knife) -> interact refused: a whittling knife is not what the hazel crate opens with, so it is put to a check
+  t= 56  Rook   began wait(ticks=4), 4 ticks
+  t= 60  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=64
+  t= 60  Rook   has not decided yet, and waits in the world
 
 what happened, as it happened
-  tick 27  check #1 asked the judging question (b723d1dc859f2ded)
-  tick 30  check #1 interact:oak chest:iron pry bar -- judged, so it is resolved
-  tick 30  check #1 asked the resolving question (4b265df7f4e73b4a)
-  tick 33  check #1 resolved
+  tick 11  check #1 asked the judging question (b723d1dc859f2ded)
+  tick 14  check #1 interact:oak chest:iron pry bar -- judged, so it is resolved
+  tick 14  check #1 asked the resolving question (4b265df7f4e73b4a)
+  tick 17  check #1 resolved
              open target=#2 -- the oak chest came open
-  tick 53  check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
+  tick 24  check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
              open target=#3 -- the oak chest came open
-  tick 79  check #3 asked the judging question (424074711a1ba4fe)
-  tick 82  check #3 interact:hazel crate:whittling knife -- judged, so it is resolved
-  tick 82  check #3 asked the resolving question (8b86636a0af3979b)
-  tick 85  check #3 resolved
+  tick 42  check #3 asked the judging question (424074711a1ba4fe)
+  tick 45  check #3 interact:hazel crate:whittling knife -- judged, so it is resolved
+  tick 45  check #3 asked the resolving question (8b86636a0af3979b)
+  tick 48  check #3 resolved
              open   target=#4 -- the hazel crate came open
-  tick 105  check #4 interact:hazel crate:whittling knife -- passed, remembered: dex 4 + roll 6 = 10 vs dc 10 (no roll, no call)
+  tick 56  check #4 interact:hazel crate:whittling knife -- passed, remembered: dex 4 + roll 6 = 10 vs dc 10 (no roll, no call)
              open   target=#5 -- the hazel crate came open
 
 the checks
@@ -117,7 +109,7 @@ after 140 ticks
     check #2 interact:oak chest:iron pry bar -- passed, remembered: str 5 + roll 15 = 20 vs dc 12 (no roll, no call)
     check #3 interact:hazel crate:whittling knife -- passed: dex 4 + roll 6 = 10 vs dc 10
     check #4 interact:hazel crate:whittling knife -- passed, remembered: dex 4 + roll 6 = 10 vs dc 10 (no roll, no call)
-  fingerprint 550e14813932bf8c
+  fingerprint 7d809c8c4e961180
 
 the two questions in full
 

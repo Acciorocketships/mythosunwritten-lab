@@ -428,9 +428,9 @@ static func report() -> PackedStringArray:
 ## A rule that wants somewhere new every time it is asked.
 ##
 ## It walks a ring of `RESTLESS_STOPS` positions, one stop per question, so two
-## questions asked within one twenty-tick walk can never land on the same answer
-## and every re-evaluation therefore proposes something the character is not
-## already doing. Nothing about the world is read: this is a stand-in for a mind
+## questions asked within one walk can never land on the same answer and every
+## re-evaluation therefore proposes something the character is not already
+## doing. Nothing about the world is read: this is a stand-in for a mind
 ## that keeps changing, and its only job is to disagree.
 static func _restless(around: Vector2) -> Callable:
 	var asked := [0]

@@ -6,7 +6,10 @@ extends RefCounted
 ##
 ##   1. *"While an action is in progress"* -- an action costs ticks. What it
 ##      costs is the `occupies` column of `ActionCatalog.ROWS`, because a cost
-##      written here would be a second list of the actions beside the table.
+##      written here would be a second list of the actions beside the table. Two
+##      of those rows are read rather than taken flat, in `occupies()` below and
+##      nowhere else: a wait names its own duration, and a walk costs the strides
+##      it has to take, up to the number its row states.
 ##   2. *"the agent re-evaluates at some frequency (it may change its mind, but
 ##      is biased toward continuing)"* -- the frequency is `REVIEW_EVERY` and the
 ##      bias is `CONTINUE_BIAS`. One constant each, used in one place each.
@@ -185,16 +188,42 @@ static func on(
 
 ## How many ticks carrying an action out costs.
 ##
-## The catalogue's `occupies` column, with one reading on top of it: a wait names
-## its own duration, because section 2.1 spells the action "wait (duration)" and
-## a duration nobody honoured would not be one. Every other action costs what its
-## row says.
-static func occupies(chosen: Action) -> int:
+## The catalogue's `occupies` column, with two readings on top of it, and both
+## are the same reading: an action whose row cannot say what it costs on its own
+## is charged what it actually takes.
+##
+##   * a **wait** names its own duration, because section 2.1 spells the action
+##     "wait (duration)" and a duration nobody honoured would not be one;
+##   * a **walk** is as long as the ground between here and there. Its row cannot
+##     know that -- the same `go_to` is a step to one side and a march across a
+##     valley -- so what it costs is the strides it has to take, counted by
+##     `ActionEngine.strides_for` in the very strides the walk then takes, and
+##     the row's number is the most any one walk may occupy. A walk charged for
+##     its own length is a walk that is walking on every tick it is charged for,
+##     which is what a person pressing a walk key gets and what everybody else
+##     already got: the world's own wandering leg is eighteen units at nine
+##     tenths of a unit a stride, so it costs the twenty ticks it always cost.
+##
+## The world the walk is measured in has to be passed in, because a chosen action
+## holds no world and an offset is not a place until somebody is standing
+## somewhere. Without one -- a caller asking what an action costs in the
+## abstract -- every row costs what it says, which is what it cost before any of
+## this. That is the same answer a walk nothing can aim gets, and for the same
+## reason: a cost worked out from a destination nobody can read would be made up.
+static func occupies(
+	chosen: Action, scene: ActionScene = null, actor: Combatant = null
+) -> int:
 	if chosen == null:
 		return 0
 	var stated := ActionCatalog.occupies_of(chosen.kind)
 	if chosen.kind == ActionCatalog.WAIT:
 		return maxi(stated, int(chosen.param("ticks", 0)))
+	if chosen.kind == ActionCatalog.GO_TO:
+		var strides := ActionEngine.strides_for(scene, actor, chosen)
+		# A walk with nowhere to go still costs a tick: the action is resolved at
+		# the end of its span, and a span of nothing would resolve it before it
+		# was ever begun.
+		return stated if strides < 0 else clampi(strides, 1, stated)
 	return stated
 
 
@@ -281,7 +310,7 @@ func _ask(one: Combatant) -> void:
 
 
 func _commit(one: Combatant, chosen: Action) -> void:
-	var doing := Activity.begun(chosen, scene.tick, occupies(chosen))
+	var doing := Activity.begun(chosen, scene.tick, occupies(chosen, scene, one))
 	_busy[one.id] = doing
 	if one.fighting:
 		_chosen_on[one.id] = _this_turn()

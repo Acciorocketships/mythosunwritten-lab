@@ -102,7 +102,17 @@ static func choices(scene: ActionScene) -> Array:
 		if at < scene.objects.size():
 			written.append(Action.examine(scene.objects[at].id))
 		written.append(Action.wait(6))
-	written.append(Action.wait(8))
+	# A last entry that outlasts the run. A plan is a list of actions and the
+	# world offers the next one when the last has been carried out, so a plan
+	# that runs out leaves the character standing about -- and standing about is
+	# exactly what this run is here to show *not* happening while the
+	# orchestrator thinks. The five stops used to fill the run on their own when
+	# a walk cost a flat twenty ticks; now that a walk costs the strides it takes
+	# (`ControlLoop.occupies`) they are done by tick 99, so the plan ends with a
+	# wait as long as the whole run rather than with one of eight ticks. Section
+	# 2.1 lets a wait name its duration, and a wait that outlives the run simply
+	# ends with it.
+	written.append(Action.wait(TICKS))
 	return written
 
 

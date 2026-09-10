@@ -64,6 +64,12 @@ const STEP := 0.9
 ## why, and "still walking" is the control loop's answer, not this one's.
 const MAX_STEPS := 400
 
+## What a stride's arithmetic is allowed to be out by when the strides a walk
+## needs are counted ahead of taking them, in strides. `strides_for` below is the
+## only reader: it exists so that a walk of a whole number of strides is charged
+## that whole number and not one more.
+const STRIDE_CRUMB := 0.0001
+
 ## How far anybody can jump with no DEX at all, and how much further each point
 ## of DEX carries them. Section 2.1 gives the failure -- "jumping farther than
 ## DEX allows" -- and this is the line it is measured against.
@@ -313,6 +319,45 @@ static func aim(scene: ActionScene, actor: Combatant, action: Action) -> Walk:
 		return Walk.refused("there is nothing with id %d" % action.target_id(), line)
 	return Walk.toward(
 		ActionScene.position_of(thing), REACH, ActionScene.name_of(thing), line)
+
+
+## How many strides the walk a character has chosen still has to take.
+##
+## A walk is the one action in the catalogue whose cost is not a property of the
+## action but of the ground between here and there: a blow takes as long to
+## swing whoever swings it, and a walk takes as long as it is long. This is that
+## length, counted in the same strides `Walk.stride` actually takes -- the
+## character's own speed, and the last stride ending as near as the walk has to
+## get -- so a walk charged this many ticks is a walk that arrives on its last
+## one. `ControlLoop.occupies` is the only caller.
+##
+## -1 comes back when there is no telling: not a walk, a walk nothing can read a
+## destination out of, or no world to read it in. The caller keeps the
+## catalogue's own number for those, because a walk that will be refused should
+## cost what the table says rather than what an unaimed walk works out to.
+##
+## Nothing is remembered here. `aim()` makes a fresh `Walk` and this one is
+## thrown away, so asking how long a walk would be does not begin it; the walk
+## the character actually takes is still the one `walk_under_way` puts on the
+## scene at the first tick of its span.
+static func strides_for(scene: ActionScene, actor: Combatant, action: Action) -> int:
+	if scene == null or actor == null or action == null:
+		return -1
+	if action.kind != ActionCatalog.GO_TO or ActionCatalog.fault(action) != "":
+		return -1
+	var leg := aim(scene, actor, action)
+	if leg.refusal != "":
+		return -1
+	var gap := actor.distance_from(leg.to.x, leg.to.y) - leg.arrive
+	if gap <= 0.0:
+		return 0
+	# `gap` is what the walk still has to cover before it may stop, so after `n`
+	# strides there is `gap - n * length` of it left and the walk is over on the
+	# first `n` that leaves none. The crumb is subtracted for a walk whose length
+	# divides exactly -- eighteen units at nine tenths of a unit is twenty
+	# strides -- so that a rounding error in the last decimal cannot make it
+	# twenty-one.
+	return int(ceil(gap / _stride_of(actor) - STRIDE_CRUMB))
 
 
 ## Carry whatever a character is part-way through one tick further.

@@ -41,7 +41,8 @@ const SEED := ScriptedPlay.SEED
 
 ## How many ticks the run gives the person to walk east into the brawler before
 ## it gives up waiting for a board. A walk key is one `go_to` of
-## `PlayerControls.STEP`, which costs twenty ticks whatever it covers.
+## `PlayerControls.STEP`, which is four strides and costs the four ticks it takes
+## to walk them (`ControlLoop.occupies`).
 const CLOSING := 400
 
 ## How many ticks the fight is given once it has begun. `Encounter.MAX_ROUNDS` is

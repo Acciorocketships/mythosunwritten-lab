@@ -710,12 +710,18 @@ is interrupted. `sim/control_loop.gd` is those three sentences and nothing else.
 
 **An action costs ticks, and the cost is in the one action table.** Every row of
 `ActionCatalog.ROWS` carries an `occupies` column beside its section 2.1 wording
-and its section 10 call names — a walk is twenty ticks, a shout five, a drop
-two. It is there rather than beside the loop because a cost written beside the
+and its section 10 call names — a shout is five ticks, a drop two, a walk at most
+twenty. It is there rather than beside the loop because a cost written beside the
 loop would be a second list of the actions beside the table, and two lists of
-one thing drift. `ActionCatalog.faults()` refuses a row that costs nothing. A wait
-is the one action that names its own duration, because section 2.1 spells it
-"wait (duration)".
+one thing drift. `ActionCatalog.faults()` refuses a row that costs nothing. Two
+rows are read rather than taken flat, and both readings are in
+`ControlLoop.occupies()`: a wait names its own duration, because section 2.1
+spells it "wait (duration)"; and a walk is as long as the ground it crosses, so
+its row is a ceiling and what it costs is the strides it has to take — a person
+pressing a walk key covers 3.6 units in four ticks, and the world's own wandering
+leg of eighteen units still costs the twenty it always did. Both are the same
+reading: an action whose row cannot say what it costs on its own is charged what
+it actually takes.
 
 A committed action has not happened yet. The engine resolves it when its span
 runs out, so an interrupted character *did not do the thing* — a walker struck
@@ -835,8 +841,9 @@ A character's next action comes from one `Callable` on its sheet, and a person's
 turns reach it as a list written down in advance. `ControlLoop` asks that list
 again every five ticks while an action runs — to find out whether the character
 has changed its mind — and a *queue* answers the question by handing over the
-next entry, which is then gone. A `go_to` costs twenty ticks, so any list with a
-walk in it was being drained by being asked.
+next entry, which is then gone. A `go_to` costs as many ticks as it has strides
+to take — up to twenty — so any list with a walk in it was being drained by being
+asked.
 
 **The rule that settles it.** `DecisionSource.plan(choices)` offers the choice at
 the index of how many actions the character has actually had *carried out*, which

@@ -37,10 +37,14 @@ extends RefCounted
 ##     It is here rather than in the control loop for the same reason the two
 ##     name columns are here: a cost written beside the loop would be a
 ##     second list of the actions beside the one below, and two lists of one
-##     thing drift. A wait is the one action that names its own duration -- section
+##     thing drift. Two rows are read rather than taken flat, and both readings
+##     live in `ControlLoop.occupies()`: a wait names its own duration -- section
 ##     2.1 spells it "wait (duration)" -- so its row is the floor and the chosen
-##     duration is what it actually costs; `ControlLoop.occupies()` is where
-##     that one reading lives.
+##     duration is what it actually costs, and a walk is as long as the ground it
+##     crosses, so its row is the ceiling and the strides it has to take are what
+##     it actually costs. Neither is a second list: the numbers below are still
+##     the only numbers, and the reading says which end of the action's own span
+##     each one is.
 ##   * `params` -- the parameters the action cannot be resolved without.
 ##   * `either` -- a group of parameters of which exactly one must be given. A
 ##     row with one is an action with more than one shape: `go_to` is the only
@@ -144,6 +148,14 @@ const NOBODY := 0
 ## `calls` column, one row each.
 const ROWS := [
 	{
+		# The most ticks one walk occupies, and the only row whose number is a
+		# ceiling rather than a flat price. A walk is the one action whose cost
+		# is a property of the ground rather than of the action -- a blow takes
+		# as long to swing wherever it is swung, and a walk takes as long as it
+		# is long -- so `ControlLoop.occupies()` charges it the strides it
+		# actually has to take, up to this. Twenty is what it has always been,
+		# and it is still exactly what the world's own wandering leg costs:
+		# `WorldCast.LEG` is eighteen units and a stride is nine tenths of one.
 		"name": GO_TO,
 		"listed": "go to (position / item / character)",
 		"calls": ["MoveTo", "MoveRelative", "Roam", "Flee"],
