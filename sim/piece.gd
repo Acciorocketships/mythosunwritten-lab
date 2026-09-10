@@ -41,12 +41,19 @@ var owner_id: int = NO_OWNER
 ## everywhere and `side()` below falls back to the owner: a board nobody has told
 ## about sides plays exactly the fight it played before.
 ##
-## They come apart the moment two commanders who are on one side in the world
-## walk into one fight together. The world has bands (`Combatant.band`), the
-## board had no word for them, and a `PieceMap` makes every commander its own
-## owner -- so a trader who came along with you was, on the board, somebody to
-## kill. `Encounter._seat` is where the world's band is written in here, and it
-## is the only place that writes it.
+## They come apart the moment somebody is pulled into a fight that was not
+## theirs. A fight is between two -- the two who drifted into each other, or the
+## one who struck and the one struck -- and everybody else on the board is there
+## because the join radius reached them. A bystander who came along with one of
+## the two is not somebody to kill: on the play stage a person who walked east
+## into a brawler took the trader they had been haggling with onto the board, and
+## with every commander its own owner that trader was a third enemy.
+##
+## `Encounter._seat` is the only place that writes this, and it writes it only
+## when the fight knows which two it is between. A band is how it decides who
+## came with whom -- but a band is a team, not an attitude, so a band is never
+## read as a side on its own: two commanders of one band who chose to fight each
+## other are the two this fight is between, and they stay two sides.
 var side_id: int = NO_OWNER
 
 ## Where it stands.

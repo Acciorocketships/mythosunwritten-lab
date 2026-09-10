@@ -95,6 +95,16 @@ var world_seed: int = 0
 
 ## The combatant whose approach began it, and where the board was anchored.
 var anchor_id: int = 0
+
+## Whom the fight is against: the other of the two it is between, or 0 when
+## whoever began it did not say.
+##
+## A fight is between two. The pairing rule finds a pair and a chosen blow has an
+## attacker and a target, so both know; a scenario that stands a board up around
+## one character does not, and a fight that does not know goes on meaning what it
+## has always meant -- every commander its own side. See `_seat`.
+var against_id: int = 0
+
 var anchor_x: float = 0.0
 var anchor_z: float = 0.0
 var anchor_height: float = 0.0
@@ -142,10 +152,12 @@ static func begin(
 	anchor: Combatant,
 	radius: float = JOIN_RADIUS,
 	span: float = BOARD_SPAN,
+	against: Combatant = null,
 ) -> Encounter:
 	var fight := Encounter.new()
 	fight.world_seed = terrain.world_seed
 	fight.anchor_id = anchor.id
+	fight.against_id = 0 if against == null else against.id
 	fight.anchor_x = anchor.x
 	fight.anchor_z = anchor.z
 	fight.anchor_height = anchor.y
@@ -422,22 +434,31 @@ func conclude() -> PackedStringArray:
 ## filled in once its commander has an id. That ordering is the whole reason
 ## there are two passes here.
 ##
-## ## The band comes onto the board with the piece
+## ## Who came with whom
 ##
-## The world sorts characters into bands and the engagement rule reads them:
-## a fight begins between two commanders *of different bands*. The board had no
-## word for a band, and a `PieceMap` makes every commander its own owner, so two
-## commanders who walked into one fight on the same side arrived on it as two
-## sides. That is not a rounding error: on the play stage a person who walked
-## east into a brawler took the trader standing beside them onto the board as an
-## enemy, and eleven rounds of the only sensible play beat that trader to death.
-## The fight could not end any other way, because a match is over when one
-## *commander* is left.
+## A fight is between two: the two who drifted into each other, or the one who
+## struck and the one struck. Everybody else on the board is there because the
+## join radius reached them, and a bystander who came along with one of the two
+## is not somebody to kill. The board had no way of saying that -- a `PieceMap`
+## makes every commander its own owner -- so on the play stage a person who
+## walked east into a brawler took the trader standing beside them onto the board
+## as a third enemy, and the fight could not end until that trader was dead,
+## because a match is over when one *commander* is left.
 ##
-## So each commander's `side_id` is the first commander of its band to be seated,
-## and its band's minions are commanded by that same one. A band with one
-## commander in it -- which is every fight the suite plays and every fight the
-## world held before this -- gets its own id back and nothing changes.
+## So the two the fight is between are each their own side, and every other
+## commander joins whichever of the two it shares a band with. A band says who
+## came with whom; it is never read as a side on its own, because a band is a
+## team and not an attitude -- `sim/scripted_territory.gd` deliberately puts
+## every commander in one band so that no fight starts by drifting, and the fight
+## it then chooses is between two of that one band. Under a rule that read bands
+## as sides those two would be allies and their fight could not be fought.
+##
+## A commander that shares a band with both of the two, or with neither, is its
+## own side, and so is every commander when the fight was not told which two it
+## is between (`against_id` is 0). That last case is every board a scenario
+## stands up directly, and it is exactly the fight those boards played before any
+## of this existed.
+
 func _seat(placed: Dictionary) -> void:
 	var pieces := PieceMap.new()
 	var band_owner := {}
@@ -445,19 +466,36 @@ func _seat(placed: Dictionary) -> void:
 		if not one.is_commander():
 			continue
 		one.piece.cell = placed[one.id]
+		# Whatever side it was on in some earlier fight is not a fact about this
+		# one. A piece outlives the board it stood on, so the slate is wiped here
+		# and written below; without this a commander would carry a side out of a
+		# fight it survived and into the next one.
+		one.piece.side_id = Piece.NO_OWNER
 		pieces.add(one.piece)
-		# The first commander of a band names it. Taking the last would make the
-		# side a fight is on depend on who happened to be seated last.
-		if not band_owner.has(one.band):
-			band_owner[one.band] = one.piece.id
-		one.piece.side_id = int(band_owner[one.band])
+		band_owner[one.band] = one.piece.id
 		by_piece[one.piece.id] = one
+	# Sides second, because a side is named by a piece id and `PieceMap.add`
+	# above is what hands those out: asked in the first pass, the two the fight
+	# is between would still be answering with the id they had on some other
+	# board.
+	var side_of_band := _sides_by_band()
+	for one in members:
+		if not one.is_commander():
+			continue
+		# Its own side unless it is a companion of one of the two. The two
+		# themselves are each their own side whatever band they share.
+		if side_of_band.has(one.band) and one.id != anchor_id and one.id != against_id:
+			one.piece.side_id = int(side_of_band[one.band])
+	# A minion is commanded by, and fights for, its own commander. Its band names
+	# that commander; nothing about sides is read here, because a minion whose
+	# commander is a companion is a companion by the commander's side.
 	for one in members:
 		if one.is_commander():
 			continue
 		one.piece.cell = placed[one.id]
 		one.piece.owner_id = int(band_owner.get(one.band, Piece.NO_OWNER))
-		one.piece.side_id = one.piece.owner_id
+		var commander := pieces.piece_of(one.piece.owner_id)
+		one.piece.side_id = Piece.NO_OWNER if commander == null else commander.side()
 		pieces.add(one.piece)
 		by_piece[one.piece.id] = one
 	match_state = CombatMatch.start(
@@ -470,6 +508,34 @@ func _seat(placed: Dictionary) -> void:
 
 
 # Everything the match has written since this was last asked, and nothing twice.
+# Which band takes which side, when the fight knows which two it is between.
+#
+# Empty -- meaning every commander is its own side, which is what a board has
+# always meant -- in the two cases where there is nothing to say: a fight that
+# was never told whom it is against, and a fight whose two are of one band. The
+# second is not a gap but a rule: a band says who came with whom, and two
+# commanders of one band who chose to fight each other are the two this fight is
+# between. Reading their shared band as a shared side would make them allies and
+# their fight unfightable, which is exactly the fight `sim/scripted_territory.gd`
+# stages on purpose.
+func _sides_by_band() -> Dictionary:
+	if against_id == 0:
+		return {}
+	var one := _member(anchor_id)
+	var other := _member(against_id)
+	if one == null or other == null or one.band == other.band:
+		return {}
+	return {one.band: one.piece.id, other.band: other.piece.id}
+
+
+# The combatant with an id among those seated, or null.
+func _member(id: int) -> Combatant:
+	for one in members:
+		if one.id == id:
+			return one
+	return null
+
+
 func _uncopied() -> PackedStringArray:
 	var found := PackedStringArray()
 	if match_state == null:

@@ -639,11 +639,12 @@ func _fight_turn() -> Dictionary:
 		return turn
 	if terrain == null:
 		return turn
-	var anchor := _two_who_have_met()
-	if anchor == null:
+	var met := _two_who_have_met()
+	if met.is_empty():
 		return turn
+	var anchor := met[0]
 	turn["began"] = anchor
-	begin_fight(anchor.id)
+	begin_fight(anchor.id, met[1].id)
 	written.append_array(_drain_opening())
 	turn["lines"] = written
 	return turn
@@ -661,16 +662,25 @@ func _drain_opening() -> PackedStringArray:
 ## Begin a fight around one character: everyone near enough joins, the board is
 ## read off the terrain under them, and the turn economy takes it from there.
 ##
+## `against_id` is the other of the two the fight is between, when whoever began
+## it knows -- the pairing rule below found a pair, and a chosen blow has a
+## target. It decides nothing here and is passed straight to `Encounter`, which
+## uses it to tell the two apart from the bystanders the join radius reached.
+## Left out, the fight is one nobody named a second party for, and every
+## commander on the board is its own side exactly as it always was.
+##
 ## Returns the encounter whether or not it could be held; an encounter that could
 ## not seat everybody comes back with `refused` set and nobody moved, and the
 ## scene is left with no fight on -- which is the combat layer's own stop
 ## condition, forwarded rather than worked around. A refused board still counts
 ## as a board built, because one was.
-func begin_fight(anchor_id: int) -> Encounter:
+func begin_fight(anchor_id: int, against_id: int = 0) -> Encounter:
 	var anchor := actor_of(anchor_id)
 	if terrain == null or anchor == null:
 		return null
-	var started := Encounter.begin(terrain, actors, anchor)
+	var started := Encounter.begin(
+		terrain, actors, anchor, Encounter.JOIN_RADIUS, Encounter.BOARD_SPAN,
+		actor_of(against_id))
 	board_version += 1
 	# What the beginning wrote, held for whoever next asks `fight_step()`. Both
 	# ways into a fight go through this call, so both put the snap-in -- or the
@@ -757,13 +767,17 @@ func is_fighting(one: Combatant) -> bool:
 
 
 ## Whether two commanders of different bands have come close enough, and if so,
-## which of them the fight is anchored on.
+## which two -- the anchor first.
 ##
 ## Pairs are walked in id order and the first pair found starts the fight, so
 ## which of several simultaneous meetings becomes the fight is decided the same
 ## way in every process. The lower-id one of the pair anchors the board, because
 ## a board is anchored on a position somebody is standing at.
-func _two_who_have_met() -> Combatant:
+##
+## Both are handed back, not just the anchor, because a fight is between two and
+## everybody else the join radius reaches is a bystander. The board has to be
+## able to tell those apart; see `Encounter._seat`.
+func _two_who_have_met() -> Array[Combatant]:
 	for i in actors.size():
 		var one := actors[i]
 		if not one.is_commander() or not one.is_alive():
@@ -776,8 +790,12 @@ func _two_who_have_met() -> Combatant:
 				continue
 			if one.distance_to(other) > ENGAGE_RADIUS:
 				continue
-			return one
-	return null
+			# Both, because a fight is between two and the board has to be told
+			# which two: everybody else who joins is a bystander the radius
+			# reached. The first is still the anchor, so where the board is read
+			# and who it is centred on are unchanged.
+			return [one, other]
+	return []
 
 
 ## Take the fallen out of the world, leaving behind whatever fell off them. A

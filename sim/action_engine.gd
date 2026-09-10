@@ -537,7 +537,7 @@ static func _open_the_fight(
 		return ActionOutcome.failed(action.kind, "%s is too far away to fight (%.2f > %.2f)" % [
 			ActionScene.name_of(target), gap, Encounter.JOIN_RADIUS,
 		])
-	var started := scene.begin_fight(actor.id)
+	var started := scene.begin_fight(actor.id, target.id)
 	if started == null or started.refused:
 		return ActionOutcome.failed(
 			action.kind, "the ground here will not hold a fight",
