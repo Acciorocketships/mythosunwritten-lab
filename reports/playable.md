@@ -20,6 +20,12 @@ re-judged those four fixes from fresh photographs rather than from the fixes'
 own claims, put the whole game through a single run at a single seed, and found
 five new faults — one of which is the worst thing on this page.
 
+Since then it has all been checked by somebody who did not build any of it: every
+claim below re-run from the command this page gives for it, and the question of
+whether a person is really just another character in the world put to a
+measurement rather than argued. It held, and the check found two more faults
+along the way. That is section 14.
+
 ## Start it with one command
 
 On a machine with a graphics card and a keyboard:
@@ -85,7 +91,9 @@ than assumed.
   from that shell with keys pressed at named ticks, photographed, and judged by
   what a player would see rather than by whether the code ran. There have been
   two: the **first pass** (commit `f17e074`) and the **second pass** (commit
-  `845a94d`), which is where most of the numbers below now come from.
+  `845a94d`), which is where most of the numbers below now come from. The
+  **independent check** of section 14 is not a third pass: it re-ran the second
+  pass's own commands and compared, rather than photographing anything new.
 
 ---
 
@@ -409,11 +417,21 @@ shell's own printed placements back at the shipped size:
 | panel | placement | right edge | bottom edge |
 |---|---|---|---|
 | sheet | `x=8 y=8 w=287 h=374` | $295$ | $382$ |
-| readout, in a fight | `x=875 y=8 w=269 h=350` | $1144$ | $358$ |
+| readout, no fight on | `x=875 y=8 w=269 h=350` | $1144$ | $358$ |
+| readout, while a fight is on | `x=875 y=8 w=269 h=290` | $1144$ | $298$ |
+| readout, while a fight is on | `x=936 y=8 w=208 h=148` | $1144$ | $156$ |
 | trade | `x=846 y=515 w=298 h=57` | $1144$ | $572$ |
 | dialogue | `x=846 y=576 w=298 h=64` | $1144$ | $640$ |
 
-Every number is inside $1152 \times 648$. The same run at $1280 \times 720$
+Every number is inside $1152 \times 648$. (The tallest readout row above is the
+biggest one this pass printed, and an earlier edition of this page labelled it
+"in a fight". It is not: the run that printed it had put its board away
+seventy-seven ticks earlier. The two rows under it are readouts printed while a
+board really was holding somebody, and they are smaller. The independent check
+of section 14 read all $91$ panel placements in every trace this pass committed
+rather than the four quoted here: $88$ are inside their own window, and the
+three that are not are all in one leftover file from the first pass that nothing
+on this page cites and no session now produces.) The same run at $1280 \times 720$
 keeps the same scale and lands at bottom $712$; at $2560 \times 1440$ it doubles
 the scale and lands at right edge $2544$, bottom $1424$. Nothing was given up in
 the art for it — $0$ of $86{,}080$ pixels are off the art's palette and $0$ of
@@ -430,6 +448,19 @@ one-times where the combat readout used to be two-times. Everything fits, and
 everything is half the size it was. Whether a pixel font at one-times on a
 $648$-pixel screen is comfortable to read for an hour is exactly the kind of
 judgement a photograph cannot make, and it is handed back with the command.
+
+**One part of that cost is not a matter of taste, and the independent check
+found it.** The font the interface is drawn in writes a zero with a slash
+through it. At two-times the slash and the ring around it are two pixels apart
+and the digit reads; at one-times they are one pixel apart, the slash fills the
+middle, and a $0$ is indistinguishable from an $8$. In
+`assets/playtest-ended-t301.png` the counts read `TRADES 8` and `DIALOGUE 8` on a
+frame where both are zero — the reviewer only caught it because the line
+underneath said `NO TRADE STANDING` — and in `assets/playtest-items-pile-t26.png`
+the readout's `0.4 AWAY` reads as `8.4 AWAY`, which is a distance a player would
+act on. Health, coins, round numbers and every count in the game are drawn in
+that font. It is a misreading rather than a strain, and the smallest fix is to
+draw the digit without its slash.
 
 ---
 
@@ -537,7 +568,7 @@ the field placed engages, and the shell prints
 `readout scale=1 x=875 y=8 w=269 h=290 fight=1` for a run that never asked for a
 readout. This is tick $61$ of it:
 
-![The board drawn under the trees with grey, red, orange and green cells, and a combat readout in the top right listing Pip, Corin and Scholar with their health, the actions on their cooldowns, and eight buttons](assets/playtest-enemy-close-t61.png)
+![The board drawn under the trees with grey, red, orange and green cells, and a combat readout in the top right listing Pip, Corin and Scholar with their health, the actions on their cooldowns, and nine buttons](assets/playtest-enemy-close-t61.png)
 
 The lattice is drawn, the cells the turn offers are coloured, and the readout
 names the round and whose turn it is, lists the turn order with everyone's
@@ -569,7 +600,7 @@ turn, the other commanders took theirs, the fight resolved, and it went back to
 real time in $61$ ticks. This is the readout during round $2$ of that fight,
 whole, with both the end-turn button and the leave-the-fight button on screen:
 
-![The combat readout in the top right of the window, complete, showing round 2, turn order, two ready actions, the turn prompt and eight buttons of which the last is LEAVE](assets/playtest-fight-t29.png)
+![The combat readout in the top right of the window, complete, showing round 2, turn order, two ready actions, the turn prompt and nine buttons of which the last is LEAVE](assets/playtest-fight-t29.png)
 
     xvfb-run -a ./run_render.sh --seed 1234 --scenario battle --play --readout --board --journal \
         --input "<27 presses>" --screenshot-ticks "28:reports/assets/playtest-fight.png"
@@ -666,6 +697,12 @@ The engine has the sentence for it — `sim/action_engine.gd:180` holds
 `"%s is down"` — and nothing on the board's side of the keyboard ever reaches
 it.
 
+The independent check of section 14 confirmed that arithmetic without taking any
+of it on trust: an earlier frame of the same run shows the person at $15$ of $32$
+after the first thrust of $11$, so they began at $26$ of $32$, and re-running the
+session printed a character sheet reading `26/32` outright. $26 - 11 - 12 - 13 =
+0$ at tick $176$.
+
 **And a fight that ends starts again three ticks later.** Nothing walks away and
 nothing cools off, so the same two characters are still inside the engagement
 radius when the board is put away and re-engage immediately: put away at $250$,
@@ -712,7 +749,7 @@ t=264 round 3 turn leave the fight -> done
 This is tick $240$ — a turn on a board the world started, with the sheet and the
 readout both open and both inside the window:
 
-![The character sheet on the left, the combat readout on the right showing round 1, a turn order of three with health, two weapon actions with one on cooldown, a last-blow line, the turn prompt reading MOVE SPENT ACTION SPENT MINION YOURS, and eight buttons; a lattice of grey, green, red and amber cells across the middle with two characters standing on it](assets/playtest-whole-t240.png)
+![The character sheet on the left, the combat readout on the right showing round 1, a turn order of three with health, two weapon actions with one on cooldown, a last-blow line, the turn prompt reading MOVE SPENT ACTION SPENT MINION YOURS, and nine buttons; a lattice of grey, green, red and amber cells across the middle with two characters standing on it](assets/playtest-whole-t240.png)
 
 **Ticks 310 to 360 — real time again.** Two walks, a wait, two examines and an
 aim, every one of them answered:
@@ -791,7 +828,10 @@ trader $2.4$ units apart:
 
 ![The shipped camera looking down on a wide green valley with a river and a road; the action panel reads a spoken line, and no character is identifiable anywhere in the frame](assets/playtest-verbs-t34.png)
 
-Neither of them can be picked out. In a forest it is worse: a whole board of
+Neither of them can be picked out. The other thing the frames turned out to be
+able to settle is the interface font's zero, which at the size the game now ships
+at cannot be told from an eight — section 5 and the defect list. In a forest it
+is worse: a whole board of
 fighters can sit under a tree canopy with no fade and no camera collision.
 Almost every frame in the playtest was taken from a closer camera than the game
 ships with, because at the shipped one there is nothing to look at.
@@ -801,10 +841,11 @@ ships with, because at the shipped one there is nothing to look at.
 ## 12. What is still not playable
 
 The second pass closed six of the first pass's sixteen defects and found five
-new ones. Sixteen are open. Nothing was fixed inside the second pass itself: it
-is judgement rather than a second implementation pass, and every repair below
-changes a wording, a camera policy, an art asset, or when the board reports a
-blow — each of which needs a decision and a test of its own.
+new ones; the independent check of section 14 then found two more that neither
+pass had named. Eighteen are open. Nothing was fixed inside either judgement
+pass: every repair below changes a wording, a camera policy, an art asset, or
+when the board reports a blow — each of which needs a decision and a test of its
+own.
 
 **Closed since the first pass**, all re-judged from fresh frames rather than from
 the fixes' own claims: panels off the window (two of them), a person walking at
@@ -812,10 +853,13 @@ one fifth of everybody else's pace, a fight that started by itself and drew
 nothing, every key on a board being silently discarded, and nothing letting a
 person leave a fight.
 
-**Still open.** The first five are new to the second pass.
+**Still open.** The first two are the independent check's; the five after them
+are new to the second pass.
 
 | what a player runs into | where it is shown |
 |---|---|
+| **Every zero on screen reads as an eight.** The interface font's slashed zero closes up at the size the game now ships at, so `TRADES 0` reads `TRADES 8` and a pile `0.4 AWAY` reads `8.4 AWAY`. Every health total, coin count, distance and round number is drawn in that font. | frames `playtest-ended-t301.png` and `playtest-items-pile-t26.png`, enlarged six times |
+| **The keyboard refuses an attack the world allows.** Pressing the attack key with nothing in hand answers `you are holding nothing to attack with` and never asks the simulation — which, asked the same question directly, answers `attack ok fight=begins` and starts an unarmed fight. So there is one thing a rule-driven or model-driven character may choose that a person may not, and the sentence the person reads is one the simulation does not own. | `render/player_controls.gd:344` against `sim/action_engine.gd`; the call and its answer are in the review's evidence file |
 | **A person can be beaten and the game never says so.** The readout drops them from the turn order, the action panel goes on saying `WAITING FOR YOU`, the answer panel goes on showing a walk refused two hundred ticks earlier, and every key is answered `it is not your turn on a board`. The engine has the sentence and nothing reaches it. | `reports/playtest-ended.log`; frame `playtest-ended-t301.png` |
 | **A fight that ends starts again three ticks later**, because nothing walks away and nothing cools off. Three whole fights in one $795$-tick run, none of them chosen. | the same log: away at $250$, back at $253$; again at $493/496$ and $736/738$ |
 | **Leaving a fight is acknowledged nowhere on screen.** The trace says `leave the fight -> done`; the answer panel still holds the refusal from before the board appeared, and the readout keeps drawing a fight the person is no longer in. | `reports/playtest-left.log` at $t=157$; frame `playtest-left-t205.png` |
@@ -824,7 +868,7 @@ person leave a fight.
 | **A weapon action on the board answers `done` and nothing else** — no target, no hit, no damage — while the same blow struck by a self-driven character reports `attack ok attack=thrust cells=2 hits=1 dealt=13`. | `reports/playtest-whole.log` at $t=234$ |
 | **The answer panel keeps its last answer for ever**, with nothing to say how old it is, so a refusal from two hundred ticks ago reads as the answer to what you just pressed. | frame `playtest-ended-t301.png` |
 | **`it is not your turn on a board` is also the answer when there is no board at all**, so one sentence means two different things. | `reports/playtest-fight.log`, printed before the board appears and after it is put away |
-| **Two wordings for one condition.** Spending a weapon action with nothing in hand is refused on the board as `no such attack`, where the real-time key for the same condition says `you are holding nothing to attack with`. | both strings are in the tree; the first pass reproduced the board half |
+| **Three wordings for one condition.** Spending a weapon action with nothing in hand is refused on the board as `no such attack`; the real-time key for the same condition says `you are holding nothing to attack with`; and the simulation itself, asked directly, does not refuse it at all. | both strings are in the tree; the first pass reproduced the board half, and the row above is the third answer |
 | **The action line is drawn as a call, not a sentence.** The panel prints the engine's wording verbatim, and in the pixel font the brackets are bare vertical strokes and the comma reads as a full stop, so a spoken line is drawn `SAYITEXT="WHAT WILL YOU TAKE FOR IT?"I`. | frame `playtest-verbs-t34.png`, or any frame with an action chosen |
 | **Ground items cannot be seen.** Four runs at three camera placements this pass, and no frame with a pile in it, while the readout names one $0.4$ units away. | `reports/playtest-items-pile.log`; frame `playtest-items-pile-t26.png` |
 | **Nothing says what an amber square means** (it is a cliff edge). There is no legend, and a fight can be fought across a field of them. | frames `playtest-board-grass-t8.png`, `playtest-enemy-t40.png` |
@@ -894,14 +938,103 @@ against this checkout at once.
 
 ---
 
+## 14. What an independent check found
+
+Everything above was made by the people who made the changes, and everything
+above has now been checked by somebody who did not. That check ran against the
+commit this page's previous edition was written on, and the two probe programs it
+wrote for the purpose are in the repository (commit `f1a8bce`), so anybody can
+run the same measurements again.
+
+**That a person really is one mind among many was run, not read.** The hardest
+mind to be indistinguishable from is a language model, because it is the only
+other kind here that cannot answer on the tick it is asked. So the probe put the
+two side by side through the one function that drives every character:
+
+* Each of the fifteen rows of the action catalogue was staged twice on identical
+  scenes and chosen twice — once as a person's live key press, once as a model's
+  reply — with both left standing in the world the same three ticks.
+  **Fifteen of fifteen gave the same engine sentence and the same scene
+  fingerprint.** None of them moved with the mind.
+* Then the ordinary world at seed $1234$ for ninety ticks, driven first by the
+  model and then by a person choosing the model's own three actions one tick
+  earlier: **$77$ of $77$ journal lines identical**, same world fingerprint
+  `dae48234fdc9bac1`.
+* And the same person pressing one tick *after* the question rather than before:
+  $24$ of the $77$ lines differ, every one of them the character starting one
+  tick later, and the fingerprint is the same `dae48234fdc9bac1`. Being slow
+  costs you ticks and costs the world nothing, which is exactly the claim.
+* No line anywhere in the simulation or the drawing code tests which kind of mind
+  is on a character's sheet, and no file on the path that drives them names one.
+
+**The world is still deterministic with a person in its cast.** Two separate
+processes ran the same ninety ticks at seed $1234$ with a person driving one
+character and a language model another, printing the whole journal: $6267$ bytes
+each, byte-for-byte identical.
+
+**The render layer was searched for rules that belong to the simulation** —
+legality, reach, cost, damage, cooldown — over all $35$ of its files rather than
+a chosen few, twice, with a wider vocabulary the second time. Of $74$ candidate
+lines, all but two are either drawing (the grass patch's own radius, the
+distances at which detail is dropped) or asking the simulation and printing its
+answer; every question of what a fighter may legally do on a board is handed to
+the board's own rule. The two exceptions are the attack-with-empty-hands
+divergence now listed in section 12, and one line in the fight's drawing code
+that recomputes "is this character alive?" as $\text{health} > 0$ instead of
+asking the simulation, which agrees with it today and is not pinned by anything
+that would notice if it stopped.
+
+**Every playability claim on this page was re-run from the command this page
+gives for it.** All fourteen photographed sessions, twenty-three traces, played
+again and compared line by line against the committed ones, and the committed
+evidence then put back. Everything load-bearing came back: the four wardrobe
+sentences word for word, `walked=3.6 steps=4` against the world's `18.0 in 20`,
+`pick_up ok item=iron key from=4`, a readout printed by a run that asked for no
+readout, the battle-stage fight appearing at tick $16$ and gone by $61$, the
+board in the long run put away at $250$, $493$ and $736$ and back three ticks
+after each — on the same line numbers of a $1018$-line trace — the three thrusts
+for $11$, $12$ and $13$, and all fifteen catalogue verbs begun by the person in
+the single long run with the same counts.
+
+**What it made this page change.** Two defects it found are now in section 12
+(every zero reading as an eight, and the attack the keyboard refuses that the
+world allows); two wordings are corrected above (the combat readout draws nine
+buttons, not eight, and the tallest readout in the fit table was measured with no
+fight on rather than during one).
+
+**And how far this kind of evidence reproduces, which is worth knowing before
+quoting any of it.** The simulation is exact: the same seed gives the same
+fingerprint and the same sentences every time. The tick a scripted key press
+lands on is not — the shell takes a press on the first frame drawn at or after
+its scheduled tick, and this machine draws about seven frames a second, so a tick
+number in this report is a label for that run and moves by about one on a
+re-run. Measurements taken off the photographs reproduce in their first two
+figures and not their third: the lattice-against-no-lattice difference of
+$19.08$ came back as $19.14$, the control box's $0.15$ as $0.07$. No conclusion
+on this page turns on a third digit, and none should.
+
+---
+
 ## Verified facts
 
 Each of these was measured from the built game at seed $1234$, not read off the
 code.
 
-* **A person is one mind among many.** A person's choice enters the world's own
-  control loop through the same seam every other character's does, and the
-  journal does not mark which line is the person's.
+* **A person is one mind among many**, and this was measured rather than
+  reasoned about. A person's choice enters the world's own control loop through
+  the same seam every other character's does, and the journal does not mark which
+  line is the person's. Put to the test against a language model on identical
+  scenes: fifteen of the fifteen catalogue actions gave the same engine sentence
+  and the same scene fingerprint whichever mind chose them, and ninety ticks of
+  the ordinary world gave $77$ of $77$ identical journal lines and the same world
+  fingerprint `dae48234fdc9bac1`.
+* **Answering late costs ticks and nothing else.** The same person pressing one
+  tick after the question rather than before moves $24$ of those $77$ lines,
+  every one of them by the character starting one tick later, and lands on the
+  same world fingerprint.
+* **The world is deterministic with a person in its cast.** Two processes, one
+  seed, ninety ticks, a person driving one character and a language model
+  another: $6267$ bytes of journal each, byte-for-byte identical.
 * **Every one of the fifteen verbs is reachable from the keyboard**, and all
   fifteen were begun by key presses inside one $362$-tick run at one seed.
 * **A grid square is now bounded by its cell in the two horizontal directions
@@ -945,6 +1078,10 @@ code.
 * **The seed-$1234$ world fingerprint is unmoved by every render-side change on
   this page**, and stands at `64f9a1c50f4510dc` on the commit the certifying
   suite run read.
+* **A tick number in this report is a label for the run it came from.** The
+  simulation is exact at a seed, but the tick a scripted key press lands on moves
+  by about one when the same command is run again, and measurements taken off the
+  photographs reproduce in their first two figures rather than their third.
 * **The whole automated suite passes on a commit that contains every change on
   this page**: `all 67 suites passed (212360 checks)`, exit code $0$, $0$ `FAIL`
   lines, with the tree shown to be unmodified for the length of the run.
@@ -956,7 +1093,10 @@ code.
   four-tick action reads as a step, whether the walk animation reads in motion,
   whether the follow camera is comfortable, and whether the interface is
   comfortable to read at its new smaller size are all unmeasured. The traces give
-  reason for optimism and are not evidence.
+  reason for optimism and are not evidence. One part of the last of those has
+  since stopped being a matter of judgement: at the new size a zero is
+  indistinguishable from an eight, which is a misreading rather than a strain,
+  and it is now a listed defect.
 * **That making the character bigger on screen is the single largest playability
   win left.** It is the biggest number in the playtest by some way, and the
   window fix has removed the panels as a competing explanation — but it is still
@@ -1019,15 +1159,16 @@ code.
 
 ## What is still open
 
-* **The independent review of the playable layer has not run.** It is to check
-  two things by running them rather than reading them: that a human-driven
-  character really is one mind among many rather than a privileged path, and that
-  every playability claim above is re-derivable from the command it names. Until
-  it does, the claims here rest on the evidence of the people who made the
-  changes and of the playtest that re-judged them.
-* **Sixteen defects are open**, listed in section 12; five of them were found by
-  the second playtest and the worst — a person beaten with nothing saying so —
-  is one of those five.
+* **The independent review has run, and what it left open is small.** It
+  confirmed both of the things it was pointed at — that a person is one mind
+  among many, and that the playability claims are re-derivable from the commands
+  this page names — and it is written up in section 14. What it leaves for
+  somebody else is the two defects it found (section 12), one line in the fight's
+  drawing code that recomputes whether a character is alive rather than asking
+  the simulation, and nothing pinning that line to the simulation's own answer.
+* **Eighteen defects are open**, listed in section 12; two were found by the
+  independent check, five by the second playtest, and the worst — a person beaten
+  with nothing saying so — is one of those five.
 * **The five keyboard-feel judgements are unmade** and can only be made by
   somebody with a display.
 * **No single seed exercises everything.** The whole game does now run in one
@@ -1039,8 +1180,10 @@ code.
 
 This report is also committed to the repository as `reports/playable.md`, so it
 survives independently of the generated view; this edition's text was committed
-and pushed to `origin/main` as `00d036c`. The write-ups it draws on are
-`reports/playtest.md` (the second pass), `reports/board-overlay.md`,
-`reports/walk-pace.md`, `reports/window-fit.md`, `reports/fight-drawn.md`,
-`reports/player-actions.md` and `reports/player-inventory.md`; the previous
-edition of this page is `reports/suite-health.md`.
+and pushed to `origin/main` as `PENDING_HASH`. The write-ups it draws on are
+`reports/playtest.md` (the second pass), the independent check's own working in
+`.lab/memory/files/playable-review-cycle3701-evidence.md`, and the change
+write-ups `reports/board-overlay.md`, `reports/walk-pace.md`,
+`reports/window-fit.md`, `reports/fight-drawn.md`, `reports/player-actions.md`
+and `reports/player-inventory.md`; the previous edition of this page is
+`reports/suite-health.md`.
