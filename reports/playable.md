@@ -1038,7 +1038,8 @@ code.
 ---
 
 This report is also committed to the repository as `reports/playable.md`, so it
-survives independently of the generated view. The write-ups it draws on are
+survives independently of the generated view; this edition's text was committed
+and pushed to `origin/main` as `00d036c`. The write-ups it draws on are
 `reports/playtest.md` (the second pass), `reports/board-overlay.md`,
 `reports/walk-pace.md`, `reports/window-fit.md`, `reports/fight-drawn.md`,
 `reports/player-actions.md` and `reports/player-inventory.md`; the previous
