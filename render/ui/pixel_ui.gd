@@ -10,10 +10,20 @@ extends CanvasLayer
 ## canvas filter is nearest-neighbour so the multiplication has no opinion of its
 ## own about what is between two pixels.
 ##
-## The scale comes from the window's height: one step per `DESIGN_HEIGHT` pixels
-## of window, never less than one. A 720-pixel window draws at 2, a 1080-pixel
-## one at 3, and a window too small for even that draws at 1 and lets the panel
-## run off the bottom rather than shrinking it to a fraction.
+## The scale answers to the panels rather than to a number written down here:
+## it is the largest whole number by which what the panels need still fits both
+## across the window and down it, and never less than one. So the question the
+## layer asks is "how much room do these panels want, and how many times does
+## that go into this window" -- which is the question a window of any size has
+## an answer to, where a design height only has an answer for the sizes it was
+## written for. A window too small even for one is drawn at one, because a
+## fraction blurs the art and there is nothing below one.
+##
+## The size the panels need only ever grows within a run. A hidden panel counts
+## as much as a showing one -- a panel the world has nothing to say through is
+## hidden rather than gone -- and a conversation that has grown longer never
+## shrinks back. An interface that changed size every time somebody spoke would
+## be worse than one that is a step smaller than it strictly had to be.
 ##
 ## ## Seven panels, one theme
 ##
@@ -32,9 +42,6 @@ extends CanvasLayer
 ## which `./run_headless.sh --assets` says from outside by asking the engine's
 ## own resource cache.
 class_name PixelUi
-
-## How many pixels of window height buy one step of interface scale.
-const DESIGN_HEIGHT := 320
 
 ## How far the panels sit from the corners, in art pixels.
 const MARGIN := 8
@@ -74,6 +81,11 @@ var territory: TerritoryPanel = null
 var art_scale := 1
 
 var _frame: MarginContainer = null
+
+## The most room the panels have asked for so far this run, in art pixels. The
+## scale is chosen against this rather than against what they happen to want on
+## this frame, so that it never rises and falls with what is being said.
+var _needed := Vector2.ZERO
 
 
 ## The layer, the theme and whichever panels were asked for, ready to be added to
@@ -183,22 +195,98 @@ static func build(
 
 
 func _ready() -> void:
-	_fit(get_viewport().get_visible_rect().size)
+	fit_to(get_viewport().get_visible_rect().size)
 	get_viewport().size_changed.connect(_on_resize)
 
 
 func _on_resize() -> void:
-	_fit(get_viewport().get_visible_rect().size)
+	fit_to(get_viewport().get_visible_rect().size)
 
 
-## Multiply the interface by the largest whole number the window has room for.
-func _fit(window: Vector2) -> void:
-	art_scale = maxi(1, int(window.y) / DESIGN_HEIGHT)
+## Asked again every frame, because what the panels need changes while the game
+## is played: a line of speech arrives, a bag fills up, the sheet is opened. The
+## answer is the same on almost every frame and a size set to what it already is
+## costs nothing, so this is a comparison rather than a re-layout.
+func _process(_delta: float) -> void:
+	fit_to(get_viewport().get_visible_rect().size)
+
+
+## Lay the interface out for a window of this size, in screen pixels.
+##
+## Public because a window is not the only thing that has a size: a test asks
+## for the three window sizes it wants to see the layout at without opening any
+## of them, which is the only way an assertion about a window the game ships in
+## can be made by a run that has no window at all.
+func fit_to(window: Vector2) -> void:
+	if _frame == null:
+		return
+	_needed = _needed.max(_measure())
+	art_scale = scale_that_fits(window, _needed)
 	scale = Vector2(art_scale, art_scale)
 	# The frame is laid out in art pixels, so it is as many of them across as the
-	# window is screen pixels divided by the scale.
-	if _frame != null:
-		_frame.size = window / float(art_scale)
+	# window is screen pixels divided by the scale. The scale above is chosen so
+	# that this is at least as big as what the panels need, which is what keeps
+	# the frame from growing past the window and carrying a panel off the edge.
+	_frame.size = window / float(art_scale)
+
+
+## How many times over the room the panels need fits inside the window: the
+## smaller of how many times it goes across and how many times it goes down,
+## and never less than one.
+static func scale_that_fits(window: Vector2, needed: Vector2) -> int:
+	if needed.x <= 0.0 or needed.y <= 0.0:
+		return 1
+	return maxi(1, mini(int(window.x / needed.x), int(window.y / needed.y)))
+
+
+## How much room the panels this run built need, in art pixels.
+##
+## Two answers, and the larger of them. The frame's own combined minimum is
+## exact, and it is the whole answer once every panel this run built is showing;
+## while some are hidden the containers leave them out of it, so the arrangement
+## `build` made -- two panels across the top, two stacks across the bottom -- is
+## added up here from the panels themselves, hidden ones included.
+func _measure() -> Vector2:
+	var gap := float(_frame.get_theme_constant("separation", "BoxContainer"))
+	var top := _beside(_room_for(panel), _room_for(readout), gap)
+	var bottom := _beside(
+		_stacked([play, answer], gap),
+		_stacked([territory, trade, dialogue], gap),
+		gap)
+	var panels := Vector2(
+		maxf(top.x, bottom.x),
+		top.y + bottom.y + (gap if top.y > 0.0 and bottom.y > 0.0 else 0.0))
+	var margins := Vector2(MARGIN, MARGIN) * 2.0
+	return (panels + margins).max(_frame.get_combined_minimum_size())
+
+
+## What one panel needs, or nothing at all for a panel this run did not build.
+static func _room_for(which: Control) -> Vector2:
+	return Vector2.ZERO if which == null else which.get_combined_minimum_size()
+
+
+## Two things side by side with the containers' own gap between them, or just
+## the one of them there is.
+static func _beside(left: Vector2, right: Vector2, gap: float) -> Vector2:
+	if left.x <= 0.0:
+		return right
+	if right.x <= 0.0:
+		return left
+	return Vector2(left.x + gap + right.x, maxf(left.y, right.y))
+
+
+## A column of panels, one under the other, with the containers' own gap between
+## each pair of them.
+static func _stacked(column: Array, gap: float) -> Vector2:
+	var size := Vector2.ZERO
+	for which in column:
+		var one := _room_for(which)
+		if one.y <= 0.0:
+			continue
+		size = Vector2(
+			maxf(size.x, one.x),
+			size.y + one.y + (gap if size.y > 0.0 else 0.0))
+	return size
 
 
 ## Where a panel landed and how big it came out, in screen pixels: what the

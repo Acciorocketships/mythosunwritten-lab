@@ -303,9 +303,12 @@ Four things, each of which the engine gets wrong by default:
   key covers CanvasItem textures only, so the 3D stack — terrain, models, grass,
   water — is untouched by it.
 * **The scale.** `render/ui/pixel_ui.gd` lays the interface out in the art's own
-  pixels and multiplies by an integer taken from the window height: one step per
-  320 pixels of window, never less than one. A 720-pixel window draws at 2, a
-  1080-pixel one at 3. Never a fraction.
+  pixels and multiplies by an integer, never a fraction. Which integer was once
+  taken from the window height alone — one step per 320 pixels of window — and
+  is now taken from the panels: the largest whole number by which the room they
+  need still fits across the window and down it, never less than one. The old
+  rule ran the panels off the edge of the window the game ships in; see
+  `reports/window-fit.md`.
 * **The font's antialiasing and hinting.** Both are on by default in this engine
   (`FONT_ANTIALIASING_GRAY`, `HINTING_LIGHT`). Both are off. Hinting nudges stems
   onto the pixel grid, which helps a typeface with curves and can only *move*
