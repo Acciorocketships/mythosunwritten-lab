@@ -253,3 +253,17 @@ That is what one would expect from what changed: the blow window only decides
 what leaves the simulation in a snapshot, and `ControlLoop.offered` is only ever
 reached through `Simulation.drive`, which only a person driving a character
 calls. A world nobody is playing never enters either path.
+
+## The whole suite
+
+```
+$ ./run_tests.sh
+all 65 suites passed (212007 checks)
+```
+
+`reports/fight-drawn-full-suite.log` is that run. It carries no `SCRIPT ERROR`
+and no `run_tests:` diagnostic, which are the two things the runner fails a run
+on whatever its summary says — and this session showed that guard working
+rather than assuming it: the run before this one printed
+`all 65 suites passed (212004 checks)` and was failed anyway, on the board
+overlay's null mesh.
