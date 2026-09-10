@@ -249,6 +249,33 @@ static func down_line(called: String) -> String:
 	return "%s is down" % called
 
 
+## What the world says about somebody who has walked out of a fight.
+##
+## One sentence, written once, in the same way as the three above. It is carried
+## out in the world's snapshot (`ActionScene.departure_of`,
+## `CombatantRoster.snapshot`) so that a screen quotes it rather than phrasing
+## leaving for itself -- which is what a readout that went on drawing the board
+## after a person left it was doing by omission.
+static func left_the_fight(one: Combatant) -> String:
+	return left_line(ActionScene.name_of(one))
+
+
+static func left_line(called: String) -> String:
+	return "%s left the fight" % called
+
+
+## What the world says to anybody who tries to start a fight again with somebody
+## they have only just finished one with.
+##
+## `ActionScene.COOL_OFF` is the rule and this is its sentence. It is public, and
+## the refusal below is the only way a chosen blow can be answered by it, so a
+## person pressing the attack key, a scripted mind and a model are told the same
+## thing in the same words -- which is what "a rule of the world" has to mean if
+## it means anything.
+static func fight_is_over(other: Combatant) -> String:
+	return "the fight with %s is over" % ActionScene.name_of(other)
+
+
 # --- go to ----------------------------------------------------------------
 
 
@@ -605,6 +632,14 @@ static func _open_the_fight(
 		return ActionOutcome.failed(action.kind, "%s is too far away to fight (%.2f > %.2f)" % [
 			ActionScene.name_of(target), gap, Encounter.JOIN_RADIUS,
 		])
+	# The fight these two have only just come out of is over. The rule and the
+	# reason for it are `ActionScene.COOL_OFF`; it is read here so that a fight
+	# somebody *chooses* to start is held to it exactly as one the world starts
+	# by itself is, which is why there is no second way round it for a person.
+	var left := scene.cool_off_between(actor.id, target.id)
+	if left > 0:
+		return ActionOutcome.failed(
+			action.kind, fight_is_over(target), {"cooling": left})
 	var started := scene.begin_fight(actor.id, target.id)
 	if started == null or started.refused:
 		return ActionOutcome.failed(

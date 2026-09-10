@@ -16,6 +16,8 @@
 #   ./tools/playtest.sh ended     # W-fight-end: the fight walked into, finished
 #   ./tools/playtest.sh beaten    # W-defeat-told: the same fight, lost
 #   ./tools/playtest.sh left      # W-fight-end: the same fight, walked out of
+#   ./tools/playtest.sh leaving   # W-fight-cooloff: leaving one, said on screen
+#   ./tools/playtest.sh cooloff   # W-fight-cooloff: the same fight, and it stays over
 #   ./tools/playtest.sh whole     # everything in one seed, one run
 #   ./tools/playtest.sh all
 #
@@ -334,6 +336,43 @@ session_left() {
 		--screenshot-ticks "100:$A/playtest-left-t100.png,140:$A/playtest-left-t140.png,205:$A/playtest-left-t205.png,220:$A/playtest-left-t220.png,234:$A/playtest-left-t234.png"
 }
 
+session_leaving() {
+	# The same fight walked out of as `left`, at the same seed and with the same
+	# presses -- and photographed at the ticks that are about the leaving rather
+	# than about the board.
+	#
+	# Its own name and its own frames on purpose: `left` is the session the defect
+	# was measured from, and its log and frames are the evidence for that
+	# measurement. What that session showed was a trace saying "leave the fight ->
+	# done" while the readout went on drawing the board the person had walked off
+	# and the answer panel went on holding a refusal the board had given them
+	# while they were still on it. The frames here are the board, the tick the
+	# person leaves it, and two moments of real time afterwards.
+	run leaving --seed $SEED --scenario play --play --journal \
+		--camera 0 9 14 --aim 1 \
+		--input "$(walk_east 6 108),$(board_turns 120 2 16),$(leave_window 150 200),210:d,216:d,222:m,230:e" \
+		--screenshot-ticks "140:$A/playtest-leaving-t140.png,160:$A/playtest-leaving-t160.png,180:$A/playtest-leaving-t180.png,205:$A/playtest-leaving-t205.png,234:$A/playtest-leaving-t234.png"
+}
+
+session_cooloff() {
+	# The same fight as `ended`, at the same seed and pressed the same way, run
+	# the same 795 ticks -- and the session this repair is measured from.
+	#
+	# Before the cool-off this run put three whole boards up, none of them
+	# chosen by anybody: away at t=250 and back at t=253, away at t=493 and back
+	# at t=496, away at t=736 and back at t=738. Nothing walked away and nothing
+	# cooled off, so the pairing rule found the same two standing where the board
+	# had put them and started the fight again on the next tick it looked.
+	#
+	# What it shows now is a fight that begins, ends and stays ended. The frames
+	# are the board up, the board at the moment it is put away, and the ticks
+	# after it, which is where the second board used to be.
+	run cooloff --seed $SEED --scenario play --play --journal \
+		--camera 0 9 14 --aim 1 \
+		--input "$(walk_east 6 108),$(board_turns 120 42 16)" \
+		--screenshot-ticks "150:$A/playtest-cooloff-t150.png,240:$A/playtest-cooloff-t240.png,260:$A/playtest-cooloff-t260.png,300:$A/playtest-cooloff-t300.png,500:$A/playtest-cooloff-t500.png,790:$A/playtest-cooloff-t790.png"
+}
+
 session_whole() {
 	# Everything in one run and one seed: walk, every kind of action, the
 	# inventory, a fight the world starts by itself played from the keyboard and
@@ -384,11 +423,13 @@ case "${1:-all}" in
 	ended) session_ended ;;
 	beaten) session_beaten ;;
 	left) session_left ;;
+	leaving) session_leaving ;;
+	cooloff) session_cooloff ;;
 	whole) session_whole ;;
 	all)
 		session_board; session_live; session_input; session_verbs; session_walk
 		session_pace; session_bag; session_fit; session_items; session_enemy
 		session_fight; session_ended; session_beaten; session_left
-		session_whole ;;
+		session_leaving; session_cooloff; session_whole ;;
 	*) echo "no such session: $1" >&2; exit 2 ;;
 esac

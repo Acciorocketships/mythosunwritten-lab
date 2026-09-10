@@ -198,6 +198,14 @@ func snapshot() -> Dictionary:
 			# phrasing being beaten for itself.
 			"alive": one.is_alive(),
 			"down": "" if one.is_alive() else ActionEngine.is_down(one),
+			# And what the world says about somebody who walked out of a fight,
+			# for exactly as long as leaving is still the last thing that
+			# happened to them. `ActionScene.departure_of` decides both halves;
+			# the sentence is `ActionEngine.left_the_fight`. It is carried here
+			# for the reason `down` above is: a readout that went on drawing a
+			# board after the person left it was phrasing their departure by
+			# omission, and there was nothing else on the screen that said so.
+			"left": scene.departure_of(one.id),
 			"cell_x": one.piece.cell.x,
 			"cell_y": one.piece.cell.y,
 			# What it has on, as catalog names by slot -- the same sort of

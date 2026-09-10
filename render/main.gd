@@ -1125,8 +1125,18 @@ func _drive_the_board(keycode: int) -> bool:
 		# one. So the world is asked what has become of them and its own
 		# sentence is quoted when it has one. See `FightSource.defeat_in`.
 		var beaten := FightSource.defeat_of(_sim.world, _sim.driven_id)
-		print("render-shell play t=%d %s" % [_sim.world.tick,
-			beaten if beaten != "" else "it is not your turn on a board"])
+		# And the other reason there is no turn to spend that is not about whose
+		# turn it is: they walked off the board. Telling somebody who left a
+		# fight that it is not their turn on a board is telling them to wait for
+		# one on a board they are not on. The world's own sentence again --
+		# `ActionEngine.left_the_fight`, through `ActionScene.departure_of`.
+		var left := FightSource.departure_of(_sim.world, _sim.driven_id)
+		var said := "it is not your turn on a board"
+		if beaten != "":
+			said = beaten
+		elif left != "":
+			said = left
+		print("render-shell play t=%d %s" % [_sim.world.tick, said])
 		return true
 	var answered := _board_controls.press(keycode, turn)
 	if _board_controls.note != "":
@@ -1288,13 +1298,31 @@ func _press_the_scripted_keys() -> void:
 ## Both are quoted rather than phrased. The journal lines are the loop's own and
 ## the answer is `ActionOutcome.line()` carried through `ControlLoop.answer_of`
 ## unchanged, which is the same sentence the answer panel puts on screen.
+## Whether the person this run is about is standing on a board right now.
+##
+## One reading, asked in the two places the shell draws or says something about a
+## board being up: the lattice over the ground and the line that says the board
+## appeared. It is the per-character answer the simulation carries in its
+## snapshot (`FightSource.on_the_board_in`), not `snapshot["fighting"]`, which
+## says only that some fight is on somewhere in the world. A run with nobody
+## driven and nobody followed falls back to the world's answer, which is what a
+## photographed board with a fixed camera beside it needs.
+func _on_a_board(snapshot: Dictionary) -> bool:
+	if snapshot.is_empty():
+		return false
+	var combat: Dictionary = snapshot["combat"]
+	var about := _sim.driven_id if _playing else _sim.world.follow_id
+	if about == 0:
+		return bool(combat["fighting"])
+	return FightSource.on_the_board_in(combat, about)
+
+
 func _say_what_happened() -> void:
 	# The board arriving and going away, said once each with the tick it happened
 	# on. Read off the snapshot rather than watched for: the shell asks whether a
 	# fight is on and compares that with what it said last time, which is the
 	# same reading the board overlay is rebuilt from.
-	var fighting := not _last_snapshot.is_empty() \
-		and bool((_last_snapshot["combat"] as Dictionary)["fighting"])
+	var fighting := _on_a_board(_last_snapshot)
 	if fighting != _was_fighting:
 		_was_fighting = fighting
 		print("render-shell fight t=%d %s" % [
@@ -2026,7 +2054,12 @@ func _sync_board(snapshot: Dictionary) -> void:
 	# different storey. The version number says when it changed, exactly as the
 	# water sheet's does, so the overlay is rebuilt once per board and not once
 	# per frame.
-	var fight_board: int = int(combat["board_version"]) if bool(combat["fighting"]) else -1
+	#
+	# "A fight is on" is asked of the person this run is about rather than of the
+	# world, for the reason `CombatPanel.read_id` gives: a board somebody has
+	# walked off is not their board, and a lattice still drawn under them says
+	# they are on it.
+	var fight_board: int = int(combat["board_version"]) if _on_a_board(snapshot) else -1
 	var here := CombatBoard.cell_of(
 		float(snapshot["observer_x"]), float(snapshot["observer_z"])
 	)
@@ -2248,7 +2281,12 @@ func _sync_sheet() -> void:
 	# restart onto a different world is picked up without anything being pushed.
 	# What is on the readout it reads through render/ui/fight_source.gd.
 	if _sheet_ui.readout != null:
-		_sheet_ui.readout.watch(_sim.world)
+		# The readout is about whoever the run is about: the character being
+		# driven when somebody is playing, and otherwise the one the world is
+		# looking through. It draws the board *they* are standing on -- see
+		# `CombatPanel.read_id`.
+		_sheet_ui.readout.watch(
+			_sim.world, _sim.driven_id if _playing else _sim.world.follow_id)
 		# And, in a run somebody is playing, the three handles the controls need:
 		# where to ask for the turn standing now, what has been picked to spend
 		# it on, and the shell's own input path, so that a button and a key are

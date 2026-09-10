@@ -131,6 +131,19 @@ const CONTROLS := [
 ## The world whose fight is being read. A handle, never written to.
 var world: SimWorld = null
 
+## Whose fight this readout is about, by the id the world knows them by, or 0 for
+## a run about nobody in particular.
+##
+## The readout draws the board this character is standing on, not "the board".
+## Those were one thing for as long as a fight was something a person was in
+## until it ended, and they came apart the moment leaving one was possible: a
+## person who walked out of a fight that carried on without them went on being
+## shown its turn order, its round and its buttons, because `snapshot["fighting"]`
+## says a fight is on somewhere in the world and says nothing about them. With
+## nobody named the panel shows whatever fight is on, which is what a photographed
+## scenario standing beside a board asks for.
+var read_id := 0
+
 ## Where the panel asks for the board turn standing for the person playing, as
 ## `func() -> BoardTurn`. Unset in a run nobody is playing, in which case there is
 ## no turn section and no controls.
@@ -242,8 +255,9 @@ func _process(delta: float) -> void:
 
 ## Watch a world. The handle, not its contents: the panel reads the fight off it
 ## again on every frame, so there is nothing here to keep in step.
-func watch(watching: SimWorld) -> void:
+func watch(watching: SimWorld, about: int = 0) -> void:
 	world = watching
+	read_id = about
 
 
 ## Wire the controls: where to ask for the turn standing now, what has been
@@ -274,8 +288,12 @@ func has_fight() -> bool:
 func refresh() -> void:
 	var on := FightSource.fight_in(world)
 	var state := FightSource.state_in(world)
-	visible = state != null
-	if state == null:
+	# A board this readout's person is not standing on is not their board, and
+	# drawing it would be the interface saying they are still in a fight they
+	# have left. Asked of the simulation, which already answers it per character
+	# -- see `FightSource.on_the_board`.
+	visible = state != null and (read_id == 0 or FightSource.on_the_board(world, read_id))
+	if not visible:
 		return
 
 	var turn := FightSource.round_of(state)

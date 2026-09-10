@@ -33,13 +33,19 @@ extends PanelContainer
 ## has not answered yet has no answer, and the last one the world happened to
 ## give about something else is not it.
 
-## ## Being beaten is said here too
+## ## Being beaten -- and having left a fight -- are said here too
 ##
 ## One thing on the panel is not about a choice at all: a character that has been
 ## beaten reads that it has, on the choice row, instead of being told the world is
 ## waiting for it. That sentence is the engine's like all the others
 ## (`ActionEngine.is_down`, carried out in the snapshot), and it wins over
 ## everything else the panel would otherwise draw -- see `refresh()`.
+##
+## A character that has walked out of a fight reads that it has, the same way and
+## for the same reason (`ActionEngine.left_the_fight`, through
+## `ActionScene.departure_of`), until it chooses something else. Without it the
+## row under it went on showing the last thing the board refused them, which is
+## an answer to a choice made on a board that is no longer theirs.
 ##
 ## ## Sizes
 ##
@@ -150,6 +156,21 @@ func refresh() -> void:
 		_answer_label.visible = false
 		_answer_icon.visible = false
 		return
+	# Then what the world says about having walked out of a fight, for as long as
+	# that is still the last thing that happened. Asked before the holder for the
+	# same reason as being beaten is: the board that was answering this person's
+	# keys is gone, and the last thing it said to them -- "the board decides where
+	# a fighter goes", refused while they were still on it -- is not the answer to
+	# having left it. Once they choose anything at all the world stops saying this
+	# and the ordinary two rows come back.
+	var left := departure_line()
+	if left != "" and choice.waiting():
+		_chose_label.text = SproutPack.drawable(left)
+		_chose_label.theme_type_variation = StringName("")
+		_answer_label.text = ""
+		_answer_label.visible = false
+		_answer_icon.visible = false
+		return
 	_chose_label.text = RESTING if choice.waiting() else SproutPack.drawable(choice.line())
 	_chose_label.theme_type_variation = StringName(
 		SproutTheme.DIM_LABEL) if choice.waiting() else StringName("")
@@ -194,6 +215,21 @@ func defeat_line() -> String:
 	if world == null or driven_id == 0:
 		return ""
 	return FightSource.defeat_of(world, driven_id)
+
+
+## What the world says about the character being driven having walked out of a
+## fight, and "" when leaving is not the last thing that happened to them.
+##
+## The same shape as `defeat_line` above and read the same way: the sentence is
+## `ActionEngine.left_the_fight` and how long it stands is
+## `ActionScene.departure_of`. It is on this panel because there was nowhere else
+## on the screen that said a person had left a fight -- the readout simply
+## stopped being about them, and this row went on drawing whatever the world had
+## last refused them while they were still on the board.
+func departure_line() -> String:
+	if world == null or driven_id == 0:
+		return ""
+	return FightSource.departure_of(world, driven_id)
 
 
 func _answer() -> Dictionary:

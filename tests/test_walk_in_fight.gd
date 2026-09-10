@@ -152,10 +152,34 @@ static func leave() -> Dictionary:
 	run["carries"] = ActionScene.inventory_of(me).size()
 	run["health"] = me.piece.health
 	run["on_a_board"] = sim.driven_turn() != null
+	# What the screen says about it, read at the moment it happened: the world's
+	# own sentence, whether the readout is still drawing a board this person is
+	# not on, and the two rows of the answer panel. Leaving used to be
+	# acknowledged nowhere at all -- the trace said "leave the fight -> done"
+	# while the readout went on drawing the board and the panel went on showing a
+	# refusal the board had given while they were still on it.
+	run["said"] = ActionEngine.left_the_fight(me)
+	run["scene_says_left"] = sim.world.combat.scene.departure_of(me.id)
+	run["snapshot_says_left"] = FightSource.departure_in(
+		sim.world.combat.snapshot(), me.id)
+	run["snapshot_on_board"] = FightSource.on_the_board_in(
+		sim.world.combat.snapshot(), me.id)
+	run["readout_up"] = _readout_up(sim)
+	run["left_panel"] = _panel_line(sim)
+	run["left_answer"] = _panel_answer(sim)
+	run["cooling"] = sim.world.combat.scene.cooling_between(
+		me.id, int(run.get("enemy_id", 0)))
 	# One more tick, so that whatever the fight does about somebody having walked
 	# out of it has happened by the time the claim is asked.
 	sim.step()
 	run["fight_after"] = sim.world.combat.scene.fight != null
+	# And the ticks after that, so a board that came straight back up would be
+	# caught. The whole of the cool-off, and one tick past it.
+	run["board_again_at"] = -1
+	for _tick in ActionScene.COOL_OFF + 1:
+		sim.step()
+		if me.fighting and int(run["board_again_at"]) < 0:
+			run["board_again_at"] = sim.world.tick
 	return run
 
 
@@ -224,6 +248,20 @@ static func _panel_line(sim: Simulation) -> String:
 	return panel._chose_label.text
 
 
+# Whether the combat readout is still drawing a board for the person being
+# driven -- or `false` in a checkout with no art unpacked, which every claim
+# reading it skips over the way the other panel claims do.
+static func _readout_up(sim: Simulation) -> bool:
+	if not SproutPack.is_installed():
+		return false
+	var panel := CombatPanel.new()
+	panel.watch(sim.world, sim.driven_id)
+	panel.refresh()
+	var up := panel.visible
+	panel.free()
+	return up
+
+
 # And what it draws underneath it.
 static func _panel_answer(sim: Simulation) -> String:
 	if not SproutPack.is_installed():
@@ -255,6 +293,7 @@ static func _walk_into_a_fight() -> Dictionary:
 	run["me"] = _named(scene, ScriptedPlay.FEN)
 	run["ally"] = _named(scene, ScriptedPlay.HOB)
 	run["enemy"] = _named(scene, ScriptedPlay.RILL)
+	run["enemy_id"] = 0 if run["enemy"] == null else (run["enemy"] as Combatant).id
 	for _tick in CLOSING:
 		if scene.fight != null:
 			break
@@ -382,6 +421,47 @@ func _a_fight_can_be_left(run: Dictionary) -> void:
 	check(int(run["health"]) > 0, "they left alive")
 	check(int(run["carries"]) > 0,
 		"and with what they carry: leaving is not falling, so nothing is spilled")
+	_leaving_is_said_on_screen(run)
+	_a_fight_that_was_left_does_not_come_straight_back(run)
+
+
+## Leaving is acknowledged on screen, which it was not.
+##
+## Three readings, and all three are the simulation's own answers: the world says
+## the person left (`ActionEngine.left_the_fight`, kept by
+## `ActionScene.departure_of`), the snapshot carries both that sentence and the
+## fact that they are no longer on a board, and the two panels draw the first and
+## stop drawing the second. The readout used to be up because *a* fight was on
+## somewhere in the world, and the answer row used to hold whatever the board had
+## last refused them while they were still standing on it.
+func _leaving_is_said_on_screen(run: Dictionary) -> void:
+	equal(run["scene_says_left"], run["said"],
+		"the world does not say the person left the fight")
+	equal(run["snapshot_says_left"], run["said"],
+		"the sentence did not reach the snapshot whoever is drawing reads")
+	check(not bool(run["snapshot_on_board"]),
+		"the snapshot still says the person is standing on a board")
+	if not SproutPack.is_installed():
+		return
+	check(not bool(run["readout_up"]),
+		"the readout went on drawing a board the person is not on")
+	equal(run["left_panel"], SproutPack.drawable(String(run["said"])),
+		"the answer panel does not say the person left the fight")
+	equal(run["left_answer"], "",
+		"the answer panel still holds what the board refused them before they left")
+
+
+## And the fight they left does not come straight back.
+##
+## The other half of `tests/test_fight_cooloff.gd`'s first claim, asked of the
+## fight a person actually meets: leaving one used to start the cool-off nowhere,
+## so the pairing rule could put the same two back on a board the next tick.
+func _a_fight_that_was_left_does_not_come_straight_back(run: Dictionary) -> void:
+	check(bool(run["cooling"]),
+		"leaving the fight did not start the cool-off between the two who were in it")
+	equal(run["board_again_at"], -1,
+		"the person was back on a board on tick %s, inside the %d-tick cool-off"
+		% [str(run["board_again_at"]), ActionScene.COOL_OFF])
 
 
 func _leaving_is_refused_out_of_turn(run: Dictionary) -> void:

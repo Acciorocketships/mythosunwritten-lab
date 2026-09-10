@@ -41,6 +41,8 @@ extends RefCounted
 ##   * **the ordering inside a tick** -- a fight that is on takes its turn before
 ##     anything else is asked, and a fight that ends on a tick does not start
 ##     another on the same tick.
+##   * **when a finished fight may begin again** -- `COOL_OFF`, the constant
+##     below, and the record `cooling` it is counted against.
 ##
 ## `CombatantRoster` now walks its combatants in real time and calls
 ## `fight_step()`; it holds no rule of its own about when a fight begins.
@@ -77,6 +79,72 @@ class_name ActionScene
 ## This constant used to live on `CombatantRoster`. It is here because the rule
 ## that reads it is here, and reading it from anywhere else is naming this file.
 const ENGAGE_RADIUS := 9.0
+
+## How long two characters who have just finished a fight are left alone before
+## the world may put them in another one, in ticks.
+##
+## ## What it is for
+##
+## A fight that ends puts its survivors back on the ground where their last
+## cells say, which for two commanders who stood next to each other on a board
+## is a few units apart -- well inside `ENGAGE_RADIUS`. Nothing walked away, so
+## the pairing rule found the same two on the very next tick and the board came
+## straight back up. Measured: a seeded pair whose fight ran to
+## `Encounter.MAX_ROUNDS` began five fights in four hundred ticks, each ending on
+## the eightieth tick of the last one and beginning again on the eighty-first;
+## in the shipped shell at seed 1234 that is three whole boards in one 795-tick
+## run, none of them chosen by anybody.
+##
+## ## Twenty, and why twenty rather than something else
+##
+## It is `ActionCatalog`'s ceiling for a `go_to` -- the longest a character can
+## be committed to going anywhere in one decision. So the cool-off is exactly one
+## whole walk: whoever has just been in a fight has time to take one leg away
+## from it before the world is willing to say they have met again. At
+## `ActionEngine.STEP` that leg is 18 units, twice `ENGAGE_RADIUS`, so a
+## departure taken inside the cool-off is a real one rather than a notional one.
+##
+## ## The rule that was not chosen, and the one that was only half of it
+##
+##   * **Push the survivors apart on the way out of the board.** It would work,
+##     and it is a lie: it moves people who chose to stand where they stand, and
+##     it would have to move a person as well as a model, which is the interface
+##     walking a character for them.
+##   * **A distance test on its own -- hysteresis, so the pair may meet again as
+##     soon as they have been some larger distance apart.** Not wrong, but not
+##     enough by itself: it has no floor, so the first step either of them takes
+##     out and back releases them, and two commanders shuffling on the spot at
+##     the edge of the radius are released immediately. It is kept, as the second
+##     half of the rule -- see below -- rather than as the whole of it.
+##
+## ## The ticks are a floor, and parting is the release
+##
+## Twenty ticks on their own are not enough, and measuring said so: on the play
+## stage at seed 1234 the cool-off turned ten back-to-back boards into eight
+## boards a hundred ticks apart, because the two it was between are a stall-
+## holder and a brawler who both stand still, so every time the twenty ticks ran
+## out they were still exactly where the last board had put them. Standing where
+## you already stood is not meeting somebody. So a pair released from a fight has
+## to have been further apart than `ENGAGE_RADIUS` at some point since it ended
+## as well as having waited out the ticks -- see `_release_the_cooled_off`, and
+## `cooling`, whose row *is* the memory of not having parted yet.
+##
+## So the rule is the two halves together -- wait out the ticks, and part -- and
+## neither does the job alone: ticks without parting leave two people who never
+## move fighting for ever on a hundred-tick beat, and parting without ticks is
+## released by a single step out and back.
+##
+## The parting test binds the *pairing* rule only. A fight somebody chooses is
+## held to the ticks and nothing more (`cool_off_between`), because choosing to
+## strike somebody standing in front of you is not something the world should
+## need them to walk away first for.
+##
+## The rule this constant serves is a rule of the world and not of any one mind:
+## it is read in `_two_who_have_met` for a fight the world starts by itself, and
+## in `ActionEngine._open_the_fight` for one somebody chooses to start -- so a
+## person pressing the attack key, a scripted mind and a model are all answered
+## the same sentence (`ActionEngine.fight_is_over`) by the same rule.
+const COOL_OFF := 20
 
 ## The id no character has: what a blow that found nobody says it struck.
 const NOBODY := 0
@@ -168,6 +236,33 @@ var fight_lines := PackedStringArray()
 ## drop layer's, unchanged; this is only so that the world can still say what
 ## became of somebody it no longer holds.
 var beaten := {}
+
+## Which two characters have lately finished a fight together, and the tick it
+## finished on: `{Vector2i(lower id, higher id) -> tick}`.
+##
+## The whole of what `COOL_OFF` above is counted against. Written when a fight
+## ends (`end_fight`) and when somebody walks out of one (`note_departure`), for
+## every pair of commanders that were on that board together -- because a fight
+## that is over is over between everybody who was in it, not only between the two
+## it was nominally between.
+##
+## A row is dropped by `_release_the_cooled_off` once the pair has both waited out
+## `COOL_OFF` and been further apart than `ENGAGE_RADIUS` since -- at which point
+## the two are strangers again and coming back together is a meeting. So the row
+## is not only a date: while it is here, these two have not met again.
+var cooling := {}
+
+## Who has lately walked out of a fight, by the id the world knows them by:
+## `{id -> {"line": String, "tick": int, "after": int}}`.
+##
+## The sentence is `ActionEngine.left_the_fight`, written once and public, in the
+## same way and for the same reason as `beaten` above: leaving a fight is
+## something the world did, and a screen that phrased it itself would be a second
+## account of it. `after` is `actions_of(id)` at the moment of the departure, so
+## the world can say whether leaving is still the last thing that happened to
+## this character or whether they have done something since -- see
+## `departure_of`.
+var departed := {}
 
 ## Every trade offered and not yet answered, newest last. One row per offer:
 ## `{"from": id, "to": id, "give": names, "give_money": int, "want": names,
@@ -470,6 +565,99 @@ func defeat_of(id: int) -> String:
 	return String(beaten.get(id, ""))
 
 
+## How many ticks of `COOL_OFF` are left between two characters, and 0 when
+## there are none -- they have never fought, or the cool-off has run out.
+##
+## Public because it is a fact about the world that a mind is entitled to read:
+## an enemy that knows the world will not let it fight somebody yet can walk away
+## instead of choosing a blow it will be refused, which is the difference between
+## `sim/enemy_mind.gd` before this and after it.
+func cool_off_between(one_id: int, other_id: int) -> int:
+	var since: Variant = cooling.get(_pair(one_id, other_id), null)
+	if since == null:
+		return 0
+	return maxi(0, COOL_OFF - (tick - int(since)))
+
+
+## Whether a fight between two characters is still cooling off.
+func cooling_between(one_id: int, other_id: int) -> bool:
+	return cool_off_between(one_id, other_id) > 0
+
+
+## What the world says about a character that has lately walked out of a fight,
+## and "" for one that has not -- or one that has done something since.
+##
+## The second half is what keeps this from being a sentence that sticks: leaving
+## is the last thing that happened to you only until you do something else, and
+## the world counts what you have done already (`actions_of`).
+func departure_of(id: int) -> String:
+	var row: Variant = departed.get(id, null)
+	if row == null:
+		return ""
+	if actions_of(id) > int((row as Dictionary)["after"]):
+		return ""
+	return String((row as Dictionary)["line"])
+
+
+## Write down that somebody walked out of the fight they were in: the world's
+## sentence for it, and the cool-off between them and everybody else who was on
+## that board.
+##
+## Called by whoever carried the departure out -- `BoardTurn.leave`, the one way
+## out of a board -- rather than by `Encounter`, because both of the things
+## recorded here are facts about the world the fight is in and outlive the board
+## it was on.
+func note_departure(one: Combatant, was_on: Array) -> void:
+	if one == null:
+		return
+	departed[one.id] = {
+		"line": ActionEngine.left_the_fight(one),
+		"tick": tick,
+		"after": actions_of(one.id),
+	}
+	var ids := PackedInt32Array([one.id])
+	for other in was_on:
+		var member := other as Combatant
+		if member != null and member != one and member.is_commander():
+			ids.append(member.id)
+	_cool_off(ids)
+
+
+# The key two ids are remembered under, lower first, so that "these two" is one
+# row however the pair is handed in.
+static func _pair(one_id: int, other_id: int) -> Vector2i:
+	return Vector2i(mini(one_id, other_id), maxi(one_id, other_id))
+
+
+# Start the cool-off between every pair among a list of ids, at this tick.
+func _cool_off(ids: PackedInt32Array) -> void:
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			cooling[_pair(ids[i], ids[j])] = tick
+
+
+# Forget the fights that are properly over: the pair waited out `COOL_OFF` and
+# has been further apart than `ENGAGE_RADIUS` since it ended, so the next time
+# they come together it is a meeting and the world may say so.
+#
+# A pair the world no longer holds both of -- somebody fell and was taken out --
+# is forgotten too: there is nothing left to pair.
+func _release_the_cooled_off() -> void:
+	if cooling.is_empty():
+		return
+	var over: Array[Vector2i] = []
+	for key in cooling:
+		var pair: Vector2i = key
+		if tick - int(cooling[pair]) < COOL_OFF:
+			continue
+		var one := actor_of(pair.x)
+		var other := actor_of(pair.y)
+		if one == null or other == null or one.distance_to(other) > ENGAGE_RADIUS:
+			over.append(pair)
+	for pair in over:
+		cooling.erase(pair)
+
+
 ## The object with an id, or null.
 func object_of(id: int) -> WorldObject:
 	for thing in objects:
@@ -503,13 +691,38 @@ static func name_of(thing: Variant) -> String:
 	return "nothing"
 
 
-## The nearest living commander of another band than this one's, or null.
+## The nearest living commander this one would strike, or null.
 ##
 ## A reading of who is standing where, like `piles_near` below, and not a rule
 ## about anything: every mind in the project that has to pick somebody out asks
 ## this, and what it does about the answer is the mind's own business. It is here
 ## rather than in any one of them because two minds asking it two ways would be
 ## two answers to "who is a stranger to me".
+##
+## ## On a board it is the board's question, and that is the whole point
+##
+## Off a board, "a stranger" is a band question: the world sorts characters into
+## bands and the engagement rule reads them. On a board it is not, and asking the
+## band there was a second answer to the one question `CombatPolicy` already
+## answers with `Piece.opposes`. The two disagreed in both directions and both
+## were measured:
+##
+##   * a mind went on choosing blows at somebody who had **left the board** --
+##     still alive, still of another band, still the nearest -- and was refused
+##     "<name> is not on the board" every time, six times in one seeded stretch
+##     of the shipped shell;
+##   * two commanders **of one band who chose to fight each other** are two sides
+##     of the board they are on (`Encounter._seat`), and each is the other's
+##     enemy as far as the board's own chooser is concerned -- but neither mind
+##     would ever name the other, so neither ever swung. Measured: a seeded pair
+##     stood through 41 rounds and 80 turns whose only lines were `face`, and the
+##     fight ended `ending=limit survivors=2 fallen=0`.
+##
+## So while this character is on a board, the answer is read off the board: the
+## nearest piece that `Piece.opposes` it, translated back to the character
+## standing on it. That is the same comparison, on the same objects, that
+## `CombatPolicy` closes and swings on -- one answer to "who is a stranger to me",
+## which is what this function was put here for.
 ##
 ## Ties are broken by distance and then by id, so which of two equally near
 ## strangers is named is decided the same way in every process.
@@ -518,10 +731,14 @@ func nearest_of_another_band(actor: Combatant) -> Combatant:
 		return null
 	var found: Combatant = null
 	var nearest := 0.0
+	var on_the_board := fight != null and actor.fighting
 	for one in actors:
 		if one == actor or not one.is_commander() or not one.is_alive():
 			continue
-		if one.band == actor.band:
+		if on_the_board:
+			if not one.fighting or not _opposed_on_the_board(actor, one):
+				continue
+		elif one.band == actor.band:
 			continue
 		var gap := actor.distance_to(one)
 		if found != null and (gap > nearest or (gap == nearest and one.id > found.id)):
@@ -529,6 +746,17 @@ func nearest_of_another_band(actor: Combatant) -> Combatant:
 		found = one
 		nearest = gap
 	return found
+
+
+# Whether the board now up puts two characters on opposite sides, asked of the
+# pieces themselves. Both have to still be standing on it: a piece that has been
+# taken is off the map and there is nothing left to compare.
+func _opposed_on_the_board(one: Combatant, other: Combatant) -> bool:
+	if fight == null or fight.match_state == null:
+		return false
+	var here := fight.match_state.pieces.piece_of(one.piece.id)
+	var there := fight.match_state.pieces.piece_of(other.piece.id)
+	return here != null and there != null and here.opposes(there)
 
 
 ## Every pile lying within a distance of a position, nearest first and by id
@@ -630,6 +858,9 @@ func fight_step() -> Dictionary:
 	# turn by hand, or by a character's own decision function, both of which spend
 	# a weapon action outside this call.
 	_take_blows()
+	# Anybody who has waited out the cool-off and walked away from whoever they
+	# fought is a stranger again, and this is where the world notices.
+	_release_the_cooled_off()
 	var turn := _fight_turn()
 	# And anything struck in the turn just played.
 	_take_blows()
@@ -743,7 +974,15 @@ func end_fight() -> PackedStringArray:
 	# away: the ids are only translatable while the fight that seated them is
 	# still here.
 	_take_blows()
+	# Who was on it, read before the conclusion empties the board. Everybody who
+	# was in this fight is cooling off with everybody else who was, because a
+	# fight that is over is over between all of them -- see `COOL_OFF`.
+	var was_on := PackedInt32Array()
+	for one in fight.members:
+		if one.is_commander():
+			was_on.append(one.id)
 	var written := fight.conclude()
+	_cool_off(was_on)
 	_drop_the_fallen()
 	fight_lines.append_array(fight.lines)
 	fight = null
@@ -821,6 +1060,12 @@ func _two_who_have_met() -> Array[Combatant]:
 			if other.band == one.band:
 				continue
 			if one.distance_to(other) > ENGAGE_RADIUS:
+				continue
+			if cooling.has(_pair(one.id, other.id)):
+				# They have not met again since the fight they were both in: too
+				# little has passed, or neither has walked away from where the
+				# board put them, or both. Standing where you already stood is
+				# not meeting somebody. See `COOL_OFF`.
 				continue
 			# Both, because a fight is between two and the board has to be told
 			# which two: everybody else who joins is a bystander the radius

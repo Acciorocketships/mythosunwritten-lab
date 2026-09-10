@@ -35,6 +35,10 @@ extends RefCounted
 ##      person's `P` key sends.
 ##   5. **Nobody worth noticing** -- wander, on the ordinary cast's own rule.
 ##      An enemy with nothing to hunt is a character walking about the world.
+##      Somebody it has just finished a fight with is nobody worth noticing while
+##      the world is still cooling that fight off (`ActionScene.COOL_OFF`): the
+##      rule is the world's and this only reads it, the same way a person is
+##      answered by it when they press the attack key.
 ##
 ## ## Why the bands sit where they do
 ##
@@ -118,6 +122,14 @@ static func hunting(wander: Callable) -> Callable:
 				if mark == null or strikes == "":
 					return Action.wait(WATCHFUL)
 				return Action.attack(mark.id, strikes)
+			if mark != null and scene.cooling_between(actor.id, mark.id):
+				# The fight with this one is over and the world will not hold
+				# another yet (`ActionScene.COOL_OFF`). A hunter that swung
+				# anyway would be refused in the world's own words, over and
+				# over, at the two-tick beat it watches on -- so it goes back to
+				# walking the world instead, which is also how it gets far
+				# enough away for the meeting to mean something next time.
+				mark = null
 			if mark == null or actor.distance_to(mark) > NOTICE:
 				if wander.is_valid():
 					var next: Variant = wander.call(scene, actor)

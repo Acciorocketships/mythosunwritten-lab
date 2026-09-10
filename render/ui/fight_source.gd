@@ -287,3 +287,46 @@ static func defeat_in(snapshot: Dictionary, id: int) -> String:
 ## The same answer, for a caller holding the world rather than a snapshot of it.
 static func defeat_of(world: SimWorld, id: int) -> String:
 	return defeat_in(snapshot_of(world), id)
+
+
+## Whether one character is standing on the board of the fight under way.
+##
+## The per-character answer, as against `snapshot["fighting"]`, which says only
+## that *a* fight is on somewhere in the world. The two are not the same question
+## and the interface had been asking the world's one on the person's behalf: a
+## person who left a fight that carried on without them went on being shown the
+## board they had walked off, because a fight was still on. Read off the piece
+## row the simulation already carries, like everything else here.
+static func on_the_board_in(snapshot: Dictionary, id: int) -> bool:
+	if id == 0 or not bool(snapshot.get("fighting", false)):
+		return false
+	for row in snapshot.get("pieces", []):
+		if int(row.get("id", 0)) == id:
+			return bool(row.get("fighting", false))
+	return false
+
+
+## The same answer, for a caller holding the world rather than a snapshot of it.
+static func on_the_board(world: SimWorld, id: int) -> bool:
+	return on_the_board_in(snapshot_of(world), id)
+
+
+## What the simulation says about a character that has walked out of a fight, and
+## "" for one that has not -- or one that has done something since.
+##
+## Both halves are the simulation's: the sentence is
+## `ActionEngine.left_the_fight` and for how long it is still the last thing that
+## happened is `ActionScene.departure_of`. Quoted here like every other sentence
+## on this side of the line.
+static func departure_in(snapshot: Dictionary, id: int) -> String:
+	if id == 0:
+		return ""
+	for row in snapshot.get("pieces", []):
+		if int(row.get("id", 0)) == id:
+			return String(row.get("left", ""))
+	return ""
+
+
+## The same answer, for a caller holding the world rather than a snapshot of it.
+static func departure_of(world: SimWorld, id: int) -> String:
+	return departure_in(snapshot_of(world), id)

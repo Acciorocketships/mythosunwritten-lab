@@ -48,6 +48,11 @@ extends RefCounted
 ## cells an attack covers change under them -- section 3.5's facing, usable.
 class_name BoardTurn
 
+## The world the fight is in. Kept because two of the things leaving a fight does
+## outlive the board it was on -- the world's sentence for having left, and the
+## cool-off between everybody who was on it -- and both are the world's to hold.
+var scene: ActionScene = null
+
 ## The fight this turn is in.
 var fight: Encounter = null
 
@@ -80,6 +85,7 @@ static func of(scene: ActionScene, actor_id: int) -> BoardTurn:
 	if standing == null:
 		return null
 	var turn := BoardTurn.new()
+	turn.scene = scene
 	turn.fight = on
 	turn.match_state = on.match_state
 	turn.member = acting
@@ -254,6 +260,9 @@ func finish() -> Dictionary:
 ## round again. Everything about what leaving does is the fight's
 ## (`Encounter.leave`); this asks and repeats the answer, as the five above do.
 func leave() -> Dictionary:
+	# Who was on the board with them, read before the departure takes them off
+	# it: the cool-off below is between everybody who was in this fight.
+	var was_on := fight.members.duplicate()
 	fight.leave(member)
 	# Whether it happened is read off the one thing leaving changes -- the
 	# character is no longer in a fight -- rather than off how much the fight
@@ -261,6 +270,13 @@ func leave() -> Dictionary:
 	# that line as a success.
 	if member.fighting:
 		return {"ok": false, "reason": match_state.last_refusal}
+	# It happened, so the world writes it down: what it says about somebody who
+	# has walked out of a fight, and the cool-off that keeps them from being
+	# walked straight back into it. Neither is decided here --
+	# `ActionScene.note_departure` holds both, `ActionEngine.left_the_fight` is
+	# the sentence and `ActionScene.COOL_OFF` is the rule.
+	if scene != null:
+		scene.note_departure(member, was_on)
 	return {"ok": true, "reason": ""}
 
 
