@@ -1,0 +1,1013 @@
+=== playtest session: ended
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --journal --camera 0 9 14 --aim 1 --input 6:d,12:d,18:d,24:d,30:d,36:d,42:d,48:d,54:d,60:d,66:d,72:d,78:d,84:d,90:d,96:d,102:d,108:d,120:bracketleft,121:bracketleft,122:bracketleft,123:bracketright,128:4,129:5,130:semicolon,131:apostrophe,132:backslash,134:0,136:bracketleft,137:bracketleft,138:bracketleft,139:bracketright,140:8,144:4,145:5,146:semicolon,147:apostrophe,148:backslash,150:0,152:bracketleft,153:bracketleft,154:bracketleft,155:bracketright,156:8,157:8,160:4,161:5,162:semicolon,163:apostrophe,164:backslash,166:0,168:bracketleft,169:bracketleft,170:bracketleft,171:bracketright,172:8,173:8,174:8,176:4,177:5,178:semicolon,179:apostrophe,180:backslash,182:0,184:bracketleft,185:bracketleft,186:bracketleft,187:bracketright,192:4,193:5,194:semicolon,195:apostrophe,196:backslash,198:0,200:bracketleft,201:bracketleft,202:bracketleft,203:bracketright,204:8,208:4,209:5,210:semicolon,211:apostrophe,212:backslash,214:0,216:bracketleft,217:bracketleft,218:bracketleft,219:bracketright,220:8,221:8,224:4,225:5,226:semicolon,227:apostrophe,228:backslash,230:0,232:bracketleft,233:bracketleft,234:bracketleft,235:bracketright,236:8,237:8,238:8,240:4,241:5,242:semicolon,243:apostrophe,244:backslash,246:0,248:bracketleft,249:bracketleft,250:bracketleft,251:bracketright,256:4,257:5,258:semicolon,259:apostrophe,260:backslash,262:0,264:bracketleft,265:bracketleft,266:bracketleft,267:bracketright,268:8,272:4,273:5,274:semicolon,275:apostrophe,276:backslash,278:0,280:bracketleft,281:bracketleft,282:bracketleft,283:bracketright,284:8,285:8,288:4,289:5,290:semicolon,291:apostrophe,292:backslash,294:0,296:bracketleft,297:bracketleft,298:bracketleft,299:bracketright,300:8,301:8,302:8,304:4,305:5,306:semicolon,307:apostrophe,308:backslash,310:0,312:bracketleft,313:bracketleft,314:bracketleft,315:bracketright,320:4,321:5,322:semicolon,323:apostrophe,324:backslash,326:0,328:bracketleft,329:bracketleft,330:bracketleft,331:bracketright,332:8,336:4,337:5,338:semicolon,339:apostrophe,340:backslash,342:0,344:bracketleft,345:bracketleft,346:bracketleft,347:bracketright,348:8,349:8,352:4,353:5,354:semicolon,355:apostrophe,356:backslash,358:0,360:bracketleft,361:bracketleft,362:bracketleft,363:bracketright,364:8,365:8,366:8,368:4,369:5,370:semicolon,371:apostrophe,372:backslash,374:0,376:bracketleft,377:bracketleft,378:bracketleft,379:bracketright,384:4,385:5,386:semicolon,387:apostrophe,388:backslash,390:0,392:bracketleft,393:bracketleft,394:bracketleft,395:bracketright,396:8,400:4,401:5,402:semicolon,403:apostrophe,404:backslash,406:0,408:bracketleft,409:bracketleft,410:bracketleft,411:bracketright,412:8,413:8,416:4,417:5,418:semicolon,419:apostrophe,420:backslash,422:0,424:bracketleft,425:bracketleft,426:bracketleft,427:bracketright,428:8,429:8,430:8,432:4,433:5,434:semicolon,435:apostrophe,436:backslash,438:0,440:bracketleft,441:bracketleft,442:bracketleft,443:bracketright,448:4,449:5,450:semicolon,451:apostrophe,452:backslash,454:0,456:bracketleft,457:bracketleft,458:bracketleft,459:bracketright,460:8,464:4,465:5,466:semicolon,467:apostrophe,468:backslash,470:0,472:bracketleft,473:bracketleft,474:bracketleft,475:bracketright,476:8,477:8,480:4,481:5,482:semicolon,483:apostrophe,484:backslash,486:0,488:bracketleft,489:bracketleft,490:bracketleft,491:bracketright,492:8,493:8,494:8,496:4,497:5,498:semicolon,499:apostrophe,500:backslash,502:0,504:bracketleft,505:bracketleft,506:bracketleft,507:bracketright,512:4,513:5,514:semicolon,515:apostrophe,516:backslash,518:0,520:bracketleft,521:bracketleft,522:bracketleft,523:bracketright,524:8,528:4,529:5,530:semicolon,531:apostrophe,532:backslash,534:0,536:bracketleft,537:bracketleft,538:bracketleft,539:bracketright,540:8,541:8,544:4,545:5,546:semicolon,547:apostrophe,548:backslash,550:0,552:bracketleft,553:bracketleft,554:bracketleft,555:bracketright,556:8,557:8,558:8,560:4,561:5,562:semicolon,563:apostrophe,564:backslash,566:0,568:bracketleft,569:bracketleft,570:bracketleft,571:bracketright,576:4,577:5,578:semicolon,579:apostrophe,580:backslash,582:0,584:bracketleft,585:bracketleft,586:bracketleft,587:bracketright,588:8,592:4,593:5,594:semicolon,595:apostrophe,596:backslash,598:0,600:bracketleft,601:bracketleft,602:bracketleft,603:bracketright,604:8,605:8,608:4,609:5,610:semicolon,611:apostrophe,612:backslash,614:0,616:bracketleft,617:bracketleft,618:bracketleft,619:bracketright,620:8,621:8,622:8,624:4,625:5,626:semicolon,627:apostrophe,628:backslash,630:0,632:bracketleft,633:bracketleft,634:bracketleft,635:bracketright,640:4,641:5,642:semicolon,643:apostrophe,644:backslash,646:0,648:bracketleft,649:bracketleft,650:bracketleft,651:bracketright,652:8,656:4,657:5,658:semicolon,659:apostrophe,660:backslash,662:0,664:bracketleft,665:bracketleft,666:bracketleft,667:bracketright,668:8,669:8,672:4,673:5,674:semicolon,675:apostrophe,676:backslash,678:0,680:bracketleft,681:bracketleft,682:bracketleft,683:bracketright,684:8,685:8,686:8,688:4,689:5,690:semicolon,691:apostrophe,692:backslash,694:0,696:bracketleft,697:bracketleft,698:bracketleft,699:bracketright,704:4,705:5,706:semicolon,707:apostrophe,708:backslash,710:0,712:bracketleft,713:bracketleft,714:bracketleft,715:bracketright,716:8,720:4,721:5,722:semicolon,723:apostrophe,724:backslash,726:0,728:bracketleft,729:bracketleft,730:bracketleft,731:bracketright,732:8,733:8,736:4,737:5,738:semicolon,739:apostrophe,740:backslash,742:0,744:bracketleft,745:bracketleft,746:bracketleft,747:bracketright,748:8,749:8,750:8,752:4,753:5,754:semicolon,755:apostrophe,756:backslash,758:0,760:bracketleft,761:bracketleft,762:bracketleft,763:bracketright,768:4,769:5,770:semicolon,771:apostrophe,772:backslash,774:0,776:bracketleft,777:bracketleft,778:bracketleft,779:bracketright,780:8,784:4,785:5,786:semicolon,787:apostrophe,788:backslash,790:0 --screenshot-ticks 40:reports/assets/playtest-ended-t40.png,100:reports/assets/playtest-ended-t100.png,150:reports/assets/playtest-ended-t150.png,300:reports/assets/playtest-ended-t300.png,500:reports/assets/playtest-ended-t500.png,700:reports/assets/playtest-ended-t700.png,790:reports/assets/playtest-ended-t790.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --journal --camera 0 9 14 --aim 1 --input 6:d,12:d,18:d,24:d,30:d,36:d,42:d,48:d,54:d,60:d,66:d,72:d,78:d,84:d,90:d,96:d,102:d,108:d,120:bracketleft,121:bracketleft,122:bracketleft,123:bracketright,128:4,129:5,130:semicolon,131:apostrophe,132:backslash,134:0,136:bracketleft,137:bracketleft,138:bracketleft,139:bracketright,140:8,144:4,145:5,146:semicolon,147:apostrophe,148:backslash,150:0,152:bracketleft,153:bracketleft,154:bracketleft,155:bracketright,156:8,157:8,160:4,161:5,162:semicolon,163:apostrophe,164:backslash,166:0,168:bracketleft,169:bracketleft,170:bracketleft,171:bracketright,172:8,173:8,174:8,176:4,177:5,178:semicolon,179:apostrophe,180:backslash,182:0,184:bracketleft,185:bracketleft,186:bracketleft,187:bracketright,192:4,193:5,194:semicolon,195:apostrophe,196:backslash,198:0,200:bracketleft,201:bracketleft,202:bracketleft,203:bracketright,204:8,208:4,209:5,210:semicolon,211:apostrophe,212:backslash,214:0,216:bracketleft,217:bracketleft,218:bracketleft,219:bracketright,220:8,221:8,224:4,225:5,226:semicolon,227:apostrophe,228:backslash,230:0,232:bracketleft,233:bracketleft,234:bracketleft,235:bracketright,236:8,237:8,238:8,240:4,241:5,242:semicolon,243:apostrophe,244:backslash,246:0,248:bracketleft,249:bracketleft,250:bracketleft,251:bracketright,256:4,257:5,258:semicolon,259:apostrophe,260:backslash,262:0,264:bracketleft,265:bracketleft,266:bracketleft,267:bracketright,268:8,272:4,273:5,274:semicolon,275:apostrophe,276:backslash,278:0,280:bracketleft,281:bracketleft,282:bracketleft,283:bracketright,284:8,285:8,288:4,289:5,290:semicolon,291:apostrophe,292:backslash,294:0,296:bracketleft,297:bracketleft,298:bracketleft,299:bracketright,300:8,301:8,302:8,304:4,305:5,306:semicolon,307:apostrophe,308:backslash,310:0,312:bracketleft,313:bracketleft,314:bracketleft,315:bracketright,320:4,321:5,322:semicolon,323:apostrophe,324:backslash,326:0,328:bracketleft,329:bracketleft,330:bracketleft,331:bracketright,332:8,336:4,337:5,338:semicolon,339:apostrophe,340:backslash,342:0,344:bracketleft,345:bracketleft,346:bracketleft,347:bracketright,348:8,349:8,352:4,353:5,354:semicolon,355:apostrophe,356:backslash,358:0,360:bracketleft,361:bracketleft,362:bracketleft,363:bracketright,364:8,365:8,366:8,368:4,369:5,370:semicolon,371:apostrophe,372:backslash,374:0,376:bracketleft,377:bracketleft,378:bracketleft,379:bracketright,384:4,385:5,386:semicolon,387:apostrophe,388:backslash,390:0,392:bracketleft,393:bracketleft,394:bracketleft,395:bracketright,396:8,400:4,401:5,402:semicolon,403:apostrophe,404:backslash,406:0,408:bracketleft,409:bracketleft,410:bracketleft,411:bracketright,412:8,413:8,416:4,417:5,418:semicolon,419:apostrophe,420:backslash,422:0,424:bracketleft,425:bracketleft,426:bracketleft,427:bracketright,428:8,429:8,430:8,432:4,433:5,434:semicolon,435:apostrophe,436:backslash,438:0,440:bracketleft,441:bracketleft,442:bracketleft,443:bracketright,448:4,449:5,450:semicolon,451:apostrophe,452:backslash,454:0,456:bracketleft,457:bracketleft,458:bracketleft,459:bracketright,460:8,464:4,465:5,466:semicolon,467:apostrophe,468:backslash,470:0,472:bracketleft,473:bracketleft,474:bracketleft,475:bracketright,476:8,477:8,480:4,481:5,482:semicolon,483:apostrophe,484:backslash,486:0,488:bracketleft,489:bracketleft,490:bracketleft,491:bracketright,492:8,493:8,494:8,496:4,497:5,498:semicolon,499:apostrophe,500:backslash,502:0,504:bracketleft,505:bracketleft,506:bracketleft,507:bracketright,512:4,513:5,514:semicolon,515:apostrophe,516:backslash,518:0,520:bracketleft,521:bracketleft,522:bracketleft,523:bracketright,524:8,528:4,529:5,530:semicolon,531:apostrophe,532:backslash,534:0,536:bracketleft,537:bracketleft,538:bracketleft,539:bracketright,540:8,541:8,544:4,545:5,546:semicolon,547:apostrophe,548:backslash,550:0,552:bracketleft,553:bracketleft,554:bracketleft,555:bracketright,556:8,557:8,558:8,560:4,561:5,562:semicolon,563:apostrophe,564:backslash,566:0,568:bracketleft,569:bracketleft,570:bracketleft,571:bracketright,576:4,577:5,578:semicolon,579:apostrophe,580:backslash,582:0,584:bracketleft,585:bracketleft,586:bracketleft,587:bracketright,588:8,592:4,593:5,594:semicolon,595:apostrophe,596:backslash,598:0,600:bracketleft,601:bracketleft,602:bracketleft,603:bracketright,604:8,605:8,608:4,609:5,610:semicolon,611:apostrophe,612:backslash,614:0,616:bracketleft,617:bracketleft,618:bracketleft,619:bracketright,620:8,621:8,622:8,624:4,625:5,626:semicolon,627:apostrophe,628:backslash,630:0,632:bracketleft,633:bracketleft,634:bracketleft,635:bracketright,640:4,641:5,642:semicolon,643:apostrophe,644:backslash,646:0,648:bracketleft,649:bracketleft,650:bracketleft,651:bracketright,652:8,656:4,657:5,658:semicolon,659:apostrophe,660:backslash,662:0,664:bracketleft,665:bracketleft,666:bracketleft,667:bracketright,668:8,669:8,672:4,673:5,674:semicolon,675:apostrophe,676:backslash,678:0,680:bracketleft,681:bracketleft,682:bracketleft,683:bracketright,684:8,685:8,686:8,688:4,689:5,690:semicolon,691:apostrophe,692:backslash,694:0,696:bracketleft,697:bracketleft,698:bracketleft,699:bracketright,704:4,705:5,706:semicolon,707:apostrophe,708:backslash,710:0,712:bracketleft,713:bracketleft,714:bracketleft,715:bracketright,716:8,720:4,721:5,722:semicolon,723:apostrophe,724:backslash,726:0,728:bracketleft,729:bracketleft,730:bracketleft,731:bracketright,732:8,733:8,736:4,737:5,738:semicolon,739:apostrophe,740:backslash,742:0,744:bracketleft,745:bracketleft,746:bracketleft,747:bracketright,748:8,749:8,750:8,752:4,753:5,754:semicolon,755:apostrophe,756:backslash,758:0,760:bracketleft,761:bracketleft,762:bracketleft,763:bracketright,768:4,769:5,770:semicolon,771:apostrophe,772:backslash,774:0,776:bracketleft,777:bracketleft,778:bracketleft,779:bracketright,780:8,784:4,785:5,786:semicolon,787:apostrophe,788:backslash,790:0 --screenshot-ticks 40:reports/assets/playtest-ended-t40.png,100:reports/assets/playtest-ended-t100.png,150:reports/assets/playtest-ended-t150.png,300:reports/assets/playtest-ended-t300.png,500:reports/assets/playtest-ended-t500.png,700:reports/assets/playtest-ended-t700.png,790:reports/assets/playtest-ended-t790.png (without --input/--screenshot-ticks)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
+Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
+Failed to create secure directory (/run/user/1000/pulse): Read-only file system
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5705:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+WARNING: All audio drivers failed, falling back to the dummy driver.
+     at: initialize (servers/audio/audio_server.cpp:258)
+
+render-shell play driving=#1
+render-shell keys WASD/arrows  walk one step (3.6 units)
+render-shell keys G            go to the nearest named place
+render-shell keys J            hop (3.0 units)
+render-shell keys K            leap (12.0 units, further than an ordinary DEX reaches)
+render-shell keys Tab          aim at the next thing in sight
+render-shell keys F            hold the next thing you carry, or nothing
+render-shell keys C            pick the next thing inside what you have aimed at
+render-shell keys B            pick the next thing to say
+render-shell keys - / =        the coins in your next offer (given / asked)
+render-shell keys P            go to what you have aimed at
+render-shell keys E            examine what you have aimed at
+render-shell keys L            look at what you are holding
+render-shell keys Q            take the picked thing out of what you have aimed at
+render-shell keys X            drop what you are holding
+render-shell keys 1            put on what you are holding
+render-shell keys 2            take off what you are holding
+render-shell keys 3            use up what you are holding
+render-shell keys V            put what you are holding into what you have aimed at
+render-shell keys T            say the picked line to what you have aimed at
+render-shell keys Y            shout the picked line
+render-shell keys O            offer a trade: give what you hold and the given coins, ask for what you have picked and the asked coins
+render-shell keys U            accept the offer standing from it
+render-shell keys I            deny the offer standing from it
+render-shell keys H            interact with it, using what you are holding
+render-shell keys N            attack it with what you are holding
+render-shell keys M            wait (5 ticks)
+render-shell keys [            pick the next cell you may step onto
+render-shell keys ]            step onto it
+render-shell keys ;            pick the next of your minions
+render-shell keys '            pick the next cell that minion may go to
+render-shell keys \            send it there
+render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
+render-shell keys 8 / 9        turn a quarter left or right (free)
+render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
+render-shell keys Z            open or shut the character sheet
+render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=13283 motes=588 sheet=1/3 aa=msaa4+fxaa
+  t=  1  Fen    has not decided yet, and waits in the world
+  t=  1  Hob    began wait(ticks=4), 4 ticks
+  t=  1  Rill   began wait(ticks=20), 20 ticks
+  t=  5  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Hob    began wait(ticks=4), 4 ticks
+  t=  6  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=8 chose go_to(offset=(3.600, 0.000))
+  t=  9  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t=  9  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=13
+  t=  9  Hob    began wait(ticks=4), 4 ticks
+  t= 11  Rill   thought again at 10/20t, wanted the same thing
+  t= 13  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+  t= 13  Fen    has not decided yet, and waits in the world
+  t= 13  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=17
+  t= 13  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
+render-shell play t=13 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+render-shell play t=13 chose go_to(offset=(3.600, 0.000))
+  t= 14  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 16  Rill   thought again at 15/20t, wanted the same thing
+  t= 17  Hob    finished trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4) -> trade_propose ok to=1 give=1 give_money=0 want=0 want_money=4
+  t= 17  Hob    began wait(ticks=4), 4 ticks
+  t= 18  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-472.800, 420.000) walked=3.6 steps=4
+  t= 18  Fen    has not decided yet, and waits in the world
+render-shell play t=18 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-472.800, 420.000) walked=3.6 steps=4
+render-shell play t=18 chose go_to(offset=(3.600, 0.000))
+  t= 19  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 21  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=25
+  t= 21  Hob    began wait(ticks=4), 4 ticks
+  t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
+  t= 21  Rill   began wait(ticks=20), 20 ticks
+  t= 23  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-469.200, 420.000) walked=3.6 steps=4
+  t= 23  Fen    has not decided yet, and waits in the world
+render-shell play t=23 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-469.200, 420.000) walked=3.6 steps=4
+render-shell play t=24 chose go_to(offset=(3.600, 0.000))
+  t= 25  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 25  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=29
+  t= 25  Hob    began wait(ticks=4), 4 ticks
+  t= 26  Rill   thought again at 5/20t, kept wait(ticks=20) over go_to(target=1)
+  t= 29  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-465.600, 420.000) walked=3.6 steps=4
+  t= 29  Fen    has not decided yet, and waits in the world
+  t= 29  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=33
+  t= 29  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=29 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-465.600, 420.000) walked=3.6 steps=4
+  t= 31  Rill   thought again at 10/20t, kept wait(ticks=20) over go_to(target=1)
+render-shell play t=32 chose go_to(offset=(3.600, 0.000))
+  t= 33  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 33  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=37
+  t= 33  Hob    began wait(ticks=4), 4 ticks
+  t= 36  Rill   thought again at 15/20t, kept wait(ticks=20) over go_to(target=1)
+  t= 37  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-462.000, 420.000) walked=3.6 steps=4
+  t= 37  Fen    has not decided yet, and waits in the world
+  t= 37  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=41
+  t= 37  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=37 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-462.000, 420.000) walked=3.6 steps=4
+render-shell play t=37 chose go_to(offset=(3.600, 0.000))
+  t= 38  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+render-shell screenshot t=40 reports/assets/playtest-ended-t40.png
+render-shell fight t=42 the board appears
+  t= 41  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=45
+  t= 41  Hob    began wait(ticks=4), 4 ticks
+  t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
+  t= 41  Rill   began go_to(target=1), 8 ticks
+  t= 42  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-458.400, 420.000) walked=3.6 steps=4
+  t= 42  Fen    has not decided yet, and waits in the world
+render-shell play t=42 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-458.400, 420.000) walked=3.6 steps=4
+render-shell play t=42 chose go_to(offset=(3.600, 0.000))
+  t= 42  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+  t= 43  Hob    interrupted (combat began), abandoned wait(ticks=4) 2/4t
+  t= 43  Rill   interrupted (combat began), abandoned go_to(target=1) 2/8t
+render-shell play t=42 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=48 chose go_to(offset=(3.600, 0.000))
+  t= 48  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=48 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=56 chose go_to(offset=(3.600, 0.000))
+  t= 56  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=56 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=61 chose go_to(offset=(3.600, 0.000))
+  t= 61  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=61 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=66 chose go_to(offset=(3.600, 0.000))
+  t= 66  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=66 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=72 chose go_to(offset=(3.600, 0.000))
+  t= 72  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=72 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=80 chose go_to(offset=(3.600, 0.000))
+  t= 80  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=80 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=85 chose go_to(offset=(3.600, 0.000))
+  t= 85  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=85 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=90 chose go_to(offset=(3.600, 0.000))
+  t= 90  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=90 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=96 chose go_to(offset=(3.600, 0.000))
+  t= 96  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=96 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell screenshot t=101 reports/assets/playtest-ended-t100.png
+render-shell play t=104 chose go_to(offset=(3.600, 0.000))
+  t=104  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=104 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=109 chose go_to(offset=(3.600, 0.000))
+  t=109  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=109 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=120 round 1 picks step (-153,139) no unit to none
+render-shell play t=122 round 1 picks step (-154,140) no unit to none
+render-shell play t=122 round 1 picks step (-152,140) no unit to none
+render-shell play t=125 round 1 turn step -> done
+render-shell play t=128 round 1 turn weapon action 1 -> done
+render-shell play t=131 round 1 turn weapon action 2 -> refused: already acted this turn
+render-shell play t=131 you have no minions on the board
+render-shell play t=131 no minion is picked
+render-shell play t=133 no minion and cell are picked
+render-shell play t=136 round 1 turn end the turn -> done
+render-shell play t=136 it is not your turn on a board
+  t=137  Hob    began wait(ticks=4), 4 ticks
+  t=138  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=139 it is not your turn on a board
+render-shell play t=139 it is not your turn on a board
+render-shell play t=139 it is not your turn on a board
+  t=141  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=145
+render-shell play t=141 it is not your turn on a board
+  t=143  Rill   thought again at 5/6t, wanted the same thing
+  t=144  Rill   finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=11
+render-shell play t=144 round 2 turn weapon action 1 -> done
+render-shell play t=146 round 2 turn weapon action 2 -> refused: already acted this turn
+render-shell play t=146 you have no minions on the board
+render-shell play t=149 no minion is picked
+render-shell play t=149 no minion and cell are picked
+render-shell screenshot t=152 reports/assets/playtest-ended-t150.png
+render-shell play t=152 round 2 turn end the turn -> done
+render-shell play t=152 it is not your turn on a board
+  t=153  Hob    began wait(ticks=4), 4 ticks
+  t=154  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=154 it is not your turn on a board
+render-shell play t=154 it is not your turn on a board
+  t=157  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=161
+render-shell play t=157 it is not your turn on a board
+render-shell play t=157 it is not your turn on a board
+render-shell play t=157 it is not your turn on a board
+  t=159  Rill   thought again at 5/6t, wanted the same thing
+  t=160  Rill   finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+render-shell play t=160 round 3 turn weapon action 1 -> done
+render-shell play t=162 round 3 turn weapon action 2 -> refused: already acted this turn
+render-shell play t=162 you have no minions on the board
+render-shell play t=165 no minion is picked
+render-shell play t=165 no minion and cell are picked
+render-shell play t=168 round 3 turn end the turn -> done
+render-shell play t=168 it is not your turn on a board
+  t=169  Hob    began wait(ticks=4), 4 ticks
+  t=170  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=170 it is not your turn on a board
+render-shell play t=170 it is not your turn on a board
+  t=173  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=177
+render-shell play t=173 it is not your turn on a board
+render-shell play t=173 it is not your turn on a board
+render-shell play t=173 it is not your turn on a board
+  t=175  Rill   thought again at 5/6t, wanted the same thing
+  t=176  Rill   finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=13
+render-shell play t=176 it is not your turn on a board
+render-shell play t=176 it is not your turn on a board
+  t=177  Hob    began wait(ticks=4), 4 ticks
+  t=178  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=179 it is not your turn on a board
+render-shell play t=179 it is not your turn on a board
+render-shell play t=179 it is not your turn on a board
+  t=181  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=185
+  t=181  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=181 it is not your turn on a board
+  t=183  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=184 it is not your turn on a board
+render-shell play t=184 it is not your turn on a board
+  t=185  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=189
+  t=185  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=187 it is not your turn on a board
+render-shell play t=187 it is not your turn on a board
+render-shell play t=187 it is not your turn on a board
+  t=188  Rill   thought again at 10/20t, wanted the same thing
+  t=189  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=193
+  t=189  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=192 it is not your turn on a board
+  t=193  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=197
+  t=193  Hob    began wait(ticks=4), 4 ticks
+  t=193  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=194 it is not your turn on a board
+render-shell play t=194 it is not your turn on a board
+  t=197  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=201
+  t=197  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=197 it is not your turn on a board
+render-shell play t=197 it is not your turn on a board
+  t=198  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=218
+  t=198  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=200 it is not your turn on a board
+render-shell play t=200 it is not your turn on a board
+  t=201  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=205
+  t=201  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=202 it is not your turn on a board
+render-shell play t=202 it is not your turn on a board
+  t=203  Rill   thought again at 5/20t, wanted the same thing
+  t=205  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=209
+  t=205  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=205 it is not your turn on a board
+render-shell play t=205 it is not your turn on a board
+  t=208  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=208 it is not your turn on a board
+  t=209  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=213
+  t=209  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=210 it is not your turn on a board
+render-shell play t=210 it is not your turn on a board
+  t=213  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=217
+  t=213  Hob    began wait(ticks=4), 4 ticks
+  t=213  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=213 it is not your turn on a board
+render-shell play t=213 it is not your turn on a board
+render-shell play t=216 it is not your turn on a board
+render-shell play t=216 it is not your turn on a board
+  t=217  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=221
+  t=217  Hob    began wait(ticks=4), 4 ticks
+  t=218  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=238
+  t=218  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=219 it is not your turn on a board
+render-shell play t=219 it is not your turn on a board
+render-shell play t=219 it is not your turn on a board
+  t=221  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=225
+  t=221  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=221 it is not your turn on a board
+render-shell play t=221 it is not your turn on a board
+  t=223  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=224 it is not your turn on a board
+  t=225  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=229
+  t=225  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=226 it is not your turn on a board
+render-shell play t=226 it is not your turn on a board
+  t=228  Rill   thought again at 10/20t, wanted the same thing
+  t=229  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=233
+  t=229  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=229 it is not your turn on a board
+render-shell play t=229 it is not your turn on a board
+render-shell play t=232 it is not your turn on a board
+render-shell play t=232 it is not your turn on a board
+  t=233  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=237
+  t=233  Hob    began wait(ticks=4), 4 ticks
+  t=233  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=234 it is not your turn on a board
+render-shell play t=234 it is not your turn on a board
+  t=237  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=241
+  t=237  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=237 it is not your turn on a board
+render-shell play t=237 it is not your turn on a board
+render-shell play t=237 it is not your turn on a board
+  t=238  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=258
+  t=238  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=240 it is not your turn on a board
+render-shell play t=240 it is not your turn on a board
+  t=241  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=245
+  t=241  Hob    began wait(ticks=4), 4 ticks
+  t=243  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=243 it is not your turn on a board
+render-shell play t=243 it is not your turn on a board
+render-shell play t=243 it is not your turn on a board
+  t=245  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=249
+  t=245  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=245 it is not your turn on a board
+  t=248  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=248 it is not your turn on a board
+render-shell play t=248 it is not your turn on a board
+render-shell fight t=250 the board is put away
+  t=249  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=253
+  t=249  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=250 it is not your turn on a board
+render-shell play t=250 it is not your turn on a board
+render-shell fight t=253 the board appears
+  t=252  Hob    interrupted (combat began), abandoned wait(ticks=4) 3/4t
+  t=252  Hob    began wait(ticks=20), 20 ticks
+  t=252  Rill   interrupted (combat began), abandoned wait(ticks=20) 14/20t
+  t=253  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=253 it is not your turn on a board
+render-shell play t=256 it is not your turn on a board
+  t=257  Hob    thought again at 5/20t, wanted the same thing
+  t=258  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=258 it is not your turn on a board
+render-shell play t=258 it is not your turn on a board
+render-shell play t=261 it is not your turn on a board
+render-shell play t=261 it is not your turn on a board
+  t=262  Hob    thought again at 10/20t, wanted the same thing
+  t=263  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=264 it is not your turn on a board
+render-shell play t=264 it is not your turn on a board
+  t=267  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=267 it is not your turn on a board
+render-shell play t=267 it is not your turn on a board
+render-shell play t=267 it is not your turn on a board
+  t=268  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=269 it is not your turn on a board
+  t=272  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=292
+  t=272  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=272 it is not your turn on a board
+  t=273  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=293
+  t=273  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=274 it is not your turn on a board
+render-shell play t=274 it is not your turn on a board
+  t=277  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=277 it is not your turn on a board
+render-shell play t=277 it is not your turn on a board
+  t=278  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=280 it is not your turn on a board
+render-shell play t=280 it is not your turn on a board
+  t=282  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=282 it is not your turn on a board
+render-shell play t=282 it is not your turn on a board
+  t=283  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=285 it is not your turn on a board
+render-shell play t=285 it is not your turn on a board
+render-shell play t=285 it is not your turn on a board
+  t=287  Hob    thought again at 15/20t, wanted the same thing
+  t=288  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=288 it is not your turn on a board
+render-shell play t=290 it is not your turn on a board
+render-shell play t=290 it is not your turn on a board
+  t=292  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=312
+  t=292  Hob    began wait(ticks=20), 20 ticks
+  t=293  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=313
+  t=293  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=293 it is not your turn on a board
+render-shell play t=293 it is not your turn on a board
+render-shell play t=296 it is not your turn on a board
+render-shell play t=296 it is not your turn on a board
+  t=297  Hob    thought again at 5/20t, wanted the same thing
+  t=298  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=298 it is not your turn on a board
+render-shell play t=298 it is not your turn on a board
+render-shell screenshot t=301 reports/assets/playtest-ended-t300.png
+render-shell play t=301 it is not your turn on a board
+render-shell play t=301 it is not your turn on a board
+render-shell play t=301 it is not your turn on a board
+  t=302  Hob    thought again at 10/20t, wanted the same thing
+  t=303  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=304 it is not your turn on a board
+render-shell play t=304 it is not your turn on a board
+render-shell play t=306 it is not your turn on a board
+render-shell play t=306 it is not your turn on a board
+  t=307  Hob    thought again at 15/20t, wanted the same thing
+  t=308  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=309 it is not your turn on a board
+render-shell play t=309 it is not your turn on a board
+  t=312  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=332
+  t=312  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=312 it is not your turn on a board
+render-shell play t=312 it is not your turn on a board
+  t=313  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=333
+  t=313  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=315 it is not your turn on a board
+render-shell play t=315 it is not your turn on a board
+render-shell play t=315 it is not your turn on a board
+  t=317  Hob    thought again at 5/20t, wanted the same thing
+  t=318  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=320 it is not your turn on a board
+  t=322  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=322 it is not your turn on a board
+render-shell play t=322 it is not your turn on a board
+  t=323  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=325 it is not your turn on a board
+render-shell play t=325 it is not your turn on a board
+  t=327  Hob    thought again at 15/20t, wanted the same thing
+  t=328  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=328 it is not your turn on a board
+render-shell play t=328 it is not your turn on a board
+render-shell play t=330 it is not your turn on a board
+render-shell play t=330 it is not your turn on a board
+  t=332  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=352
+  t=332  Hob    began wait(ticks=20), 20 ticks
+  t=333  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=353
+  t=333  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=333  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=333 it is not your turn on a board
+render-shell play t=333 it is not your turn on a board
+  t=334  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=336 it is not your turn on a board
+  t=338  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=338 it is not your turn on a board
+render-shell play t=338 it is not your turn on a board
+  t=339  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=341 it is not your turn on a board
+render-shell play t=341 it is not your turn on a board
+  t=343  Hob    thought again at 10/20t, wanted the same thing
+  t=344  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=344 it is not your turn on a board
+render-shell play t=344 it is not your turn on a board
+render-shell play t=346 it is not your turn on a board
+render-shell play t=346 it is not your turn on a board
+  t=348  Hob    thought again at 15/20t, wanted the same thing
+  t=349  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=349 it is not your turn on a board
+render-shell play t=349 it is not your turn on a board
+render-shell play t=349 it is not your turn on a board
+render-shell play t=352 it is not your turn on a board
+  t=353  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=373
+  t=353  Hob    began wait(ticks=20), 20 ticks
+  t=354  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=374
+  t=354  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=354 it is not your turn on a board
+render-shell play t=354 it is not your turn on a board
+render-shell play t=357 it is not your turn on a board
+render-shell play t=357 it is not your turn on a board
+  t=358  Hob    thought again at 5/20t, wanted the same thing
+  t=359  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=360 it is not your turn on a board
+render-shell play t=360 it is not your turn on a board
+render-shell play t=362 it is not your turn on a board
+render-shell play t=362 it is not your turn on a board
+  t=363  Hob    thought again at 10/20t, wanted the same thing
+  t=364  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=365 it is not your turn on a board
+render-shell play t=365 it is not your turn on a board
+render-shell play t=365 it is not your turn on a board
+  t=368  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=368 it is not your turn on a board
+render-shell play t=368 it is not your turn on a board
+  t=369  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=370 it is not your turn on a board
+render-shell play t=370 it is not your turn on a board
+  t=373  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=393
+  t=373  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=373 it is not your turn on a board
+render-shell play t=373 it is not your turn on a board
+  t=374  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=394
+  t=374  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=376 it is not your turn on a board
+render-shell play t=376 it is not your turn on a board
+  t=378  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=378 it is not your turn on a board
+render-shell play t=378 it is not your turn on a board
+  t=379  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=381 it is not your turn on a board
+  t=383  Hob    thought again at 10/20t, wanted the same thing
+  t=384  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=384 it is not your turn on a board
+render-shell play t=386 it is not your turn on a board
+render-shell play t=386 it is not your turn on a board
+  t=388  Hob    thought again at 15/20t, wanted the same thing
+  t=389  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=389 it is not your turn on a board
+render-shell play t=389 it is not your turn on a board
+render-shell play t=392 it is not your turn on a board
+render-shell play t=392 it is not your turn on a board
+  t=393  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=413
+  t=393  Hob    began wait(ticks=20), 20 ticks
+  t=394  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=414
+  t=394  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=394 it is not your turn on a board
+render-shell play t=394 it is not your turn on a board
+render-shell play t=397 it is not your turn on a board
+render-shell play t=397 it is not your turn on a board
+  t=398  Hob    thought again at 5/20t, wanted the same thing
+  t=399  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=400 it is not your turn on a board
+render-shell play t=402 it is not your turn on a board
+render-shell play t=402 it is not your turn on a board
+  t=403  Hob    thought again at 10/20t, wanted the same thing
+  t=404  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=405 it is not your turn on a board
+render-shell play t=405 it is not your turn on a board
+  t=408  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=408 it is not your turn on a board
+render-shell play t=408 it is not your turn on a board
+  t=409  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=410 it is not your turn on a board
+render-shell play t=410 it is not your turn on a board
+  t=413  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=433
+  t=413  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=413 it is not your turn on a board
+render-shell play t=413 it is not your turn on a board
+render-shell play t=413 it is not your turn on a board
+  t=414  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=434
+  t=414  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=414  Hob    began wait(ticks=20), 20 ticks
+  t=415  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=416 it is not your turn on a board
+render-shell play t=418 it is not your turn on a board
+render-shell play t=418 it is not your turn on a board
+  t=419  Hob    thought again at 5/20t, wanted the same thing
+  t=420  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=421 it is not your turn on a board
+render-shell play t=421 it is not your turn on a board
+  t=424  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=424 it is not your turn on a board
+render-shell play t=424 it is not your turn on a board
+  t=425  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=426 it is not your turn on a board
+render-shell play t=426 it is not your turn on a board
+  t=429  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=429 it is not your turn on a board
+render-shell play t=429 it is not your turn on a board
+render-shell play t=429 it is not your turn on a board
+  t=430  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=432 it is not your turn on a board
+render-shell play t=432 it is not your turn on a board
+  t=434  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=454
+  t=434  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=434 it is not your turn on a board
+render-shell play t=434 it is not your turn on a board
+  t=435  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=455
+  t=435  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=437 it is not your turn on a board
+render-shell play t=437 it is not your turn on a board
+  t=439  Hob    thought again at 5/20t, wanted the same thing
+  t=440  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=440 it is not your turn on a board
+render-shell play t=440 it is not your turn on a board
+render-shell play t=442 it is not your turn on a board
+render-shell play t=442 it is not your turn on a board
+  t=444  Hob    thought again at 10/20t, wanted the same thing
+  t=445  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=445 it is not your turn on a board
+render-shell play t=448 it is not your turn on a board
+  t=449  Hob    thought again at 15/20t, wanted the same thing
+  t=450  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=450 it is not your turn on a board
+render-shell play t=450 it is not your turn on a board
+render-shell play t=453 it is not your turn on a board
+render-shell play t=453 it is not your turn on a board
+  t=454  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=474
+  t=454  Hob    began wait(ticks=20), 20 ticks
+  t=455  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=475
+  t=455  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=456 it is not your turn on a board
+render-shell play t=456 it is not your turn on a board
+render-shell play t=458 it is not your turn on a board
+render-shell play t=458 it is not your turn on a board
+  t=459  Hob    thought again at 5/20t, wanted the same thing
+  t=460  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=461 it is not your turn on a board
+render-shell play t=461 it is not your turn on a board
+  t=464  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=464 it is not your turn on a board
+  t=465  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=466 it is not your turn on a board
+render-shell play t=466 it is not your turn on a board
+  t=469  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=469 it is not your turn on a board
+render-shell play t=469 it is not your turn on a board
+  t=470  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=472 it is not your turn on a board
+render-shell play t=472 it is not your turn on a board
+  t=474  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=494
+  t=474  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=474 it is not your turn on a board
+render-shell play t=474 it is not your turn on a board
+  t=475  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=495
+  t=475  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=477 it is not your turn on a board
+render-shell play t=477 it is not your turn on a board
+render-shell play t=477 it is not your turn on a board
+  t=479  Hob    thought again at 5/20t, wanted the same thing
+  t=480  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=480 it is not your turn on a board
+render-shell play t=482 it is not your turn on a board
+render-shell play t=482 it is not your turn on a board
+  t=484  Hob    thought again at 10/20t, wanted the same thing
+  t=485  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=485 it is not your turn on a board
+render-shell play t=485 it is not your turn on a board
+render-shell play t=488 it is not your turn on a board
+render-shell play t=488 it is not your turn on a board
+  t=489  Hob    thought again at 15/20t, wanted the same thing
+  t=490  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=490 it is not your turn on a board
+render-shell play t=490 it is not your turn on a board
+render-shell fight t=493 the board is put away
+render-shell play t=493 it is not your turn on a board
+render-shell play t=493 it is not your turn on a board
+render-shell play t=493 it is not your turn on a board
+render-shell fight t=496 the board appears
+  t=494  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=514
+  t=494  Hob    began wait(ticks=20), 20 ticks
+  t=495  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=515
+  t=495  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=495  Hob    began wait(ticks=20), 20 ticks
+  t=496  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=496 it is not your turn on a board
+render-shell play t=496 it is not your turn on a board
+render-shell play t=498 it is not your turn on a board
+render-shell play t=498 it is not your turn on a board
+  t=500  Hob    thought again at 5/20t, wanted the same thing
+  t=501  Rill   thought again at 5/20t, wanted the same thing
+render-shell screenshot t=501 reports/assets/playtest-ended-t500.png
+render-shell play t=501 it is not your turn on a board
+render-shell play t=501 it is not your turn on a board
+render-shell play t=504 it is not your turn on a board
+render-shell play t=504 it is not your turn on a board
+  t=505  Hob    thought again at 10/20t, wanted the same thing
+  t=506  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=506 it is not your turn on a board
+render-shell play t=506 it is not your turn on a board
+render-shell play t=509 it is not your turn on a board
+  t=510  Hob    thought again at 15/20t, wanted the same thing
+  t=511  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=512 it is not your turn on a board
+render-shell play t=514 it is not your turn on a board
+render-shell play t=514 it is not your turn on a board
+  t=515  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=535
+  t=515  Hob    began wait(ticks=20), 20 ticks
+  t=516  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=536
+  t=516  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=517 it is not your turn on a board
+render-shell play t=517 it is not your turn on a board
+  t=520  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=520 it is not your turn on a board
+render-shell play t=520 it is not your turn on a board
+  t=521  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=522 it is not your turn on a board
+render-shell play t=522 it is not your turn on a board
+  t=525  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=525 it is not your turn on a board
+render-shell play t=525 it is not your turn on a board
+  t=526  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=528 it is not your turn on a board
+  t=530  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=530 it is not your turn on a board
+render-shell play t=530 it is not your turn on a board
+  t=531  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=533 it is not your turn on a board
+render-shell play t=533 it is not your turn on a board
+  t=535  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=555
+  t=535  Hob    began wait(ticks=20), 20 ticks
+  t=536  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=556
+  t=536  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=536 it is not your turn on a board
+render-shell play t=536 it is not your turn on a board
+render-shell play t=538 it is not your turn on a board
+render-shell play t=538 it is not your turn on a board
+  t=540  Hob    thought again at 5/20t, wanted the same thing
+  t=541  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=541 it is not your turn on a board
+render-shell play t=541 it is not your turn on a board
+render-shell play t=541 it is not your turn on a board
+render-shell play t=544 it is not your turn on a board
+  t=545  Hob    thought again at 10/20t, wanted the same thing
+  t=546  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=546 it is not your turn on a board
+render-shell play t=546 it is not your turn on a board
+render-shell play t=549 it is not your turn on a board
+render-shell play t=549 it is not your turn on a board
+  t=550  Hob    thought again at 15/20t, wanted the same thing
+  t=551  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=552 it is not your turn on a board
+render-shell play t=552 it is not your turn on a board
+render-shell play t=554 it is not your turn on a board
+render-shell play t=554 it is not your turn on a board
+  t=555  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=575
+  t=555  Hob    began wait(ticks=20), 20 ticks
+  t=556  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=576
+  t=556  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=557 it is not your turn on a board
+render-shell play t=557 it is not your turn on a board
+render-shell play t=557 it is not your turn on a board
+  t=560  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=560 it is not your turn on a board
+render-shell play t=560 it is not your turn on a board
+  t=561  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=562 it is not your turn on a board
+render-shell play t=562 it is not your turn on a board
+  t=565  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=565 it is not your turn on a board
+render-shell play t=565 it is not your turn on a board
+  t=566  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=568 it is not your turn on a board
+render-shell play t=568 it is not your turn on a board
+  t=570  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=570 it is not your turn on a board
+render-shell play t=570 it is not your turn on a board
+  t=571  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=573 it is not your turn on a board
+  t=575  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=595
+  t=575  Hob    began wait(ticks=20), 20 ticks
+  t=576  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=596
+  t=576  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=576  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=576 it is not your turn on a board
+  t=577  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=578 it is not your turn on a board
+render-shell play t=578 it is not your turn on a board
+  t=581  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=581 it is not your turn on a board
+render-shell play t=581 it is not your turn on a board
+  t=582  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=584 it is not your turn on a board
+render-shell play t=584 it is not your turn on a board
+  t=586  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=586 it is not your turn on a board
+render-shell play t=586 it is not your turn on a board
+  t=587  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=589 it is not your turn on a board
+render-shell play t=589 it is not your turn on a board
+  t=591  Hob    thought again at 15/20t, wanted the same thing
+  t=592  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=592 it is not your turn on a board
+render-shell play t=594 it is not your turn on a board
+render-shell play t=594 it is not your turn on a board
+  t=596  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=616
+  t=596  Hob    began wait(ticks=20), 20 ticks
+  t=597  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=617
+  t=597  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=597 it is not your turn on a board
+render-shell play t=597 it is not your turn on a board
+render-shell play t=600 it is not your turn on a board
+render-shell play t=600 it is not your turn on a board
+  t=601  Hob    thought again at 5/20t, wanted the same thing
+  t=602  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=602 it is not your turn on a board
+render-shell play t=602 it is not your turn on a board
+render-shell play t=605 it is not your turn on a board
+render-shell play t=605 it is not your turn on a board
+render-shell play t=605 it is not your turn on a board
+  t=606  Hob    thought again at 10/20t, wanted the same thing
+  t=607  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=608 it is not your turn on a board
+render-shell play t=610 it is not your turn on a board
+render-shell play t=610 it is not your turn on a board
+  t=611  Hob    thought again at 15/20t, wanted the same thing
+  t=612  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=613 it is not your turn on a board
+render-shell play t=613 it is not your turn on a board
+  t=616  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=636
+  t=616  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=616 it is not your turn on a board
+render-shell play t=616 it is not your turn on a board
+  t=617  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=637
+  t=617  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=618 it is not your turn on a board
+render-shell play t=618 it is not your turn on a board
+  t=621  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=621 it is not your turn on a board
+render-shell play t=621 it is not your turn on a board
+render-shell play t=621 it is not your turn on a board
+  t=622  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=624 it is not your turn on a board
+render-shell play t=624 it is not your turn on a board
+  t=626  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=626 it is not your turn on a board
+render-shell play t=626 it is not your turn on a board
+  t=627  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=629 it is not your turn on a board
+render-shell play t=629 it is not your turn on a board
+  t=631  Hob    thought again at 15/20t, wanted the same thing
+  t=632  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=632 it is not your turn on a board
+render-shell play t=632 it is not your turn on a board
+render-shell play t=634 it is not your turn on a board
+render-shell play t=634 it is not your turn on a board
+  t=636  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=656
+  t=636  Hob    began wait(ticks=20), 20 ticks
+  t=637  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=657
+  t=637  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=637 it is not your turn on a board
+render-shell play t=640 it is not your turn on a board
+  t=641  Hob    thought again at 5/20t, wanted the same thing
+  t=642  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=642 it is not your turn on a board
+render-shell play t=642 it is not your turn on a board
+render-shell play t=645 it is not your turn on a board
+render-shell play t=645 it is not your turn on a board
+  t=646  Hob    thought again at 10/20t, wanted the same thing
+  t=647  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=648 it is not your turn on a board
+render-shell play t=648 it is not your turn on a board
+render-shell play t=650 it is not your turn on a board
+render-shell play t=650 it is not your turn on a board
+  t=651  Hob    thought again at 15/20t, wanted the same thing
+  t=652  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=653 it is not your turn on a board
+render-shell play t=653 it is not your turn on a board
+  t=656  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=676
+  t=656  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=656 it is not your turn on a board
+  t=657  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=677
+  t=657  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=657  Hob    began wait(ticks=20), 20 ticks
+  t=658  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=658 it is not your turn on a board
+render-shell play t=658 it is not your turn on a board
+render-shell play t=661 it is not your turn on a board
+render-shell play t=661 it is not your turn on a board
+  t=662  Hob    thought again at 5/20t, wanted the same thing
+  t=663  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=664 it is not your turn on a board
+render-shell play t=664 it is not your turn on a board
+render-shell play t=666 it is not your turn on a board
+render-shell play t=666 it is not your turn on a board
+  t=667  Hob    thought again at 10/20t, wanted the same thing
+  t=668  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=669 it is not your turn on a board
+render-shell play t=669 it is not your turn on a board
+render-shell play t=669 it is not your turn on a board
+  t=672  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=672 it is not your turn on a board
+  t=673  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=674 it is not your turn on a board
+render-shell play t=674 it is not your turn on a board
+  t=677  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=697
+  t=677  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=677 it is not your turn on a board
+render-shell play t=677 it is not your turn on a board
+  t=678  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=698
+  t=678  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=680 it is not your turn on a board
+render-shell play t=680 it is not your turn on a board
+  t=682  Hob    thought again at 5/20t, wanted the same thing
+  t=683  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=683 it is not your turn on a board
+render-shell play t=683 it is not your turn on a board
+render-shell play t=683 it is not your turn on a board
+render-shell play t=685 it is not your turn on a board
+render-shell play t=685 it is not your turn on a board
+  t=687  Hob    thought again at 10/20t, wanted the same thing
+  t=688  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=688 it is not your turn on a board
+render-shell play t=688 it is not your turn on a board
+render-shell play t=690 it is not your turn on a board
+render-shell play t=690 it is not your turn on a board
+  t=692  Hob    thought again at 15/20t, wanted the same thing
+  t=693  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=693 it is not your turn on a board
+render-shell play t=693 it is not your turn on a board
+render-shell play t=696 it is not your turn on a board
+render-shell play t=696 it is not your turn on a board
+  t=697  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=717
+  t=697  Hob    began wait(ticks=20), 20 ticks
+  t=698  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=718
+  t=698  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=698 it is not your turn on a board
+render-shell play t=698 it is not your turn on a board
+render-shell screenshot t=701 reports/assets/playtest-ended-t700.png
+render-shell play t=701 it is not your turn on a board
+  t=702  Hob    thought again at 5/20t, wanted the same thing
+  t=703  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=704 it is not your turn on a board
+render-shell play t=706 it is not your turn on a board
+render-shell play t=706 it is not your turn on a board
+  t=707  Hob    thought again at 10/20t, wanted the same thing
+  t=708  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=709 it is not your turn on a board
+render-shell play t=709 it is not your turn on a board
+  t=712  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=712 it is not your turn on a board
+render-shell play t=712 it is not your turn on a board
+  t=713  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=715 it is not your turn on a board
+render-shell play t=715 it is not your turn on a board
+render-shell play t=715 it is not your turn on a board
+  t=717  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=737
+  t=717  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=717 it is not your turn on a board
+  t=718  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=738
+  t=718  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=720 it is not your turn on a board
+  t=722  Hob    thought again at 5/20t, wanted the same thing
+render-shell play t=722 it is not your turn on a board
+render-shell play t=722 it is not your turn on a board
+  t=723  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=725 it is not your turn on a board
+render-shell play t=725 it is not your turn on a board
+  t=727  Hob    thought again at 10/20t, wanted the same thing
+  t=728  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=728 it is not your turn on a board
+render-shell play t=728 it is not your turn on a board
+render-shell play t=730 it is not your turn on a board
+render-shell play t=730 it is not your turn on a board
+  t=732  Hob    thought again at 15/20t, wanted the same thing
+  t=733  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=733 it is not your turn on a board
+render-shell play t=733 it is not your turn on a board
+render-shell play t=733 it is not your turn on a board
+render-shell fight t=736 the board is put away
+render-shell play t=736 it is not your turn on a board
+render-shell fight t=738 the board appears
+  t=737  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=757
+  t=737  Hob    began wait(ticks=20), 20 ticks
+  t=738  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=758
+  t=738  Hob    interrupted (combat began), abandoned wait(ticks=20) 1/20t
+  t=738  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=738 it is not your turn on a board
+render-shell play t=738 it is not your turn on a board
+  t=739  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=741 it is not your turn on a board
+render-shell play t=741 it is not your turn on a board
+  t=743  Hob    thought again at 5/20t, wanted the same thing
+  t=744  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=744 it is not your turn on a board
+render-shell play t=744 it is not your turn on a board
+render-shell play t=746 it is not your turn on a board
+render-shell play t=746 it is not your turn on a board
+  t=748  Hob    thought again at 10/20t, wanted the same thing
+  t=749  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=749 it is not your turn on a board
+render-shell play t=749 it is not your turn on a board
+render-shell play t=749 it is not your turn on a board
+render-shell play t=752 it is not your turn on a board
+render-shell play t=752 it is not your turn on a board
+  t=753  Hob    thought again at 15/20t, wanted the same thing
+  t=754  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=754 it is not your turn on a board
+render-shell play t=754 it is not your turn on a board
+render-shell play t=757 it is not your turn on a board
+render-shell play t=757 it is not your turn on a board
+  t=758  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=778
+  t=758  Hob    began wait(ticks=20), 20 ticks
+  t=759  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=779
+  t=759  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=760 it is not your turn on a board
+render-shell play t=760 it is not your turn on a board
+render-shell play t=762 it is not your turn on a board
+render-shell play t=762 it is not your turn on a board
+  t=763  Hob    thought again at 5/20t, wanted the same thing
+  t=764  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=765 it is not your turn on a board
+  t=768  Hob    thought again at 10/20t, wanted the same thing
+render-shell play t=768 it is not your turn on a board
+  t=769  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=770 it is not your turn on a board
+render-shell play t=770 it is not your turn on a board
+  t=773  Hob    thought again at 15/20t, wanted the same thing
+render-shell play t=773 it is not your turn on a board
+render-shell play t=773 it is not your turn on a board
+  t=774  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=776 it is not your turn on a board
+render-shell play t=776 it is not your turn on a board
+  t=778  Hob    finished wait(ticks=20) -> wait ok ticks=20 until=798
+  t=778  Hob    began wait(ticks=20), 20 ticks
+render-shell play t=778 it is not your turn on a board
+render-shell play t=778 it is not your turn on a board
+  t=779  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=799
+  t=779  Rill   began wait(ticks=20), 20 ticks
+render-shell play t=781 it is not your turn on a board
+render-shell play t=781 it is not your turn on a board
+  t=783  Hob    thought again at 5/20t, wanted the same thing
+  t=784  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=784 it is not your turn on a board
+render-shell play t=786 it is not your turn on a board
+render-shell play t=786 it is not your turn on a board
+  t=788  Hob    thought again at 10/20t, wanted the same thing
+  t=789  Rill   thought again at 10/20t, wanted the same thing
+render-shell play t=789 it is not your turn on a board
+render-shell play t=789 it is not your turn on a board
+render-shell screenshot t=792 reports/assets/playtest-ended-t790.png
+render-shell play t=792 it is not your turn on a board
+  t=793  Hob    thought again at 15/20t, wanted the same thing
+  t=794  Rill   thought again at 15/20t, wanted the same thing
+render-shell sheet scale=1 x=8 y=8 w=287 h=320 sheets=2 showing=0
+render-shell readout scale=1 x=936 y=8 w=208 h=132 fight=1
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=524 w=298 h=57
+render-shell stop tick=795 frames=298 views=42 handles=79 far=122 fartris=16432 farbuilt=133 farcorners=8544 faruse=6 islands=33 water=4 grass=17369 drawn=12917 patches=37 isles=2 motes=581 lights=0 orbs=0 board=441/37 pieces=3 mirror=298 frame_ms=133.39 timed=208 digest=1bd3f850606d17c2
+rm: cannot remove '/tmp/lab-sbx-jnnk0_am/tmp/xvfb-run.6Jqzri': No such file or directory
+xvfb-run: error: problem while cleaning up temporary directory

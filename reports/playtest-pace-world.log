@@ -1,0 +1,106 @@
+=== the world's own walk, for comparison
+=== command: ./tools/measure_walk.sh --seed 1234
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+walk seed=1234 ticks=48 follows=#1 stride=0.90 go_to=20t
+  tick          x          z   snapshot.speed  clip        camera
+     0      0.000      0.000          0.000  Idle_A       0.000
+     1      0.000      0.000          0.000  Idle_A       0.000
+        | t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+        | t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+        | t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+        | t=  1  Scholar(-1,-1) began go_to(target=(-5.711, -39.422)), 20 ticks
+     2      0.878      0.196          0.900  Walking_A    0.900
+     3      1.757      0.393          0.900  Walking_A    0.900
+     4      2.635      0.589          0.900  Walking_A    0.900
+     5      3.513      0.785          0.900  Walking_A    0.900
+     6      4.392      0.982          0.900  Walking_A    0.900
+        | t=  6  Pip    thought again at 5/20t, wanted the same thing
+        | t=  6  Nettle thought again at 5/20t, wanted the same thing
+        | t=  6  Corin  thought again at 5/20t, wanted the same thing
+        | t=  6  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
+     7      5.270      1.178          0.900  Walking_A    0.900
+     8      6.148      1.374          0.900  Walking_A    0.900
+     9      7.027      1.571          0.900  Walking_A    0.900
+    10      7.905      1.767          0.900  Walking_A    0.900
+    11      8.783      1.963          0.900  Walking_A    0.900
+        | t= 11  Pip    thought again at 10/20t, wanted the same thing
+        | t= 11  Nettle thought again at 10/20t, wanted the same thing
+        | t= 11  Corin  thought again at 10/20t, wanted the same thing
+        | t= 11  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
+    12      9.662      2.160          0.900  Walking_A    0.900
+    13     10.540      2.356          0.900  Walking_A    0.900
+    14     11.418      2.552          0.900  Walking_A    0.900
+    15     12.297      2.749          0.900  Walking_A    0.900
+    16     13.175      2.945          0.900  Walking_A    0.900
+        | t= 16  Pip    thought again at 15/20t, wanted the same thing
+        | t= 16  Nettle thought again at 15/20t, wanted the same thing
+        | t= 16  Corin  thought again at 15/20t, wanted the same thing
+        | t= 16  Scholar(-1,-1) changed its mind at 15/20t, dropped go_to(target=(-5.711, -39.422)) for go_to(target=(-8.921, -24.363))
+        | t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 16 ticks
+    17     14.053      3.141          0.900  Walking_A    0.900
+    18     14.931      3.338          0.900  Walking_A    0.900
+    19     15.810      3.534          0.900  Walking_A    0.900
+    20     16.688      3.730          0.900  Walking_A    0.900
+    21     17.566      3.927          0.900  Walking_A    0.900
+        | t= 21  Pip    finished go_to(target=(17.566, 3.927)) -> go_to ok at=(17.566, 3.927) walked=18.0 steps=20
+        | t= 21  Pip    began go_to(target=(34.154, 10.917)), 20 ticks
+        | t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
+        | t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
+        | t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
+        | t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
+        | t= 21  Scholar(-1,-1) thought again at 5/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+    22     18.396      4.276          0.900  Walking_A    0.900
+    23     19.225      4.626          0.900  Walking_A    0.900
+    24     20.055      4.975          0.900  Walking_A    0.900
+    25     20.884      5.325          0.900  Walking_A    0.900
+    26     21.713      5.674          0.900  Walking_A    0.900
+        | t= 26  Pip    thought again at 5/20t, wanted the same thing
+        | t= 26  Nettle thought again at 5/20t, wanted the same thing
+        | t= 26  Corin  thought again at 5/20t, kept go_to(target=(-11.335, -36.548)) over attack(target=4 item=common buckler)
+        | t= 26  Scholar(-1,-1) thought again at 10/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+        | t= 26  Corin  interrupted (combat began), abandoned go_to(target=(-11.335, -36.548)) 5/20t
+        | t= 26  Corin  began attack(target=4 item=common buckler), 6 ticks
+        | t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/16t
+    27     22.543      6.024          0.900  Walking_A    0.900
+    28     23.372      6.373          0.900  Walking_A    0.900
+    29     24.201      6.723          0.900  Walking_A    0.900
+    30     25.031      7.072          0.900  Walking_A    0.900
+    31     25.860      7.422          0.900  Walking_A    0.900
+        | t= 31  Pip    thought again at 10/20t, wanted the same thing
+        | t= 31  Nettle thought again at 10/20t, wanted the same thing
+        | t= 31  Corin  thought again at 5/6t, wanted the same thing
+    32     26.689      7.771          0.900  Walking_A    0.900
+        | t= 32  Corin  finished attack(target=4 item=common buckler) -> attack refused: Scholar(-1,-1) is outside the pattern of a common buckler from here
+    33     27.519      8.121          0.900  Walking_A    0.900
+        | t= 33  Scholar(-1,-1) began attack(target=3 item=common spear), 6 ticks
+    34     28.348      8.470          0.900  Walking_A    0.900
+    35     29.178      8.820          0.900  Walking_A    0.900
+    36     30.007      9.169          0.900  Walking_A    0.900
+        | t= 36  Pip    thought again at 15/20t, wanted the same thing
+        | t= 36  Nettle thought again at 15/20t, wanted the same thing
+    37     30.836      9.519          0.900  Walking_A    0.900
+    38     31.666      9.869          0.900  Walking_A    0.900
+        | t= 38  Scholar(-1,-1) thought again at 5/6t, wanted the same thing
+    39     32.495     10.218          0.900  Walking_A    0.900
+        | t= 39  Scholar(-1,-1) finished attack(target=3 item=common spear) -> attack refused: Corin is outside the pattern of a common spear from here
+    40     33.324     10.568          0.900  Walking_A    0.900
+        | t= 40  Corin  began attack(target=4 item=common buckler), 6 ticks
+    41     34.154     10.917          0.900  Walking_A    0.900
+        | t= 41  Pip    finished go_to(target=(34.154, 10.917)) -> go_to ok at=(34.154, 10.917) walked=18.0 steps=20
+        | t= 41  Pip    began go_to(target=(51.020, 17.205)), 20 ticks
+        | t= 41  Nettle finished go_to(target=(-31.155, 30.384)) -> go_to ok at=(-31.155, 30.384) walked=18.0 steps=20
+        | t= 41  Nettle began go_to(target=(-38.152, 46.968)), 20 ticks
+    42     34.997     11.231          0.900  Walking_A    0.900
+    43     35.840     11.546          0.900  Jump_Full_Short   0.900
+    44     36.684     11.860          0.900  Jump_Full_Short   0.900
+    45     37.527     12.175          0.900  Walking_A    0.900
+        | t= 45  Corin  thought again at 5/6t, wanted the same thing
+    46     38.370     12.489          0.900  Walking_A    0.900
+        | t= 46  Pip    thought again at 5/20t, wanted the same thing
+        | t= 46  Nettle thought again at 5/20t, wanted the same thing
+        | t= 46  Corin  finished attack(target=4 item=common buckler) -> attack refused: Scholar(-1,-1) is outside the pattern of a common buckler from here
+    47     39.214     12.803          0.900  Walking_A    0.900
+        | t= 47  Scholar(-1,-1) began attack(target=3 item=common spear), 6 ticks
+    48     40.057     13.118          0.900  Walking_A    0.900
+walk end at=(40.057, 13.118) moved_ticks=47 of 48 digest=0d12df32e51a9edf

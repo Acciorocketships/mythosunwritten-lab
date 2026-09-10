@@ -1,0 +1,291 @@
+=== playtest session: left
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --journal --camera 0 9 14 --aim 1 --input 6:d,12:d,18:d,24:d,30:d,36:d,42:d,48:d,54:d,60:d,66:d,72:d,78:d,84:d,90:d,96:d,102:d,108:d,120:bracketleft,121:bracketleft,122:bracketleft,123:bracketright,128:4,130:5,132:0,136:bracketleft,137:bracketleft,138:bracketleft,139:bracketright,140:8,144:4,146:5,148:0,150:period,152:period,154:period,156:period,158:period,160:period,162:period,164:period,166:period,168:period,170:period,172:period,174:period,176:period,178:period,180:period,182:period,184:period,186:period,188:period,190:period,192:period,194:period,196:period,198:period,200:period,210:d,216:d,222:m,230:e --screenshot-ticks 100:reports/assets/playtest-left-t100.png,140:reports/assets/playtest-left-t140.png,205:reports/assets/playtest-left-t205.png,220:reports/assets/playtest-left-t220.png,234:reports/assets/playtest-left-t234.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --journal --camera 0 9 14 --aim 1 --input 6:d,12:d,18:d,24:d,30:d,36:d,42:d,48:d,54:d,60:d,66:d,72:d,78:d,84:d,90:d,96:d,102:d,108:d,120:bracketleft,121:bracketleft,122:bracketleft,123:bracketright,128:4,130:5,132:0,136:bracketleft,137:bracketleft,138:bracketleft,139:bracketright,140:8,144:4,146:5,148:0,150:period,152:period,154:period,156:period,158:period,160:period,162:period,164:period,166:period,168:period,170:period,172:period,174:period,176:period,178:period,180:period,182:period,184:period,186:period,188:period,190:period,192:period,194:period,196:period,198:period,200:period,210:d,216:d,222:m,230:e --screenshot-ticks 100:reports/assets/playtest-left-t100.png,140:reports/assets/playtest-left-t140.png,205:reports/assets/playtest-left-t205.png,220:reports/assets/playtest-left-t220.png,234:reports/assets/playtest-left-t234.png (without --input/--screenshot-ticks)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
+Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
+Failed to create secure directory (/run/user/1000/pulse): Read-only file system
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5182:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5705:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:97)
+WARNING: All audio drivers failed, falling back to the dummy driver.
+     at: initialize (servers/audio/audio_server.cpp:258)
+
+render-shell play driving=#1
+render-shell keys WASD/arrows  walk one step (3.6 units)
+render-shell keys G            go to the nearest named place
+render-shell keys J            hop (3.0 units)
+render-shell keys K            leap (12.0 units, further than an ordinary DEX reaches)
+render-shell keys Tab          aim at the next thing in sight
+render-shell keys F            hold the next thing you carry, or nothing
+render-shell keys C            pick the next thing inside what you have aimed at
+render-shell keys B            pick the next thing to say
+render-shell keys - / =        the coins in your next offer (given / asked)
+render-shell keys P            go to what you have aimed at
+render-shell keys E            examine what you have aimed at
+render-shell keys L            look at what you are holding
+render-shell keys Q            take the picked thing out of what you have aimed at
+render-shell keys X            drop what you are holding
+render-shell keys 1            put on what you are holding
+render-shell keys 2            take off what you are holding
+render-shell keys 3            use up what you are holding
+render-shell keys V            put what you are holding into what you have aimed at
+render-shell keys T            say the picked line to what you have aimed at
+render-shell keys Y            shout the picked line
+render-shell keys O            offer a trade: give what you hold and the given coins, ask for what you have picked and the asked coins
+render-shell keys U            accept the offer standing from it
+render-shell keys I            deny the offer standing from it
+render-shell keys H            interact with it, using what you are holding
+render-shell keys N            attack it with what you are holding
+render-shell keys M            wait (5 ticks)
+render-shell keys [            pick the next cell you may step onto
+render-shell keys ]            step onto it
+render-shell keys ;            pick the next of your minions
+render-shell keys '            pick the next cell that minion may go to
+render-shell keys \            send it there
+render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
+render-shell keys 8 / 9        turn a quarter left or right (free)
+render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
+render-shell keys Z            open or shut the character sheet
+render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=13283 motes=588 sheet=1/3 aa=msaa4+fxaa
+  t=  1  Fen    has not decided yet, and waits in the world
+  t=  1  Hob    began wait(ticks=4), 4 ticks
+  t=  1  Rill   began wait(ticks=20), 20 ticks
+  t=  5  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=9
+  t=  5  Hob    began wait(ticks=4), 4 ticks
+  t=  6  Rill   thought again at 5/20t, wanted the same thing
+render-shell play t=7 chose go_to(offset=(3.600, 0.000))
+  t=  8  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t=  9  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=13
+  t=  9  Hob    began wait(ticks=4), 4 ticks
+  t= 11  Rill   thought again at 10/20t, wanted the same thing
+  t= 12  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+  t= 12  Fen    has not decided yet, and waits in the world
+  t= 13  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=17
+  t= 13  Hob    began trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4), 4 ticks
+render-shell play t=12 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-476.400, 420.000) walked=3.6 steps=4
+render-shell play t=13 chose go_to(offset=(3.600, 0.000))
+  t= 14  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 16  Rill   thought again at 15/20t, wanted the same thing
+  t= 17  Hob    finished trade_propose(target=1 give=[brass lantern] give_money=0 want=[] want_money=4) -> trade_propose ok to=1 give=1 give_money=0 want=0 want_money=4
+  t= 17  Hob    began wait(ticks=4), 4 ticks
+  t= 18  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-472.800, 420.000) walked=3.6 steps=4
+  t= 18  Fen    has not decided yet, and waits in the world
+render-shell play t=18 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-472.800, 420.000) walked=3.6 steps=4
+render-shell play t=18 chose go_to(offset=(3.600, 0.000))
+  t= 19  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 21  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=25
+  t= 21  Hob    began wait(ticks=4), 4 ticks
+  t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
+  t= 21  Rill   began wait(ticks=20), 20 ticks
+  t= 23  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-469.200, 420.000) walked=3.6 steps=4
+  t= 23  Fen    has not decided yet, and waits in the world
+render-shell play t=23 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-469.200, 420.000) walked=3.6 steps=4
+render-shell play t=24 chose go_to(offset=(3.600, 0.000))
+  t= 25  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 25  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=29
+  t= 25  Hob    began wait(ticks=4), 4 ticks
+  t= 26  Rill   thought again at 5/20t, kept wait(ticks=20) over go_to(target=1)
+  t= 29  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-465.600, 420.000) walked=3.6 steps=4
+  t= 29  Fen    has not decided yet, and waits in the world
+  t= 29  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=33
+  t= 29  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=29 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-465.600, 420.000) walked=3.6 steps=4
+  t= 31  Rill   thought again at 10/20t, kept wait(ticks=20) over go_to(target=1)
+render-shell play t=31 chose go_to(offset=(3.600, 0.000))
+  t= 32  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t= 33  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=37
+  t= 33  Hob    began wait(ticks=4), 4 ticks
+  t= 36  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-462.000, 420.000) walked=3.6 steps=4
+  t= 36  Fen    has not decided yet, and waits in the world
+  t= 36  Rill   thought again at 15/20t, kept wait(ticks=20) over go_to(target=1)
+  t= 37  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=41
+  t= 37  Hob    began wait(ticks=4), 4 ticks
+render-shell play t=36 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-462.000, 420.000) walked=3.6 steps=4
+render-shell play t=37 chose go_to(offset=(3.600, 0.000))
+  t= 38  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+render-shell fight t=42 the board appears
+  t= 41  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=45
+  t= 41  Hob    began wait(ticks=4), 4 ticks
+  t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
+  t= 41  Rill   began go_to(target=1), 8 ticks
+  t= 42  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-458.400, 420.000) walked=3.6 steps=4
+  t= 42  Fen    has not decided yet, and waits in the world
+render-shell play t=42 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-458.400, 420.000) walked=3.6 steps=4
+render-shell play t=42 chose go_to(offset=(3.600, 0.000))
+  t= 42  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+  t= 43  Hob    interrupted (combat began), abandoned wait(ticks=4) 2/4t
+  t= 43  Rill   interrupted (combat began), abandoned go_to(target=1) 2/8t
+render-shell play t=42 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=48 chose go_to(offset=(3.600, 0.000))
+  t= 48  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=48 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=56 chose go_to(offset=(3.600, 0.000))
+  t= 56  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=56 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=61 chose go_to(offset=(3.600, 0.000))
+  t= 61  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=61 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=66 chose go_to(offset=(3.600, 0.000))
+  t= 66  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=66 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=74 chose go_to(offset=(3.600, 0.000))
+  t= 74  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=74 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=79 chose go_to(offset=(3.600, 0.000))
+  t= 79  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=79 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=85 chose go_to(offset=(3.600, 0.000))
+  t= 85  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=85 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=90 chose go_to(offset=(3.600, 0.000))
+  t= 90  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=90 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=98 chose go_to(offset=(3.600, 0.000))
+  t= 98  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=98 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell screenshot t=101 reports/assets/playtest-left-t100.png
+render-shell play t=104 chose go_to(offset=(3.600, 0.000))
+  t=104  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=104 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=109 chose go_to(offset=(3.600, 0.000))
+  t=109  Fen    was answered go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=109 go_to(offset=(3.600, 0.000)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=120 round 1 picks step (-153,139) no unit to none
+render-shell play t=122 round 1 picks step (-154,140) no unit to none
+render-shell play t=122 round 1 picks step (-152,140) no unit to none
+render-shell play t=125 round 1 turn step -> done
+render-shell play t=128 round 1 turn weapon action 1 -> done
+render-shell play t=130 round 1 turn weapon action 2 -> refused: already acted this turn
+render-shell play t=133 round 1 turn end the turn -> done
+  t=134  Hob    began wait(ticks=4), 4 ticks
+  t=135  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=136 it is not your turn on a board
+  t=138  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=142
+render-shell play t=138 it is not your turn on a board
+render-shell play t=138 it is not your turn on a board
+  t=140  Rill   thought again at 5/6t, wanted the same thing
+  t=141  Rill   finished attack(target=1 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=11
+render-shell screenshot t=141 reports/assets/playtest-left-t140.png
+render-shell play t=141 round 2 turn step -> done
+render-shell play t=141 round 2 turn turn left -> done
+render-shell play t=144 round 2 turn weapon action 1 -> done
+render-shell play t=147 round 2 turn weapon action 2 -> refused: already acted this turn
+render-shell play t=149 round 2 turn end the turn -> done
+  t=150  Hob    began wait(ticks=4), 4 ticks
+  t=151  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=152 it is not your turn on a board
+render-shell play t=152 it is not your turn on a board
+  t=154  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=158
+render-shell play t=154 it is not your turn on a board
+  t=156  Rill   thought again at 5/6t, wanted the same thing
+  t=157  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is outside the pattern of a common spear from here
+render-shell play t=157 round 3 turn leave the fight -> done
+  t=158  Hob    began wait(ticks=4), 4 ticks
+  t=159  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=160 it is not your turn on a board
+render-shell play t=160 it is not your turn on a board
+  t=162  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=166
+render-shell play t=162 it is not your turn on a board
+  t=164  Rill   thought again at 5/6t, wanted the same thing
+  t=165  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=165 it is not your turn on a board
+  t=166  Hob    began wait(ticks=4), 4 ticks
+  t=167  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=168 it is not your turn on a board
+render-shell play t=168 it is not your turn on a board
+  t=170  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=174
+render-shell play t=170 it is not your turn on a board
+  t=172  Rill   thought again at 5/6t, wanted the same thing
+  t=173  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=173 it is not your turn on a board
+  t=174  Hob    began wait(ticks=4), 4 ticks
+  t=175  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=176 it is not your turn on a board
+render-shell play t=176 it is not your turn on a board
+  t=178  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=182
+render-shell play t=178 it is not your turn on a board
+  t=180  Rill   thought again at 5/6t, wanted the same thing
+  t=181  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=181 it is not your turn on a board
+  t=182  Hob    began wait(ticks=4), 4 ticks
+  t=183  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=184 it is not your turn on a board
+render-shell play t=184 it is not your turn on a board
+  t=186  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=190
+render-shell play t=186 it is not your turn on a board
+  t=188  Rill   thought again at 5/6t, wanted the same thing
+  t=189  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=189 it is not your turn on a board
+  t=190  Hob    began wait(ticks=4), 4 ticks
+  t=191  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=192 it is not your turn on a board
+render-shell play t=192 it is not your turn on a board
+  t=194  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=198
+render-shell play t=194 it is not your turn on a board
+  t=196  Rill   thought again at 5/6t, wanted the same thing
+  t=197  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=197 it is not your turn on a board
+  t=198  Hob    began wait(ticks=4), 4 ticks
+  t=199  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=200 it is not your turn on a board
+render-shell play t=200 it is not your turn on a board
+  t=202  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=206
+  t=204  Rill   thought again at 5/6t, wanted the same thing
+  t=205  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell screenshot t=205 reports/assets/playtest-left-t205.png
+  t=206  Hob    began wait(ticks=4), 4 ticks
+  t=207  Rill   began attack(target=1 item=common spear), 6 ticks
+  t=210  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=214
+render-shell play t=210 chose go_to(offset=(3.600, 0.000))
+  t=211  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t=212  Rill   thought again at 5/6t, wanted the same thing
+  t=213  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+  t=214  Hob    began wait(ticks=4), 4 ticks
+  t=215  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-450.900, 418.500) walked=3.6 steps=4
+  t=215  Fen    has not decided yet, and waits in the world
+  t=215  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=215 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-450.900, 418.500) walked=3.6 steps=4
+render-shell play t=216 chose go_to(offset=(3.600, 0.000))
+  t=217  Fen    began go_to(offset=(3.600, 0.000)), 4 ticks
+  t=218  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=222
+  t=220  Rill   thought again at 5/6t, wanted the same thing
+  t=221  Fen    finished go_to(offset=(3.600, 0.000)) -> go_to ok at=(-447.300, 418.500) walked=3.6 steps=4
+  t=221  Fen    has not decided yet, and waits in the world
+  t=221  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell play t=221 go_to(offset=(3.600, 0.000)) -> go_to ok at=(-447.300, 418.500) walked=3.6 steps=4
+render-shell screenshot t=221 reports/assets/playtest-left-t220.png
+  t=222  Hob    began wait(ticks=4), 4 ticks
+  t=223  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=224 chose wait(ticks=5)
+  t=225  Fen    began wait(ticks=5), 5 ticks
+  t=226  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=230
+  t=228  Rill   thought again at 5/6t, wanted the same thing
+  t=229  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+  t=230  Fen    finished wait(ticks=5) -> wait ok ticks=5 until=235
+  t=230  Fen    has not decided yet, and waits in the world
+  t=230  Hob    began wait(ticks=4), 4 ticks
+  t=231  Rill   began attack(target=1 item=common spear), 6 ticks
+render-shell play t=230 wait(ticks=5) -> wait ok ticks=5 until=235
+render-shell play t=232 nothing is aimed at
+  t=234  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=238
+render-shell screenshot t=234 reports/assets/playtest-left-t234.png
+  t=236  Rill   thought again at 5/6t, wanted the same thing
+  t=237  Rill   finished attack(target=1 item=common spear) -> attack refused: Fen is not on the board
+render-shell sheet scale=1 x=8 y=8 w=287 h=374 sheets=3 showing=0
+render-shell readout scale=1 x=936 y=8 w=208 h=132 fight=1
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=498 w=298 h=83
+render-shell stop tick=237 frames=89 views=44 handles=87 far=122 fartris=16432 farbuilt=155 farcorners=9576 faruse=5997 islands=36 water=3 grass=21348 drawn=14696 patches=43 isles=3 motes=576 lights=0 orbs=0 board=441/37 pieces=3 mirror=89 frame_ms=0.00 timed=0 digest=9778a369b3459cbb
+playtest-left-t100.png -> playtest-left-t101.png
+playtest-left-t140.png -> playtest-left-t141.png
+playtest-left-t220.png -> playtest-left-t221.png
+reticked 3 frame(s)

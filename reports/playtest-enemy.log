@@ -1,6 +1,6 @@
 === playtest session: enemy
-=== command: xvfb-run -a ./run_render.sh --seed 1234 --play --journal --input 6:w,28:w,50:w,72:w --screenshot-ticks 24:reports/assets/playtest-enemy-t24.png,40:reports/assets/playtest-enemy-t40.png,90:reports/assets/playtest-enemy-t90.png
-=== on a machine with a display: ./run_render.sh --seed 1234 --play --journal --input 6:w,28:w,50:w,72:w --screenshot-ticks 24:reports/assets/playtest-enemy-t24.png,40:reports/assets/playtest-enemy-t40.png,90:reports/assets/playtest-enemy-t90.png (without --input/--screenshot-ticks)
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --play --journal --input 6:w,12:w,18:w,24:w,30:w,36:w --screenshot-ticks 20:reports/assets/playtest-enemy-t20.png,40:reports/assets/playtest-enemy-t40.png,52:reports/assets/playtest-enemy-t52.png,90:reports/assets/playtest-enemy-t90.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --play --journal --input 6:w,12:w,18:w,24:w,30:w,36:w --screenshot-ticks 20:reports/assets/playtest-enemy-t20.png,40:reports/assets/playtest-enemy-t40.png,52:reports/assets/playtest-enemy-t52.png,90:reports/assets/playtest-enemy-t90.png (without --input/--screenshot-ticks)
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
 Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
@@ -53,8 +53,9 @@ render-shell keys \            send it there
 render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
 render-shell keys 8 / 9        turn a quarter left or right (free)
 render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
 render-shell keys Z            open or shut the character sheet
-render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 motes=1073 sheet=2/4 aa=msaa4+fxaa
+render-shell boot seed=1234 chunks=32 far=2 fartris=304 islands=10 grass=9278 motes=1073 sheet=1/4 aa=msaa4+fxaa
   t=  1  Pip    has not decided yet, and waits in the world
   t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
   t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
@@ -63,58 +64,75 @@ render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 mo
   t=  6  Corin  thought again at 5/20t, wanted the same thing
   t=  6  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
 render-shell play t=8 chose go_to(offset=(0.000, -3.600))
-  t=  9  Pip    began go_to(offset=(0.000, -3.600)), 20 ticks
+  t=  9  Pip    began go_to(offset=(0.000, -3.600)), 4 ticks
   t= 11  Nettle thought again at 10/20t, wanted the same thing
   t= 11  Corin  thought again at 10/20t, wanted the same thing
   t= 11  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
-  t= 14  Pip    thought again at 5/20t, wanted the same thing
+  t= 13  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+  t= 13  Pip    has not decided yet, and waits in the world
+render-shell play t=13 go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -3.600) walked=3.6 steps=4
+render-shell play t=13 chose go_to(offset=(0.000, -3.600))
+  t= 14  Pip    began go_to(offset=(0.000, -3.600)), 4 ticks
   t= 16  Nettle thought again at 15/20t, wanted the same thing
   t= 16  Corin  thought again at 15/20t, wanted the same thing
   t= 16  Scholar(-1,-1) changed its mind at 15/20t, dropped go_to(target=(-5.711, -39.422)) for go_to(target=(-8.921, -24.363))
-  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 20 ticks
-  t= 19  Pip    thought again at 10/20t, wanted the same thing
+  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 16 ticks
+  t= 18  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -7.200) walked=3.6 steps=4
+  t= 18  Pip    has not decided yet, and waits in the world
+render-shell play t=18 go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -7.200) walked=3.6 steps=4
+render-shell play t=18 chose go_to(offset=(0.000, -3.600))
+  t= 19  Pip    began go_to(offset=(0.000, -3.600)), 4 ticks
   t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
   t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
   t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
   t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
-  t= 21  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
-  t= 24  Pip    thought again at 15/20t, wanted the same thing
-render-shell screenshot t=24 reports/assets/playtest-enemy-t24.png
-render-shell fight t=27 the board appears
+  t= 21  Scholar(-1,-1) thought again at 5/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+render-shell screenshot t=21 reports/assets/playtest-enemy-t20.png
+  t= 23  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -10.800) walked=3.6 steps=4
+  t= 23  Pip    has not decided yet, and waits in the world
+render-shell play t=23 go_to(offset=(0.000, -3.600)) -> go_to ok at=(0.000, -10.800) walked=3.6 steps=4
+render-shell play t=24 chose go_to(offset=(0.000, -3.600))
+render-shell fight t=26 the board appears
+  t= 25  Pip    began go_to(offset=(0.000, -3.600)), 4 ticks
   t= 26  Nettle thought again at 5/20t, wanted the same thing
   t= 26  Corin  thought again at 5/20t, kept go_to(target=(-11.335, -36.548)) over attack(target=4 item=common buckler)
-  t= 26  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
-  t= 26  Pip    interrupted (combat began), abandoned go_to(offset=(0.000, -3.600)) 17/20t
-  t= 26  Pip    began go_to(offset=(0.000, -3.600)), 20 ticks
+  t= 26  Scholar(-1,-1) thought again at 10/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+  t= 26  Pip    interrupted (combat began), abandoned go_to(offset=(0.000, -3.600)) 1/4t
+  t= 26  Pip    began go_to(offset=(0.000, -3.600)), 4 ticks
   t= 26  Corin  interrupted (combat began), abandoned go_to(target=(-11.335, -36.548)) 5/20t
-  t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/20t
-render-shell play t=29 chose go_to(offset=(0.000, -3.600))
-  t= 31  Pip    thought again at 5/20t, wanted the same thing
+  t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/16t
+  t= 30  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
   t= 31  Nettle thought again at 10/20t, wanted the same thing
-  t= 36  Pip    thought again at 10/20t, wanted the same thing
+render-shell play t=30 go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
+render-shell play t=32 chose go_to(offset=(0.000, -3.600))
+  t= 32  Pip    was answered go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=32 go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
   t= 36  Nettle thought again at 15/20t, wanted the same thing
+render-shell play t=37 chose go_to(offset=(0.000, -3.600))
+  t= 37  Pip    was answered go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes before it began
+render-shell play t=37 go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
 render-shell screenshot t=40 reports/assets/playtest-enemy-t40.png
-  t= 41  Pip    thought again at 15/20t, wanted the same thing
   t= 41  Nettle finished go_to(target=(-31.155, 30.384)) -> go_to ok at=(-31.155, 30.384) walked=18.0 steps=20
   t= 41  Nettle began go_to(target=(-38.152, 46.968)), 20 ticks
-  t= 46  Pip    finished go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
   t= 46  Nettle thought again at 5/20t, wanted the same thing
-render-shell play t=46 go_to(offset=(0.000, -3.600)) -> go_to refused: the board decides where a fighter goes
-render-shell play t=50 chose go_to(offset=(0.000, -3.600))
   t= 51  Nettle thought again at 10/20t, wanted the same thing
+render-shell screenshot t=53 reports/assets/playtest-enemy-t52.png
   t= 56  Nettle thought again at 15/20t, wanted the same thing
   t= 61  Nettle finished go_to(target=(-38.152, 46.968)) -> go_to ok at=(-38.152, 46.968) walked=18.0 steps=20
   t= 61  Nettle began go_to(target=(-43.259, 64.229)), 20 ticks
   t= 66  Nettle thought again at 5/20t, wanted the same thing
   t= 71  Nettle thought again at 10/20t, wanted the same thing
-render-shell play t=72 chose go_to(offset=(0.000, -3.600))
   t= 76  Nettle thought again at 15/20t, wanted the same thing
   t= 81  Nettle finished go_to(target=(-43.259, 64.229)) -> go_to ok at=(-43.259, 64.229) walked=18.0 steps=20
   t= 81  Nettle began go_to(target=(-51.261, 80.352)), 20 ticks
   t= 86  Nettle thought again at 5/20t, wanted the same thing
 render-shell screenshot t=90 reports/assets/playtest-enemy-t90.png
   t= 91  Nettle thought again at 10/20t, wanted the same thing
-render-shell sheet scale=2 x=16 y=16 w=574 h=784 sheets=4 showing=0
-render-shell dialogue scale=2 x=676 y=522 w=596 h=110
-render-shell trade scale=2 x=676 y=400 w=596 h=114
-render-shell stop tick=93 frames=35 views=32 handles=64 far=96 fartris=12752 farbuilt=97 farcorners=6697 faruse=40053 islands=30 water=1 grass=9278 drawn=7094 patches=32 isles=1 motes=1074 lights=16 orbs=0 board=0/0 pieces=4 mirror=0 frame_ms=0.00 timed=0 digest=058c74cf6b4def25
+render-shell sheet scale=1 x=8 y=8 w=287 h=392 sheets=4 showing=0
+render-shell readout scale=1 x=875 y=8 w=269 h=290 fight=1
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=524 w=298 h=57
+render-shell stop tick=93 frames=35 views=36 handles=71 far=65 fartris=8528 farbuilt=67 farcorners=4545 faruse=233537 islands=33 water=2 grass=10656 drawn=7580 patches=35 isles=2 motes=1075 lights=16 orbs=0 board=441/0 pieces=4 mirror=0 frame_ms=0.00 timed=0 digest=e495f00e895c4129
+playtest-enemy-t20.png -> playtest-enemy-t21.png
+playtest-enemy-t52.png -> playtest-enemy-t53.png
+reticked 2 frame(s)

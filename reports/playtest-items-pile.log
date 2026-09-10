@@ -1,3 +1,6 @@
+=== playtest session: items-pile
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --journal --no-grass --camera 7 5 -7 --aim 1 --input 6:s,14:tab,16:tab,18:tab,22:q,28:f,32:l,38:x --screenshot-ticks 12:reports/assets/playtest-items-pile-t12.png,26:reports/assets/playtest-items-pile-t26.png,44:reports/assets/playtest-items-pile-t44.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --journal --no-grass --camera 7 5 -7 --aim 1 --input 6:s,14:tab,16:tab,18:tab,22:q,28:f,32:l,38:x --screenshot-ticks 12:reports/assets/playtest-items-pile-t12.png,26:reports/assets/playtest-items-pile-t26.png,44:reports/assets/playtest-items-pile-t44.png (without --input/--screenshot-ticks)
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
 Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
@@ -50,95 +53,77 @@ render-shell keys \            send it there
 render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
 render-shell keys 8 / 9        turn a quarter left or right (free)
 render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
 render-shell keys Z            open or shut the character sheet
-render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=0 motes=588 sheet=2/3 aa=msaa4+fxaa
+render-shell boot seed=1234 chunks=32 far=2 fartris=304 islands=10 grass=0 motes=588 sheet=1/3 aa=msaa4+fxaa
   t=  1  Fen    has not decided yet, and waits in the world
   t=  1  Hob    began wait(ticks=4), 4 ticks
   t=  1  Rill   began wait(ticks=20), 20 ticks
   t=  5  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=9
   t=  5  Hob    began wait(ticks=4), 4 ticks
   t=  6  Rill   thought again at 5/20t, wanted the same thing
-render-shell play t=8 chose go_to(offset=(0.000, 3.600))
-  t=  9  Fen    began go_to(offset=(0.000, 3.600)), 20 ticks
+render-shell play t=7 chose go_to(offset=(0.000, 3.600))
+  t=  8  Fen    began go_to(offset=(0.000, 3.600)), 4 ticks
   t=  9  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=13
   t=  9  Hob    began wait(ticks=4), 4 ticks
   t= 11  Rill   thought again at 10/20t, wanted the same thing
+  t= 12  Fen    finished go_to(offset=(0.000, 3.600)) -> go_to ok at=(-480.000, 423.600) walked=3.6 steps=4
+  t= 12  Fen    has not decided yet, and waits in the world
   t= 13  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=17
   t= 13  Hob    began wait(ticks=4), 4 ticks
-  t= 14  Fen    thought again at 5/20t, wanted the same thing
+render-shell play t=12 go_to(offset=(0.000, 3.600)) -> go_to ok at=(-480.000, 423.600) walked=3.6 steps=4
+render-shell screenshot t=13 reports/assets/playtest-items-pile-t12.png
   t= 16  Rill   thought again at 15/20t, wanted the same thing
+render-shell play t=16 aims at #2 Hob (character) 7.0 away · holding nothing / taking nothing / coins none / saying "well met"
+render-shell play t=16 aims at #3 (character) 30.2 away · holding nothing / taking nothing / coins none / saying "well met"
   t= 17  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=21
   t= 17  Hob    began wait(ticks=4), 4 ticks
-  t= 19  Fen    thought again at 10/20t, wanted the same thing
+render-shell play t=18 aims at #4 pile (pile) 0.4 away · holding nothing / taking iron key / coins none / saying "well met"
   t= 21  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=25
   t= 21  Hob    began wait(ticks=4), 4 ticks
   t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
   t= 21  Rill   began wait(ticks=20), 20 ticks
-  t= 24  Fen    thought again at 15/20t, wanted the same thing
+render-shell play t=23 chose pick_up(item=iron key target=4)
+  t= 24  Fen    began pick_up(item=iron key target=4), 3 ticks
   t= 25  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=29
   t= 25  Hob    began wait(ticks=4), 4 ticks
   t= 26  Rill   thought again at 5/20t, wanted the same thing
-  t= 29  Fen    finished go_to(offset=(0.000, 3.600)) -> go_to ok at=(-480.000, 423.600) walked=3.6 steps=4
-  t= 29  Fen    has not decided yet, and waits in the world
+render-shell screenshot t=26 reports/assets/playtest-items-pile-t26.png
+  t= 27  Fen    finished pick_up(item=iron key target=4) -> pick_up ok item=iron key from=4
+  t= 27  Fen    has not decided yet, and waits in the world
   t= 29  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=33
   t= 29  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=29 go_to(offset=(0.000, 3.600)) -> go_to ok at=(-480.000, 423.600) walked=3.6 steps=4
+render-shell play t=27 pick_up(item=iron key target=4) -> pick_up ok item=iron key from=4
+render-shell play t=29 aims at nothing aimed · holding common boots / taking iron key / coins none / saying "well met"
   t= 31  Rill   thought again at 10/20t, wanted the same thing
-render-shell screenshot t=32 reports/assets/playtest-items-pile-t30.png
-render-shell play t=32 aims at #2 Hob (character) 7.0 away · holding nothing / taking nothing / coins none / saying "well met"
+render-shell play t=32 chose examine(target=common boots)
+  t= 33  Fen    began examine(target=common boots), 4 ticks
   t= 33  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=37
   t= 33  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=35 aims at #3 (character) 30.2 away · holding nothing / taking nothing / coins none / saying "well met"
   t= 36  Rill   thought again at 15/20t, wanted the same thing
+  t= 37  Fen    finished examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
+  t= 37  Fen    has not decided yet, and waits in the world
   t= 37  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=41
   t= 37  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=37 aims at #4 pile (pile) 0.4 away · holding nothing / taking iron key / coins none / saying "well met"
+render-shell play t=37 examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
+render-shell play t=39 chose drop(item=common boots)
+  t= 40  Fen    began drop(item=common boots), 2 ticks
   t= 41  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=45
   t= 41  Hob    began wait(ticks=4), 4 ticks
   t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
   t= 41  Rill   began wait(ticks=20), 20 ticks
-render-shell play t=42 chose pick_up(item=iron key target=4)
-  t= 43  Fen    began pick_up(item=iron key target=4), 3 ticks
+  t= 42  Fen    finished drop(item=common boots) -> drop ok item=common boots into=6
+  t= 42  Fen    has not decided yet, and waits in the world
+render-shell play t=42 drop(item=common boots) -> drop ok item=common boots into=6
   t= 45  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=49
   t= 45  Hob    began wait(ticks=4), 4 ticks
-  t= 46  Fen    finished pick_up(item=iron key target=4) -> pick_up ok item=iron key from=4
-  t= 46  Fen    has not decided yet, and waits in the world
+render-shell screenshot t=45 reports/assets/playtest-items-pile-t44.png
   t= 46  Rill   thought again at 5/20t, wanted the same thing
-render-shell play t=46 pick_up(item=iron key target=4) -> pick_up ok item=iron key from=4
-  t= 49  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=53
-  t= 49  Hob    began wait(ticks=4), 4 ticks
-render-shell screenshot t=50 reports/assets/playtest-items-pile-t50.png
-  t= 51  Rill   thought again at 10/20t, wanted the same thing
-  t= 53  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=57
-  t= 53  Hob    began wait(ticks=4), 4 ticks
-  t= 56  Rill   thought again at 15/20t, wanted the same thing
-render-shell play t=56 aims at nothing aimed · holding common boots / taking iron key / coins none / saying "well met"
-  t= 57  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=61
-  t= 57  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=58 chose examine(target=common boots)
-  t= 59  Fen    began examine(target=common boots), 4 ticks
-  t= 61  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=65
-  t= 61  Hob    began wait(ticks=4), 4 ticks
-  t= 61  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=81
-  t= 61  Rill   began wait(ticks=20), 20 ticks
-  t= 63  Fen    finished examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
-  t= 63  Fen    has not decided yet, and waits in the world
-render-shell play t=63 examine(target=common boots) -> examine ok item=common boots seen=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots
-  t= 65  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=69
-  t= 65  Hob    began wait(ticks=4), 4 ticks
-  t= 66  Rill   thought again at 5/20t, wanted the same thing
-render-shell play t=67 chose drop(item=common boots)
-  t= 68  Fen    began drop(item=common boots), 2 ticks
-  t= 69  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=73
-  t= 69  Hob    began wait(ticks=4), 4 ticks
-  t= 70  Fen    finished drop(item=common boots) -> drop ok item=common boots into=6
-  t= 70  Fen    has not decided yet, and waits in the world
-  t= 71  Rill   thought again at 10/20t, wanted the same thing
-render-shell play t=70 drop(item=common boots) -> drop ok item=common boots into=6
-render-shell screenshot t=72 reports/assets/playtest-items-pile-t72.png
-  t= 73  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=77
-  t= 73  Hob    began wait(ticks=4), 4 ticks
-render-shell sheet scale=2 x=16 y=16 w=574 h=748 sheets=3 showing=0
-render-shell dialogue scale=2 x=676 y=522 w=596 h=110
-render-shell trade scale=2 x=676 y=400 w=596 h=114
-render-shell stop tick=75 frames=28 views=32 handles=32 far=121 fartris=16128 farbuilt=121 farcorners=8352 faruse=43917 islands=33 water=1 grass=0 drawn=0 patches=0 isles=0 motes=591 lights=0 orbs=0 board=0/0 pieces=3 mirror=28 frame_ms=0.00 timed=0 digest=a129f8c9d1ab3100
+render-shell sheet scale=1 x=8 y=8 w=287 h=268 sheets=3 showing=0
+render-shell readout scale=1 x=8 y=8 w=269 h=214 fight=0
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=524 w=298 h=57
+render-shell stop tick=48 frames=18 views=32 handles=32 far=50 fartris=6624 farbuilt=50 farcorners=3393 faruse=54903 islands=33 water=1 grass=0 drawn=0 patches=0 isles=0 motes=591 lights=0 orbs=0 board=0/0 pieces=3 mirror=18 frame_ms=0.00 timed=0 digest=2c88c0ef69c60c98
+playtest-items-pile-t12.png -> playtest-items-pile-t13.png
+playtest-items-pile-t44.png -> playtest-items-pile-t45.png
+reticked 2 frame(s)

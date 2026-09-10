@@ -53,8 +53,9 @@ render-shell keys \            send it there
 render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
 render-shell keys 8 / 9        turn a quarter left or right (free)
 render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
 render-shell keys Z            open or shut the character sheet
-render-shell boot seed=1234 chunks=37 far=1 fartris=160 islands=10 grass=9602 motes=594 sheet=2/3 aa=msaa4+fxaa
+render-shell boot seed=1234 chunks=37 far=1 fartris=160 islands=10 grass=9602 motes=594 sheet=1/3 aa=msaa4+fxaa
   t=  1  Alder  has not decided yet, and waits in the world
   t=  1  Ember  has not decided yet, and waits in the world
   t=  1  Wisp   has not decided yet, and waits in the world
@@ -66,7 +67,7 @@ render-shell fight t=16 the board appears
 render-shell play t=16 round 1 picks step none #3 to (-171,130)
 render-shell play t=18 round 1 picks step none #3 to (-155,130)
 render-shell play t=21 round 1 turn send a minion -> done
-render-shell play t=26 round 1 turn turn left -> done
+render-shell play t=24 round 1 turn turn left -> done
 render-shell play t=26 round 1 turn end the turn -> done
 render-shell screenshot t=29 reports/assets/playtest-fight-t28.png
 render-shell play t=40 round 2 picks step (-162,138) #3 to (-155,130)
@@ -78,21 +79,24 @@ render-shell play t=56 round 2 turn send a minion -> done
 render-shell play t=58 round 2 turn end the turn -> done
 render-shell fight t=61 the board is put away
 render-shell play t=72 it is not your turn on a board
-render-shell play t=74 it is not your turn on a board
-render-shell play t=79 it is not your turn on a board
-render-shell screenshot t=82 reports/assets/playtest-fight-t80.png
+render-shell play t=75 it is not your turn on a board
+render-shell screenshot t=80 reports/assets/playtest-fight-t80.png
+render-shell play t=80 it is not your turn on a board
 render-shell play t=82 it is not your turn on a board
 render-shell play t=96 it is not your turn on a board
-render-shell play t=98 it is not your turn on a board
-render-shell play t=103 it is not your turn on a board
+render-shell play t=99 it is not your turn on a board
+render-shell play t=104 it is not your turn on a board
 render-shell play t=106 it is not your turn on a board
 render-shell play t=120 it is not your turn on a board
 render-shell play t=122 it is not your turn on a board
 render-shell play t=128 it is not your turn on a board
-render-shell play t=130 it is not your turn on a board
+render-shell play t=131 it is not your turn on a board
 render-shell screenshot t=136 reports/assets/playtest-fight-t134.png
-render-shell sheet scale=2 x=16 y=16 w=574 h=676 sheets=2 showing=0
-render-shell readout scale=2 x=816 y=16 w=456 h=700 fight=0
-render-shell dialogue scale=2 x=676 y=522 w=596 h=110
-render-shell trade scale=2 x=676 y=400 w=596 h=114
-render-shell stop tick=138 frames=52 views=50 handles=99 far=122 fartris=16416 farbuilt=210 farcorners=10952 faruse=5 islands=33 water=5 grass=3817 drawn=2117 patches=49 isles=1 motes=616 lights=0 orbs=0 board=441/100 pieces=8 mirror=52 frame_ms=0.00 timed=0 digest=aa9a35f67152f18a
+render-shell sheet scale=1 x=8 y=8 w=287 h=338 sheets=2 showing=0
+render-shell readout scale=1 x=875 y=8 w=269 h=350 fight=0
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=524 w=298 h=57
+render-shell stop tick=138 frames=52 views=50 handles=99 far=122 fartris=16416 farbuilt=210 farcorners=10952 faruse=7 islands=33 water=5 grass=3817 drawn=2117 patches=49 isles=1 motes=616 lights=0 orbs=0 board=441/100 pieces=8 mirror=52 frame_ms=0.00 timed=0 digest=aa9a35f67152f18a
+playtest-fight-t28.png -> playtest-fight-t29.png
+playtest-fight-t134.png -> playtest-fight-t136.png
+reticked 2 frame(s)

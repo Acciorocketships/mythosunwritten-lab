@@ -7,10 +7,14 @@
 #   ./tools/playtest.sh input     # W-player-input
 #   ./tools/playtest.sh verbs     # W-player-actions
 #   ./tools/playtest.sh walk      # W-walk-motion
+#   ./tools/playtest.sh pace      # W-walk-pace
 #   ./tools/playtest.sh bag       # W-player-inventory
+#   ./tools/playtest.sh fit       # W-window-fit
 #   ./tools/playtest.sh items     # W-ground-items
-#   ./tools/playtest.sh enemy     # W-enemy-spawn
+#   ./tools/playtest.sh enemy     # W-enemy-spawn, and W-fight-drawn with it
 #   ./tools/playtest.sh fight     # W-player-combat
+#   ./tools/playtest.sh ended     # W-fight-end: the fight walked into, finished
+#   ./tools/playtest.sh left      # W-fight-end: the same fight, walked out of
 #   ./tools/playtest.sh whole     # everything in one seed, one run
 #   ./tools/playtest.sh all
 #
@@ -22,6 +26,11 @@
 # renders into an off-screen buffer and --input presses the keys a person would
 # press. On a machine WITH a display, drop the `xvfb-run -a` and the
 # --input/--screenshot-ticks flags and play the same session by hand.
+#
+# The tick schedules below are the second pass's, and they are shorter than the
+# first pass's on purpose. A walk now costs the strides it takes rather than a
+# flat twenty ticks (commit ac63731), so one press of W is a four-tick action:
+# every gap that used to wait out a walk is a quarter of what it was.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
@@ -37,21 +46,48 @@ run() {
 		echo "=== on a machine with a display: ./run_render.sh $* (without --input/--screenshot-ticks)"
 	} > "$log"
 	xvfb-run -a ./run_render.sh "$@" >> "$log" 2>&1
+	./tools/playtest_retick.sh "$log" >> "$log" 2>&1
+	echo "$name done -> $log"
+}
+
+# The same session at a window size other than the shipped one. `--resolution`
+# is the engine's own argument, so it goes ahead of the `--` that hands the rest
+# to the shell; `run_render.sh` puts everything after that `--`, which is why
+# this one calls the binary the way `run_render.sh` calls it rather than calling
+# `run_render.sh`.
+run_at() {
+	local name=$1 size=$2; shift 2
+	local log="reports/playtest-$name.log"
+	source ./godot_env.sh
+	{
+		echo "=== playtest session: $name (window $size)"
+		echo "=== command: xvfb-run -a \$GODOT --path . --resolution $size -- $*"
+		echo "=== on a machine with a display: ./run_render.sh $* at a $size window (without --input/--screenshot-ticks)"
+	} > "$log"
+	xvfb-run -a "$GODOT" --path . --resolution "$size" -- "$@" >> "$log" 2>&1
+	./tools/playtest_retick.sh "$log" >> "$log" 2>&1
 	echo "$name done -> $log"
 }
 
 session_board() {
-	# Squares that follow the terrain and grass that gives way over them. The
-	# same seed, camera and ticks twice: once with the grass, once without.
+	# Squares that follow the terrain and grass that gives way over them.
+	#
+	# Three runs of the same seed, the same camera and the same asked-for tick.
+	# Which tick each frame actually lands on is whatever tick the renderer got to
+	# first (see `tools/playtest_retick.sh`), so the three frames are not
+	# guaranteed to be the same moment -- and the report does not assume they are.
+	# It measures a control box of sky and far hill that no lattice and no
+	# character is in, and shows the frames agree there; what is left over is the
+	# lattice and the grass over it, which is what the comparison is about.
 	run board --seed $SEED --scenario play --play --board \
 		--camera 0 16 20 --aim 2 \
 		--screenshot-ticks "8:$A/playtest-board-grass-t8.png"
 	run board-nograss --seed $SEED --scenario play --play --board --no-grass \
 		--camera 0 16 20 --aim 2 \
 		--screenshot-ticks "8:$A/playtest-board-bare-t8.png"
-	# The pair the claim actually turns on: the same grass, the same seed, the
-	# same camera and the same tick, with the squares on and with them off, so
-	# what the grass does over a square is the only difference between them.
+	# The pair the claim actually turns on: the same grass, the same seed and the
+	# same camera, with the squares on and with them off, so what the grass does
+	# over a square is the only difference between them.
 	run board-off --seed $SEED --scenario play --play \
 		--camera 0 16 20 --aim 2 \
 		--screenshot-ticks "8:$A/playtest-board-off-t8.png"
@@ -67,9 +103,11 @@ session_live() {
 session_input() {
 	# A person is one of the minds: four steps, and the journal shows them
 	# arriving at the same seam the other three characters' choices arrive at.
+	# Six ticks apart, which is one four-tick walk plus the tick the choice is
+	# picked up on and the tick it is reported on.
 	run input --seed $SEED --scenario play --play --journal \
-		--input "6:w,28:a,50:s,72:d" \
-		--screenshot-ticks "10:$A/playtest-input-t10.png,80:$A/playtest-input-t80.png"
+		--input "6:w,12:a,18:s,24:d" \
+		--screenshot-ticks "10:$A/playtest-input-t10.png,30:$A/playtest-input-t30.png"
 }
 
 session_verbs() {
@@ -77,27 +115,65 @@ session_verbs() {
 	# built to hold one of each. K is pressed on purpose: it is further than an
 	# ordinary DEX reaches, so the engine refuses it and says why.
 	run verbs --seed $SEED --scenario play --play --journal \
-		--input "6:tab,8:e,14:p,36:b,38:t,46:y,54:f,56:l,62:equal,64:o,72:u,78:i,84:h,92:j,98:k,104:g,126:m,130:c,132:q,138:x,144:v,150:n" \
-		--screenshot-ticks "20:$A/playtest-verbs-t20.png,60:$A/playtest-verbs-t60.png,100:$A/playtest-verbs-t100.png,156:$A/playtest-verbs-t156.png"
+		--input "6:tab,8:e,12:p,20:b,22:t,30:y,38:f,40:l,44:equal,46:o,52:u,56:i,60:h,66:j,72:k,78:g,100:m,104:c,106:q,110:x,114:v,118:n" \
+		--screenshot-ticks "16:$A/playtest-verbs-t16.png,34:$A/playtest-verbs-t34.png,64:$A/playtest-verbs-t64.png,124:$A/playtest-verbs-t124.png"
 }
 
 session_walk() {
-	# One step, photographed on five consecutive ticks of the twenty it spans,
-	# so the walk can be seen happening rather than inferred.
-	# Close and low: the four panels cover the bottom third of the window and the
+	# One step, photographed as often as this machine can photograph, so the walk
+	# can be seen happening rather than inferred -- and after it, to show the
+	# person is free again rather than standing out sixteen ticks of an action
+	# already finished. The frames are renamed to the ticks they were actually
+	# taken on (`tools/playtest_retick.sh`), because a run asked for six
+	# consecutive ticks gets six frames on whatever ticks they landed on.
+	# Close and low: the four panels cover the bottom of the window and the
 	# followed character is drawn near the middle of it, so a camera further back
 	# than this puts the walker behind a panel instead of in front of one.
 	run walk --seed $SEED --scenario play --play --journal \
 		--camera 0 5 10 --aim 1 --input "6:w" \
-		--screenshot-ticks "8:$A/playtest-walk-t8.png,12:$A/playtest-walk-t12.png,16:$A/playtest-walk-t16.png,20:$A/playtest-walk-t20.png,28:$A/playtest-walk-t28.png"
+		--screenshot-ticks "8:$A/playtest-walk-t8.png,10:$A/playtest-walk-t10.png,11:$A/playtest-walk-t11.png,12:$A/playtest-walk-t12.png,13:$A/playtest-walk-t13.png,15:$A/playtest-walk-t15.png"
+}
+
+session_pace() {
+	# The pace question, asked of one run rather than of two: five presses of W
+	# in a row, with the journal on, so the person's walks and the world's own
+	# walks are timed against each other in the same trace at the same seed.
+	run pace --seed $SEED --scenario play --play --journal \
+		--camera 0 5 10 --aim 1 --input "6:w,12:w,18:w,24:w,30:w" \
+		--screenshot-ticks "8:$A/playtest-pace-t8.png,36:$A/playtest-pace-t36.png"
+	# What the world's own wandering leg costs, for the other side of the
+	# comparison: eighteen units, twenty strides, twenty ticks.
+	echo "=== the world's own walk, for comparison" > reports/playtest-pace-world.log
+	echo "=== command: ./tools/measure_walk.sh --seed $SEED" >> reports/playtest-pace-world.log
+	./tools/measure_walk.sh --seed $SEED >> reports/playtest-pace-world.log 2>&1
+	echo "pace-world done -> reports/playtest-pace-world.log"
 }
 
 session_bag() {
 	# The sheet opened and operated: hold, put on, take off, use up, drop, and
 	# give away what is held.
 	run bag --seed $SEED --scenario play --play --sheet --journal \
-		--input "10:f,14:1,22:2,28:f,32:3,40:f,44:x,52:tab,54:f,58:o,66:z" \
-		--screenshot-ticks "8:$A/playtest-bag-t8.png,18:$A/playtest-bag-t18.png,36:$A/playtest-bag-t36.png,62:$A/playtest-bag-t62.png"
+		--input "10:f,14:1,20:2,26:f,30:3,36:f,40:x,46:tab,48:f,52:o,60:z" \
+		--screenshot-ticks "8:$A/playtest-bag-t8.png,18:$A/playtest-bag-t18.png,34:$A/playtest-bag-t34.png,56:$A/playtest-bag-t56.png"
+}
+
+session_fit() {
+	# Every panel the shell can draw, open at once, in the window the game ships
+	# in and in the two the milestone's fit work also promises. The trace's last
+	# lines print each panel's own placement, which is what "inside the window"
+	# is judged from; the frames are what a player sees.
+	run fit --seed $SEED --scenario play --play --sheet --readout --board \
+		--dialogue --trade --journal \
+		--input "10:f,20:tab,24:b,28:t" \
+		--screenshot-ticks "16:$A/playtest-fit-t16.png,34:$A/playtest-fit-t34.png"
+	run_at fit-720 1280x720 --seed $SEED --scenario play --play --sheet --readout \
+		--board --dialogue --trade \
+		--input "10:f,20:tab,24:b,28:t" \
+		--screenshot-ticks "34:$A/playtest-fit-1280x720-t34.png"
+	run_at fit-1440 2560x1440 --seed $SEED --scenario play --play --sheet --readout \
+		--board --dialogue --trade \
+		--input "10:f,20:tab,24:b,28:t" \
+		--screenshot-ticks "34:$A/playtest-fit-2560x1440-t34.png"
 }
 
 session_items() {
@@ -105,20 +181,21 @@ session_items() {
 	# it, take it, hold it, look at it, drop it.
 	run items --seed $SEED --scenario play --play --journal \
 		--camera 0 6 -11 --aim 1 \
-		--input "6:tab,8:tab,10:tab,16:q,24:f,28:l,36:x" \
-		--screenshot-ticks "4:$A/playtest-items-t4.png,20:$A/playtest-items-t20.png,32:$A/playtest-items-t32.png,42:$A/playtest-items-t42.png"
+		--input "6:tab,8:tab,10:tab,14:q,20:f,24:l,30:x" \
+		--screenshot-ticks "4:$A/playtest-items-t4.png,18:$A/playtest-items-t18.png,28:$A/playtest-items-t28.png,36:$A/playtest-items-t36.png"
 	# The same again with the grass switched off, to rule the grass out as the
 	# reason nothing is visible on the ground.
 	run items-nograss --seed $SEED --scenario play --play --journal --no-grass \
 		--camera 0 6 -11 --aim 1 \
-		--input "6:tab,8:tab,10:tab,16:q,24:f,28:l,36:x" \
-		--screenshot-ticks "20:$A/playtest-items-bare-t20.png,42:$A/playtest-items-bare-t42.png"
+		--input "6:tab,8:tab,10:tab,14:q,20:f,24:l,30:x" \
+		--screenshot-ticks "18:$A/playtest-items-bare-t18.png,36:$A/playtest-items-bare-t36.png"
 	# Walked up to the pile first, so the key is actually taken and dropped
-	# rather than refused for reach.
+	# rather than refused for reach. Two presses of S now, because one press is
+	# a four-tick step of 3.6 units and the pile is 4.0 away.
 	run items-pile --seed $SEED --scenario play --play --journal --no-grass \
 		--camera 7 5 -7 --aim 1 \
-		--input "6:s,32:tab,34:tab,36:tab,42:q,54:f,58:l,66:x" \
-		--screenshot-ticks "30:$A/playtest-items-pile-t30.png,50:$A/playtest-items-pile-t50.png,72:$A/playtest-items-pile-t72.png"
+		--input "6:s,14:tab,16:tab,18:tab,22:q,28:f,32:l,38:x" \
+		--screenshot-ticks "12:$A/playtest-items-pile-t12.png,26:$A/playtest-items-pile-t26.png,44:$A/playtest-items-pile-t44.png"
 	# The fourth camera: high, off to the side, grass off, before anybody moves.
 	run items-side --seed $SEED --scenario play --play --no-grass \
 		--camera 11 7 5 --aim 0.5 --fov 45 \
@@ -127,10 +204,17 @@ session_items() {
 
 session_enemy() {
 	# The ordinary world, walked through: what the enemy field puts out there
-	# decides for itself and starts a fight by coming close.
+	# decides for itself and starts a fight by coming close. Nothing is asked
+	# for on the command line beyond --play, which is the whole point of the
+	# re-judgement: a fight that starts by itself has to draw itself.
 	run enemy --seed $SEED --play --journal \
-		--input "6:w,28:w,50:w,72:w" \
-		--screenshot-ticks "24:$A/playtest-enemy-t24.png,40:$A/playtest-enemy-t40.png,90:$A/playtest-enemy-t90.png"
+		--input "6:w,12:w,18:w,24:w,30:w,36:w" \
+		--screenshot-ticks "20:$A/playtest-enemy-t20.png,40:$A/playtest-enemy-t40.png,52:$A/playtest-enemy-t52.png,90:$A/playtest-enemy-t90.png"
+	# The same seed and the same world, with the camera pulled in to where a
+	# board can be photographed rather than guessed at.
+	run enemy-close --seed $SEED --play --journal --camera 0 9 14 --aim 1 \
+		--input "6:w,12:w,18:w,24:w,30:w,36:w" \
+		--screenshot-ticks "40:$A/playtest-enemy-close-t40.png,60:$A/playtest-enemy-close-t60.png,90:$A/playtest-enemy-close-t90.png"
 }
 
 session_fight() {
@@ -141,22 +225,127 @@ session_fight() {
 		--screenshot-ticks "10:$A/playtest-fight-t10.png,28:$A/playtest-fight-t28.png,80:$A/playtest-fight-t80.png,134:$A/playtest-fight-t134.png"
 }
 
+# Walking east until a board turns up. `tests/test_walk_in_fight.gd` drives the
+# same walk from inside the simulation -- it presses D on every tick the person
+# is not already inside an action -- and this is the keyboard's version of it:
+# one press every six ticks, which is a four-tick walk plus the tick the choice
+# is picked up on and the tick the answer is reported on.
+walk_east() {
+	local start=$1 until_tick=$2
+	local script="" t=$start
+	while [ $t -le "$until_tick" ]; do
+		script+="$t:d,"
+		t=$((t + 6))
+	done
+	echo "${script%,}"
+}
+
+# The turn a person takes over and over on a board they walked into. A turn buys
+# three things -- a move, an action and a minion -- and this spends all three:
+# cycle the ring of cells the board is offering and step onto one, turn a quarter
+# or two, spend the first weapon action and then the second, pick a minion and a
+# cell for it and send it, and end the turn. Written once here and pressed from
+# `ended`, `left` and `whole`, so the runs play the same fight the same way.
+#
+# The second weapon action is pressed on purpose even though a turn buys one:
+# `already acted this turn` is the board saying what a turn is worth, and it is
+# the only place in this playtest that sentence is shown.
+board_turns() {
+	local start=$1 turns=$2 every=$3
+	local script="" t=$start i=0
+	while [ $i -lt "$turns" ]; do
+		# Three presses of [ before stepping, because [ cycles the ring of cells
+		# on offer rather than choosing the best one: a person reads the board
+		# and picks, and this is as much of that as a fixed schedule can do.
+		script+="$((t)):bracketleft,$((t + 1)):bracketleft,$((t + 2)):bracketleft,$((t + 3)):bracketright,"
+		# Turn a different number of quarters each round, because what a weapon
+		# covers is read from where the commander stands as it is facing.
+		local q=0
+		while [ $q -lt $((i % 4)) ]; do
+			script+="$((t + 4 + q)):8,"
+			q=$((q + 1))
+		done
+		script+="$((t + 8)):4,$((t + 9)):5,"
+		script+="$((t + 10)):semicolon,$((t + 11)):apostrophe,$((t + 12)):backslash,"
+		script+="$((t + 14)):0,"
+		t=$((t + every))
+		i=$((i + 1))
+	done
+	echo "${script%,}"
+}
+
+session_ended() {
+	# A fight nobody asked for, played until it is over. The play stage's own
+	# cast walks into one at seed 1234; this presses the same six-key turn
+	# twenty times over and photographs the board, a turn on it, and the tick
+	# after it is put away.
+	run ended --seed $SEED --scenario play --play --journal \
+		--camera 0 9 14 --aim 1 \
+		--input "$(walk_east 6 108),$(board_turns 120 42 16)" \
+		--screenshot-ticks "40:$A/playtest-ended-t40.png,100:$A/playtest-ended-t100.png,150:$A/playtest-ended-t150.png,300:$A/playtest-ended-t300.png,500:$A/playtest-ended-t500.png,700:$A/playtest-ended-t700.png,790:$A/playtest-ended-t790.png"
+}
+
+# `.` pressed over and over across a window of ticks. Leaving is a thing a turn
+# is spent on, so it is only askable on the person's own turn -- and a fixed
+# schedule cannot know which tick that is, because the two other commanders take
+# theirs in between and how long they take is their business. Pressing every
+# other tick across a window wide enough to hold a whole round means one press
+# lands on the person's turn and the rest are refused in the match's own words,
+# which is the other half of what this session is for.
+leave_window() {
+	local start=$1 until_tick=$2
+	local script="" t=$start
+	while [ $t -le "$until_tick" ]; do
+		script+="$t:period,"
+		t=$((t + 2))
+	done
+	echo "${script%,}"
+}
+
+session_left() {
+	# The same fight, walked out of instead: two turns on the board and then `.`,
+	# which spends the turn on leaving and puts the character back in the world
+	# where it stood. The frames are the board, a turn on it, the tick after the
+	# leave, and real time afterwards.
+	run left --seed $SEED --scenario play --play --journal \
+		--camera 0 9 14 --aim 1 \
+		--input "$(walk_east 6 108),$(board_turns 120 2 16),$(leave_window 150 200),210:d,216:d,222:m,230:e" \
+		--screenshot-ticks "100:$A/playtest-left-t100.png,140:$A/playtest-left-t140.png,205:$A/playtest-left-t205.png,220:$A/playtest-left-t220.png,234:$A/playtest-left-t234.png"
+}
+
 session_whole() {
 	# Everything in one run and one seed: walk, every kind of action, the
-	# inventory, the walk east that Rill notices, the whole fight on the board,
-	# and the return to real time after it.
+	# inventory, a fight the world starts by itself played from the keyboard and
+	# then left, and the return to real time after it -- with a walk, a wait and a
+	# look on the far side of the fight to show the world took the person back.
 	#
-	# Two things this session learned the hard way and now encodes.
-	# First: the wardrobe is worked with the BOOTS, never the sword. Pressing 2
-	# while the sword is the held thing takes it out of the hand (`attacks=0`),
-	# and a commander with nothing in the hand slot cannot spend a weapon action,
-	# so a run that disarms itself can never bring its own fight to an end.
-	# Second: what an attack covers is read from where the commander stands *as
-	# it is facing*, so each round turns a different number of quarters before it
-	# swings -- 0, 1, 2, 3 and round again -- and every facing gets tried.
+	# What this session learned the hard way and now encodes.
+	#
+	# The wardrobe is worked with the BOOTS, never the sword. Pressing 2 while the
+	# sword is the held thing takes it out of the hand (`attacks=0`), and a
+	# commander with nothing in the hand slot cannot spend a weapon action.
+	#
+	# And the fight is left rather than won. Two turns is what a person gets: at
+	# this seed Rill lands a thrust every sixteen ticks for eleven to sixteen, Fen
+	# starts six down of thirty-two, and a swing aimed by a fixed schedule rather
+	# than at the enemy answers `done` without landing. `ended` is the session that
+	# fights one to the board being put away; this one takes its two turns and
+	# spends the third on `.`, which is the other way the milestone says a fight
+	# ends, and the only one that hands the person back to real time alive.
+	#
+	# Four stretches, in the order a person would meet them: the fifteen rows of
+	# the catalogue and the wardrobe on the play stage (t=6 to t=160), the walk
+	# east into the fight the world starts by itself (t=166 on), two turns on the
+	# board and the leave, and then real time again -- two steps, a wait, a look
+	# and the sheet.
+	local verbs="6:s,12:s,18:tab,20:tab,22:tab,26:q,32:f,36:l,40:1,46:2,52:x"
+	verbs+=",58:f,62:f,66:3,72:tab,74:tab,78:b,80:t,88:y,96:e,100:equal,102:o"
+	verbs+=",110:u,116:i,122:h,128:j,134:k,138:m,144:f,148:n,156:z,160:z"
+	local after="310:d,316:d,322:m,330:e,336:tab,342:f,348:l,354:z"
 	run whole --seed $SEED --scenario play --play --journal --sheet --board --readout \
-		--input "6:s,30:tab,32:tab,34:tab,40:q,48:f,52:l,56:1,64:2,72:x,80:f,84:f,88:3,96:tab,98:tab,102:b,104:t,112:y,120:e,128:equal,130:o,138:u,144:i,150:h,158:j,164:k,170:m,176:f,180:n,188:f,192:n,200:f,204:n,212:f,216:n,224:z,230:z,236:d,258:d,280:d,302:d,324:d,350:bracketleft,352:bracketright,356:4,360:5,364:0,376:bracketleft,378:bracketright,380:8,384:4,388:5,392:0,404:bracketleft,406:bracketright,408:8,410:8,414:4,418:5,422:0,434:bracketleft,436:bracketright,438:8,440:8,442:8,446:4,450:5,454:0,466:bracketleft,468:bracketright,472:4,476:5,480:0,492:bracketleft,494:bracketright,496:8,500:4,504:5,508:0,520:bracketleft,522:bracketright,524:8,526:8,530:4,534:5,538:0,550:bracketleft,552:bracketright,554:8,556:8,558:8,562:4,566:5,570:0,582:bracketleft,584:bracketright,588:4,592:5,596:0,608:bracketleft,610:bracketright,612:8,616:4,620:5,624:0,636:bracketleft,638:bracketright,640:8,642:8,646:4,650:5,654:0,666:bracketleft,668:bracketright,670:8,672:8,674:8,678:4,682:5,686:0,698:bracketleft,700:bracketright,704:4,708:5,712:0,724:bracketleft,726:bracketright,728:8,732:4,736:5,740:0,752:bracketleft,754:bracketright,756:8,758:8,762:4,766:5,770:0,782:bracketleft,784:bracketright,786:8,788:8,790:8,794:4,798:5,802:0,814:bracketleft,816:bracketright,820:4,824:5,828:0,840:bracketleft,842:bracketright,844:8,848:4,852:5,856:0,868:bracketleft,870:bracketright,872:8,874:8,878:4,882:5,886:0,898:bracketleft,900:bracketright,902:8,904:8,906:8,910:4,914:5,918:0,930:w,952:m,958:tab,960:e" \
-		--screenshot-ticks "34:$A/playtest-whole-t34.png,90:$A/playtest-whole-t90.png,230:$A/playtest-whole-t230.png,345:$A/playtest-whole-t345.png,500:$A/playtest-whole-t500.png,700:$A/playtest-whole-t700.png,920:$A/playtest-whole-t920.png,966:$A/playtest-whole-t966.png"
+		--camera 0 9 14 --aim 1 \
+		--input "$verbs,$(walk_east 166 214),$(board_turns 224 2 16),$(leave_window 256 304),$after" \
+		--screenshot-ticks "30:$A/playtest-whole-t30.png,70:$A/playtest-whole-t70.png,130:$A/playtest-whole-t130.png,158:$A/playtest-whole-t158.png,210:$A/playtest-whole-t210.png,240:$A/playtest-whole-t240.png,262:$A/playtest-whole-t262.png,300:$A/playtest-whole-t300.png,325:$A/playtest-whole-t325.png,350:$A/playtest-whole-t350.png,358:$A/playtest-whole-t358.png"
 }
 
 case "${1:-all}" in
@@ -165,13 +354,18 @@ case "${1:-all}" in
 	input) session_input ;;
 	verbs) session_verbs ;;
 	walk) session_walk ;;
+	pace) session_pace ;;
 	bag) session_bag ;;
+	fit) session_fit ;;
 	items) session_items ;;
 	enemy) session_enemy ;;
 	fight) session_fight ;;
+	ended) session_ended ;;
+	left) session_left ;;
 	whole) session_whole ;;
 	all)
 		session_board; session_live; session_input; session_verbs; session_walk
-		session_bag; session_items; session_enemy; session_fight; session_whole ;;
+		session_pace; session_bag; session_fit; session_items; session_enemy
+		session_fight; session_ended; session_left; session_whole ;;
 	*) echo "no such session: $1" >&2; exit 2 ;;
 esac

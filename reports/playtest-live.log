@@ -53,8 +53,9 @@ render-shell keys \            send it there
 render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
 render-shell keys 8 / 9        turn a quarter left or right (free)
 render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
 render-shell keys Z            open or shut the character sheet
-render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 motes=1073 sheet=2/4 aa=msaa4+fxaa
+render-shell boot seed=1234 chunks=32 far=2 fartris=304 islands=10 grass=9278 motes=1073 sheet=1/4 aa=msaa4+fxaa
   t=  1  Pip    has not decided yet, and waits in the world
   t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
   t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
@@ -62,32 +63,36 @@ render-shell boot seed=1234 chunks=32 far=3 fartris=448 islands=10 grass=9278 mo
   t=  6  Nettle thought again at 5/20t, wanted the same thing
   t=  6  Corin  thought again at 5/20t, wanted the same thing
   t=  6  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
-render-shell screenshot t=8 reports/assets/playtest-live-t6.png
+render-shell screenshot t=7 reports/assets/playtest-live-t6.png
   t= 11  Nettle thought again at 10/20t, wanted the same thing
   t= 11  Corin  thought again at 10/20t, wanted the same thing
   t= 11  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
   t= 16  Nettle thought again at 15/20t, wanted the same thing
   t= 16  Corin  thought again at 15/20t, wanted the same thing
   t= 16  Scholar(-1,-1) changed its mind at 15/20t, dropped go_to(target=(-5.711, -39.422)) for go_to(target=(-8.921, -24.363))
-  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 20 ticks
+  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 16 ticks
   t= 21  Nettle finished go_to(target=(-20.572, 15.824)) -> go_to ok at=(-20.572, 15.824) walked=18.0 steps=20
   t= 21  Nettle began go_to(target=(-31.155, 30.384)), 20 ticks
   t= 21  Corin  finished go_to(target=(-2.873, -20.661)) -> go_to ok at=(-2.873, -20.661) walked=18.0 steps=20
   t= 21  Corin  began go_to(target=(-11.335, -36.548)), 20 ticks
-  t= 21  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+  t= 21  Scholar(-1,-1) thought again at 5/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
 render-shell fight t=26 the board appears
   t= 26  Nettle thought again at 5/20t, wanted the same thing
   t= 26  Corin  thought again at 5/20t, kept go_to(target=(-11.335, -36.548)) over attack(target=4 item=common buckler)
-  t= 26  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
+  t= 26  Scholar(-1,-1) thought again at 10/16t, kept go_to(target=(-8.921, -24.363)) over attack(target=3 item=common spear)
   t= 26  Corin  interrupted (combat began), abandoned go_to(target=(-11.335, -36.548)) 5/20t
   t= 26  Corin  began attack(target=4 item=common buckler), 6 ticks
-  t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/20t
+  t= 26  Scholar(-1,-1) interrupted (combat began), abandoned go_to(target=(-8.921, -24.363)) 10/16t
   t= 31  Nettle thought again at 10/20t, wanted the same thing
   t= 31  Corin  thought again at 5/6t, wanted the same thing
   t= 32  Corin  finished attack(target=4 item=common buckler) -> attack refused: Scholar(-1,-1) is outside the pattern of a common buckler from here
 render-shell screenshot t=32 reports/assets/playtest-live-t30.png
   t= 33  Scholar(-1,-1) began attack(target=3 item=common spear), 6 ticks
-render-shell sheet scale=2 x=16 y=16 w=574 h=784 sheets=4 showing=0
-render-shell dialogue scale=2 x=676 y=522 w=596 h=110
-render-shell trade scale=2 x=676 y=400 w=596 h=114
-render-shell stop tick=35 frames=13 views=32 handles=64 far=40 fartris=5088 farbuilt=40 farcorners=2704 faruse=53107 islands=30 water=1 grass=9278 drawn=6997 patches=32 isles=1 motes=1073 lights=16 orbs=0 board=0/0 pieces=4 mirror=0 frame_ms=0.00 timed=0 digest=885023c1f87e7c93
+render-shell sheet scale=1 x=8 y=8 w=287 h=392 sheets=4 showing=0
+render-shell readout scale=1 x=936 y=8 w=208 h=148 fight=1
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=524 w=298 h=57
+render-shell stop tick=34 frames=13 views=32 handles=64 far=26 fartris=3296 farbuilt=26 farcorners=1777 faruse=41072 islands=30 water=1 grass=9278 drawn=6997 patches=32 isles=1 motes=1073 lights=16 orbs=0 board=441/0 pieces=4 mirror=0 frame_ms=0.00 timed=0 digest=8be54c5dea5b197f
+playtest-live-t6.png -> playtest-live-t7.png
+playtest-live-t30.png -> playtest-live-t32.png
+reticked 2 frame(s)

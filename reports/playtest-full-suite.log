@@ -38,7 +38,7 @@ PASS  combat pieces  360 checks
 RUN   test_combat_resolution
 PASS  combat resolution 1754 checks
 RUN   test_combat_snap
-PASS  combat snap    855 checks
+PASS  combat snap    866 checks
 RUN   test_live_world
 PASS  live world     82 checks
 RUN   test_layering
@@ -62,7 +62,7 @@ PASS  effects        1474 checks
 RUN   test_actions
 PASS  actions        351 checks
 RUN   test_control_loop
-PASS  control loop   81 checks
+PASS  control loop   138 checks
 RUN   test_walk_motion
 PASS  walk motion    93 checks
 RUN   test_observation
@@ -70,7 +70,7 @@ PASS  observation    248 checks
 RUN   test_scenario
 PASS  scenario       160 checks
 RUN   test_agent
-PASS  agent          1069 checks
+PASS  agent          1238 checks
 RUN   test_memory
 PASS  memory         106 checks
 RUN   test_goals
@@ -98,15 +98,15 @@ PASS  enemies        596 checks
 RUN   test_turn_seam
 PASS  turn seam      23 checks
 RUN   test_strike_record
-PASS  strike record  299 checks
+PASS  strike record  304 checks
 RUN   test_attack_clips
-PASS  attack clips   1009 checks
+PASS  attack clips   1054 checks
 RUN   test_flights
-PASS  flights        2107 checks
+PASS  flights        9194 checks
 RUN   test_held_items
 PASS  held items     149 checks
 RUN   test_player_input
-PASS  player input   106 checks
+PASS  player input   130 checks
 RUN   test_player_actions
 PASS  player actions 212 checks
 RUN   test_bargain
@@ -115,6 +115,8 @@ RUN   test_player_inventory
 PASS  player inventory 57 checks
 RUN   test_player_combat
 PASS  player combat  73 checks
+RUN   test_walk_in_fight
+PASS  walk-in fight  26 checks
 RUN   test_window_glow
         window glow: 52 villages light ["house=426", "cottage=403", "tavern=100", "workshop=8", "tower=13"]
         window glow: 286 distinct placements checked, worst gap 0.221 (workshop face +1 share +0.20)
@@ -139,15 +141,17 @@ PASS  ui readout     1527 checks
 RUN   test_ui_exchange
 PASS  ui exchange    555 checks
 RUN   test_ui_territory
-PASS  ui territory   63 checks
+PASS  ui territory   64 checks
+RUN   test_ui_fit
+PASS  ui fit         100 checks
 
-all 65 suites passed (204835 checks)
-WARNING: 75 RIDs of type "CanvasItem" were leaked.
+all 67 suites passed (212360 checks)
+WARNING: 84 RIDs of type "CanvasItem" were leaked.
    at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2735)
-WARNING: 1070 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+WARNING: 1361 ObjectDB instances were leaked at exit (run with `--verbose` for details).
    at: cleanup (core/object/object.cpp:2536)
 ERROR: 67 resources still in use at exit (run with --verbose for details).
    at: clear (core/io/resource.cpp:822)
 ERROR: 7 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
-ERROR: 16 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 18 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
 ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.

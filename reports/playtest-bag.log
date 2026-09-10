@@ -1,6 +1,6 @@
 === playtest session: bag
-=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --sheet --journal --input 10:f,14:1,22:2,28:f,32:3,40:f,44:x,52:tab,54:f,58:o,66:z --screenshot-ticks 8:reports/assets/playtest-bag-t8.png,18:reports/assets/playtest-bag-t18.png,36:reports/assets/playtest-bag-t36.png,62:reports/assets/playtest-bag-t62.png
-=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --sheet --journal --input 10:f,14:1,22:2,28:f,32:3,40:f,44:x,52:tab,54:f,58:o,66:z --screenshot-ticks 8:reports/assets/playtest-bag-t8.png,18:reports/assets/playtest-bag-t18.png,36:reports/assets/playtest-bag-t36.png,62:reports/assets/playtest-bag-t62.png (without --input/--screenshot-ticks)
+=== command: xvfb-run -a ./run_render.sh --seed 1234 --scenario play --play --sheet --journal --input 10:f,14:1,20:2,26:f,30:3,36:f,40:x,46:tab,48:f,52:o,60:z --screenshot-ticks 8:reports/assets/playtest-bag-t8.png,18:reports/assets/playtest-bag-t18.png,34:reports/assets/playtest-bag-t34.png,56:reports/assets/playtest-bag-t56.png
+=== on a machine with a display: ./run_render.sh --seed 1234 --scenario play --play --sheet --journal --input 10:f,14:1,20:2,26:f,30:3,36:f,40:x,46:tab,48:f,52:o,60:z --screenshot-ticks 8:reports/assets/playtest-bag-t8.png,18:reports/assets/playtest-bag-t18.png,34:reports/assets/playtest-bag-t34.png,56:reports/assets/playtest-bag-t56.png (without --input/--screenshot-ticks)
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 Failed to create /home/ryko/.cache/mesa_shader_cache for shader cache (Read-only file system)---disabling.
 Vulkan 1.3.255 - Forward+ - Using Device #0: Unknown - llvmpipe (LLVM 15.0.7, 256 bits)
@@ -53,17 +53,18 @@ render-shell keys \            send it there
 render-shell keys 4 5 6 7      use the first, second, third or fourth weapon action
 render-shell keys 8 / 9        turn a quarter left or right (free)
 render-shell keys 0            end your turn
+render-shell keys .            leave the fight and go back to real time
 render-shell keys Z            open or shut the character sheet
-render-shell boot seed=1234 chunks=32 far=4 fartris=592 islands=10 grass=13283 motes=588 sheet=2/3 aa=msaa4+fxaa
+render-shell boot seed=1234 chunks=32 far=2 fartris=304 islands=10 grass=13283 motes=588 sheet=1/3 aa=msaa4+fxaa
   t=  1  Fen    has not decided yet, and waits in the world
   t=  1  Hob    began wait(ticks=4), 4 ticks
   t=  1  Rill   began wait(ticks=20), 20 ticks
   t=  5  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=9
   t=  5  Hob    began wait(ticks=4), 4 ticks
   t=  6  Rill   thought again at 5/20t, wanted the same thing
-render-shell screenshot t=8 reports/assets/playtest-bag-t8.png
   t=  9  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=13
   t=  9  Hob    began wait(ticks=4), 4 ticks
+render-shell screenshot t=10 reports/assets/playtest-bag-t8.png
 render-shell play t=10 aims at nothing aimed · holding common boots / taking nothing / coins none / saying "well met"
   t= 11  Rill   thought again at 10/20t, wanted the same thing
   t= 13  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=17
@@ -73,7 +74,7 @@ render-shell play t=16 chose equip(item=common boots)
   t= 17  Fen    began equip(item=common boots), 3 ticks
   t= 17  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=21
   t= 17  Hob    began wait(ticks=4), 4 ticks
-render-shell screenshot t=19 reports/assets/playtest-bag-t18.png
+render-shell screenshot t=18 reports/assets/playtest-bag-t18.png
   t= 20  Fen    finished equip(item=common boots) -> equip ok item=common boots slot=boots instead_of=- moves=2 attacks=2 defence=0
   t= 20  Fen    has not decided yet, and waits in the world
   t= 21  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=25
@@ -81,66 +82,67 @@ render-shell screenshot t=19 reports/assets/playtest-bag-t18.png
   t= 21  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=41
   t= 21  Rill   began wait(ticks=20), 20 ticks
 render-shell play t=20 equip(item=common boots) -> equip ok item=common boots slot=boots instead_of=- moves=2 attacks=2 defence=0
-render-shell play t=24 chose unequip(item=common boots)
-  t= 25  Fen    began unequip(item=common boots), 2 ticks
+render-shell play t=21 chose unequip(item=common boots)
+  t= 22  Fen    began unequip(item=common boots), 2 ticks
+  t= 24  Fen    finished unequip(item=common boots) -> unequip ok item=common boots slot=boots moves=1 attacks=2 defence=0
+  t= 24  Fen    has not decided yet, and waits in the world
+render-shell play t=24 unequip(item=common boots) -> unequip ok item=common boots slot=boots moves=1 attacks=2 defence=0
   t= 25  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=29
   t= 25  Hob    began wait(ticks=4), 4 ticks
   t= 26  Rill   thought again at 5/20t, wanted the same thing
-  t= 27  Fen    finished unequip(item=common boots) -> unequip ok item=common boots slot=boots moves=1 attacks=2 defence=0
-  t= 27  Fen    has not decided yet, and waits in the world
+render-shell play t=26 aims at nothing aimed · holding common sword / taking nothing / coins none / saying "well met"
   t= 29  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=33
   t= 29  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=27 unequip(item=common boots) -> unequip ok item=common boots slot=boots moves=1 attacks=2 defence=0
-render-shell play t=29 aims at nothing aimed · holding common sword / taking nothing / coins none / saying "well met"
   t= 31  Rill   thought again at 10/20t, wanted the same thing
-render-shell play t=32 chose use(item=common sword)
-  t= 33  Fen    began use(item=common sword), 3 ticks
+render-shell play t=31 chose use(item=common sword)
+  t= 32  Fen    began use(item=common sword), 3 ticks
   t= 33  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=37
   t= 33  Hob    began wait(ticks=4), 4 ticks
-  t= 36  Fen    finished use(item=common sword) -> use refused: a common sword is not used up: it is kept
-  t= 36  Fen    has not decided yet, and waits in the world
+render-shell screenshot t=34 reports/assets/playtest-bag-t34.png
+  t= 35  Fen    finished use(item=common sword) -> use refused: a common sword is not used up: it is kept
+  t= 35  Fen    has not decided yet, and waits in the world
   t= 36  Rill   thought again at 15/20t, wanted the same thing
   t= 37  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=41
   t= 37  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=36 use(item=common sword) -> use refused: a common sword is not used up: it is kept
-render-shell screenshot t=37 reports/assets/playtest-bag-t36.png
-render-shell play t=40 aims at nothing aimed · holding mending draught / taking nothing / coins none / saying "well met"
+render-shell play t=35 use(item=common sword) -> use refused: a common sword is not used up: it is kept
+render-shell play t=37 aims at nothing aimed · holding mending draught / taking nothing / coins none / saying "well met"
+render-shell play t=40 chose drop(item=mending draught)
+  t= 41  Fen    began drop(item=mending draught), 2 ticks
   t= 41  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=45
   t= 41  Hob    began wait(ticks=4), 4 ticks
   t= 41  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=61
   t= 41  Rill   began wait(ticks=20), 20 ticks
+  t= 43  Fen    finished drop(item=mending draught) -> drop ok item=mending draught into=6
+  t= 43  Fen    has not decided yet, and waits in the world
   t= 45  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=49
   t= 45  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=45 chose drop(item=mending draught)
-  t= 46  Fen    began drop(item=mending draught), 2 ticks
+render-shell play t=43 drop(item=mending draught) -> drop ok item=mending draught into=6
   t= 46  Rill   thought again at 5/20t, wanted the same thing
-  t= 48  Fen    finished drop(item=mending draught) -> drop ok item=mending draught into=6
-  t= 48  Fen    has not decided yet, and waits in the world
-render-shell play t=48 drop(item=mending draught) -> drop ok item=mending draught into=6
+render-shell play t=48 aims at #2 Hob (character) 6.0 away · holding mending draught / taking nothing / coins none / saying "well met"
+render-shell play t=48 aims at #2 Hob (character) 6.0 away · holding nothing / taking nothing / coins none / saying "well met"
   t= 49  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=53
   t= 49  Hob    began wait(ticks=4), 4 ticks
   t= 51  Rill   thought again at 10/20t, wanted the same thing
   t= 53  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=57
   t= 53  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=53 aims at #2 Hob (character) 6.0 away · holding mending draught / taking nothing / coins none / saying "well met"
+render-shell play t=53 chose trade_propose(target=2 give=[] give_money=0 want=[] want_money=0)
+  t= 54  Fen    began trade_propose(target=2 give=[] give_money=0 want=[] want_money=0), 4 ticks
   t= 56  Rill   thought again at 15/20t, wanted the same thing
-render-shell play t=56 aims at #2 Hob (character) 6.0 away · holding nothing / taking nothing / coins none / saying "well met"
   t= 57  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=61
   t= 57  Hob    began wait(ticks=4), 4 ticks
-render-shell play t=58 chose trade_propose(target=2 give=[] give_money=0 want=[] want_money=0)
-  t= 59  Fen    began trade_propose(target=2 give=[] give_money=0 want=[] want_money=0), 4 ticks
+  t= 58  Fen    finished trade_propose(target=2 give=[] give_money=0 want=[] want_money=0) -> trade_propose refused: Hob is out of reach (6.00 > 2.50)
+  t= 58  Fen    has not decided yet, and waits in the world
+render-shell play t=58 trade_propose(target=2 give=[] give_money=0 want=[] want_money=0) -> trade_propose refused: Hob is out of reach (6.00 > 2.50)
+render-shell screenshot t=58 reports/assets/playtest-bag-t56.png
   t= 61  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=65
   t= 61  Hob    began wait(ticks=4), 4 ticks
   t= 61  Rill   finished wait(ticks=20) -> wait ok ticks=20 until=81
   t= 61  Rill   began wait(ticks=20), 20 ticks
-  t= 63  Fen    finished trade_propose(target=2 give=[] give_money=0 want=[] want_money=0) -> trade_propose refused: Hob is out of reach (6.00 > 2.50)
-  t= 63  Fen    has not decided yet, and waits in the world
-render-shell play t=63 trade_propose(target=2 give=[] give_money=0 want=[] want_money=0) -> trade_propose refused: Hob is out of reach (6.00 > 2.50)
-render-shell screenshot t=64 reports/assets/playtest-bag-t62.png
-  t= 65  Hob    finished wait(ticks=4) -> wait ok ticks=4 until=69
-  t= 65  Hob    began wait(ticks=4), 4 ticks
-  t= 66  Rill   thought again at 5/20t, wanted the same thing
-render-shell sheet scale=2 x=16 y=16 w=574 h=712 sheets=3 showing=0
-render-shell dialogue scale=2 x=676 y=922 w=596 h=110
-render-shell trade scale=2 x=676 y=750 w=596 h=164
-render-shell stop tick=66 frames=25 views=32 handles=62 far=91 fartris=12160 farbuilt=91 farcorners=6281 faruse=42618 islands=30 water=1 grass=13283 drawn=9871 patches=30 isles=1 motes=588 lights=0 orbs=0 board=0/0 pieces=3 mirror=25 frame_ms=0.00 timed=0 digest=f5e1218587f11c3c
+render-shell sheet scale=1 x=8 y=8 w=287 h=356 sheets=3 showing=0
+render-shell readout scale=1 x=8 y=8 w=269 h=214 fight=0
+render-shell dialogue scale=1 x=846 y=585 w=298 h=55
+render-shell trade scale=1 x=846 y=499 w=298 h=82
+render-shell stop tick=61 frames=23 views=32 handles=62 far=59 fartris=7744 farbuilt=59 farcorners=4041 faruse=52619 islands=30 water=1 grass=13283 drawn=9871 patches=30 isles=1 motes=588 lights=0 orbs=0 board=0/0 pieces=3 mirror=23 frame_ms=0.00 timed=0 digest=970585ecd616e8fc
+playtest-bag-t8.png -> playtest-bag-t10.png
+playtest-bag-t56.png -> playtest-bag-t58.png
+reticked 2 frame(s)
