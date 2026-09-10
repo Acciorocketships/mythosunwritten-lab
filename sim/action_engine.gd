@@ -177,7 +177,7 @@ static func _cannot_act(scene: ActionScene, actor: Combatant) -> String:
 	if _sheet_of(actor) == null:
 		return "only a character acts"
 	if not actor.piece.is_alive():
-		return "%s is down" % ActionScene.name_of(actor)
+		return is_down(actor)
 	return ""
 
 
@@ -224,6 +224,29 @@ static func out_of_turn(one: Combatant) -> String:
 
 static func turn_already_spent(one: Combatant) -> String:
 	return "%s has already spent this turn" % ActionScene.name_of(one)
+
+
+## What the world says about somebody who has been beaten.
+##
+## One sentence, written once, in the same way as the two above and for the same
+## reason. `_cannot_act` refuses everything a beaten character chooses with it,
+## so it is what the resolver would say and what `ControlLoop.offered` says the
+## moment a key is pressed; and because it is public, it is also what the world
+## carries out in its snapshot for whoever is drawing the character
+## (`ActionScene.defeat_of`, `CombatantRoster.snapshot`). Being beaten is the one
+## outcome a person most needs told, and a screen that phrased it itself would be
+## a second account of it.
+##
+## `down_line` is the same sentence for somebody the world no longer holds. A
+## character that falls is taken out of the world, so there is no `Combatant`
+## left to name -- the name is kept at the moment of the fall instead, and the
+## sentence is still assembled here.
+static func is_down(one: Combatant) -> String:
+	return down_line(ActionScene.name_of(one))
+
+
+static func down_line(called: String) -> String:
+	return "%s is down" % called
 
 
 # --- go to ----------------------------------------------------------------

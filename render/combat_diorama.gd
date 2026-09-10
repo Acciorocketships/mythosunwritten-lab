@@ -66,7 +66,6 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 		var heading := float(row.get("heading", 0.0))
 		if fighting and commander:
 			heading = heading_for_facing(int(row.get("facing", 0)))
-		var health := int(row.get("health", 1))
 		var swinging := striking(snapshot, int(row.get("id", 0)))
 		var motion := String(swinging[0])
 		var began := int(swinging[1])
@@ -94,7 +93,13 @@ static func placements(snapshot: Dictionary) -> Array[Dictionary]:
 				# ground rises by nothing, so it cannot be read off the rise;
 				# the world knows which action it resolved and says.
 				"jumped": bool(row.get("jumped", false)),
-				"alive": health > 0,
+				# Whether it is still standing: the simulation's own answer,
+				# read out of the row like everything else here. Not
+				# "its health is above zero" -- that was this file deciding
+				# for itself what a health of nothing means, which is the one
+				# rule of the fight it had kept a copy of. What being beaten
+				# is is `Piece.is_alive`'s answer, and the snapshot carries it.
+				"alive": bool(row.get("alive", true)),
 				# And whether a blow is landing on it right now, out of the same
 				# record the swing above comes out of. Not "it has less health
 				# than it started with": that is a wound already taken, and it

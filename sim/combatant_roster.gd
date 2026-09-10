@@ -187,6 +187,17 @@ func snapshot() -> Dictionary:
 			"fighting": one.fighting,
 			"health": one.piece.health,
 			"max_health": one.piece.max_health(),
+			# Whether it is still standing, and -- when it is not -- what the
+			# world says about that, in the engine's own words. The piece's own
+			# answer (`Combatant.is_alive`) rather than a health for whoever is
+			# drawing to compare against zero: two hit points and a threshold
+			# are the beginnings of a second copy of the rule, and being beaten
+			# is a fact the simulation already holds. The sentence is
+			# `ActionEngine.is_down`, the one the resolver refuses a beaten
+			# character's every choice with, so a screen quotes it rather than
+			# phrasing being beaten for itself.
+			"alive": one.is_alive(),
+			"down": "" if one.is_alive() else ActionEngine.is_down(one),
 			"cell_x": one.piece.cell.x,
 			"cell_y": one.piece.cell.y,
 			# What it has on, as catalog names by slot -- the same sort of
@@ -214,7 +225,29 @@ func snapshot() -> Dictionary:
 		"pieces": rows,
 		"ground": ground_rows(),
 		"blows": blow_rows(),
+		"beaten": beaten_rows(),
 	}
+
+
+## Everyone the world has seen beaten and is no longer holding, one row each:
+##
+##     {"id": int, "down": String}
+##
+## in the order they fell. The scene's own record, forwarded (`ActionScene.beaten`).
+##
+## The piece rows above already say of everybody standing in the world whether
+## they are still standing. This is the other half, and the reason it is needed
+## is that a character that falls is taken out of the world when the fight ends:
+## without it, a screen still addressed to that character -- the panels of
+## whoever was playing them -- would have nothing at all to read, and would go
+## back to saying what it says about somebody who has simply not chosen anything
+## yet. There is no row here for anybody the world still holds, so the two lists
+## never say anything twice.
+func beaten_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for id in scene.beaten:
+		rows.append({"id": int(id), "down": String(scene.beaten[id])})
+	return rows
 
 
 ## The most recent blows struck in this world, oldest first: the scene's own

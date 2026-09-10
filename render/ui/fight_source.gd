@@ -259,3 +259,31 @@ static func blow_in(snapshot: Dictionary) -> Dictionary:
 ## The same blow, for a caller holding the world rather than a snapshot of it.
 static func last_blow(world: SimWorld) -> Dictionary:
 	return blow_in(snapshot_of(world))
+
+
+## What the simulation says about a character that has been beaten, out of a
+## snapshot, and "" for one still standing.
+##
+## Read off the dictionary handed in, like `blow_in` above and for the same
+## reason: being beaten is the simulation's answer (`Piece.is_alive`) and the
+## sentence is the simulation's sentence (`ActionEngine.is_down`), so there is
+## nothing here to work out and nothing to phrase. Two places carry it, because
+## a character that falls is taken out of the world when the fight ends: its own
+## piece row while the world still holds it, and the world's record of who has
+## been beaten afterwards. Asking in that order means the live answer always
+## wins.
+static func defeat_in(snapshot: Dictionary, id: int) -> String:
+	if id == 0:
+		return ""
+	for row in snapshot.get("pieces", []):
+		if int(row.get("id", 0)) == id:
+			return String(row.get("down", ""))
+	for row in snapshot.get("beaten", []):
+		if int(row.get("id", 0)) == id:
+			return String(row.get("down", ""))
+	return ""
+
+
+## The same answer, for a caller holding the world rather than a snapshot of it.
+static func defeat_of(world: SimWorld, id: int) -> String:
+	return defeat_in(snapshot_of(world), id)

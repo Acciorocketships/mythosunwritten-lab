@@ -1082,7 +1082,19 @@ func _drive(keycode: int) -> bool:
 	# may never come to it. The answer is the engine's own and reaches the screen
 	# through `_say_what_happened` and the answer panel, as every other answer
 	# does; nothing is decided here. See `Simulation.drive`.
-	_sim.drive(chosen)
+	var said := _sim.drive(chosen)
+	if said.is_empty():
+		# The world had nothing to say, which is the ordinary case -- the choice
+		# stands and the loop picks it up next tick. It is also what happens when
+		# there is nobody left to offer anything to: a character that was beaten
+		# is taken out of the world when the fight it fell in ends, and from then
+		# on the loop has nobody to answer for. Saying "chose" there would be a
+		# key taken and never answered, so the world is asked what became of them
+		# and its own sentence is quoted. See `FightSource.defeat_in`.
+		var beaten := FightSource.defeat_of(_sim.world, _sim.driven_id)
+		if beaten != "":
+			print("render-shell play t=%d %s" % [_sim.world.tick, beaten])
+			return true
 	print("render-shell play t=%d chose %s" % [_sim.world.tick, chosen.line()])
 	return true
 
@@ -1106,7 +1118,15 @@ func _drive_the_board(keycode: int) -> bool:
 		return false
 	var turn := _sim.driven_turn()
 	if turn == null:
-		print("render-shell play t=%d it is not your turn on a board" % _sim.world.tick)
+		# There is no turn to spend. Which of the two reasons that is is the
+		# world's answer and not this file's: a character that has been beaten
+		# is out of the fight and will never be asked for another turn, and
+		# telling them it is somebody else's turn is telling them to wait for
+		# one. So the world is asked what has become of them and its own
+		# sentence is quoted when it has one. See `FightSource.defeat_in`.
+		var beaten := FightSource.defeat_of(_sim.world, _sim.driven_id)
+		print("render-shell play t=%d %s" % [_sim.world.tick,
+			beaten if beaten != "" else "it is not your turn on a board"])
 		return true
 	var answered := _board_controls.press(keycode, turn)
 	if _board_controls.note != "":

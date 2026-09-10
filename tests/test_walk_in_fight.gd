@@ -33,6 +33,14 @@ extends TestSuite
 ##      departure by whoever asked. A refusal writes a line into the fight's
 ##      transcript like anything else, so a caller reading "something was
 ##      written" as "it was done" reports a refused leave as a successful one.
+##   6. **A person who is beaten is told, and is not asked for a turn.** The
+##      third way this fight ends is the one a person actually meets at this
+##      seed: they lose. The simulation's own answer that they are down reaches
+##      the snapshot, the answer panel draws the engine's sentence for it instead
+##      of going on saying it is waiting for them, and it keeps saying it after
+##      the fight ends and the world stops holding them at all. There is no turn
+##      to spend from the moment they fall, so a board key is answered by what
+##      happened rather than by whose turn it is.
 class_name TestWalkInFight
 
 ## The stage and its seed: the play stage, which is the one a person is handed
@@ -72,6 +80,7 @@ func run() -> void:
 	var left := leave()
 	_a_fight_can_be_left(left)
 	_leaving_is_refused_out_of_turn(left)
+	_a_beaten_person_is_told(beaten())
 
 
 # --- The run that is fought to its end -------------------------------------
@@ -148,6 +157,81 @@ static func leave() -> Dictionary:
 	sim.step()
 	run["fight_after"] = sim.world.combat.scene.fight != null
 	return run
+
+
+## Walk east into the brawler and lose to her, then let the fight finish.
+##
+## The third way the fight ends, and the one a person meets at this seed. The
+## person spends every turn on ending it and nothing else -- which is a person
+## who does not fight back, and is the shape `./tools/playtest.sh ended` presses
+## from the keyboard -- so being beaten is certain rather than lucky. Everything
+## the claim needs is read at two moments and kept: the tick the person went
+## down, and the tick after the fight that beat them was put away, which is when
+## the world stops holding them at all.
+static func beaten() -> Dictionary:
+	var run := _walk_into_a_fight()
+	if not bool(run["ok"]):
+		return run
+	var sim: Simulation = run["sim"]
+	var controls: BoardControls = run["controls"]
+	var me: Combatant = run["me"]
+	run["down_at"] = -1
+	run["gone_at"] = -1
+	for _tick in PATIENCE:
+		if not me.is_alive():
+			break
+		if sim.world.combat.scene.fight == null:
+			break
+		if sim.driven_turn() != null:
+			_press(sim, controls, BoardControls.KEY_END_TURN)
+			continue
+		sim.step()
+	if me.is_alive():
+		return run
+
+	# Beaten, and still on the board the fight is being held on.
+	run["down_at"] = sim.world.tick
+	run["said"] = ActionEngine.is_down(me)
+	run["down_snapshot"] = sim.world.combat.snapshot()
+	run["down_turn"] = sim.driven_turn() != null
+	run["down_panel"] = _panel_line(sim)
+	run["down_answer"] = _panel_answer(sim)
+
+	# And the same questions once the fight is over and the fallen have been
+	# taken out of the world, which is where the answer used to run out.
+	for _tick in PATIENCE:
+		if sim.world.combat.scene.fight == null:
+			break
+		sim.step()
+	run["gone_at"] = sim.world.tick
+	run["gone_snapshot"] = sim.world.combat.snapshot()
+	run["still_held"] = sim.world.combat.scene.actor_of(me.id) != null
+	run["gone_turn"] = sim.driven_turn() != null
+	run["gone_panel"] = _panel_line(sim)
+	run["scene_says"] = sim.world.combat.scene.defeat_of(me.id)
+	return run
+
+
+# What the answer panel draws on its choice row, for a world with somebody being
+# driven in it -- or "" in a checkout with no art unpacked, which every claim
+# reading it skips over the way the other panel claims do.
+static func _panel_line(sim: Simulation) -> String:
+	if not SproutPack.is_installed():
+		return ""
+	var panel := AnswerPanel.new()
+	panel.watch(sim.world, sim.driven_id, sim.driven)
+	panel.refresh()
+	return panel._chose_label.text
+
+
+# And what it draws underneath it.
+static func _panel_answer(sim: Simulation) -> String:
+	if not SproutPack.is_installed():
+		return ""
+	var panel := AnswerPanel.new()
+	panel.watch(sim.world, sim.driven_id, sim.driven)
+	panel.refresh()
+	return panel._answer_label.text
 
 
 # The half both runs share: the play stage, the person handed one of its three,
@@ -319,6 +403,92 @@ func _leaving_is_refused_out_of_turn(run: Dictionary) -> void:
 
 
 # --- Reading the world ------------------------------------------------------
+
+
+# --- 6: a person who is beaten is told -------------------------------------
+
+
+## The one outcome the fight never narrated.
+##
+## Three things are asked of it, and the third is the one that used to have no
+## answer at all. While the person is on the board: the simulation says they are
+## down, the snapshot carries that answer and the sentence for it, and the panel
+## draws the sentence. Once the fight is over: the world no longer holds the
+## character, and the same question still has the same answer. And throughout:
+## there is no turn standing for somebody who has been beaten, which is what the
+## board's own keys are answered out of.
+func _a_beaten_person_is_told(run: Dictionary) -> void:
+	check(bool(run["ok"]), "the play stage walked into a fight")
+	if not bool(run["ok"]):
+		return
+	check(int(run["down_at"]) > 0,
+		"a person who spends every turn on ending it should be beaten in this"
+			+ " fight, and was not")
+	if int(run["down_at"]) <= 0:
+		return
+	var me: Combatant = run["me"]
+	var said := String(run["said"])
+	equal(said, ActionEngine.down_line(ActionScene.name_of(me)),
+		"the sentence should be the engine's own")
+	check(not me.is_alive(), "the person is down at t=%d" % int(run["down_at"]))
+
+	# The snapshot, while the world still holds them: its own row says they are
+	# not standing, and carries the engine's sentence for it.
+	var row := _row_for(run["down_snapshot"], me.id)
+	check(not row.is_empty(), "the snapshot should still carry the person's row")
+	if not row.is_empty():
+		equal(bool(row["alive"]), false,
+			"the snapshot should say the person is not standing")
+		equal(bool(row["alive"]), me.is_alive(),
+			"and it should say exactly what the simulation says")
+		equal(String(row["down"]), said,
+			"and carry the engine's sentence for it")
+	equal(FightSource.defeat_in(run["down_snapshot"], me.id), said,
+		"the render layer should read that sentence out of the snapshot")
+
+	# And no turn to spend, from the tick they fell: this is what a board key
+	# press is answered out of, and it is why the answer must not be "it is not
+	# your turn".
+	check(not bool(run["down_turn"]),
+		"a beaten person should not be holding a turn open")
+	check(not bool(run["gone_turn"]),
+		"and should not be handed one afterwards either")
+
+	# The other half: the panel's own drawing function, with nothing but a world
+	# and an id. Skipped in a checkout with the art pack not unpacked.
+	if SproutPack.is_installed():
+		equal(String(run["down_panel"]), SproutPack.drawable(said),
+			"the panel should draw the engine's sentence on the choice row")
+		not_equal(String(run["down_panel"]), AnswerPanel.RESTING,
+			"and should stop saying it is waiting for a person who is down")
+		equal(String(run["down_answer"]), "",
+			"and should stop showing the answer to a choice made before it")
+
+	# Once the fight is over, the world does not hold the character at all --
+	# and the question is still answered, out of the world's own record of who
+	# has been beaten.
+	check(int(run["gone_at"]) > int(run["down_at"]),
+		"the fight that beat them should have been put away afterwards")
+	check(not bool(run["still_held"]),
+		"the world should have taken the fallen character out of it")
+	check(_row_for(run["gone_snapshot"], me.id).is_empty(),
+		"so there is no piece row left for them")
+	equal(String(run["scene_says"]), said,
+		"the world should still say what became of somebody it no longer holds")
+	equal(FightSource.defeat_in(run["gone_snapshot"], me.id), said,
+		"and the snapshot should still carry it")
+	if SproutPack.is_installed():
+		equal(String(run["gone_panel"]), SproutPack.drawable(said),
+			"and the panel should still be drawing it")
+
+
+# One piece row out of a roster snapshot, by the id the world knows it by, or an
+# empty dictionary when the snapshot has none.
+static func _row_for(snapshot: Dictionary, id: int) -> Dictionary:
+	for row in snapshot.get("pieces", []):
+		if int(row["id"]) == id:
+			return row
+	return {}
 
 
 static func _seating(run: Dictionary) -> Dictionary:

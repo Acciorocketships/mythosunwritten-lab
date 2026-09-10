@@ -14,6 +14,7 @@
 #   ./tools/playtest.sh enemy     # W-enemy-spawn, and W-fight-drawn with it
 #   ./tools/playtest.sh fight     # W-player-combat
 #   ./tools/playtest.sh ended     # W-fight-end: the fight walked into, finished
+#   ./tools/playtest.sh beaten    # W-defeat-told: the same fight, lost
 #   ./tools/playtest.sh left      # W-fight-end: the same fight, walked out of
 #   ./tools/playtest.sh whole     # everything in one seed, one run
 #   ./tools/playtest.sh all
@@ -285,6 +286,26 @@ session_ended() {
 		--screenshot-ticks "40:$A/playtest-ended-t40.png,100:$A/playtest-ended-t100.png,150:$A/playtest-ended-t150.png,300:$A/playtest-ended-t300.png,500:$A/playtest-ended-t500.png,700:$A/playtest-ended-t700.png,790:$A/playtest-ended-t790.png"
 }
 
+session_beaten() {
+	# The same fight as `ended`, at the same seed, with the same presses -- and
+	# photographed at the ticks that are about losing it rather than about
+	# playing it. At this seed the brawler's three thrusts (t=144, 160, 176) take
+	# a person who starts six hearts down out of the fight, and every key pressed
+	# from then on used to be answered "it is not your turn on a board" while the
+	# panel went on saying it was waiting for them. The frames are the tick after
+	# the third thrust, the turn after it, the second board with the person no
+	# longer in the world at all, and two later moments of a run that carries on
+	# without them.
+	#
+	# Its own name and its own frames on purpose: `ended` is the session the
+	# defect was measured from, and its log and frames are the evidence for that
+	# measurement.
+	run beaten --seed $SEED --scenario play --play --journal \
+		--camera 0 9 14 --aim 1 \
+		--input "$(walk_east 6 108),$(board_turns 120 42 16)" \
+		--screenshot-ticks "180:$A/playtest-beaten-t180.png,200:$A/playtest-beaten-t200.png,300:$A/playtest-beaten-t300.png,500:$A/playtest-beaten-t500.png,790:$A/playtest-beaten-t790.png"
+}
+
 # `.` pressed over and over across a window of ticks. Leaving is a thing a turn
 # is spent on, so it is only askable on the person's own turn -- and a fixed
 # schedule cannot know which tick that is, because the two other commanders take
@@ -361,11 +382,13 @@ case "${1:-all}" in
 	enemy) session_enemy ;;
 	fight) session_fight ;;
 	ended) session_ended ;;
+	beaten) session_beaten ;;
 	left) session_left ;;
 	whole) session_whole ;;
 	all)
 		session_board; session_live; session_input; session_verbs; session_walk
 		session_pace; session_bag; session_fit; session_items; session_enemy
-		session_fight; session_ended; session_left; session_whole ;;
+		session_fight; session_ended; session_beaten; session_left
+		session_whole ;;
 	*) echo "no such session: $1" >&2; exit 2 ;;
 esac

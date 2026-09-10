@@ -32,6 +32,14 @@ extends PanelContainer
 ## panel shows the world's answer to the choice it is showing; a choice the world
 ## has not answered yet has no answer, and the last one the world happened to
 ## give about something else is not it.
+
+## ## Being beaten is said here too
+##
+## One thing on the panel is not about a choice at all: a character that has been
+## beaten reads that it has, on the choice row, instead of being told the world is
+## waiting for it. That sentence is the engine's like all the others
+## (`ActionEngine.is_down`, carried out in the snapshot), and it wins over
+## everything else the panel would otherwise draw -- see `refresh()`.
 ##
 ## ## Sizes
 ##
@@ -123,6 +131,25 @@ func refresh() -> void:
 	visible = choice != null and driven_id != 0
 	if not visible:
 		return
+	# What has become of this character, if anything has: asked first, because it
+	# is true whatever is standing in the holder and it is the one thing a person
+	# most needs told. A character that has been beaten is out of the fight and
+	# will not be asked for another turn, so a row that went on saying "waiting
+	# for you" would be the interface asking them for one anyway. The sentence is
+	# the simulation's own, carried out in the snapshot and quoted here like every
+	# other sentence on this panel -- see `FightSource.defeat_in`.
+	var beaten := defeat_line()
+	if beaten != "":
+		_chose_label.text = SproutPack.drawable(beaten)
+		_chose_label.theme_type_variation = StringName("")
+		# And nothing underneath it. Whatever the world last answered belonged
+		# to a choice this character made while it was still standing; a walk
+		# refused two hundred ticks ago, drawn under "is down", reads as the
+		# answer to having been beaten.
+		_answer_label.text = ""
+		_answer_label.visible = false
+		_answer_icon.visible = false
+		return
 	_chose_label.text = RESTING if choice.waiting() else SproutPack.drawable(choice.line())
 	_chose_label.theme_type_variation = StringName(
 		SproutTheme.DIM_LABEL) if choice.waiting() else StringName("")
@@ -154,6 +181,19 @@ func refresh() -> void:
 ## down. An empty dictionary before it has answered anything.
 func last_answer() -> Dictionary:
 	return _answer()
+
+
+## What the world says has become of the character being driven -- the engine's
+## sentence for somebody who has been beaten -- and "" while they are standing.
+##
+## Read out of the snapshot on the frame it is asked, like everything else here,
+## and nothing about it is worked out on this side: whether a character has been
+## beaten is `Piece.is_alive`'s answer and the wording is `ActionEngine`'s.
+## Public so that a test can pin the sentence and what is drawn to each other.
+func defeat_line() -> String:
+	if world == null or driven_id == 0:
+		return ""
+	return FightSource.defeat_of(world, driven_id)
 
 
 func _answer() -> Dictionary:

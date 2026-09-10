@@ -151,6 +151,24 @@ var board_version: int = 0
 ## description and these are not part of it.
 var fight_lines := PackedStringArray()
 
+## Who has been beaten, by the id the world knew them by, and the sentence the
+## world says about each: `{id -> "<name> is down"}`.
+##
+## Being beaten already has an answer while the character is still here --
+## `Combatant.is_alive()`, which is the piece's own health and the only answer
+## anything should ask. This is that answer *kept*, and it exists because a
+## character that falls is taken out of the world when the fight ends
+## (`_drop_the_fallen`): from that tick on there is no combatant to ask, and
+## "am I still standing" is the one question whoever was driving that character
+## most needs answered. Written where the fall is already handled, in
+## `ActionEngine`'s own words, and never rewritten -- being beaten is not a
+## thing that stops having happened.
+##
+## Nothing in the simulation reads it. What defeat *does* is the match's and the
+## drop layer's, unchanged; this is only so that the world can still say what
+## became of somebody it no longer holds.
+var beaten := {}
+
 ## Every trade offered and not yet answered, newest last. One row per offer:
 ## `{"from": id, "to": id, "give": names, "give_money": int, "want": names,
 ## "want_money": int}`.
@@ -436,6 +454,20 @@ func actor_of(id: int) -> Combatant:
 		if one.id == id:
 			return one
 	return null
+
+
+## What the world says about a character that has been beaten, and "" for one
+## still standing -- or one it has never held.
+##
+## One question, one answer, whichever side of the fight's end it is asked on:
+## while the character is still here the piece's own health decides, and once it
+## has been taken out of the world the sentence written down when it fell is
+## handed back. The wording is `ActionEngine`'s in both cases.
+func defeat_of(id: int) -> String:
+	var one := actor_of(id)
+	if one != null:
+		return "" if one.is_alive() else ActionEngine.is_down(one)
+	return String(beaten.get(id, ""))
 
 
 ## The object with an id, or null.
@@ -825,8 +857,16 @@ func _drop_the_fallen() -> void:
 	for one in actors:
 		if not gone.has(one.id):
 			kept.append(one)
-		else:
-			_leave_what_fell(one)
+			continue
+		# What the world will say about this character from now on, written
+		# before it is taken out of the world and while there is still somebody
+		# to name. Only for a character that was actually beaten: a minion the
+		# king rule took off the board with its commander never lost a hit
+		# point, and "is down" would be a sentence about something that did not
+		# happen. See `beaten` above.
+		if not one.is_alive():
+			beaten[one.id] = ActionEngine.is_down(one)
+		_leave_what_fell(one)
 	actors = kept
 
 

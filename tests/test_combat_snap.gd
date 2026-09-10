@@ -555,6 +555,25 @@ func _the_render_layer_draws_the_fight_out_of_the_snapshot() -> void:
 		else:
 			equal(drawn["heading"], float(row["heading"]),
 				"#%d off the board is turned by its heading" % int(row["id"]))
+		# Whether it is still standing is the simulation's answer, carried in
+		# the row and drawn out of it.
+		equal(bool((drawn["state"] as Dictionary)["alive"]), bool(row["alive"]),
+			"#%d is drawn standing exactly as the snapshot says" % int(row["id"]))
+		equal(bool(row["alive"]), world.combat.member_of(int(row["id"])).is_alive(),
+			"#%d's row should say what the simulation says" % int(row["id"]))
+
+	# And it is the answer that is read, not a health compared against zero.
+	# Asked of two rows the simulation would never produce -- one standing with
+	# nothing left, one down at full health -- because a recomputation and a read
+	# agree on every row a real fight makes, and disagree on exactly these.
+	equal(_drawn_alive({"alive": true, "health": 0}), true,
+		"the drawing should take the simulation's word over the health")
+	equal(_drawn_alive({"alive": false, "health": 30}), false,
+		"and should take it in the other direction too")
+	# A snapshot from before the answer was carried reads as the quiet case,
+	# which is the rule every other key on the row follows.
+	equal(_drawn_alive({"health": 0}), true,
+		"a row with no answer in it should read as standing")
 
 	# The four facings turn into the four quarter turns, and nothing else.
 	equal(CombatDiorama.heading_for_facing(PieceGeometry.EAST), 0.0,
@@ -563,6 +582,17 @@ func _the_render_layer_draws_the_fight_out_of_the_snapshot() -> void:
 		"north is -z, which is a heading of -pi/2")
 	equal(CombatDiorama.heading_for_facing(PieceGeometry.SOUTH), PI * 0.5, "south is +z")
 	equal(CombatDiorama.heading_for_facing(PieceGeometry.WEST), PI, "west is -x")
+
+
+# Whether the diorama draws one piece as standing, out of one made-up piece row.
+# A whole snapshot around it, because `CombatDiorama.placements` reads the combat
+# section of one and nothing else.
+static func _drawn_alive(row: Dictionary) -> bool:
+	var made := row.duplicate()
+	made["id"] = 1
+	var drawn := CombatDiorama.placements(
+		{"combat": {"fighting": true, "pieces": [made]}})
+	return bool((drawn[0]["state"] as Dictionary)["alive"])
 
 
 ## What the diorama draws as a blow landing is a blow landing.
