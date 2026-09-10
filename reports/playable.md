@@ -292,6 +292,22 @@ Three seed-$1234$ fingerprints are unchanged across the change; four checked-in
 transcripts moved, each because its run now gets through the same plan sooner,
 and each is quoted with that reason.
 
+**It broke exactly one automated check, and that was fixed where the fault was.**
+One check had a tick number written into it: it asserted that a certain patch of
+ground still belonged to nobody at tick $55$ of a fixed run, before a bargain
+was honoured that would hand it over. A cheaper walk lets that run get through
+its plan sooner, so the moment the ground changed hands moved from tick $62$ to
+tick $34$ — measured, not guessed — and tick $55$ became ground that had been
+owned for twenty-one ticks. The check now steps a run of its own and asks the
+ownership rule when the ground turns over, instead of being told; the only
+number still written down is a bound on how far to look. That is deliberate: a
+bound that is wrong fails by saying *it never happened*, where a tick that is
+wrong fails as a baffling assertion about something unrelated. The rewritten
+check passes on the old code as well as the new, which is how it is known to be
+repaired at the cause rather than tuned to the new number (commit `35ff3f0`).
+Two other checks name a tick of a fixed run in the same way; both were
+re-measured, both still hold, and both were left alone.
+
 For a walk that is not a whole number of strides — which only the **P** and
 **G** keys produce, because they aim at a place somebody else chose — the rate
 is at worst $0.80$ units per tick on a four-tick walk and $0.88$ on a twenty-tick
@@ -608,18 +624,51 @@ repeated here rather than left in the old document:
 * **Six end-to-end trading checks turn on what one language-model reply happened
   to do**, sitting in a suite otherwise full of claims about machinery.
 
-**The current standing of the suite is honestly incomplete, and that matters for
-reading this page.** The last full run to certify a green tree was
-`all 65 suites passed (204835 checks)`, taken at the commit that drew the fight.
-Three changes have landed since: the one that made a walked-into fight finishable,
-the window fix and the walk-pace fix. The first of those ran the whole suite and
-came back `1 of 66 suites failed (2 failed checks of 212057)` — one recorded
-conversation with a language model that had recorded the very behaviour the fix
-corrected, so it necessarily went stale; that recording was made afresh during the
-walk-pace work. The whole suite on the newest tip **was still running while this
-page was written**, into `reports/walk-pace-full-suite.log`. So sections 3 through
-9 rest on their own targeted evidence, on sixteen suites run individually, and on
-the four structure checks — and not yet on a certifying whole-suite run.
+**The suite is now green on a commit that contains everything on this page.**
+The previous edition of this section had to say that the certifying run was
+still in flight. It has since finished, and the last line of
+`reports/walk-pace-full-suite-2.log` reads:
+
+```
+all 67 suites passed (212360 checks)
+```
+
+Exit code $0$; sixty-seven `PASS` lines; searching the whole file for a line
+beginning `FAIL` returns nothing. (The `WARNING: ... were leaked` and
+`ERROR: 67 resources still in use at exit` lines after it are the engine's
+ordinary tidying-up complaints at shutdown, present in green runs before this
+one as well. They are not failed checks.)
+
+Three things make that run worth believing rather than merely green:
+
+* **It read the code it claims to have read.** The log file was created twenty
+  seconds after the last commit it was meant to test, and nothing but the log
+  itself was untracked for the whole run, so no edit landed in the tree
+  mid-suite. Every change this page describes is inside the commit it ran on:
+  the drawn fight (`16e2f77`), the finishable fight (`e328871`, `9076ae6`), the
+  window fit (`d29342c`) and the walk pace (`ac63731`) are all ancestors of it,
+  checked with `git merge-base --is-ancestor`, and that commit is in turn an
+  ancestor of what is published.
+* **The run's own arithmetic agrees.** It reads `PASS ui territory 64 checks`.
+  The attempt before it read `FAIL ui territory 63 checks, 1 failed` — the check
+  section 4 describes. The extra check is the premise the repair now states out
+  loud rather than assumes.
+* **The runs it replaces are quoted too, not quietly dropped.** The first attempt
+  on this change came back `1 of 67 suites failed (1 failed checks of 212359)`,
+  and the run before that, `reports/window-fit-full-suite.log`, came back
+  `10 of 67 suites failed (11 failed checks of 212157)`. All ten of those —
+  scenario, agent, memory, goals, checks, goodwill, orchestrator, grass,
+  atmosphere and render shell — pass in the green run.
+
+The suites this page's own claims lean on, by name and count, from that log:
+`board overlay 21`, `walk-in fight 26`, `player combat 73`, `combat board 25505`,
+`combat resolution 1754`, `ui fit 100`, `ui readout 1527`, `ui territory 64`.
+
+**The standing caution has not changed.** A green suite is a statement about one
+commit at one moment and not a warrant for a later one, the three reservations
+above about the runner itself still hold, and two suites must never be run
+against this checkout at once — which is why three separate pieces of work read
+this one run instead of launching three.
 
 ---
 
@@ -663,6 +712,10 @@ code.
   this page**, and the three fingerprints the walk-pace change could have moved
   are quoted unchanged while the four transcripts it did move are quoted with
   their reasons.
+* **The whole automated suite passes on a commit that contains every change on
+  this page**: `all 67 suites passed (212360 checks)`, no failing line anywhere
+  in the log, with the drawn fight, the finishable fight, the window fit and the
+  walk pace all shown to be ancestors of the commit it ran on.
 
 ## Hypotheses
 
@@ -671,10 +724,6 @@ code.
   action's span reads as a beat, whether the walk animation reads in motion and
   whether the follow camera is comfortable are all unmeasured. The traces give
   reason for optimism and are not evidence.
-* **That the walk-pace change leaves the whole suite green.** Sixteen suites it
-  reaches were run first and pass, including the three that compare a rendered
-  run against a headless one at the same seed. The whole-suite run is still in
-  flight.
 * **That making the character bigger on screen is the single largest playability
   win left.** It is the biggest number in the playtest by some way, but it is one
   measurement of one camera and no alternative camera has been built and looked
@@ -711,6 +760,11 @@ code.
   "Flee" because a walk away from what is coming is fleeing and is makeable in
   real time; what is refused is a walk by somebody a board already holds, and on
   a board the same intention costs a turn.
+* **A check about a fixed run finds its own tick, and the only number it writes
+  down is a bound on how far to look.** Because making an action cheaper moves
+  every moment of a fixed run, and a written-down tick then fails as an
+  assertion about something unrelated, where a bound that is too small fails by
+  naming its own premise — *it never happened within so many ticks*.
 * **Keys are not greyed out when they cannot be used.** Because an interface that
   disabled the wrong keys would be a second, quieter copy of a rule the
   simulation already owns, and the two would eventually disagree.
@@ -726,8 +780,6 @@ code.
 * **The second playtest pass has not run either.** The four fixes in sections 3
   through 9 have each been measured by their own author. They have not yet been
   re-judged from frames by a pass that was not trying to prove them.
-* **The certifying whole-suite run for the newest tip is still in flight**, as
-  section 12 says.
 * **Eight defects from the first playtest are still open**, listed in section 11.
 * **The four keyboard-feel judgements are unmade** and can only be made by
   somebody with a display.
