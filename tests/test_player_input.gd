@@ -50,12 +50,13 @@ class_name TestPlayerInput
 const SEED := 1234
 
 ## Long enough for the other two characters to choose a leg, walk it and be
-## asked again -- a leg costs 20 ticks -- so "everybody else carried on" is
+## asked again -- a leg costs the strides it takes and `ActionCatalog`'s 20 is
+## the most it may occupy (ac63731) -- so "everybody else carried on" is
 ## measured over more than one action each.
 const WAIT_TICKS := 60
 
-## Long enough for one choice to be committed and carried out: a walk costs 20
-## ticks and is committed on the tick after it is made.
+## Long enough for one choice to be committed and carried out: a walk occupies
+## at most 20 ticks and is committed on the tick after it is made.
 const CARRY_TICKS := 30
 
 ## Long enough for a jump, which costs 4.

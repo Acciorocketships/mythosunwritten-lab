@@ -200,3 +200,97 @@ actions (351), player input (130), turn seam (23), scenario (160), agent (1238),
 checks (121), goals (133), goodwill (130), memory (106), orchestrator (282), and
 the three that compare a rendered run against a headless one at the same seed:
 render shell (58), atmosphere (156), grass (886).
+
+## The one check it broke, and why
+
+That full run came back at 66 of 67 suites: 212358 checks of 212359 pass, and
+the one that does not is `test_ui_territory` —
+
+```
+FAIL  ui territory   63 checks, 1 failed
+        - the ground under Wren did not read neutral before the trade
+      expected: neutral ground
+      actual:   owned by Rook
+```
+
+It is this change's own doing and not a flake. The same suite reads `PASS` in
+the previous full run (`reports/window-fit-full-suite.log`) on `d29342c`, the
+tip immediately before `ac63731`, and `ac63731` is the only commit since that
+touches the simulation.
+
+**The cause, measured rather than assumed.** The suite held two tick numbers
+about the seed-1234 market run: `const NEUTRAL_TICK := 55`, "a tick on which
+the ground under Wren is still neutral", and a comment saying the honoured
+trade flips that same ground "past tick 62". Both are claims about how far a
+seeded run has got by a given tick, and a walk that costs the strides it takes
+gets that run through its plan sooner. `./tools/seeded_ticks.sh` — added here —
+steps the run and asks `OwnershipField` about the ground under the followed
+character on every tick, so the flip can be read off instead of remembered:
+
+| | the tick the trade flips the ground under Wren | what `NEUTRAL_TICK := 55` then names |
+|---|---|---|
+| before, on `d29342c` | 62 | neutral ground, seven ticks of margin |
+| after, on `ac63731` | 34 | ground Rook has owned for twenty-one ticks |
+
+```
+$ ./tools/seeded_ticks.sh --seed 1234 --scenario market --ticks 60
+seeded ticks: seed 1234, scenario market, followed id 1 (Wren)
+tick  ground                    best      considered  edges  fight
+   1  neutral                   +0.000    5           0      -   <- changed
+  34  owned by Rook             +0.108    5           1      -   <- changed
+  59  owned by Rook             +0.129    5           1      on   <- changed
+```
+
+Nothing about the readout is wrong. The suite's premise had gone out of date,
+and no fingerprint compares a number written in a test and no regeneration
+rewrites one, which is exactly why this was the last place the knock-on showed.
+
+**The fix is that the suite finds its own tick.** `NEUTRAL_TICK` is gone.
+`TestUiTerritory._flip_tick()` steps a market run of its own — same seed, same
+scenario, and this project's worlds are deterministic — and returns the first
+tick on which the ground under the followed character stops reading neutral.
+The check then builds its world one tick short of that and steps `LATER_TICKS`
+past it. What is left written down is `SEARCH_TICKS := 240`, a bound on the
+looking rather than an answer about the run: a bound cannot go quietly out of
+date, because a wrong one fails loudly as "the honoured trade never flips the
+ground under Wren".
+
+The same check, before and after the suite change, on the current tip:
+
+```
+$ ./run_tests.sh test_ui_territory          # before
+FAIL  ui territory   63 checks, 1 failed
+        - the ground under Wren did not read neutral before the trade
+
+$ ./run_tests.sh test_ui_territory          # after
+PASS  ui territory   64 checks
+```
+
+The extra check is the premise itself, now stated. And the fix is at the cause
+rather than tuned to the new number: the rewritten suite, dropped into a
+worktree at `d29342c` where the flip is still at tick 62, passes the
+neutral-ground check there too (its only two failures there are the pack's
+icons, which that worktree has not imported).
+
+**Whether any other test writes down a tick about a seeded run.** Checked over
+the whole suite rather than left to the next full run to find. Every
+`const …TICKS…` in `tests/` was read with its own comment, and they fall in two
+groups. Most are *durations with slack* — "long enough for a leg to be chosen,
+walked and asked again" — and those fail safe in the direction this change
+moves: more happens per tick, so a budget that was long enough still is. Three
+are claims about a particular tick of a particular seeded run, and all three
+were re-measured:
+
+| where | what it writes down | measured now | standing |
+|---|---|---|---|
+| `test_ui_territory.gd` | `NEUTRAL_TICK := 55`, "past tick 62" | flip at tick 34 | broken; fixed here by finding its own tick |
+| `test_ui_readout.gd` | `FIGHT_TICK := 18`, `LATER_TICKS := 3` | encounter fight on from tick 16 to 23 | holds — 18 and 21 are both inside it |
+| `test_ui_fit.gd` | `FIGHT_TICK := 16` | fight begins on tick 16 | holds |
+
+The two that hold are left alone, and both are noted as the same fragility:
+they are one action-cost change away from the failure this one had.
+
+Two comments made false by `ac63731` were corrected where they sit, since they
+describe the very thing that changed: `test_player_input.gd` and
+`test_live_world.gd` each said a leg *costs* `ActionCatalog`'s twenty ticks.
+It occupies at most twenty; the durations they justify are unaffected.

@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seeded ticks: seed 1234, scenario encounter, followed id 0 (#0)
+tick  ground                    best      considered  edges  fight
+   1  no actor                  +0.000    0           0      -   <- changed
+   2  no actor                  +0.000    0           0      -
+   3  no actor                  +0.000    0           0      -
+   4  no actor                  +0.000    0           0      -
+   5  no actor                  +0.000    0           0      -
+   6  no actor                  +0.000    0           0      -
+   7  no actor                  +0.000    0           0      -
+   8  no actor                  +0.000    0           0      -
+   9  no actor                  +0.000    0           0      -
+  10  no actor                  +0.000    0           0      -
+  11  no actor                  +0.000    0           0      -
+  12  no actor                  +0.000    0           0      -
+  13  no actor                  +0.000    0           0      -
+  14  no actor                  +0.000    0           0      -
+  15  no actor                  +0.000    0           0      -
+  16  no actor                  +0.000    0           0      on   <- changed
+  17  no actor                  +0.000    0           0      on
+  18  no actor                  +0.000    0           0      on
+  19  no actor                  +0.000    0           0      on
+  20  no actor                  +0.000    0           0      on
+  21  no actor                  +0.000    0           0      on
+  22  no actor                  +0.000    0           0      on
+  23  no actor                  +0.000    0           0      on
+  24  no actor                  +0.000    0           0      -   <- changed
+  25  no actor                  +0.000    0           0      -
+  26  no actor                  +0.000    0           0      -
+  27  no actor                  +0.000    0           0      -
+  28  no actor                  +0.000    0           0      -
+  29  no actor                  +0.000    0           0      -
+  30  no actor                  +0.000    0           0      -
+  31  no actor                  +0.000    0           0      -
+  32  no actor                  +0.000    0           0      -
+  33  no actor                  +0.000    0           0      -
+  34  no actor                  +0.000    0           0      -
+  35  no actor                  +0.000    0           0      -
+  36  no actor                  +0.000    0           0      -
+  37  no actor                  +0.000    0           0      -
+  38  no actor                  +0.000    0           0      -
+  39  no actor                  +0.000    0           0      -
+  40  no actor                  +0.000    0           0      -

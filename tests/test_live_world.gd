@@ -30,8 +30,9 @@ class_name TestLiveWorld
 const SEED := 1234
 
 ## How many ticks are enough for a `go_to` to be chosen, run its course and be
-## resolved. One leg costs `ActionCatalog`'s 20 ticks, so two legs and a little
-## over is plenty.
+## resolved. One leg occupies at most `ActionCatalog`'s 20 ticks -- since
+## ac63731 that row is a ceiling and a walk costs the strides it takes -- so two
+## legs and a little over is plenty.
 const TICKS := 50
 
 ## A seed whose world origin is the middle of a river. The water suite works on

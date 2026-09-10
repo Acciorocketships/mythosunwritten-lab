@@ -27,16 +27,26 @@ class_name TestUiTerritory
 ## the same tick there.
 const SEED := 1234
 
-## A tick on which Wren already stands still at the market and the ground
-## under Wren is still neutral: the trade has not yet been honoured.
-const NEUTRAL_TICK := 55
+## How far into the market run to look for the tick the honoured trade flips
+## the ground under Wren from neutral to owned. Not the tick itself: that is
+## found by asking the rule, in `_flip_tick()` below, because it moves whenever
+## anything changes how fast the run gets through its plan. It was tick 62
+## before a walk started costing the strides it takes (ac63731) and is tick 34
+## after, which is exactly how a `NEUTRAL_TICK := 55` written down here came to
+## be a tick on already-owned ground. A bound rather than an answer is the only
+## number about this run that is safe to write down.
+const SEARCH_TICKS := 240
 
-## Ticks to step further, past tick 62 -- the tick the honoured trade flips
-## that same ground to owned -- without telling the panel.
+## Ticks to step past the flip without telling the panel. Any number that
+## carries from the last neutral tick over the flip would do; ten leaves room
+## on the far side for the score to settle.
 const LATER_TICKS := 10
 
 const FIXED_FPS := 60
 const FRAMES := 60
+
+## What `_flip_tick()` last answered; -1 until it has been asked.
+var _flip_tick_found := -1
 
 
 func _init() -> void:
@@ -60,7 +70,13 @@ func run() -> void:
 func _the_panel_reads_the_ground_and_keeps_no_copy() -> void:
 	if not SproutPack.is_installed():
 		return
-	var sim := _market_world(NEUTRAL_TICK)
+	var flip := _flip_tick()
+	check(flip > 1, "the honoured trade never flips the ground under Wren"
+		+ " within %d ticks, so there is no neutral tick to start from"
+		% SEARCH_TICKS)
+	if flip <= 1:
+		return
+	var sim := _market_world(flip - 1)
 	var panel := TerritoryPanel.new()
 	panel.watch(sim.world, sim.world.follow_id)
 	panel.refresh()
@@ -103,7 +119,10 @@ func _the_panel_reads_the_ground_and_keeps_no_copy() -> void:
 func _every_number_is_the_simulations_own_answer() -> void:
 	if not SproutPack.is_installed():
 		return
-	var sim := _market_world(NEUTRAL_TICK + LATER_TICKS)
+	var flip := _flip_tick()
+	if flip <= 1:
+		return
+	var sim := _market_world(flip - 1 + LATER_TICKS)
 	var wren := sim.world.follow_id
 	var panel := TerritoryPanel.new()
 	panel.watch(sim.world, wren)
@@ -217,6 +236,36 @@ func _the_readout_changes_nothing_about_the_world() -> void:
 
 
 # --- Helpers ---------------------------------------------------------------
+
+
+## The tick the market run's honoured trade flips the ground under Wren from
+## neutral to owned, asked of the rule rather than written down: step a run of
+## this suite's own and watch `OwnershipField` answer about the ground the
+## followed character is standing on. Returns 0 if it never flips inside
+## `SEARCH_TICKS`, which is a failure of this suite's premise and is reported
+## as one.
+##
+## The run stepped here is the same seed and the same scenario as the one the
+## checks then use, and this project's worlds are deterministic
+## (`TestDeterminism`), so the tick found is the tick that will arrive. It
+## costs one extra market run of a few dozen ticks, which is the price of never
+## again having a number in this file go quietly out of date.
+##
+## Cached because both checks want it and the answer cannot change inside one
+## run of the suite: -1 is "not asked yet", 0 is "asked, and it never flips".
+func _flip_tick() -> int:
+	if _flip_tick_found >= 0:
+		return _flip_tick_found
+	_flip_tick_found = 0
+	var sim := Simulation.new(SEED)
+	sim.begin_scenario(Simulation.SCENARIO_MARKET)
+	for _tick in SEARCH_TICKS:
+		sim.step()
+		var claim := _claim_under(sim, sim.world.follow_id)
+		if claim != null and not claim.is_neutral():
+			_flip_tick_found = sim.world.tick
+			break
+	return _flip_tick_found
 
 
 func _market_world(ticks: int) -> Simulation:
