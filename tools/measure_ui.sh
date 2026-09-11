@@ -10,6 +10,7 @@
 #   xvfb-run -a ./tools/measure_ui.sh --panel readout --tick 30   # the combat readout
 #   ./tools/measure_ui.sh --icons reports/assets/drawn-icons.png   # no display needed
 #   ./tools/measure_ui.sh --effects reports/assets/effect-art.png  # no display needed
+#   ./tools/measure_ui.sh --digits reports/assets/zero-glyph.png   # no display needed
 #
 # --panel says which of the panels is measured. By default every panel is
 # drawn, so one frame can be looked at and measured several times; --only asks
@@ -23,11 +24,14 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 source ./godot_env.sh
 
-# --icons writes the eleven icons this project drew, magnified, and --effects
-# writes the six effect sprites and the seven animations they are put through.
-# Both measure nothing and need no display, so they are handled before anything
-# is rendered.
-if [[ "${1:-}" == "--icons" || "${1:-}" == "--effects" ]]; then
+# --icons writes the eleven icons this project drew, magnified, --effects writes
+# the six effect sprites and the seven animations they are put through, and
+# --digits writes the ten numerals at the size the interface ships at, as the
+# pack draws them and as the game now draws them, with the holes and distances
+# that decide whether a 0 can be read as an 8. None of the three measures a
+# frame or needs a display, so all three are handled before anything is
+# rendered.
+if [[ "${1:-}" == "--icons" || "${1:-}" == "--effects" || "${1:-}" == "--digits" ]]; then
 	WHICH="$1"
 	shift
 	exec env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . \

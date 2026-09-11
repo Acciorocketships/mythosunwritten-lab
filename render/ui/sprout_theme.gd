@@ -36,6 +36,15 @@ extends RefCounted
 ## Sizes are multiples of the font's own fourteen-pixel cell: 14 for body text
 ## and 28 for the character's name, and nothing between.
 ##
+## ## The one glyph of the pack's that is changed, and why
+##
+## The pack draws its `0` slashed, and at the size the interface ships at the
+## slash closes the counter: the glyph ends up with two enclosed holes, which is
+## what an `8` has, and every number on screen is ambiguous. `unslash_the_zero()`
+## below points the digit at the pack's own capital `O` -- which is that same
+## zero with the slash lifted -- and its comment is where the reasoning and the
+## two options not taken are written down.
+##
 ## tools/measure_ui.sh measures the result rather than trusting this comment: it
 ## counts how many distinct colours the drawn panel contains and how much of its
 ## detail lands off the pixel grid.
@@ -44,6 +53,15 @@ class_name SproutTheme
 ## The font's own cell, and the only sizes anything is drawn at.
 const BODY_SIZE := SproutPack.FONT_CELL
 const TITLE_SIZE := SproutPack.FONT_CELL * 2
+
+## Both of them, for the things that have to be done at every size the interface
+## draws at rather than at one of them.
+const SIZES := [BODY_SIZE, TITLE_SIZE]
+
+## The digit whose glyph the pack draws slashed, and the glyph it is drawn with
+## instead. See `unslash_the_zero()` for why these two and not a third thing.
+const ZERO := 0x30
+const UNSLASHED := 0x4f
 
 ## The pack's palette, sampled out of its own art. Text is the lightest cream the
 ## buttons are drawn in; a heading is the cream of the icon sheet; a dimmed line
@@ -89,10 +107,23 @@ static func build() -> Theme:
 	return theme
 
 
-## The pack's font, with antialiasing and hinting off. Public because the check
-## that they really are off is a test, and a test should ask the object rather
-## than read this file.
+## The font the interface is drawn with: the pack's own, with antialiasing and
+## hinting off and the digit zero drawn with the pack's own unslashed ring.
+## Public because the check that all of that really holds is a test, and a test
+## should ask the object rather than read this file.
 static func build_font() -> FontFile:
+	var font := pack_font()
+	if font == null:
+		return null
+	unslash_the_zero(font)
+	return font
+
+
+## The pack's font exactly as it ships, before the zero is dealt with. Public
+## because the measurement of what that change bought has to be able to see the
+## before, and because a test that pins the fault has to be able to show it is
+## still there in the file it came from.
+static func pack_font() -> FontFile:
 	var font := FontFile.new()
 	var err := font.load_dynamic_font(SproutPack.FONT)
 	if err != OK:
@@ -111,6 +142,76 @@ static func build_font() -> FontFile:
 	# show as a missing glyph, not as a smooth one in somebody else's font.
 	font.allow_system_fallback = false
 	return font
+
+
+## Draw the digit zero with the pack's own capital `O`, at every size the
+## interface uses.
+##
+## ## The fault
+##
+## The pack's `0` is a slashed zero whose slash meets both walls of the counter.
+## At the size the interface ships at the middle closes completely, so the glyph
+## has two enclosed holes -- which is exactly what an `8` has, and holes are what
+## a reader counts. Five pixels of a hundred and four separate the two. On the
+## frames the second playtest took, `TRADES 0` reads `TRADES 8` and a pile
+## `0.4 AWAY` reads `8.4 AWAY`: a wrong number rather than a hard-to-read one,
+## and every health total, coin count, distance and round number in the game is
+## drawn in this font.
+##
+## ## The three ways out, and why this is the one taken
+##
+##   * **A larger whole-number scale changes nothing.** `oversampling` is pinned
+##     to 1.0 above, so a glyph is rasterised once at its nominal size and the
+##     canvas magnifies that bitmap: a bigger interface is the same closed
+##     middle, bigger. Nor does rasterising at a larger nominal size help -- the
+##     zero has two holes at 14, 18, 21 and 28 alike, because the slash is drawn
+##     touching both walls at every one of them. And the interface is at scale 1
+##     because that is what fits the window the game ships in; taking it back to
+##     2 would undo the work that got every panel inside that window.
+##   * **A second face from the pack does not exist.** The pack ships one font,
+##     `pixelFont-7-8x14-sproutLands.ttf`, and its bitmap source beside it.
+##   * **A different glyph**, which is this. The pack's own capital `O` is, pixel
+##     for pixel, its `0` with the slash lifted off -- ten pixels on the artist's
+##     own 8x14 cell, six in the raster the game draws. The unslashed ring is
+##     already in the pack, drawn by the pack's hand, on the pack's grid. So the
+##     digit is pointed at it.
+##
+## ## What that costs and what it does not
+##
+## Nothing is drawn and nothing is copied out of the pack: this moves one entry
+## in the font's own glyph cache to a rectangle that is already in it. The text
+## the panels hold still says `0` -- only the pixels it is drawn with change --
+## so nothing the simulation says is rewritten and no panel has to remember to
+## call anything. And it reaches every panel at once, because there is one font.
+##
+## The cost is that a zero and a capital `O` are now the same shape. That is the
+## usual bargain of an unslashed zero, and it is the right way round here: the
+## interface is drawn in capitals either way (this font maps lowercase to the
+## same glyphs), a digit and a letter are never in the same slot, and mistaking a
+## `0` for an `O` loses a reader nothing, where mistaking it for an `8` gives
+## them a wrong distance to walk.
+static func unslash_the_zero(font: FontFile) -> void:
+	if font == null:
+		return
+	for size in SIZES:
+		var key := Vector2i(size, 0)
+		var zero := font.get_glyph_index(size, ZERO, 0)
+		var ring := font.get_glyph_index(size, UNSLASHED, 0)
+		if zero == 0 or ring == 0:
+			push_error("SproutTheme: the pack's font has no zero or no capital O")
+			return
+		# Asking where a glyph sits in the cache is what puts it there. Both have
+		# to be in it before one can be pointed at the other.
+		var at := font.get_glyph_uv_rect(0, key, ring)
+		font.get_glyph_uv_rect(0, key, zero)
+		font.set_glyph_texture_idx(0, key, zero,
+			font.get_glyph_texture_idx(0, key, ring))
+		font.set_glyph_uv_rect(0, key, zero, at)
+		font.set_glyph_offset(0, key, zero, font.get_glyph_offset(0, key, ring))
+		font.set_glyph_size(0, key, zero, font.get_glyph_size(0, key, ring))
+		# The advance is deliberately left alone. The two are the same eight
+		# pixels wide in this font, and a glyph's width is a fact about the text
+		# rather than about the picture: nothing on any panel moves.
 
 
 ## The frame, and the two slot plates. All three are the pack's own art

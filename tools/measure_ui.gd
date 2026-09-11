@@ -36,6 +36,7 @@ func _initialize() -> void:
 		printerr("usage: measure_ui.gd --frame PNG --at X Y --size W H --scale N")
 		printerr("       measure_ui.gd --icons PNG [--icon-scale N]")
 		printerr("       measure_ui.gd --effects PNG [--icon-scale N]")
+		printerr("       measure_ui.gd --digits PNG [--icon-scale N]")
 		quit(2)
 		return
 
@@ -46,6 +47,11 @@ func _initialize() -> void:
 
 	if options["effects"] != "":
 		_write_effect_sheet(options["effects"], options["icon_scale"])
+		quit(0)
+		return
+
+	if options["digits"] != "":
+		_write_digit_strip(options["digits"], options["icon_scale"])
 		quit(0)
 		return
 
@@ -306,7 +312,7 @@ func _parse(args: PackedStringArray) -> Dictionary:
 	var options := {
 		"frame": ProjectSettings.globalize_path(DEFAULT_FRAME),
 		"at_x": 0, "at_y": 0, "width": 0, "height": 0, "scale": 1,
-		"icons": "", "effects": "", "icon_scale": 6,
+		"icons": "", "effects": "", "digits": "", "icon_scale": 6,
 	}
 	var i := 0
 	while i < args.size():
@@ -329,14 +335,166 @@ func _parse(args: PackedStringArray) -> Dictionary:
 				var key := "scale" if args[i] == "--scale" else "icon_scale"
 				options[key] = maxi(1, args[i + 1].to_int())
 				i += 2
-			"--icons", "--effects":
+			"--icons", "--effects", "--digits":
 				if i + 1 >= args.size():
 					return {"error": "%s needs a path" % args[i]}
-				options["icons" if args[i] == "--icons" else "effects"] = args[i + 1]
+				options[args[i].substr(2)] = args[i + 1]
 				i += 2
 			_:
 				return {"error": "unknown argument '%s'" % args[i]}
 	if options["icons"] == "" and options["effects"] == "" \
+			and options["digits"] == "" \
 			and (options["width"] <= 0 or options["height"] <= 0):
 		return {"error": "--size needs a rectangle with area"}
 	return options
+
+
+# --- The digits ------------------------------------------------------------
+
+
+## The ten digits, and the two lines a playtest misread, drawn with the pack's
+## font at the size the interface ships at -- once as the pack draws them and
+## once as the game now draws them -- at that size and magnified beside it.
+##
+## Every pixel here is the font drawing a character, which is what a frame of
+## this game already is: `reports/assets/playtest-*.png` carry hundreds of these
+## same glyphs at this same size. Nothing of the pack's own files is copied out
+## -- no sheet, no atlas, no typeface -- so this stays on the right side of the
+## line the icon sheet above draws, which is that the pack's art is not written
+## out of this repository even modified.
+##
+## The numbers printed beside the picture are the argument the picture makes:
+## how many enclosed holes each digit has, and how many pixels separate it from
+## the `8`. A reader tells round glyphs apart by counting holes long before
+## reading any curve, so a zero with two holes is an eight however many pixels
+## it differs by.
+func _write_digit_strip(path: String, at_scale: int) -> void:
+	if not SproutPack.is_installed():
+		printerr("the Sprout Lands pack is not unpacked; "
+			+ "run ./tools/extract_sprout_lands.sh")
+		return
+	var size := SproutTheme.BODY_SIZE
+	var fonts := {
+		"the pack's own zero": SproutTheme.pack_font(),
+		"what the game draws": SproutTheme.build_font(),
+	}
+
+	_report_digits(fonts, size)
+
+	# The panel's own ground and its own two inks, so the picture is the colours
+	# a player sees rather than black on white.
+	var sheet_art: Texture2D = load(SproutPack.SHEET)
+	var brown: Color = sheet_art.get_image().get_pixel(
+		SproutPack.FRAME.position.x + SproutPack.FRAME.size.x / 2,
+		SproutPack.FRAME.position.y + SproutPack.FRAME.size.y / 2)
+	var lines := PackedStringArray([
+		"0123456789", "TRADES 0  ACTIONS 0", "0.4 AWAY  10/10  +0.00",
+	])
+	var pad := 4
+	var step := size + 4
+	var wide := 0
+	for which in fonts:
+		wide = maxi(wide, _line_width(fonts[which], size, which))
+		for line in lines:
+			wide = maxi(wide, size + _line_width(fonts[which], size, line))
+	var tall := fonts.size() * (lines.size() + 1) * step + pad
+	var block := Image.create_empty(wide + pad * 2, tall + pad, false, Image.FORMAT_RGBA8)
+	block.fill(brown)
+	var y := pad
+	for which in fonts:
+		var font: FontFile = fonts[which]
+		_write_line(block, font, size, which, Vector2i(pad, y), SproutTheme.DIM)
+		y += step
+		for line in lines:
+			_write_line(block, font, size, line, Vector2i(pad + size, y), SproutTheme.TEXT)
+			y += step
+	var big := block.duplicate() as Image
+	big.resize(big.get_width() * at_scale, big.get_height() * at_scale,
+		Image.INTERPOLATE_NEAREST)
+	var sheet := Image.create_empty(
+		maxi(block.get_width(), big.get_width()),
+		block.get_height() + big.get_height() + pad, false, Image.FORMAT_RGBA8)
+	sheet.fill(brown)
+	sheet.blit_rect(block, Rect2i(Vector2i.ZERO, block.get_size()), Vector2i.ZERO)
+	sheet.blit_rect(big, Rect2i(Vector2i.ZERO, big.get_size()),
+		Vector2i(0, block.get_height() + pad))
+	var error := sheet.save_png(path)
+	if error != OK:
+		printerr("could not write %s (%d)" % [path, error])
+		return
+	print("wrote %s: the ten digits at %d, and the same at %dx"
+		% [path, size, at_scale])
+
+
+## Holes and distances for every digit, both fonts, at every size the interface
+## draws at.
+func _report_digits(fonts: Dictionary, body: int) -> void:
+	for which in fonts:
+		var font: FontFile = fonts[which]
+		for size in SproutTheme.SIZES:
+			var shapes := {}
+			for digit in range(10):
+				shapes[str(digit)] = GlyphShape.of(font, size, str(digit))
+			var holes := PackedStringArray()
+			var from_eight := PackedStringArray()
+			var nearest := PackedStringArray()
+			for digit in shapes:
+				holes.append("%s:%d" % [digit, GlyphShape.counters(shapes[digit])])
+				from_eight.append("%s:%d" % [
+					digit, GlyphShape.differing(shapes[digit], shapes["8"])])
+				var closest := 999
+				var to := ""
+				for other in shapes:
+					if other == digit:
+						continue
+					var apart := GlyphShape.differing(shapes[digit], shapes[other])
+					if apart < closest:
+						closest = apart
+						to = other
+				nearest.append("%s:%s/%d" % [digit, to, closest])
+			print("%s, size %d" % [which, size])
+			print("   holes          %s" % " ".join(holes))
+			print("   px from the 8  %s" % " ".join(from_eight))
+			print("   nearest digit  %s" % " ".join(nearest))
+			print("   the 0 is the pack's own O: %s" % (
+				"yes" if GlyphShape.differing(
+					shapes["0"], GlyphShape.of(font, size, "O")) == 0 else "no"))
+
+
+## How wide one line of text is, at the font's own advances.
+func _line_width(font: FontFile, size: int, text: String) -> int:
+	var wide := 0.0
+	for at in text.length():
+		var glyph := font.get_glyph_index(size, text.unicode_at(at), 0)
+		wide += font.get_glyph_advance(0, size, glyph).x
+	return int(ceil(wide))
+
+
+## One line of text blitted into an image, glyph by glyph, at the font's own
+## advances and offsets, with the panel's own one-pixel shadow under it.
+##
+## `at` is where the line's own top-left would be, so a caller can stack lines
+## without knowing where a baseline is; the font's ascent puts each glyph on it.
+## This needs no canvas and so no display, which is the whole reason the picture
+## can be written by a headless run.
+func _write_line(
+	into: Image, font: FontFile, size: int, text: String, at: Vector2i, ink: Color
+) -> void:
+	var pen := Vector2(at.x, at.y + font.get_ascent(size))
+	for index in text.length():
+		var glyph := font.get_glyph_index(size, text.unicode_at(index), 0)
+		var shape := GlyphShape.of(font, size, text[index])
+		var offset := font.get_glyph_offset(0, Vector2i(size, 0), glyph)
+		var corner := Vector2i(pen + offset)
+		for pass_at: Vector2i in [Vector2i.ONE, Vector2i.ZERO]:
+			for y in shape.size():
+				for column in shape[y].length():
+					if shape[y][column] != "#":
+						continue
+					var here := corner + Vector2i(column, y) + pass_at
+					if here.x < 0 or here.y < 0 or here.x >= into.get_width() \
+							or here.y >= into.get_height():
+						continue
+					into.set_pixelv(here,
+						SproutTheme.SHADOW if pass_at == Vector2i.ONE else ink)
+		pen.x += font.get_glyph_advance(0, size, glyph).x
