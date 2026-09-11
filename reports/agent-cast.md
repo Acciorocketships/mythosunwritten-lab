@@ -206,30 +206,35 @@ for a model-driven one and requires both to carry every row of the one action
 list.
 
 (The counts and the lines above are this recording's draw. `net/model_recording.gd`
-was remade on 2026-09-09, when the observation packet stopped saying where a
-character stands to three decimal places and the prompt the recording is keyed to
-changed; the passages further up that describe *what happened* in the shipped run
-are this page's own older draw and were left as they were written.)
+has been remade twice since they were written: on 2026-09-09, when the
+observation packet stopped saying where a character stands to three decimal
+places, and on 2026-09-11, when the tactical board learned what the scatter layer
+stands on the ground and the observation packet's window and sight lines changed
+with it. Both changed the prompt the recording is keyed to. The passages further
+up that describe *what happened* in the shipped run are this page's own older
+draw and were left as they were written; see reports/blocked-ground.md for the
+second of the two.)
 
 ## No key, no network, two processes, same bytes
 
 ```
-528f5cc03298b2d7a51c9c7395bf984baf5a06840c0af554f36af48ffa43b000  first run
-528f5cc03298b2d7a51c9c7395bf984baf5a06840c0af554f36af48ffa43b000  second run
-528f5cc03298b2d7a51c9c7395bf984baf5a06840c0af554f36af48ffa43b000  reports/agent-evidence.txt
+22e07a890136b5afb5cfc48d2d3e620eb0b006351b2aeb65491cc531cd12808b  first run
+22e07a890136b5afb5cfc48d2d3e620eb0b006351b2aeb65491cc531cd12808b  second run
+22e07a890136b5afb5cfc48d2d3e620eb0b006351b2aeb65491cc531cd12808b  reports/agent-evidence.txt
 ```
 
-The 95 replies the run and its four sibling runs replay were put to
+The 154 replies the run and its five sibling runs replay were put to
 **`z-ai/glm-5.3-flash`** over `openrouter.ai` by `./run_record.sh --live` — the
 only command in the repository that touches the network, and one no test and no
-other run script calls. Everything else replays them. 81 of the 95 answer the
-three character runs and were put on 2026-09-09; the other 14 answer the
-difficulty-class run and the orchestrator run and were put on 2026-09-05 and
-written back unchanged since.
+other run script calls. Everything else replays them. 116 of the 154 answer the
+three character runs and were put on 2026-09-11; the other 38 answer the
+difficulty-class run, the orchestrator run, the goodwill run and the bargain run,
+were put on 2026-09-05, 2026-09-07 and 2026-09-09, and are written back unchanged
+by every later pass that does not name them.
 
-**Not one of the 95 was declined and not one came back empty.** Every question
-those passes put came back with something a reader could take a line from, so
-nothing in the shipped transcript is a silence. That is a fact about this
+**Not one of the 154 came back empty.** Every question those passes put came back
+with something a reader could take a line from, so nothing in the shipped
+transcript is a silence. That is a fact about this
 provider and this draw, and the machinery for a silence stays because the
 previous provider needed it: it declined nine of its own pass's questions under
 its content policy.

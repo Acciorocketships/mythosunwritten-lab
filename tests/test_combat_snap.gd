@@ -67,6 +67,7 @@ func run() -> void:
 	_the_world_goes_on_while_a_fight_is_on()
 	_a_fight_on_an_island_uses_that_storeys_board()
 	_a_combatant_that_cannot_be_seated_refuses_the_fight()
+	_a_fight_in_a_wood_is_seated_on_the_ground_that_is_open()
 	_an_empty_roster_is_nothing_at_all()
 	_two_processes_play_the_same_cycle()
 	_the_render_layer_draws_the_fight_out_of_the_snapshot()
@@ -462,6 +463,129 @@ func _a_combatant_that_cannot_be_seated_refuses_the_fight() -> void:
 	equal(crowded["ok"], false, "two combatants cannot share the one cell")
 	equal((crowded["placed"] as Dictionary).size(), 1, "the first was seated")
 	equal((crowded["unplaced"] as PackedInt32Array)[0], 2, "and the second was not")
+
+
+## What blocking props do to a fight, measured rather than hoped for.
+##
+## The board is never edited to keep itself playable. A cell is closed because
+## something is standing on it, and that is a pure function of the world seed and
+## the cell -- repairing it for one fight would make the same ground answer
+## differently in the next one, and two boards over the same wood would stop
+## agreeing. So what protects a fight is not the board giving way; it is the two
+## things the fight layer already does, and this measures both.
+##
+## *A commander is never left standing in a tree.* Seating skips any cell that
+## blocks movement, so a piece that walked into a thicket is put on the nearest
+## open cell instead -- and if there is none within `CombatSnap.SEARCH_RINGS`,
+## the fight is refused and nobody is moved at all, which is
+## `_a_combatant_that_cannot_be_seated_refuses_the_fight` above.
+##
+## *A wood can still hold two fighters apart, and that is terrain rather than a
+## fault.* Over 49 boards spread across 1,560 units of this seed's world and the
+## eight ways two combatants can meet at `ActionScene.ENGAGE_RADIUS`, every one
+## of the 392 pieces found a seat, a good many of them were moved off ground that
+## was taken, and two of the 392 pairs ended up in walkable pockets separated by
+## trees. Those two are honest: a fighter who backed into a thicket is in a
+## thicket. The fight still ends, because a match that cannot be decided ends at
+## `Encounter.MAX_ROUNDS` -- see tests/test_fight_cooloff.gd, which plays several
+## whole fights out to exactly that.
+##
+## The bound below is a tenth of the pairs rather than the measured two, because
+## what is being pinned is "rare and known", not a number of this seed's.
+func _a_fight_in_a_wood_is_seated_on_the_ground_that_is_open() -> void:
+	var terrain := TerrainQuery.for_seed(SEED)
+	var builder := CombatBoardBuilder.new(terrain)
+	var scatter := DecorationScatter.new(terrain)
+	var pairs := 0
+	var apart := 0
+	var moved := 0
+	var moved_off_something := 0
+	for row in range(-3, 4):
+		for column in range(-3, 4):
+			var at := Vector2(float(column) * 260.0, float(row) * 260.0)
+			var board := builder.build_on_top(at.x, at.y)
+			for step in 8:
+				var angle := TAU * float(step) / 8.0
+				var away := Vector2(cos(angle), sin(angle)) * (
+					ActionScene.ENGAGE_RADIUS * 0.5
+				)
+				var taken := {}
+				var one := _seat(board, taken, at + away)
+				var two := _seat(board, taken, at - away)
+				pairs += 1
+				check(bool(one["ok"]) and bool(two["ok"]),
+					"a pair meeting at %s facing %d could not be seated" % [at, step])
+				if not bool(one["ok"]) or not bool(two["ok"]):
+					continue
+				for seated in [one, two]:
+					var cell: Vector2i = seated["cell"]
+					check(board.is_standable(cell) and not board.blocks_move(cell),
+						"a piece was seated on %s, which is closed" % cell)
+					if int(seated["rings"]) == 0:
+						continue
+					moved += 1
+					# Where it was standing, and why it was not left there. Only
+					# the cells something is standing on are this test's
+					# business; the rest were water, or a house, or taken.
+					var home := CombatSnap.cell_for(
+						float(seated["at"].x), float(seated["at"].y), board.cell_size
+					)
+					if _stands_on(scatter, board, home):
+						moved_off_something += 1
+						check(board.blocks_move(home),
+							"cell %s carries something solid and did not move the piece off it"
+								% home)
+				if not _walkable_from(board, one["cell"]).has(two["cell"]):
+					apart += 1
+	check(pairs > 380, "expected a wide sweep of meetings, got %d" % pairs)
+	check(moved > 20,
+		"expected the ground to move a good many pieces, got %d of %d" % [moved, pairs])
+	check(moved_off_something > 0,
+		"expected at least one piece moved off ground something was standing on")
+	check(apart * 10 <= pairs,
+		("%d of %d pairs were seated in walkable pockets separated from each "
+		+ "other -- the board is not repaired, but this is meant to be rare")
+			% [apart, pairs])
+
+
+## One combatant seated on a board, remembering the position it came from.
+func _seat(board: CombatBoard, taken: Dictionary, at: Vector2) -> Dictionary:
+	var found := CombatSnap.nearest_free_cell(board, taken, at.x, at.y)
+	if bool(found["ok"]):
+		taken[found["cell"]] = true
+	found["at"] = at
+	return found
+
+
+## Whether the scatter layer stands something solid in a cell.
+func _stands_on(
+	scatter: DecorationScatter, board: CombatBoard, cell: Vector2i
+) -> bool:
+	var low := Vector2(
+		float(cell.x) * board.cell_size, float(cell.y) * board.cell_size
+	)
+	for item in scatter.solid_items_within(
+		low.x, low.y, low.x + board.cell_size, low.y + board.cell_size
+	):
+		return true
+	return false
+
+
+## Every cell ordinary walking reaches from a cell, on this board.
+func _walkable_from(board: CombatBoard, start: Vector2i) -> Dictionary:
+	var seen := {start: true}
+	var queue: Array[Vector2i] = [start]
+	while not queue.is_empty():
+		var here: Vector2i = queue.pop_back()
+		for step in CombatBoard.NEIGHBOURS:
+			var next: Vector2i = here + step
+			if seen.has(next) or not board.contains(next):
+				continue
+			if not board.can_step(here, next):
+				continue
+			seen[next] = true
+			queue.append(next)
+	return seen
 
 
 # --- 8 and 9: determinism, and the picture -------------------------------

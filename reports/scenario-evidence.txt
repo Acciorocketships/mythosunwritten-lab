@@ -148,10 +148,10 @@ t= 58  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=62
 t= 58  Rook   began wait(ticks=4), 4 ticks
 t= 59  --     Bram and somebody of another band have met
     snap-in around #3 at (-434.200, 1.098, 407.000) radius=24.0 span=30.0 storey=0 joined=2
-    snap-in board 8a3c063646afb984 cells=441 standable=437 holes=4 cliffs=8
+    snap-in board 68134520cd543c6a cells=441 standable=387 holes=4 closed=50 line=44 cliffs=8
     snap-in #3 (-434.200, 407.000) -> cell (-145,135) centre (-433.500, 406.500) moved 0.860 rings=0
     snap-in #4 (-425.800, 407.000) -> cell (-142,135) centre (-424.500, 406.500) moved 1.393 rings=0
-    board 8a3c063646afb984 cells=441 standable=437 holes=4 cliffs=8
+    board 68134520cd543c6a cells=441 standable=387 holes=4 cliffs=8
     dice seed=3050574282 swing=92..108
     commanders 2
       #1 commander owner=1 level=3 hp=38/38 def=0 power=0
@@ -180,7 +180,7 @@ t= 71  Wren   finished wait(ticks=24) -> wait ok ticks=24 until=95
 t= 71  Wren   began say(text=what was that noise?), 5 ticks
 t= 71  Odo    thought again at 20/30t, wanted the same thing
 t= 72  Sable  thought again at 5/6t, wanted the same thing
-t= 73  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+t= 73  Sable  finished attack(target=3 item=common spear) -> attack ok target=Bram attack=thrust cells=2 hits=1 dealt=12
       attack #2 thrust cells=2 hits=1
         hit #2->#1 power=12 x100 swing=103 front def=0 dealt=12 hp=26/38
       face #2 west
@@ -194,7 +194,7 @@ t= 76  Odo    thought again at 25/30t, wanted the same thing
 t= 78  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=82
 t= 78  Rook   began wait(ticks=4), 4 ticks
 t= 79  Bram   thought again at 5/6t, wanted the same thing
-t= 80  Bram   finished attack(target=4 item=common sword) -> attack ok attack=cleave cells=6 hits=1 dealt=7
+t= 80  Bram   finished attack(target=4 item=common sword) -> attack ok target=Sable attack=cleave cells=6 hits=1 dealt=7
       attack #1 cleave cells=6 hits=1
         hit #1->#2 power=7 x100 swing=104 front def=0 dealt=7 hp=31/38
       face #1 east
@@ -208,7 +208,7 @@ t= 86  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=90
 t= 86  Rook   began wait(ticks=4), 4 ticks
 t= 86  Sable  thought again at 5/6t, wanted the same thing
 t= 86  Odo    thought again at 5/30t, wanted the same thing
-t= 87  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=11
+t= 87  Sable  finished attack(target=3 item=common spear) -> attack ok target=Bram attack=thrust cells=2 hits=1 dealt=11
       attack #2 thrust cells=2 hits=1
         hit #2->#1 power=12 x100 swing=94 front def=0 dealt=11 hp=15/38
       face #2 west
@@ -228,7 +228,7 @@ t= 96  Odo    thought again at 15/30t, wanted the same thing
 t= 98  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=102
 t= 98  Rook   began wait(ticks=4), 4 ticks
 t=100  Sable  thought again at 5/6t, wanted the same thing
-t=101  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+t=101  Sable  finished attack(target=3 item=common spear) -> attack ok target=Bram attack=thrust cells=2 hits=1 dealt=12
 t=101  Odo    thought again at 20/30t, wanted the same thing
       attack #2 thrust cells=2 hits=1
         hit #2->#1 power=12 x100 swing=102 front def=0 dealt=12 hp=3/38
@@ -252,7 +252,7 @@ t=111  Odo    began wait(ticks=30), 30 ticks
 t=114  Rook   finished wait(ticks=4) -> wait ok ticks=4 until=118
 t=114  Rook   began wait(ticks=4), 4 ticks
 t=114  Sable  thought again at 5/6t, wanted the same thing
-t=115  Sable  finished attack(target=3 item=common spear) -> attack ok attack=thrust cells=2 hits=1 dealt=12
+t=115  Sable  finished attack(target=3 item=common spear) -> attack ok target=Bram attack=thrust cells=2 hits=1 dealt=12
       attack #2 thrust cells=2 hits=1
         hit #2->#1 power=12 x100 swing=99 front def=0 dealt=12 hp=0/38 dead removed=1
       commander #1 is out

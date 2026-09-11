@@ -843,12 +843,24 @@ func _trace_line() -> String:
 ## are wide, so every board shares a band of cells with its neighbours and the
 ## claim that two boards agree on the ground they share is checked by the report
 ## rather than only by the suite.
+##
+## `places` replaces the grid with the places named, which is how the ground a
+## particular fight was held on is printed: a board is a function of the place
+## and the seed, so one read there afterwards is the board that fight was played
+## on, digest and all.
 func board_report(
 	span: float = CombatBoardBuilder.DEFAULT_SPAN,
 	spacing: float = 40.0,
 	reach: int = 2,
+	places: Array[Vector2] = [],
 ) -> PackedStringArray:
 	var lines := PackedStringArray()
+	if not places.is_empty():
+		for at in places:
+			lines.append_array(_board_lines(
+				"board", world.combat_board_builder.build_on_top(at.x, at.y, span)
+			))
+		return lines
 	for row in range(-reach, reach + 1):
 		for column in range(-reach, reach + 1):
 			var x := float(column) * spacing
@@ -902,14 +914,21 @@ func _first_walkable_island(span: float = 400.0) -> FloatingIsland:
 ## legible fight. Three numbers per candidate, and every one of them is measured
 ## rather than judged:
 ##
-##   * `stand`  -- the share of the board's cells a piece may stand on. A fight
-##     on ground that is mostly hole is a fight on a few islands of cells.
+##   * `open`   -- the share of the board's cells the *ground* leaves open: not a
+##     hole, not a building. A fight on ground that is mostly hole is a fight on
+##     a few islands of cells, and that is what this threshold has always been
+##     about, so it is measured on the ground alone.
+##   * `stand`  -- the share a piece may actually stand on, which is `open` less
+##     the cells something is standing in. The two were the same number until the
+##     board learned what the scatter layer puts on the ground; they are reported
+##     side by side now because they answer different questions, and the gap
+##     between them is how wooded the place is.
 ##   * `relief` -- the spread between the highest and lowest standable cell, in
 ##     world units. Flat ground makes a legible board; a hillside does not.
 ##   * `flora`  -- how many things the scatter layer grew in the chunk the
-##     candidate falls in. The board does not carry a tree, so a fight in a
-##     canopy is legal and unwatchable: this is the openness of the place, and it
-##     is the one number here that is about the *picture*.
+##     candidate falls in. This is the openness of the place as a *picture*, and
+##     it is the threshold that keeps a fight out of a canopy -- the board does
+##     carry the trees now, but a fight nobody can see is still a bad fight.
 ##
 ## The summary line names the candidates that pass all three stated thresholds,
 ## which is where sim/scripted_encounter.gd's meeting place comes from. The grid
@@ -921,7 +940,7 @@ func snap_report(
 	board_span: float = CombatBoardBuilder.DEFAULT_SPAN,
 ) -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append("snap-thresholds stand>=%.2f relief<=%.1f flora<=%d" % [
+	lines.append("snap-thresholds open>=%.2f relief<=%.1f flora<=%d" % [
 		OPEN_ENOUGH, FLAT_ENOUGH, UNCLUTTERED,
 	])
 	var reach := int(span / spacing)
@@ -942,15 +961,30 @@ func snap_report(
 					low = minf(low, height)
 					high = maxf(high, height)
 			var relief := 0.0 if low == INF else high - low
-			var stand := float(board.standable_count()) / float(maxi(1, board.cell_count()))
+			var cells := float(maxi(1, board.cell_count()))
+			var stand := float(board.standable_count()) / cells
+			# What the ground itself leaves open, with what is standing on it
+			# put aside: a hole is the water and the void, a reservation is a
+			# building, and both are the terrain query's own answers.
+			var clear := 0
+			for cell_row in board.cells_deep:
+				for cell_column in board.cells_across:
+					var cell := board.min_cell + Vector2i(cell_column, cell_row)
+					var middle := board.centre(cell)
+					if board.is_hole(cell) \
+							or world.terrain.is_reserved_at(middle.x, middle.y):
+						continue
+					clear += 1
+			var open_ground := float(clear) / cells
 			var chunk_size := TerrainChunkMesher.CHUNK_SIZE
 			var flora := world.scatter_field.build(
 				int(floorf(x / chunk_size)), int(floorf(z / chunk_size))
 			).count()
-			var ok := stand >= OPEN_ENOUGH and relief <= FLAT_ENOUGH and flora <= UNCLUTTERED
-			var line := ("snap %.0f %.0f %s stand=%.3f relief=%.2f flora=%d "
+			var ok := open_ground >= OPEN_ENOUGH and relief <= FLAT_ENOUGH \
+				and flora <= UNCLUTTERED
+			var line := ("snap %.0f %.0f %s open=%.3f stand=%.3f relief=%.2f flora=%d "
 				+ "holes=%d cliffs=%d built=%d %s") % [
-				x, z, world.terrain.biome_at(x, z), stand, relief, flora,
+				x, z, world.terrain.biome_at(x, z), open_ground, stand, relief, flora,
 				board.hole_count(), board.cliff_edge_count(), board.blocking_count(),
 				"ok" if ok else "--",
 			]

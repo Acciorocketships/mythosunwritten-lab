@@ -3,7 +3,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 model cast run seed=1234 ticks=160 where=(-480.0, 420.0)
   cast       5 of the 6 characters decide through a model; Wren is driven by a person's choices written down in advance
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-10 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 91 replies
+  recording  recorded 2026-09-11 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 116 replies
   prompt     every action of the one list, the observation packet,
              and what this character remembers -- every lesson it has kept
              and the last few lines of its own log, with the three tools
@@ -41,28 +41,28 @@ t=  1  Bram   has not decided yet, and waits in the world
 t=  1  Sable  has not decided yet, and waits in the world
 t=  1  Odo    has not decided yet, and waits in the world
 t=  1  Pell   has not decided yet, and waits in the world
-t=  4  Rook   began say(text=Hello, Pell and Wren. What's in that pile? target=7), 5 ticks
-t=  4  Bram   began examine(target=6), 4 ticks
+t=  4  Rook   began examine(target=6), 4 ticks
+t=  4  Bram   began say(text=Hail, traveler! target=4), 5 ticks
 t=  4  Sable  began go_to(target=3), 11 ticks
 t=  4  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
 t=  4  Pell   began go_to(target=2), 5 ticks
 t=  6  Wren   finished say(text=good morning target=2) -> say ok shout=false heard_by=1 check=1 context=persuade:#2
 t=  6  Wren   began go_to(target=6), 14 ticks
-t=  6  Rook   interrupted (spoken to), abandoned say(text=Hello, Pell and Wren. What's in that pile? target=7) 2/5t
-t=  6  Rook   began say(text=Hello, Pell and Wren. What's in that pile? target=7), 5 ticks
-t=  8  Bram   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=36.139
-t=  8  Bram   has not decided yet, and waits in the world
+t=  6  Rook   interrupted (spoken to), abandoned examine(target=6) 2/4t
+t=  6  Rook   began examine(target=6), 4 ticks
 t=  8  --     Bram and somebody of another band have met
     snap-in around #3 at (-436.000, 0.952, 407.000) radius=24.0 span=30.0 storey=0 joined=2
-    snap-in board d28edee217164a8f cells=441 standable=435 holes=6 cliffs=8
+    snap-in board bf453bb4794d18ae cells=441 standable=384 holes=6 closed=51 line=44 cliffs=8
     snap-in #3 (-436.000, 407.000) -> cell (-146,135) centre (-436.500, 406.500) moved 0.707 rings=0
     snap-in #4 (-427.600, 407.000) -> cell (-143,135) centre (-427.500, 406.500) moved 0.510 rings=0
-    board d28edee217164a8f cells=441 standable=435 holes=6 cliffs=8
+    board bf453bb4794d18ae cells=441 standable=384 holes=6 cliffs=8
     dice seed=2756302612 swing=92..108
     commanders 2
       #1 commander owner=1 level=3 hp=38/38 def=0 power=0
       #2 commander owner=2 level=3 hp=38/38 def=0 power=0
     round 1 turn #1 at (-146,135) facing=north hp=38/38 def=0 sword + boots(4/4)
+t=  9  Bram   finished say(text=Hail, traveler! target=4) -> say ok shout=false heard_by=1 check=2 context=persuade:#4
+t=  9  Bram   has not decided yet, and waits in the world
 t=  9  Sable  thought again at 5/11t, wanted the same thing
 t=  9  Odo    thought again at 5/7t, wanted the same thing
 t=  9  Pell   finished go_to(target=2) -> go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
@@ -71,712 +71,624 @@ t=  9  Sable  interrupted (combat began), abandoned go_to(target=3) 5/11t
       move #1 (-146,135)->(-145,135)
       face #1 east
     round 1 turn #2 at (-143,135) facing=north hp=38/38 def=0 spear + boots(4/4)
+t= 10  Rook   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0
+t= 10  Rook   has not decided yet, and waits in the world
 t= 10  Sable  began go_to(target=3), 4 ticks
       face #2 west
     round 2 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
 t= 11  Wren   thought again at 5/14t, wanted the same thing
-t= 11  Rook   finished say(text=Hello, Pell and Wren. What's in that pile? target=7) -> say ok shout=false heard_by=1 check=2 context=persuade:#7
-t= 11  Rook   has not decided yet, and waits in the world
-t= 11  Bram   began say(text=Hail, traveler! What brings you here? target=4), 5 ticks
 t= 11  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-478.000, 472.000) walked=6.0 steps=7
 t= 11  Odo    has not decided yet, and waits in the world
       face #1 east
     round 2 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 12  Pell   began go_to(target=2), 1 ticks
+t= 12  Pell   began go_to(target=6), 5 ticks
       face #2 west
     round 3 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 13  Pell   finished go_to(target=2) -> go_to ok at=(-477.423, 417.731) walked=0.0 steps=0
-t= 13  Pell   has not decided yet, and waits in the world
+t= 13  Rook   began say(text=good morning target=1), 5 ticks
+t= 13  Bram   began say(text="What brings you this way?" target=4), 5 ticks
       face #1 east
     round 3 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 14  Rook   began examine(target=6), 4 ticks
 t= 14  Sable  finished go_to(target=3) -> go_to refused: the board decides where a fighter goes
 t= 14  Sable  has not decided yet, and waits in the world
-t= 14  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 14  Odo    began examine(target=x), 4 ticks
       face #2 west
     round 4 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
       face #1 east
     round 4 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
 t= 16  Wren   thought again at 10/14t, wanted the same thing
-t= 16  Bram   finished say(text=Hail, traveler! What brings you here? target=4) -> say ok shout=false heard_by=1 check=3 context=persuade:#4
-t= 16  Pell   began say(text=Let's look. I'll check the pile. target=2), 5 ticks
       face #2 west
     round 5 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 17  Bram   has not decided yet, and waits in the world
-t= 17  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-475.300, 472.000) walked=2.7 steps=3
-t= 17  Odo    has not decided yet, and waits in the world
+t= 17  Pell   finished go_to(target=6) -> go_to ok at=(-473.078, 416.560) walked=4.5 steps=5
+t= 17  Pell   has not decided yet, and waits in the world
       face #1 east
     round 5 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 18  Rook   finished examine(target=6) -> examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0
+t= 18  Rook   finished say(text=good morning target=1) -> say ok shout=false heard_by=1 check=3 context=persuade:#1
 t= 18  Rook   has not decided yet, and waits in the world
-t= 18  Sable  began say(text=Hail, traveler! I am Sable. target=3), 5 ticks
+t= 18  Bram   finished say(text="What brings you this way?" target=4) -> say ok shout=false heard_by=1 check=4 context=persuade:#4
+t= 18  Sable  began say(text=Hail, Bram! What brings you out here? target=3), 5 ticks
+t= 18  Odo    finished examine(target=x) -> examine refused: Odo carries no x
+t= 18  Odo    has not decided yet, and waits in the world
+t= 18  Wren   interrupted (spoken to), abandoned go_to(target=6) 12/14t
+t= 18  Wren   began go_to(target=6), 2 ticks
+t= 18  Sable  interrupted (spoken to), abandoned say(text=Hail, Bram! What brings you out here? target=3) 0/5t
       face #2 west
     round 6 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 19  Bram   has not decided yet, and waits in the world
       face #1 east
     round 6 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 20  Wren   finished go_to(target=6) -> go_to ok at=(-473.400, 416.000) walked=12.6 steps=14
+t= 20  Wren   finished go_to(target=6) -> go_to ok at=(-473.400, 416.000) walked=1.8 steps=2
 t= 20  Wren   began pick_up(item=brass lantern), 3 ticks
-t= 20  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 20  Sable  began say(text=Hail, Bram! What brings you out here? target=3), 5 ticks
+t= 20  Pell   began pick_up(item=brass lantern target=6), 3 ticks
       face #2 west
     round 7 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 21  Rook   began examine(target=6), 4 ticks
-t= 21  Bram   began wait(ticks=5), 5 ticks
-t= 21  Pell   finished say(text=Let's look. I'll check the pile. target=2) -> say ok shout=false heard_by=1 check=4 context=persuade:#2
-t= 21  Pell   has not decided yet, and waits in the world
-t= 21  Rook   interrupted (spoken to), abandoned examine(target=6) 0/4t
-t= 21  Rook   began examine(target=6), 4 ticks
+t= 21  Rook   began say(text="a fine morning for exploring" target=1), 5 ticks
+t= 21  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #1 east
     round 7 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
       face #2 west
     round 8 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
 t= 23  Wren   finished pick_up(item=brass lantern) -> pick_up ok item=brass lantern from=6
 t= 23  Wren   began go_to(target=2), 3 ticks
-t= 23  Sable  finished say(text=Hail, traveler! I am Sable. target=3) -> say ok shout=false heard_by=1 check=5 context=persuade:#3
-t= 23  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-472.600, 472.000) walked=2.7 steps=3
-t= 23  Odo    has not decided yet, and waits in the world
-t= 23  Bram   interrupted (spoken to), abandoned wait(ticks=5) 2/5t
-t= 23  Bram   began wait(ticks=5), 5 ticks
+t= 23  Bram   began say(text="Fine day for a walk, isn't it?" target=4), 5 ticks
+t= 23  Pell   finished pick_up(item=brass lantern target=6) -> pick_up refused: there is nothing with id 6
+t= 23  Pell   has not decided yet, and waits in the world
       face #1 east
     round 8 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 24  Sable  has not decided yet, and waits in the world
-t= 24  Pell   began examine(target=6), 4 ticks
+t= 24  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-475.300, 472.000) walked=2.7 steps=3
+t= 24  Odo    has not decided yet, and waits in the world
       face #2 west
     round 9 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 25  Rook   finished examine(target=6) -> examine refused: there is nothing with id 6
-t= 25  Rook   has not decided yet, and waits in the world
+t= 25  Sable  finished say(text=Hail, Bram! What brings you out here? target=3) -> say ok shout=false heard_by=1 check=5 context=persuade:#3
+t= 25  Bram   interrupted (spoken to), abandoned say(text="Fine day for a walk, isn't it?" target=4) 2/5t
+t= 25  Bram   began say(text="Fine day for a walk, isn't it?" target=4), 5 ticks
       face #1 east
     round 9 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
 t= 26  Wren   finished go_to(target=2) -> go_to ok at=(-476.100, 416.000) walked=2.7 steps=3
 t= 26  Wren   began trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0), 4 ticks
-t= 26  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 26  Rook   finished say(text="a fine morning for exploring" target=1) -> say ok shout=false heard_by=1 check=6 context=persuade:#1
+t= 26  Rook   has not decided yet, and waits in the world
+t= 26  Sable  has not decided yet, and waits in the world
+t= 26  Pell   began go_to(target=6), 20 ticks
+t= 26  Wren   interrupted (spoken to), abandoned trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0) 0/4t
+t= 26  Wren   began trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0), 4 ticks
       face #2 west
     round 10 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 27  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #1 east
     round 10 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 28  Rook   began say(text="Let me know what you find in it." target=7), 5 ticks
-t= 28  Bram   finished wait(ticks=5) -> wait ok ticks=5 until=33
-t= 28  Sable  began say(text="I wander these lands seeking purpose, friend. What of you?" target=3), 5 ticks
-t= 28  Pell   finished examine(target=6) -> examine refused: there is nothing with id 6
-t= 28  Pell   has not decided yet, and waits in the world
       face #2 west
     round 11 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 29  Bram   has not decided yet, and waits in the world
-t= 29  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-469.900, 472.000) walked=2.7 steps=3
-t= 29  Odo    has not decided yet, and waits in the world
+t= 29  Rook   began say(text="a fine morning for exploring" target=1), 5 ticks
       face #1 east
     round 11 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
 t= 30  Wren   finished trade_propose(target=2 give=[] give_money=12 want=[silk cloak] want_money=0) -> trade_propose ok to=2 give=0 give_money=12 want=1 want_money=0
 t= 30  Wren   began wait(ticks=8), 8 ticks
+t= 30  Bram   finished say(text="Fine day for a walk, isn't it?" target=4) -> say ok shout=false heard_by=1 check=7 context=persuade:#4
+t= 30  Sable  began say(text="Just wandering, seeing what the land holds. Care to travel together?" target=3), 5 ticks
+t= 30  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-472.600, 472.000) walked=2.7 steps=3
+t= 30  Odo    has not decided yet, and waits in the world
+t= 30  Sable  interrupted (spoken to), abandoned say(text="Just wandering, seeing what the land holds. Care to travel together?" target=3) 0/5t
       face #2 west
     round 12 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 31  Pell   began go_to(target=6), 20 ticks
+t= 31  Bram   has not decided yet, and waits in the world
+t= 31  Pell   thought again at 5/20t, wanted the same thing
       face #1 east
     round 12 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 32  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 32  Sable  began say(text="Just wandering, seeing what the land holds. Care to travel together?" target=3), 5 ticks
       face #2 west
     round 13 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 33  Rook   finished say(text="Let me know what you find in it." target=7) -> say ok shout=false heard_by=1 check=6 context=persuade:#7
-t= 33  Rook   has not decided yet, and waits in the world
-t= 33  Bram   began say(text=Well met, Sable. I am Bram. Might you have goods to trade, or news of the road? target=4), 5 ticks
-t= 33  Sable  finished say(text="I wander these lands seeking purpose, friend. What of you?" target=3) -> say ok shout=false heard_by=1 check=7 context=persuade:#3
-t= 33  Bram   interrupted (spoken to), abandoned say(text=Well met, Sable. I am Bram. Might you have goods to trade, or news of the road? target=4) 0/5t
-t= 33  Pell   interrupted (spoken to), abandoned go_to(target=6) 2/20t
-t= 33  Pell   began go_to(target=6), 20 ticks
+t= 33  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #1 east
     round 13 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 34  Sable  has not decided yet, and waits in the world
+t= 34  Rook   finished say(text="a fine morning for exploring" target=1) -> say ok shout=false heard_by=1 check=8 context=persuade:#1
+t= 34  Rook   has not decided yet, and waits in the world
+t= 34  Wren   interrupted (spoken to), abandoned wait(ticks=8) 4/8t
+t= 34  Wren   began wait(ticks=8), 8 ticks
       face #2 west
     round 14 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 35  Wren   thought again at 5/8t, wanted the same thing
-t= 35  Bram   began say(text=Well met, Sable. I am Bram. Might you have goods to trade, or news of the road? target=4), 5 ticks
-t= 35  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-467.200, 472.000) walked=2.7 steps=3
-t= 35  Odo    has not decided yet, and waits in the world
+t= 35  Bram   began say(text="Aye, it is. Safe travels, friend." target=4), 5 ticks
       face #1 east
     round 14 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 36  Rook   began trade_accept(target=1), 3 ticks
+t= 36  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-469.900, 472.000) walked=2.7 steps=3
+t= 36  Odo    has not decided yet, and waits in the world
+t= 36  Pell   thought again at 10/20t, wanted the same thing
       face #2 west
     round 15 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 37  Rook   began trade_accept(target=1), 3 ticks
+t= 37  Sable  finished say(text="Just wandering, seeing what the land holds. Care to travel together?" target=3) -> say ok shout=false heard_by=1 check=9 context=persuade:#3
+t= 37  Bram   interrupted (spoken to), abandoned say(text="Aye, it is. Safe travels, friend." target=4) 2/5t
+t= 37  Bram   began say(text="Aye, it is. Safe travels, friend." target=4), 5 ticks
       face #1 east
     round 15 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 38  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=46
-t= 38  Wren   began examine(target=silk cloak), 4 ticks
-t= 38  Sable  began say(text="I seek a purpose worth a spear, Bram. Might you know of work or trouble nearby?" target=3), 5 ticks
-t= 38  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
-t= 38  Pell   thought again at 5/20t, wanted the same thing
+t= 38  Sable  has not decided yet, and waits in the world
       face #2 west
     round 16 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 39  Rook   finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
-t= 39  Rook   has not decided yet, and waits in the world
+t= 39  Wren   thought again at 5/8t, wanted the same thing
+t= 39  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #1 east
     round 16 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 40  Bram   finished say(text=Well met, Sable. I am Bram. Might you have goods to trade, or news of the road? target=4) -> say ok shout=false heard_by=1 check=8 context=persuade:#4
-t= 40  Sable  interrupted (spoken to), abandoned say(text="I seek a purpose worth a spear, Bram. Might you know of work or trouble nearby?" target=3) 2/5t
-t= 40  Sable  began say(text="I seek a purpose worth a spear, Bram. Might you know of work or trouble nearby?" target=3), 5 ticks
+t= 40  Rook   finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
+t= 40  Rook   has not decided yet, and waits in the world
       face #2 west
     round 17 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 41  Bram   has not decided yet, and waits in the world
+t= 41  Pell   thought again at 15/20t, wanted the same thing
       face #1 east
     round 17 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 42  Wren   finished examine(target=silk cloak) -> examine ok item=silk cloak seen=common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak
-t= 42  Wren   began say(text=a fair bargain), 5 ticks
-t= 42  Rook   began say(text="Good morning, Wren. Pell's checking that pile over there." target=1), 5 ticks
+t= 42  Wren   finished wait(ticks=8) -> wait ok ticks=8 until=50
+t= 42  Wren   began examine(target=silk cloak), 4 ticks
+t= 42  Bram   finished say(text="Aye, it is. Safe travels, friend." target=4) -> say ok shout=false heard_by=1 check=10 context=persuade:#4
+t= 42  Sable  began say(text="Then let's wander together, friend." target=3), 5 ticks
+t= 42  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-467.200, 472.000) walked=2.7 steps=3
+t= 42  Odo    has not decided yet, and waits in the world
+t= 42  Sable  interrupted (spoken to), abandoned say(text="Then let's wander together, friend." target=3) 0/5t
       face #2 west
     round 18 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 43  Odo    thought again at 5/7t, wanted the same thing
-t= 43  Pell   thought again at 10/20t, wanted the same thing
+t= 43  Rook   began say(text="shall we head out and explore together?" target=1), 5 ticks
+t= 43  Bram   has not decided yet, and waits in the world
       face #1 east
     round 18 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 44  Sable  began say(text="Then let's wander together, friend." target=3), 5 ticks
       face #2 west
     round 19 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 45  Bram   began trade_propose(target=4 give=[common sword] want=[common spear]), 4 ticks
-t= 45  Sable  finished say(text="I seek a purpose worth a spear, Bram. Might you know of work or trouble nearby?" target=3) -> say ok shout=false heard_by=1 check=9 context=persuade:#3
-t= 45  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-461.200, 472.000) walked=6.0 steps=7
-t= 45  Odo    has not decided yet, and waits in the world
-t= 45  Bram   interrupted (spoken to), abandoned trade_propose(target=4 give=[common sword] want=[common spear]) 0/4t
+t= 45  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #1 east
     round 19 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 46  Sable  has not decided yet, and waits in the world
+t= 46  Wren   finished examine(target=silk cloak) -> examine ok item=silk cloak seen=common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak
+t= 46  Wren   began say(text=a fair bargain), 5 ticks
+t= 46  Pell   finished go_to(target=6) -> go_to refused: there is nothing with id 6
+t= 46  Pell   has not decided yet, and waits in the world
       face #2 west
     round 20 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 47  Wren   finished say(text=a fair bargain) -> say ok shout=true heard_by=2
-t= 47  Wren   began wait(ticks=24), 24 ticks
-t= 47  Rook   finished say(text="Good morning, Wren. Pell's checking that pile over there." target=1) -> say ok shout=false heard_by=1 check=10 context=persuade:#1
-t= 47  Rook   has not decided yet, and waits in the world
-t= 47  Bram   began trade_propose(target=4 give=[common sword] want=[common spear]), 4 ticks
-t= 47  Wren   interrupted (spoken to), abandoned wait(ticks=24) 0/24t
-t= 47  Wren   began wait(ticks=24), 24 ticks
+t= 47  Bram   began say(text="Traveling together sounds good to me. Lead the way?" target=4), 5 ticks
       face #1 east
     round 20 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 48  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
-t= 48  Pell   thought again at 15/20t, wanted the same thing
+t= 48  Rook   finished say(text="shall we head out and explore together?" target=1) -> say ok shout=false heard_by=1 check=11 context=persuade:#1
+t= 48  Rook   has not decided yet, and waits in the world
+t= 48  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-464.500, 472.000) walked=2.7 steps=3
+t= 48  Odo    has not decided yet, and waits in the world
+t= 48  Wren   interrupted (spoken to), abandoned say(text=a fair bargain) 2/5t
+t= 48  Wren   began say(text=a fair bargain), 5 ticks
       face #2 west
     round 21 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 49  Sable  finished say(text="Then let's wander together, friend." target=3) -> say ok shout=false heard_by=1 check=12 context=persuade:#3
+t= 49  Pell   began go_to(target=6), 20 ticks
+t= 49  Bram   interrupted (spoken to), abandoned say(text="Traveling together sounds good to me. Lead the way?" target=4) 2/5t
+t= 49  Bram   began say(text="Traveling together sounds good to me. Lead the way?" target=4), 5 ticks
       face #1 east
     round 21 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 50  Rook   began wait(ticks=5), 5 ticks
-t= 50  Sable  began say(text="I carry little but my spear and boots, friend. If you've work or coin, I'm your blade." target=3), 5 ticks
+t= 50  Sable  has not decided yet, and waits in the world
       face #2 west
     round 22 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 51  Bram   finished trade_propose(target=4 give=[common sword] want=[common spear]) -> trade_propose refused: Sable is out of reach (6.00 > 2.50)
-t= 51  Bram   has not decided yet, and waits in the world
+t= 51  Rook   began say(text="shall we head out and explore together?" target=7), 5 ticks
+t= 51  Odo    began go_to(offset=(9.000, 0.000)), 10 ticks
       face #1 east
     round 22 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 52  Wren   thought again at 5/24t, wanted the same thing
       face #2 west
     round 23 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 53  Odo    thought again at 5/7t, wanted the same thing
-t= 53  Pell   finished go_to(target=6) -> go_to refused: there is nothing with id 6
-t= 53  Pell   has not decided yet, and waits in the world
+t= 53  Wren   finished say(text=a fair bargain) -> say ok shout=true heard_by=2
+t= 53  Wren   began wait(ticks=24), 24 ticks
       face #1 east
     round 23 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 54  Bram   finished say(text="Traveling together sounds good to me. Lead the way?" target=4) -> say ok shout=false heard_by=1 check=13 context=persuade:#4
+t= 54  Sable  began go_to(offset=(0.000, -3.000)), 3 ticks
+t= 54  Pell   thought again at 5/20t, wanted the same thing
+t= 54  Sable  interrupted (spoken to), abandoned go_to(offset=(0.000, -3.000)) 0/3t
       face #2 west
     round 24 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 55  Rook   finished wait(ticks=5) -> wait ok ticks=5 until=60
-t= 55  Rook   has not decided yet, and waits in the world
-t= 55  Bram   began say(text="I've seen no trouble yet, but there's a pile of goods some 40 paces east of here, unclaimed. Care to walk with me and see what fortune holds?" target=4), 5 ticks
-t= 55  Sable  finished say(text="I carry little but my spear and boots, friend. If you've work or coin, I'm your blade." target=3) -> say ok shout=false heard_by=1 check=11 context=persuade:#3
-t= 55  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-455.200, 472.000) walked=6.0 steps=7
-t= 55  Odo    has not decided yet, and waits in the world
-t= 55  Bram   interrupted (spoken to), abandoned say(text="I've seen no trouble yet, but there's a pile of goods some 40 paces east of here, unclaimed. Care to walk with me and see what fortune holds?" target=4) 0/5t
+t= 55  Bram   has not decided yet, and waits in the world
       face #1 east
     round 24 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 56  Sable  has not decided yet, and waits in the world
+t= 56  Rook   finished say(text="shall we head out and explore together?" target=7) -> say ok shout=false heard_by=1 check=14 context=persuade:#7
+t= 56  Rook   has not decided yet, and waits in the world
+t= 56  Sable  began go_to(offset=(0.000, -3.000)), 3 ticks
+t= 56  Odo    thought again at 5/10t, wanted the same thing
+t= 56  Pell   interrupted (spoken to), abandoned go_to(target=6) 7/20t
 t= 56  Pell   began go_to(target=6), 20 ticks
       face #2 west
     round 25 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 57  Wren   thought again at 10/24t, wanted the same thing
-t= 57  Bram   began say(text="I've seen no trouble yet, but there's a pile of goods some 40 paces east of here, unclaimed. Care to walk with me and see what fortune holds?" target=4), 5 ticks
       face #1 east
     round 25 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 58  Rook   began wait(ticks=5), 5 ticks
-t= 58  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 58  Wren   thought again at 5/24t, wanted the same thing
       face #2 west
     round 26 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 59  Rook   began say(text="Pell, Wren and I could make a fine exploring party — shall we three head out together?" target=7), 5 ticks
+t= 59  Bram   began say(text="After you, then — which way shall we wander?" target=4), 5 ticks
+t= 59  Sable  finished go_to(offset=(0.000, -3.000)) -> go_to refused: the board decides where a fighter goes
       face #1 east
     round 26 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 60  Sable  began say(text="No goods worth coin, Bram - only this spear and these boots. Point me at work or trouble, and any news I gather on the road is yours to hear." target=3), 5 ticks
+t= 60  Sable  has not decided yet, and waits in the world
       face #2 west
     round 27 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 61  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-452.500, 472.000) walked=2.7 steps=3
+t= 61  Odo    finished go_to(offset=(9.000, 0.000)) -> go_to ok at=(-455.500, 472.000) walked=9.0 steps=10
 t= 61  Odo    has not decided yet, and waits in the world
 t= 61  Pell   thought again at 5/20t, wanted the same thing
       face #1 east
     round 27 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 62  Wren   thought again at 15/24t, wanted the same thing
-t= 62  Bram   finished say(text="I've seen no trouble yet, but there's a pile of goods some 40 paces east of here, unclaimed. Care to walk with me and see what fortune holds?" target=4) -> say ok shout=false heard_by=1 check=12 context=persuade:#4
-t= 62  Sable  interrupted (spoken to), abandoned say(text="No goods worth coin, Bram - only this spear and these boots. Point me at work or trouble, and any news I gather on the road is yours to hear." target=3) 2/5t
-t= 62  Sable  began say(text="No goods worth coin, Bram - only this spear and these boots. Point me at work or trouble, and any news I gather on the road is yours to hear." target=3), 5 ticks
       face #2 west
     round 28 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 63  Rook   finished wait(ticks=5) -> wait ok ticks=5 until=68
-t= 63  Rook   has not decided yet, and waits in the world
-t= 63  Bram   has not decided yet, and waits in the world
+t= 63  Wren   thought again at 10/24t, wanted the same thing
       face #1 east
     round 28 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 64  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 64  Rook   finished say(text="Pell, Wren and I could make a fine exploring party — shall we three head out together?" target=7) -> say ok shout=false heard_by=1 check=15 context=persuade:#7
+t= 64  Rook   has not decided yet, and waits in the world
+t= 64  Bram   finished say(text="After you, then — which way shall we wander?" target=4) -> say ok shout=false heard_by=1 check=16 context=persuade:#4
+t= 64  Sable  began go_to(offset=(2.000, 0.000)), 2 ticks
+t= 64  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 64  Sable  interrupted (spoken to), abandoned go_to(offset=(2.000, 0.000)) 0/2t
+t= 64  Pell   interrupted (spoken to), abandoned go_to(target=6) 8/20t
+t= 64  Pell   began go_to(target=6), 20 ticks
       face #2 west
     round 29 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 65  Bram   has not decided yet, and waits in the world
       face #1 east
     round 29 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 66  Rook   began say(text=Did you find anything in the pile? target=7), 5 ticks
-t= 66  Pell   thought again at 10/20t, wanted the same thing
+t= 66  Sable  began go_to(offset=(2.000, 0.000)), 2 ticks
       face #2 west
     round 30 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 67  Wren   thought again at 20/24t, wanted the same thing
-t= 67  Bram   began go_to(offset=(40.000, 0.000)), 20 ticks
-t= 67  Sable  finished say(text="No goods worth coin, Bram - only this spear and these boots. Point me at work or trouble, and any news I gather on the road is yours to hear." target=3) -> say ok shout=false heard_by=1 check=13 context=persuade:#3
-t= 67  Bram   interrupted (spoken to), abandoned go_to(offset=(40.000, 0.000)) 0/20t
+t= 67  Rook   began say(text="then let us be off — east, toward the open ground" target=1), 5 ticks
+t= 67  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-452.800, 472.000) walked=2.7 steps=3
+t= 67  Odo    has not decided yet, and waits in the world
       face #1 east
     round 30 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 68  Wren   thought again at 15/24t, wanted the same thing
+t= 68  Sable  finished go_to(offset=(2.000, 0.000)) -> go_to refused: the board decides where a fighter goes
 t= 68  Sable  has not decided yet, and waits in the world
       face #2 west
     round 31 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 69  Bram   began go_to(offset=(40.000, 0.000)), 20 ticks
-t= 69  Odo    thought again at 5/7t, wanted the same thing
+t= 69  Bram   began say(text="East looks promising — let's head that way." target=4), 5 ticks
+t= 69  Pell   thought again at 5/20t, wanted the same thing
       face #1 east
     round 31 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 70  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #2 west
     round 32 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 71  Wren   finished wait(ticks=24) -> wait ok ticks=24 until=95
-t= 71  Wren   began say(text=what was that noise?), 5 ticks
-t= 71  Rook   finished say(text=Did you find anything in the pile? target=7) -> say ok shout=false heard_by=1 check=14 context=persuade:#7
-t= 71  Rook   has not decided yet, and waits in the world
-t= 71  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-446.500, 472.000) walked=6.0 steps=7
-t= 71  Odo    has not decided yet, and waits in the world
-t= 71  Pell   thought again at 15/20t, wanted the same thing
-t= 71  Pell   interrupted (spoken to), abandoned go_to(target=6) 15/20t
-t= 71  Pell   began go_to(target=6), 20 ticks
       face #1 east
     round 32 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 72  Sable  began say(text="Lead on, Bram - I'll walk east with you and we'll split whatever that pile holds." target=3), 5 ticks
+t= 72  Rook   finished say(text="then let us be off — east, toward the open ground" target=1) -> say ok shout=false heard_by=1 check=17 context=persuade:#1
+t= 72  Rook   has not decided yet, and waits in the world
+t= 72  Sable  began say(text="East, toward that rise — the land looks promising that way." target=3), 5 ticks
+t= 72  Wren   interrupted (spoken to), abandoned wait(ticks=24) 19/24t
+t= 72  Wren   began wait(ticks=24), 24 ticks
       face #2 west
     round 33 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 73  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-450.100, 472.000) walked=2.7 steps=3
+t= 73  Odo    has not decided yet, and waits in the world
       face #1 east
     round 33 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 74  Rook   began say(text="What bargain is that, Wren?" target=1), 5 ticks
-t= 74  Bram   thought again at 5/20t, wanted the same thing
-t= 74  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 74  Bram   finished say(text="East looks promising — let's head that way." target=4) -> say ok shout=false heard_by=1 check=18 context=persuade:#4
+t= 74  Pell   thought again at 10/20t, wanted the same thing
+t= 74  Sable  interrupted (spoken to), abandoned say(text="East, toward that rise — the land looks promising that way." target=3) 2/5t
+t= 74  Sable  began say(text="East, toward that rise — the land looks promising that way." target=3), 5 ticks
       face #2 west
     round 34 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 75  Rook   began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 75  Bram   has not decided yet, and waits in the world
       face #1 east
     round 34 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 76  Wren   finished say(text=what was that noise?) -> say ok shout=true heard_by=2
-t= 76  Wren   has not decided yet, and waits in the world
-t= 76  Pell   thought again at 5/20t, wanted the same thing
+t= 76  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #2 west
     round 35 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 77  Sable  finished say(text="Lead on, Bram - I'll walk east with you and we'll split whatever that pile holds." target=3) -> say ok shout=false heard_by=1 check=15 context=persuade:#3
-t= 77  Bram   interrupted (spoken to), abandoned go_to(offset=(40.000, 0.000)) 8/20t
-t= 77  Bram   began go_to(offset=(40.000, 0.000)), 20 ticks
+t= 77  Wren   thought again at 5/24t, wanted the same thing
       face #1 east
     round 35 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 78  Sable  has not decided yet, and waits in the world
       face #2 west
     round 36 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 79  Rook   finished say(text="What bargain is that, Wren?" target=1) -> say ok shout=false heard_by=1 check=16 context=persuade:#1
-t= 79  Rook   has not decided yet, and waits in the world
-t= 79  Odo    thought again at 5/7t, wanted the same thing
+t= 79  Bram   began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 79  Sable  finished say(text="East, toward that rise — the land looks promising that way." target=3) -> say ok shout=false heard_by=1 check=19 context=persuade:#3
+t= 79  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-447.400, 472.000) walked=2.7 steps=3
+t= 79  Odo    has not decided yet, and waits in the world
+t= 79  Pell   thought again at 15/20t, wanted the same thing
+t= 79  Bram   interrupted (spoken to), abandoned go_to(offset=(6.000, 0.000)) 0/7t
       face #1 east
     round 36 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 80  Rook   thought again at 5/7t, wanted the same thing
+t= 80  Sable  has not decided yet, and waits in the world
       face #2 west
     round 37 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 81  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-440.500, 472.000) walked=6.0 steps=7
-t= 81  Odo    has not decided yet, and waits in the world
-t= 81  Pell   thought again at 10/20t, wanted the same thing
+t= 81  Bram   began go_to(offset=(6.000, 0.000)), 7 ticks
       face #1 east
     round 37 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 82  Rook   began say(text="Not sure what the noise was — maybe Pell rustling through that pile. Now, what bargain did you mean?" target=1), 5 ticks
-t= 82  Bram   thought again at 5/20t, wanted the same thing
-t= 82  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 82  Wren   thought again at 10/24t, wanted the same thing
+t= 82  Rook   finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-472.000, 416.000) walked=6.0 steps=7
+t= 82  Rook   has not decided yet, and waits in the world
+t= 82  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #2 west
     round 38 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
       face #1 east
     round 38 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 84  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 84  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
+t= 84  Pell   finished go_to(target=6) -> go_to refused: there is nothing with id 6
+t= 84  Pell   has not decided yet, and waits in the world
       face #2 west
     round 39 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t= 85  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 85  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-444.700, 472.000) walked=2.7 steps=3
+t= 85  Odo    has not decided yet, and waits in the world
       face #1 east
     round 39 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 86  Pell   thought again at 15/20t, wanted the same thing
+t= 86  Bram   thought again at 5/7t, wanted the same thing
       face #2 west
     round 40 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 87  Rook   finished say(text="Not sure what the noise was — maybe Pell rustling through that pile. Now, what bargain did you mean?" target=1) -> say ok shout=false heard_by=1 check=17 context=persuade:#1
-t= 87  Rook   has not decided yet, and waits in the world
-t= 87  Bram   thought again at 10/20t, wanted the same thing
-t= 87  Sable  thought again at 5/7t, wanted the same thing
-t= 87  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-437.800, 472.000) walked=2.7 steps=3
-t= 87  Odo    has not decided yet, and waits in the world
+t= 87  Wren   thought again at 15/24t, wanted the same thing
+t= 87  Pell   began say(text="Aye, Rook — let the three of us head out together." target=2), 5 ticks
       face #1 east
     round 40 turn #2 at (-143,135) facing=west hp=38/38 def=0 spear + boots(4/4)
+t= 88  Rook   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-469.300, 416.000) walked=2.7 steps=3
+t= 88  Rook   has not decided yet, and waits in the world
+t= 88  Bram   finished go_to(offset=(6.000, 0.000)) -> go_to refused: the board decides where a fighter goes
+t= 88  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
       face #2 west
     round 41 turn #1 at (-145,135) facing=east hp=38/38 def=0 sword + boots(4/4)
 t= 88  --     the fight is over; real time again
     over turns=80 rounds=41 ending=limit survivors=2 fallen=0
     snap-out #3 cell (-145,135) -> (-433.500, 1.164, 406.500) back to cell (-145,135) hp=38/38
     snap-out #4 cell (-143,135) -> (-427.500, 1.609, 406.500) back to cell (-143,135) hp=38/38
-t= 89  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-421.500, 406.500) walked=6.0 steps=7
-t= 89  Sable  has not decided yet, and waits in the world
-t= 90  Rook   began wait(ticks=3), 3 ticks
-t= 90  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
-t= 91  Pell   finished go_to(target=6) -> go_to refused: there is nothing with id 6
-t= 91  Pell   has not decided yet, and waits in the world
-t= 92  Bram   thought again at 15/20t, wanted the same thing
-t= 92  Sable  began go_to(offset=(10.000, 0.000)), 11 ticks
-t= 92  --     Bram and somebody of another band have met
-    snap-in around #3 at (-429.900, 1.322, 406.500) radius=24.0 span=30.0 storey=0 joined=2
-    snap-in board 80fbc2b50f73e795 cells=441 standable=439 holes=2 cliffs=7
-    snap-in #3 (-429.900, 406.500) -> cell (-144,135) centre (-430.500, 406.500) moved 0.600 rings=0
-    snap-in #4 (-421.500, 406.500) -> cell (-141,135) centre (-421.500, 406.500) moved 0.000 rings=0
-    board 80fbc2b50f73e795 cells=441 standable=439 holes=2 cliffs=7
-    dice seed=2700738740 swing=92..108
-    commanders 2
-      #1 commander owner=1 level=3 hp=38/38 def=0 power=0
-      #2 commander owner=2 level=3 hp=38/38 def=0 power=0
-    round 1 turn #1 at (-144,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 93  Rook   finished wait(ticks=3) -> wait ok ticks=3 until=96
-t= 93  Rook   has not decided yet, and waits in the world
-t= 93  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-435.100, 472.000) walked=2.7 steps=3
-t= 93  Odo    has not decided yet, and waits in the world
-t= 93  Bram   interrupted (combat began), abandoned go_to(offset=(40.000, 0.000)) 16/20t
-t= 93  Bram   began go_to(offset=(40.000, 0.000)), 20 ticks
-t= 93  Sable  interrupted (combat began), abandoned go_to(offset=(10.000, 0.000)) 1/11t
-      move #1 (-144,135)->(-143,135)
-      face #1 east
-    round 1 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 94  Sable  began go_to(offset=(10.000, 0.000)), 11 ticks
-t= 94  Pell   began say(text="I don't see any pile from here — where is it?" target=2), 5 ticks
-      face #2 west
-    round 2 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 2 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 96  Rook   began say(text="Ah — I take it the bargain was our trade, Wren. Fair indeed; enjoy the cloak." target=1), 5 ticks
-t= 96  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
-      face #2 west
-    round 3 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 3 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t= 98  Bram   thought again at 5/20t, wanted the same thing
-      face #2 west
-    round 4 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t= 99  Sable  thought again at 5/11t, wanted the same thing
-t= 99  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-432.400, 472.000) walked=2.7 steps=3
-t= 99  Odo    has not decided yet, and waits in the world
-t= 99  Pell   finished say(text="I don't see any pile from here — where is it?" target=2) -> say ok shout=false heard_by=1 check=18 context=persuade:#2
-t= 99  Pell   has not decided yet, and waits in the world
-t= 99  Rook   interrupted (spoken to), abandoned say(text="Ah — I take it the bargain was our trade, Wren. Fair indeed; enjoy the cloak." target=1) 3/5t
-t= 99  Rook   began say(text="Ah — I take it the bargain was our trade, Wren. Fair indeed; enjoy the cloak." target=1), 5 ticks
-      face #1 east
-    round 4 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 5 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 5 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=102  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
-t=102  Pell   began say(text="I don't see any pile nearby — maybe it's beyond the drop to the south. I'll head that way." target=2), 5 ticks
-      face #2 west
-    round 6 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=103  Bram   thought again at 10/20t, wanted the same thing
-      face #1 east
-    round 6 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=104  Rook   finished say(text="Ah — I take it the bargain was our trade, Wren. Fair indeed; enjoy the cloak." target=1) -> say ok shout=false heard_by=1 check=19 context=persuade:#1
-t=104  Rook   has not decided yet, and waits in the world
-t=104  Sable  thought again at 10/11t, wanted the same thing
-      face #2 west
-    round 7 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=105  Sable  finished go_to(offset=(10.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=105  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-429.700, 472.000) walked=2.7 steps=3
-t=105  Odo    has not decided yet, and waits in the world
-      face #1 east
-    round 7 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=106  Sable  has not decided yet, and waits in the world
-      face #2 west
-    round 8 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=107  Rook   began say(text="Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it." target=7), 5 ticks
-t=107  Pell   finished say(text="I don't see any pile nearby — maybe it's beyond the drop to the south. I'll head that way." target=2) -> say ok shout=false heard_by=1 check=20 context=persuade:#2
-t=107  Pell   has not decided yet, and waits in the world
-t=107  Rook   interrupted (spoken to), abandoned say(text="Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it." target=7) 0/5t
-t=107  Rook   began say(text="Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it." target=7), 5 ticks
-      face #1 east
-    round 8 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=108  Bram   thought again at 15/20t, wanted the same thing
-t=108  Odo    began go_to(offset=(12.000, 0.000)), 13 ticks
-      face #2 west
-    round 9 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 9 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=110  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
-t=110  Pell   began go_to(offset=(0.000, -6.000)), 7 ticks
-      face #2 west
-    round 10 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 10 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=112  Rook   finished say(text="Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it." target=7) -> say ok shout=false heard_by=1 check=21 context=persuade:#7
-t=112  Rook   has not decided yet, and waits in the world
-t=112  Pell   interrupted (spoken to), abandoned go_to(offset=(0.000, -6.000)) 2/7t
-t=112  Pell   began go_to(offset=(0.000, -6.000)), 7 ticks
-      face #2 west
-    round 11 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=113  Bram   finished go_to(offset=(40.000, 0.000)) -> go_to refused: the board decides where a fighter goes
+t= 89  Bram   has not decided yet, and waits in the world
+t= 89  Sable  thought again at 5/7t, wanted the same thing
+t= 91  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 91  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-421.500, 406.500) walked=6.0 steps=7
+t= 91  Sable  has not decided yet, and waits in the world
+t= 91  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-442.000, 472.000) walked=2.7 steps=3
+t= 91  Odo    has not decided yet, and waits in the world
+t= 92  Wren   thought again at 20/24t, wanted the same thing
+t= 92  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 92  Pell   finished say(text="Aye, Rook — let the three of us head out together." target=2) -> say ok shout=false heard_by=1 check=20 context=persuade:#2
+t= 92  Pell   has not decided yet, and waits in the world
+t= 92  Rook   interrupted (spoken to), abandoned go_to(offset=(3.000, 0.000)) 1/3t
+t= 92  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 94  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 94  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t= 95  Rook   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-465.700, 416.000) walked=2.7 steps=3
+t= 95  Rook   has not decided yet, and waits in the world
+t= 95  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-430.800, 406.500) walked=2.7 steps=3
+t= 95  Bram   has not decided yet, and waits in the world
+t= 95  Pell   began go_to(target=6), 20 ticks
+t= 96  Wren   finished wait(ticks=24) -> wait ok ticks=24 until=120
+t= 96  Wren   began say(text=what was that noise?), 5 ticks
+t= 97  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-418.800, 406.500) walked=2.7 steps=3
+t= 97  Sable  has not decided yet, and waits in the world
+t= 97  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-439.300, 472.000) walked=2.7 steps=3
+t= 97  Odo    has not decided yet, and waits in the world
+t= 98  Rook   began go_to(offset=(10.000, 0.000)), 11 ticks
+t= 98  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=100  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=100  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=100  Pell   thought again at 5/20t, wanted the same thing
+t=101  Wren   finished say(text=what was that noise?) -> say ok shout=true heard_by=2
+t=101  Wren   has not decided yet, and waits in the world
+t=101  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-428.100, 406.500) walked=2.7 steps=3
+t=101  Bram   has not decided yet, and waits in the world
+t=103  Rook   thought again at 5/11t, wanted the same thing
+t=103  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-416.100, 406.500) walked=2.7 steps=3
+t=103  Sable  has not decided yet, and waits in the world
+t=103  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-436.600, 472.000) walked=2.7 steps=3
+t=103  Odo    has not decided yet, and waits in the world
+t=104  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=105  Pell   thought again at 10/20t, wanted the same thing
+t=106  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=106  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=107  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-425.400, 406.500) walked=2.7 steps=3
+t=107  Bram   has not decided yet, and waits in the world
+t=108  Rook   thought again at 10/11t, wanted the same thing
+t=109  Rook   finished go_to(offset=(10.000, 0.000)) -> go_to ok at=(-455.800, 416.000) walked=9.9 steps=11
+t=109  Rook   has not decided yet, and waits in the world
+t=109  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-413.400, 406.500) walked=2.7 steps=3
+t=109  Sable  has not decided yet, and waits in the world
+t=109  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-433.900, 472.000) walked=2.7 steps=3
+t=109  Odo    has not decided yet, and waits in the world
+t=110  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=110  Pell   thought again at 15/20t, wanted the same thing
+t=112  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=112  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=112  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=113  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-422.700, 406.500) walked=2.7 steps=3
 t=113  Bram   has not decided yet, and waits in the world
-t=113  Odo    thought again at 5/13t, wanted the same thing
-      face #1 east
-    round 11 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 12 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=115  Rook   began go_to(target=7), 1 ticks
-t=115  Sable  thought again at 5/7t, wanted the same thing
-      face #1 east
-    round 12 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=116  Rook   finished go_to(target=7) -> go_to ok at=(-477.816, 415.119) walked=0.9 steps=1
-t=116  Rook   has not decided yet, and waits in the world
-      face #2 west
-    round 13 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=117  Bram   began go_to(offset=(40.000, 0.000)), 20 ticks
-t=117  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=117  Pell   thought again at 5/7t, wanted the same thing
-      face #1 east
-    round 13 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=118  Sable  has not decided yet, and waits in the world
-t=118  Odo    thought again at 10/13t, wanted the same thing
-      face #2 west
-    round 14 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=119  Rook   began say(text="Careful, Pell — there's a hole just past the drop; don't fall in." target=7), 5 ticks
-t=119  Pell   finished go_to(offset=(0.000, -6.000)) -> go_to ok at=(-477.423, 409.931) walked=6.0 steps=7
-t=119  Pell   has not decided yet, and waits in the world
-      face #1 east
-    round 14 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 15 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=121  Odo    finished go_to(offset=(12.000, 0.000)) -> go_to ok at=(-418.000, 472.000) walked=11.7 steps=13
-t=121  Odo    has not decided yet, and waits in the world
-      face #1 east
-    round 15 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=122  Bram   thought again at 5/20t, wanted the same thing
-t=122  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
-t=122  Pell   began say(text="Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out." target=2), 5 ticks
-      face #2 west
-    round 16 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 16 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=124  Rook   finished say(text="Careful, Pell — there's a hole just past the drop; don't fall in." target=7) -> say ok shout=false heard_by=1 check=22 context=persuade:#7
-t=124  Rook   has not decided yet, and waits in the world
-t=124  Odo    began go_to(offset=(-6.000, 0.000)), 7 ticks
-t=124  Pell   interrupted (spoken to), abandoned say(text="Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out." target=2) 2/5t
-t=124  Pell   began say(text="Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out." target=2), 5 ticks
-      face #2 west
-    round 17 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 17 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 18 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=127  Rook   began go_to(target=7), 4 ticks
-t=127  Bram   thought again at 10/20t, wanted the same thing
-t=127  Sable  thought again at 5/7t, wanted the same thing
-      face #1 east
-    round 18 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 19 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=129  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=129  Odo    thought again at 5/7t, wanted the same thing
-t=129  Pell   finished say(text="Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out." target=2) -> say ok shout=false heard_by=1 check=23 context=persuade:#2
-t=129  Pell   has not decided yet, and waits in the world
-t=129  Rook   interrupted (spoken to), abandoned go_to(target=7) 2/4t
-t=129  Rook   began go_to(target=7), 2 ticks
-      face #1 east
-    round 19 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=130  Sable  has not decided yet, and waits in the world
-      face #2 west
-    round 20 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=131  Rook   finished go_to(target=7) -> go_to ok at=(-477.544, 411.529) walked=1.8 steps=2
+t=115  Rook   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-453.100, 416.000) walked=2.7 steps=3
+t=115  Rook   has not decided yet, and waits in the world
+t=115  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-410.700, 406.500) walked=2.7 steps=3
+t=115  Sable  has not decided yet, and waits in the world
+t=115  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-431.200, 472.000) walked=2.7 steps=3
+t=115  Odo    has not decided yet, and waits in the world
+t=115  Pell   finished go_to(target=6) -> go_to refused: there is nothing with id 6
+t=115  Pell   has not decided yet, and waits in the world
+t=116  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=118  Rook   began say(text="Wren, Pell — I heard it too. Stay sharp; let's move east together and find what made that noise." target=1), 5 ticks
+t=118  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=118  Odo    began go_to(offset=(6.000, 0.000)), 7 ticks
+t=118  Pell   began say(text="What noise, Wren? I heard nothing but the wind." target=1), 5 ticks
+t=119  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-420.000, 406.500) walked=2.7 steps=3
+t=119  Bram   has not decided yet, and waits in the world
+t=121  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-408.000, 406.500) walked=2.7 steps=3
+t=121  Sable  has not decided yet, and waits in the world
+t=122  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=123  Rook   finished say(text="Wren, Pell — I heard it too. Stay sharp; let's move east together and find what made that noise." target=1) -> say refused: Wren is out of earshot (23.00 > 20.00)
+t=123  Rook   has not decided yet, and waits in the world
+t=123  Odo    thought again at 5/7t, wanted the same thing
+t=123  Pell   finished say(text="What noise, Wren? I heard nothing but the wind." target=1) -> say ok shout=false heard_by=1 check=21 context=persuade:#1
+t=123  Pell   has not decided yet, and waits in the world
+t=124  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=125  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-417.300, 406.500) walked=2.7 steps=3
+t=125  Bram   has not decided yet, and waits in the world
+t=125  Odo    finished go_to(offset=(6.000, 0.000)) -> go_to ok at=(-425.200, 472.000) walked=6.0 steps=7
+t=125  Odo    has not decided yet, and waits in the world
+t=126  Rook   began say(text=I heard nothing myself — perhaps #3, the armed one moving east? target=1), 5 ticks
+t=126  Pell   began say(text=Shall we set off, then? Rook, Wren — the road waits. target=2), 5 ticks
+t=127  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-405.300, 406.500) walked=2.7 steps=3
+t=127  Sable  has not decided yet, and waits in the world
+t=128  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=128  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=130  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=131  Rook   finished say(text=I heard nothing myself — perhaps #3, the armed one moving east? target=1) -> say refused: Wren is out of earshot (23.00 > 20.00)
 t=131  Rook   has not decided yet, and waits in the world
-t=131  Odo    finished go_to(offset=(-6.000, 0.000)) -> go_to ok at=(-424.000, 472.000) walked=6.0 steps=7
+t=131  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-414.600, 406.500) walked=2.7 steps=3
+t=131  Bram   has not decided yet, and waits in the world
+t=131  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-422.500, 472.000) walked=2.7 steps=3
 t=131  Odo    has not decided yet, and waits in the world
-      face #1 east
-    round 20 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=132  Bram   thought again at 15/20t, wanted the same thing
-t=132  Pell   began go_to(offset=(-6.000, -6.000)), 9 ticks
-      face #2 west
-    round 21 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 21 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=134  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
-t=134  Odo    began go_to(offset=(-6.000, 0.000)), 7 ticks
-      face #2 west
-    round 22 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 22 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 23 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=137  Bram   finished go_to(offset=(40.000, 0.000)) -> go_to refused: the board decides where a fighter goes
+t=131  Pell   finished say(text=Shall we set off, then? Rook, Wren — the road waits. target=2) -> say ok shout=false heard_by=1 check=22 context=persuade:#2
+t=131  Pell   has not decided yet, and waits in the world
+t=133  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-402.600, 406.500) walked=2.7 steps=3
+t=133  Sable  has not decided yet, and waits in the world
+t=134  Rook   began say(text="Wren, Pell — I heard it too. Let us move east together and find what made that noise." target=1), 5 ticks
+t=134  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=134  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=134  Pell   began say(text=Set off east, then — keep together, and mind the edge south of here. target=2), 5 ticks
+t=136  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=137  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-411.900, 406.500) walked=2.7 steps=3
 t=137  Bram   has not decided yet, and waits in the world
-t=137  Pell   thought again at 5/9t, wanted the same thing
-      face #1 east
-    round 23 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 24 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=139  Sable  thought again at 5/7t, wanted the same thing
-t=139  Odo    thought again at 5/7t, wanted the same thing
-      face #1 east
-    round 24 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 25 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=141  Bram   began go_to(offset=(12.000, 0.000)), 13 ticks
-t=141  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=141  Odo    finished go_to(offset=(-6.000, 0.000)) -> go_to ok at=(-430.000, 472.000) walked=6.0 steps=7
-t=141  Odo    has not decided yet, and waits in the world
-t=141  Pell   finished go_to(offset=(-6.000, -6.000)) -> go_to ok at=(-483.151, 404.203) walked=8.1 steps=9
-t=141  Pell   has not decided yet, and waits in the world
-      face #1 east
-    round 25 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=142  Rook   began go_to(offset=(-3.000, -3.000)), 5 ticks
-t=142  Sable  has not decided yet, and waits in the world
-      face #2 west
-    round 26 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 26 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=144  Odo    began go_to(offset=(-3.000, 0.000)), 3 ticks
-t=144  Pell   began go_to(offset=(-6.000, -6.000)), 9 ticks
-      face #2 west
-    round 27 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 27 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=146  Bram   thought again at 5/13t, wanted the same thing
-t=146  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
-      face #2 west
-    round 28 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=147  Rook   finished go_to(offset=(-3.000, -3.000)) -> go_to ok at=(-480.544, 408.529) walked=4.243 steps=5
+t=137  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-419.800, 472.000) walked=2.7 steps=3
+t=137  Odo    has not decided yet, and waits in the world
+t=139  Rook   finished say(text="Wren, Pell — I heard it too. Let us move east together and find what made that noise." target=1) -> say refused: Wren is out of earshot (23.00 > 20.00)
+t=139  Rook   has not decided yet, and waits in the world
+t=139  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-399.900, 406.500) walked=2.7 steps=3
+t=139  Sable  has not decided yet, and waits in the world
+t=139  Pell   finished say(text=Set off east, then — keep together, and mind the edge south of here. target=2) -> say ok shout=false heard_by=1 check=23 context=persuade:#2
+t=139  Pell   has not decided yet, and waits in the world
+t=140  Bram   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=140  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=142  Rook   began say(text=the three of us are set — east, toward that open ground, and let us find what made that noise target=1), 5 ticks
+t=142  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=142  Pell   began say(text="Rook, Wren — eastward, and mind the drop south of here." target=2), 5 ticks
+t=143  Bram   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-409.200, 406.500) walked=2.7 steps=3
+t=143  Bram   has not decided yet, and waits in the world
+t=143  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-417.100, 472.000) walked=2.7 steps=3
+t=143  Odo    has not decided yet, and waits in the world
+t=145  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-397.200, 406.500) walked=2.7 steps=3
+t=145  Sable  has not decided yet, and waits in the world
+t=146  Bram   began say(text="East it is — after you, Sable." target=4), 5 ticks
+t=146  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=147  Rook   finished say(text=the three of us are set — east, toward that open ground, and let us find what made that noise target=1) -> say refused: Wren is out of earshot (23.00 > 20.00)
 t=147  Rook   has not decided yet, and waits in the world
-t=147  Odo    finished go_to(offset=(-3.000, 0.000)) -> go_to ok at=(-432.700, 472.000) walked=2.7 steps=3
-t=147  Odo    has not decided yet, and waits in the world
-      face #1 east
-    round 28 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 29 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=149  Pell   thought again at 5/9t, wanted the same thing
-      face #1 east
-    round 29 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=150  Rook   began wait(ticks=5), 5 ticks
-t=150  Odo    began go_to(offset=(9.000, 0.000)), 10 ticks
-      face #2 west
-    round 30 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=151  Bram   thought again at 10/13t, wanted the same thing
-t=151  Sable  thought again at 5/7t, wanted the same thing
-      face #1 east
-    round 30 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-      face #2 west
-    round 31 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=153  Sable  finished go_to(offset=(6.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=153  Pell   finished go_to(offset=(-6.000, -6.000)) -> go_to ok at=(-488.878, 398.476) walked=8.1 steps=9
+t=147  Pell   finished say(text="Rook, Wren — eastward, and mind the drop south of here." target=2) -> say ok shout=false heard_by=1 check=24 context=persuade:#2
+t=147  Pell   has not decided yet, and waits in the world
+t=148  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=149  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-414.400, 472.000) walked=2.7 steps=3
+t=149  Odo    has not decided yet, and waits in the world
+t=150  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=150  Pell   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=151  Bram   finished say(text="East it is — after you, Sable." target=4) -> say ok shout=false heard_by=1 check=25 context=persuade:#4
+t=151  Bram   has not decided yet, and waits in the world
+t=151  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-394.500, 406.500) walked=2.7 steps=3
+t=151  Sable  has not decided yet, and waits in the world
+t=152  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=153  Rook   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-450.400, 416.000) walked=2.7 steps=3
+t=153  Rook   has not decided yet, and waits in the world
+t=153  Pell   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-470.378, 416.560) walked=2.7 steps=3
 t=153  Pell   has not decided yet, and waits in the world
-      face #1 east
-    round 31 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=154  Bram   finished go_to(offset=(12.000, 0.000)) -> go_to refused: the board decides where a fighter goes
-t=154  Sable  has not decided yet, and waits in the world
-      face #2 west
-    round 32 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=155  Rook   finished wait(ticks=5) -> wait ok ticks=5 until=160
-t=155  Rook   has not decided yet, and waits in the world
-t=155  Bram   has not decided yet, and waits in the world
-t=155  Odo    thought again at 5/10t, wanted the same thing
-      face #1 east
-    round 32 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=156  Pell   began go_to(offset=(-15.000, -15.000)), 20 ticks
-      face #2 west
-    round 33 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-      face #1 east
-    round 33 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=158  Rook   began go_to(offset=(-6.000, -9.000)), 12 ticks
-t=158  Sable  began go_to(offset=(6.000, 0.000)), 7 ticks
-      face #2 west
-    round 34 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
-t=159  Bram   began go_to(offset=(35.000, 0.000)), 20 ticks
-      face #1 east
-    round 34 turn #2 at (-141,135) facing=west hp=38/38 def=0 spear + boots(4/4)
-t=160  Odo    finished go_to(offset=(9.000, 0.000)) -> go_to ok at=(-423.700, 472.000) walked=9.0 steps=10
-t=160  Odo    has not decided yet, and waits in the world
-      face #2 west
-    round 35 turn #1 at (-143,135) facing=east hp=38/38 def=0 sword + boots(4/4)
+t=154  Bram   began go_to(target=4), 14 ticks
+t=154  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
+t=155  Odo    finished go_to(offset=(3.000, 0.000)) -> go_to refused: the way to the position is blocked
+t=155  Odo    has not decided yet, and waits in the world
+t=156  Rook   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=156  Pell   began go_to(offset=(3.000, 0.000)), 3 ticks
+t=157  Sable  finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-391.800, 406.500) walked=2.7 steps=3
+t=157  Sable  has not decided yet, and waits in the world
+t=158  Odo    began go_to(offset=(3.000, 0.000)), 3 ticks
+t=159  Rook   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-447.700, 416.000) walked=2.7 steps=3
+t=159  Rook   has not decided yet, and waits in the world
+t=159  Bram   thought again at 5/14t, wanted the same thing
+t=159  Pell   finished go_to(offset=(3.000, 0.000)) -> go_to ok at=(-467.678, 416.560) walked=2.7 steps=3
+t=159  Pell   has not decided yet, and waits in the world
+t=160  Sable  began go_to(offset=(3.000, 0.000)), 3 ticks
 
-the model cast's turns -- 78 questions across 5 characters, 76 chose an action
+the model cast's turns -- 96 questions across 5 characters, 96 chose an action
   who    turn asked answered  observed          the model said                 which read back as           what the engine answered
-  Rook   1        1        4  c075af3add949864  say text=Hello, Pell and Wren… say(text=Hello, Pell and Wr… say ok shout=false heard_by=1 check=2 context=persuade:#7  (chosen again after 1 interruption)
-  Bram   1        1        4  42e2678aeea9c3d6  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=36.139
-  Sable  1        1        4  177eddb243989a96  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
-  Odo    1        1        4  a7aa50cf231b773f  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-478.000, 472.000) walked=6.0 steps=7
-  Pell   1        1        4  6ab0babc4ca88c2f  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
-  Bram   2        8       11  f432f29d64380a1a  say text=Hail, traveler! What… say(text=Hail, traveler! Wh… say ok shout=false heard_by=1 check=3 context=persuade:#4
-  Pell   2        9       12  a413ad56161fb348  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=0.0 steps=0
-  Rook   2       11       14  a7ce03e17ebbaee4  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0
-  Odo    2       11       14  cb6ba8cfbb16fca7  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-475.300, 472.000) walked=2.7 steps=3
-  Pell   3       13       16  27e9be3b759625db  say text=Let's look. I'll che… say(text=Let's look. I'll c… say ok shout=false heard_by=1 check=4 context=persuade:#2
-  Sable  2       14       18  5c4422c2eb695033  say text=Hail, traveler! I am… say(text=Hail, traveler! I … say ok shout=false heard_by=1 check=5 context=persuade:#3
-  Odo    3       17       20  5a95ec4f37ad9032  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-472.600, 472.000) walked=2.7 steps=3
-  Rook   3       18       21  422d598c8505e02c  examine target=#6              examine(target=6)            examine refused: there is nothing with id 6  (chosen again after 1 interruption)
-  Bram   3       17       21  c569f2711667c10f  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=33  (chosen again after 1 interruption)
-  Pell   4       21       24  836561a2c4cccdf7  examine target=#6              examine(target=6)            examine refused: there is nothing with id 6
-  Odo    4       23       26  82040db94e783b97  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-469.900, 472.000) walked=2.7 steps=3
-  Rook   4       25       28  f166f4794c37e10d  say text="Let me know what yo… say(text="Let me know what … say ok shout=false heard_by=1 check=6 context=persuade:#7
-  Sable  3       24       28  174dcf2da4382160  say text="I wander these land… say(text="I wander these la… say ok shout=false heard_by=1 check=7 context=persuade:#3
-  Pell   5       28       31  7e8c44cfae817235  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6  (chosen again after 1 interruption)
-  Odo    5       29       32  fed04cb8c935dae0  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-467.200, 472.000) walked=2.7 steps=3
-  Bram   4       29       33  faad9436be0ec0c3  say text=Well met, Sable. I a… say(text=Well met, Sable. I… say ok shout=false heard_by=1 check=8 context=persuade:#4  (chosen again after 1 interruption)
-  Rook   5       33       36  2edc6d156200a1f0  trade_accept target=#1         trade_accept(target=1)       trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
-  Sable  4       34       38  189f372b8d20eef4  say text="I seek a purpose wo… say(text="I seek a purpose … say ok shout=false heard_by=1 check=9 context=persuade:#3  (chosen again after 1 interruption)
-  Odo    6       35       38  c6d76c51ac5e8697  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-461.200, 472.000) walked=6.0 steps=7
-  Rook   6       39       42  bbcaa27557747d28  say text="Good morning, Wren.… say(text="Good morning, Wre… say ok shout=false heard_by=1 check=10 context=persuade:#1
-  Bram   5       41       45  013964403272db2b  trade_propose target=#4 give=… trade_propose(target=4 give… trade_propose refused: Sable is out of reach (6.00 > 2.50)  (chosen again after 1 interruption)
-  Odo    7       45       48  0d36178c7bfc9c1b  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-455.200, 472.000) walked=6.0 steps=7
-  Rook   7       47       50  8dcf3cc561669a6d  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=60
-  Sable  5       46       50  ac5e7518e7596d31  say text="I carry little but … say(text="I carry little bu… say ok shout=false heard_by=1 check=11 context=persuade:#3
-  Bram   6       51       55  73751984f22e1466  say text="I've seen no troubl… say(text="I've seen no trou… say ok shout=false heard_by=1 check=12 context=persuade:#4  (chosen again after 1 interruption)
-  Pell   6       53       56  bf21f82a2f0f97c2  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6  (chosen again after 1 interruption)
-  Rook   8       55       58  2b2e248e650c83eb  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=68
-  Odo    8       55       58  d4cdc040c5fa3c93  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-452.500, 472.000) walked=2.7 steps=3
-  Sable  6       56       60  369fcdc15e004913  say text="No goods worth coin… say(text="No goods worth co… say ok shout=false heard_by=1 check=13 context=persuade:#3  (chosen again after 1 interruption)
-  Odo    9       61       64  acc070e55fce3862  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-446.500, 472.000) walked=6.0 steps=7
-  Rook   9       63       66  8dcf3cc561669a6d  say text=Did you find anythin… say(text=Did you find anyth… say ok shout=false heard_by=1 check=14 context=persuade:#7
-  Bram   7       63       67  c10bb99f122a542a  go_to offset=(40, 0)           go_to(offset=(40.000, 0.000… go_to refused: the board decides where a fighter goes  (chosen again after 3 interruptions)
-  Sable  7       68       72  72e961188ab74f1a  say text="Lead on, Bram - I'l… say(text="Lead on, Bram - I… say ok shout=false heard_by=1 check=15 context=persuade:#3
-  Rook   10      71       74  ba5fdea40e961bf2  say text="What bargain is tha… say(text="What bargain is t… say ok shout=false heard_by=1 check=16 context=persuade:#1
-  Odo    10      71       74  6536e509ad2022b1  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-440.500, 472.000) walked=6.0 steps=7
-  Rook   11      79       82  bdb02e68ad9d2e59  say text="Not sure what the n… say(text="Not sure what the… say ok shout=false heard_by=1 check=17 context=persuade:#1
-  Sable  8       78       82  4dc0253d56d02f03  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to ok at=(-421.500, 406.500) walked=6.0 steps=7
-  Odo    11      81       84  ce04c8da3a1fb530  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-437.800, 472.000) walked=2.7 steps=3
-  Rook   12      87       90  9d37ede46ab9468a  wait ticks=3                   wait(ticks=3)                wait ok ticks=3 until=96
-  Odo    12      87       90  26f0e3b8a4463ee1  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-435.100, 472.000) walked=2.7 steps=3
-  Sable  9       89       92  a65a873994d34eba  go_to offset=(10.0, 0.0)       go_to(offset=(10.000, 0.000… go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
-  Pell   7       91       94  ad7c520d328571e2  say text="I don't see any pil… say(text="I don't see any p… say ok shout=false heard_by=1 check=18 context=persuade:#2
-  Rook   13      93       96  f5b2a58ffeb75b26  say text="Ah — I take it the … say(text="Ah — I take it th… say ok shout=false heard_by=1 check=19 context=persuade:#1  (chosen again after 1 interruption)
-  Odo    13      93       96  cd6c9de87b4fe2ac  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-432.400, 472.000) walked=2.7 steps=3
-  Odo    14      99      102  d2555f8049e81f76  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-429.700, 472.000) walked=2.7 steps=3
-  Pell   8       99      102  20104ed225f57de7  say text="I don't see any pil… say(text="I don't see any p… say ok shout=false heard_by=1 check=20 context=persuade:#2
-  Rook   14     104      107  afe6a7b6fb455b61  say text="Southwest of us, pa… say(text="Southwest of us, … say ok shout=false heard_by=1 check=21 context=persuade:#7  (chosen again after 1 interruption)
-  Odo    15     105      108  ba9b61d18b7acb53  go_to offset=(12, 0)           go_to(offset=(12.000, 0.000… go_to ok at=(-418.000, 472.000) walked=11.7 steps=13
-  Sable  10     106      110  161e4c13f43bedfe  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to refused: the board decides where a fighter goes
-  Pell   9      107      110  18a59917651dd60a  go_to offset=(0, -6)           go_to(offset=(0.000, -6.000… go_to ok at=(-477.423, 409.931) walked=6.0 steps=7  (chosen again after 1 interruption)
-  Rook   15     112      115  05204bb2099ec07d  go_to target=#7                go_to(target=7)              go_to ok at=(-477.816, 415.119) walked=0.9 steps=1
-  Bram   8      113      117  f55992ca6711bf57  go_to offset=(40, 0)           go_to(offset=(40.000, 0.000… go_to refused: the board decides where a fighter goes
-  Rook   16     116      119  a739757d48c473c5  say text="Careful, Pell — the… say(text="Careful, Pell — t… say ok shout=false heard_by=1 check=22 context=persuade:#7
-  Sable  11     118      122  161e4c13f43bedfe  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to refused: the board decides where a fighter goes
-  Pell   10     119      122  674c337dbab5efbc  say text="Rook, the pile soun… say(text="Rook, the pile so… say ok shout=false heard_by=1 check=23 context=persuade:#2  (chosen again after 1 interruption)
-  Odo    16     121      124  8324c22ca7299fc2  go_to offset=(-6, 0)           go_to(offset=(-6.000, 0.000… go_to ok at=(-424.000, 472.000) walked=6.0 steps=7
-  Rook   17     124      127  6276109a7522fd82  go_to target=#7                go_to(target=7)              go_to ok at=(-477.544, 411.529) walked=1.8 steps=2  (chosen again after 1 interruption)
-  Pell   11     129      132  61a4a108bec96008  go_to offset=(-6, -6)          go_to(offset=(-6.000, -6.00… go_to ok at=(-483.151, 404.203) walked=8.1 steps=9
-  Rook   18     131      134  d5990d04c481f47e                                 -- nothing readable --       (nothing was chosen)
-  Sable  12     130      134  161e4c13f43bedfe  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to refused: the board decides where a fighter goes
-  Odo    17     131      134  65156bcc0e48f170  go_to offset=(-6, 0)           go_to(offset=(-6.000, 0.000… go_to ok at=(-430.000, 472.000) walked=6.0 steps=7
-  Rook   19     135      138  ed3343c4655c07f1  recall about=the brass lantern recall about=the brass lant… (a tool, not an action: 9 things came back)
-  Bram   9      137      141  f55992ca6711bf57  go_to offset=(12, 0)           go_to(offset=(12.000, 0.000… go_to refused: the board decides where a fighter goes
-  Rook   20     139      142  8384da6c0439a4d6  go_to offset=(-3, -3)          go_to(offset=(-3.000, -3.00… go_to ok at=(-480.544, 408.529) walked=4.243 steps=5
-  Odo    18     141      144  7866d462e06e9295  go_to offset=(-3, 0)           go_to(offset=(-3.000, 0.000… go_to ok at=(-432.700, 472.000) walked=2.7 steps=3
-  Pell   12     141      144  9b6265c1be89ffb0  go_to offset=(-6, -6)          go_to(offset=(-6.000, -6.00… go_to ok at=(-488.878, 398.476) walked=8.1 steps=9
-  Sable  13     142      146  161e4c13f43bedfe  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to refused: the board decides where a fighter goes
-  Rook   21     147      150  37001fe3908c728c  wait ticks=5                   wait(ticks=5)                wait ok ticks=5 until=160
-  Odo    19     147      150  afd08988c0e2eb3e  go_to offset=(9, 0)            go_to(offset=(9.000, 0.000)) go_to ok at=(-423.700, 472.000) walked=9.0 steps=10
-  Pell   13     153      156  ece59732fcd044d9  go_to offset=(-15, -15)        go_to(offset=(-15.000, -15.… still running when the run ended
-  Rook   22     155      158  7b882ad0d29ff42a  go_to offset=(-6, -9)          go_to(offset=(-6.000, -9.00… still running when the run ended
-  Sable  14     154      158  02228683d46a0300  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) still running when the run ended
-  Bram   10     155      159  07eca3a61d7f47ea  go_to offset=(35, 0)           go_to(offset=(35.000, 0.000… still running when the run ended
+  Rook   1        1        4  d57c079e4523569b  examine target=#6              examine(target=6)            examine ok id=6 name=pile kind=pile shut=false holds=1 money=0 distance=7.0  (chosen again after 1 interruption)
+  Bram   1        1        4  2acd0558cc216f1e  say text=Hail, traveler! targ… say(text=Hail, traveler! ta… say ok shout=false heard_by=1 check=2 context=persuade:#4
+  Sable  1        1        4  0e6d0e82fc2c07ad  go_to target=#3                go_to(target=3)              go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
+  Odo    1        1        4  20fb01e892b856df  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-478.000, 472.000) walked=6.0 steps=7
+  Pell   1        1        4  eef3cf3be6bc38d1  go_to target=#2                go_to(target=2)              go_to ok at=(-477.423, 417.731) walked=4.5 steps=5
+  Pell   2        9       12  99f51048d8332491  go_to target=#6                go_to(target=6)              go_to ok at=(-473.078, 416.560) walked=4.5 steps=5
+  Rook   2       10       13  a101dd92ff055c8e  say text=good morning target=… say(text=good morning targe… say ok shout=false heard_by=1 check=3 context=persuade:#1
+  Bram   2        9       13  2dfaa5bcd139b857  say text="What brings you thi… say(text="What brings you t… say ok shout=false heard_by=1 check=4 context=persuade:#4
+  Odo    2       11       14  de2e0b8fc60ff590  examine target=x               examine(target=x)            examine refused: Odo carries no x
+  Sable  2       14       18  d526450fbce3023e  say text=Hail, Bram! What bri… say(text=Hail, Bram! What b… say ok shout=false heard_by=1 check=5 context=persuade:#3  (chosen again after 1 interruption)
+  Pell   3       17       20  fcefc65e021990fc  pick_up item=brass lantern ta… pick_up(item=brass lantern … pick_up refused: there is nothing with id 6
+  Rook   3       18       21  1eac7c6127f661f2  say text="a fine morning for … say(text="a fine morning fo… say ok shout=false heard_by=1 check=6 context=persuade:#1
+  Odo    3       18       21  2afc6fba09080146  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-475.300, 472.000) walked=2.7 steps=3
+  Bram   3       19       23  827023e12e4952b4  say text="Fine day for a walk… say(text="Fine day for a wa… say ok shout=false heard_by=1 check=7 context=persuade:#4  (chosen again after 1 interruption)
+  Pell   4       23       26  e62060b5f49496ee  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
+  Odo    4       24       27  27fd022e6c0e342d  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-472.600, 472.000) walked=2.7 steps=3
+  Rook   4       26       29  66ae05d6a02a55a7  say text="a fine morning for … say(text="a fine morning fo… say ok shout=false heard_by=1 check=8 context=persuade:#1
+  Sable  3       26       30  9890205b18752825  say text="Just wandering, see… say(text="Just wandering, s… say ok shout=false heard_by=1 check=9 context=persuade:#3  (chosen again after 1 interruption)
+  Odo    5       30       33  0ee0a8e76b8bdaea  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-469.900, 472.000) walked=2.7 steps=3
+  Bram   4       31       35  b45a3e2664fbdeae  say text="Aye, it is. Safe tr… say(text="Aye, it is. Safe … say ok shout=false heard_by=1 check=10 context=persuade:#4  (chosen again after 1 interruption)
+  Rook   5       34       37  b541858c4fa84273  trade_accept target=#1         trade_accept(target=1)       trade_accept ok from=1 took=0 took_money=12 gave=1 gave_money=0
+  Odo    6       36       39  c16f53d66bb9b492  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-467.200, 472.000) walked=2.7 steps=3
+  Sable  4       38       42  03bf3a359f84cc17  say text="Then let's wander t… say(text="Then let's wander… say ok shout=false heard_by=1 check=12 context=persuade:#3  (chosen again after 1 interruption)
+  Rook   6       40       43  b63acd2233abe329  say text="shall we head out a… say(text="shall we head out… say ok shout=false heard_by=1 check=11 context=persuade:#1
+  Odo    7       42       45  e001c733876adaf9  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-464.500, 472.000) walked=2.7 steps=3
+  Bram   5       43       47  14a265274ced7a75  say text="Traveling together … say(text="Traveling togethe… say ok shout=false heard_by=1 check=13 context=persuade:#4  (chosen again after 1 interruption)
+  Pell   5       46       49  17df3e0d7e61f8a7  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6  (chosen again after 2 interruptions)
+  Rook   7       48       51  c176164ee1a4f0d1  say text="shall we head out a… say(text="shall we head out… say ok shout=false heard_by=1 check=14 context=persuade:#7
+  Odo    8       48       51  e3c9eb1bf9ea43e2  go_to offset=(9, 0)            go_to(offset=(9.000, 0.000)) go_to ok at=(-455.500, 472.000) walked=9.0 steps=10
+  Sable  5       50       54  c4ff591038f8b69e  go_to offset=(0.0, -3.0)       go_to(offset=(0.000, -3.000… go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
+  Rook   8       56       59  ba085acb7c579dc2  say text="Pell, Wren and I co… say(text="Pell, Wren and I … say ok shout=false heard_by=1 check=15 context=persuade:#7
+  Bram   6       55       59  9956048d1175456a  say text="After you, then — w… say(text="After you, then —… say ok shout=false heard_by=1 check=16 context=persuade:#4
+  Sable  6       60       64  5ea071d18274b1b7  go_to offset=(2.0, 0.0)        go_to(offset=(2.000, 0.000)) go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
+  Odo    9       61       64  bb5aff6edd54449a  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-452.800, 472.000) walked=2.7 steps=3
+  Rook   9       64       67  d562a6c5229dd967  say text="then let us be off … say(text="then let us be of… say ok shout=false heard_by=1 check=17 context=persuade:#1
+  Bram   7       65       69  04f77cb3cd176925  say text="East looks promisin… say(text="East looks promis… say ok shout=false heard_by=1 check=18 context=persuade:#4
+  Odo    10      67       70  47dab3c170c8dbe2  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-450.100, 472.000) walked=2.7 steps=3
+  Sable  7       68       72  39040033216ef927  say text="East, toward that r… say(text="East, toward that… say ok shout=false heard_by=1 check=19 context=persuade:#3  (chosen again after 1 interruption)
+  Rook   10      72       75  e80dd52b916e401e  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to ok at=(-472.000, 416.000) walked=6.0 steps=7
+  Odo    11      73       76  1f9a4907cb720820  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-447.400, 472.000) walked=2.7 steps=3
+  Bram   8       75       79  dd4689b9d9fcdc0e  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to refused: the board decides where a fighter goes  (chosen again after 1 interruption)
+  Odo    12      79       82  da20d87769bcc2da  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-444.700, 472.000) walked=2.7 steps=3
+  Sable  8       80       84  51d5532cdb0e1134  go_to offset=(6.0, 0.0)        go_to(offset=(6.000, 0.000)) go_to ok at=(-421.500, 406.500) walked=6.0 steps=7
+  Rook   11      82       85  9078f72f6fbdf5b0  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-469.300, 416.000) walked=2.7 steps=3
+  Pell   6       84       87  dd296f36b8006bd9  say text="Aye, Rook — let the… say(text="Aye, Rook — let t… say ok shout=false heard_by=1 check=20 context=persuade:#2
+  Odo    13      85       88  e891795e68462442  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-442.000, 472.000) walked=2.7 steps=3
+  Rook   12      88       91  fdd52559f8e5207c  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-465.700, 416.000) walked=2.7 steps=3  (chosen again after 1 interruption)
+  Bram   9       89       92  e4c62081b5a9d957  go_to offset=(+3.0, +0.0)      go_to(offset=(3.000, 0.000)) go_to ok at=(-430.800, 406.500) walked=2.7 steps=3
+  Sable  9       91       94  be02ae7ebe659c59  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-418.800, 406.500) walked=2.7 steps=3
+  Odo    14      91       94  778376b23ff6c10d  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-439.300, 472.000) walked=2.7 steps=3
+  Pell   7       92       95  f8d353e1607b972b  go_to target=#6                go_to(target=6)              go_to refused: there is nothing with id 6
+  Rook   13      95       98  ea7a0de2f4459fd7  go_to offset=(10, 0)           go_to(offset=(10.000, 0.000… go_to ok at=(-455.800, 416.000) walked=9.9 steps=11
+  Bram   10      95       98  9072de4f046f951f  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-428.100, 406.500) walked=2.7 steps=3
+  Sable  10      97      100  c2d02d4b6c66b0b5  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-416.100, 406.500) walked=2.7 steps=3
+  Odo    15      97      100  8ae0b166bf093a1c  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-436.600, 472.000) walked=2.7 steps=3
+  Bram   11     101      104  ed4bea38c3da10ac  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-425.400, 406.500) walked=2.7 steps=3
+  Sable  11     103      106  4547304a3ffdd204  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-413.400, 406.500) walked=2.7 steps=3
+  Odo    16     103      106  20155c7377d87048  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-433.900, 472.000) walked=2.7 steps=3
+  Bram   12     107      110  7e4f8465cf5c6b31  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-422.700, 406.500) walked=2.7 steps=3
+  Rook   14     109      112  597f29fad6947605  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-453.100, 416.000) walked=2.7 steps=3
+  Sable  12     109      112  89539528eaf8b1cf  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-410.700, 406.500) walked=2.7 steps=3
+  Odo    17     109      112  17c734677698d2eb  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-431.200, 472.000) walked=2.7 steps=3
+  Bram   13     113      116  e7e86df71fc9abd6  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-420.000, 406.500) walked=2.7 steps=3
+  Rook   15     115      118  892f4f4c94b350b7  say text="Wren, Pell — I hear… say(text="Wren, Pell — I he… say refused: Wren is out of earshot (23.00 > 20.00)
+  Sable  13     115      118  c2ed61f78128fb72  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-408.000, 406.500) walked=2.7 steps=3
+  Odo    18     115      118  a2699bce8d6db10a  go_to offset=(6, 0)            go_to(offset=(6.000, 0.000)) go_to ok at=(-425.200, 472.000) walked=6.0 steps=7
+  Pell   8      115      118  1cf732a9fca5d3e9  say text="What noise, Wren? I… say(text="What noise, Wren?… say ok shout=false heard_by=1 check=21 context=persuade:#1
+  Bram   14     119      122  36b15363a9bbcdb7  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-417.300, 406.500) walked=2.7 steps=3
+  Sable  14     121      124  b17a41b09821ee9f  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-405.300, 406.500) walked=2.7 steps=3
+  Rook   16     123      126  2b63f07bb4bd7018  say text=I heard nothing myse… say(text=I heard nothing my… say refused: Wren is out of earshot (23.00 > 20.00)
+  Pell   9      123      126  5953a888d4ceefc0  say text=Shall we set off, th… say(text=Shall we set off, … say ok shout=false heard_by=1 check=22 context=persuade:#2
+  Bram   15     125      128  8af13b428916a5e8  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-414.600, 406.500) walked=2.7 steps=3
+  Odo    19     125      128  65f0e70236c8d83d  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-422.500, 472.000) walked=2.7 steps=3
+  Sable  15     127      130  6aef0ec2aa5afe37  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-402.600, 406.500) walked=2.7 steps=3
+  Rook   17     131      134  75905133534f3431  say text="Wren, Pell — I hear… say(text="Wren, Pell — I he… say refused: Wren is out of earshot (23.00 > 20.00)
+  Bram   16     131      134  c761b055eeada5cf  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-411.900, 406.500) walked=2.7 steps=3
+  Odo    20     131      134  40c78e89baf16183  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-419.800, 472.000) walked=2.7 steps=3
+  Pell   10     131      134  67d576070a64c1ce  say text=Set off east, then —… say(text=Set off east, then… say ok shout=false heard_by=1 check=23 context=persuade:#2
+  Sable  16     133      136  a2d51cc2d02f1de2  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-399.900, 406.500) walked=2.7 steps=3
+  Bram   17     137      140  3feadd258ea0662f  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-409.200, 406.500) walked=2.7 steps=3
+  Odo    21     137      140  77bd5dc676c7b38d  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-417.100, 472.000) walked=2.7 steps=3
+  Rook   18     139      142  e1a1d9029805fb84  say text=the three of us are … say(text=the three of us ar… say refused: Wren is out of earshot (23.00 > 20.00)
+  Sable  17     139      142  7fec5d632947e1bd  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-397.200, 406.500) walked=2.7 steps=3
+  Pell   11     139      142  74a5361324072407  say text="Rook, Wren — eastwa… say(text="Rook, Wren — east… say ok shout=false heard_by=1 check=24 context=persuade:#2
+  Bram   18     143      146  a4e760831e8bd7fa  say text="East it is — after … say(text="East it is — afte… say ok shout=false heard_by=1 check=25 context=persuade:#4
+  Odo    22     143      146  f1f153d28871e2ba  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-414.400, 472.000) walked=2.7 steps=3
+  Sable  18     145      148  b1aa0c21cf99401b  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-394.500, 406.500) walked=2.7 steps=3
+  Rook   19     147      150  ed722640d14fca91  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to ok at=(-450.400, 416.000) walked=2.7 steps=3
+  Pell   12     147      150  df40d293234a4c83  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-470.378, 416.560) walked=2.7 steps=3
+  Odo    23     149      152  abe530db37086033  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) go_to refused: the way to the position is blocked
+  Bram   19     151      154  5410dd99a7ad6f8f  go_to target=#4                go_to(target=4)              still running when the run ended
+  Sable  19     151      154  8c760536b47df752  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-391.800, 406.500) walked=2.7 steps=3
+  Rook   20     153      156  06be2b4f54b891e5  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-447.700, 416.000) walked=2.7 steps=3
+  Pell   13     153      156  7508cbd0bfb48dbf  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) go_to ok at=(-467.678, 416.560) walked=2.7 steps=3
+  Odo    24     155      158  4d3f7edcf37494f5  go_to offset=(3, 0)            go_to(offset=(3.000, 0.000)) still running when the run ended
+  Sable  20     157      160  710a397e4127dc42  go_to offset=(3.0, 0.0)        go_to(offset=(3.000, 0.000)) still running when the run ended
 
 nobody waits on anybody
   who    turn asked answered waited alongside  ticks each of the others was serviced for      actions
@@ -786,85 +698,103 @@ nobody waits on anybody
   Sable  1        1        4      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
   Odo    1        1        4      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
   Pell   1        1        4      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
-  Bram   2        8       11      3         3  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             3
   Pell   2        9       12      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Rook   2       11       14      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
-  Odo    2       11       14      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
-  Pell   3       13       16      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Sable  2       14       18      4         4  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              3
-  Odo    3       17       20      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
-  Rook   3       18       21      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
-  Bram   3       17       21      4         4  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             3
-  Pell   4       21       24      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             3
-  Odo    4       23       26      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
-  Rook   4       25       28      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             3
-  Sable  3       24       28      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              4
-  Pell   5       28       31      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Odo    5       29       32      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
-  Bram   4       29       33      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             3
-  Rook   5       33       36      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
-  Sable  4       34       38      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
-  Odo    6       35       38      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
-  Rook   6       39       42      3         1  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
-  Bram   5       41       45      4         2  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             3
-  Odo    7       45       48      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
-  Rook   7       47       50      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Sable  5       46       50      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
-  Bram   6       51       55      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             4
-  Pell   6       53       56      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             3
-  Rook   8       55       58      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Odo    8       55       58      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Sable  6       56       60      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              0
+  Rook   2       10       13      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Bram   2        9       13      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
+  Odo    2       11       14      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  2       14       18      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              4
+  Pell   3       17       20      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             4
+  Rook   3       18       21      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Odo    3       18       21      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Bram   3       19       23      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             3
+  Pell   4       23       26      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             4
+  Odo    4       24       27      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            3
+  Rook   4       26       29      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
+  Sable  3       26       30      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              3
+  Odo    5       30       33      3         1  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Bram   4       31       35      4         2  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             1
+  Rook   5       34       37      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
+  Odo    6       36       39      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  4       38       42      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              4
+  Rook   6       40       43      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             3
+  Odo    7       42       45      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Bram   5       43       47      4         2  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
+  Pell   5       46       49      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             3
+  Rook   7       48       51      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Odo    8       48       51      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  5       50       54      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
+  Rook   8       56       59      3         1  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Bram   6       55       59      4         1  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
+  Sable  6       60       64      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              3
   Odo    9       61       64      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
-  Rook   9       63       66      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Bram   7       63       67      4         2  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             1
-  Sable  7       68       72      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              3
-  Rook   10      71       74      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Odo    10      71       74      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Rook   11      79       82      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
-  Sable  8       78       82      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
-  Odo    11      81       84      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Rook   12      87       90      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
-  Odo    12      87       90      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
-  Sable  9       89       92      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              1
-  Pell   7       91       94      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Rook   13      93       96      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Odo    13      93       96      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Odo    14      99      102      3         1  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Pell   8       99      102      3         1  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
-  Rook   14     104      107      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             3
-  Odo    15     105      108      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
-  Sable  10     106      110      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              1
-  Pell   9      107      110      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
-  Rook   15     112      115      3         1  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
-  Bram   8      113      117      4         1  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
-  Rook   16     116      119      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
-  Sable  11     118      122      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
-  Pell   10     119      122      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             1
-  Odo    16     121      124      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
-  Rook   17     124      127      3         0  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Pell   11     129      132      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Rook   18     131      134      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Sable  12     130      134      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
-  Odo    17     131      134      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Rook   19     135      138      3         1  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
-  Bram   9      137      141      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             3
-  Rook   20     139      142      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             3
-  Odo    18     141      144      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Pell   12     141      144      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
-  Sable  13     142      146      4         2  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              0
-  Rook   21     147      150      3         1  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Odo    19     147      150      3         1  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
-  Pell   13     153      156      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
-  Rook   22     155      158      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
-  Sable  14     154      158      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              1
-  Bram   10     155      159      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             0
-  ticks with more than one answer outstanding  84 of 160
+  Rook   9       64       67      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Bram   7       65       69      4         3  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
+  Odo    10      67       70      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  7       68       72      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              1
+  Rook   10      72       75      3         2  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
+  Odo    11      73       76      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Bram   8       75       79      4         1  Wren 4 Rook 4 Sable 4 Odo 4 Pell 4             2
+  Odo    12      79       82      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  8       80       84      4         3  Wren 4 Rook 4 Bram 4 Odo 4 Pell 4              2
+  Rook   11      82       85      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
+  Pell   6       84       87      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             1
+  Odo    13      85       88      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
+  Rook   12      88       91      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
+  Bram   9       89       92      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             3
+  Sable  9       91       94      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              1
+  Odo    14      91       94      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Pell   7       92       95      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
+  Rook   13      95       98      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             3
+  Bram   10      95       98      3         3  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             3
+  Sable  10      97      100      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Odo    15      97      100      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Bram   11     101      104      3         2  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             2
+  Sable  11     103      106      3         2  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Odo    16     103      106      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Bram   12     107      110      3         3  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             3
+  Rook   14     109      112      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
+  Sable  12     109      112      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Odo    17     109      112      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Bram   13     113      116      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             4
+  Rook   15     115      118      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
+  Sable  13     115      118      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Odo    18     115      118      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            0
+  Pell   8      115      118      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
+  Bram   14     119      122      3         1  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             1
+  Sable  14     121      124      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              2
+  Rook   16     123      126      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             2
+  Pell   9      123      126      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             2
+  Bram   15     125      128      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             1
+  Odo    19     125      128      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  15     127      130      3         2  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Rook   17     131      134      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Bram   16     131      134      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             1
+  Odo    20     131      134      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Pell   10     131      134      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             1
+  Sable  16     133      136      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Bram   17     137      140      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             3
+  Odo    21     137      140      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            3
+  Rook   18     139      142      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             0
+  Sable  17     139      142      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              0
+  Pell   11     139      142      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             0
+  Bram   18     143      146      3         2  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             1
+  Odo    22     143      146      3         2  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  18     145      148      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              2
+  Rook   19     147      150      3         3  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Pell   12     147      150      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             1
+  Odo    23     149      152      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            2
+  Bram   19     151      154      3         4  Wren 3 Rook 3 Sable 3 Odo 3 Pell 3             2
+  Sable  19     151      154      3         4  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              2
+  Rook   20     153      156      3         4  Wren 3 Bram 3 Sable 3 Odo 3 Pell 3             1
+  Pell   13     153      156      3         4  Wren 3 Rook 3 Bram 3 Sable 3 Odo 3             1
+  Odo    24     155      158      3         3  Wren 3 Rook 3 Bram 3 Sable 3 Pell 3            1
+  Sable  20     157      160      3         3  Wren 3 Rook 3 Bram 3 Odo 3 Pell 3              2
+  ticks with more than one answer outstanding  98 of 160
   the most outstanding at once                 5
-  ticks by how many were outstanding           0:30 1:46 2:51 3:28 4:2 5:3
-  spans: 58 of 78 took the stated 3 ticks, the longest took 4
+  ticks by how many were outstanding           0:14 1:48 2:58 3:24 4:10 5:6
+  spans: 82 of 96 took the stated 3 ticks, the longest took 4
   the longest span, by how many other answers were outstanding across it
-    0:3 1:4 2:4 3:4 4:4
+    1:4 2:4 3:4 4:3
     this is the line that says the answers do not queue: a channel that served them
     in turn would make a question put while 5 others were outstanding
     take about 18 ticks, not 3. A span longer than the stated 3 is a
@@ -874,75 +804,74 @@ nobody waits on anybody
 
 what the run cost in model calls
   who     calls  answered  resolved calls per 100 ticks
-  Rook       22        22        19                13.8
-  Bram       10        10         9                 6.2
-  Sable      14        14        13                 8.8
-  Odo        20        19        19                12.5
-  Pell       13        13        12                 8.1
-  total      79        78
-  the run                    160 ticks, 79 calls -> 0.494 calls a tick
+  Rook       21        20        20                13.1
+  Bram       19        19        18                11.9
+  Sable      20        20        19                12.5
+  Odo        24        24        23                15.0
+  Pell       14        13        13                 8.8
+  total      98        96
+  the run                    160 ticks, 98 calls -> 0.613 calls a tick
   an hour of play at that rate  20 ticks a second, so 72000 ticks an hour
-                                35550 calls an hour for 5 characters, 7110 each
+                                44100 calls an hour for 5 characters, 8820 each
 
 being asked again is not a new call
   who       asked  calls    held  polled  re-evaluations re-evaluations per call
-  Rook         93     22       5      66               0                    0.00
-  Bram         50     10      19      21              12                    1.20
-  Sable        56     14      12      30               8                    0.57
-  Odo          87     20      10      57              10                    0.50
-  Pell         68     13      16      39              12                    0.92
-  total       354     79      62     213              42                    0.53
-  re-evaluations to model calls  42 : 79 = 0.53 -- the loop asks again every 5 ticks an action runs, and none of those asks is a call
-  asks that cost a call          79 of 354 (22.3%)
-  the loop's own counts          reviews=49 changes=0 finished=82 attacked=0 combat began=3 spoken to=18
+  Rook         87     21       5      61               3                    0.14
+  Bram         75     19       6      50               2                    0.11
+  Sable        82     20       9      53               2                    0.10
+  Odo          99     24       3      72               3                    0.12
+  Pell         67     14      13      40              11                    0.79
+  total       410     98      36     276              21                    0.21
+  re-evaluations to model calls  21 : 98 = 0.21 -- the loop asks again every 5 ticks an action runs, and none of those asks is a call
+  asks that cost a call          98 of 410 (23.9%)
+  the loop's own counts          reviews=31 changes=0 finished=103 attacked=0 combat began=1 spoken to=19
 
 what the first run of this file measured, measured again
-  turns                      78, across 5 characters
-  lines of speech chosen     22, 22 of them different
-  the most-repeated line     1 time: "Hello, Pell and Wren. What's in that pile?"
-  turns asked with the same observation as the one before  4
-  turns that chose a position 36
+  turns                      96, across 5 characters
+  lines of speech chosen     28, 26 of them different
+  the most-repeated line     2 times: ""a fine morning for exploring""
+  turns asked with the same observation as the one before  0
+  turns that chose a position 57
 
 what each of them came to remember
   who    driven by  entries   events   lessons  characters  recalls lessons written
-  Wren   a person       18       18         0         718        -               -
-  Rook   a model        36       36         0        1934        1               0
-  Bram   a model        21       21         0        1338        0               0
-  Sable  a model        21       21         0        1221        0               0
-  Odo    a model         8        8         0         140        0               0
-  Pell   a model        31       31         0        1639        0               0
+  Wren   a person       21       21         0         868        -               -
+  Rook   a model        42       42         0        1860        0               0
+  Bram   a model        29       29         0        1250        0               0
+  Sable  a model        27       27         0        1151        0               0
+  Odo    a model         8        8         0         134        0               0
+  Pell   a model        27       27         0        1361        0               0
 
 what the world recorded between them
-  4 edges, made of 28 happenings, and not one of them on anybody's sheet
+  4 edges, made of 30 happenings, and not one of them on anybody's sheet
   sentiment is familiarity x (trust - fear), which is the one number section 6 reads
   who    driven by with     trust    fear   respect   familiarity  sentiment
-  Wren   a person  Rook      0.20    0.00      0.10          0.90      +0.18
-  Wren   a person  Pell      0.00    0.00      0.00          0.44      +0.00
-  Rook   a model   Wren      0.20    0.00      0.10          0.90      +0.18
-  Rook   a model   Pell      0.00    0.00      0.00          0.92      +0.00
-  Bram   a model   Sable     0.00    0.00      0.00          0.92      +0.00
-  Sable  a model   Bram      0.00    0.00      0.00          0.92      +0.00
+  Wren   a person  Rook      0.20    0.00      0.10          0.92      +0.18
+  Wren   a person  Pell      0.00    0.00      0.00          0.58      +0.00
+  Rook   a model   Wren      0.20    0.00      0.10          0.92      +0.18
+  Rook   a model   Pell      0.00    0.00      0.00          0.82      +0.00
+  Bram   a model   Sable     0.00    0.00      0.00          0.97      +0.00
+  Sable  a model   Bram      0.00    0.00      0.00          0.97      +0.00
   Odo    a model   nothing has passed between it and anybody
-  Pell   a model   Rook      0.00    0.00      0.00          0.92      +0.00
-  Pell   a model   Wren      0.00    0.00      0.00          0.44      +0.00
+  Pell   a model   Wren      0.00    0.00      0.00          0.58      +0.00
+  Pell   a model   Rook      0.00    0.00      0.00          0.82      +0.00
   and what each edge is made of, in the world's own words
-    #1 <-> #2 8 happenings | #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.90 | #2 trust 0.20 fear 0.00 respect 0.10 familiarity 0.90
-    #2 <-> #7 9 happenings | #2 trust 0.00 fear 0.00 respect 0.00 familiarity 0.92 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.92
-    #3 <-> #4 9 happenings | #3 trust 0.00 fear 0.00 respect 0.00 familiarity 0.92 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.92
-    #1 <-> #7 2 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.44 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.44
+    #1 <-> #2 9 happenings | #1 trust 0.20 fear 0.00 respect 0.10 familiarity 0.92 | #2 trust 0.20 fear 0.00 respect 0.10 familiarity 0.92
+    #3 <-> #4 12 happenings | #3 trust 0.00 fear 0.00 respect 0.00 familiarity 0.97 | #4 trust 0.00 fear 0.00 respect 0.00 familiarity 0.97
+    #1 <-> #7 3 happenings | #1 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.58
+    #2 <-> #7 6 happenings | #2 trust 0.00 fear 0.00 respect 0.00 familiarity 0.82 | #7 trust 0.00 fear 0.00 respect 0.00 familiarity 0.82
 
 what Pell came to remember
-  entries                    31 (31 events, 0 lessons)
-  events by kind             saw 15 heard 11 changed 5 lesson 0
-  characters held            1639
-  characters a packet carries 443 of 1639 (27%), being every lesson and the last 8 events
-  the last question put      3357 characters, of which 284 (8%) are what it remembers
+  entries                    27 (27 events, 0 lessons)
+  events by kind             saw 14 heard 9 changed 4 lesson 0
+  characters held            1361
+  characters a packet carries 418 of 1361 (31%), being every lesson and the last 8 events
+  the last question put      4644 characters, of which 611 (13%) are what it remembers
   tools used                 0 recalls, 0 lessons written
   everything it remembers
     lessons 0
-    events 31
+    events 27
       I saw Rook (#2), a commander, about 6m away.
-      I saw Wren (#1), a commander, about 12m away.
       I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
       I saw Rook (#2), a commander, about 2m away.
       I saw Wren (#1), a commander, about 5m away.
@@ -950,28 +879,25 @@ what Pell came to remember
       I moved 0.9m north.
       I dropped 0.1m.
       I saw Wren (#1), a commander, about 2m away.
-      Rook (#2) said to me: "Hello, Pell and Wren. What's in that pile?"
-      I saw Wren (#1), a commander, about 4m away.
-      I said: "Let's look. I'll check the pile."
-      Rook (#2) said to me: ""Let me know what you find in it.""
-      Wren (#1) shouted: "a fair bargain"
-      Rook (#2) said to me: "Did you find anything in the pile?"
-      Wren (#1) shouted: "what was that noise?"
-      I said: ""I don't see any pile from here — where is it?""
-      I said: ""I don't see any pile nearby — maybe it's beyond the drop to the south. I'll head that way.""
       I saw Rook (#2), a commander, about 5m away.
+      I saw a pile (#6) about 2m away, open, holding 1 thing and 0 coins.
+      I moved 0.9m east.
+      I saw Wren (#1), a commander, about 1m away.
+      I saw Wren (#1), a commander, about 3m away.
+      I saw Rook (#2), a commander, about 1m away.
+      Wren (#1) shouted: "a fair bargain"
+      Rook (#2) said to me: ""shall we head out and explore together?""
+      Rook (#2) said to me: ""Pell, Wren and I could make a fine exploring party — shall we three head out together?""
+      I said: ""Aye, Rook — let the three of us head out together.""
+      I saw Rook (#2), a commander, about 20m away.
+      Wren (#1) shouted: "what was that noise?"
+      I said: ""What noise, Wren? I heard nothing but the wind.""
+      I said: "Shall we set off, then? Rook, Wren — the road waits."
+      I said: "Set off east, then — keep together, and mind the edge south of here."
+      I said: ""Rook, Wren — eastward, and mind the drop south of here.""
       I saw Wren (#1), a commander, about 6m away.
-      Rook (#2) said to me: ""Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it.""
-      I moved 0.6m north.
-      I saw Rook (#2), a commander, about 3m away.
-      Rook (#2) said to me: ""Careful, Pell — there's a hole just past the drop; don't fall in.""
-      I said: ""Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out.""
-      I saw Rook (#2), a commander, about 9m away.
-      I saw Wren (#1), a commander, about 14m away.
-      I moved 0.9m north-west.
+      I saw Wren (#1), a commander, about 8m away.
       I climbed 0.1m.
-      I saw Rook (#2), a commander, about 13m away.
-      I saw Wren (#1), a commander, about 22m away.
 
 what they were after -- scenario setup, not game content
   Pell, driven by a model
@@ -993,68 +919,72 @@ after 160 ticks
     tick 160 actors=6 objects=0 offers=0
       #1 commander band=1 at (-476.100, -2.373, 416.000) hp=32/32 walking
         carries money=18 carried=[common armour chestplate L2 P=8 mov=4 def=4 eff=0 dex [] silk cloak | common weapon hand L1 P=4 mov=0 def=0 eff=4 dex [brass lantern:4] brass lantern] worn=[]
-      #2 commander band=1 at (-481.543, -2.453, 407.032) hp=32/32 walking
+      #2 commander band=1 at (-447.700, -0.514, 416.000) hp=32/32 walking
         carries money=20 carried=[] worn=[]
-      #3 commander band=3 at (-427.500, 1.609, 406.500) hp=38/38 cell (-143,135)
+      #3 commander band=3 at (-403.800, 2.793, 406.500) hp=38/38 walking
         carries money=0 carried=[common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots | common weapon hand L3 P=12 mov=0 def=0 eff=12 str [sword:12] common sword] worn=[boots=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots hand=common weapon hand L3 P=12 mov=0 def=0 eff=12 str [sword:12] common sword]
-      #4 commander band=4 at (-421.500, 2.571, 406.500) hp=38/38 cell (-141,135)
+      #4 commander band=4 at (-391.800, -0.515, 406.500) hp=38/38 walking
         carries money=0 carried=[common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots | common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear] worn=[boots=common armour boots L2 P=8 mov=4 def=4 eff=0 dex [] common boots hand=common weapon hand L3 P=12 mov=0 def=0 eff=12 str [spear:12] common spear]
-      #5 commander band=5 at (-423.700, -2.700, 472.000) hp=26/26 walking
+      #5 commander band=5 at (-412.600, -4.729, 472.000) hp=26/26 walking
         carries money=0 carried=[] worn=[]
-      #7 commander band=1 at (-491.424, -2.432, 395.930) hp=32/32 walking
+      #7 commander band=1 at (-467.678, -2.186, 416.560) hp=32/32 walking
         carries money=9 carried=[] worn=[]
       check #1 persuade:#2 -- raised
-      check #2 persuade:#7 -- raised
-      check #3 persuade:#4 -- raised
-      check #4 persuade:#2 -- raised
+      check #2 persuade:#4 -- raised
+      check #3 persuade:#1 -- raised
+      check #4 persuade:#4 -- raised
       check #5 persuade:#3 -- raised
-      check #6 persuade:#7 -- raised
-      check #7 persuade:#3 -- raised
-      check #8 persuade:#4 -- raised
+      check #6 persuade:#1 -- raised
+      check #7 persuade:#4 -- raised
+      check #8 persuade:#1 -- raised
       check #9 persuade:#3 -- raised
-      check #10 persuade:#1 -- raised
-      check #11 persuade:#3 -- raised
-      check #12 persuade:#4 -- raised
-      check #13 persuade:#3 -- raised
+      check #10 persuade:#4 -- raised
+      check #11 persuade:#1 -- raised
+      check #12 persuade:#3 -- raised
+      check #13 persuade:#4 -- raised
       check #14 persuade:#7 -- raised
-      check #15 persuade:#3 -- raised
-      check #16 persuade:#1 -- raised
+      check #15 persuade:#7 -- raised
+      check #16 persuade:#4 -- raised
       check #17 persuade:#1 -- raised
-      check #18 persuade:#2 -- raised
-      check #19 persuade:#1 -- raised
+      check #18 persuade:#4 -- raised
+      check #19 persuade:#3 -- raised
       check #20 persuade:#2 -- raised
-      check #21 persuade:#7 -- raised
-      check #22 persuade:#7 -- raised
+      check #21 persuade:#1 -- raised
+      check #22 persuade:#2 -- raised
       check #23 persuade:#2 -- raised
+      check #24 persuade:#2 -- raised
+      check #25 persuade:#4 -- raised
       said #1 to #2 "good morning" heard by [2]
-      said #2 to #7 "Hello, Pell and Wren. What's in that pile?" heard by [7]
-      said #3 to #4 "Hail, traveler! What brings you here?" heard by [4]
-      said #7 to #2 "Let's look. I'll check the pile." heard by [2]
-      said #4 to #3 "Hail, traveler! I am Sable." heard by [3]
-      said #2 to #7 ""Let me know what you find in it."" heard by [7]
-      said #4 to #3 ""I wander these lands seeking purpose, friend. What of you?"" heard by [3]
-      said #3 to #4 "Well met, Sable. I am Bram. Might you have goods to trade, or news of the road?" heard by [4]
-      said #4 to #3 ""I seek a purpose worth a spear, Bram. Might you know of work or trouble nearby?"" heard by [3]
+      said #3 to #4 "Hail, traveler!" heard by [4]
+      said #2 to #1 "good morning" heard by [1]
+      said #3 to #4 ""What brings you this way?"" heard by [4]
+      said #4 to #3 "Hail, Bram! What brings you out here?" heard by [3]
+      said #2 to #1 ""a fine morning for exploring"" heard by [1]
+      said #3 to #4 ""Fine day for a walk, isn't it?"" heard by [4]
+      said #2 to #1 ""a fine morning for exploring"" heard by [1]
+      said #4 to #3 ""Just wandering, seeing what the land holds. Care to travel together?"" heard by [3]
+      said #3 to #4 ""Aye, it is. Safe travels, friend."" heard by [4]
+      said #2 to #1 ""shall we head out and explore together?"" heard by [1]
+      said #4 to #3 ""Then let's wander together, friend."" heard by [3]
       said #1 aloud "a fair bargain" heard by [2, 7]
-      said #2 to #1 ""Good morning, Wren. Pell's checking that pile over there."" heard by [1]
-      said #4 to #3 ""I carry little but my spear and boots, friend. If you've work or coin, I'm your blade."" heard by [3]
-      said #3 to #4 ""I've seen no trouble yet, but there's a pile of goods some 40 paces east of here, unclaimed. Care to walk with me and see what fortune holds?"" heard by [4]
-      said #4 to #3 ""No goods worth coin, Bram - only this spear and these boots. Point me at work or trouble, and any news I gather on the road is yours to hear."" heard by [3]
-      said #2 to #7 "Did you find anything in the pile?" heard by [7]
+      said #3 to #4 ""Traveling together sounds good to me. Lead the way?"" heard by [4]
+      said #2 to #7 ""shall we head out and explore together?"" heard by [7]
+      said #2 to #7 ""Pell, Wren and I could make a fine exploring party — shall we three head out together?"" heard by [7]
+      said #3 to #4 ""After you, then — which way shall we wander?"" heard by [4]
+      said #2 to #1 ""then let us be off — east, toward the open ground"" heard by [1]
+      said #3 to #4 ""East looks promising — let's head that way."" heard by [4]
+      said #4 to #3 ""East, toward that rise — the land looks promising that way."" heard by [3]
+      said #7 to #2 ""Aye, Rook — let the three of us head out together."" heard by [2]
       said #1 aloud "what was that noise?" heard by [2, 7]
-      said #4 to #3 ""Lead on, Bram - I'll walk east with you and we'll split whatever that pile holds."" heard by [3]
-      said #2 to #1 ""What bargain is that, Wren?"" heard by [1]
-      said #2 to #1 ""Not sure what the noise was — maybe Pell rustling through that pile. Now, what bargain did you mean?"" heard by [1]
-      said #7 to #2 ""I don't see any pile from here — where is it?"" heard by [2]
-      said #2 to #1 ""Ah — I take it the bargain was our trade, Wren. Fair indeed; enjoy the cloak."" heard by [1]
-      said #7 to #2 ""I don't see any pile nearby — maybe it's beyond the drop to the south. I'll head that way."" heard by [2]
-      said #2 to #7 ""Southwest of us, past the drop by the hole — though it looks picked clean now; I see nothing left of it."" heard by [7]
-      said #2 to #7 ""Careful, Pell — there's a hole just past the drop; don't fall in."" heard by [7]
-      said #7 to #2 ""Rook, the pile sounds picked clean — I'll head southwest past the drop and look for a brass lantern while I'm out."" heard by [2]
-  reviews=49 changes=0 finished=82 attacked=0 combat began=3 spoken to=18
-  fingerprint 5f4edd77d2353a3e
+      said #7 to #1 ""What noise, Wren? I heard nothing but the wind."" heard by [1]
+      said #7 to #2 "Shall we set off, then? Rook, Wren — the road waits." heard by [2]
+      said #7 to #2 "Set off east, then — keep together, and mind the edge south of here." heard by [2]
+      said #7 to #2 ""Rook, Wren — eastward, and mind the drop south of here."" heard by [2]
+      said #3 to #4 ""East it is — after you, Sable."" heard by [4]
+  reviews=31 changes=0 finished=103 attacked=0 combat began=1 spoken to=19
+  fingerprint ca456621cd9e1c17
 
-the first question in full -- 3536 characters, digest a0db2c61ed7b1b00
+the first question in full -- 3536 characters, digest 62f4269849130446
 
     You are Rook, one character in a world of many.
     
@@ -1100,11 +1030,11 @@ the first question in full -- 3536 characters, digest a0db2c61ed7b1b00
         #6   pile       pile     (+7.0, +0.0, +0.0)   7.00 seen   open holds 1, 0 coins
       ground     7x7 cells of 3.0, north up, east right; each mark is followed by how far that cell stands above you
       legend     @ where you stand; ~ a hole with nothing to stand on; x a building; # a face of ground too tall to climb; ! the edge of a drop; . ground to walk on; ? not read
-        .0   .0   .0   .0   .0   .1   .1  
-        .0   .0   .0   .0   .0   .0   .1  
+        .0   .0   x0   .0   .0   .1   .1  
+        .0   .0   x0   .0   .0   .0   .1  
         .0   .0   .0   .0   .0   .0   .0  
-        .0   .0   .0   @0   .0   .0   .0  
-        !-1  !0   .0   .0   .0   .0   .0  
+        .0   x0   .0   @0   .0   .0   .0  
+        !-1  !0   x0   .0   .0   .0   .0  
         ~-   ~-   !0   .0   .0   .0   .0  
         ~-   ~-   ~-   !-1  !-1  .-1  .-1 
       heard      0 lines of speech, oldest first

@@ -171,11 +171,19 @@ static func begin(
 			anchor.id, anchor.x, anchor.y, anchor.z, radius, span,
 			fight.board.anchor_storey, fight.members.size(),
 		])
-	fight.lines.append("snap-in board %s cells=%d standable=%d holes=%d cliffs=%d" % [
-		fight.board.digest(), fight.board.cell_count(),
-		fight.board.standable_count(), fight.board.hole_count(),
-		fight.board.cliff_edge_count(),
-	])
+	# How much of the ground this fight is being held on is closed, and by what.
+	# `standable` is what is left after both: `holes` is the water and the void,
+	# and the rest of the difference is what is standing on it -- a tree, a
+	# boulder, a fence -- of which `line` many are tall enough to stop a line of
+	# sight as well as a piece.
+	fight.lines.append(
+		"snap-in board %s cells=%d standable=%d holes=%d closed=%d line=%d cliffs=%d" % [
+			fight.board.digest(), fight.board.cell_count(),
+			fight.board.standable_count(), fight.board.hole_count(),
+			fight.board.cell_count() - fight.board.standable_count()
+				- fight.board.hole_count(),
+			fight.board.blocking_count(), fight.board.cliff_edge_count(),
+		])
 
 	var seating := CombatSnap.place(fight.board, fight.members)
 	fight.lines.append_array(seating["lines"])

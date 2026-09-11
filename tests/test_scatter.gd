@@ -28,6 +28,14 @@ extends TestSuite
 ## *Everything placed is named by tag.* Every tag the layer can name has to be in
 ## the catalog, and the catalog's own promises about a biome -- the prop tags on
 ## its profile -- have to be things this layer can actually grow there.
+##
+## *A rectangle of the world holds exactly what its cells hold.* The tactical
+## board reads what is standing on it through `items_within`, and that has to be
+## the same answer as asking every cell of both lattices one at a time -- and the
+## faster `solid_items_within`, which throws out most cells for a hash before
+## anything about the ground is asked, has to be that answer again with the
+## walked-through things dropped. Both are swept rather than spot-checked,
+## because a shortcut that is wrong is wrong on the cells nobody named.
 class_name TestScatter
 
 const SEED := 1234
@@ -70,6 +78,7 @@ func run() -> void:
 	var scatter := DecorationScatter.new(terrain)
 
 	_the_catalog_adds_up()
+	_the_catalog_says_how_everything_stands()
 	_the_catalog_keeps_every_biome_profiles_promise()
 	_a_cell_is_a_pure_function_of_its_cell_and_the_seed(scatter)
 	_a_block_of_chunks_is_the_same_dressed_in_either_order(scatter)
@@ -82,6 +91,8 @@ func run() -> void:
 	_road_props_only_stand_beside_a_road(terrain, scatter)
 	_yard_props_only_stand_beside_a_building(terrain, scatter)
 	_a_stone_circle_only_stands_in_a_clearing(terrain, scatter)
+	_a_rectangle_holds_what_its_cells_hold(scatter)
+	_the_shortcut_for_solid_things_keeps_the_same_answer(scatter)
 	_the_world_carries_the_dressing_in_its_fingerprint()
 	_two_processes_dress_the_world_the_same_way()
 
@@ -208,6 +219,47 @@ func _the_catalog_adds_up() -> void:
 	check(ScatterCatalog.FLORA_CEILING - highest < 0.05,
 		"the flora shortcut is %.3f but nothing reaches past %.3f, so it throws "
 		% [ScatterCatalog.FLORA_CEILING, highest] + "away nothing")
+
+
+## Every row says how it stands in the way, and says one of the two things there
+## are to say. The board reads this column for every tree and every boulder it
+## finds, so a row that answered something else would quietly become walkable.
+##
+## The ceiling the fast path uses is checked here as well, and checked the way it
+## has to be: it is derived from the table rather than written down, so what
+## needs asserting is that it really does bound every solid row -- the sum of the
+## rows up to and including the last solid one, in every biome.
+func _the_catalog_says_how_everything_stands() -> void:
+	var solid := 0
+	for entry in ScatterCatalog.all_entries():
+		var stands := String(entry["stands"])
+		check(ScatterCatalog.STANDINGS.has(stands),
+			"%s says it stands '%s', which is not one of the two ways"
+				% [String(entry["tag"]), stands])
+		if stands == ScatterCatalog.STANDS_SOLID:
+			solid += 1
+		equal(ScatterCatalog.stands_of(String(entry["tag"])), stands,
+			"%s is looked up as standing some other way than its row says"
+				% String(entry["tag"]))
+	check(solid >= 8, "expected the table to hold a good many solid things, got %d" % solid)
+	equal(ScatterCatalog.stands_solid("a tag no table names"), false,
+		"a tag the catalog does not know is walked through, not an invented obstacle")
+
+	for lattice in ScatterCatalog.LATTICES:
+		var rows := ScatterCatalog.entries(lattice)
+		var last := -1
+		for at in rows.size():
+			if String(rows[at]["stands"]) == ScatterCatalog.STANDS_SOLID:
+				last = at
+		check(last >= 0, "the %s lattice has nothing solid on it at all" % lattice)
+		for biome in BiomeCatalog.IDS:
+			var reach := 0.0
+			for at in range(last + 1):
+				reach += float((rows[at]["weights"] as Dictionary).get(biome, 0.0))
+			check(reach <= ScatterCatalog.solid_ceiling(lattice) + 0.000001,
+				("%s of %s reaches %.4f along the line but the shortcut refuses "
+				+ "everything past %.4f -- solid things would be lost")
+					% [lattice, biome, reach, ScatterCatalog.solid_ceiling(lattice)])
 
 
 ## The biome catalog says how thickly a biome grows (`foliage_density`) and the
@@ -679,6 +731,108 @@ func _a_stone_circle_only_stands_in_a_clearing(
 	equal(strays, 0,
 		"%d of %d stone circles stand on a road, in a village, or under an "
 		% [strays, circles] + "island")
+
+
+## A rectangle of the world holds exactly what the cells overlapping it hold.
+##
+## `items_within` is how the tactical board learns what is standing on it, and it
+## has to be a view of the layer rather than a second layer. So the same
+## rectangle is gathered twice: once by asking for the rectangle, and once by
+## asking every cell of both lattices in the block around it and keeping the ones
+## that landed inside. The rectangle is deliberately not aligned to either
+## lattice -- neither 2.0 nor 8.0 divides its corner -- because an aligned one
+## would hide exactly the mistake worth catching.
+func _a_rectangle_holds_what_its_cells_hold(scatter: DecorationScatter) -> void:
+	var low := Vector2(-73.5, 46.5)
+	var high := low + Vector2(63.0, 63.0)
+	var asked := {}
+	for item in scatter.items_within(low.x, low.y, high.x, high.y):
+		asked[_where(item)] = String(item["tag"])
+	var walked := {}
+	for lattice in ScatterCatalog.LATTICES:
+		var size := DecorationScatter.cell_size(lattice)
+		var first := Vector2i(
+			int(floor(low.x / size)) - 2, int(floor(low.y / size)) - 2
+		)
+		var last := Vector2i(
+			int(floor(high.x / size)) + 2, int(floor(high.y / size)) + 2
+		)
+		for cell_x in range(first.x, last.x + 1):
+			for cell_z in range(first.y, last.y + 1):
+				var item := scatter.item_in_cell(lattice, Vector2i(cell_x, cell_z))
+				if item.is_empty():
+					continue
+				var x := float(item["x"])
+				var z := float(item["z"])
+				if x < low.x or x >= high.x or z < low.y or z >= high.y:
+					continue
+				walked[_where(item)] = String(item["tag"])
+	check(asked.size() > 40,
+		"expected a good many things in a 63-unit square, got %d" % asked.size())
+	equal(asked.size(), walked.size(),
+		"the rectangle holds %d things and its cells hold %d" % [
+			asked.size(), walked.size(),
+		])
+	for key in walked:
+		equal(asked.get(key, ""), walked[key],
+			"the thing at %s is in the cells but not in the rectangle" % key)
+
+
+## The fast way of asking for the solid things is the slow way with the rest
+## dropped, over every cell of a block of the world.
+##
+## It has a shortcut in front of it -- a cell whose one roll lands past the last
+## solid row of its lattice is refused before anything about the ground under it
+## is asked -- and a shortcut is exactly the kind of thing that is right on the
+## cells somebody looked at. So this compares the two answers over nine
+## rectangles laid side by side, which between them put the question to some ten
+## thousand cells of the two lattices, rather than naming a cell.
+func _the_shortcut_for_solid_things_keeps_the_same_answer(
+	scatter: DecorationScatter
+) -> void:
+	var rectangles := 0
+	var solid := 0
+	for row in 3:
+		for column in 3:
+			var low := Vector2(-73.5, 46.5) + Vector2(
+				float(column) * 63.0, float(row) * 63.0
+			)
+			var high := low + Vector2(63.0, 63.0)
+			var slow := {}
+			for item in scatter.items_within(low.x, low.y, high.x, high.y):
+				if ScatterCatalog.stands_solid(String(item["tag"])):
+					slow[_where(item)] = item
+			var fast := {}
+			for item in scatter.solid_items_within(low.x, low.y, high.x, high.y):
+				fast[_where(item)] = item
+			rectangles += 1
+			solid += slow.size()
+			equal(fast.size(), slow.size(),
+				("the square at %.1f,%.1f holds %d solid things asked for slowly "
+				+ "and %d asked for quickly") % [
+					low.x, low.y, slow.size(), fast.size(),
+				])
+			for key in slow:
+				var one: Dictionary = slow[key]
+				var other: Dictionary = fast.get(key, {})
+				check(not other.is_empty(),
+					"the %s at %s is found slowly and missed by the shortcut"
+						% [String(one["tag"]), key])
+				if other.is_empty():
+					continue
+				equal(String(other["tag"]), String(one["tag"]),
+					"the two ways of asking disagree about what is at %s" % key)
+				equal(float(other["size"]), float(one["size"]),
+					"the two ways of asking disagree about how big the thing at %s is" % key)
+	equal(rectangles, 9, "the sweep should cover nine squares of the world")
+	check(solid > 100,
+		"expected the sweep to hold plenty of solid things, got %d" % solid)
+
+
+## Where a placed thing stands, at fixed precision: the key the two ways of
+## gathering a rectangle are matched on.
+func _where(item: Dictionary) -> String:
+	return "%.4f,%.4f" % [float(item["x"]), float(item["z"])]
 
 
 # --- The world and the outside world -------------------------------------

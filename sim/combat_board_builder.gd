@@ -8,6 +8,24 @@ extends RefCounted
 ## constants. There is no second rule here about what a hole is, and there is no
 ## number here that the ground does not already live by.
 ##
+## ## What stands on the ground is asked for, not guessed at
+##
+## The one layer above the terrain query that a board reads is the scatter layer,
+## because a tree is in the way of a fight in a way a colour of grass is not. It
+## is read the same way as everything else here: `DecorationScatter.items_within`
+## over the board's own rectangle, which walks the cells of the flora and prop
+## lattices that overlap it and asks each the very question it answers when it
+## decides what model to stand there. So a blocked cell stays a pure function of
+## the world seed and the cell -- there is no list of trees kept anywhere, no
+## board is told about a tree by anybody, and the renderer and the board cannot
+## come to disagree about where one is, because neither has an answer of its own.
+##
+## Which of the things standing about are in the way is the catalog's row
+## (`ScatterCatalog.STANDS_SOLID`), and how tall one has to be to stop a line of
+## sight as well is `CombatBoard.STEP_UP` -- the board's own existing rule for a
+## face of earth, applied to the size the thing actually rolled. Nothing new is
+## decided here.
+##
 ## ## How a storey is chosen, and why every cell is read on its own
 ##
 ## The world has more than one surface over a position: an island's top and the
@@ -64,9 +82,20 @@ const SAME_SURFACE := 0.000001
 ## geometry a mesher builds cannot disagree about any layer of the stack.
 var terrain: TerrainQuery = null
 
+## What stands on the ground: the trees, the stone and the made things.
+##
+## Built here from the same terrain query rather than handed in, for the reason
+## the whole file is written this way -- the scatter layer is a pure function of
+## the seed and the cell, so one built here and the one the renderer draws from
+## are the same layer, not two copies that could drift. Nothing is kept between
+## boards; there is nothing to keep.
+var scatter: DecorationScatter = null
+
 
 func _init(query: TerrainQuery = null) -> void:
 	terrain = query
+	if query != null:
+		scatter = DecorationScatter.new(query)
 
 
 ## The board around a position, read on the storey reached from `from_height`.
@@ -144,13 +173,45 @@ func build(
 				and terrain.is_reserved_at(centre.x, centre.y)
 			) else 0
 
+	# What is standing on the board, asked of the scatter layer once for the
+	# whole rectangle rather than cell by cell: the two lattices are finer and
+	# coarser than this one, so walking them once is both cheaper and the only
+	# way a thing on a lattice cell straddling two board cells is counted once.
+	#
+	# The board adds nothing to the answer. Where a thing stands is the scatter
+	# layer's; whether it is solid is its catalog row's; the only judgement made
+	# here is the one the board already makes about a face of earth -- something
+	# taller than a piece can climb stops a line as well as a piece.
+	var standing := PackedInt32Array()
+	standing.resize(across * deep)
+	if scatter != null:
+		var edge := board.extent()
+		for item in scatter.solid_items_within(edge[0], edge[1], edge[2], edge[3]):
+			var stood := CombatBoard.cell_of(
+				float(item["x"]), float(item["z"]), size
+			) - lowest
+			if stood.x < 0 or stood.y < 0 or stood.x >= across or stood.y >= deep:
+				continue
+			var index := stood.y * across + stood.x
+			standing[index] |= CombatBoard.BLOCKS_MOVE
+			if float(item["size"]) > CombatBoard.STEP_UP:
+				standing[index] |= CombatBoard.BLOCKS_LINE
+
 	for row in deep:
 		for column in across:
 			var cell := lowest + Vector2i(column, row)
 			var at := (row + 1) * apron_across + (column + 1)
 			var surface: float = height[at]
 			var is_hole := surface == -INF
-			var occupied := built[at] == 1
+			# What the scatter layer stood here, and the one condition on it: a
+			# tree grows out of the ground, so it is only in the way of a cell
+			# that resolved to the ground. A board on an island passing over a
+			# wood far below is not in its branches -- the same rule, and the
+			# same reason, as the village underneath it.
+			var stands: int = 0 if storey[at] != CombatBoard.GROUND_STOREY \
+				else standing[row * across + column]
+			var built_on := built[at] == 1
+			var occupied := built_on or (stands & CombatBoard.BLOCKS_MOVE) != 0
 			var standable := not is_hole and not occupied
 
 			# What the four neighbours do to this cell: the deepest fall away
@@ -180,7 +241,7 @@ func build(
 			# same way a wall does: the earth is in the way. A hole does not --
 			# you can shoot over a chasm, and the design says a chasm is a
 			# highway to the Frog rather than a wall.
-			if occupied or (
+			if built_on or (stands & CombatBoard.BLOCKS_LINE) != 0 or (
 				not is_hole
 				and lowest_beside != INF
 				and surface - lowest_beside > CombatBoard.STEP_UP

@@ -569,6 +569,23 @@ made true. What a piece may step up and down is `TerrainQuery.HOP_HEIGHT` and
 `TerrainQuery.DROP_REACH` taken rather than restated, so what a piece may climb is
 the same fact as what a walker may climb.
 
+**And a tree holds its square.** The board asks the scatter layer what is
+standing on each cell, through the same `item_in_cell` the renderer's dressing
+comes from — no list of trees is kept anywhere, so whether a cell is blocked is a
+pure function of the world seed and the cell exactly as its height is. A catalog
+row says which of two ways a thing stands: *through* (ferns, flowers, reeds,
+pebbles, a lantern post) changes nothing, and *solid* (trees, boulders, spires,
+stone circles, fences, carts, crates, barrels) takes the cell. A solid thing
+taller than a piece can climb takes the line of sight through it as well — the
+same 3.0 units the board already uses for a face of earth, because what you could
+scramble over you can see over. So the same `boulder` row is cover you shoot over
+in a wood at 0.9–1.7 units and a wall on the moor at 2.2–4.4, and a fight in deep
+forest is fought across a board with 88 of its 441 cells closed rather than an
+open field with trees drawn on it. Nothing is ever un-blocked to keep a board
+connected; over 392 pairs of combatants meeting across 49 boards, every piece
+found a seat and two pairs ended up in pockets a thicket had separated, which is
+terrain. See [reports/blocked-ground.md](reports/blocked-ground.md).
+
 The reasoning, the cell-size sweep and a board read on a floating island's top
 are in [reports/combat-board.md](reports/combat-board.md).
 
@@ -2245,6 +2262,7 @@ project, which takes a few seconds, and later runs do not.
 ./run_headless.sh --scenario market      # ...with a named cast set out and lived forward
 ./run_headless.sh --scenario market --frozen   # ...or photographed at a stated tick
 ./run_headless.sh --board                # ...and the tactical lattice, cell by cell
+./run_headless.sh --board-at -484.4 420  # ...or the one board read at a named place
 ./run_headless.sh --snap                 # ...and where in the world a fight can be held
 ./run_headless.sh --board-sweep          # ...and what each candidate cell size costs
 ./run_headless.sh --assets               # ...and what visual material the run loaded
@@ -2274,7 +2292,10 @@ tick 21 real-time chunks=34 islands=11 props=424 begun=1 ended=1 standing=5 ...
 
 `rings=` on a snap-in line is how far the search had to go from the cell the
 combatant was standing over: 0 whenever that cell would take it, and anything
-above 0 says the cell was water, or built on, or already spoken for. The
+above 0 says the cell was water, or built on, or had a tree standing in it, or
+was already spoken for. `closed=` on the board line is how many of the board's
+cells something is standing in, and `line=` how many of those stop a line of
+sight. The
 `snap-out` line prints the cell, the world position it became, and the cell that
 position snaps back to — the round trip, in the record rather than asserted.
 Nothing in that command chooses anything: the positions and headings are

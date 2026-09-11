@@ -33,12 +33,17 @@ extends RefCounted
 ##     a floating island's rim, or the pond in an island's own basin. Most
 ##     pieces cannot enter one, the Frog leaps them, and a piece on the lip of
 ##     one can be shoved in.
-##   * **blocks movement** -- no piece may occupy it: a hole, or a building's
-##     footprint.
+##   * **blocks movement** -- no piece may occupy it: a hole, a building's
+##     footprint, or something solid standing on it. A tree, a boulder, a fence
+##     and a crate are all in the way; a fern and a tuft of flowers are not, and
+##     which is which is the scatter catalog's own column rather than anything
+##     decided here.
 ##   * **blocks a line** -- neither a piece nor a line of sight passes through
-##     it: a building, or a face of ground standing more than a piece can climb
-##     above the lowest ground beside it. A hole does not block a line; you can
-##     shoot across a chasm.
+##     it: a building, a face of ground standing more than a piece can climb
+##     above the lowest ground beside it, or something solid standing on it that
+##     is itself taller than that climb. The same threshold for both, and for the
+##     same reason: what you could scramble over you can see over. A hole does
+##     not block a line; you can shoot across a chasm.
 ##   * **cliff edge** -- the ground falls away from it to a neighbour by more
 ##     than a step, so a piece standing here can be shoved off it.
 ##

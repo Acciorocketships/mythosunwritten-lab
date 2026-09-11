@@ -30,6 +30,15 @@ extends TestSuite
 ## *The world has storeys and the board says which.* A board reads as readily on
 ## an island's top as on the ground, and where an island laps over the ground in
 ## plan a cell says so.
+##
+## *What stands on the ground is in the way.* A tree, a boulder, a fence and a
+## crate take the cell they stand in, and a solid thing taller than a piece can
+## climb takes the line of sight through it as well. That is checked cell by cell
+## against `DecorationScatter.items_within` -- the scatter layer's own question,
+## asked again here rather than a list of trees kept anywhere -- over a sweep of
+## whole boards in several kinds of country, both ways round: no cell is blocked
+## that has nothing solid on it and no reason of the ground's either, and no cell
+## carrying something solid is left open.
 class_name TestCombatBoard
 
 ## The world the whole suite reads. One seed, because what is being checked is
@@ -76,6 +85,7 @@ func run() -> void:
 	_the_board_reads_its_holes_off_the_terrain_query(terrain, builder)
 	_water_is_a_hole(terrain, builder)
 	_a_village_blocks_movement_and_lines(terrain, builder)
+	_what_stands_on_the_ground_is_in_the_way(terrain, builder)
 	_a_cliff_edge_is_a_drop_of_more_than_a_step(builder)
 
 	var island := _an_island_with_a_basin(terrain)
@@ -347,19 +357,137 @@ func _a_village_blocks_movement_and_lines(
 				continue
 			var centre := board.centre(cell)
 			if not terrain.is_reserved_at(centre.x, centre.y):
-				# The other way a cell blocks a line: a face of ground taller
-				# than a piece can climb. Then it is standable ground rather
-				# than a building, and the face has to really be there.
+				# The other two ways a cell blocks a line: a face of ground
+				# taller than a piece can climb, or something solid standing on
+				# it that is taller than that same climb. Then it is not a
+				# building, and whichever of the two it is has to really be
+				# there.
 				var tallest := 0.0
 				for step in CombatBoard.NEIGHBOURS:
 					if not board.contains(cell + step) or board.is_hole(cell + step):
 						continue
 					tallest = maxf(tallest, board.height_at(cell) - board.height_at(cell + step))
-				check(tallest > CombatBoard.STEP_UP,
-					"cell %s blocks a line with neither a building nor a face on it" % cell)
+				check(tallest > CombatBoard.STEP_UP or _tallest_solid_in(builder, board, cell) > CombatBoard.STEP_UP,
+					"cell %s blocks a line with no building, no face and nothing standing on it" % cell)
 				continue
 			check(board.blocks_move(cell), "a cell inside a building at %s must block movement" % cell)
 			check(not board.is_standable(cell), "no piece stands inside a building at %s" % cell)
+
+
+## What stands on the ground takes the cell it stands in, and the tall ones take
+## the line through it as well.
+##
+## Checked both ways round, cell by cell, over three whole boards in three kinds
+## of country. The question put to the scatter layer here is `items_within` over
+## one cell's own square of ground -- the plain question, asked a cell at a time,
+## not the bulk one the builder uses -- so the two answers are arrived at by
+## different routes and agreeing is worth something.
+##
+##   * nothing solid standing on a cell and the cell is open, unless the ground
+##     itself is the reason: a hole, or a building on it;
+##   * something solid standing on a cell and the cell is closed to a piece;
+##   * something solid taller than a piece can climb and the line through the
+##     cell is closed too.
+##
+## The last one is the whole of "a boulder is not a tuft of grass": the threshold
+## is `CombatBoard.STEP_UP`, the board's own rule for a face of earth, applied to
+## the size the thing rolled -- so the same boulder row is cover in the woods and
+## a wall on the moor.
+##
+## A cell the board reads as a hole is left out of all three, and that is checked
+## rather than assumed: the scatter layer stands things on the ground, so a cell
+## whose surface is water or the void off a rim carries nothing, even where a
+## thing stands on a dry corner of it.
+func _what_stands_on_the_ground_is_in_the_way(
+	terrain: TerrainQuery, builder: CombatBoardBuilder
+) -> void:
+	var scatter := DecorationScatter.new(terrain)
+	var built := _a_position_where(terrain, func(x: float, z: float) -> bool:
+		return terrain.is_reserved_at(x, z)
+	)
+	var places: Array[Vector2] = [Vector2.ZERO, WATER_SAMPLE_AT]
+	if built != Vector2.INF:
+		places.append(built)
+	var pinned := 0
+	var taken := 0
+	var walled := 0
+	var ignored := 0
+	for place in places:
+		var board := builder.build_on_ground(place.x, place.y)
+		for row in board.cells_deep:
+			for column in board.cells_across:
+				var cell := board.min_cell + Vector2i(column, row)
+				var centre := board.centre(cell)
+				var solid := _solid_in(scatter, board, cell)
+				var tallest := 0.0
+				for item in solid:
+					tallest = maxf(tallest, float(item["size"]))
+				pinned += 1
+				if board.storey_at(cell) != CombatBoard.GROUND_STOREY:
+					# Not the ground: a hole, or an island's top over it.
+					# Whatever is standing about is standing on ground this cell
+					# is not about, so it changes nothing here.
+					if not solid.is_empty():
+						ignored += 1
+						check(board.is_hole(cell) == not board.is_standable(cell),
+							"cell %s is not on the ground and yet something on it moved the board" % cell)
+						check(not board.blocks_line(cell),
+							"a hole at %s must not stop a line because something stands on its dry corner" % cell)
+					continue
+				if solid.is_empty():
+					# Nothing solid here: the only things that may close the
+					# cell are the ground's own, and they are the ones the board
+					# already answered for before this layer was read at all.
+					if board.blocks_move(cell):
+						check(board.is_hole(cell) or terrain.is_reserved_at(centre.x, centre.y),
+							"cell %s is closed with nothing on it and no hole or building either" % cell)
+					continue
+				taken += 1
+				check(board.blocks_move(cell),
+					"cell %s carries %s and is still open to a piece" % [
+						cell, String(solid[0]["tag"]),
+					])
+				check(not board.is_standable(cell),
+					"a piece stands in a %s at %s" % [String(solid[0]["tag"]), cell])
+				if tallest > CombatBoard.STEP_UP:
+					walled += 1
+					check(board.blocks_line(cell),
+						"a %s of %.2f units at %s is taller than a piece can climb and does not stop a line"
+							% [String(solid[0]["tag"]), tallest, cell])
+	check(pinned > 1000, "expected a thousand cells pinned against the scatter layer, got %d" % pinned)
+	check(taken > 40,
+		"expected a good many cells taken by what stands on them, got %d of %d" % [taken, pinned])
+	check(walled > 10,
+		"expected some of them tall enough to stop a line as well, got %d" % walled)
+	check(ignored > 0,
+		"expected at least one thing standing on a cell the board reads as a hole or an island")
+
+
+## Everything solid the scatter layer stands inside one cell's own square of
+## ground, asked of the layer a cell at a time.
+func _solid_in(
+	scatter: DecorationScatter, board: CombatBoard, cell: Vector2i
+) -> Array[Dictionary]:
+	var low := Vector2(
+		float(cell.x) * board.cell_size, float(cell.y) * board.cell_size
+	)
+	var found: Array[Dictionary] = []
+	for item in scatter.items_within(
+		low.x, low.y, low.x + board.cell_size, low.y + board.cell_size
+	):
+		if ScatterCatalog.stands_solid(String(item["tag"])):
+			found.append(item)
+	return found
+
+
+## The tallest solid thing standing in a cell, or zero where nothing does.
+func _tallest_solid_in(
+	builder: CombatBoardBuilder, board: CombatBoard, cell: Vector2i
+) -> float:
+	var tallest := 0.0
+	for item in _solid_in(builder.scatter, board, cell):
+		tallest = maxf(tallest, float(item["size"]))
+	return tallest
 
 
 ## Every cell flagged a cliff edge really does have a neighbour more than a step

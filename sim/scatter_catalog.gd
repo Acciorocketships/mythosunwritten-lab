@@ -34,6 +34,10 @@ extends RefCounted
 ##   lives: the same `fir` is five to seven and a half units under canopy and a
 ##   stunted two and a half up on the tops, and the same `boulder` is knee-high
 ##   in the woods and taller than a house on the moor.
+## * **how it stands in the way**: walked through, or solid. A fern is one, a
+##   trunk is the other, and the tactical board reads this row rather than
+##   guessing from the tag. It is a fact about the thing, so it lives beside the
+##   thing.
 ##
 ## The reasoning behind every number, and the measured result, are written up in
 ## reports/scatter.md.
@@ -93,6 +97,55 @@ const KIND_PROP := "prop"
 
 const KINDS := [KIND_TREE, KIND_UNDERGROWTH, KIND_WATERSIDE, KIND_ROCK, KIND_PROP]
 
+# --- How a thing stands in the way ---------------------------------------
+# What a placed thing does to the square of ground it stands on, which is the
+# one thing the tactical board needs to know about it. A row says which of two
+# it is, and says it here rather than in the board, because whether you can walk
+# through a fern is a fact about ferns.
+#
+# The board turns the two into its own three answers, and a row does not have to
+# know how:
+#
+#   * a thing that is walked through changes nothing. A cell with a tuft of
+#     grass on it is an empty cell.
+#   * a solid thing takes the cell: no piece may be on it.
+#   * a solid thing *taller than a piece can climb* takes the line as well.
+#     That threshold is CombatBoard.STEP_UP, which is the board's own existing
+#     rule for a face of earth -- earth you could scramble up is earth you can
+#     see over -- and it is applied to the size the thing actually rolled rather
+#     than to its tag. So a boulder in the woods (0.9 to 1.7 units) is cover you
+#     shoot over and a boulder on the moor (2.2 to 4.4) is a wall, and the
+#     highland's bigger stone finally means something other than a picture.
+#
+# Why each group is what it is:
+#
+#   * **trees** are solid. A trunk is in the way, and every tree in the table
+#     rolls taller than a piece can climb, so a wood is a place with sight lines
+#     in it rather than an open field with decoration.
+#   * **undergrowth** and **waterside flora** are walked through. Bushes, ferns,
+#     flowers, mushrooms, petals, a fallen log, reeds, cattails, toadstools,
+#     lily pads and the marsh's orb are all things a person pushes past or steps
+#     over; none of them would stop anybody.
+#   * **stone** splits on size, which is what the two lattices already say about
+#     it: a pebble or a patch of gravel on the fine lattice is walked over, and
+#     a boulder, a spire or a stone circle on the coarse one is solid rock.
+#   * **made things** are solid where somebody built them to be in the way -- a
+#     fence, a cart, a crate, a barrel -- and walked past where they are a post:
+#     a lantern on a pole is a thin thing in a three-unit square, and stopping a
+#     piece with one would be stopping it with a signpost.
+
+## Walked through, seen through, stood on. Grass, ferns, flowers, reeds, lily
+## pads, pebbles -- everything a person pushes past without breaking stride, and
+## everything low enough to stand a boot on. Most of the table.
+const STANDS_THROUGH := "through"
+
+## Occupies the ground it stands on: a trunk, a block of stone, a made thing
+## somebody built to be in the way. Nobody stands in a boulder, so the cell it
+## stands in is not a cell a piece may be on.
+const STANDS_SOLID := "solid"
+
+const STANDINGS := [STANDS_THROUGH, STANDS_SOLID]
+
 ## The most any one lattice's weights may add up to at a single position.
 ##
 ## The weights of a lattice are compared against one roll in [0, 1), so their sum
@@ -114,6 +167,12 @@ const FLORA_CEILING := 0.62
 
 # Built once, handed out as the same arrays every time. Nothing writes to them.
 static var _rows := {}
+
+# Which tags are solid, as a set, built on first use from the rows above.
+static var _solid := {}
+
+# How far along each lattice's line anything solid reaches, worked out once.
+static var _ceilings := {}
 
 
 ## Every row of one lattice, in a fixed order.
@@ -147,6 +206,58 @@ static func tags() -> PackedStringArray:
 	for entry in all_entries():
 		found.append(String(entry["tag"]))
 	return found
+
+
+## How a tag stands in the way: STANDS_THROUGH or STANDS_SOLID. A tag this table
+## does not name is walked through, which is what an unknown thing on the ground
+## should be: the board does not invent an obstacle it cannot account for.
+static func stands_of(tag: String) -> String:
+	return STANDS_SOLID if stands_solid(tag) else STANDS_THROUGH
+
+
+## How far along a lattice's line anything solid can reach, at any position.
+##
+## One roll in [0, 1) decides a cell, and the rows are laid end to end along it
+## in table order, so a roll past the end of the *last solid row's* stretch can
+## only ever land on something walked through -- whatever the biome, because a
+## position's weights are a blend of its biomes' and a blend cannot exceed the
+## largest of them, and because a context can only ever scale a weight down.
+##
+## That makes this a sound refusal rather than an estimate: a cell whose roll is
+## at or past it cannot hold anything solid, and nothing about the ground under
+## it needs to be asked. It is the same trick, for the same reason, as
+## FLORA_CEILING -- and it is computed from the table rather than written down,
+## so retuning a weight cannot leave it stale. On the flora lattice the trees are
+## the first four rows and it comes to 0.128, so seven cells in eight are thrown
+## out for one hash.
+static func solid_ceiling(lattice: String) -> float:
+	if not _ceilings.has(lattice):
+		var rows := entries(lattice)
+		var last := -1
+		for at in rows.size():
+			if String(rows[at]["stands"]) == STANDS_SOLID:
+				last = at
+		var most := 0.0
+		for biome in BiomeCatalog.IDS:
+			var total := 0.0
+			for at in range(last + 1):
+				total += float((rows[at]["weights"] as Dictionary).get(biome, 0.0))
+			most = maxf(most, total)
+		_ceilings[lattice] = most
+	return float(_ceilings[lattice])
+
+
+## Whether a thing with this tag occupies the ground it stands on.
+##
+## Asked once per placed thing by the tactical board, which is a few hundred
+## times per board, so the answer is built once into a set rather than found by
+## walking every row each time. The table is fixed after the first call, so this
+## cannot fall out of step with it.
+static func stands_solid(tag: String) -> bool:
+	if _solid.is_empty():
+		for entry in all_entries():
+			_solid[String(entry["tag"])] = String(entry["stands"]) == STANDS_SOLID
+	return bool(_solid.get(tag, false))
 
 
 ## How likely this row is at a position, given that position's biome shares.
@@ -216,6 +327,7 @@ static func _entry(
 	base_size: Vector2,
 	sizes: Dictionary = {},
 	hover: float = 0.0,
+	stands: String = STANDS_THROUGH,
 ) -> Dictionary:
 	return {
 		"tag": tag,
@@ -227,6 +339,10 @@ static func _entry(
 		# How far above the surface the thing floats. Zero for everything that
 		# stands on the ground, which is everything but a drifting orb.
 		"hover": hover,
+		# Whether the square of ground it stands on is still a square a person
+		# can walk into. Walked through unless the row says otherwise, because
+		# most of what grows is grass.
+		"stands": stands,
 	}
 
 
@@ -257,7 +373,7 @@ static func _built() -> Dictionary:
 				highland: Vector2(2.4, 3.4),
 				blossom: Vector2(3.4, 5.0),
 				marsh: Vector2(3.0, 4.4),
-			}),
+			}, 0.0, STANDS_SOLID),
 		# The canopy itself. Deep forest is where it grows and where it is tall;
 		# it does not grow on the tops at all.
 		_entry(AssetTags.CANOPY_TREE, KIND_TREE, CONTEXT_GROUND,
@@ -268,15 +384,15 @@ static func _built() -> Dictionary:
 				highland: Vector2(5.0, 6.5),
 				blossom: Vector2(7.0, 9.0),
 				marsh: Vector2(6.0, 8.0),
-			}),
+			}, 0.0, STANDS_SOLID),
 		_entry(AssetTags.BLOSSOM_TREE, KIND_TREE, CONTEXT_GROUND,
 			{meadow: 0.003, forest: 0.002, highland: 0.000, blossom: 0.062, marsh: 0.000},
 			Vector2(3.6, 5.0),
-			{blossom: Vector2(4.5, 6.5)}),
+			{blossom: Vector2(4.5, 6.5)}, 0.0, STANDS_SOLID),
 		_entry(AssetTags.DEAD_TREE, KIND_TREE, CONTEXT_GROUND,
 			{meadow: 0.000, forest: 0.004, highland: 0.002, blossom: 0.000, marsh: 0.026},
 			Vector2(2.8, 3.8),
-			{marsh: Vector2(3.2, 4.6)}),
+			{marsh: Vector2(3.2, 4.6)}, 0.0, STANDS_SOLID),
 
 		_entry(AssetTags.BUSH, KIND_UNDERGROWTH, CONTEXT_GROUND,
 			{meadow: 0.038, forest: 0.066, highland: 0.006, blossom: 0.050, marsh: 0.018},
@@ -378,39 +494,39 @@ static func _built() -> Dictionary:
 				highland: Vector2(2.2, 4.4),
 				blossom: Vector2(0.9, 1.5),
 				marsh: Vector2(0.9, 1.6),
-			}),
+			}, 0.0, STANDS_SOLID),
 		_entry(AssetTags.ROCK_SPIRE, KIND_ROCK, CONTEXT_GROUND,
 			{meadow: 0.006, forest: 0.004, highland: 0.070, blossom: 0.002, marsh: 0.004},
 			Vector2(2.4, 3.6),
-			{highland: Vector2(3.2, 5.5)}),
+			{highland: Vector2(3.2, 5.5)}, 0.0, STANDS_SOLID),
 		# Standing stones, and the one row in the table that needs a clearing:
 		# a stone circle in a thicket would read as scenery that fell over.
 		_entry(AssetTags.STONE_HENGE, KIND_ROCK, CONTEXT_CLEARING,
 			{meadow: 0.006, highland: 0.050},
 			Vector2(3.2, 4.2),
-			{highland: Vector2(3.6, 5.0)}),
+			{highland: Vector2(3.6, 5.0)}, 0.0, STANDS_SOLID),
 
 		# The roadside. The path layer already puts a signpost where a road
 		# leaves a village and lanterns along the lit stretch nearest it; these
 		# are what the rest of the route gets.
 		_entry(AssetTags.FENCE, KIND_PROP, CONTEXT_PATHSIDE,
 			{meadow: 0.280, forest: 0.220, highland: 0.240, blossom: 0.260, marsh: 0.100},
-			Vector2(1.0, 1.2)),
+			Vector2(1.0, 1.2), {}, 0.0, STANDS_SOLID),
 		_entry(AssetTags.LANTERN_POST, KIND_PROP, CONTEXT_PATHSIDE,
 			{meadow: 0.040, forest: 0.040, highland: 0.030, blossom: 0.040, marsh: 0.060},
 			Vector2(2.6, 3.0)),
 		_entry(AssetTags.CART, KIND_PROP, CONTEXT_PATHSIDE,
 			{meadow: 0.030, forest: 0.025, highland: 0.020, blossom: 0.030, marsh: 0.010},
-			Vector2(1.0, 1.15)),
+			Vector2(1.0, 1.15), {}, 0.0, STANDS_SOLID),
 
 		# The yard. What is stacked against the wall of a building, in the
 		# village the settlement layer laid out.
 		_entry(AssetTags.CRATE, KIND_PROP, CONTEXT_YARD,
 			{meadow: 0.140, forest: 0.140, highland: 0.140, blossom: 0.140, marsh: 0.140},
-			Vector2(0.7, 0.95)),
+			Vector2(0.7, 0.95), {}, 0.0, STANDS_SOLID),
 		_entry(AssetTags.BARREL, KIND_PROP, CONTEXT_YARD,
 			{meadow: 0.110, forest: 0.110, highland: 0.110, blossom: 0.110, marsh: 0.110},
-			Vector2(0.9, 1.1)),
+			Vector2(0.9, 1.1), {}, 0.0, STANDS_SOLID),
 	]
 
 	_rows = {LATTICE_FLORA: flora, LATTICE_PROP: props}

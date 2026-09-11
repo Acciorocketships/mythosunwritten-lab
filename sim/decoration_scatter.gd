@@ -188,6 +188,89 @@ func build(chunk_x: int, chunk_z: int) -> ScatterPatch:
 	return patch
 
 
+## Everything the scatter layer stands inside a rectangle of the world.
+##
+## The rectangle is half-open -- [`min_x`, `max_x`) by [`min_z`, `max_z`) -- so
+## the rectangles of two touching squares of ground divide what is on them
+## between the two, and nothing is counted twice or missed at the join.
+##
+## This is not a second answer to where anything is. It walks the cells of both
+## lattices that overlap the rectangle and asks each of them the very
+## `item_in_cell` a chunk asks when it builds its dressing, then keeps the ones
+## that landed inside. A cell's jitter is kept well inside its own cell, so the
+## cells walked here are exactly the cells that could put something in the
+## rectangle -- no margin is needed and none is taken.
+##
+## What it costs is one hash for most cells and a look at the ground for the
+## rest, the same as building a chunk: a fight-sized board of 63 units square
+## comes to about a thousand cells across the two lattices.
+func items_within(
+	min_x: float, min_z: float, max_x: float, max_z: float
+) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for lattice in ScatterCatalog.LATTICES:
+		var size := cell_size(lattice)
+		var low := Vector2i(
+			int(floor(min_x / size)), int(floor(min_z / size))
+		)
+		var high := Vector2i(
+			int(floor(max_x / size)), int(floor(max_z / size))
+		)
+		for cell_x in range(low.x, high.x + 1):
+			for cell_z in range(low.y, high.y + 1):
+				var item := item_in_cell(lattice, Vector2i(cell_x, cell_z))
+				if item.is_empty():
+					continue
+				var x := float(item["x"])
+				var z := float(item["z"])
+				if x < min_x or x >= max_x or z < min_z or z >= max_z:
+					continue
+				found.append(item)
+	return found
+
+
+## The same rectangle, but only the things that stand in the way.
+##
+## What the tactical board asks, and the only reason it is a call of its own is
+## cost. A cell whose roll lands past the last solid row of its lattice cannot
+## hold anything solid whatever the ground under it turns out to be -- that is
+## `ScatterCatalog.solid_ceiling`, and it is the same refusal, for the same
+## reason, that throws out three flora cells in eight before anything is asked
+## about the ground. Seven flora cells in eight leave here for one hash apiece.
+##
+## The answer is `items_within`'s answer with the walked-through things dropped.
+## The suite checks that cell by cell over a sweep rather than trusting it.
+func solid_items_within(
+	min_x: float, min_z: float, max_x: float, max_z: float
+) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for lattice in ScatterCatalog.LATTICES:
+		var size := cell_size(lattice)
+		var ceiling := ScatterCatalog.solid_ceiling(lattice)
+		var low := Vector2i(
+			int(floor(min_x / size)), int(floor(min_z / size))
+		)
+		var high := Vector2i(
+			int(floor(max_x / size)), int(floor(max_z / size))
+		)
+		for cell_x in range(low.x, high.x + 1):
+			for cell_z in range(low.y, high.y + 1):
+				var cell := Vector2i(cell_x, cell_z)
+				if _roll(lattice, cell, SALT_PICK) >= ceiling:
+					continue
+				var item := item_in_cell(lattice, cell)
+				if item.is_empty():
+					continue
+				if not ScatterCatalog.stands_solid(String(item["tag"])):
+					continue
+				var x := float(item["x"])
+				var z := float(item["z"])
+				if x < min_x or x >= max_x or z < min_z or z >= max_z:
+					continue
+				found.append(item)
+	return found
+
+
 ## What one cell of one lattice holds: a placed thing, or an empty dictionary.
 ##
 ## This is the whole of the layer's decision, and it depends on the cell, the

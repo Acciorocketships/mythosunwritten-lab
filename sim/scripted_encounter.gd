@@ -49,11 +49,19 @@ const SEED := 1234
 ##
 ## Chosen by measurement rather than by taste. `./run_headless.sh --snap` scores
 ## 289 candidate places over the world on three stated numbers -- how much of the
-## board can be stood on, how much height there is between its highest and lowest
-## standable cell, and how much the scatter layer grew there -- and 25 of them
-## pass. This is the one of those 25 with a real shoreline on the board: an open
-## meadow with a lake along one edge, so the fight is held on ground that has
-## something to say. See reports/combat-snap.md.
+## board the ground leaves open, how much height there is between its highest and
+## lowest standable cell, and how much the scatter layer grew there. This is the
+## one of the places that pass with a real shoreline on the board: an open meadow
+## with a lake along one edge, so the fight is held on ground that has something
+## to say. See reports/combat-snap.md.
+##
+## Two of those numbers now read differently, and the place is the same place.
+## Since the board learned what stands on the ground, `stand` counts the cells a
+## piece may actually be on and the threshold moved onto `open`, which is what it
+## always meant -- the ground's own holes and houses. Here the ground leaves
+## 0.909 of the board open exactly as it did before; of that, trees and stone
+## take 79 of the 441 cells and 37 of them stop a line as well. At the last
+## measurement 16 of the 289 candidates pass. See reports/blocked-ground.md.
 const WHERE := Vector2(-480.0, 420.0)
 
 ## How far either side of `WHERE` the two bands start, in world units. Far enough

@@ -37,7 +37,8 @@ func _initialize() -> void:
 			"usage: run_headless.sh [--seed N] [--ticks N] [--start X Z]"
 			+ " [--scenario NAME] [--frozen]"
 			+ " [--chunks] [--biomes] [--water] [--islands] [--settlements]"
-			+ " [--scatter] [--enemies] [--board] [--snap] [--board-sweep]"
+			+ " [--scatter] [--enemies] [--board] [--board-at X Z]"
+			+ " [--snap] [--board-sweep]"
 			+ " [--assets] [--digest]"
 			+ "\nscenarios: " + " ".join(Simulation.SCENARIOS)
 		)
@@ -106,8 +107,14 @@ func _initialize() -> void:
 	if options["board"]:
 		# The tactical lattice over a fixed set of overlapping rectangles, cell
 		# by cell, and one board read on a floating island's top. It answers for
-		# the lattice rather than for whatever is underfoot.
-		for line in sim.board_report():
+		# the lattice rather than for whatever is underfoot -- unless --board-at
+		# named a place, which prints the one board read there instead. That is
+		# how the ground a particular fight was held on gets printed: the board
+		# is a function of the place and the seed, so a board read there now is
+		# the board that fight was played on.
+		for line in sim.board_report(
+			CombatBoardBuilder.DEFAULT_SPAN, 40.0, 2, options["board_at"]
+		):
 			print(line)
 	if options["snap"]:
 		# Where a fight can be held, measured over a fixed grid of candidate
@@ -219,6 +226,8 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 		"scatter": false,
 		"enemies": false,
 		"board": false,
+		# Places to read a board at, instead of the fixed grid around the origin.
+		"board_at": [] as Array[Vector2],
 		"board_sweep": false,
 		"snap": false,
 		"assets": false,
@@ -266,6 +275,16 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 			"--board":
 				options["board"] = true
 				i += 1
+			"--board-at":
+				if i + 2 >= args.size():
+					return {"error": "--board-at needs two values"}
+				if not args[i + 1].is_valid_float() or not args[i + 2].is_valid_float():
+					return {"error": "--board-at needs two numbers"}
+				options["board"] = true
+				(options["board_at"] as Array[Vector2]).append(Vector2(
+					args[i + 1].to_float(), args[i + 2].to_float()
+				))
+				i += 3
 			"--snap":
 				options["snap"] = true
 				i += 1
