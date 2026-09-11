@@ -39,6 +39,11 @@ extends RefCounted
 ## branch at the end of `strike()`.
 class_name CombatResolution
 
+## What nobody is called: the answer `called_on_the_board` and
+## `struck_on_the_board` give when there is no piece to name, and what a weapon
+## action reports as its target when its pattern found no one.
+const NOBODY := "nobody"
+
 ## What an outcome was.
 const NOTHING := "nothing"
 const MOVE := "move"
@@ -74,9 +79,25 @@ static func empty_handed(called: String) -> String:
 ## which is everywhere a person can see.
 static func called_on_the_board(commander: Commander) -> String:
 	if commander == null:
-		return "nobody"
+		return NOBODY
 	return commander.sheet.character_name if commander.sheet.character_name != "" \
 		else "#%d" % commander.id
+
+
+## What any piece a blow found is called, commander or minion.
+##
+## `called_on_the_board` above answers for a commander, because a refusal is
+## addressed to whoever spent the action and that is always one. This answers for
+## whoever the blow *landed on*, which may be a minion and has no character sheet
+## to be named off. Same vocabulary either way: a name when there is one, the
+## piece's number when there is not, and `NOBODY` for a swing that found nobody
+## at all -- which is still a blow, and still says so.
+static func struck_on_the_board(piece: Piece) -> String:
+	if piece == null:
+		return NOBODY
+	if piece is Commander:
+		return called_on_the_board(piece as Commander)
+	return "#%d" % piece.id
 
 
 # --- The tactical layer ---------------------------------------------------
@@ -304,10 +325,16 @@ static func commander_attack(
 	commander.spend_attack(index, turn)
 
 	var hits: Array[Dictionary] = []
+	# What each piece the pattern found is called, written down here because here
+	# is the last moment it can be: a blow that kills takes its target off the
+	# board (`PieceMap.kill`), and a name looked up afterwards is a name nobody
+	# can find. See `blow_report` below, which is what reads them.
+	var found := PackedStringArray()
 	for id in targets:
 		var target := pieces.piece_of(id)
 		if target == null:
 			continue
+		found.append(struck_on_the_board(target))
 		hits.append(strike(
 			board, pieces, commander, target, commander.damage_of(index),
 			attack.push, fight_seed
@@ -324,6 +351,40 @@ static func commander_attack(
 		# -- which, the attack having just been spent, would answer differently.
 		"covered": cells,
 		"hits": hits,
+		"struck": found,
+	}
+
+
+## The one report a weapon action makes of itself: who it found, which attack it
+## was, how much ground it covered, how many pieces it landed on, and what they
+## took in all.
+##
+## Written here, once, because there are three ways to spend a weapon action --
+## a person pressing a key on the board, a character's own decision function
+## choosing `attack`, and the board's stand-in playing a commander nobody drives
+## -- and every one of them spends it through `commander_attack` above. They did
+## not all *say* the same thing: a self-driven character was answered the figures
+## below and a person pressing the key was answered "done", which is the same
+## blow reported two ways with the person's the poorer. Now there is one report
+## and both quote it.
+##
+## Nothing is worked out here. Every figure is read off the outcome the
+## resolution step has already returned, which is why this cannot drift from what
+## actually happened: there is nothing in it to drift.
+static func blow_report(swung: Dictionary) -> Dictionary:
+	var hits: Array = swung.get("hits", [])
+	var dealt := 0
+	for hit in hits:
+		dealt += int(hit.get("dealt", 0))
+	var found: PackedStringArray = swung.get("struck", PackedStringArray())
+	return {
+		# The first piece the pattern found, in the lattice's own order, which is
+		# the same one `CombatMatch._blow_of` calls the blow's target.
+		"target": found[0] if not found.is_empty() else NOBODY,
+		"attack": String(swung.get("attack", "")),
+		"cells": int(swung.get("cells", 0)),
+		"hits": hits.size(),
+		"dealt": dealt,
 	}
 
 

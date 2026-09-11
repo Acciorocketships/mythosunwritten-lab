@@ -275,9 +275,23 @@ func turn_right() -> Dictionary:
 
 
 ## Use one weapon action. Spends the turn's one action, unless it is refused.
+##
+## The answer carries `said`: the simulation's own report of the blow, in the
+## same sentence a character that chose `attack` for itself is answered with.
+## Before this, a blow struck by hand came back as nothing but `ok`, and the
+## shell could say no more about it than "done" -- so a person struck a blow and
+## was told less about it than a rule-driven character doing the same thing was.
+## The sentence is `ActionOutcome.line()` over `CombatResolution.blow_report`,
+## which is exactly what `ActionEngine._swing` hands the control loop, so the two
+## are the same sentence about the same blow by construction rather than by two
+## files agreeing to print the same figures.
 func swing(index: int) -> Dictionary:
 	var swung := match_state.attack(index)
-	return _answer(bool(swung.get("ok", false)), swung)
+	var answer := _answer(bool(swung.get("ok", false)), swung)
+	if bool(answer["ok"]):
+		answer["said"] = ActionOutcome.done(
+			ActionCatalog.ATTACK, CombatResolution.blow_report(swung)).line()
+	return answer
 
 
 ## Send one minion to a cell, to step onto it or to take what is on it. Spends

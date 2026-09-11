@@ -33,6 +33,15 @@ extends TestSuite
 ##   6. **The run is the same run twice**, in one process, which is the half of
 ##      determinism a suite can check; the shell checks the other half by running
 ##      two processes.
+##   7. **The two ways into a blow give the same answer.** Claim 2 is about the
+##      record the world keeps; this is about what whoever struck the blow is
+##      *told*, which was not the same thing. A weapon action spent by hand came
+##      back carrying nothing but "it happened", so the shell said "done"; a
+##      character that chose `attack` for itself was answered which attack it was,
+##      how much ground it covered, who it found and what they took. The same blow
+##      is now struck both ways on two boards built alike from one seed, and the
+##      two answers are pinned equal word for word -- so they cannot drift apart
+##      again. `./run_strike.sh` prints both.
 class_name TestStrikeRecord
 
 ## Every field a blow record carries, and what claim 1 requires of each. `true`
@@ -73,6 +82,7 @@ func run() -> void:
 	_there_is_one_record_and_not_two()
 	_the_tags_are_the_attacks_own(run)
 	_the_run_is_the_same_twice()
+	_both_hands_are_given_the_same_answer()
 
 
 # --- 1. What the record carries -------------------------------------------
@@ -354,6 +364,43 @@ func _the_run_is_the_same_twice() -> void:
 			check(false, "line %d differs between two runs:\n  %s\n  %s"
 				% [at, once[at], again[at]])
 			return
+
+
+# --- 7. Two drivers, one answer -------------------------------------------
+
+
+## The same blow struck both ways, and the same sentence back from each.
+##
+## The fixture is `ScriptedStrike.same_blow_either_way`, which builds the board
+## twice from one seed so that the same commander strikes the same target from
+## the same cell with the same weapon on the same round -- once through
+## `BoardTurn.swing`, which is what a key press reaches, and once through
+## `ActionEngine.resolve`, which is what a decision function reaches.
+##
+## Three things are checked, and the middle one is the whole claim. The answers
+## are pinned equal to each other rather than to a sentence written out here,
+## because a literal in this file would be a third copy of the wording and the
+## thing being prevented is copies. What is asked of the wording itself is only
+## that it says the five things the item names, so that "equal" cannot be
+## satisfied by both sides saying nothing.
+func _both_hands_are_given_the_same_answer() -> void:
+	var both := ScriptedStrike.same_blow_either_way()
+	check(bool(both["ok"]),
+		"the blow could not be struck both ways: %s" % String(both["why"]))
+	if not bool(both["ok"]):
+		return
+	equal(String(both["by_hand"]), String(both["by_its_own_choice"]),
+		"a person's blow and a self-driven character's blow are answered differently")
+	var said := String(both["by_hand"])
+	check(said.begins_with("%s ok" % ActionCatalog.ATTACK),
+		"the answer is not the engine's own outcome line: %s" % said)
+	for named in ["target=", "attack=", "cells=", "hits=", "dealt="]:
+		check(said.contains(named), "the answer says no '%s': %s" % [named, said])
+	# And it is the outcome the simulation built, not a sentence assembled here:
+	# the same words come back out of `CombatResolution.blow_report` put through
+	# `ActionOutcome`, which is the one place either side gets them from.
+	check(not said.contains("done"),
+		"the answer still carries the shell's own word for a blow: %s" % said)
 
 
 # --- The furniture --------------------------------------------------------

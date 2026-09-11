@@ -599,21 +599,18 @@ static func _attack(
 	var swung := match_state.attack(chosen)
 	if not swung.get("ok", false):
 		return ActionOutcome.failed(action.kind, str(swung.get("reason", "refused")))
-	var dealt := 0
-	for hit in swung["hits"]:
-		dealt += int(hit.get("dealt", 0))
 	# The blow is not written down here. Every weapon action spent on a board --
 	# this one, one a person spends by hand through `BoardTurn`, one the board's
 	# own stand-in spends for a commander nobody drives -- goes through
 	# `CombatMatch.attack`, which records it; `ActionScene` takes the record off
 	# the board and writes it into `blows`. Writing it here as well would put this
 	# blow in the world twice and every other blow in once.
-	return ActionOutcome.done(action.kind, {
-		"attack": swung["attack"],
-		"cells": swung["cells"],
-		"hits": (swung["hits"] as Array).size(),
-		"dealt": dealt,
-	})
+	#
+	# What it answers is the resolution layer's own report of the blow
+	# (`CombatResolution.blow_report`) and not a summary written here. A person
+	# spending the same action by hand is answered the same object, through
+	# `BoardTurn.swing`, so the two cannot say different things about one blow.
+	return ActionOutcome.done(action.kind, CombatResolution.blow_report(swung))
 
 
 ## A blow struck when no fight is on: the world snaps to a board around it.

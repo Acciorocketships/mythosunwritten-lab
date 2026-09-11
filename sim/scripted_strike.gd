@@ -28,12 +28,16 @@ extends RefCounted
 ## `blows` -- so the two rows below are the same row with different numbers in it,
 ## and there is no second channel for either of them to have come down.
 ##
-## ## The four sections
+## ## The five sections
 ##
 ##   * **the fight** -- the whole run, tick by tick, so the two blows can be found
 ##     in it.
 ##   * **the same record from either hand** -- the first blow each of them struck,
 ##     field by field, side by side.
+##   * **the same answer from either hand** -- one blow, struck both ways on two
+##     boards built alike, and the sentence each way came back with. That is a
+##     different claim from the one above: the record is what the world keeps, and
+##     this is what whoever struck the blow is told about it.
 ##   * **every blow in the run** -- one line each, with the driver that spent it.
 ##   * **what leaves the simulation** -- the same rows as the snapshot carries
 ##     them out, which is how they reach anything that draws.
@@ -88,7 +92,12 @@ const HAND_PACE := 10
 ## section reads the snapshot and the snapshot is the roster's. The roster adds
 ## no rule: it walks its members and calls `ActionScene.fight_step()`, and both
 ## of the two are seated on a board and do not walk.
-static func stage(seed_value: int = SEED) -> CombatantRoster:
+##
+## `by_hand` is whether Alder's turns are a person's to take. It is true for
+## every run in this file but one: `same_blow_either_way` below builds the same
+## board twice and has Alder strike by their own decision function on the second,
+## which is a character acting for itself and not a character being played.
+static func stage(seed_value: int = SEED, by_hand: bool = true) -> CombatantRoster:
 	var roster := CombatantRoster.new()
 	roster.scene.terrain = TerrainQuery.for_seed(seed_value)
 	var one := _put(roster, HAND, WHERE - Vector2(APART * 0.5, 0.0))
@@ -98,7 +107,8 @@ static func stage(seed_value: int = SEED) -> CombatantRoster:
 	var began := roster.scene.begin_fight(one.id)
 	if began == null or began.refused:
 		return roster
-	roster.scene.take_by_hand(one.id)
+	if by_hand:
+		roster.scene.take_by_hand(one.id)
 	return roster
 
 
@@ -329,6 +339,130 @@ static func what_leaves_the_simulation() -> PackedStringArray:
 	return written
 
 
+## The same blow struck both ways, and what the striker was told about it.
+##
+## `side_by_side` above is about the *record* a blow leaves in the world. This is
+## about what whoever struck it is answered, which is a different thing and used
+## not to be the same thing at all. A weapon action spent by hand came back
+## carrying nothing but "it happened", so the shell could say no more than
+## "done"; a character that chose `attack` for itself was answered which attack
+## it was, how much ground it covered, how many pieces it found and what they
+## took. One blow, two answers, and the person's was the poorer.
+##
+## The comparison is honest because the blow really is the same one. Two boards
+## are built from one seed by the same call, so the same commander stands on the
+## same cell holding the same spear against the same target on the same round,
+## and the pattern is aimed by the same rule in both. The only thing that differs
+## is the way in: `BoardTurn.swing`, which is what a key press reaches, against
+## `ActionEngine.resolve` on `Action.attack`, which is what a decision function
+## reaches. Both spend the action through `CombatMatch.attack` and both quote
+## `CombatResolution.blow_report`, which is why they now agree.
+static func same_blow_either_way() -> Dictionary:
+	var by_hand := _struck_by_hand()
+	var by_choice := _struck_by_its_own_choice()
+	var both := bool(by_hand["ok"]) and bool(by_choice["ok"])
+	return {
+		"ok": both,
+		"by_hand": String(by_hand["said"]),
+		"by_its_own_choice": String(by_choice["said"]),
+		"same": both and String(by_hand["said"]) == String(by_choice["said"]),
+		"striker": HAND,
+		"at": String(by_hand["at"]),
+		"facing": String(by_hand["facing"]),
+		"round": int(by_hand["round"]),
+		"why": String(by_hand["why"] if not bool(by_hand["ok"]) else by_choice["why"]),
+	}
+
+
+## The two answers, quoted, and whether they are the same words.
+static func the_same_answer_either_way() -> PackedStringArray:
+	var both := same_blow_either_way()
+	var written := PackedStringArray()
+	written.append("the same blow, struck both ways, and what each way answered")
+	if not bool(both["ok"]):
+		written.append("  the blow could not be struck both ways: %s" % String(both["why"]))
+		return written
+	written.append("  %s on %s facing %s, round %d, with a %s" % [
+		String(both["striker"]), String(both["at"]), String(both["facing"]),
+		int(both["round"]), SPEAR,
+	])
+	written.append("  by hand, through a key on the board:")
+	written.append("    %s" % String(both["by_hand"]))
+	written.append("  by its own decision function, through the action surface:")
+	written.append("    %s" % String(both["by_its_own_choice"]))
+	written.append("  the same answer: %s" % ("yes" if bool(both["same"]) else "no"))
+	return written
+
+
+# One board, and Alder strikes on it the way a person does: turn until the spear
+# covers somebody, then spend the weapon action. Exactly the two calls
+# `_take_a_turn_by_hand` makes, and nothing else touches the board.
+static func _struck_by_hand() -> Dictionary:
+	var roster := stage()
+	var scene := roster.scene
+	var id := _id_of(roster, HAND)
+	var turn := BoardTurn.of(scene, id)
+	if turn == null:
+		release(scene)
+		return _nothing_struck(BoardTurn.why_none(scene, id))
+	for _quarter in PieceGeometry.FACINGS.size():
+		if _covers_somebody(scene, turn):
+			break
+		turn.turn_right()
+	var standing := turn.cell()
+	var looking := turn.facing_name()
+	var round_number := turn.round_number()
+	var swung := turn.swing(QUICK)
+	release(scene)
+	return {
+		"ok": bool(swung.get("ok", false)),
+		"said": String(swung.get("said", "")),
+		"why": String(swung.get("reason", "")),
+		"at": "(%d,%d)" % [standing.x, standing.y],
+		"facing": looking,
+		"round": round_number,
+	}
+
+
+# The same board again, with nobody's turns taken by hand, and Alder striking
+# because its own decision function chose to: one `Action.attack` put through
+# `ActionEngine.resolve`, which is the call `ControlLoop` makes for a character
+# that decides for itself. The engine aims the pattern itself, from the same
+# facing, by the same quarter-by-quarter search the turn above turns through.
+static func _struck_by_its_own_choice() -> Dictionary:
+	var roster := stage(SEED, false)
+	var scene := roster.scene
+	var one := _member_of(roster, HAND)
+	var other := _member_of(roster, MIND)
+	if one == null or other == null:
+		release(scene)
+		return _nothing_struck("%s or %s is not on the board" % [HAND, MIND])
+	var outcome := ActionEngine.resolve(scene, one, Action.attack(other.id, SPEAR))
+	release(scene)
+	return {
+		"ok": outcome.ok,
+		"said": outcome.line(),
+		"why": outcome.reason,
+		"at": "(%d,%d)" % [one.piece.cell.x, one.piece.cell.y],
+		"facing": CombatMatch.facing_name((one.piece as Commander).facing),
+		"round": 0,
+	}
+
+
+static func _nothing_struck(why: String) -> Dictionary:
+	return {
+		"ok": false, "said": "", "why": why, "at": "-", "facing": "-", "round": 0,
+	}
+
+
+static func _member_of(roster: CombatantRoster, called: String) -> Combatant:
+	for one in roster.members:
+		var sheet := _sheet(one)
+		if sheet != null and sheet.character_name == called:
+			return one
+	return null
+
+
 ## Everything above, in order. What `./run_strike.sh` prints.
 static func play() -> PackedStringArray:
 	var written := PackedStringArray()
@@ -337,6 +471,8 @@ static func play() -> PackedStringArray:
 	written.append_array(the_fight())
 	written.append("")
 	written.append_array(side_by_side())
+	written.append("")
+	written.append_array(the_same_answer_either_way())
 	written.append("")
 	written.append_array(every_blow())
 	written.append("")

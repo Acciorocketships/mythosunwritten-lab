@@ -1107,8 +1107,10 @@ func _drive(keycode: int) -> bool:
 ## what may be spent, where a piece may go and what a weapon covers is the
 ## simulation's, read through `Simulation.driven_turn()`; what becomes of it is
 ## the match's. Nothing is decided here -- in particular there is no legality
-## test, no cooldown, no capture and no damage -- and the refusal printed below
-## is the match's own sentence, quoted.
+## test, no cooldown, no capture and no damage -- and both halves of what is
+## printed below are the simulation's own sentences, quoted: the refusal is the
+## match's, and what a weapon action did is the resolution layer's report of the
+## blow. See `_what_the_turn_answered`.
 ##
 ## Returns whether the key was one of the board's. A key that is meant one thing
 ## on a board and another in real time does not exist: `BoardControls.binds` and
@@ -1141,10 +1143,32 @@ func _drive_the_board(keycode: int) -> bool:
 		return true
 	print("render-shell play t=%d round %d turn %s -> %s" % [
 		_sim.world.tick, turn.round_number(), _the_key_named(keycode),
-		"done" if bool(answered.get("ok", false))
-			else "refused: %s" % String(answered.get("reason", "")),
+		_what_the_turn_answered(answered),
 	])
 	return true
+
+
+## What the simulation answered one board key, for the line above.
+##
+## An answer that carries the simulation's own sentence is quoted, and nothing is
+## added to it: a weapon action comes back carrying the resolution layer's report
+## of the blow -- who it found, which attack it was, how many cells it covered,
+## how many pieces it landed on and what they took -- which is the same sentence
+## a character that chose `attack` for itself is answered with. See
+## `BoardTurn.swing`. Before this, a blow struck by hand had nothing to quote and
+## this line said "done", so a person was told less about their own blow than a
+## rule-driven character was told about the identical one.
+##
+## The two short words are for the answers that carry no sentence: stepping,
+## turning, sending a minion, ending the turn and leaving. They say whether it
+## happened, and when it did not they quote the match's own reason.
+static func _what_the_turn_answered(answered: Dictionary) -> String:
+	var sentence := String(answered.get("said", ""))
+	if sentence != "":
+		return sentence
+	if bool(answered.get("ok", false)):
+		return "done"
+	return "refused: %s" % String(answered.get("reason", ""))
 
 
 ## What a board key is called, for the line above. Interface furniture: the
