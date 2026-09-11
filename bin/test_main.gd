@@ -77,6 +77,7 @@ const SUITES := [
 	preload("res://tests/test_window_glow.gd"),
 	preload("res://tests/test_board_overlay.gd"),
 	preload("res://tests/test_grass.gd"),
+	preload("res://tests/test_camera_read.gd"),
 	preload("res://tests/test_atmosphere.gd"),
 	preload("res://tests/test_reflection.gd"),
 	preload("res://tests/test_anti_aliasing.gd"),

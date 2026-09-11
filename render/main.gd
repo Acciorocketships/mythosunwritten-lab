@@ -66,18 +66,44 @@ const TICKS_PER_SECOND := 20.0
 const OBSERVER_TAG := AssetTags.RANGER
 
 ## Where the camera sits relative to the observer: behind, above, looking down.
-const CAMERA_OFFSET := Vector3(0.0, 42.0, 52.0)
+##
+## Chosen against how big the person is on the screen, which is the one thing a
+## camera in a game about steering somebody has to get right. The shipped
+## character measures 1.93 world units. At the old `(0, 42, 52)` -- 66.8 units
+## away -- that is **13 pixels** tall in the 648-pixel window the game ships in,
+## two per cent of the height, which the second playtest photographed and could
+## not find without being told where to look. At this offset -- 16.7 units away,
+## a quarter of the distance -- the same character measures **49 pixels**, or
+## 7.5% of the height.
+##
+## Why 49 and not more: the view still has to hold a fight. A board cell is 3.0
+## units (`CombatBoard.CELL_SIZE`), the vertical span of the view at the
+## person's own depth is `2 tan(37.5 deg) * 16.7` = 25 units, and the ground
+## plane is looked down on at 39 degrees, so a fight eight cells across is in
+## frame with room around it. Nearer than this and a board runs off the top.
+##
+## The *direction* is exactly the old one: 10.5 / 13.0 is 42 / 52 to four
+## figures, so this is the same picture from four times closer and not a
+## different angle on the world. `CAMERA_AIM_LIFT` below is scaled by the same
+## quarter for the same reason. See `reports/camera-read.md`.
+const CAMERA_OFFSET := Vector3(0.0, 10.5, 13.0)
 
 ## How far above the observer the camera aims.
 ##
-## Aiming straight at the observer's feet from forty units up puts the top edge
-## of the frame below the horizon, so the sky is never actually in shot -- which
-## does not matter while everything worth seeing is on the ground, and matters a
-## great deal once there are islands in the air. Lifting the aim by this much
-## tilts the view up by about eight degrees: enough for the horizon, the sky
-## gradient and the far-sky band to be in frame, and not so much that the
-## diorama stops being looked down on.
-const CAMERA_AIM_LIFT := 10.0
+## Aiming straight at the observer's feet puts the top edge of the frame below
+## the horizon, so the sky is never actually in shot -- which does not matter
+## while everything worth seeing is on the ground, and matters a great deal once
+## there are islands in the air. Lifting the aim by this much tilts the view up
+## by about seven degrees: enough for the horizon, the sky gradient and the
+## far-sky band to be in frame, and not so much that the diorama stops being
+## looked down on.
+##
+## Scaled with `CAMERA_OFFSET` when the camera came in, and by exactly the same
+## quarter: the tilt a lift produces is the ratio of the lift to the camera's
+## distance, so 2.5 at 16.7 units away is the 10.0 at 66.8 units the view was
+## composed at. A lift left at 10.0 from 16.7 units away would have aimed the
+## camera over the horizon at the sky.
+const CAMERA_AIM_LIFT := 2.5
 
 ## How far the camera can see. Far enough for the far-sky islands, which are
 ## streamed out to several hundred units because they are the horizon.
@@ -590,6 +616,45 @@ var _pieces_drawn := 0
 var _flight_views := {}
 var _flights_launched := 0
 
+## Every scattered prop currently standing out of the person's way, as the
+## node's instance id -> how transparent it is being drawn at this instant.
+##
+## The id rather than the node itself, because the streamer frees a patch's
+## props when it unloads it and a freed object is not a thing to be holding as a
+## dictionary key. `instance_from_id` gives the node back while it is alive and
+## `is_instance_id_valid` says when it stopped being.
+##
+## Only the props that are thinned or are on their way back to solid are in
+## here, so a frame with a clear view of the person walks an empty dictionary.
+## A prop stays in it while it thickens back up and is dropped the moment it is
+## solid again, which is what keeps the per-frame work proportional to how many
+## trees are actually in the way rather than to how many trees exist.
+var _foliage_fades := {}
+
+## The most props thinned on any one frame of this run, and the deepest any of
+## them was ever drawn at. Peaks rather than a running total, because what a
+## reader of the stop line wants to know is how much work the worst frame did --
+## a run with no screen at it says what the rule cost by these two numbers and
+## the frame time beside them.
+var _foliage_thinned := 0
+var _foliage_deepest := 0.0
+
+## How many props were giving way when that was last said out loud, so the
+## sentence is printed when the number changes rather than every frame.
+var _foliage_said := 0
+
+## How long the fade rule has spent deciding, in microseconds, and over how
+## many frames. Its own clock rather than the frame's, because the frame time
+## beside it prices what the rule costs to *draw* -- a thinned tree goes through
+## the transparent pass -- and these two numbers are what it costs to work out.
+var _foliage_usec := 0
+var _foliage_frames := 0
+
+## Whether foliage gives way at all, or the run was started with --no-fade.
+## Only a measurement ever turns it off: the cost of the rule is the difference
+## between two runs that differ in this and nothing else.
+var _fade_foliage := true
+
 ## One drawable per item lying on the ground, keyed by `GroundItems`' own key --
 ## which object it is in and which place in it -- so a pile that gains or loses
 ## something costs one add or one free rather than a rebuild.
@@ -739,6 +804,7 @@ func _ready() -> void:
 		_sim.world.place_observer(options["start_x"], options["start_z"])
 	_paused = options["paused"]
 	AssetLibrary.model_tint_enabled = options["model_tint"]
+	_fade_foliage = options["fade"]
 	if options["grass"]:
 		_grass = GrassLayer.new(_sim.world.terrain, _sim.world.world_seed)
 	if options["distant"]:
@@ -891,7 +957,7 @@ func _exit_tree() -> void:
 			ground.size.x, ground.size.y,
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
-	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d frame_ms=%.2f timed=%d digest=%s" % [
+	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d faded=%d deepest=%.2f fade_us=%.1f frame_ms=%.2f timed=%d digest=%s" % [
 		_sim.world.tick, _frames, _chunk_views_built,
 		_sim.world.terrain_streamer.handles_handed_out,
 		_distant_tiles, _distant_triangles,
@@ -909,6 +975,9 @@ func _exit_tree() -> void:
 		_board_cells, _board_holes,
 		_pieces_drawn,
 		0 if _reflection == null else _reflection.frames_drawn,
+		_foliage_thinned,
+		_foliage_deepest,
+		0.0 if _foliage_frames == 0 else float(_foliage_usec) / float(_foliage_frames),
 		0.0 if _timed_frames == 0 else _timed_seconds * 1000.0 / float(_timed_frames),
 		_timed_frames,
 		_sim.world.digest(),
@@ -1345,6 +1414,15 @@ func _say_what_happened() -> void:
 			_sim.world.tick,
 			"the board appears" if fighting else "the board is put away",
 		])
+	# And how many trees are standing out of the person's way, said when the
+	# number changes and not once a frame. A run with no screen at it has no
+	# other way to know the rule fired, and a run with a screen at it has the
+	# picture; this is what lets a capture name the tick to photograph.
+	if _foliage_said != _foliage_fades.size():
+		_foliage_said = _foliage_fades.size()
+		print("render-shell foliage t=%d giving way=%d deepest=%.2f" % [
+			_sim.world.tick, _foliage_said, _foliage_deepest,
+		])
 	if _journalling:
 		var journal := _sim.world.loop.journal
 		for at in range(_journal_said, journal.size()):
@@ -1472,6 +1550,108 @@ func _sync_views() -> void:
 	_camera.look_at_from_position(
 		_camera.position, observer + Vector3(0.0, _camera_aim, 0.0), Vector3.UP
 	)
+	# And last, because it is the only thing here that needs the camera to be
+	# where it has just been put.
+	_sync_foliage(observer)
+
+
+## Thin whatever stands between the camera and the person, and let whatever has
+## stopped standing there thicken back up.
+##
+## What counts as in the way is `FoliageFade`, which is a pure function of
+## positions and sizes; this only finds the props worth asking about and carries
+## the answer onto the nodes. Nothing about the world is touched: a prop that
+## gives way is drawn differently and stands in exactly the place the simulation
+## scattered it.
+##
+## The scatter patches and nothing else, so what grows on a floating island's top
+## does not thin: an island's cover hangs off that island's own view rather than
+## off a patch, and a walkable island is somewhere a person can stand. That is a
+## known gap and not an oversight -- the rule itself is told positions and sizes
+## and would answer for an island's tree as readily -- and closing it is another
+## loop over `_island_views`, which is worth writing when somebody is actually
+## standing up there.
+##
+## Two passes, and the second is why a tree ever comes back. The first walks the
+## scatter patches near enough to hold an obstruction and works out what each
+## prop's transparency should be; the second walks the props that were being
+## thinned on the *previous* frame and were not named by the first -- the ones
+## the person has walked out from behind, or that the streamer is about to
+## unload -- and moves them back towards solid. A node is dropped from the
+## record the moment it is solid again, so a clear view costs an empty loop.
+func _sync_foliage(observer: Vector3) -> void:
+	if not _fade_foliage:
+		return
+	var began := Time.get_ticks_usec()
+	var thinned := 0
+	var camera := _camera.position
+	# How far from the person a prop can stand and still cross the sight line:
+	# the whole length of that line, plus the fattest crown anything could be
+	# drawn with. A patch further away than this holds nothing worth measuring.
+	var reach := _camera_offset.length() + FoliageFade.WIDEST_CROWN
+	var named := {}
+	for key in _scatter_views:
+		if TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.z) > reach:
+			continue
+		for node in (_scatter_views[key] as Node3D).get_children():
+			if not (node is Node3D):
+				continue
+			var prop := node as Node3D
+			var covered := FoliageFade.cover(
+				camera, observer, prop.position,
+				float(prop.get_meta("crown", 0.0)),
+				float(prop.get_meta("stands", 0.0)),
+			)
+			var want := FoliageFade.transparency_for(covered)
+			var id := prop.get_instance_id()
+			if want <= 0.0 and not _foliage_fades.has(id):
+				continue
+			named[id] = true
+			thinned += _thin(prop, want)
+	for id in _foliage_fades.keys():
+		if named.has(id):
+			continue
+		if not is_instance_id_valid(id):
+			_foliage_fades.erase(id)
+			continue
+		thinned += _thin(instance_from_id(id) as Node3D, 0.0)
+	_foliage_thinned = maxi(_foliage_thinned, thinned)
+	_foliage_usec += Time.get_ticks_usec() - began
+	_foliage_frames += 1
+
+
+## Move one prop a frame's worth towards the transparency it should have, and
+## carry that onto the meshes under it.
+##
+## The engine's own per-instance transparency rather than a material of this
+## prop's own: the pack models share their materials between every copy of a
+## tree in the world, so fading a material would fade the forest. It also leaves
+## the shadow alone, which is the point -- a tree that thins still lies across
+## the grass, so the picture goes on saying there is a tree there.
+##
+## Hands back 1 if the prop is still being thinned after this frame's step and 0
+## if it has arrived back at solid, so the caller can count a frame's work
+## without walking the record a second time.
+func _thin(prop: Node3D, want: float) -> int:
+	var id := prop.get_instance_id()
+	var now := float(_foliage_fades.get(id, 0.0))
+	var next := FoliageFade.toward(now, want, _last_delta)
+	if next <= 0.0:
+		_foliage_fades.erase(id)
+		_wash(prop, 0.0)
+		return 0
+	_foliage_fades[id] = next
+	_wash(prop, next)
+	_foliage_deepest = maxf(_foliage_deepest, next)
+	return 1
+
+
+## Set one transparency on every mesh under a node.
+func _wash(node: Node, amount: float) -> void:
+	if node is GeometryInstance3D:
+		(node as GeometryInstance3D).transparency = amount
+	for child in node.get_children():
+		_wash(child, amount)
 
 
 ## Put the floating islands on screen, one drawable per island.
@@ -1949,6 +2129,17 @@ func _add_scattered(
 	var natural := AssetLibrary.natural_height(String(item["tag"]))
 	if natural > 0.0:
 		node.scale = Vector3.ONE * (float(item["size"]) / natural)
+	# How much room this prop takes up, measured off the model that was actually
+	# built rather than off the size that was asked for. `FoliageFade` needs a
+	# cylinder to test a sight line against and the packs do not agree on how
+	# wide a thing of a given height is -- a fir is a third as broad as it is
+	# tall, an oak nearly as broad as tall. Measured once, here, because this is
+	# the one moment the node exists and nothing has been asked of it yet; a
+	# per-frame measurement of every tree in the meadow would cost more than the
+	# rule it feeds.
+	var box := _bounds_of(node, Transform3D.IDENTITY)
+	node.set_meta("crown", maxf(box.size.x, box.size.z) * 0.5 * node.scale.x)
+	node.set_meta("stands", box.size.y * node.scale.y)
 	return node
 
 
@@ -2576,6 +2767,7 @@ func _parse_args() -> Dictionary:
 		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
 		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
+		"fade": true,
 	}
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
@@ -2760,6 +2952,11 @@ func _parse_args() -> Dictionary:
 				# which is what tests/test_terrain_lod.gd does, and so the layer
 				# can be priced against its absence.
 				options["distant"] = false
+			"--no-fade":
+				# Foliage stops giving way in front of the person. Nothing but a
+				# cost measurement wants this: it is the other half of the pair
+				# of runs that prices the rule.
+				options["fade"] = false
 			"--no-grass":
 				# Draw the world with no grass layer at all: nothing baked,
 				# nothing instanced, no shader. It exists so that "the grass
@@ -2889,10 +3086,13 @@ func _save_screenshot(path: String, then_quit: bool = true) -> void:
 
 func _build_scenery() -> void:
 	_camera = Camera3D.new()
-	# The camera sits tens of units back from anything it draws, and pushing the
-	# far plane out to the far-sky islands stretches the depth buffer. Moving the
-	# near plane out with it keeps the precision where the world is, which is
-	# what stops the ground shadow-fighting with itself.
+	# Pushing the far plane out to the far-sky islands stretches the depth
+	# buffer, and moving the near plane out with it keeps the precision where
+	# the world is, which is what stops the ground shadow-fighting with itself.
+	# A unit is still short of anything that matters now the camera plays from
+	# 16.7 units rather than 66.8: the nearest thing it can meet is a tree
+	# standing right beside the person, and that is metres away, not
+	# centimetres.
 	_camera.near = 1.0
 	_camera.far = CAMERA_FAR
 	if _camera_fov > 0.0:

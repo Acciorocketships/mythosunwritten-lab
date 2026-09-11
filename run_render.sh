@@ -59,7 +59,10 @@
 # off, 3 uses it up, X drops it and O offers it to whatever you have aimed at.
 # The buttons along the bottom of the panel press those same keys.
 # --no-model-tint draws the pack models in the colours they ship in, which is
-# only useful for photographing what the biome tint is doing.
+# only useful for photographing what the biome tint is doing. --no-fade stops
+# the trees between the camera and your character from thinning out of the way,
+# which is only useful for pricing that rule against a run that differs in
+# nothing else.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 source ./godot_env.sh
