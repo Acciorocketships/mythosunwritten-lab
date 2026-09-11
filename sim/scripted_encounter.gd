@@ -50,19 +50,27 @@ const SEED := 1234
 ## Chosen by measurement rather than by taste. `./run_headless.sh --snap` scores
 ## 289 candidate places over the world on three stated numbers -- how much of the
 ## board the ground leaves open, how much height there is between its highest and
-## lowest standable cell, and how much the scatter layer grew there. This is the
-## one of the places that pass with a real shoreline on the board: an open meadow
-## with a lake along one edge, so the fight is held on ground that has something
-## to say. See reports/combat-snap.md.
+## lowest standable cell, and how much the scatter layer grew there. This is one
+## of the places that pass with a real shoreline on the board, so the fight is
+## held on ground that has something to say. See reports/combat-snap.md and
+## reports/blocked-ground.md for how the three numbers are read.
 ##
-## Two of those numbers now read differently, and the place is the same place.
-## Since the board learned what stands on the ground, `stand` counts the cells a
-## piece may actually be on and the threshold moved onto `open`, which is what it
-## always meant -- the ground's own holes and houses. Here the ground leaves
-## 0.909 of the board open exactly as it did before; of that, trees and stone
-## take 79 of the 441 cells and 37 of them stop a line as well. At the last
-## measurement 16 of the 289 candidates pass. See reports/blocked-ground.md.
-const WHERE := Vector2(-480.0, 420.0)
+## Measured again when the ground changed under it. The base adoption
+## (ADOPTION.md) put the adopted heightfield and water plan under the terrain
+## query, so the meeting place had to be re-found on that ground: the old spot,
+## (-480, 420), is open meadow with no water anywhere near it there. Of the 289
+## candidates on seed 1234, 172 now pass and exactly two of those hold a
+## shoreline; this is the lakeside one, near (60, 300), where the sweep read
+## open=0.925, relief=4.58, holes=33 and cliffs=32. The meeting itself sits on
+## the cliff that shoreline climbs away over, read cell by cell off
+## tools/terrain_seam_probe.gd: the approach line along cell row 98 runs into
+## the storey edge between cells 27 and 28, where the ground drops 19.7 to
+## 15.7. Four units is over the walker's climb limits both ways, so the two
+## commanders close to the lip and fight across it -- the drop is far over
+## Damage.HIGH_GROUND_RISE, so the west side's blows carry the high-ground
+## multiplier -- and the lake's bay two rows south fills the board's south-east
+## with the holes water is.
+const WHERE := Vector2(84.5, 294.0)
 
 ## How far either side of `WHERE` the two bands start, in world units. Far enough
 ## that the two are outside `ActionScene.ENGAGE_RADIUS` for a good many ticks

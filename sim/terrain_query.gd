@@ -12,9 +12,9 @@ extends RefCounted
 ##
 ## So this is the one place that composes them, and the one surface the rest of
 ## the project reads the ground through. It decides nothing: every answer here
-## is a field's answer, forwarded or combined. It holds no state that sampling
-## changes, so it inherits the purity of the fields under it -- an answer depends
-## on the position and the world seed and on nothing else.
+## is a field's answer, forwarded or combined. The fields under it may memoise
+## their work, but never their meaning -- an answer depends on the position and
+## the world seed and on nothing else, in whichever process it is asked.
 class_name TerrainQuery
 
 ## The seed the whole stack descends from.
@@ -79,7 +79,34 @@ const SHORE_FLOOR := 0.05
 
 ## The whole stack for one seed. This is how a world, a test or a tool that has
 ## nothing but a seed gets a query that agrees with every other one.
+##
+## Since the base adoption (ADOPTION.md) the ground under this stack is the
+## adopted heightfield, water plan and biome fields: the three ground layers
+## are AdoptedGround's adapters, which answer every sample from the adopted
+## stack, and the layers of this repo's own that have no adopted counterpart
+## -- the floating islands, the villages, the roads -- generate on that ground
+## exactly as they did on the old one. A sim cell is a fixed patch of that
+## heightfield; the mapping is stated once, in AdoptedGround's own doc.
 static func for_seed(seed_value: int) -> TerrainQuery:
+	var ground := AdoptedGround.shared_for_seed(seed_value)
+	var biomes := AdoptedGround.Biomes.new(ground)
+	var surface := AdoptedGround.Surface.new(ground, biomes)
+	var water := AdoptedGround.Water.new(ground, surface, biomes)
+	var islands := IslandField.new(water, biomes)
+	var settlements := SettlementField.new(water, biomes, islands)
+	return TerrainQuery.new(
+		surface, biomes, water, islands, settlements, PathNetwork.new(settlements, water)
+	)
+
+
+## The retired from-scratch ground: the flat-board era's own noise fields,
+## kept behind this named switch rather than deleted because the suites that
+## certified that generation stack (mountains, rivers, biome resolution) still
+## document its behaviour, and because the render seam has not yet finished
+## moving every visual idiom onto the adopted base. Nothing in the sim
+## constructs a world through this; a caller that does is asking for the old
+## world on purpose.
+static func for_seed_legacy(seed_value: int) -> TerrainQuery:
 	var biomes := BiomeField.new(seed_value)
 	var surface := SimTerrainSurfaceField.new(seed_value, biomes)
 	var water := SimWaterField.new(surface, biomes)
