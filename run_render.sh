@@ -62,7 +62,11 @@
 # only useful for photographing what the biome tint is doing. --no-fade stops
 # the trees between the camera and your character from thinning out of the way,
 # which is only useful for pricing that rule against a run that differs in
-# nothing else.
+# nothing else. --grass-give-way <thin> <fade> is the same kind of flag for the
+# grass over a board square: how much shorter a blade stands over one, and what
+# share of its pixels are thrown away instead. The shipped pair is in
+# render/grass_layer.gd; this is how the runs that priced the choice were told
+# apart. See tools/measure_board_read.sh.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 source ./godot_env.sh

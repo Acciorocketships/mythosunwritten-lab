@@ -15,8 +15,12 @@ extends TestSuite
 ##   1. **the table is a legend**: every colour on it has a meaning, no two
 ##      colours are the same, and no meaning is blank;
 ##   2. **the table is what the ground is painted from**: on a board with all
-##      five kinds of cell in it, the colour a cell is painted is the colour
-##      filed under the row that cell reads as, and all five rows are reached;
+##      five kinds of cell in it, the colour a cell is painted is a colour filed
+##      under the row that cell reads as, and all five rows are reached. Ordinary
+##      ground is painted in two close shades of blue by the parity of the cell,
+##      so a field of it reads as squares rather than as one sheet, and the same
+##      pass pins what that checker must not cost: every other meaning is painted
+##      its own one colour on either parity;
 ##   3. **the panel is generated**: it draws one entry per row of the table, in
 ##      the table's order, with the table's colour and the table's words -- so a
 ##      colour cannot be painted without appearing on screen;
@@ -97,6 +101,24 @@ func _every_colour_has_a_meaning_and_no_two_are_alike() -> void:
 		# there is one lookup and not a second table inside it.
 		equal(BoardLegend.tint_for(key), tint,
 			"the colour filed under %s should be the one the table holds" % key)
+		# A checkered row -- one meaning painted in two shades by the parity of
+		# the cell -- has a second colour, and it is a colour like any other:
+		# nobody else's, visible, and the first of the row's two shades is the
+		# row's own tint.
+		var shades := BoardLegend.shades_of(entry)
+		equal(shades[0], tint,
+			"the first shade of %s should be the colour the table files it under" % key)
+		equal(shades.size(), 2 if entry.has("pair") else 1,
+			"a row should be painted in one shade, or in two if it is checkered: %s" % key)
+		for extra in range(1, shades.size()):
+			var other := shades[extra]
+			var also := "%s" % other
+			check(not tints.has(also),
+				"no two shades the board paints should be the same colour: %s and %s" % [
+					key, tints.get(also, ""),
+				])
+			tints[also] = key
+			check(other.a > 0.0, "a colour nobody can see is not a colour: %s" % key)
 
 
 # --- 2: the table is what the ground is painted from -----------------------
@@ -110,8 +132,15 @@ func _the_ground_is_painted_the_colour_the_table_files_under_it() -> void:
 			var cell := board.min_cell + Vector2i(column, row)
 			var key := BoardLegend.lattice_key(board, cell)
 			reached[key] = true
-			equal(BoardLegend.tint_of(board, cell), BoardLegend.tint_for(key),
-				"a cell reading as %s should be painted the colour filed under it" % key)
+			equal(BoardLegend.tint_of(board, cell), BoardLegend.shade_of(key, cell),
+				"a cell reading as %s should be painted a shade filed under it" % key)
+			# And that shade is one of the row's own, whichever way the parity
+			# fell: the checker picks between a meaning's shades and never
+			# between meanings, so a cliff edge is a cliff edge on either parity.
+			check(BoardLegend.shades_of(BoardLegend.row_for(key)).has(
+					BoardLegend.tint_of(board, cell)),
+				"the cell at %s reads as %s and should be painted in one of that"
+					% [cell, key] + " meaning's own shades")
 			# And the key is the board's own answer, asked again here rather than
 			# taken from the table: the order the five are tested in is the
 			# table's, and the first that fits is the one that stops you.
@@ -121,6 +150,57 @@ func _the_ground_is_painted_the_colour_the_table_files_under_it() -> void:
 		var key := String((row as Dictionary)["key"])
 		check(reached.has(key),
 			"the sketch should reach every kind of cell the legend explains: %s" % key)
+	_the_ground_is_checkered_and_nothing_else_is(board)
+
+
+# Ordinary ground alternates between the two shades the table holds for it, by
+# the parity of the cell, and no other meaning alternates at all.
+#
+# Both halves matter. The first is the checker: a board of squares all one
+# colour reads as a single sheet, which is the fault this answers. The second is
+# what the checker must not cost: a cliff edge, a hole, a built cell and a cell
+# a storey up are painted the one colour their meaning is filed under wherever
+# they fall, so parity cannot make one cell of a kind read as another kind.
+func _the_ground_is_checkered_and_nothing_else_is(board: CombatBoard) -> void:
+	var ground := BoardLegend.row_for(BoardLegend.GROUND)
+	check(ground.has("pair"), "ordinary ground should be painted in two shades")
+	var shades := BoardLegend.shades_of(ground)
+	not_equal(shades[0], shades[1], "the two shades of ground should be two colours")
+	# Close rather than opposite: the ask was a checkerboard a person reads
+	# without being shouted at, so the two shades stay within a quarter of the
+	# range of one another on every channel and are the same see-through weight.
+	for channel in [
+		[shades[0].r, shades[1].r], [shades[0].g, shades[1].g], [shades[0].b, shades[1].b],
+	]:
+		check(absf(channel[0] - channel[1]) <= 0.40,
+			"the two shades of ground should be close: %.2f against %.2f" % [
+				channel[0], channel[1],
+			])
+	equal(shades[0].a, shades[1].a, "both shades of ground should be equally see-through")
+
+	# On the board itself: every cell that reads as ground is painted the shade
+	# its own parity picks, and the two parities are two different colours, so a
+	# square and the square beside it never come out the same.
+	var seen := {}
+	for row in board.cells_deep:
+		for column in board.cells_across:
+			var cell := board.min_cell + Vector2i(column, row)
+			var key := BoardLegend.lattice_key(board, cell)
+			var odd := (cell.x + cell.y) % 2 != 0
+			if key == BoardLegend.GROUND:
+				equal(BoardLegend.tint_of(board, cell), shades[1 if odd else 0],
+					"the ground at %s should be painted its parity's shade" % cell)
+				seen[odd] = true
+			else:
+				# Every other meaning: one colour, and the same colour on both
+				# parities, which is what "the checker overwrites nothing" means.
+				equal(BoardLegend.tint_of(board, cell), BoardLegend.tint_for(key),
+					"a cell reading as %s should be painted that meaning's own colour" % key)
+				equal(BoardLegend.shade_of(key, cell + Vector2i(1, 0)),
+					BoardLegend.shade_of(key, cell),
+					"%s should be the same colour on either parity" % key)
+	check(seen.has(true) and seen.has(false),
+		"the sketch should hold ground cells of both parities")
 
 
 # The sketch, with one cell lifted a storey. Nothing else is touched: the drop
@@ -166,11 +246,17 @@ func _the_panel_is_one_entry_per_row_of_the_table() -> void:
 	# here can be.
 	var panel := LegendPanel.new()
 	var swatches := _swatches_of(panel)
-	equal(swatches.size(), rows.size(),
-		"the panel should draw one swatch per colour the board paints")
-	for at in mini(swatches.size(), rows.size()):
-		equal(swatches[at], Color((rows[at] as Dictionary)["tint"]),
-			"swatch %d should be the colour the table holds" % at)
+	# Every shade of every row, in the table's order: a plain row is one patch
+	# and a checkered one is both of its shades side by side, so a colour cannot
+	# be painted on the ground without being shown here.
+	var painted: Array[Color] = []
+	for row in rows:
+		painted.append_array(BoardLegend.shades_of(row as Dictionary))
+	equal(swatches.size(), painted.size(),
+		"the panel should draw one patch per shade the board paints")
+	for at in mini(swatches.size(), painted.size()):
+		equal(swatches[at], painted[at],
+			"patch %d should be the colour the table holds" % at)
 	panel.free()
 
 
@@ -199,7 +285,7 @@ func _collect_swatches(node: Node, into: Array[Color]) -> void:
 func _no_other_file_in_the_render_layer_names_a_board_colour() -> void:
 	var wanted: Array[Color] = []
 	for row in BoardLegend.rows():
-		wanted.append(Color((row as Dictionary)["tint"]))
+		wanted.append_array(BoardLegend.shades_of(row as Dictionary))
 	# Every colour written down anywhere under render/, read out of the source
 	# as four numbers rather than as a spelling, so that a second copy written
 	# `Color(1.0,0.66,0.26,0.52)` is caught as readily as one written with

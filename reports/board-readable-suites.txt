@@ -1,0 +1,28 @@
+# ./run_tests.sh --layers-only
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+layer check: OK -- res://sim references nothing in the render layer
+combat check: OK -- res://render draws the fight and holds none of it
+interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+asset check: OK -- res://sim names asset tags and no asset
+
+# ./run_tests.sh test_board_legend test_board_overlay test_grass test_ui_fit test_ui_panel test_render_shell test_camera_read
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+RUN   test_board_legend
+PASS  board legend   313 checks
+RUN   test_board_overlay
+PASS  board overlay  21 checks
+RUN   test_grass
+        island grass: 37 overlapping storey pairs, 1019 patches in the laps, 606 sharing a world cell, 0 coincidences
+PASS  grass          886 checks
+RUN   test_ui_fit
+PASS  ui fit         109 checks
+RUN   test_ui_panel
+PASS  ui panel       381 checks
+RUN   test_render_shell
+PASS  render shell   58 checks
+RUN   test_camera_read
+PASS  camera read    154 checks
+
+all 7 suites passed (1922 checks)

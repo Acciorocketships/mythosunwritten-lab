@@ -358,15 +358,26 @@ const SWAY_GUST := 0.24
 ## the root of the copy it belongs to in its second texture-coordinate channel,
 ## written when the patch was baked, and the shader puts that through the model
 ## matrix to get where that blade is standing in the world.
-## How much shorter a blade stands where a board square is painted under it, and
+## How much of a blade is taken where a board square is painted under it, and
 ## what share of its pixels a fade would throw away instead.
 ##
-## 0.80 and 0.0: the blades over a square stand at a fifth of their height, which
-## is enough for the square to read through them without the ground going bare,
-## and the fade is off because shortening won the comparison. Both are one
-## uniform each, so turning the choice round is a one-line change and the losing
-## pair is still in reports/board-overlay.md.
-const BOARD_THIN := 0.80
+## 1.0 and 0.0: a square of the board is mown -- a blade standing on one is taken
+## all the way down to its own root -- and the fade is off because mowing beat it
+## on the frame the question is actually about.
+##
+## Both numbers were chosen against a measurement rather than by argument, twice.
+## The first time (reports/board-overlay.md) was at a camera 67 units from the
+## person, where a blade is two pixels tall and nothing much is in the way; the
+## camera has since come in to 16.7 units, and at the camera the game ships with
+## the same 0.80 left the lattice reading at *minus* 221% of what it reads with
+## no grass on it -- the squares came out darker than the gutters between them.
+## What the second measurement found is in reports/board-readable.md: over the
+## grass it stands in, a mown square reads at 129% of a bare one (the grass left
+## standing in the gutters helps), a square shortened to a fifth at 86%, and the
+## dither at 73% while shading every pixel it then throws away. Both are still
+## one uniform each, so turning the choice round is a one-line change and the
+## losing frames are in that report.
+const BOARD_THIN := 1.0
 const BOARD_FADE := 0.0
 
 const GRASS_SHADER := """
@@ -500,14 +511,26 @@ void vertex() {
 		));
 	}
 
+	// How far a blade over a painted square gives way: 0 leaves it standing and
+	// 1 takes the whole of it.
+	float mown = board_thin * board_share;
+
 	float shrink = 1.0 - smoothstep(fade_start, fade_end, distance(root.xz, focus));
 	shrink *= 1.0 - flattened * walker_flatten;
-	shrink *= 1.0 - board_thin * board_share;
+	shrink *= 1.0 - mown;
 
 	VERTEX.y = root.y + (VERTEX.y - root.y) * shrink;
 	VERTEX.xz += push * lean * shrink;
 	// A blade that has been pushed over is not as tall as one standing up.
 	VERTEX.y -= lean * length(push) * 0.30;
+	// And in towards its own root by the same share, which is the difference
+	// between mowing a blade and flattening it. Shortening alone moves only the
+	// y of a vertex, so a blade taken all the way down keeps its width and its
+	// spread and comes out as a green mat lying on the square -- which paints
+	// the square the colour of grass just as surely as standing up did. Pulled
+	// in as well, a blade that gives way entirely arrives at its own root with
+	// no area at all: no mat, and no pixels to shade either.
+	VERTEX.xz = mix(VERTEX.xz, root.xz, mown);
 
 }
 
@@ -1497,14 +1520,17 @@ func stand_clear() -> void:
 	_material.set_shader_parameter("board_rect", Plane(0.0, 0.0, 0.0, 0.0))
 
 
-## How a blade over a board square gives way: how much shorter it stands, and
-## what share of its pixels are thrown away.
+## How a blade over a board square gives way: how much of it is taken, and what
+## share of its pixels are thrown away instead.
 ##
 ## Two ways of saying the same thing, and which one is used was decided by
-## looking at both under the diorama camera rather than by argument -- see
-## reports/board-overlay.md. Shortening won: a shortened blade still catches the
-## light and still reads as grass, where a dithered one crumbles into speckle at
-## the distance the camera actually sits at.
+## measuring both at the camera the game ships with -- see
+## reports/board-readable.md, and reports/board-overlay.md for the first pass at
+## the camera before it. Mowing won on both counts: it clears the square more
+## completely than a dither does, and it clears it in the vertex stage, where a
+## blade that gives way entirely leaves no pixels to shade at all, while the
+## dither shades every pixel it is about to discard and gives up early-z for the
+## whole of the grass while it is at it.
 func give_way(thin: float, fade: float) -> void:
 	_material.set_shader_parameter("board_thin", thin)
 	_material.set_shader_parameter("board_fade", fade)

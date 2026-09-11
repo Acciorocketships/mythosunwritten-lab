@@ -43,21 +43,39 @@ const REACH := "reach"
 const MINION := "minion"
 const PICKED := "picked"
 
-## The lattice, in the order a cell is tested. Cool white for ground a piece may
-## stand on, a paler cool tint one storey up, warm amber for a cliff edge it can
-## be shoved off, dull red for something built on, and a dark plate at the
-## anchor's own height for a hole -- water, or the void off an island's rim -- so
-## a hole reads as a missing square rather than as nothing at all.
+## The lattice, in the order a cell is tested. Two close shades of blue for
+## ground a piece may stand on, a paler cool tint one storey up, warm amber for a
+## cliff edge it can be shoved off, dull red for something built on, and a dark
+## plate at the anchor's own height for a hole -- water, or the void off an
+## island's rim -- so a hole reads as a missing square rather than as nothing at
+## all.
 ##
 ## `means` is short because it is drawn beside a swatch in a pixel font at
 ## fourteen pixels, and a legend that has to be scrolled is not a legend. What
 ## each one *costs* is the simulation's business and is not said here.
+##
+## ## Why one row carries two colours
+##
+## A row is *one meaning*. Ordinary ground is one meaning and is painted in two
+## shades, because a field of squares all the same colour reads as one sheet
+## however crisply its gutters are drawn -- which is what a board over a meadow
+## looked like. `pair` is the second shade of a row that is checkered, chosen by
+## the parity of the cell (`shade_of` below), and a row without one is painted in
+## its own colour wherever it falls. So a cliff edge is amber on every cell it
+## lands on and the checker cannot make one cell of a cliff read as another kind
+## of ground: only the meaning decides the colour, and the parity decides no more
+## than which of that meaning's two shades.
 const LATTICE := [
 	{"key": HOLE, "tint": Color(0.05, 0.07, 0.12, 0.44), "means": "no ground"},
 	{"key": BUILT, "tint": Color(0.92, 0.36, 0.36, 0.5), "means": "built on"},
 	{"key": CLIFF, "tint": Color(1.0, 0.66, 0.26, 0.52), "means": "a cliff edge"},
 	{"key": AERIAL, "tint": Color(0.62, 0.92, 0.86, 0.34), "means": "one storey up"},
-	{"key": GROUND, "tint": Color(0.86, 0.94, 1.0, 0.20), "means": "you may stand"},
+	{
+		"key": GROUND,
+		"tint": Color(0.70, 0.83, 1.0, 0.26),
+		"pair": Color(0.34, 0.54, 0.94, 0.26),
+		"means": "you may stand",
+	},
 ]
 
 ## The cells offered to whoever is taking a turn, painted over the lattice, in
@@ -103,19 +121,54 @@ static func lattice_key(board: CombatBoard, cell: Vector2i) -> String:
 	return String((LATTICE[LATTICE.size() - 1] as Dictionary)["key"])
 
 
-## What colour a cell of the lattice is painted in.
+## What colour a cell of the lattice is painted in: the colour of what it means,
+## in whichever of that meaning's shades its own cell falls on.
 static func tint_of(board: CombatBoard, cell: Vector2i) -> Color:
-	return tint_for(lattice_key(board, cell))
+	return shade_of(lattice_key(board, cell), cell)
+
+
+## Which shade of a meaning a particular cell is painted in.
+##
+## A row with no `pair` has one colour and every cell of it is painted that
+## colour. A row with one is checkered: the parity of the cell's own coordinates
+## picks the shade, so neighbours differ and a field of them reads as squares
+## rather than as a sheet. The parity is of the cell and of nothing else -- not
+## of where the board is, not of where the camera is -- so a square keeps its
+## shade as the board is redrawn and as the observer walks across it.
+static func shade_of(key: String, cell: Vector2i) -> Color:
+	var row := row_for(key)
+	if row.has("pair") and (cell.x + cell.y) % 2 != 0:
+		return Color(row["pair"])
+	return tint_for(key)
 
 
 ## The colour filed under a key, in either table, or transparent for a key that
 ## is in neither. One lookup, so a caller naming a colour names a row of the
 ## table rather than a `Color` of its own.
 static func tint_for(key: String) -> Color:
+	var row := row_for(key)
+	if row.is_empty():
+		return Color(0.0, 0.0, 0.0, 0.0)
+	return Color(row["tint"])
+
+
+## The row filed under a key, in either table, or an empty one for a key that is
+## in neither.
+static func row_for(key: String) -> Dictionary:
 	for row in rows():
 		if String((row as Dictionary)["key"]) == key:
-			return Color((row as Dictionary)["tint"])
-	return Color(0.0, 0.0, 0.0, 0.0)
+			return row as Dictionary
+	return {}
+
+
+## Every shade a row is painted in, in the order they are the table's: one
+## colour for a plain row and two for a checkered one. What the legend draws a
+## swatch of, so a colour cannot be painted without being shown.
+static func shades_of(row: Dictionary) -> Array[Color]:
+	var shades: Array[Color] = [Color(row["tint"])]
+	if row.has("pair"):
+		shades.append(Color(row["pair"]))
+	return shades
 
 
 ## The colour a square's outline is drawn in: its own fill, stronger.

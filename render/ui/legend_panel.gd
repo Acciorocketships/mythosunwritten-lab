@@ -29,6 +29,12 @@ extends PanelContainer
 ## layers -- an opaque backing and the tint over it, at its own alpha -- exactly
 ## as the ground is, and `UNDER` is what the backing is.
 ##
+## A row the board checkers -- ordinary ground, painted in two close shades of
+## blue by the parity of the cell -- has both of its shades over the one backing,
+## side by side, so the swatch is a picture of what that meaning looks like on
+## the ground. The panel is told which those are by the table (`shades_of`); it
+## does not know that any row has two, only how many the table handed it.
+##
 ## ## Sizes
 ##
 ## In pixels of the art, before the whole interface is scaled up by a whole
@@ -123,10 +129,16 @@ func _entry(row: Dictionary) -> Control:
 	backing.color = UNDER
 	backing.custom_minimum_size = Vector2(SWATCH, SWATCH)
 	backing.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var patch := ColorRect.new()
-	patch.color = Color(row["tint"])
-	patch.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backing.add_child(patch)
+	# One shade over the whole backing, or each of a checkered row's shades over
+	# its own share of it, in the table's order.
+	var shades := BoardLegend.shades_of(row)
+	for at in shades.size():
+		var patch := ColorRect.new()
+		patch.color = shades[at]
+		patch.set_anchors_preset(Control.PRESET_FULL_RECT)
+		patch.anchor_left = float(at) / float(shades.size())
+		patch.anchor_right = float(at + 1) / float(shades.size())
+		backing.add_child(patch)
 	box.add_child(backing)
 
 	var label := Label.new()

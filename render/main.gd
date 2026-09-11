@@ -789,6 +789,14 @@ func _ready() -> void:
 	_fade_foliage = options["fade"]
 	if options["grass"]:
 		_grass = GrassLayer.new(_sim.world.terrain, _sim.world.world_seed)
+		# How the grass over a board square gives way, when a run is pricing
+		# that choice rather than playing. Nothing but a measurement wants
+		# this: the shipped pair is GrassLayer.BOARD_THIN and BOARD_FADE, and
+		# every other run leaves them alone.
+		if options["give_way"]:
+			_grass.give_way(
+				float(options["give_way_thin"]), float(options["give_way_fade"])
+			)
 	if options["distant"]:
 		_distant = DistantGround.new(_sim.world.terrain)
 	_lod_levels = options["lod_levels"]
@@ -1509,9 +1517,15 @@ func _sync_views() -> void:
 	_sync_islands(snapshot)
 	_sync_settlements(snapshot)
 	_sync_scatter(snapshot)
+	# The board before the grass, because the grass is told where the board is
+	# and how to give way over it, and a rectangle worked out after that telling
+	# is a rectangle a frame late. That cost nothing while the world was
+	# running -- the next frame caught up -- and cost everything while it was
+	# not: a --paused run syncs its views exactly once, so every held frame was
+	# photographed with grass that had never heard of the board under it.
+	_sync_board(snapshot)
 	_sync_grass(snapshot)
 	_sync_water(snapshot)
-	_sync_board(snapshot)
 	_sync_choice()
 	_sync_combat(snapshot)
 	_sync_flights(snapshot)
@@ -2307,7 +2321,11 @@ func _sync_board(snapshot: Dictionary) -> void:
 			var key := BoardLegend.lattice_key(board, cell)
 			if key == BoardLegend.HOLE:
 				holes += 1
-			var tint := BoardLegend.tint_for(key)
+			# Which of that meaning's shades this cell is painted in: ordinary
+			# ground is checkered by the parity of the cell, so a field of it
+			# reads as squares rather than as one sheet. The parity is the
+			# table's and not this loop's.
+			var tint := BoardLegend.shade_of(key, cell)
 			var surface := _cell_surface(board, cell, kept)
 
 			# The square, as BOARD_CUTS x BOARD_CUTS quads bounded in x and z by
@@ -2764,6 +2782,7 @@ func _parse_args() -> Dictionary:
 		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 		"fade": true,
+		"give_way": false, "give_way_thin": 0.0, "give_way_fade": 0.0,
 	}
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
@@ -2953,6 +2972,17 @@ func _parse_args() -> Dictionary:
 				# cost measurement wants this: it is the other half of the pair
 				# of runs that prices the rule.
 				options["fade"] = false
+			"--grass-give-way":
+				# How much of a blade over a board square is taken, and what
+				# share of its pixels are thrown away instead: the two uniforms
+				# `GrassLayer.give_way` writes, overridden for a run. Nothing
+				# but a measurement wants this either -- it is how the pair of
+				# runs that priced the choice differ in nothing else.
+				if i + 2 < args.size() and args[i + 1].is_valid_float() \
+						and args[i + 2].is_valid_float():
+					options["give_way"] = true
+					options["give_way_thin"] = args[i + 1].to_float()
+					options["give_way_fade"] = args[i + 2].to_float()
 			"--no-grass":
 				# Draw the world with no grass layer at all: nothing baked,
 				# nothing instanced, no shader. It exists so that "the grass
