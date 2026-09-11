@@ -2,7 +2,7 @@ extends TestSuite
 ## The character sheet is drawn from the pack, at whole pixels, off the
 ## simulation's own object -- and a headless run loads none of it.
 ##
-## Five claims, in the order they matter:
+## Six claims, in the order they matter:
 ##
 ##   1. **The pack is really there and really fits.** Every file the table names
 ##      exists, and every rectangle it cuts is inside the file it cuts from.
@@ -23,8 +23,16 @@ extends TestSuite
 ##   5. **A headless run loads no interface at all** -- no texture, no font, not
 ##      one script of render/ui/ -- and the panel changes nothing about the
 ##      world it is drawn over.
+##   6. **Nothing on the panel is a mark a person has to be told the meaning
+##      of.** Every equipped slot carries the simulation's own word for what
+##      goes in it and every button carries the key that presses it. Both are
+##      checked by walking what was drawn and counting it against the
+##      simulation's own list -- `Inventory.SLOT_ORDER` and the panel's
+##      `CONTROLS` -- rather than by looking for the five words and six verbs
+##      that happen to be there today, so a slot or a control added later and
+##      left unlabelled fails this.
 ##
-## The sixth claim, that the drawn result is actually crisp, is not a thing a
+## The last claim, that the drawn result is actually crisp, is not a thing a
 ## test can assert about an object: it is a property of pixels on a screen. It is
 ## measured instead, by tools/measure_ui.sh, and reports/ui.md has the numbers.
 class_name TestUiPanel
@@ -51,6 +59,7 @@ func run() -> void:
 	_the_source_hands_over_the_world_s_own_objects()
 	_a_headless_run_loads_no_interface()
 	_the_panel_changes_nothing_about_the_world()
+	_every_slot_is_named_and_every_button_names_its_key()
 
 
 # --- The pack -------------------------------------------------------------
@@ -543,6 +552,118 @@ func _the_panel_changes_nothing_about_the_world() -> void:
 		"setting the encounter out should have changed the world")
 	equal(with_panel, with_scenario,
 		"the world the shell reached differed with the character sheet on screen")
+
+
+# --- Nothing on the panel is an unexplained mark --------------------------
+
+
+## Every equipped slot says what goes in it, and every button says which key
+## presses it.
+##
+## Both halves are read off what was actually built and counted against the
+## simulation's own lists, so this cannot pass by having the five words and the
+## six verbs that exist today written into it:
+##
+##   * every entry of `Inventory.SLOT_ORDER` -- which is `Item`'s own `SLOT_*`
+##     vocabulary, the same strings the engine matches an item's `slot` against
+##     -- has one plate on the row with that word under it, and the row carries
+##     no label belonging to no slot. A sixth slot added to that array and drawn
+##     without a word fails the count.
+##   * every entry of `CharacterPanel.CONTROLS` has one button whose text is its
+##     verb followed by the engine's name for its keycode -- and pressing that
+##     button hands the shell that same keycode, so the letter on the button is
+##     the key that presses it rather than a letter typed beside it.
+func _every_slot_is_named_and_every_button_names_its_key() -> void:
+	if not SproutPack.is_installed():
+		return
+	var layer := PixelUi.build()
+	check(layer != null, "the interface did not build")
+	if layer == null:
+		return
+	var panel := layer.panel
+
+	var row := _equipment_row(panel)
+	check(row != null, "the panel drew no equipped row to read")
+	if row == null:
+		layer.free()
+		return
+	equal(row.get_child_count(), Inventory.SLOT_ORDER.size(),
+		"the equipped row draws %d columns for the simulation's %d slots"
+		% [row.get_child_count(), Inventory.SLOT_ORDER.size()])
+	var named := {}
+	for column in row.get_children():
+		var word := _label_under(column)
+		check(word != "", "a column of the equipped row carries no word at all")
+		named[word] = int(named.get(word, 0)) + 1
+	for slot in Inventory.SLOT_ORDER:
+		var word: String = CharacterPanel.slot_text(slot)
+		equal(int(named.get(word, 0)), 1,
+			"the slot the simulation calls '%s' is drawn %d times with its own"
+			% [slot, int(named.get(word, 0))] + " word under it, not once")
+		# The word under the plate is the tag itself, not a second vocabulary
+		# kept here, and it is drawn in glyphs this pack's font has.
+		equal(word, SproutPack.drawable(slot),
+			"the label under the '%s' slot is not that slot's own word" % slot)
+		var plate: PanelContainer = panel._equipment[slot]
+		equal(_label_under(plate.get_parent()), word,
+			"the '%s' plate does not stand over the '%s' label" % [slot, word])
+	equal(named.size(), Inventory.SLOT_ORDER.size(),
+		"the equipped row draws %d distinct words for %d slots"
+		% [named.size(), Inventory.SLOT_ORDER.size()])
+
+	# Every button, and the key it says it presses.
+	var buttons := panel._control_row.get_children()
+	equal(buttons.size(), CharacterPanel.CONTROLS.size(),
+		"the panel drew %d buttons for its %d controls"
+		% [buttons.size(), CharacterPanel.CONTROLS.size()])
+	var pressed: Array[int] = []
+	panel.on_key = func(keycode: int) -> void: pressed.append(keycode)
+	for index in CharacterPanel.CONTROLS.size():
+		var entry: Dictionary = CharacterPanel.CONTROLS[index]
+		var button: Button = buttons[index]
+		var key := int(entry["key"])
+		var letter := OS.get_keycode_string(key)
+		check(letter != "", "control '%s' presses a keycode with no name"
+			% String(entry["label"]))
+		equal(button.text, SproutPack.drawable(
+			"%s %s" % [String(entry["label"]), letter]),
+			"the '%s' button reads '%s', which does not name its key"
+			% [String(entry["label"]), button.text])
+		check(button.text.ends_with(letter),
+			"the '%s' button does not end with the key that presses it"
+			% String(entry["label"]))
+		# And the letter on it is the key it really presses.
+		pressed.clear()
+		button.pressed.emit()
+		equal(pressed.size(), 1,
+			"pressing the '%s' button pressed %d keys"
+			% [String(entry["label"]), pressed.size()])
+		if pressed.size() == 1:
+			equal(OS.get_keycode_string(pressed[0]), letter,
+				"the '%s' button says '%s' and presses '%s'"
+				% [String(entry["label"]), letter,
+					OS.get_keycode_string(pressed[0])])
+	layer.free()
+
+
+## The row the equipped plates stand on, found through a plate rather than by
+## counting children of the panel, so moving the section does not silently stop
+## this from looking at anything.
+func _equipment_row(panel: CharacterPanel) -> Control:
+	if Inventory.SLOT_ORDER.is_empty():
+		return null
+	var plate: Variant = panel._equipment.get(Inventory.SLOT_ORDER[0], null)
+	return null if plate == null else plate.get_parent().get_parent() as Control
+
+
+## The one word written under a slot's plate, or "" when there is none.
+static func _label_under(column: Node) -> String:
+	if column == null:
+		return ""
+	for child in column.get_children():
+		if child is Label:
+			return String((child as Label).text)
+	return ""
 
 
 # --- Helpers --------------------------------------------------------------

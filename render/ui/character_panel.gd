@@ -57,10 +57,17 @@ extends PanelContainer
 ## sum of such multiples.
 class_name CharacterPanel
 
-## How wide the panel is, in art pixels. Fixed rather than fitted, so that paging
-## from a character with a long name to one with a short one does not resize the
-## interface under the reader.
-const WIDTH := 260
+## How wide the panel is, in art pixels -- twenty-one of the art's own cells.
+## Fixed rather than fitted, so that paging from a character with a long name to
+## one with a short one does not resize the interface under the reader.
+##
+## It is this wide because of the two labelled rows: six buttons each carrying a
+## verb and the key that presses it need 327 pixels of it, and five slots each
+## carrying the simulation's own word for what goes in them need 270. Width is
+## the dimension there is room in -- the shipped 1152x648 window is short, not
+## narrow -- so the labels were spent on it rather than on a second row of
+## either.
+const WIDTH := 336
 
 ## The health bar is always ten hearts, so a character of any level has a row of
 ## hearts that fits. Each heart is a tenth of that character's own maximum, drawn
@@ -91,6 +98,10 @@ const NOTHING := "-"
 ## it presses. The key is `PlayerControls`' own constant, so a button and the
 ## keyboard cannot come to mean different things -- there is one binding and this
 ## names it.
+##
+## The button says both: the verb, and then the key, written by `control_text`
+## out of the keycode in this table. Nothing here spells a key out, so a control
+## added to this list arrives on the sheet with its key already on it.
 ##
 ## `next` turns the ring of carried things, which is what every other control
 ## here is aimed at. It is on the panel because a person operating the sheet with
@@ -470,7 +481,7 @@ func _build_controls() -> Control:
 	_control_row = row
 	for entry in CONTROLS:
 		var button := Button.new()
-		button.text = SproutPack.drawable(String(entry["label"]))
+		button.text = control_text(entry)
 		button.custom_minimum_size = Vector2(0, SproutPack.CELL + 8)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.focus_mode = Control.FOCUS_NONE
@@ -478,6 +489,19 @@ func _build_controls() -> Control:
 		button.pressed.connect(func() -> void: press(keycode))
 		row.add_child(button)
 	return row
+
+
+## What one control's button says: the verb, a space, and the key that presses
+## it -- "drop X", "use 3".
+##
+## The key half is not written here: it is the engine's own name for the keycode
+## in `CONTROLS`, which is `PlayerControls`' own constant for that binding. A
+## control added to that table is therefore drawn with its key on it without
+## anybody remembering to type the letter, and a rebinding in `PlayerControls`
+## moves the letter on the button with it.
+static func control_text(entry: Dictionary) -> String:
+	return SproutPack.drawable("%s %s" % [
+		String(entry["label"]), OS.get_keycode_string(int(entry["key"]))])
 
 
 ## Press one of the sheet's controls, as though the key had been pressed.
@@ -490,13 +514,57 @@ func press(keycode: int) -> void:
 		on_key.call(keycode)
 
 
+## The equipped row: one plate per slot, with the slot's own name written under
+## it, in the simulation's order.
+##
+## The name is `slot_text`'s, which is the tag itself. A slot the simulation
+## grows later is in `Inventory.SLOT_ORDER` the moment it exists, so it arrives
+## here with a plate, an icon and its own word under it and no edit to this file.
 func _build_equipment() -> Control:
 	var row := _row()
+	# Wider apart than the rest of the panel: the words under the plates are of
+	# very different lengths, and at the row's usual two pixels "leggings" and
+	# "chestplate" touch and read as one word. The spare width the panel has is
+	# spread between the columns as well, so the gap is the same everywhere.
+	row.add_theme_constant_override("separation", SECTION_GAP)
 	for slot in Inventory.SLOT_ORDER:
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override("separation", GAP)
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var plate := _slot(PixelIcons.of(slot))
+		# The plate keeps the art's own 16-pixel square whatever the width of
+		# the word under it, so the row reads as five equal boxes rather than as
+		# five boxes stretched to the length of their names.
+		plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		_equipment[slot] = plate
-		row.add_child(plate)
+		column.add_child(plate)
+		column.add_child(_slot_label(slot))
+		row.add_child(column)
 	return row
+
+
+## What goes in a slot, written under it: the simulation's own word for that
+## slot and nothing else.
+##
+## There is no table of pretty names here on purpose. `Inventory.SLOT_ORDER`
+## holds `Item`'s `SLOT_*` constants -- "boots", "leggings", "chestplate",
+## "helmet", "hand" -- which are the words the engine matches an item's own
+## `slot` against when it decides whether a thing can be worn. Reading the label
+## off that same array is what makes an unlabelled slot impossible: a slot only
+## exists on this row because the simulation put it in that vocabulary, and the
+## label is that entry.
+static func slot_text(slot: String) -> String:
+	return SproutPack.drawable(slot)
+
+
+## The label under one slot's plate, centred on it.
+func _slot_label(slot: String) -> Label:
+	var label := Label.new()
+	label.theme_type_variation = SproutTheme.DIM_LABEL
+	label.text = slot_text(slot)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.custom_minimum_size = Vector2(0, SproutPack.FONT_CELL)
+	return label
 
 
 ## One inventory slot: the pack's plate with one 16-pixel icon centred in it.

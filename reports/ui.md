@@ -21,7 +21,10 @@ given some -- put on, take off, use up, drop, give away -- without gaining a rul
 or a cached copy of anything; that is
 [reports/player-inventory.md](player-inventory.md).
 
-![The character sheet over the rendered world](assets/character-sheet.png)
+![The character sheet over the rendered world: five equipped plates with boots,
+leggings, chestplate, helmet and hand written under them, and six buttons
+reading "next F", "on 1", "off 2", "use 3", "drop X" and "give O"
+](assets/character-sheet.png)
 
 ---
 
@@ -216,17 +219,17 @@ the hand slot](assets/inventory-faces.png)
 
 ```
 $ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/inventory-faces.png \
-        --scenario play --tick 40 --resolution 1280x950 --play --input "20:f"
-render-shell sheet scale=2 x=16 y=16 w=574 h=748 sheets=3 showing=0
+        --scenario play --tick 40 --resolution 1280x1024 --play --input "20:f"
+render-shell sheet scale=1 x=8 y=8 w=353 h=390 sheets=3 showing=0
 
-frame          reports/assets/inventory-faces.png (1280x950)
-panel          at 16,16 size 574x748, interface scale 2
-measured       at 34,34 size 538x712 (inside the frame's rails)
+frame          reports/assets/inventory-faces.png (1280x1024)
+panel          at 8,8 size 353x390, interface scale 1
+measured       at 17,17 size 335x372 (inside the frame's rails)
 palette        66 colours: the pack's own files plus PixelIcons' three
-distinct       16 colours over 383056 pixels
-off-palette    0 of 383056 = 0.0000%
-edges          42192 changes of colour along rows and columns
-off-grid       0 of 42192 = 0.0000%
+distinct       16 colours over 124620 pixels
+off-palette    0 of 124620 = 0.0000%
+edges          24078 changes of colour along rows and columns
+off-grid       0 of 24078 = 0.0000%
 ```
 
 Row by row: the **common sword** shows the cruciform blade (`gear_blade`, the
@@ -235,21 +238,25 @@ tag the forge wrote on the item), the **common boots** the boot
 draught** the stoppered bottle (`gear_draught`, said by the item), and the
 **wool blanket** the tied parcel — because a blanket is a hand-slot item with
 no shape recorded, and the render layer's honest answer to that is a parcel.
-The window is 1280×950 rather than the usual 720 because this sheet with its
-control row is 748 screen pixels tall and a panel taller than the frame cannot
-be measured; the interface scale is 2 either way, because the scale is one step
-per 320 art pixels of window height and both 720 and 950 are two of those.
+The window is 1280×1024 rather than the usual 720 because a panel taller than
+the frame cannot be measured, and this sheet — the control row under it and the
+slot names under the plates — is 390 art pixels tall. The interface scale is 1:
+the scale is the largest whole one the *whole* interface fits at
+(§ [reports/window-fit.md](window-fit.md)), and a run with the reading stack
+built needs more than half of even a 1024-pixel window. That is a property of
+the window and not of this panel; every pixel below is still a whole one.
 
 The encounter's own sheet, the frame at the head of this report, is the same
 thing with less in the bag — the hand slot holds the spear's own face and the
 carried lines carry a boot and a spear, not two identical marks:
 
 ```
-$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png --tick 60
-panel          at 16,16 size 574x676, interface scale 2
-off-palette    0 of 344320 = 0.0000%
-edges          34124 changes of colour along rows and columns
-off-grid       0 of 34124 = 0.0000%
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png \
+        --tick 60 --resolution 1280x760
+panel          at 8,8 size 353x354, interface scale 1
+off-palette    0 of 112560 = 0.0000%
+edges          20044 changes of colour along rows and columns
+off-grid       0 of 20044 = 0.0000%
 ```
 
 Two frames, four zeros: 0.0000% off-palette and 0.0000% off-grid on both. The
@@ -286,6 +293,34 @@ an item. Getting a face needs the item and not its name, and the observation
 packet this panel otherwise quotes carries names — so this one fact is read
 through `render/ui/sheet_source.gd`, the same live `Character` handle the sheet
 reads, asked on the frame the row is written and kept nowhere.
+
+### 3b. Each slot says what goes in it, and each button says its key
+
+The panel used to show five unlabelled boxes and six unlabelled verbs. A person
+who had not been told could see that the third box was full and that one of the
+buttons said "on", and could not find out from the panel what the box was for or
+which key "on" was. Both are now written on it, and neither is written *here*:
+
+| what is drawn | where the words come from |
+| --- | --- |
+| the word under each equipped plate | `Inventory.SLOT_ORDER` — which is `Item`'s own `SLOT_BOOTS`, `SLOT_LEGGINGS`, `SLOT_CHESTPLATE`, `SLOT_HELMET`, `SLOT_HAND`: the same strings the engine matches an item's `slot` against when it decides whether a thing can be worn |
+| the key on each button | `OS.get_keycode_string` of the keycode in `CharacterPanel.CONTROLS`, which is `PlayerControls`' own constant for that binding |
+
+Neither list is a second vocabulary kept on the render side. A slot the
+simulation grows later is in `SLOT_ORDER` the moment it exists, so it arrives on
+this row with a plate, an icon and its own word under it and no edit to the
+panel; a control rebound in `PlayerControls` moves the letter on its button with
+it. tests/test_ui_panel.gd checks both by walking what was drawn and counting it
+against those two lists rather than by looking for the five words and six verbs
+that are there today — and it presses each button and checks that the key the
+shell is handed is the key written on it, so the letter is the binding and not a
+letter beside it.
+
+It costs the sheet sixteen art pixels of height (one line of type under the
+plates) and 76 of width, which is why `WIDTH` is now 336: six buttons each
+carrying a verb and a key need 327 pixels of it. Width is the dimension there is
+room in — the window the game ships in, 1152×648, is short rather than narrow —
+so the labels were spent on width rather than on a second row of either.
 
 ---
 
@@ -343,26 +378,31 @@ rails, where every pixel is pack art, drawn art or type):
 ### The result
 
 ```
-$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png --tick 60
+$ xvfb-run -a ./tools/measure_ui.sh --keep reports/assets/character-sheet.png \
+        --tick 60 --resolution 1280x760
 render-shell boot seed=1234 chunks=32 far=1 fartris=160 islands=10 grass=12594 motes=588 sheet=2/3 aa=msaa4+fxaa
-render-shell sheet scale=2 x=16 y=16 w=574 h=676 sheets=2 showing=0
+render-shell sheet scale=1 x=8 y=8 w=353 h=354 sheets=2 showing=0
 
-frame          reports/assets/character-sheet.png (1280x720)
-panel          at 16,16 size 574x676, interface scale 2
-measured       at 34,34 size 538x640 (inside the frame's rails)
+frame          reports/assets/character-sheet.png (1280x760)
+panel          at 8,8 size 353x354, interface scale 1
+measured       at 17,17 size 335x336 (inside the frame's rails)
 palette        66 colours: the pack's own files plus PixelIcons' three
-distinct       16 colours over 344320 pixels
-off-palette    0 of 344320 = 0.0000%
-edges          34124 changes of colour along rows and columns
-off-grid       0 of 34124 = 0.0000%
+distinct       16 colours over 112560 pixels
+off-palette    0 of 112560 = 0.0000%
+edges          20044 changes of colour along rows and columns
+off-grid       0 of 20044 = 0.0000%
 ```
 
 (The numbers above are the current frame's — re-measured with the gear faces
-of §3a on screen, controls row and all; the first measurement of this panel,
-before the controls and the faces, was 0.0000% of 274 912 pixels and 0.0000%
-of 25 634 edges, and every re-measurement since has held both zeros.)
+of §3a on screen, the controls row naming its keys and the slot names under the
+plates, §3b; the first measurement of this panel, before the controls and the
+faces, was 0.0000% of 274 912 pixels and 0.0000% of 25 634 edges, and every
+re-measurement since has held both zeros. The pixel count falls and rises with
+the interface scale, which is the window's business rather than the panel's:
+this frame is drawn at 1 and the earlier ones at 2, so a panel carrying *more*
+than it used to covers fewer screen pixels than it used to.)
 
-Sixteen colours over a third of a million pixels, every one of them the pack's,
+Sixteen colours over a hundred thousand pixels, every one of them the pack's,
 and not one edge off the grid. That is what "integer scale with nearest-neighbour
 filtering" means when it is true.
 
