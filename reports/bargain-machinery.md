@@ -134,7 +134,7 @@ that produced it. Its summary line, at line 2932:
 3 of 73 suites failed (5 failed checks of 219422)
 ```
 
-`PASS  bargain        2083 checks` is in it, at line 2732 — the suite this work
+`PASS  bargain        2083 checks` is in it, at line 2887 — the suite this work
 rewrote is green inside the full run, over all three draws, with no key, no
 network and no model.
 
