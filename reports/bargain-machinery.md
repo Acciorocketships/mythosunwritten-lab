@@ -124,3 +124,35 @@ field's presence, as `Observation.of` writes it.
 ./run_tests.sh test_bargain         # the suite over all of them
 ./tools/bargain_actions.sh          # the shipped run, printed end to end
 ```
+
+## 5. The full suite, and what it does not certify
+
+`reports/bargain-machinery-full-suite.log`, committed so it outlives the sandbox
+that produced it. Its summary line, at line 2932:
+
+```
+3 of 73 suites failed (5 failed checks of 219422)
+```
+
+`PASS  bargain        2083 checks` is in it, at line 2732 — the suite this work
+rewrote is green inside the full run, over all three draws, with no key, no
+network and no model.
+
+The three failures are **not** this work's, and that is measured rather than
+asserted. A worktree at `182a191`, the commit this branched from, running those
+three suites and nothing else:
+
+```
+FAIL  walk motion    93 checks, 2 failed
+FAIL  scenario       160 checks, 1 failed
+FAIL  agent          1238 checks, 2 failed
+3 of 3 suites failed (5 failed checks of 1491)
+```
+
+The same three suites, the same five checks, before the change. They are a
+stale checked-in scenario transcript, a shipped model recording whose prompts
+have drifted (which needs a live pass to repair), and the one-mover scan
+catching a text cursor in `tools/measure_ui.gd:500` — all three already reported
+as finding `I-59d87f7cd259` by the work that preceded this. This change adds no
+failure and removes none of theirs; what it changes in that log is one line,
+from `PASS  bargain 46 checks` to `PASS  bargain 2083 checks`.
