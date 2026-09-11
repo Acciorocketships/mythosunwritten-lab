@@ -53,9 +53,9 @@ const WORLD_TICKS := 20
 ## these: the two are separate streams, and the cheapest way to keep them
 ## separate is for neither to be able to reach the other.
 const WORLD_CLASSES := [
-	"SimWorld", "Simulation", "TerrainQuery", "TerrainSurfaceField",
-	"TerrainStreamer", "TerrainChunkMesher", "TerrainChunkGeometry",
-	"BiomeField", "BiomeCatalog", "BiomeProfile", "WaterField", "WaterSheet",
+	"SimWorld", "Simulation", "TerrainQuery", "SimTerrainSurfaceField",
+	"TerrainStreamer", "SimTerrainChunkMesher", "TerrainChunkGeometry",
+	"BiomeField", "BiomeCatalog", "SimBiomeProfile", "SimWaterField", "WaterSheet",
 	"IslandField", "FloatingIsland", "IslandStreamer", "SettlementField",
 	"Settlement", "SettlementStreamer", "PathNetwork", "DecorationScatter",
 	"ScatterPatch", "ScatterStreamer", "MountainField", "ValueNoise",

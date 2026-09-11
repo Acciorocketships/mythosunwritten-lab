@@ -210,7 +210,7 @@ func natural_height() -> float:
 
 ## A detached copy: same values, no shared storage.
 ##
-## The same reason BiomeProfile has one. The table's own rows are never handed
+## The same reason SimBiomeProfile has one. The table's own rows are never handed
 ## out, because a caller that wrote into a row it was merely shown would be
 ## rewriting what every later lookup returns.
 func detached_copy() -> AssetVisual:

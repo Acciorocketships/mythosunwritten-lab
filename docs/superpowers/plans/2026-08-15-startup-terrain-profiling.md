@@ -1,0 +1,599 @@
+# Startup + terrain-generation profiling — findings and optimization plan (2026-08-15)
+
+Profiled on branch `feat/mass-first-warren`, world seed pinned to `2697992464`
+([world.tscn:57](../../../scenes/world.tscn)). Three evidence sources:
+
+1. **Live game log** of Ryan's editor-embedded run (Aug 15 21:29,
+   `~/Library/Application Support/Godot/app_userdata/Story/logs/godot.log`) —
+   the streamer's own `[terrain-streamer]` heartbeat/phase instrumentation.
+2. **Headless production-faithful profiler**
+   `tests/harness/profile_startup_pipeline.gd` (new; mirrors
+   `FieldTerrainStreamer._ready()` exactly), run twice with an isolated
+   `user://`: **warm** (copy of the current pin cache) and **cold** (empty pin
+   cache = true first boot).
+3. Code audit (startup path, streaming pipeline, per-frame costs) with
+   file:line evidence.
+
+---
+
+## TL;DR
+
+| Symptom | Root cause | Measured |
+|---|---|---|
+| Startup takes minutes | Warren/settlement production search runs **inside the startup loading gate**, serialized on the **single** terrain worker, in 20 s budget slices whose *first attempt is uncapped* | Live: **154.5 s** to `startup_complete`. Cold headless: ~128 s of the gate is search + cold water trace |
+| Terrain doesn't load before the player reaches the edge | Same search monopolizes the one worker for 15–75 s **per chunk** near unsolved settlements, while finished terrain **cannot integrate** because its 3×3 feature halo isn't ready | Live: `built` frozen at 9 chunks for ~8 minutes with 16–28 computed chunks stuck in `pending` |
+| Streaming feels slow even away from villages | Terrain mesh compute is **83 %** of a chunk build — ~9 216 quads × dozens of interpreted GDScript calls each | 1.35 s avg/chunk (mesh 1.12 s); worst 2.8 s |
+| (bonus) frame-time waste in normal play | Debug overlay raycasting every frame, allocation storms in water sampling, trample-field rebuilds | see §6 |
+
+The **startup problem and the streaming problem are the same problem**: the
+village solver owns the only build thread, and the integration gate turns one
+slow feature block into a frozen world.
+
+---
+
+## 1. Measured startup timeline (live run, seed 2697992464)
+
+`startup_complete elapsed_ms=154532`. Where it went:
+
+| t (s) | Phase | Evidence (log) |
+|---|---|---|
+| 0–~2 | `world.tscn` instantiate + `FieldTerrainStreamer._ready()` (program compiles, asset prepare) | headless: `READY_TOTAL 1775 ms` (feature program compile **981 ms**, dressing compile **460 ms**, catalog **186 ms**, render-cache prepare 62 assets **139 ms**) |
+| ~0–36 | Chunk (0,0) `feature_context` = **36.1 s** — contains the **cold water trace/region cache (~28 s)** (cold_plan hit 1.0 at t≈30) + spawn settlement search slice | `worker_phase … phase=feature_placements previous=feature_context previous_ms=36083` |
+| 36–37 | Chunk (0,0) mesh 824 ms, dressing 231 ms | `previous_ms=824`, `previous_ms=231` |
+| 37–45 | Chunk (-1,-1): feature_context **7.3 s**, then ~1.1 s build | `previous_ms=7286` |
+| 45–58 | Ring-1 chunks ~1–2.4 s each. **Defect observed:** non-support chunk (-1,1) built before support (0,-1) — see §4.3 | job_complete lines |
+| 58–116 | Chunk (-2,-2) — a **halo feature key** the gate waits on — `feature_context` = **55.8 s** (village search slice) | `previous_ms=55838`; heartbeats stuck at `progress=0.9025 ready=1/4` for 55 s |
+| 116–142 | Chunk (-2,-1) `feature_context` = **25.3 s** | `previous_ms=25291` |
+| 142–154.5 | Remaining halo keys + supports integrate; gate opens | `startup_complete … elapsed_ms=154532` |
+
+**Startup ≈ 28 s cold water plan + ~90 s settlement searches + ~20 s meshing
++ ~2 s setup + tail.** The loading bar sat at 0.90 for a full minute because
+the gate's 16 feature keys include halo chunks that touch a settlement
+super-cell.
+
+Headless replay of the same gate work:
+
+| | contexts (16 keys) | 4 support builds | total gate work |
+|---|---|---|---|
+| **Warm** (current pins) | 33.9 s (key (-2,-2) alone 31.3 s) | 3.6 s | **37.5 s** |
+| **Cold** (first boot, no pins) | **206.6 s** | 3.6 s | **210.2 s** |
+
+Cold per-key: (-2,-2) **73.3 s**, (0,1) **71.7 s**, (0,0) **21.6 s**,
+(-2,-1) **20.6 s**, (0,-2) **12.0 s**, (1,0) 6.4 s — separate
+searches/slices for the settlements whose discovery radius overlaps the spawn
+halo. After that entire 3.5-minute "first boot", the pin cache held two
+failure pins and one `attempts_tried: 3` progress pin — i.e. a **second**
+boot still resumes searching. The search journey spans launches by design;
+today the player's loading screen and streaming worker pay for it.
+
+## 2. Post-startup: why the world stops streaming (live log)
+
+Immediately after the gate opened, the player walked south-west toward a
+settlement. The single worker then spent **45–75 s per chunk** in
+`feature_context`:
+
+```
+elapsed 180s..225s  chunk -3,-3  feature_context ≥60 s   built=9  pending=16
+elapsed 253s..298s  chunk -4,-3  feature_context ≥60 s   built=9  pending=18
+elapsed 326s..386s  chunk -4,-2  feature_context ≥75 s   built=9  pending=19
+elapsed 406s..451s  chunk -3,-2  feature_context ≥60 s   built=9  pending=21
+elapsed 469s..607s  -3,-1 / -5,* … 15–30 s each          built 9→35
+```
+
+For ~8 minutes `built` stayed at 9 while 16–28 fully-computed terrain
+payloads sat in `_pending_terrain` — they may not integrate until every block
+of their 3×3 feature halo is ready
+([FieldTerrainStreamer.gd:852](../../../scripts/terrain/field/FieldTerrainStreamer.gd),
+`_feature_square_ready`), and those blocks were queued behind one
+village search after another on the one worker. **This is the
+"terrain doesn't load before I reach the edge of the world" bug.** It is not
+meshing throughput and not (primarily) prioritization — it is the search
+serialized in front of everything else.
+
+Mechanics of the search cost
+([VillageWarrenFabricSolver.gd:13,49-52](../../../scripts/terrain/features/villages/VillageWarrenFabricSolver.gd),
+[WarrenVolumetricSolver.gd:136-142](../../../scripts/terrain/features/villages/fabric/WarrenVolumetricSolver.gd),
+[VillagePlan.gd:44-47](../../../scripts/terrain/features/villages/VillagePlan.gd)):
+
+- `PRODUCTION_SEARCH_BUDGET_MS = 20000` per record build, but **the first
+  attempt of each slice runs to completion** (observed 45–75 s phases).
+- A budget-interrupted record is **deliberately not cached**, so *every*
+  feature key whose discovery radius touches the same unsolved settlement
+  re-enters the solver and burns another slice. The pin cache
+  (`user://warren_solution_pins.json`) persists progress
+  (`attempts_tried`) across slices/boots, so the search does converge — but
+  the worker pays the whole journey in the player's face.
+- Docs already record 78–408 s per settlement full searches
+  (2026-08-12-town-quality-remediation.md).
+
+## 3. Steady-state chunk economics (headless, warm caches)
+
+21-chunk sweep, radius 2, away from unsolved-village slices:
+
+| Phase | avg ms/chunk | share |
+|---|---|---|
+| `mesher.compute_chunk` | **1 124** | **83 %** |
+| `DressingField.compute` | 165 | 12 % |
+| commit (main thread: meshes+collision+multimesh) | 40 | 3 % |
+| heightfield region | 10 | — |
+| water context (warm) | 2 | — |
+| feature context (warm) | 3 | — |
+| **Total** | **1 349** | worst 2 799 (near village: mesh 1.75–1.9 s) |
+
+Grass: 52 tiles built in 1.85 s (**36 ms avg**, worst 55 ms) — cheap.
+
+**Demand vs supply at MAX_SPEED = 10 m/s** (192 m chunks, radius 3):
+straight-line movement needs a new 7-chunk column every 19.2 s →
+0.365 chunk/s → **49 % worker duty** at 1.35 s/chunk; diagonal ~65 %; grass
+adds ~10 %. So normal streaming *just about* keeps up — there is no slack.
+One 20–75 s search slice costs 15–55 chunks of build time; the ring collapses
+and the player reaches the frontier. The mesher's 1.1 s is what makes the
+system fragile; the search is what breaks it.
+
+Why the mesh phase is 1.1 s
+([TerrainChunkMesher.gd:99-282](../../../scripts/terrain/field/TerrainChunkMesher.gd)):
+`GRID = 96` → **9 216 quads/chunk**; per quad: 4 baked samples, 4 clip-vert
+checks, a path-candidacy probe fan (`_emit_path_surface` — up to ~20+
+`FeatureGroundField` probes on the rejection path, ~230 k queries/chunk even
+when no path exists anywhere near), and ~18 SurfaceTool per-vertex calls;
+then `st.index()` + `generate_normals()` over ~55 k verts. It is interpreter-
+call-bound, not math-bound.
+
+## 4. Prioritization defects (secondary, but they bite at saturation)
+
+1. **Stale distance ratchet.** `_request_job_locked` takes
+   `mini(old, new)` for `priority_distance`/`priority_tier`
+   ([FieldTerrainStreamer.gd:1028-1029](../../../scripts/terrain/field/FieldTerrainStreamer.gd)).
+   Distances are never *raised*, so chunks behind a moving player keep their
+   old close-distance priority and tie with (or beat) the chunks ahead.
+   Terrain jobs are also never cancelled when they leave the radius (only
+   grass has `_cancel_far_grass_jobs_locked`) — the worker happily spends
+   1.35 s each on chunks the player is running away from, and `_drain_results`
+   then throws the payload away if it's beyond KEEP_RADIUS.
+2. **Grass outranks far terrain.** Grass jobs are tier 2; terrain beyond the
+   84 m grass radius is tier 3 ([:967-974,:1093](../../../scripts/terrain/field/FieldTerrainStreamer.gd)).
+   While moving, ~2.9 new grass tiles/s continuously pre-empt the terrain
+   frontier — pretty grass at your feet, void on the horizon.
+3. **Halo-tier leakage, both directions.** `_drain_results` requests the 8
+   feature-halo jobs with the *drained chunk's* tier/distance ([:791-802]).
+   For the centre chunk that is tier 0 — observed live: non-support chunk
+   (-1,1) (merged into a full terrain job) built **before** support chunk
+   (0,-1) during startup. For non-centre chunks the halo jobs land at tier
+   1/3 even though integration (and the startup gate, and the player
+   unfreeze) is blocked on them.
+4. **No direction-of-motion bias.** `desired_chunks` is a symmetric square;
+   priority is Chebyshev distance only. At 10 m/s the ~8 s lead time of the
+   tier-1 band is marginal.
+5. **FIFO commit queues.** `FeatureCommitQueue` (1 asset load/frame, 24
+   shapes, 2.5 ms) and `EnvironmentCommitQueue` (2 batches/frame) drain in
+   insertion order — a far village block consumes the budget ahead of the
+   near block the player is frozen on.
+
+## 5. Startup-specific costs outside the worker
+
+- `_ready` main-thread block ≈ **1.8 s** headless (feature program compile
+  981 ms — ~146 `FabricRecipe` literals; dressing compile 460 ms; catalog
+  load + 394 `ResourceLoader.exists` probes 186 ms; 62 visual loads 139 ms).
+- Loading screen itself: ~7.9 MB of PNGs decoded before anything else.
+- Every chunk integrate builds `BiomeChunkFx` (GPUParticles3D + FogVolume +
+  OmniLight3D) with **no particle warm-up** → first-use shader-compile
+  hitches during/after loading.
+- Gate tail: `MAX_BUILD_PER_FRAME = 1` (≥4 frames) + 0.45 s fade.
+
+## 6. Normal-gameplay per-frame findings (bonus audit)
+
+Ranked by value-per-effort:
+
+1. **`CoordOverlay` ships enabled** ([CoordOverlay.gd:12](../../../scripts/terrain/tools/CoordOverlay.gd)):
+   every frame does a **4 000 m `intersect_ray`**, two absolute-path
+   `get_node_or_null` lookups, 5-noise biome sampling, ~6 format strings, 9
+   `loaded_storey_at` calls, and an unconditional `Label.text` assignment
+   (TextServer re-shape). Default it off / throttle to 10 Hz.
+2. **`WaterSampler._corners` allocates 4 nested Arrays per call**
+   ([WaterSampler.gd:157-171](../../../scripts/terrain/water/WaterSampler.gd));
+   `level_at`/`velocity_at`/`flow_diagnostics_at` each re-call it.
+   `WaterRippleSim._refresh_flow_texture` runs a 32×32 grid × linear scan of
+   all water samplers every ≤0.5 s (~20–40 k allocations per refresh);
+   the character's swim probe pays the same per physics tick. Return packed
+   floats / locals instead; add a Rect2 bounds pre-test per sampler;
+   refresh samplers only on chunk load/evict.
+3. **`TrampleField`**: 256² `get_pixel`/`set_pixel` epoch loop = a
+   **guaranteed hitch every 60 s** ([TrampleField.gd:172-183](../../../scripts/terrain/grass/TrampleField.gd));
+   `_publish_globals` re-sets 5 global shader params every frame; and the
+   static-stamp image is fully rebuilt (all ~81 chunks' stamps, deep-copied)
+   on **every chunk integrate and evict** ([FieldTerrainStreamer.gd:865-866,702-703,876-888])
+   — i.e. precisely when streaming is already busy.
+4. **Streamer `_process` sweeps**: `desired_chunks` allocation + O(49 ×
+   pending) `_has_pending_terrain` scans + three full `_built`/`_feature_ready`
+   keys() sweeps run every frame regardless of movement; `_pending_terrain`
+   sort_custom runs even when empty; `_request_job_locked` re-sorts the whole
+   job queue under the mutex for every already-queued chunk each frame
+   (~dozens of sorts/frame with a deep backlog). Gate on `centre` change.
+5. **`GrassStreamer`**: exact-float LOD origin means `origin_changed` every
+   frame → full tile×batch visible-count walk + evict rebuild; `desired_tiles`
+   sort allocates ~700 Rect2/frame in its comparator. Quantize the origin.
+6. **`character.gd`**: fresh `PhysicsPointQueryParameters3D` +
+   `get_first_node_in_group("water_dynamics")` every swim tick; string-path
+   `anim_tree.get/set` per tick; `KinematicCollision3D.new()` in step-up.
+   Cache all four.
+7. **`camera.gd`/`CameraObstructionSolver`**: 2 shape-casts/tick with fresh
+   query params — reuse members.
+8. **`WaterRippleSim`**: ~16 `set_shader_parameter`/frame of which 4–6 are
+   constants; 3 drop params written even when inert.
+
+## 7. Optimization brainstorm
+
+### A. Kill the terrain-loading failure (highest impact)
+
+1. **Ship pins for the shipped seed.** The world seed is pinned in
+   `world.tscn`; run the existing seed-corpus harness offline for
+   `2697992464`'s reachable cities and bundle the resulting
+   `warren_solution_pins.json` as a res:// default (user:// overlays it).
+   Sealed pins re-seal in ~10 s and failure pins are free — the in-game
+   search should be a fallback, not the common path. This alone removes
+   ~90 s of the live startup and the 45–75 s streaming stalls near the
+   spawn settlements.
+2. **Move the warren search off the terrain worker** (second thread with its
+   own `WorldFieldBlockCache`; solver state is already self-contained, pin
+   cache writes are the only shared artifact). `record_for` returns a
+   "pending" record immediately; feature blocks that only await a village
+   solve report ready-with-placeholder so terrain integrates now and the
+   village pops in when sealed (or fade/scaffold it in). The worker then
+   never stalls > ~2 s.
+3. **Relax the integration gate.** Let terrain commit when its halo blocks
+   are pending *only on a village solve* (terrain geometry doesn't depend on
+   it in route-first mode — `make_relief` is inert). Keep the player-freeze
+   tied to terrain collision + the chunk's own features only.
+4. **Priority hygiene** (cheap, do regardless):
+   - Recompute `priority_distance` from the current centre when re-requesting
+     (assign, don't `mini`), and drop queued terrain jobs > CHUNK_RADIUS+1
+     from centre (mirror the grass cancellation).
+   - Give startup support chunks a dedicated tier below everything else, and
+     make gate-blocking halo feature jobs inherit tier 0.
+   - Put grass at the bottom tier (or only above terrain inside FULL_RADIUS).
+   - Add a motion bias: effective_distance −1 for chunks within ±45° of the
+     velocity direction.
+
+### B. Startup wall-time
+
+5. **Persist the cold water trace/region cache** keyed by (seed, salt) —
+   ~28 s of every boot is recomputing identical pure data for a pinned seed.
+   Serialize after first trace (or bake at export). Fallback: keep the
+   compute but overlap it with a second worker meshing the support chunks —
+   region builds only need the fill/trace for wet chunks.
+6. **Compile programs off the main thread / cache them.** The 1.8 s `_ready`
+   block (SettlementFabricProgram 981 ms + dressing 460 ms + catalog probes)
+   can run on the worker before its first job, or be cached as a built
+   resource; the window and loading screen then appear ~2 s sooner.
+7. **Warm particle/shader pipelines during the loading screen** (one hidden
+   GPUParticles3D per material + the water/ripple shaders) to remove
+   first-chunk hitches at gate-open.
+
+### C. Chunk throughput (makes everything resilient)
+
+8. **Broad-phase the path overlay.** Precompute once per chunk whether any
+   path/feature surface intersects it (features.context already knows);
+   skip `_emit_path_surface` candidacy entirely for the ~majority of quads
+   in path-free cells. Expected to remove a large slice of the 1.12 s mesh
+   phase (~230 k probe calls today).
+9. **Flat-cell fast path.** Cells whose baked 13×13 samples are constant
+   (most meadow cells) emit 2 triangles instead of 288; tint continuity is
+   preserved by the existing corner-lattice interpolation.
+10. **Batch vertex emission.** Replace per-vertex SurfaceTool calls with
+    directly-built PackedArrays (positions/uv/color/index) — one
+    `commit`-equivalent per surface; skip `index()` by emitting indexed
+    quads natively. 55 k × ~3 native calls → ~10 array writes.
+11. If still needed: adaptive `SAMPLES_PER_CELL` (12 on slope bands, 4–6 on
+    flats), or port the quad loop to GDExtension. A second general terrain
+    worker thread is also viable once the caches are split per-thread —
+    but items 8–10 likely triple throughput in GDScript alone.
+
+### D. Frame-time cleanups (normal play)
+
+12. §6 items 1–8, in that order: overlay off, `_corners` allocation-free,
+    trample epoch amortized + static rebuild keyed to trample-range chunks,
+    streamer sweeps gated on centre change, grass origin quantized, cached
+    physics/anim handles, reused camera query params, dirty-flagged shader
+    params.
+
+### Expected outcome (rough)
+
+| | today | after A+B | after A–C |
+|---|---|---|---|
+| First boot near settlements | 150–250 s | ~30–40 s (cold water still paid once) | **~8–15 s** |
+| Warm boot | ~40 s live | ~10 s | **~5 s** |
+| Streaming stall near unsolved village | 45–75 s × N chunks, world frozen | none (search off-thread / pinned) | none |
+| Sustained chunk rate | 0.74/s | 0.74/s | **~2–3/s** |
+
+---
+
+## 8. Addendum (2026-08-16): inside the warren search — where 70–400 s per settlement goes
+
+Follow-up profiling of `WarrenVolumetricSolver.solve` on the three city seeds
+touched by the spawn halo (isolated probe `probe_warren_spatial_features.gd
+--production-only`, plus a temporarily-instrumented `context_for` replay).
+
+### 8.1 A diagnostic flag was changing the search (bug)
+
+`WarrenVolumetricSolver.gd:~1180-1204`: the wip checkpoint `80dc605`
+(2026-08-12) inserted `_rank_courtyard_candidates_for_macro(...)` and a
+`SKYWALK_TIMING` block between `if requires_courtyard:` and its `else:`, so
+the `else: raw_court_candidates.append(_absent_courtyard_bridge_candidate())`
+silently re-attached to `if diagnostic_trace_skywalk_timing:`. Consequences:
+
+- **Production** (flag off), compact/standard profiles
+  (`requires_elevated_courtyard = false`): the sentinel candidate is appended
+  → the full market/landmark/skywalk joint beam runs → *intended* but slow.
+  Large/grand (`true`): a bogus "no courtyard" candidate is added on top of
+  the real ones — extra work and a possible court-less seal for a profile
+  that requires a court.
+- **Every `--timing` harness/probe run** (flag on): compact/standard get *no*
+  court candidate → the market attempt fails immediately → the search is
+  ~16× faster **and different from what the game ships**. Seed 3910 standard:
+  **23.4 s with `--timing`, 367.5 s without**. Corpus/pin results gathered
+  under the flag do not reflect production.
+
+Fix (in working tree, uncommitted): move the `else` back to
+`if requires_courtyard:`.
+
+### 8.2 True production breakdown, seed 3910 standard (365.6 s, exhausted)
+
+| stage | n | total | per |
+|---|---|---|---|
+| frontier (excavation carve, 256 bores each) | 12 | 11.0 s | 0.9 s |
+| `partition_spatial` rejected (beam empty / composition failed) | 30 | 93.7 s | 3.1 s |
+| `partition_spatial` accepted = 3D room composition | 34 | **197.5 s** | 5.8 s |
+| `partition_fabric` compile | 34 | **62.1 s** | 1.8 s |
+
+Of the 34 variants that survived composition + fabric (~7.6 s each), **26
+were rejected by the sightline caps** ("N through sightlines; maximum 48",
+"ground … maximum 20") and 8 by fabric setback/roof gates. I.e. **~200 s of
+365 s is spent fully building towns that fail a count check at the very
+end.**
+
+Two structural facts make that avoidable:
+
+1. **The precomposition proxy already computes the sightline counts**
+   (`_precomposition_enclosure_audit` → `through_sightline_count`,
+   `ground_through_sightline_count`) and uses them only to *rank*
+   (`_precomposition_quality_score`), never to reject. Observed proxy vs
+   compiled: proxy 98–128 → compiled 74–104 (all fail); proxy 60 → 69–96
+   (fail); proxy 6 → 50–117 (fail — proxy under-predicts here). Rejecting
+   source volumes whose proxy exceeds the cap by a safety margin (e.g. > 78)
+   would have skipped 6 of the 8 source volumes (~48 of 64 variants) before
+   any composition. Needs corpus validation for zero false rejections.
+2. **The 8 partition variants of one source volume fail the same way**
+   (sightlines are a street-network property; variants change room choices,
+   per the code's own comment). Per-source results: 91/74/91 · 104/80/104 ·
+   93/93/93/89 · 97/97/97 · 85/86/86/86. A "topology-bound failure → skip the
+   source's remaining variants" memo removes ~7/8 of that cost. Same for
+   "final 3D room composition lost structural bearing" (4/8 variants on two
+   sources, ~4 s each).
+
+Also: `WarrenExcavationCarver.carve` runs 256 bores (~3.4 ms each) per outer
+attempt and selects by `_candidate_score`, which ignores the topology gate
+that runs immediately afterwards ("walk cells ≥ 12", "ramp transitions ≥ 1")
+— on the compact seed all 12 × 256 bores were discarded by it. Filtering
+inside the bore loop would let attempts produce candidates instead of a
+guaranteed 0.9 s miss.
+
+### 8.3 Per-settlement production numbers (instrumented `context_for` replay)
+
+| city seed / profile | in-game slices | isolated full search |
+|---|---|---|
+| 166… compact | 8.7 s (12 attempts, no candidates) | 8.5 s |
+| 6357… standard | 24.3 + 57.0 + 5.1 s (3 slices) | 12.1 s *with flag* (true path not measured) |
+| 3910… standard | 34.7 + 20.5 s (2 slices, 3 of 12 attempts) | 23.4 s with flag / **367.5 s true** |
+
+The 20 s budget's uncapped first attempt is why single slices hit 35–57 s.
+
+### 8.4 Expected effect
+
+Fix 8.1 + proxy sightline pre-gate + per-source failure memo + carver
+gate-aware selection: seed 3910's exhausted search ≈ 365 s → ~40–60 s (11 s
+carving + a handful of genuinely ambiguous compositions), and successful
+seals arrive earlier because fewer doomed variants precede the winner. This
+does not remove the need for the async/placeholder work (a hard seed still
+costs tens of seconds), but shrinks placeholder dwell time ~5–8×.
+
+### 8.5 Sub-project A0 result (2026-08-16, branch feat/async-settlement-resolution)
+
+Implemented (TDD, `tests/test_warren_search_pregates.gd`, 11 tests):
+
+1. `WarrenVolumetricSolver.precomposition_pregate_failure` — a source
+   volume whose *precomposition* through-sightline proxy exceeds the cap by
+   `PRECOMPOSITION_SIGHTLINE_MARGIN` (30 → limit 78) is dropped in
+   `_ranked_precomposition_variants` before any variant reaches composition.
+   Ground sightlines are not pre-gated (proxy under-predicts).
+2. `is_topology_bound_quality_failure` + a per-source retirement memo in
+   `_solve_frontier`: a compiled **through**-sightline count > 1.5 × cap
+   retires the source's remaining variants. Ground counts were tried and
+   **withdrawn by the oracle**: seed 3613… attempt 0 compiled 35 ground
+   sightlines on `gallery0/v4` while `gallery0/v3` (the recorded winner)
+   seals — ground daylight is variant-dependent.
+3. `WarrenExcavationCarver.carve_ranked` (`carve()` = its head) +
+   `WarrenTownSolver._gate_preferred_volume`, shared by the staged frontier
+   and the selected-attempt rebuild: the first ranked bore survivor that
+   passes the public-realm topology gate is taken (`TOPOLOGY_GATE_CANDIDATES
+   = 8`); the score-best is still reported when none passes. Compact seed
+   166… went from 0 candidates in 12 attempts to candidates on attempts
+   5/7/8/11.
+4. `WarrenSolutionPinCache.GENERATION_SALT` → `2026-08-16a`.
+
+Oracle (`tests/harness/warren_search_oracle.gd`, unbudgeted
+`WarrenVolumetricSolver.solve`, true production path; baseline = commit
+54e625d in a worktree):
+
+| seed / profile | before | after | outcome |
+|---|---|---|---|
+| world 4242 → 6052…0358 standard | 51.5 s | **11.6 s** | fail = fail |
+| world 991177 → 3360…9337 compact | 124.2 s | 154.5 s | fail = fail (attempt 8 now passes the gate and is composed; +1 candidate explored) |
+| world 3046246887 → 8702…6463 standard | 80.7 s | **11.6 s** | fail = fail |
+| world 2697992464 → 6046…5059 compact | 62.9 s | **11.2 s** | fail = fail |
+| 166029932451774690 compact | 8.6 s | 9.8 s | fail = fail (4 new candidates, all rejected early) |
+| 3910114991003307946 standard | 372.8 s | **44.2 s** | fail = fail |
+| 6357506428441529412 standard | 65.8 s | **10.8 s** | fail = fail |
+| 3613595803240038080 standard | 179.8 s | 174.8 s | **seal = seal**, attempt 0 / `gallery0` / variant 3, sig `d8f95ed1c4f5` identical |
+| 7 standard | 9.5 s | 9.2 s | **seal = seal**, attempt 4 / variant 0, sig `707e0d22b2a8` identical |
+
+Total 955.8 s → 437.7 s; the typical exhausted search drops from ~65 s to
+~11 s (6×), the worst from 373 s to 44 s (8×); both recorded sealing towns are
+bit-identical. Related GUT suites (volumetric_solver 43/45, massif 12/13,
+inhabited_massif 3/5, generation_mode 5/8, spatial_fabric_compiler 9/10,
+settlement_relief 16/17, solid_partitioner 21/25,
+excavation 6/17+7 risky, excavation_adapter 5/11, interstitial_joins 7/7,
+fabric_roof_topology 9/9) have identical pass/fail counts before and after
+— the non-passing cases pre-date A0.
+
+Not addressed here: seed 3613's 175 s is ranking (six variants composed
+before the winner) — a better precomposition score, not a gate.
+
+### 8.6 Why the sightline gate fails (evidence for a constructive fix)
+
+Measured on 3910…/attempt 11 (fails, proxy 101) and 3613…/attempt 0
+`gallery0` (seals, proxy 20) with throwaway probes:
+
+- A *through sightline* is an eye-height chord from a route cell that leaves
+  the core in **both** directions without hitting **building** mass
+  (`SettlementFabricSolver._audit_sightlines`); the massif's own rock does
+  not occlude because unassigned mass is discarded (`_discard_unassigned_mass`).
+- 3910: 216 eye-height flank sides along the street; **198 solid massif**,
+  185 house-capable (≥ 4 bands above the floor); only **108 proposed** →
+  101 chords. **With all mass kept as occluders: 0 chords** (3613: 176 solid,
+  112 proposed, 20 chords → 0).
+- Route straightness is not the cause: the carver already caps runs at
+  `MAX_STRAIGHT_RUN = 4`.
+- `WarrenSolidPartitioner.street_wall_audit`: 3910 = 74 raw walls → owned 32,
+  plinth 12, kerb 13, undermined 8, short 9, unowned 0. 3613 = 64 → 29 / 13 /
+  13 / 7 / 2 / 0. The partitioner honours its contract; the contract houses
+  ~45 % of walls and trims the rest to air by policy (spec §3). Near-identical
+  buckets on the sealing and failing town — the *arrangement* of gaps decides.
+- `_fill_free_solid` (the interior-infill pass) places **0** houses on both:
+  every column beside a public cell is already claimed (251/…) or carved
+  (151/…) at `_top_band`; the interior 66 % of the hill is unaddressable.
+- Lanes — the mechanism meant to open the interior (lane curve 30 → 74 mean
+  houses was measured on radius-12 towns) — are 0–3 per town at the reviewed
+  village scale (3910: 2 lanes/11 cells; 3613: 1/6; 6357: 3/13; 7: 0; 166: 0).
+
+So at village scale the topology is a one-house-deep skin along a canyon,
+and whether the compiled town passes the sightline caps depends on where the
+skin's policy-trimmed gaps line up — hence compose-then-reject.
+
+### 8.7 Decision + O2 experiment (2026-08-16)
+
+Decision (Ryan): the sightline caps were guidance for the intended look, not
+a hard rule; enclosure should come from density. Landed:
+`production_quality_failure` no longer rejects on through/ground sightlines
+(overhead and alley ratios stay hard); the A0 pre-gate and per-source memo,
+which hard-rejected on the same metric, are removed; the precomposition
+ranking's proxy penalties remain the only sightline influence.
+
+O2 (density via lanes) was measured before touching production rules, with
+`tests/harness/warren_density_probe.gd` (frontier level, 9 seeds × 12
+attempts) and two experiment knobs (`WarrenExcavationCarver.lane_reserve_radius`,
+`lane_reserve_clearance_bands` paired with
+`WarrenGroundArcadeSolver.auxiliary_separation_clearance_bands`; defaults =
+production). Why lanes fail today: of ~11–14 anchors per town, 11–13 cannot
+make a first move — the arcade reserve (`LANE_ARCADE_RESERVE_CELLS = 4`
+around every grade route cell) covers 56–58 of ~120–135 columns.
+
+| variant | candidates/108 | arcade fails | lanes/cand | lane cells | houses/cand | mass ratio | proxy through | proxy overhead |
+|---|---|---|---|---|---|---|---|---|
+| baseline | 51 | 31 | 0.92 | 4.2 | 19.4 | 0.325 | 80 | 0.003 |
+| reserve radius 2 | 43 | 50 | 1.49 | 7.3 | 18.8 | 0.305 | 86 | 0.000 |
+| clearance 6 bands | 50 | 31 | 1.02 | 4.8 | 19.2 | 0.324 | 84 | 0.001 |
+| clearance 4 bands | 57 | 28 | 1.42 | 6.5 | 19.1 | 0.305 | 85 | 0.001 |
+| radius 2 + clearance 6 | 45 | 48 | 1.51 | 7.3 | 18.7 | 0.305 | 87 | 0.000 |
+
+More lanes do **not** raise house count at village scale (flat ~19/candidate),
+slightly worsen enclosure (lanes cut mass; proxy through +5–7), and a smaller
+reserve costs arcade candidates. Per seed, the two sealing towns (3613…, 7)
+have proxy through 44/39 and ground 12/22; failing seeds 91–165 — enclosure
+tracks route/massif shape, not lanes (seed 8702… has 3.5 lanes and through
+161). Front-rank houses are 1–2 columns (`footprint_families` 1cell 11–15,
+2cell 6–9, 4cell 1–2) because deeper footprints span more terrace relief
+(`footprint_fits_plinth_budget`, terrace tops). The precomposition overhead
+proxy is ~0 for every candidate: compiled overhead comes entirely from
+composition (skywalks/bridges), and that gate stays hard.
+
+Conclusion: at radius 7–8 the density lever is not lanes; it is footprint
+depth / how the front rank consumes interior mass (or courtyard/back-plot
+addressing) — a partitioner/massif-shape question for Ryan's design, not a
+tuning change. The reserve knobs are left at production defaults.
+
+Oracle under the guidance policy (vs the A0 state):
+
+| seed | A0 | guidance |
+|---|---|---|
+| 4242 std | 11.6 s fail | 61 s fail — all 8 variants fail composition (5 "authored room envelope: bridge room", 3 "retained arbitrary exposed") |
+| 991177 compact | 154 s fail | 182 s fail |
+| 3046… std | 11.6 s fail | 173 s fail |
+| 2697… compact | 11.2 s fail | 182 s fail |
+| 166… compact | 9.8 s fail | **79 s seal** (attempt 5 / v3, sig 0f1608f8dc9b) — new town |
+| 3910… std | 44 s fail | 448 s fail |
+| 6357… std | 10.8 s fail | 80 s fail |
+| 3613… std | 175 s seal (att 0 / v3) | **20 s seal** (att 2 / v2, sig 24122fd46b32) — an earlier variant the cap used to reject |
+| 7 std | 9.2 s seal | 10.8 s seal, identical |
+
+Seal rate 2/9 → 3/9 and the look-policy is honoured, but exhaustive failures
+are 5–15× slower because doomed sources are now fully composed. They are
+doomed by **composition** (bearing / authored room envelope), which the proxy
+sightline count was predicting — and which the pre-gate would also have used
+to block 166's new town. The next constructive frontier is therefore the
+room composition stage: why village-scale front ranks cannot compose.
+
+### 8.8 Why composed towns are rejected (gate trace, 9 seeds, guidance policy)
+
+Full production solves with `--timing --gate-trace`; 211 rejected partition
+variants, 156 in composition, 41 at quality gates, 14 in fabric; **1,208 s**
+spent on rejected variants in total.
+
+| class | time | n | nature |
+|---|---|---|---|
+| `compact/standard partition formed N inhabited rooms; expected A..B` (`room_volume_budget`, compact 10..30 / standard 16..60) | **464 s (38 %)** | 85 | size quota checked after the ~5 s composition; compact towns compose **31–48** rooms on every variant of three seeds, standard 61–66 |
+| `alley-bounded walk ratio N is below 0.300` (standard-only regression floor from a 6-seed corpus) | **364 s (30 %)** | 34 | enclosure/character metric checked after fabric (~7 s); values 0.09–0.299, mostly 0.25–0.30 near-misses |
+| `joint hero-feature beam found court=0, 0 landmarks, 0 skywalks` | small (~0.4 s each) | 27 | cheap early miss |
+| bridge room has no built flank / lost structural bearing / retained arbitrary exposed shoulders / room-scale outcroppings unsupported / skywalk fits | ~200 s (17 %) | ~40 | genuinely structural composition failures |
+| overhead ratio, fabric setback/envelope, misc | ~180 s | ~50 | mixed |
+
+So ~70 % of village-scale composition waste is two thresholds applied after
+the expensive work, not structural inability. Sealed towns for reference:
+7 (standard) stacks 48, alley/overhead 0.55; 3613… stacks 49, overhead 0.54,
+through 52 / ground 27; 166… (compact) stacks 24, overhead 0.43, through 144.
+
+### 8.9 Decision: all enclosure/size metrics are guidance (2026-08-16)
+
+Ryan: "all of this is guidance, not hard ratios." Landed: the post-composition
+quality gate (`production_quality_failure`: overhead ratio, alley ratio —
+sightlines were already removed) is deleted with its three solver call sites
+and two adapter call sites; the inhabited-room range check is removed (the
+budget stays in the audit). Structural gates (bearing, envelopes, fabric
+compile, topology) are untouched. `GENERATION_SALT` → `2026-08-16b`.
+
+Oracle:
+
+| seed | A0 | sightlines guidance | all guidance |
+|---|---|---|---|
+| 4242 std | 11.6 s fail | 61 s fail | 62 s fail (composition: envelope / exposed shoulders) |
+| 991177 compact | 154 s fail | 182 s fail | **22.6 s seal** (att 6 / v0, 8f366f4ec0f3) |
+| 3046… std | 11.6 s fail | 173 s fail | **17.5 s seal** (att 0 / v4, 1a5db282bad6) |
+| 2697… compact | 11.2 s fail | 182 s fail | **6.4 s seal** (att 8 / v7, d5328bca744e) |
+| 166… compact | 9.8 s fail | 79 s seal | **24.1 s seal** (att 11 / v1, 896fa2468af2) |
+| 3910… std | 44 s fail | 448 s fail | **12.3 s seal** (att 11 / v4, ae9d0d98fa72) |
+| 6357… std | 10.8 s fail | 80 s fail | **16.3 s seal** (att 5 / v3, 3ee735d9d6bf) |
+| 3613… std | 175 s seal | 20 s seal | 19.5 s seal (same town, 24122fd46b32) |
+| 7 std | 9.2 s seal | 10.8 s seal | 10.8 s seal (identical, 707e0d22b2a8) |
+
+**Seal rate 2/9 → 8/9; every sealing town in 6–24 s; total 191 s** (vs
+1,236 s under sightlines-only guidance and 438 s under A0). The towns were
+composable all along; the thresholds were the wall. Enclosure/density now
+rests on the ranking terms and on Ryan's visual review of what seals.
+
+---
+
+*Harness: `tests/harness/profile_startup_pipeline.gd` (new). Run:*
+```
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/ryko/story \
+  -s res://tests/harness/profile_startup_pipeline.gd -- --radius=2 --grass
+```
+*Use a scratch `HOME` to avoid touching the real pin cache; `--seed=N` to vary.*

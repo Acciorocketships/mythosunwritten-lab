@@ -694,10 +694,10 @@ func _a_village_straddling_a_chunk_border_is_the_same_either_way_round(
 
 	# Two independent stacks for the same seed, each meshing the two chunks in
 	# the opposite order to the other.
-	var ahead := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var ahead := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var ahead_first := ahead.build(first.x, first.y)
 	var ahead_second := ahead.build(second.x, second.y)
-	var behind := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var behind := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var behind_second := behind.build(second.x, second.y)
 	var behind_first := behind.build(first.x, first.y)
 
@@ -725,7 +725,7 @@ func _a_village_straddling_a_chunk_border_is_the_same_either_way_round(
 ## those two chunks. Empty when there is none, which the caller reports.
 func _straddling_village(villages: Array[Settlement]) -> Dictionary:
 	for site in villages:
-		var here := TerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
+		var here := SimTerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
 		var west := Vector2i(here.x - 1, here.y)
 		if _village_reaches_chunk(site, here) and _village_reaches_chunk(site, west):
 			return {"site": site, "first": here, "second": west}
@@ -734,7 +734,7 @@ func _straddling_village(villages: Array[Settlement]) -> Dictionary:
 
 ## Whether any of a village's levelled ground falls inside a chunk.
 func _village_reaches_chunk(site: Settlement, key: Vector2i) -> bool:
-	return TerrainChunkMesher.distance_to_chunk(key, site.centre_x, site.centre_z) \
+	return SimTerrainChunkMesher.distance_to_chunk(key, site.centre_x, site.centre_z) \
 		< site.core_radius
 
 
@@ -1194,8 +1194,8 @@ func _crosses_water(terrain: TerrainQuery, road: Dictionary) -> bool:
 # --- The water invariant --------------------------------------------------
 
 func _the_layer_never_creates_or_destroys_water(terrain: TerrainQuery) -> void:
-	var bare := WaterField.new(
-		TerrainSurfaceField.new(SEED), BiomeField.new(SEED)
+	var bare := SimWaterField.new(
+		SimTerrainSurfaceField.new(SEED), BiomeField.new(SEED)
 	)
 	# Two squares, because one cannot answer both halves of the claim any more.
 	# The square on the origin is where the villages and the roads are, so it is
@@ -1222,7 +1222,7 @@ func _the_layer_never_creates_or_destroys_water(terrain: TerrainQuery) -> void:
 
 ## One 360-unit square of the water invariant, as {dry, wet, moved}.
 func _water_invariant_over(
-	terrain: TerrainQuery, bare: WaterField, middle: Vector2
+	terrain: TerrainQuery, bare: SimWaterField, middle: Vector2
 ) -> Dictionary:
 	var dry := 0
 	var wet := 0

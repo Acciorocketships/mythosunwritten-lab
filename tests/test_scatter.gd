@@ -133,8 +133,8 @@ func _chunks_of_biome(terrain: TerrainQuery, biome: String, wanted: int) -> Arra
 			for chunk_z in range(-ring, ring + 1):
 				if maxi(absi(chunk_x), absi(chunk_z)) != ring:
 					continue
-				var middle_x := (float(chunk_x) + 0.5) * TerrainChunkMesher.CHUNK_SIZE
-				var middle_z := (float(chunk_z) + 0.5) * TerrainChunkMesher.CHUNK_SIZE
+				var middle_x := (float(chunk_x) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
+				var middle_z := (float(chunk_z) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
 				if terrain.biome_at(middle_x, middle_z) != biome:
 					continue
 				found.append(Vector2i(chunk_x, chunk_z))
@@ -583,7 +583,7 @@ func _nothing_stands_in_a_building_or_in_a_cart_track(
 	check(not villages.is_empty(), "expected a village within reach of the origin")
 	var chunks := []
 	for site in villages:
-		var middle := TerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
+		var middle := SimTerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
 		for offset_x in range(-2, 3):
 			for offset_z in range(-2, 3):
 				chunks.append(Vector2i(middle.x + offset_x, middle.y + offset_z))
@@ -688,7 +688,7 @@ func _yard_props_only_stand_beside_a_building(
 	var villages := terrain.settlement_field.settlements_near(0.0, 0.0, 700.0)
 	var chunks := []
 	for site in villages:
-		var middle := TerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
+		var middle := SimTerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
 		for offset_x in range(-2, 3):
 			for offset_z in range(-2, 3):
 				chunks.append(Vector2i(middle.x + offset_x, middle.y + offset_z))

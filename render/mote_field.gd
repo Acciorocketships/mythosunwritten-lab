@@ -236,7 +236,7 @@ func view() -> MultiMeshInstance3D:
 
 ## How thickly a biome carries motes, in [0, 1]. A pure function of the profile,
 ## so a test can state the rule and check the five named biomes against it.
-static func density_for(profile: BiomeProfile) -> float:
+static func density_for(profile: SimBiomeProfile) -> float:
 	var gloom := clampf(profile.fog_density / GLOOM_FULL, 0.0, 1.0)
 	return clampf(
 		DENSITY_FLOOR
@@ -248,7 +248,7 @@ static func density_for(profile: BiomeProfile) -> float:
 
 ## How brightly a mote burns in a biome. The gloomier the air, the more of the
 ## light in the scene a firefly is.
-static func brightness_for(profile: BiomeProfile) -> float:
+static func brightness_for(profile: SimBiomeProfile) -> float:
 	var gloom := clampf(profile.fog_density / GLOOM_FULL, 0.0, 1.0)
 	return lerpf(BRIGHT_MIN, BRIGHT_MAX, gloom)
 
@@ -256,7 +256,7 @@ static func brightness_for(profile: BiomeProfile) -> float:
 ## Take the biome's mood. Changing how many motes are drawn is one integer on
 ## the multimesh -- nothing is rebuilt, nothing is re-hashed, and the motes that
 ## stay drawn do not so much as blink, because the pool was laid out shuffled.
-func take(profile: BiomeProfile) -> void:
+func take(profile: SimBiomeProfile) -> void:
 	_density = density_for(profile)
 	_brightness = brightness_for(profile)
 	_material.set_shader_parameter("brightness", _brightness)

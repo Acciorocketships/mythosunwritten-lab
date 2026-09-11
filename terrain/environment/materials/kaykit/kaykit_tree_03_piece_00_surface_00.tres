@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b0ce3fpqrm0x8"]
+
+[ext_resource type="Texture2D" path="res://terrain/environment/textures/kaykit/db6c409d41d895cfc2ac.res" id="1_md05y"]
+[ext_resource type="Shader" path="res://terrain/environment/materials/biome_canopy.gdshader" id="2_canopy"]
+
+[resource]
+shader = ExtResource("2_canopy")
+shader_parameter/albedo_texture = ExtResource("1_md05y")

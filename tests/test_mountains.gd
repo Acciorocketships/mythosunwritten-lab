@@ -8,7 +8,7 @@ extends TestSuite
 ##    against a remembered number, so the claim is about the arithmetic and not
 ##    about a fixture.
 ## 2. **The uplift is exactly zero outside a range.** Not nearly zero:
-##    `TerrainSurfaceField.height_at` returns the identical float it would have
+##    `SimTerrainSurfaceField.height_at` returns the identical float it would have
 ##    returned with no mountain layer at all. That is what makes "the ground far
 ##    away carries the relief it carries today" checkable rather than arguable.
 ## 3. **The rocky axis drives it.** Highland ground stands far higher than
@@ -135,8 +135,8 @@ func _the_uplift_is_a_pure_function() -> void:
 	# And the whole surface inherits it: a surface handed the biome map and one
 	# left to build its own answer the same, because a biome field for a seed is
 	# the same field however it was reached.
-	var shared := TerrainSurfaceField.new(SEED, BiomeField.new(SEED))
-	var alone := TerrainSurfaceField.new(SEED)
+	var shared := SimTerrainSurfaceField.new(SEED, BiomeField.new(SEED))
+	var alone := SimTerrainSurfaceField.new(SEED)
 	for probe in probes:
 		equal(shared.height_at(probe.x, probe.y), alone.height_at(probe.x, probe.y),
 			"a surface given a biome field disagrees with one that built its own"
@@ -148,7 +148,7 @@ func _the_uplift_is_a_pure_function() -> void:
 ## alone; multiplying by 0.0001 does not, and "the far ground is unchanged"
 ## would then be a claim about rounding.
 func _the_mask_is_exactly_zero_outside_a_range() -> void:
-	var field := TerrainSurfaceField.new(SEED)
+	var field := SimTerrainSurfaceField.new(SEED)
 	var shut := 0
 	var open := 0
 	for index in 2000:
@@ -174,7 +174,7 @@ func _the_mask_is_exactly_zero_outside_a_range() -> void:
 ## of world, most of the ground has to be exactly as tall as it was.
 func _the_uplift_is_regional() -> void:
 	for seed_value in [SEED, OTHER_SEED, 42]:
-		var field := TerrainSurfaceField.new(seed_value)
+		var field := SimTerrainSurfaceField.new(seed_value)
 		var lifted := 0
 		var samples := 0
 		for row in 61:

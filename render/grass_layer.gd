@@ -57,7 +57,7 @@ const PATCH_SPAN := 1.9
 const LATTICE := 28
 
 ## World units between candidates.
-const CELL := TerrainChunkMesher.CHUNK_SIZE / float(LATTICE)
+const CELL := SimTerrainChunkMesher.CHUNK_SIZE / float(LATTICE)
 
 ## How far off its cell's centre a patch may sit, as a share of half a cell.
 ## Below 1 so that two neighbours can never swap places, which would show as a
@@ -901,15 +901,15 @@ const HASH_MASK := 0xFFFFFFFF
 ## the slope and the buildings are only asked about the ones that survive it.
 func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 	chunks_built += 1
-	var origin_x := float(geometry.chunk_x) * TerrainChunkMesher.CHUNK_SIZE
-	var origin_z := float(geometry.chunk_z) * TerrainChunkMesher.CHUNK_SIZE
+	var origin_x := float(geometry.chunk_x) * SimTerrainChunkMesher.CHUNK_SIZE
+	var origin_z := float(geometry.chunk_z) * SimTerrainChunkMesher.CHUNK_SIZE
 
 	# The biome's share of the chunk, asked once per corner. The weights are what
 	# is asked for rather than the blended profile, because this layer wants two
 	# different averages of them -- its own grass coverage, which the profile
 	# does not carry, and the foliage tint, which it does -- and weighting them
 	# both here is one sample rather than two.
-	var profile_step := TerrainChunkMesher.CHUNK_SIZE / float(PROFILE_SIDE - 1)
+	var profile_step := SimTerrainChunkMesher.CHUNK_SIZE / float(PROFILE_SIDE - 1)
 	var density := PackedFloat32Array()
 	var leaf := PackedColorArray()
 	for row in PROFILE_SIDE:
@@ -923,7 +923,7 @@ func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 
 	# The clearing mask over the chunk, on a grid of its own. Arithmetic only --
 	# no terrain query -- so this is the one field the layer can afford finely.
-	var mask_step := TerrainChunkMesher.CHUNK_SIZE / float(MASK_SIDE - 1)
+	var mask_step := SimTerrainChunkMesher.CHUNK_SIZE / float(MASK_SIDE - 1)
 	var mask := PackedFloat32Array()
 	for row in MASK_SIDE:
 		for column in MASK_SIDE:
@@ -933,7 +933,7 @@ func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 				_world_seed
 			))
 
-	var field_step := TerrainChunkMesher.CHUNK_SIZE / float(FIELD_SIDE - 1)
+	var field_step := SimTerrainChunkMesher.CHUNK_SIZE / float(FIELD_SIDE - 1)
 	var water_level := PackedFloat32Array()
 	var road := PackedFloat32Array()
 	for row in FIELD_SIDE:
@@ -949,8 +949,8 @@ func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 	# everywhere there is not, and the question is skipped entirely.
 	var built_on := _settled_near(origin_x, origin_z)
 
-	var cells := TerrainChunkMesher.CELLS
-	var cell_size := TerrainChunkMesher.CELL_SIZE
+	var cells := SimTerrainChunkMesher.CELLS
+	var cell_size := SimTerrainChunkMesher.CELL_SIZE
 	var salt_one := _world_seed ^ 0x6C7A55
 	var salt_two := _world_seed ^ 0x33D9E7
 
@@ -1152,9 +1152,9 @@ func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 	view.custom_aabb = AABB(
 		Vector3(origin_x - margin, geometry.lowest - 1.0, origin_z - margin),
 		Vector3(
-			TerrainChunkMesher.CHUNK_SIZE + margin * 2.0,
+			SimTerrainChunkMesher.CHUNK_SIZE + margin * 2.0,
 			geometry.highest - geometry.lowest + lift,
-			TerrainChunkMesher.CHUNK_SIZE + margin * 2.0
+			SimTerrainChunkMesher.CHUNK_SIZE + margin * 2.0
 		)
 	)
 	return view
@@ -1628,7 +1628,7 @@ func _leaf_on_grid(
 ## question is worth asking at all. Sampled at the corners and the middle,
 ## widened by the margin, which is what a pad has to miss all of to be absent.
 func _settled_near(origin_x: float, origin_z: float) -> bool:
-	var size := TerrainChunkMesher.CHUNK_SIZE
+	var size := SimTerrainChunkMesher.CHUNK_SIZE
 	for offset in [
 		Vector2(0.0, 0.0), Vector2(size, 0.0), Vector2(0.0, size), Vector2(size, size),
 		Vector2(size * 0.5, size * 0.5),

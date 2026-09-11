@@ -435,7 +435,7 @@ var world_seed: int = 0
 ## the same ground anything walks on -- so an island over a river valley is
 ## measured against the valley floor rather than against the land before the
 ## river cut it.
-var water: WaterField = null
+var water: SimWaterField = null
 
 ## Which biome the ground below an island is, which is the biome the island
 ## takes its colours from.
@@ -461,7 +461,7 @@ var _memo := {}
 var _candidate_memo := {}
 
 
-func _init(water_field: WaterField = null, biome_field: BiomeField = null) -> void:
+func _init(water_field: SimWaterField = null, biome_field: BiomeField = null) -> void:
 	water = water_field
 	world_seed = water_field.world_seed if water_field != null else 0
 	biomes = biome_field if biome_field != null else BiomeField.new(world_seed)

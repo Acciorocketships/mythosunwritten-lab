@@ -227,8 +227,8 @@ func _report() -> void:
 		chunk_loaded += multimesh.instance_count
 		var shown := multimesh.visible_instance_count
 		chunk_drawn += multimesh.instance_count if shown < 0 else shown
-	var chunk_area := float(chunks) * TerrainChunkMesher.CHUNK_SIZE \
-		* TerrainChunkMesher.CHUNK_SIZE
+	var chunk_area := float(chunks) * SimTerrainChunkMesher.CHUNK_SIZE \
+		* SimTerrainChunkMesher.CHUNK_SIZE
 
 	print("measured at         (%.1f, %.1f), seed %d" % [
 		world.observer_x, world.observer_z, world.world_seed,

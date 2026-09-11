@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://bqh0d85oga6fa"]
+
+[resource]
+resource_name = "SFT_TRANSPARENT"
+vertex_color_use_as_albedo = true
+emission_enabled = true

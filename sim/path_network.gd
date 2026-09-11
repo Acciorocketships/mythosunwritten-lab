@@ -164,7 +164,7 @@ var world_seed: int = 0
 var settlements: SettlementField = null
 
 ## The water a road may have to cross, and the ground it is carved into.
-var water: WaterField = null
+var water: SimWaterField = null
 
 # Vector2i tile -> PackedVector2Array of segment endpoints, in pairs.
 var _tiles := {}
@@ -173,7 +173,7 @@ var _tiles := {}
 var _edges := {}
 
 
-func _init(settlement_field: SettlementField = null, water_field: WaterField = null) -> void:
+func _init(settlement_field: SettlementField = null, water_field: SimWaterField = null) -> void:
 	settlements = settlement_field
 	water = water_field if water_field != null else settlement_field.water
 	world_seed = water.world_seed if water != null else 0

@@ -1,0 +1,233 @@
+extends GutTest
+
+const CORE := Rect2(Vector2.ZERO, Vector2.ONE * 192.0)
+
+func _feature_context(surface_rects: Array[Rect2],
+		clearance_rects: Array[Rect2], limit: float) -> FeatureContext:
+	var surfaces: Array[FeatureGroundShape] = []
+	var clearances: Array[FeatureGroundShape] = []
+	for rect: Rect2 in surface_rects:
+		surfaces.append(FeatureGroundShape.axis_rect(rect,
+			FeatureGroundField.WORN_PATH))
+	for rect: Rect2 in clearance_rects:
+		clearances.append(FeatureGroundShape.axis_rect(rect))
+	var ground := FeatureGroundField.new(surfaces, clearances, limit)
+	return FeatureContext.new(CORE, ground, EnvironmentInstancePayload.new())
+
+func _program() -> DressingProgram:
+	var index := load("res://terrain/dressing/index.tres") as DressingCatalogIndex
+	return DressingCompiler.compile(index, EnvironmentCatalog.load_default())
+
+func _dry_context(region: HeightfieldRegion, coverage: Rect2,
+		shore_limit: float) -> WaterFieldContext:
+	var context := WaterFieldContext.new()
+	context._ctx = {"ponds": [], "rivers": [], "buckets": {}, "region": region}
+	context._region = region
+	context._coverage = coverage
+	context._shore_limit = shore_limit
+	return context
+
+func _signature(payload: EnvironmentInstancePayload, filter_rect: Rect2 = Rect2()) -> Array:
+	var out: Array = []
+	for asset_id: StringName in payload.asset_ids():
+		var batch: Dictionary = payload.batches[asset_id]
+		for index in batch.transforms.size():
+			var transform: Transform3D = batch.transforms[index]
+			var point := Vector2(transform.origin.x, transform.origin.z)
+			if filter_rect.has_area() and not (point.x >= filter_rect.position.x \
+					and point.y >= filter_rect.position.y and point.x < filter_rect.end.x \
+					and point.y < filter_rect.end.y):
+				continue
+			out.append([String(asset_id), transform, batch.colors[index]])
+	out.sort_custom(func(a: Array, b: Array) -> bool:
+		if a[0] != b[0]:
+			return a[0] < b[0]
+		var ao: Vector3 = (a[1] as Transform3D).origin
+		var bo: Vector3 = (b[1] as Transform3D).origin
+		return ao.x < bo.x if ao.x != bo.x else ao.z < bo.z)
+	return out
+
+func test_compiler_produces_resource_free_bounded_program() -> void:
+	var program := _program()
+	assert_not_null(program)
+	assert_eq(program.sets.size(), 10)
+	assert_false(&"kaykit.grass.01" in program.referenced_asset_ids,
+		"dense GrassField is the sole runtime owner of grass ground cover")
+	assert_lte(program.maximum_spacing_radius, DressingCompiler.LOCAL_SPACING_CAP)
+	assert_gt(program.query_margin, program.maximum_spacing_radius)
+	assert_gte(program.feature_query_margin, program.query_margin,
+		"full visual reservations have independent complete coverage")
+	assert_almost_eq(program.maximum_feature_clearance, 2.0, 0.001)
+	assert_lte(program.query_margin + program.shore_distance_limit,
+		WaterField.FILL_MARGIN * WaterField.FILL_STEP - WaterContour.MARGIN,
+		"compiled dressing is guaranteed to fit its canonical water context")
+	assert_gt(program.estimated_proposals_per_chunk, 0)
+	for index in 9:
+		assert_true(StringName("lpfv.tree.%02d" % (index + 1)) in program.referenced_asset_ids)
+	assert_false(&"lpfv.tree.10" in program.referenced_asset_ids)
+	assert_false(&"lpfv.tree.blossom_01" in program.referenced_asset_ids)
+	for asset_id: StringName in [&"lpfv.mushroom.01", &"lpfv.flower.01",
+			&"lpfv.reeds.01", &"lpfv.log.01", &"lpfv.big_rock.01",
+			&"sfv.lily_pad.01"]:
+		assert_true(asset_id in program.referenced_asset_ids,
+			"nature wave asset is active: %s" % asset_id)
+	for set_data: Dictionary in program.sets:
+		assert_gte(float(set_data.feature_clearance), 0.0)
+		assert_false(_contains_resource(set_data), "compiled sets contain primitive worker data only")
+		for choice: Dictionary in set_data.choices:
+			var descriptor := EnvironmentCatalog.load_default().descriptor(choice.asset_id)
+			assert_gt(choice.feature_footprint_half_extents.x, 0.0,
+				"every visual has a projected feature footprint")
+			assert_gt(choice.feature_footprint_half_extents.y, 0.0,
+				"every visual has a projected feature footprint")
+			if descriptor.collision_piece_count <= 0:
+				continue
+			assert_false(choice.support_points.is_empty(),
+				"collidable %s has an automatic visible support stencil" % choice.asset_id)
+			assert_gt(float(program.ground_radius_by_asset[choice.asset_id]), 0.0)
+			assert_eq(program.ground_stencil_by_asset[choice.asset_id],
+				choice.support_points,
+				"the runtime grass mask reuses the qualified visual outline")
+
+func test_visible_support_stencil_rejects_a_collidable_asset_across_a_cliff() -> void:
+	var storeys: Dictionary = {}
+	var levels: Dictionary = {}
+	for z in range(-4, 5):
+		for x in range(-4, 5):
+			storeys[Vector2i(x, z)] = 1 if x >= 0 else 0
+			levels[Vector2i(x, z)] = 0
+	var region := HeightfieldRegion.new(storeys, levels)
+	var water := _dry_context(region, Rect2(Vector2(-96, -96), Vector2(192, 192)), 0.0)
+	var set_data := {
+		"surface_mode": DressingSet.SurfaceMode.GROUND_POINT,
+		"water_mode": DressingSet.WaterMode.LAND,
+		"shore_range": Vector2.ZERO,
+		"support_radius": 0.0,
+		"max_support_height_span": DressingCompiler.AUTO_SUPPORT_HEIGHT_SPAN,
+		"max_grade": 1.0,
+		"feature_clearance": 0.0,
+	}
+	var anchor := Vector2(-13.0, 12.0)
+	var choice := {"support_points": PackedVector2Array([Vector2(5.0, 0.0)])}
+	assert_true(DressingField._qualify(set_data, anchor, region, water).has("y"),
+		"a point-only placement would incorrectly accept its grounded origin")
+	assert_true(DressingField._qualify(set_data, anchor, region, water, null,
+		choice, Basis.IDENTITY).is_empty(),
+		"the same placement is rejected when its visible base crosses the drop")
+
+func test_full_visual_footprint_rejects_canopy_over_authored_space() -> void:
+	var storeys: Dictionary = {}
+	var levels: Dictionary = {}
+	for z in range(-4, 5):
+		for x in range(-4, 5):
+			storeys[Vector2i(x, z)] = 0
+			levels[Vector2i(x, z)] = 0
+	var region := HeightfieldRegion.new(storeys, levels)
+	var water := _dry_context(region, Rect2(Vector2(-96, -96),
+		Vector2(192, 192)), 0.0)
+	var features := _feature_context([], [Rect2(Vector2(4.0, -0.5),
+		Vector2(1.0, 1.0))], 2.0)
+	var set_data := {
+		"surface_mode": DressingSet.SurfaceMode.GROUND_POINT,
+		"water_mode": DressingSet.WaterMode.LAND,
+		"shore_range": Vector2.ZERO,
+		"support_radius": 0.0,
+		"max_support_height_span": DressingCompiler.AUTO_SUPPORT_HEIGHT_SPAN,
+		"max_grade": 1.0,
+		"feature_clearance": 0.0,
+	}
+	var anchor := Vector2.ZERO
+	var broad_canopy := {
+		"feature_footprint_centre": Vector2.ZERO,
+		"feature_footprint_half_extents": Vector2(6.0, 3.0),
+	}
+	assert_true(DressingField._qualify(set_data, anchor, region, water,
+		null).has("y"), "an origin-only query misses the enclosed reservation")
+	assert_true(DressingField._qualify(set_data, anchor, region, water,
+		features, broad_canopy, Basis.IDENTITY).is_empty(),
+		"the continuous visual footprint rejects a reservation enclosed by canopy")
+
+func test_path_reservation_rejects_every_population_including_zero_margin() -> void:
+	var plan := HeightfieldPlan.new(4242, 1.0, 1, "mean")
+	var region := plan.compute_region(4, 4, 12)
+	var program := _program()
+	var water := _dry_context(region, CORE.grow(program.query_margin + 2.0),
+		program.shore_distance_limit)
+	var features := _feature_context([CORE], [CORE],
+		program.maximum_feature_clearance)
+	var payload := DressingField.compute(program, 4242, CORE, region, water,
+		features)
+	assert_eq(payload.instance_count, 0,
+		"zero clearance still rejects the reservation interior")
+
+func test_field_is_deterministic_grounded_and_half_open() -> void:
+	var plan := HeightfieldPlan.new(4242, 40.0, 8, "mean")
+	var region := plan.compute_region(4, 4, 12)
+	var program := _program()
+	var water := _dry_context(region, CORE.grow(program.query_margin + 2.0),
+		program.shore_distance_limit)
+	var a := DressingField.compute(program, 4242, CORE, region, water)
+	var b := DressingField.compute(program, 4242, CORE, region, water)
+	assert_eq(_signature(a), _signature(b))
+	assert_gt(a.instance_count, 0)
+	for asset_id: StringName in a.asset_ids():
+		for transform: Transform3D in a.batches[asset_id].transforms:
+			assert_gte(transform.origin.x, CORE.position.x)
+			assert_lt(transform.origin.x, CORE.end.x)
+			assert_gte(transform.origin.z, CORE.position.y)
+			assert_lt(transform.origin.z, CORE.end.y)
+			assert_almost_eq(transform.origin.y,
+				TerrainSurfaceField.surface_y(region, transform.origin.x, transform.origin.z),
+				0.001, "grounding uses the final jittered anchor")
+			assert_gt(DressingEcology.land_occupancy01(
+				Vector2(transform.origin.x, transform.origin.z), 4242), 0.0,
+				"no land dressing can occupy a clearing or path centre")
+
+func test_shifted_chunk_windows_produce_the_same_border_decisions() -> void:
+	var union := Rect2(Vector2.ZERO, Vector2(384.0, 192.0))
+	var left := Rect2(Vector2.ZERO, Vector2(192.0, 192.0))
+	var right := Rect2(Vector2(192.0, 0.0), Vector2(192.0, 192.0))
+	var plan := HeightfieldPlan.new(991177, 32.0, 8, "mean")
+	var region := plan.compute_region(8, 4, 20)
+	var program := _program()
+	var water := _dry_context(region, union.grow(program.query_margin + 2.0),
+		program.shore_distance_limit)
+	var left_payload := DressingField.compute(program, 991177, left, region, water)
+	var right_payload := DressingField.compute(program, 991177, right, region, water)
+	var union_payload := DressingField.compute(program, 991177, union, region, water)
+	assert_eq(_signature(left_payload), _signature(union_payload, left),
+		"left chunk decisions do not depend on the query window")
+	assert_eq(_signature(right_payload), _signature(union_payload, right),
+		"right chunk decisions do not depend on the query window")
+
+func test_tree_spacing_is_enforced_across_visual_variants() -> void:
+	var plan := HeightfieldPlan.new(7, 24.0, 8, "mean")
+	var region := plan.compute_region(4, 4, 12)
+	var program := _program()
+	var water := _dry_context(region, CORE.grow(program.query_margin + 2.0),
+		program.shore_distance_limit)
+	var payload := DressingField.compute(program, 7, CORE, region, water)
+	var trees: Array[Vector2] = []
+	for asset_id: StringName in payload.asset_ids():
+		if not String(asset_id).contains("tree"):
+			continue
+		for transform: Transform3D in payload.batches[asset_id].transforms:
+			trees.append(Vector2(transform.origin.x, transform.origin.z))
+	for i in trees.size():
+		for j in range(i + 1, trees.size()):
+			assert_gte(trees[i].distance_to(trees[j]), 4.0 - 0.0001,
+				"one tree population spaces every visual choice together")
+
+static func _contains_resource(value: Variant) -> bool:
+	if value is Resource or value is Node or value is Mesh or value is Material \
+			or value is Texture2D or value is PackedScene or value is Shape3D:
+		return true
+	if value is Array:
+		for item: Variant in value:
+			if _contains_resource(item):
+				return true
+	elif value is Dictionary:
+		for item: Variant in value.values():
+			if _contains_resource(item):
+				return true
+	return false

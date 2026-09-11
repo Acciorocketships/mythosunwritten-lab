@@ -174,7 +174,7 @@ func biome_at(x: float, z: float) -> String:
 ## detached value that no one else holds a reference to. Colours, fog, ambient
 ## light and foliage density are all weighted averages, which is why walking
 ## across a border shifts the mood gradually instead of switching it.
-func profile_at(x: float, z: float) -> BiomeProfile:
+func profile_at(x: float, z: float) -> SimBiomeProfile:
 	return BiomeCatalog.blend(weights_at(x, z))
 
 

@@ -118,9 +118,9 @@ func run() -> void:
 
 
 func _new_field(seed_value: int) -> IslandField:
-	var surface := TerrainSurfaceField.new(seed_value)
+	var surface := SimTerrainSurfaceField.new(seed_value)
 	var biomes := BiomeField.new(seed_value)
-	return IslandField.new(WaterField.new(surface, biomes), biomes)
+	return IslandField.new(SimWaterField.new(surface, biomes), biomes)
 
 
 ## Every walkable island in a square of cells around the origin, in a fixed

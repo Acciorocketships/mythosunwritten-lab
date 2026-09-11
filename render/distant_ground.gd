@@ -63,7 +63,7 @@ const CELLS := 8
 const LEVELS := 5
 
 ## World units along one side of a level-1 tile: two simulation chunks.
-const BASE_TILE := TerrainChunkMesher.CHUNK_SIZE * 2.0
+const BASE_TILE := SimTerrainChunkMesher.CHUNK_SIZE * 2.0
 
 ## How many tiles out from the observer's own each level draws, as a Chebyshev
 ## radius, so a level covers a (2r+1) square of its tiles.

@@ -71,7 +71,7 @@ written down below; the lighting stack is a later one:
   position* rather than from a random stream, because a stream's numbers depend
   on how many were drawn before them — two chunks covering the same ground would
   then disagree about it. Every continuous field in the stack is made of this.
-* **`TerrainSurfaceField`** — how high the land is at a world position, before
+* **`SimTerrainSurfaceField`** — how high the land is at a world position, before
   water is cut out of it. It is a pure function of that position and the world
   seed: it stores nothing that sampling changes, it does not know that chunks
   exist, and it never looks at a clock.
@@ -82,7 +82,7 @@ written down below; the lighting stack is a later one:
   a position, what you would be standing on coming from a given height, and
   whether there is anything there at all. It decides nothing; every answer is a
   field's answer, forwarded or combined.
-* **`TerrainChunkMesher`** — turns a square of those fields into triangles. It
+* **`SimTerrainChunkMesher`** — turns a square of those fields into triangles. It
   carries nothing between chunks, so a chunk's geometry is the same whether it
   was the first built or the thousandth. Corner positions are computed from the
   world origin rather than from a neighbour, so two chunks meet exactly along
@@ -139,7 +139,7 @@ Three continuous fields are sampled per world position — how wooded the land i
 how rocky, how wet — plus a fourth, sparse field that carves out twilight marsh
 pockets. `BiomeField` resolves them into the five named biomes of the design:
 meadow, deep forest, highland, blossom grove and twilight marsh. Each name
-carries a **profile** (`BiomeProfile`): ground, tree and rock tint, fog colour
+carries a **profile** (`SimBiomeProfile`): ground, tree and rock tint, fog colour
 and density, a sky gradient, ambient colour, foliage density, and the set of prop
 tags allowed there. A profile is plain numbers — no meshes, no materials, nothing
 the renderer owns.

@@ -23,7 +23,7 @@ const LOAD_RADIUS := 40.0
 ## than LOAD_RADIUS.
 const UNLOAD_RADIUS := 56.0
 
-var mesher: TerrainChunkMesher = null
+var mesher: SimTerrainChunkMesher = null
 
 ## How many chunks have ever been built, including rebuilds. Diagnostic only --
 ## nothing in the world's state depends on it.
@@ -38,7 +38,7 @@ var handles_handed_out: int = 0
 var _loaded := {}
 
 
-func _init(chunk_mesher: TerrainChunkMesher = null) -> void:
+func _init(chunk_mesher: SimTerrainChunkMesher = null) -> void:
 	mesher = chunk_mesher
 
 
@@ -102,14 +102,14 @@ func live_geometry(key: Vector2i) -> TerrainChunkGeometry:
 
 
 func _load_around(observer: Vector2) -> void:
-	var reach := int(ceil(LOAD_RADIUS / TerrainChunkMesher.CHUNK_SIZE)) + 1
-	var centre := TerrainChunkMesher.chunk_at(observer.x, observer.y)
+	var reach := int(ceil(LOAD_RADIUS / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
+	var centre := SimTerrainChunkMesher.chunk_at(observer.x, observer.y)
 	for offset_x in range(-reach, reach + 1):
 		for offset_z in range(-reach, reach + 1):
 			var key := Vector2i(centre.x + offset_x, centre.y + offset_z)
 			if _loaded.has(key):
 				continue
-			if TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > LOAD_RADIUS:
+			if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > LOAD_RADIUS:
 				continue
 			_loaded[key] = mesher.build(key.x, key.y)
 			chunks_built += 1
@@ -120,7 +120,7 @@ func _unload_far_from(observers: Array[Vector2]) -> void:
 	for key in _loaded:
 		var nearest := INF
 		for observer in observers:
-			nearest = minf(nearest, TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y))
+			nearest = minf(nearest, SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y))
 		if nearest > UNLOAD_RADIUS:
 			dropped.append(key)
 	for key in dropped:

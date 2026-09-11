@@ -57,7 +57,7 @@ func _initialize() -> void:
 		chunk_vertices += geometry.vertices.size()
 		chunk_triangles += geometry.triangle_count()
 	print("lod-measure near radius=%.0f chunks=%d cell=%.1f tris=%d kib=%.1f build_ms %s" % [
-		TerrainStreamer.LOAD_RADIUS, loaded.size(), TerrainChunkMesher.CELL_SIZE,
+		TerrainStreamer.LOAD_RADIUS, loaded.size(), SimTerrainChunkMesher.CELL_SIZE,
 		chunk_triangles, float(chunk_vertices * VERTEX_BYTES) / 1024.0,
 		_spread(chunk_times),
 	])
@@ -93,8 +93,8 @@ func _initialize() -> void:
 
 	var radius := DistantGround.guaranteed_radius()
 	var uniform_chunks := int(PI * radius * radius
-		/ (TerrainChunkMesher.CHUNK_SIZE * TerrainChunkMesher.CHUNK_SIZE))
-	var uniform_triangles := uniform_chunks * TerrainChunkMesher.CELLS * TerrainChunkMesher.CELLS * 2
+		/ (SimTerrainChunkMesher.CHUNK_SIZE * SimTerrainChunkMesher.CHUNK_SIZE))
+	var uniform_triangles := uniform_chunks * SimTerrainChunkMesher.CELLS * SimTerrainChunkMesher.CELLS * 2
 	print("lod-measure after radius=%.0f pieces=%d tris=%d kib=%.1f fill_ms=%.0f" % [
 		radius, loaded.size() + lod.wanted().size(),
 		chunk_triangles + far_triangles,

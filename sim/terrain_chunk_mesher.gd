@@ -21,7 +21,7 @@ extends RefCounted
 ## builds is the ground every other layer will be told about -- including the
 ## water's carving, which reaches the geometry as a dip in the height rather
 ## than as anything the mesher knows about.
-class_name TerrainChunkMesher
+class_name SimTerrainChunkMesher
 
 ## World units along one side of a chunk.
 const CHUNK_SIZE := 16.0

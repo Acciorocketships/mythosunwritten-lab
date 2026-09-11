@@ -1,0 +1,2253 @@
+> September 10 repository consolidation: `main` continues the September 5 evening
+> village-review branch and its September 5–9 working implementation. The atmosphere
+> and water/travel histories are integrated without replacing that later work.
+> Bulk manual render sequences remain ignored local QA artifacts; reports, numeric
+> evidence, fixtures and harnesses are versioned. See
+> `docs/branch-consolidation-2026-09-10.md` for branch decisions, recovery paths and
+> validation limits. Consolidation does not resolve the documented baseline
+> cliff, cold-start, composition and historical-water failures.
+
+> September 8 night manual review (completed September 9): all 18 reported
+> issues plus photo 19's window/pillar detail were handled individually with
+> before/after game renders, nearby views, pixel differences and relevant
+> physical/field regressions. Evidence is indexed at
+> `/Users/ryko/Documents/Codex/2026-09-08/i-did-a-manual-judging-pass/outputs/verification-index.md`.
+> The source overlays round coordinates to 0.1 m: replay cameras match each
+> other, but the original full-precision camera cannot be recovered. These
+> reports establish the photographed fixes, not a globally green test suite;
+> known baseline cliff, cold-start, composition and water failures are recorded
+> separately in the final validation report.
+>
+> Native facade end ownership now distinguishes a measured retaining miter
+> from a room miter. The offline baker handles unindexed source triangles,
+> closes the referenced cut faces and removes only explicitly shared jetty
+> ends. Floor subtraction assigns coincident boundaries to one owner using a
+> 1 micrometre classification tolerance without moving source vertices. A cap
+> wholly owned by a room floor emits no remainder; test censuses must verify
+> the real floor triangles before crediting that logical boundary. Window 010
+> explicitly opts into fitting its complete panel into a deep doorway return;
+> bake version 31 preserves its height, relief and UVs before ordinary joints.
+>
+> Shallow outcrops use their actual supported projection. Flower anchors sit
+> above the soil inside their reserved planter. Stair guards subtract the
+> completed wall envelope, including hanging courses; exposed portions retain
+> collision. Ends receive taller posts and each face has nondegenerate UVs.
+> Terminal rising flights reserve a supported 2-by-2-cell overlook, including
+> its headroom, before later construction. Raised exterior entrances reserve
+> the complete flight and clear approach before selecting their direction.
+>
+> The long bridge's authored collision follows its arch and preserves the
+> bank handoff under longitudinal scaling. Swimming aborts an active jump
+> one-shot so the underlying animation continues. Roadside lamps sample the
+> final graded ground at their declared contact. Complete-house path contacts
+> distinguish the real porch toe from the entrance and support rectangle.
+> House 001 keeps its native door leaf posed open around its authored hinge;
+> its baked collision leaves the doorway traversable.
+>
+> Streaming rebases urgency from physical proximity and bounded velocity
+> lookahead. Terrain requests publish feature-halo dependencies immediately;
+> those dependencies inherit their waiting terrain's urgency and can finish
+> separately from distant terrain work. Fine-grid vertex reuse and conservative
+> local path samplers preserve geometry and collision. Both reported running
+> approaches cross with zero frozen frames; the unrelated 60-second cold-start
+> test still fails in the preserved baseline.
+>
+> Sub-lattice water rescue uses untapered hydraulic levels and a fixed one-ring
+> witness from originally wet coarse nodes. Complete source-fill extents obtain
+> every intersecting river/pond through `WaterPlan.bodies_in_rect`; a larger
+> solve must not use only the initiating chunk's river inventory. This prevents
+> a missing distant river constraint from sending high water onto lower land.
+> Ground-grade collars compose smooth compact influences from maximal
+> rectangles of the exact claimed-cell union. They preserve the ordinary 12 m
+> straight-pad profile and fixed pad heights while removing nearest-edge cusps.
+>
+> Non-collidable bushes explicitly request `visual_ground_support`; the compiler
+> prepares their native base stencil on the main thread and the ordinary tree
+> support checks reject cliff/slope overhangs. All six bush assets use the existing
+> biome-canopy hue replacement. Bush palette colors blend absolute tree and
+> substrate colors, never the ground texture's relative color multipliers.
+
+> September 8 independent porch review: an authored ground entrance may
+> declare the measured toe of its native porch separately from its placement
+> datum and conservative foundation rectangle. The SFV 006 approach now ends
+> at that real tread. Physical tests cover both themes in four orientations;
+> seven related tests pass with 6,231 assertions. Matched photo 9, nearby
+> pixel differences and six strict live porch traversals verify the cleanup.
+
+> September 8 river-bank review: gentle reaches
+> widen the terrain carve through the ordinary ground kernel; steep descents
+> and their abutments retain the established narrow profile. A bounded cache
+> holds deterministic bank strengths. Banks constrain water without becoming
+> water seeds; terminal lakes retain their connected shore domain. Fine water
+> topology uses the same dry-bank constraints and 64-bit queue labels. Adjacent
+> water trigger boxes overlap by 1 mm per side, while the frozen sampler still
+> owns exact wetness. Matched photo 10 and nearby pixel differences pass;
+> four shoreline traversals stay grounded, and six neighboring-town entrance
+> traversals pass. The 95 related tests pass with 18,896 assertions.
+
+> September 8 garden-border review: a connected facade bank chooses one
+> shared outcrop profile from its reserved clearance. Shallow caps fit the
+> actual projection instead of borrowing the full gallery depth. Photo 1,
+> nearby angles and pixel differences pass; all 140 west-town walk cells and
+> 205 crossings retain identical clearance. Photos 11/12 remain clean.
+
+> September 8 gate-paint review: the ground handoff shares the exterior road's
+> 4 m painted width. The two-cell structural aperture retains its complete
+> stair, walk and headroom reservation. Photo 5 and nearby pixel comparisons
+> verify removal of the intermediate wide tabs; rotated and connected-gate
+> regressions pass.
+
+> September 8 door-path review: complete prefab houses address the measured
+> doorway center. Their closed-leaf attachment keeps its authored hinge origin;
+> those are distinct coordinates. Photo 6, nearby views and pixel differences
+> verify the centered approaches; all seven houses in four orientations retain
+> physical jamb clearance.
+
+> September 8 destination review: a terminal rising stair reserves an available
+> neighboring platform and its open sky before bridge compounds and house plots.
+> The unchanged climb meets a larger guarded overlook where adjacent room floors
+> cannot supply a real doorway. Source reservations survive final construction;
+> photo 8 and nearby renders, 12 walking traversals and 128 clear walk cells /
+> 185 clear crossings verify the photographed town.
+
+> September 8 stair motion: step-up samples the actual horizontal destination.
+> A short ray at an ambiguous capsule contact verifies the tread's real top;
+> it never supplies a future tread height. The normal step-limited floor snap
+> retains an 80 ms witness across rounded tread noses. Character presentation
+> and camera share one critically damped height response; animation uses the
+> same grounded witness, while jumps and real ledges remain airborne. All five
+> photographed flights pass streamed ascent/descent; normal and slow side-lane
+> runs pass, alongside jump, ceiling, obstacle and animation regressions.
+
+> September 8 exterior finishing: closed doorway return cuts survive shared
+> corner ownership. Native timber closes miter cuts; authored stone relief
+> finishes deep rock-door ends inside the original envelope. Retaining banks
+> use stone-only stock fitted to their declared joining bounds; isolated free
+> shoulders continue masonry. Ledge caps use horizontal boards with exact
+> private-floor ownership and main-thread source preparation. Matched photos
+> 3/4/9 and nearby pixel comparisons pass; photos 7/11 retain their earlier
+> repairs. Physical clearance is unchanged across 124 cells and 179 crossings.
+
+> September 8 inline facade joins: adjacent room runs with different authored
+> depths declare one recessed timber seam member inside the existing room
+> envelope. The native mesh closes the full course in all four orientations.
+> Photo 7 and nearby pixel comparisons pass; physical clearance is identical
+> across 124 walk cells and 179 crossings. Perpendicular ends remain under review.
+
+> September 8 doorway caps: full-height door panels publish the same exact
+> floor-cap ownership as other facades. A 5 mm base-datum allowance includes
+> imported door feet; top-face clipping retains its 1 mm tolerance. Photo 11
+> and the actual shared-triangle regression verify the balcony overlap.
+
+> September 8 floor placement: single-cell authored boards receive the logical
+> cell center; their asset pivot is corrected exactly once. Larger board unions
+> retain their union centers. Courtyard paving uses the same convention, matching
+> the existing collision boundary. Photo 12 and nearby matched pixel comparisons
+> verify the overlapping floor strips; exterior trim remains under review.
+
+> September 8 morning review (in progress): raised exterior portals now declare
+> an architectural flight and a full lower landing before outskirts frontage
+> allocation. The same gate geometry supplies its street contact and occupancy;
+> the public surface compiler opens the declared landing seam. A raised platform
+> does not force its height into adjacent fine-grid ground controls. Gate flights
+> reuse the ordinary stair builder and assign shared posts once. The new frozen
+> west-town regression fails before and passes after in four orientations.
+> Matched photos 2/13 and nearby views remove the ground spikes; both approaches
+> pass six streamed ascent/descent checks each, and 64 perimeter cases pass.
+> Stair motion and other surface joins remain separate open issues. Do not treat
+> the rest of the September 8 morning issue list as fixed.
+
+> September 8 manual slope review: extending streets preserves the existing
+> continuous TerrainGradePatch field instead of sampling a second conical ramp
+> into 3 m plateau controls. Foundation additions retain fixed pad heights and
+> inherited street fields; bounds compose those same fields. The ordinary
+> terrain kernel and 12 m collar remain the only slope authority. A bounded
+> 64-bit target/weight cache preserves exact cold samples and natural inputs.
+> The September 7 sixth-photo views, normal-profile regressions and streamed
+> ascent/descent pass; all five public stair flights remain walkable.
+
+> September 8 manual garden-wall review: roof solid cells reserve clearance,
+> but do not occlude neighboring vertical retaining skins. Room mass still
+> closes those seams. Retaining course style follows the complete bank even
+> when a neighboring room hides its lower portion. Payload and panel clearance
+> share the final shell. The September 7 fourth photo, nearby views, actual
+> wall meshes and unchanged public clearance verify the reported garden wall.
+
+> September 7 manual stair review: transition tread count respects the planned
+> world-space step limit after scale and the shared ground-datum guard. A 3 m
+> flight now has eight 37.5 cm risers; the first ground approach totals 45.5 cm.
+> Landings, flight footprint and player step limits are unchanged. The frozen
+> ground-handoff walking regression fails before and passes after; matched
+> streamed walking verifies all five public flights without jumping, alongside
+> all original photo angles in `04-stairs-after` and their pixel differences.
+
+> September 7 manual street review: the exterior circuit owns the town's
+> ground street domain. Independent country-road paint yields inside it;
+> incoming lattice arms publish boundary handoffs before frontage allocation.
+> Town streets retain priority and outside country roads remain unchanged.
+> The frozen photographed frontage has one 4 m street, unchanged house access
+> points, and three connected world-road handoffs. Four-orientation tests and
+> matched `03-path-candidate` views/pixel differences pass.
+
+> September 7 manual floor review: private room floors participate in retained
+> ground-cap ownership. Partial caps and upright wall tops use the existing
+> exact triangle ownership, retaining uncovered source coordinates, UVs and
+> collision. The offline wall-interface manifest declares a 1 mm imported-face
+> tolerance; construction matches the declared course plane. Resource-free
+> interface arrays are prepared on the main thread. The photographed floor
+> overlap regression and matched `02-floor-candidate` views pass; cell/crossing
+> clearance remains identical. Other manual issues remain under review.
+
+> September 7 manual wall review: neighboring generated room shells own their
+> shared corner. Diagonal contacts retain square ends into one timber joint;
+> inside corners use a native wall return between the rear reveals, with both
+> slab thicknesses projected along the meeting angle. Masonry corners include
+> inhabited room volume. A low retained shoulder can carry a one-band return
+> between taller masonry and a diagonal house; it requires its existing bearing
+> and cannot consume an owned walking surface. `test_september7_wall_enclosure.gd`
+> covers the photographed source, four orientations and absent-bearing cases.
+> The matched `docs/qa/2026-09-07-manual/01-gaps-after` views and pixel differences
+> verify the reported gaps. The full photographed town retains identical
+> clearance across 124 walk cells and 179 crossings. Photo 2's reconstructed
+> camera is behind the closed return; separately matched side views and the
+> production collision-resolved camera record that distinction. Other issues
+> from this manual pass remain under review.
+
+> September 7 entrance construction: each exterior portal keeps its own transverse
+> coordinate until it meets the shared perimeter. Secondary entrances must not snap
+> to the primary entrance's lattice phase, which creates diagonal paint notches.
+> Completed physical clearance is inspected by `perimeter_gate_corpus.gd` (four
+> seeds, four scales, four orientations; 64 completed cases). The matched `perimeter-straight-gates-after` views
+> confirm the reported junction and entrance edges. Roof gardens, as well as pitched
+> roofs, use the remaining space after fixed ground-frame columns are reserved.
+>
+> September 7 column construction: provisional upper bands continue their declared
+> bearing column and end at its available height. Lateral packing retries are removed;
+> the room grammar owns explicit supported changes of floorplate. The (16,-201) roof
+> regression and the production corpus verify this independently.
+
+# Project Instructions (AGENTS.md)
+
+> September 7 support construction: cantilever courses select one authored
+> profile from previously reserved feature envelopes. They share one timber
+> frame and no longer enumerate 2^N course combinations or backtrack across
+> the town. The frozen exhaustive solver is test-only; all 16 mixed-course
+> cases match it, and the 48-town physical clearance corpus remains clear.
+> Compact bracket clearance is independently audited by tests.
+>
+> Graded streets own their full width before house pads. Graded cliff backing
+> and authored rock vertices use the same final height field; fully collapsed
+> rock triangles are omitted. Main-thread preparation extracts resource-free
+> source arrays for worker deformation. Immutable regions memoize repeated
+> grade-influence queries for authored piece bounds.
+>
+> September 7 perimeter follow-up: the owner requests one constant-width
+> exterior circuit and a shared approach junction. `VillageOutskirtsConstruction`
+> derives four straight frontage sides from the finished town envelope and
+> places houses directly along them. Reserve the incoming approach before
+> consuming frontage intervals. `FeatureGroundField.construction_clearance_bounds`
+> includes the canonical road lattice as well as explicit shapes. Every street
+> has the same 4 m painted/headroom width; conservative final-ground extrema
+> bound its headroom. Old cliff aprons disappear wherever grading closes the
+> discontinuity. The matched `perimeter-clean-after` overhead and ground views
+> pass visual review for the reported spurs, width and staggered junctions;
+> broader validation remains in progress.
+
+> September 7 water/travel follow-up: a terminal `PondStamp` caps its natural
+> bank datum at the incoming river's hydraulic surface; its carved bed follows
+> that same datum. Never reconcile a new lake by raising kilometres of an
+> already-descended river. `WaterField` solves complete in-context source
+> extents before projecting the normal 42m chunk halo; a bounded CPU cache
+> shares those solves. Current-geography seam regressions are separate from
+> historical screenshot fixtures. Fully flooded chunks emit water even when
+> no shoreline crosses the chunk. The source solve remains finite; the border
+> survey reports wet domain edges as well as shared-chunk disagreement.
+> Streaming requests retain ownership through
+> the worker-to-main hand-off, skip unchanged queue mutations, and rebase
+> priorities as the player travels. Urgent feature dependencies can publish
+> before their distant terrain component. `PROFILE_STREAMING` enables bounded
+> queue/phase diagnostics; `tests/harness/travel_profile.tscn` provides real
+> walking, separately labelled obstacle-bypassing traversal, and fixed-camera
+> graphics ablations. The 49-chunk profiler now includes production grading.
+> These measurements identify expensive graded/path subdivision and collision
+> commits; they do not establish that construction or rendering is fully optimized.
+
+> September 7 room-band follow-up: paired rooms are constructed by ascending
+> absolute floor band from current lower plates. Existing upper contacts bound
+> their room domain. When an upper plate moves, its newly exposed lower roof
+> immediately reserves its air before another lineage can use it. Frozen source
+> regression fixtures include bridge-span ownership and frontage reservations,
+> as those are construction facts even where old field names say `audit`.
+> Ground-frame posts explicitly publish their single `post` flashing placement;
+> only the measured narrow member and a named supporting-room roof can join.
+
+
+> September 7 shallow-roof follow-up: one-sided roof skins publish an explicit
+> `FabricRecipe.roof_high_edge` and use their occluder cells as the construction
+> footprint. Their measured high edge meets the wall, transverse centre matches
+> the cell run, and underside meets its bearing datum. Complete crowns retain
+> their symmetric solid-volume contract. Two-cell runs centre at 0.75 m, not
+> 1.5 m; all lengths/materials and deliberately shifted negative fixtures are
+> covered by `test_shallow_roof_contract.gd`.
+
+
+> September 7 frontage follow-up: finite house intervals are consumed from
+> one end, preserving contiguous space for the next house without trial
+> placement or repacking. Door paths meet their house's support boundary;
+> test positive overlap separately from inclusive boundary contact.
+> Historical building regressions keep frozen CPU source facts in
+> `tests/fixtures/*source.txt` and run those through the current compiler;
+> production does not read those fixtures.
+
+
+> September 7 atmosphere rebuild: seven art-directed biomes retain the five
+> historical content IDs and add `amber_heath` and `jade_wetlands`; display names
+> are Sunwash Meadows, Lanternwood, Opal Highlands, Cherryveil, Moonfen, Amber
+> Heath and Jade Estuary. `Helper.biome_weights5` is a compatibility name for
+> seven normalized weights. Mood never changes the global sky, sun, fog or
+> ambient light at the player's position. `BiomeAtmosphereField` samples the
+> actual ground and continuous biome blend into CPU arrays; `BiomeChunkFx`
+> commits world-space mist, grounded particles, exact-water fall spray and
+> moving spirit lights on the main thread. Adjacent mist chunks share boundary
+> samples. `BiomeGroundMap` projects the same field onto a canonical 48m grid
+> in a bounded 3072m render window; 768m scrolls preserve overlapping samples
+> exactly. Terrain, lips and grass share `ground_style.gdshaderinc` and the
+> palette's real texture; paths and rock retain their distinct atlas texels.
+> Canonical substrate colours live in `BiomeRegistry.SUBSTRATES`, with moss,
+> chalk, silt, petal litter and amber earth detail resolved in world space.
+> Tree materials use a manifest-declared `biome_canopy` hue replacement that
+> preserves bark, including at bake time. Ground-cover grass remains beneath
+> woodland canopy; the separate ecology/feature fields still own empty paths.
+> `LandformField` contributes deterministic 768m geological provinces to BOTH
+> natural ground and river descent (scarps, amphitheatres, terraces, mesas,
+> ridges/passes, hollows and clefts). Production amplitude is 32m. Large lake
+> stamps may preserve natural islands or peninsulas through their shared carve;
+> no water-only decoration or second terrain authority is added. This changes
+> seed geography. Construction must retain the owner's single-town policy.
+> F6 cycles the biome review locations; F4 retains the existing review list.
+
+> September 6 construction policy (owner instruction): a settlement generates
+> one deterministic town and one world placement. Do not use audits to erase
+> towns, retry terrain placements, or rebuild an optional alternate town.
+> Construction defects belong in regression/corpus tests and must be corrected
+> in the generator's space reservations and ownership rules. The production
+> adapter now aligns its single primary gate and publishes the sealed grade
+> patch; it no longer re-solves a flat preview against trial terrain quarters.
+> Road connectivity does not control whether a settlement exists. The compiler
+> now exposes `generate()` separately from the explicitly checked `solve()` and
+> `validation_errors()` used by tests. `WarrenVolumetricSolver.generate()` is
+> the production entry; its diagnostic `solve()` additionally collects the
+> full-town module, foundation, masonry, terrace, and material audits. Payload
+> assembly no longer revalidates a complete town or each generated payload.
+> Unassigned-mass, route-overhead-supply and plot-mass scans run only when
+> diagnostics are requested. Their pre-discard inspection does not supply
+> construction facts. A parity regression requires identical construction with diagnostics enabled
+> and disabled. The remaining lower-level construction
+> searches and mixed seal/audit methods are still being migrated; this work is
+> not yet accepted as a complete removal of runtime checks or retries.
+
+> September 7 construction follow-up: production outskirts now use
+> `VillageOutskirtsConstruction` and `VillageFrontageDomain`. Measured house
+> envelopes subtract occupied space from continuous frontage intervals before
+> a lot is selected; each selected lot emits one house and a flat grade pad.
+> Different pad datums reserve disjoint footprints. The substantial-house
+> cohort precedes smaller infill, and every final lane samples the completed
+> grade. Inset porches own the walk from the outer base to the door; terrain
+> paint stops at that base. Shared T/X junctions derive both inner curves from
+> all declared street arms. Landings shorter than a path half-width stay square
+> so capsule ends cannot overrun a doorway. The old outskirts trial solver is
+> retained for legacy tests but is no longer called by `VillagePlan`.
+> Deep door panels now keep whole ends, while perpendicular returns terminate
+> at the measured doorway back plane. `export_door_return_manifest.gd` discovers
+> the finite square/miter/back-plane alternatives offline; ordinary asset bake
+> produces their visuals and collision. Suppressing an end owner withdraws its
+> return cut. These choices retain the original conservative envelope. Matched
+> doorway/facade review is still in progress; do not report it accepted yet.
+> Terrain screenshot regressions additionally pin the original reported field
+> in `tests/fixtures/september6_reported_terrain.json`, because the atmosphere
+> rebuild intentionally changes seed geography. Exact historical screenshots
+> use the original-world review copy; current-world tests remain separate.
+
+
+> September 7 roof/support follow-up: actual unsuppressed placement bounds
+> resolve connected-component clearance; broad boxes alone cannot create a
+> false collision across empty space. Joined crowns choose the existing tight
+> transverse profile when their eave belt contains allocated construction.
+> Fixed ground-frame columns reserve their space before roof choice. Frames
+> are built from low bearings upward and publish bearing through connected
+> private mass; thin posts never pretend to fill a complete structural cell.
+> Posts stop at private ceilings. A post may cross only its named bearing
+> room's roof skin through the existing measured shallow seam contract.
+> Canopies and roof trims explicitly name their flashing placements; furniture
+> in the same recipe does not inherit that joint. Native compound L-shaped
+> roof partitions retain complete return stamps. Interstitial infill consumes
+> only cells outside mandatory roof space. `construction_diagnostics()` inspects
+> existing construction without changing its audit, signature, or placements.
+> The final court retry/rejection loop and court-selection room preflight are
+> removed. Bridge endpoint crowns retain their explicit party-seam role ahead
+> of neighborhood silhouette choices; even-cell roofs retain the phase-aligned
+> floorplate center in both source reservations and final placement. Prospective
+> party contacts derive from canonical room cells, independent of emitted faces.
+> The 46-site regional corpus passed after those changes. Subsequent bearing
+> work is under regression review: occupied contacts above a room constrain
+> its floorplate domain. Exposed tops and undersides reserve their vertical
+> interfaces before neighboring room variants are selected. The eight-sweep
+> support repair/building-deletion routine is removed; production also no longer
+> invokes repeated silhouette relief, crown truncation, or global roof repair.
+> The six unused silhouette/crown repair helpers now live exclusively in
+> `tests/fixtures/legacy_room_repair.gd`; their five regression tests remain.
+> Source reservations and final roof construction share one canonical roof
+> domain. Ordinary terminal rooms start with their complete house crown;
+> bridge endpoints retain only their explicit party-seam profile. The duplicate
+> second full-roof fallback pass is removed. The current 48-town scale corpus
+> builds every town with 10,672 clear walk cells and 15,216 clear route gates.
+> Roof asset selection and earlier construction searches still contain retries; do not report the
+> owner's no-retry requirement complete yet.
+
+> The maze carver now freezes its completed excavation and source directly.
+> `WarrenExcavation.validate_construction()` retains the independent route,
+> headroom, portal, loop and bridge checks for tests; it cannot withdraw a
+> published walk. Source diagnostics are optional and preserve the same
+> deterministic signature. Earlier alley/loop preview checks remain to migrate.
+> Maze-to-volume projection similarly derives its exact walk surface and mass
+> subtraction without a final validation gate. `WarrenVolumePlan` retains a
+> separate diagnostic validator; optional diagnostics cannot alter the bore,
+> mass or deterministic signature. Legacy checked volume callers still exist.
+
+> Court corner closure derives its available cells from both structural solids
+> and inhabited room volume. A supported gap beside a court is not public
+> floor when a room owns either of its two headroom bands. The seed 2 grand
+> town regression covers the former accidental paving beneath a room chimney.
+
+> Wall-course surface ownership is under visual review. Full-height generated
+> room facades select finite `.course_open` assets only when an actual upper
+> floor overlaps their cap. The floor owns its exact rectangle; pure
+> `FabricSurfaceOwnership` partitions the original baked cap triangles and
+> retains every uncovered portion, including millimetre-wide ends, with its
+> original material and interpolated UVs. An exposed roof shoulder retains
+> the original complete wall. `export_wall_interface_manifest.gd` discovers
+> the finite alternatives; the offline bake also publishes the omitted source
+> triangles as resource-free data. Perpendicular end ownership remains independent. Do not accept
+> this change until the pinned stacked-facade overlap tests and matched gallery
+> renders pass and nearby roof shoulders remain closed.
+
+> Alley and loop construction now publishes each chosen connection once.
+> `WarrenExcavation.frontage_reservations` preserves housing beside existing
+> streets before later excavation; the size profile supplies the lane budget.
+> The former completed-lane frontage audit, whole-volume preview, rollback,
+> and next-candidate retry are removed. Source tests and the sloped frontage
+> regression pass; full composition review is still required. Other source,
+> roof, and room selection searches have not yet all been migrated.
+
+
+> September 5 evening facade follow-up: generated-room miter choices carry
+> explicit perpendicular end-owner placement IDs in `FabricRecipe`. Final
+> placement expansion withdraws a cut when its owner is suppressed as a party
+> wall; demand discovery includes the finite square/single/double-end choices.
+> These choices remain inside the original uncut conservative envelope. This
+> change is under visual review; it must not be reported as accepted before
+> the matched doorway screenshots pass.
+
+> September 6 facade follow-up: timber plain/window/door families now bake the
+> same finite corner choices as masonry. Full framed panels own their joins;
+> the renderer no longer adds coplanar room stitch posts or extra portal jambs.
+> Unrelated combined clearance boxes use the actual module-bound union as a
+> narrow phase, so empty space between a floor and an ornament is not treated
+> as a solid room corner. The matched evening captures remain under review;
+> street handoffs and some facade joins are still open issues.
+
+> Keep this file current. When the architecture, conventions, or core invariants
+> change, update it in the same change.
+
+## What this project is
+
+**MythosUnwritten** (Godot project name "Story"; repo `Acciorocketships/mythosunwritten`).
+An open-ended, turn-based fantasy RPG conceived as an LLM-driven **world simulator** —
+every non-player character and the world itself are meant to be agent-driven, with
+narrative emerging rather than scripted. See **`docs/mythosunwritten-master-design.md`**
+for the full vision; that document is the design north star.
+
+- **Engine/language**: Godot 4.5, typed GDScript.
+- **What exists today**: an infinite procedural terrain world plus a controllable,
+  physics-driven character (walk, jump, step-up, swim) with an orbit camera. The RPG /
+  combat / agent layers in the master design are not built yet.
+
+## Quick commands
+
+- **Run the game (windowed)**: `godot --path /Users/ryko/story`
+  The terrain streams forever around the player, so a run does **not** self-exit — stop
+  it with Ctrl-C / closing the window. For automated verification prefer the tests and
+  the harness scenes below over a bare headless run.
+- **Run all tests (GUT)**: `godot-test` (a shell alias for
+  `godot -d --path /Users/ryko/story -s res://addons/gut/gut_cmdln.gd -gconfig=res://tests/gutconfig.json`).
+  Tests live in `tests/`, are named `test_*.gd`, and `extends GutTest`.
+- **After moving/renaming a `class_name` script**: run
+  `godot --headless --path /Users/ryko/story --import` once so Godot rebuilds the global
+  script class cache; otherwise headless runs fail with "Could not find type X".
+- **Profile terrain generation**: `godot --headless --path /Users/ryko/story -s res://tests/harness/profile_terrain.gd`
+  prints per-phase build timings (49-chunk startup sweep + phase attribution). Paste the summary
+  into perf-related commit messages.
+
+## The core invariant: field-driven, deterministic, churn-free
+
+Terrain is a **pure function of `(world_seed, cell)`**. A cell's final height is decided
+before any geometry is instantiated, so tiles never retile, morph, or pop as neighbours
+stream in. This is the whole point of the current architecture — it replaced an older
+socket / module-catalog engine that grew terrain reactively and needed reveal margins and
+churn suppression to hide the settling. **That socket engine is gone.** If you find docs
+referring to `TerrainGenerator`, `TerrainModule*`, sockets, `WaterRule`, `PositionIndex`,
+or generation "rules", they describe the retired system (see "Historical docs" below).
+
+Keep the worker pipeline pure: plan, field, mesher/dressing `compute*` methods return
+plain CPU-side data and are headless-unit-testable. Render/physics resources and nodes are
+created only by the explicit main-thread `commit*` adapters; only `FieldTerrainStreamer`
+attaches those nodes to the active scene tree. Never create `MeshInstance3D`, `MultiMesh`,
+`ArrayMesh`, collision shapes, or other server-backed resources in the streamer worker.
+
+## Terrain pipeline (`scripts/terrain/`)
+
+Data flows: **HeightfieldPlan → HeightfieldRegion → TerrainSurfaceField → TerrainChunkMesher**,
+with sibling **WaterSkin** and **DressingField** payloads, driven per-chunk by
+**FieldTerrainStreamer**.
+
+- **`heightfield/HeightfieldPlan.gd`** — the deterministic plan. A continuous height field
+  `H(cell)` (layered value noise + rocky-biome mountain spines, faded flat near spawn) is
+  quantized into integer **storeys** (4 m each) and sub-storey **levels** (1 m). A monotone
+  trickle-down **clamp** lowers each cell to at most `max_step` storeys above its lowest
+  cardinal neighbour (diagonals may drop two — a valid formation). The clamp has a unique,
+  order-independent fixpoint, so results are seed-stable. `compute_region()` batches a whole
+  chunk's storeys+levels in two clamps and returns a `HeightfieldRegion`. Per-cell noise+carve
+  samples are **memoized on the plan instance** (`_sample`, cleared by `set_raw_height_override`/
+  `set_water_plan`) so the ~77 %-overlapping windows of successive chunk builds are sampled once —
+  a pure-performance cache, output-identical. This remains the immutable natural planning
+  input. Following the 2026-09-04 ground review, a sealed village publishes a finite
+  `TerrainGradePatch` on its 3 m construction lattice. `WorldFeaturePlan` supplies that
+  patch before final terrain sampling; it never mutates the natural plan or changes a
+  loaded cell in response to streaming neighbours.
+  - **Levels are rendered** (`RENDER_LEVELS = true`): adjacent same-storey cells may differ
+    by one 1 m level, and that short step uses the same shared smootherstep surface patch as
+    a 4 m storey slope. Levels do not emit cliff dressing or vertical backing walls.
+- **`heightfield/HeightfieldRegion.gd`** — precomputed storey/level dictionaries with O(1)
+  `storey_at` / `level_at` / `surface_height`. Same read API as the plan.
+  Its final graded view composes the village's sealed ground-band and foundation-pad
+  constraints through `TerrainGradePatch`, using the same centre/edge/corner smootherstep
+  kernel for target heights. The finite collar applies the normal 12 m transition profile
+  once to distance from the claimed-cell union, with continuous boundary-height blending;
+  it never resmooths weights at every 3 m construction cell or switches nearest-pad owners.
+  Natural fields remain available
+  for deterministic site and parcel selection. The final view is shared by terrain visuals,
+  collision and environmental dressing; foundation bounds use conservative interval
+  composition rather than assuming a coarse natural quadrant still contains every extremum.
+- **`field/TerrainSurfaceField.gd`** — reconstructs the **continuous walkable height** from a
+  region. Each non-cliff cell quadrant is a smootherstep patch through four shared controls:
+  its centre, the pairwise-minimum height at each adjoining edge midpoint, and the four-cell
+  minimum at the corner. Both owners of an ordinary storey/level seam therefore compute the
+  exact same boundary curve, including T-junctions where one neighbour slopes in a transverse
+  direction. There is **no up-ramp**: a cell never rises to meet a higher neighbour — the
+  higher cell is a flat **cliff top** and walls down vertically. Deliberate cliff/inner-corner
+  discontinuities are filled by the mesher's rock skirts. Also the classifier for everything downstream: `_is_cliff_top`,
+  `has_inner_corner`, `is_flat_cell`, `own_edge_flat`, `is_exposed_edge`, `is_higher_flat`,
+  `edge_profile`. Ordinary slopes are single-valued on the shared grid, and adjacent chunks
+  sample the same controls ⇒ **gap-free by construction** without miniature level walls.
+  `height_bounds(region, footprint)` proves conservative extrema from the four corners of every
+  clipped quadrant sub-patch (bilinear in monotone smootherstep coordinates); structural solvers
+  use it instead of trusting a sample grid or inheriting unrelated far-away quadrant controls.
+- **`field/TerrainChunkMesher.gd`** — builds one chunk (8×8 cells = 192 m, sampled at 2 m).
+  `compute_chunk()` produces CPU-side mesh arrays, collision faces, and cliff placement data on
+  the worker; `commit_chunk()` turns that payload into the chunk
+  `Node3D` on the main thread. Its children are `Surface` (walkable grass mesh, visually clipped
+  behind the cliff lips), a separate full-extent **collision** trimesh (the lip band stays
+  walkable), `CliffFaces` (vertical **rock skirts** filling the gap under each flat cliff edge,
+  double as wall collision), `Aprons` (ground continued under higher neighbours to seal recess
+  slits), and `Cliffs` (the fixed cliff dressing). Ambient environment dressing is intentionally
+  not part of the terrain payload. Quads are **pinned to their own cell** so cliff tops render flat
+  to their boundary; the vertical gap is filled by the skirt. Classic inner-corner sheet points
+  tuck below the rounded piece; any part of that tuck exposed by a low camera uses the same rock
+  atlas texel as the wall, never bright grass. The walkable collision sheet is a
+  raw `PackedVector3Array` fed to `ConcavePolygonShape3D.set_faces` (no `SurfaceTool`/trimesh
+  cook). Much of this file is edge/lip/corner clip geometry — read the inline comments first.
+  Its scale-independent `field_ground_surface()` adapter accepts any sealed lattice-height
+  region and runs the identical `TerrainSurfaceField` centre/edge/corner kernel. Village turf
+  and plaza caps use this path through `LatticeTerrainSurfaceRegion`: one-band changes are real
+  welded smootherstep slopes, only true discontinuities receive a lip, and the committed surface
+  uses the same ground-palette UV, biome tint, collision authority, and logical-cell metadata as
+  streamed terrain. Village code must not rebuild grass panels or infer logical owners from the
+  sub-quads produced by slope tessellation. The village's actual lip/corner layout also feeds
+  the mesher's shared `_clip_vert` kernel, scaled by the lattice/module pitch; no separate
+  garden rectangle trim is permitted. Only visuals retract beneath lips: collision retains
+  the complete cell union. Concave tucked triangles carry `terrain_rock_vertices` through
+  feature commit, preserving the normal terrain's rock backing instead of repainting it green.
+- **`field/CliffDressing.gd`** — hangs real **KayKit** rock-wall + beveled grass-lip + inner/
+  outer/step/junction **corner** pieces on cliff edges, batched into one `MultiMesh` per piece
+  type per chunk. Visual only; the mesh skirt is the collision. `compute()` returns plain
+  `Transform3D` arrays (unit-testable headless); `build()` turns them into nodes. Pieces snap to
+  the **old-tile 10.5 grid** (3 m KayKit modules at ±1.5…±10.5, corners at ±10.5,±10.5).
+- **`dressing/DressingField.gd`** — the pure deterministic ambient-nature field. Sets author
+  direct per-biome fill rates, then shared `DressingHabitatLayer` fields form correlated groves,
+  clearings, ecotones, rock exposures, and small colonies with true negative space. Optional
+  jittered-Voronoi community fields keep nearby visual choices related instead of confetti-like.
+  A separate world-wide `DressingEcology.land_occupancy01` mask is multiplied into every
+  ground population, so broad clearings and the connected edges of a jittered-Voronoi graph form
+  paths that no independent set can sprinkle back into. Mushrooms deliberately use a dense
+  colony set plus a rare singleton set. Reeds are `EMERGENT` content: wet, inside the shoreline,
+  and never scattered over dry land.
+  Final jittered anchors are qualified against terrain and the shared `WaterFieldContext`, then
+  bounded Matérn-II arbitration supplies local and cross-population spacing. Chunk ownership is
+  half-open, so overlapping queries agree and seams cannot duplicate or omit an anchor. Worker
+  payloads contain only asset IDs, transforms, and colours. At compile time every collidable
+  choice is reduced to a resource-free radial stencil of its actual near-ground visual vertices;
+  qualification rotates/scales that stencil and rejects roots, rock bases, or deadwood whose
+  visible footprint would overhang a cliff, span excessive height, or cross water. That ordered
+  compiled outline is transformed into a persistent static layer of the live grass deformation
+  field around loaded structural dressing. It follows each asset's rotated/non-uniformly-scaled
+  base instead of an oversized circular radius, keeping blades from passing through its mesh
+  without coupling the worker fields. Authored-feature clearance is intentionally broader:
+  every choice compiles its complete visual XZ bounds, then exact oriented-rectangle overlap
+  rejects any tree crown, bush, rock, or future visual whose projection would enter a road or
+  village reservation even when its anchor and grounded collision remain outside. The resulting
+  `feature_query_margin` sizes only the feature-reservation lookup; it is intentionally separate
+  from the finite terrain/water `query_margin`, so tall crowns cannot inflate water computation.
+  `EnvironmentCollisionBuilder` commits
+  baked static physics for structural nature before chunk readiness; `EnvironmentCommitQueue`
+  creates one visual `MultiMesh` per `(asset_id, visual piece)` under a separate per-frame budget,
+  and discards stale chunk generations. Dressing still owns no gameplay identity, interaction,
+  persistence, navigation, or world-feature planning. Dense grass is intentionally separate;
+  the former sparse `ambient_grass` dressing set is retired.
+- **`grass/GrassField.gd` / `grass/GrassStreamer.gd`** — the deterministic, visual-only dense
+  ground-cover pipeline. The pure worker field places a primary 17×17 jittered candidate lattice
+  per 24 m tile, plus a deterministic supplemental lattice admitted in exact proportion to a
+  slope's additional surface area. Instances use the sampled terrain normal as local up, so hills
+  retain the flat-ground carpet density instead of exposing stretched XZ gaps. The field projects
+  the slow biome/canopy/tint owners from a canonical world-aligned 3 m lattice,
+  converts viable habitat through a narrow 0.20–0.42 monotone carpet curve while preserving
+  exact-zero shared clearings. Open marsh and stronger habitat saturate, while weak margins reach
+  zero quickly instead of exposing isolated repeated patches. It qualifies exact jittered anchors
+  against paths, water, grade, and terrain.
+  Path rejection covers the selected patch's full baked footprint, not just its centre. One
+  generalized edge scale uniformly shrinks patches toward every ecological grass-bed margin and
+  exposed upper cliff lip (both to 55% over the final 3 m), preserving blade proportions. Additional
+  hashed layers are visited only by tiles containing such an edge. Moderate edges use
+  `(1 + slope_area_extra) / edge_scale²`; total density is capped at four layers. Cliff
+  classification is symmetric for one-sided surface-normal sampling, so the vertical discontinuity
+  cannot falsely reject a strip as over-grade. The lower side is ordinary full-size carpet meeting
+  an opaque rock wall; only upper-lip candidates taper, and their final shrunken footprint must
+  stay on the walkable sheet. This prevents both a bare perimeter band and overhanging blades.
+  Each tile selects one compiled asset variant and returns at most one packed CPU buffer. The
+  current `stylized_grass.collection_05` source patch is bake-selected from a multi-variant FBX.
+  All 311 blade silhouettes remain, but each indexed 18-triangle ribbon is reduced to a four-
+  triangle root/bend/tip strip. The bake also moves complete blades 25% radially from the patch
+  centre, producing one self-contained 1,244-triangle, roughly 3.11 m-wide mesh. Its large
+  overlapping footprint closes the bed at far fewer instances than the former tuft grid. The main-thread
+  service streams a 60 m full-density / 84 m fade / 108 m eviction ring and commits one shadowless
+  MultiMesh per tile under an elapsed-time budget. Player distance owns deterministic population
+  dropout and conservative CPU prefix caps; camera distance independently removes unreadable
+  wind detail over 32–48 m, so an orbit camera cannot leave screen-distant blades
+  sparkling. One double-sided shader also owns gentle height-relative sway, broad rolling gusts,
+  and `TrampleField`'s world-anchored deformation. The bake stores each authored
+  ribbon's local root in UV2, so trampling resolves blade groups instead of moving a whole 3.11 m
+  patch as one tuft. A 1.1 m actor wake bends/drops grass strongly, retains at least 72% strength
+  while moving, and recovers over 10 s. A separate persistent texture presses grass mostly
+  vertically under loaded structural assets with a small radial outward spread. A fresh player
+  trail owns the lateral direction and continuously blends back to that static crush as it
+  recovers; no periodic obstacle stamp can snap it back. Both textures and their shared scrolled
+  world origin publish atomically. Its base albedo directly samples
+  the live texture object and grass-island UV owned by `terrain/materials/ground_palette.tres`,
+  exactly like the terrain sheet. Collection 5 has no albedo
+  texture; its relative light/dark structure comes from retained blade normals plus a nonlinear
+  ground-matched contact/shaded-lower-growth/warm-tip ramp. Subtle root-group value variation fades out with camera
+  detail, and the far field converges to the exact terrain value instead of retaining tiny tip
+  marks or drawing a dark ring before the population cutoff. An 82% up-normal bias preserves nearby
+  blade shading, then converges to the terrain normal with the same camera-detail fade; full
+  roughness and zero specular bring the base colour into
+  the terrain's lighting family. Back-facing ribbon cards flip their fragment normal into the
+  same lighting hemisphere, avoiding dark double-sided stipple. The same projected
+  `BiomeRegistry.ground_tint_at` field makes blades follow every biome transition and the shared
+  broad 108/156 m intra-biome value/warmth patches.
+  Grass has no
+  collision, navigation, gameplay identity, persistence, or separate worker.
+- **Paths and man-made features** (`scripts/terrain/features/`) — pure `SettlementPlan` owns only
+  deterministic 768m future-village site identities and cells; it has no terrain API. `PathPlan`
+  validates those sites against the untouched final fields, then owns canonical dry-landing bridge
+  sites, monotone bounded route
+  solves, local backbone/loop selection, and bridge/arch/lamp identities. `PathProgram` compiles
+  the five demand-warmed assets and their primitive placement metrics; it contains no resources.
+  Resource-free `FeatureProgram` composes path and village programs into the one canonical query
+  margin, clearance, record-discovery reach, geometry halo, surface-priority table, field-cache
+  budget, and sorted demanded-asset set. Streamer sizing therefore never reads a producer-specific
+  limit. `WorldFeaturePlan` is the worker-facing owner and projects both canonical paths and
+  complete village records; projection only selects already-decided ground shapes and half-open-
+  owned placements.
+  `FeatureContext` is the immutable per-block projection: `FeatureGroundField` always unions the
+  O(1) path-grid layer with bucketed immutable circle/capsule/oriented-rectangle shapes, resolves
+  surface paint by priority, and derives signed clearance from independent clearance shapes.
+  Terrain, dressing, and grass consume only this general context; no path-only fallback remains.
+  Future-village nodes validate a compact dry, supported footprint; their path-width square
+  junction surface provides a gathering place without mutating terrain or stamping a circular
+  plaza over the route. A node is a built junction: its square and arms meet at right angles and
+  never take the open-country bend fillet, so a town's street and gate ramp butt against straight
+  edges. Hot predicates use the same
+  connection masks plus local shape buckets, so queries are O(1) in route length; lattice callers
+  pass their already-known terrain cell to avoid repeating coordinate division. Each perpendicular
+  arm pair adds a bounded quarter-annulus fillet, so both inner and outer path edges curve through
+  turns and branches without a circle stamped over the junction. Path
+  triangles keep the original tan; sparse varied-size world-hashed circular decals use one
+  slightly darker tan from the same atlas island. The circles conform to the sheet and share its
+  mesh, material, and draw call; exposed aprons use the base path tan. Path colour replaces the
+  local 0.25m ground triangles in-place rather than riding on a second depth-fighting sheet.
+  Mixed triangles partition at the existing feature field's continuous boundary; both paint
+  owners share canonical crossing vertices, so curved corners are not whole-tile staircases;
+  transition fans give adjacent coarse grass quads the same boundary vertices, so adaptive path
+  edges cannot open T-junction hairlines. Bridges are
+  exact-water-validated before becoming atomic route macro-edges; ordinary routes use cheap
+  planning water, then validate only the selected corridor against exact water. Every ordinary
+  route edge uses `TerrainSurfaceField.is_walkable_edge`, so a hill may be climbed over the same
+  continuous sub-storey/storey slopes the mesher renders, but a route can never cut through an
+  exposed cliff face. Existing cliffs beside an approach remain natural and optional; no shelf,
+  ridge, cutting, or flanking cliff is manufactured for a village. Lamps face inward over the road.
+  Large arches walk every accepted route from both village endpoints: the first attempt is centred
+  84 m from the node, later segments supply bounded support fallback, and shared segments deduplicate
+  while routes that split early each retain a gate. Small arches mark refined dominant-biome
+  crossings, stay at least 144 m from a village and 96 m from another arch, so ecotone oscillation
+  cannot make a gate stack. Precedence is
+  bridge → village gate → biome gate → lamp. Stable feature
+  IDs never include a streaming chunk or contributing route.
+  The sectional warren system lives under `features/villages/fabric/`, with its diagnostic
+  review scene in `tests/harness/warren_phase0_review.tscn`. The default production
+  `VillagePlan` invokes `VillageWarrenFabricSolver`, which converts one sealed sectional
+  plan into the canonical `VillageUrbanFabricPlan` and `VillageRecord`; topology is never
+  re-inferred from render placements. Its production adapter coalesces the same canonical
+  solid, walk, headroom, and guard cells into typed `VillageOccupancyVolume` cuboids; the
+  broad district exclusion is supplementary, not a prefab-box replacement for those facts.
+  `SectionalPublicRealmPlan` seals only typed exterior
+  street, stair-canyon, undercroft, court, gallery, and short-bridge episodes plus their
+  player-width seams, primary itinerary, loops, cover policies, and required interval
+  classifications. A sealed maze source names two or three separated, at-grade exterior portals
+  (the primary mouth first); production projects every one to an exact two-lane terrain street and
+  heightfield-painted handoff rather than inferring exits from cul-de-sac degree. Each episode carries
+  explicit exterior-air cells above its walk surface.
+  `FabricVolumeClassifier` unions those claims with structural solids and inhabited volume,
+  rejects every public-air/occupied-volume overlap, and flood-proves all public air back to the
+  route landing. Passage rooms and occupied skywalks remain private building mass; building
+  interiors and interior stairs are deferred and cannot satisfy public circulation. Ordinary
+  `FabricUnit` records bind modular rooms, prefabs, markets, outcroppings, exterior facade
+  stairs, roofs, and occupied overhead links through semantic sockets and a parent-before-child
+  bearing DAG. `FabricModuleProgram` compiles each authored asset into a typed construction
+  contract: even-cell footprints retain their half-cell phase, walk-surface visuals snap their
+  authored top plane to the logical route plane, and roofs are sealed repeat runs with explicit
+  pitch, profile, material family, and end seams. Every rotatable full crown preserves the exact
+  world-space centre of its parent's finished floorplate; an even-cell quarter turn may change the
+  roof's lattice origin, but can never shift the crown onto the adjacent 1.5 m phase. At final fabric sealing,
+  `FabricContinuousRoofPlan` derives maximal straight roof chains only from exact matching run
+  endpoints, bearing planes, transverse profiles, pitches, and seam profiles. Rooms retain their
+  complete structural roof volumes, while realized construction removes the two internal gable
+  caps at every proved join and selects one compatible repeat material for the entire chain.
+  Compact-house crowns publish pre-aligned start, middle, and end alternatives for every reviewed
+  material family. All three roles are clipped from one source crown around the same symmetric 3 m
+  party-seam profile: each semantic 6 m construction bay emits two exact 3 m sections, while only
+  the two exterior sections retain the
+  source roof's measured outer eave. Provisional layout reserves the exact party span plus the
+  complete transverse eaves and height; after component topology is known, the final plan proves
+  the two actual exterior eaves against every unsuppressed placement. An explicitly socket-bound
+  neighboring pitched roof may meet that realized skin only when the existing finite seam contract
+  also proves the final world-space boxes; this preserves a real flashing junction without granting
+  any exemption to undeclared roofs, walls, or retained stone. The only other exception is the
+  named roof of a socket-bound facade bay on that same component, whose typed flashing joint is
+  allowed while its walls and supports remain collision-checked. A joined chain is rebuilt as two
+  exterior ends plus true middle bays on the one bearing plane,
+  so adjacent complete houses cannot leave nested end caps, mismatched cut profiles, or change
+  colour mid-ridge. Exterior end sections keep their complete source eave by default. When that
+  finite eave would enter unrelated finished construction, the final transaction may select the
+  corresponding pre-baked flush end whose bounds are a strict subset of the full end; the flush
+  alternative is accepted only after it clears the same finished-fabric proof, so roof junctions
+  are resolved by a valid authored construction choice rather than an overlap exception.
+  Ambiguous branches and non-matching roofs remain separate; the renderer performs no proximity
+  search, snapping, or per-mesh offset repair. A one-bay occupied bridge-house crown is two finite
+  party-seam end halves: it terminates exactly at both endpoint planes while retaining its ordinary
+  transverse eaves. Integrated crowns participate in the same roof alignment and connected-envelope
+  rules as standalone roof units; lateral bearing parents never authorize a crown to continue inside
+  endpoint stone or another roof. One-sided shed roofs additionally declare their authored high
+  edge; the program aligns that edge to the parent wall before a recipe can seal. A paired shallow
+  gable derives both inward-facing high edges from one shared ridge plane, so it cannot become an
+  inverted valley through independent yaw choices. Measured
+  visual-clearance envelopes reject
+  unrelated mesh intersections, while explicit semantic visual seams are the only exception;
+  those envelopes also feed the bounded filler search so invalid proposals are avoided before
+  assembly. Layout code never repairs individual meshes with visual offsets.
+  Rare reviewed palette variants reuse the exact source mesh and collision only through an
+  explicit `EnvironmentVisualPiece.material_override`; variants that need the authored colour
+  channel opt out of MultiMesh instance colour so the renderer cannot erase the remap input.
+  `PublicRealmSurfaceSolver` unions only exterior terrain-street, structural-court,
+  stair, gallery, and bridge claims; the assembler commits visual and collision faces from the
+  same payload. Every rendered surface kind is also the sole owner of its horizontal boundary,
+  so retained masonry cannot reappear as a rock cap in a street, stair, court, or bridge. A
+  floor-facing retained boundary is sealed with an exact one/two-cell authored timber soffit,
+  never an upright rock-wall module rotated into a horizontal shelf. Side masonry maps its
+  measured 1.7701733 m face to the exact 1.5 m fine-grid claim and is inset by its measured half
+  depth; perpendicular walls therefore meet at the lattice corner without protruding panels.
+  A single occupancy-vertex rule seals concave and diagonal retained joints with one timber
+  member per band; straight and buried vertices emit none. Facade alignment always presents
+  the authored +Z exterior toward its declared normal. Full-width facade slots use full-width
+  panels; proved perpendicular plain/window/door joins select baked finite miter ends (including
+  handed variants), while straight repeats keep square ends. These clipped choices remain
+  subsets of the original measured clearance envelope rather than adding overlap exemptions.
+  Village turf is evaluated by the same `TerrainSurfaceField` kernel as streamed ground. Every
+  capped yard and planned-green cell is emitted in one logical-cell union, with the complete
+  public-surface union supplying its real neighboring height controls; invented equal-height
+  rings are forbidden because they suppress exposed lawn edges. Only finished turf and public
+  surfaces supply height controls; hidden retained blocks are structural occupancy, never a
+  second ground-height authority that can pull a lawn through its timber substrate. Separate decorative panels
+  may never own or omit a centre cell. Straight lips and corner lips use the same uniform
+  lattice/module scale. Turf's top retaining course uses the matching terrain rock family,
+  not square masonry protruding through its recessed rolled edge. A paired corner covers
+  two named logical faces; every face retains its own exact inset wall collider, since
+  terrain dressing meshes are visual-only. Rim audits count inner as well as outer corners.
+  Rolled grass lips occur only on true exposed field edges, never at an
+  equal-height turf/plank material seam. Like `CliffDressing`, a concave turn of an L-shaped lawn
+  receives the authored inner-corner lip (rotated the extra half turn the kit needs) so the two
+  straight lips round into each other instead of leaving a notch over the wall's corner block. A
+  planted public deck over air uses a connected timber substrate instead of expanding
+  one-band support markers into hanging stone courses. Grounded retained mass is preserved.
+  Decorative facade caps bear with their authored underside on the wall-top plane, unlike
+  walk-aligned public floors. Their visible tops cannot share the wall's horizontal faces.
+  Its shared terrain clip kernel suppresses unbacked run-end drapes: grass cannot form
+  a vertical curtain through the public air below a structural deck. A
+  supported missing fourth cell in an otherwise complete 2 x 2 structural court is sealed as an
+  explicit derived claim before surfaces, guards, or audits are built; closure cannot cascade
+  across arbitrary empty space. When one sealed transition mesh owns both the upper and lower
+  tread across a retained riser, it also owns that vertical seam and the generic stone skin is
+  suppressed there; adjacent unrelated stair claims cannot open the massif. Every structural court, gallery, and bridge cell also carries the exact local
+  envelope-ground support datum; renderer posts descend to that datum rather than an implicit
+  global band zero, so a support cannot stop in air or continue through unrelated terrain. All
+  low and tall post candidates derive from the complete final structural-surface outline vertices,
+  repeat at the authored 3 m pitch, and are rejected when their thickness would enter any public
+  lane below; internal surface seams can never manufacture posts in a plaza. The route entry also
+  publishes ground-height constraints and path paint at each boundary. Production no longer
+  emits separate town-street or handoff-ramp meshes: the terrain's fine local tessellation owns
+  both their appearance and collision. Nearby accepted house pads join the same sealed grading
+  transaction, retaining the neighbourhood while the collar meets untouched natural ground.
+  Outskirts survey the finished field and propose pads on that same construction datum/grid
+  before their entrance and route proofs. A later pad cannot overwrite a sealed ground band.
+  After retained masonry is finalized, root rooms are re-proved against the actual
+  six-neighbour ground-connected mass, not temporary source stone. Edge-only contact
+  and pitched-roof bounding boxes cannot establish bearing. An otherwise unborne room
+  requires four finite timber corner courses reaching the local support datum; every
+  member passes the existing public-air and measured visual-clearance transaction.
+  Every rendered exterior door
+  requires both its exact threshold landing and a clear direct approach tile beyond every open
+  facade half; a proposal that cannot provide that two-cell-deep approach is rejected before
+  guards or facade assets are derived. Stair-span claims are not flat doorsteps: construction
+  selects the existing closed facade when its doorstep lies on a flight or its approach
+  crosses a flight's side rail, records the suppressed door IDs, and preserves the room
+  envelope and stair guards. An aligned flight may lead through its open end to a flat
+  doorstep. Prefab admission applies the same proof before reserving its mass, and surface
+  sealing independently rejects any surviving unserved entrance. Courtyard planters have
+  no minimum quota; only genuine outside corners qualify, with adjoining stair bands counted
+  as route neighbours so furniture cannot occupy a flight's approach.
+  Reviewed fixed-size floor/gallery meshes tile structural claims as authored plank
+  visuals without replacing the union's collision authority or scaling assets. Production also
+  emits the exact sealed structural union as a minimally recessed skin beneath those boards, so
+  authored border insets cannot expose gaps while the authored planks retain their detail. The
+  former short floor-bearer/corbel modules are not emitted: they read as unsupported stairs beneath
+  overhangs, while boundary-derived posts and structural skins own the actual bearing. The same
+  ruling (2026-09-04) removed the ribbed `sfv.fabric.brace.wood.002` corbel from every overhang:
+  facade bays and bump-outs, skywalk ends, balconies, oriels, dormers, corner wraps, and the
+  integrated room-jetty support courses. Those `outcrop.support.bracketed.*` recipes still seal and
+  are audited once per bearing edge, but they carry no placements: they declare the exact envelope
+  the corbels occupied (`FabricRecipe.set_local_clearance_bounds`) so every clearance proof keeps
+  the same input while nothing is drawn. The diagonal-strut variants remain visible supports.
+  Exposed court
+  guards derive from that union and structural occupancy, so graph
+  transitions stay open and arbitrary leftover gaps never become platforms. The proof first
+  compiles a diagnostic seed, then `FabricSolidVoidPlan` turns every exposed route side into a
+  boundary obligation. `StaggeredFabricEmbedder` runs a deterministic bounded beam over complete
+  roof-closed one/two-storey envelopes at route, half-level-lower, and full-level-lower bases.
+  `StaggeredFabricCompiler` turns proposals into ordinary terrain-perched room/roof DAGs; low
+  edges that cannot fit a room may receive a complete baked market-stall envelope. The common
+  transaction recomputes surfaces, exterior air, occupancy, and boundaries from the compiled
+  units. It currently proves a connected exterior route with several rises and descents, a high court,
+  private occupied skywalk mass above public space, zero public-interior episodes, zero
+  public-air/occupied overlap, zero tents, and zero unclassified required intervals. Its
+  adversarial capture harness validates both camera collision clearance and target line of sight;
+  every full-resolution image receives one falsification disposition, and finding a real issue is
+  explicitly a successful review. Sectional capture manifests carry raw and rotation-normalized
+  maze signatures, construction signatures, and the hard stair/platform/entrance/support/overlap
+  audit beside every image target; corpus coverage rejects repeated maze or construction geometry.
+  The former v14 proof folded its upper journey and
+  descent back through one denser mass, places the second occupied bridge-house directly over the
+  lower route, renders structural surfaces with reviewed plank meshes, and shrinks the classified
+  core from 40 x 50 to 30 x 36 lattice cells. It failed the 24 x 24 compactness budget,
+  reconnecting-loop, frontage (53 of 138 exact boundary obligations closed), overhead, and
+  sightline gates; these failures are intentionally
+  preserved by the critical review harness rather than hidden by props or detached platforms. Its
+  alignment revision treats exterior doors and deliberate floor openings as typed plan facts:
+  an addressed room is selected only when its exact handed 1.5 m threshold has an adjacent public
+  landing, and every real companion landing opens the remainder of the authored 3 m facade. Derived
+  guards and endpoint posts open only across those actually claimed landing halves; an absent
+  companion remains guarded exterior air rather than becoming an invented forecourt. Only an actual
+  claimed landing proves the door reachable; otherwise the facade is closed/windowed. Collinear
+  short guards along its shallow forecourt coalesce into one authored
+  3 m rail with posts only at its outer ends, but only when the finished public surface owns both
+  sections. The final
+  `PublicRealmSurfacePlan` transaction hard-rejects every remaining unserved exterior threshold,
+  so a visible door can never survive as a later diagnostic over empty air. Stair audits
+  require both player-width lanes at their exact low/high graph seams. Structural courts satisfy
+  bearing ancestry before surface compilation, while every reserved `DAYLIGHT_VOID` remains
+  exterior headroom and receives derived guards. Guard openings are never inferred from arbitrary
+  vertically adjacent walk cells, and missing geometry is never promoted to a platform implicitly.
+  Fixed authored route seeds remain diagnostic fixtures only. Production runs the bounded
+  procedural fabric search. Four orthogonal motifs, two turn phases, and four balanced vertical
+  profiles form 32 seed-selected sectional grammar families before hashed construction choices;
+  the exact and production corpora require different raw routes, rotation-normalized routes, and
+  construction signatures. Exact visual selection compares two sealed survivors normally and the
+  complete fixed eight-plan frontier only when the current best still has under 25% overhead route
+  coverage or over 50 through-core sightlines. That vertical-coverage metric counts inhabited mass
+  or a connected upper public surface crossing a lower route column; detached decoration never
+  counts. Both
+  compact-house families use true 3 m by 6 m narrow/deep envelopes
+  with pitched roofs. Every rectangular generated house names local Z as both parcel depth and
+  ridge axis, requires the measured roof to be longer on Z than its X eave span, and rotates the
+  parcel/roof contract together; production cannot admit a sideways wide house. Complete authored
+  3 m facade modules tile every side span with their source UVs. Timber panels own one edge post,
+  so east/west faces use bake-time X-mirrored variants with corrected winding, normals, tangents,
+  collision, and material surfaces. Runtime transforms remain proper rotations; rectangular shells
+  must resolve to exactly one post at every corner, never doubled diagonal corners and empty opposite
+  corners. Modular room stitches use the solid timber jamb fitted to a 0.28 m square,
+  not the kit's plaster-bearing corner-wall panel. Every authored 3 m facade-bay
+  endpoint is framed, including intermediate T-joints on long rooms; party-wall
+  suppression must not leave an unstitched slot halfway along a room side.
+  Every compact 3 m by 3 m modular room is also classified at the final fabric boundary:
+  it must be a fully borne stack/foundation course, a two-ended occupied skywalk, or the roofed top
+  of a compact house. Partial-bearing tower rooms, roofless compact houses, and unclassified
+  micro-boxes reject the transaction; larger jetties remain governed by their separate exact
+  bracket/support proof. The stackable townhouse may fill
+  upper-route pockets without admitting sideways buildings. A greedy three-or-more-storey stack is
+  admitted only after a lower complete roof-step neighbor already exists, and exact selection rejects
+  every remaining unstepped tall stack. A narrow tall lineage is accepted only when it has a real
+  world-space floorplate break releasing two or more facade planes and no identical plate runs
+  for three storeys, so a deliberate 2+2 whole-room step is not mislabeled as a vertical extrusion;
+  central height descends through occupied neighbors.
+  Exterior stair-facade doors use the same cardinal threshold contract as
+  other addressed rooms. A generated facade may render a door-shaped module only for a sealed
+  exterior entrance or typed private feature portal, and every exterior entrance must have an
+  exact public-surface claim at its threshold; decorative or midair facade doors invalidate the
+  town. Finished static entrances always select reviewed closed-leaf assemblies. The stone assembly
+  bakes the standalone arched leaf into the authored rock surround, so closing a threshold never
+  replaces its masonry family with a plaster/timber wall; empty door frames remain catalogued only
+  for a future interactive-door transaction. Outcropping vocabulary retains three exact scales.
+  Production facade relief first tries a complete native-width 3 m gabled bay and falls back to the
+  partial-height embedded oriel only where the larger measured envelope cannot preserve every
+  unrelated room and finite roof closure. The assembler walks eligible facade courses in one
+  canonical order and commits a maximal non-overlapping set, alternating full gabled bays and
+  shallow bump-outs across accepted courses instead of independently rolling each feature. Failed
+  measured-clearance proposals try the other relief family before yielding, so a seed cannot
+  silently lose all of one vocabulary through presentation odds. The full-scale same-storey
+  bump-out remains disabled: it is a
+  3 m room plate shifted diagonally across a 3 m tower room: their shared 1.5 m quadrant remains the
+  parent's authored shell, while only the exposed L-shaped union shell, floor, braces, and roof are
+  emitted. It therefore reads as one compound building with no duplicate wall or texture in the
+  overlap. A small facade bay is instead a 1.5 m-wide embedded oriel with 0.9 m return cheeks and a
+  1.38 m partial-height face assembled from one normally proportioned authored S window. Identical
+  centered timber jambs overlap the scaled centreline of the source panel's authored terminal post
+  and its exact reflection rather than widening either edge; glazed return cheeks meet that same
+  scaled face envelope at the parent seam. Its centered complete sill and shallow tiled canopy cover
+  the complete narrowed face and both returns, the sill and
+  canopy carry it visually (no corbel hangs below), and the parent remains a closed facade rather than opening a full doorway-sized
+  hole behind the small bay. A straight room pasted beyond a facade,
+  dormer, flue, or trim can satisfy neither massing contract. Its diagonal/corner-union recipes remain testable but
+  their scale quotas are zero and production rejects any survivor which still requires a tower
+  annex; they must not reappear through an implicit relief obligation. The optional bay search ranges across every eligible
+  lineage and caps successful commits, so two initially cramped lineages cannot suppress relief
+  elsewhere. Integrated upper-floorplate shifts still emit a `room_outcropping` fact, including
+  directly borne shifts that need no brackets. A tower-to-slim/row size change computes its real
+  bearing and extension before that outcropping classification: when exactly half of the upper
+  plate crosses a two-band public-route bay, the solver seals an `arcade_overhang_support` as a
+  four-corner frame of measured deck pillars, with explicit seams to both room plates. The frame
+  occupies only the plate corners, so both 1.5 m public lanes remain open; a full 3 m stone arch is
+  not used because its jambs stand on those lane centrelines. The shift may never pass as a
+  zero-extension setback or receive loose decorative stone fragments. Ordinary
+  shallow room jetties use compact wall-bracket courses; the full-storey diagonal asset is reserved
+  for deliberately deep authored features because its long upright reads as a dangling pole when
+  repeated below a shallow projection. Side panels sit on the actual one-module shell planes rather
+  than leaving untextured gaps, never unroofed cubes, and markets draw only from the seven reviewed
+  `stocked_market` prefabs;
+  empty tent families are ineligible. The old terrain-massing planner and its compatibility entry
+  point are removed; runtime village construction has one topology producer and one atomic
+  transaction. The volumetric source-plan pipeline is the production path: the plot-model maze
+  source described below. Before the town is built, `WarrenVillageScaleProfile.select()` deterministically chooses one
+  of four size contracts: compact 65%, standard 25%, large 8%, grand 2%. **Task I8 (2026-08-30)
+  set `radius_cells` to 5/6/7/8 after fixed-camera/player review showed that the restored
+  7/8/9/11 footprints again dominated the character and surrounding world. Planning diameters are
+  51/57/63/69 m in the production frame. The source macro lattice remains the authored 3 m
+  module and its 1.5 m two-lane proof grid; `VillageWorldScale` maps the entire sealed transaction
+  uniformly to a 6 m world macro / 3 m world fine lattice. One immutable 24 m terrain-field cell
+  therefore contains exactly four town macro cells. The frame scales meshes, collision, semantic
+  occupancy, route widths, supports, and terrain samples together; individual assets are never
+  resized to repair a fit. Town extent changes only by admitting more procedural massif, street,
+  plot, and outskirts opportunities.** Total
+  inhabited-room budgets are 10--30/12--35/18--50/25--75; residual
+  infill is capped separately at 6/6/8/12 rooms. Those totals include the late residual pass,
+  which may never disappear from size accounting. Complete authored-building ranges are
+  4 for compact, 3--4 for standard, 4--5 for large, and 5--6 for grand. A bounded deterministic compatible-set beam
+  replaces the former hard-coded pair/triple enumeration, so the richer sets do not make generation
+  exponential. The reviewed catalog contains 32 distinct complete meshes: twelve Stylized
+  Fantasy Village interiors, seven tavern buildings, three alchemy buildings, two forges, seven
+  Low Poly Fantasy Village houses, and its church. They compile as indivisible measured prefabs.
+  The seven LPFV houses ship with an empty front aperture and a centred `_01` jamb frame, so each
+  prefab recipe also owns one of the pack's two hinged `_02` closed leaves at the exact authored
+  jamb/hinge transform; the leaf carries
+  both visual and collision, while a retained clearance-only halo preserves the previously reviewed
+  prefab envelope and keeps this visual correction from reshuffling bounded town search.
+  Prefab admission uses unscaled 21/24/30/36 m maximum spans for compact/standard/large/grand,
+  so a giant authored building cannot consume a compact town but the broadest silhouettes remain
+  reachable in the larger profiles instead of being globally excluded.
+  Buildings with the same occupancy,
+  clearance, and socket signature share one topology proof but select a seed-varied visual
+  representative afterward, so deduplication cannot freeze a footprint family to one mesh. The
+  solver ranks compatible sets across the whole catalog before room composition. Source skywalk
+  ranges are 2/2--2--3/3--4/4--5: larger towns request richer occupied-link sets and the sealed
+  hero-feature ranking (exact composed recipe occluder route coverage, the same test as the final
+  enclosure audit) keeps three only when the fourth provably adds no distinct inhabited route
+  cover — that redundancy is recorded as an exact diagnostic fact. Balcony ranges are
+  0--2/1--3/3--4/4--6; production full-scale diagonal-outcropping ranges are temporarily zero for
+  every size. Compact and standard towns take a covered market only when their ground street
+  holds the complete measured transaction; large and grand require it and the elevated
+  third-storey court. Stable source signatures and
+  terrain-relative rebuilds carry the exact selected profile; a small town is never a cropped or
+  mesh-scaled large one. The smaller footprint is produced at source-plan time, before streets,
+  plots, or buildings exist; it is not a camera accommodation or a crop of a finished result.
+  **THE PRODUCTION PIPELINE IS ONE PASS.** There is no generation mode, no attempt rotation, no
+  ranked candidate frontier and no solution pin: task F1 deleted the searched pipeline outright
+  (`WarrenTownSolver.GENERATION_MODE`, `WarrenPublicRealmCarver`, `WarrenGroundArcadeSolver`,
+  `WarrenExcavationCarver`, `WarrenParcelizer`, `WarrenParcelHeightSolver`,
+  `WarrenSolidPartitioner`, `WarrenBuiltTownSolver`/`WarrenBuiltTownPlan`, `WarrenTownPlan`,
+  `WarrenAssetPlan`, `WarrenFabricCompiler`, `WarrenMassPruner`, `WarrenVolumeSurfaceCompiler`,
+  `WarrenSolutionPinCache`, and the hero-feature beam inside `WarrenVolumetricSolver`). A settlement
+  is built exactly once per (city seed, scale profile), and if it is rejected there is no second
+  candidate -- which is why every richness quota below is an audit fact rather than a refusal.
+  The call graph is: `VillagePlan` -> `VillageWarrenFabricSolver.solve` (terrain sampling, yaw
+  placement, materialization) -> `WarrenVolumetricSolver.solve` -> `WarrenMazeSitePlanner.plan`
+  (massif -> carve -> reserve -> partition -> seal) -> `WarrenMazeVolumeAdapter.to_volume_plan` ->
+  `WarrenVolumetricSolver.from_volume` (public volume, parcels, rooms, one-pass feature selection,
+  residual backfill) -> `WarrenSpatialFabricCompiler.solve` -> `SettlementFabricAssembler`. The
+  terrain rebuild after placement (`solve_selected`) is the identical one-pass solve with the
+  placement's real ground bands.
+  The corpus sweep is `tests/harness/warren_maze_mode_sweep.gd`, run as
+  `Godot --headless --path . -s res://tests/harness/warren_maze_mode_sweep.gd -- --seeds
+  1,2,3,4,5,6,7,8,9,10,11,12 --scale compact,standard,large,grand`. It writes its matrix to
+  `res://.godot/warren_maze_mode_sweep.json` with a fingerprint of the fabric script directory, and
+  `tests/test_warren_maze_composition.gd::test_corpus_composes` scores itself against that file
+  and refuses a matrix measured against a different tree. `--mode` and `--constructive` are
+  retired and now exit 2 rather than silently no-opping. The full four-scale run is MANDATORY:
+  `--seeds` is global, so a per-scale reduction cannot be expressed and a short matrix
+  hard-fails the corpus gate. Corpus figures are regression measurements, never generation inputs;
+  refusals remain named composition, public-air, roof, or bearing gates rather than seed exceptions.
+  The focused five-town life corpus after the scale/connectivity revision realizes ten occupied
+  skywalks and zero unsupported/floating modular rooms. Source spans are selected with two complete
+  ground-reaching endpoint-house proofs; exact roof or envelope conflicts release the whole span
+  rather than leaving a floating body or intersecting textures.
+  Per-stage wall clock for one town is on the
+  sealed plan's `maze_stage_ms` audit
+  key; `tests/harness/warren_maze_stage_probe.gd` and `warren_solve_profile.gd` print it.
+  `WarrenMazeCarver` builds one deterministic entrance-to-summit spine,
+  coverage-driven alley network, a universal typed 6 m by 6 m market square, and open-air/tunnel
+  classification from the same `WarrenMassif`,
+  using the shared resource-free stride geometry in `WarrenPassageLatticeRules`. Its sealed
+  `WarrenMazeSourcePlan` is the prospective pre-`WarrenVolumePlan` authority: every public cell has a
+  typed spine/alley/market owner, one universal market-zone prefix, a block-thickness classification, and a
+  deterministic signature covering graph, air, and thickness state. The source seal requires one
+  exterior entrance, connected valid passage strides, capped straight runs, and at least 90% of
+  public cells retaining an inhabitable facade. It reports addressed-column reach and raw-solid
+  survival separately; the design's mass ratio is the later partition's share of post-carve SOLID,
+  not the fraction of the original massif left after intentional passage/shaft excavation. The
+  `WarrenMazeVolumeAdapter` seals a bidirectional bore/surface alignment audit before exposing the
+  common volume: every nominal passage cell retains at least two fine floor lanes, every emitted
+  floor remains inside the actually carved passage column/slot, and the second tread band of a
+  stair is recorded separately rather than misclassified as an invented path.
+  market widens a straight approach by two cells when possible and otherwise fills the missing
+  diagonal of a tight approach turn; alley growth treats that square as immutable topology and
+  restores the source frontage margin around it. `WarrenMazeBlockPartitioner` is the town's only
+  parcel stage, reached through `WarrenTownSolver.partition_parcels`. It translates the sealed
+  source's plots into the existing authored tower/slim/row/building/long parcel contracts in one
+  deterministic pass and generates no partition variants: the leftover solid already IS the
+  buildings, so nothing has to be fitted around the route.
+  `WarrenMassifBuilder` authors the one bounded 2--18-band **inhabited** mountain directly above
+  immutable terrain; `WarrenMassif.bearing_at()` is the terrain base, never a hidden stone
+  substrate. Its height law uses the footprint's continuous Gaussian value plus
+  two coherent integer-hash noise octaves, quantized to whole storeys under a
+  monotone riser clamp. Finite terrace regions are bounded before columns are
+  emitted, then small regions coalesce once without erasing a height level.
+  `WarrenMassifBuilder.build()` constructs one field and freezes it; the former
+  128 seed phases, preferred/fallback candidates and completed-field quality
+  gate are removed. `WarrenMassif.validate_construction()` inspects connectivity
+  separately for tests. The 10,000-field inspection harness checks core height,
+  five-level minimum, riser bounds, clustering and plateau limits independently.
+  Before residual massif becomes renderable stone, a deterministic macro-lattice erosion lowers
+  every complete top course of unclassified retained rock which has no cardinal structural
+  neighbour and nothing borne above it. Both derived hillside and plot mass which became no
+  building participate; rooms, roofs, features, public surfaces, prefab envelopes, and structural
+  bearing are already claimed and therefore cannot be removed. The pass iterates to a local
+  fixpoint, so an isolated raw 3 m cube cannot survive while a two-column ridge or a complete,
+  supported, roofed one-cell building remains legal.
+  When a complete source-rock course is the terrain-bearing endpoint of an occupied bridge-house,
+  it is promoted into the authored lower storey of that same building lineage; it never survives
+  as an undecorated stone cube immediately below the upper room and roof.
+  Within a partition, macro room bearing is repaired and hard-rejected before the more expensive
+  registration/silhouette relief; a source macro preflight performs that proof before the hero
+  feature beam, and the final transaction repeats it afterward. A merged room may carry a source
+  lineage upward only when the resumed authored floorplate is fully borne or has one exact
+  bracketable bay--a one-cell incidental overlap is never a support seam. Registration relief
+  scores the exact exposed shoulder before facade variation and may never replace a roofable seam
+  with an arbitrary voxel shelf; complete room crowns, compound gables, and bound lean-to runs are
+  the only admitted shoulder vocabulary.
+  After every required feature campaign and before optional facade bays, every one-cell residual
+  course trapped between occupied party walls must compile as exactly one typed
+  `interstitial_join` construction — a stepped-shoulder lean-to (bearing bond into the room
+  below's exact top socket, ridge on the single continuing wall) or a measured
+  `interstitial.seal` strip (flush-capped to the sky, timber-blocked under bridging mass) — or
+  the town is rejected with a reason-coded refusal. Coincidental mesh adjacency is never a seam,
+  a shoulder may never bear on another strip, and the final audit proves
+  `one_cell_interstitial_gap_cell_count == 0` on every sealed plan.
+  A successful exact hero-feature room composition is carried into final partitioning instead of
+  recomputing the same deterministic result, unless feature-envelope displacement changed its
+  input parcel set. Exact construction
+  assigns blue/orange/amber timber families through deterministic jittered-Voronoi architectural
+  districts about 18 m across, so neighbouring houses and vertical lineages read as related quarters
+  instead of per-room colour confetti. Blue and amber quarters take cool slate roofs; orange quarters
+  retain warm roofs, deliberately counterbalancing the two compact authored tower roofs whose honest
+  source textures are both orange. Storey phase still changes complete authored wall modules and
+  measured facade details. Construction admits only explicit compatible party-wall seams. A sealed
+  `PARTY_WALL` may suppress a facade placement only when all four fine-grid faces behind that one
+  complete 3 m authored wall module meet private volume; partial contacts retain the whole module.
+  Suppression is stored on `FabricUnit`, validated against its recipe, enters the construction
+  signature, and is applied before asset demand/placement expansion, so the renderer never guesses
+  proximity or draws coincident timber/stone skins. Touching equal-height room roofs are solved as
+  one atomic neighborhood transaction: continuous ridges, measured valleys, and stepped wall joins
+  are legal only when the complete authored neighborhood fits. A collision cannot rewrite that
+  neighborhood into flat architecture; it rejects construction while proposal selection can still
+  choose different massing. Complete terminal house plates therefore receive pitched roofs.
+  Only a complete `roof.terminal.tight.*` gable may satisfy that terminal obligation;
+  `roof.terminal.step.*` and `roof.terminal.profile.*` remain facade/junction seam vocabulary and
+  can never masquerade as a whole-room roof. The reversible source-plan gate derives every
+  complete candidate with the same phase-aligned origin and exact public-air test as final roof
+  assembly. Every roof obligation enters the layout transaction even when that candidate list is
+  empty, so an impossible optional parcel is displaced (or the layout rejects) before commit rather
+  than losing the obligation and reaching the renderer roofless or embedded in retained stone.
+  Flat/cap vocabulary is reserved for typed public terraces, circulation backing, and partial
+  setback closure whose finished topology already requires a level surface; it is never a collision
+  repair or an exposed plank weather roof.
+  Partial setback strips prefer an honest exposed-edge rail; enclosed strips may receive a measured
+  planter-only roof garden, and every dressed form has the exact plain cap as its transactional
+  fallback. A changed upper floorplate is accepted only when every exposed shoulder is either one
+  complete standard room footprint, an exact wall-bound lean-to row, or a lossless compound
+  partition of complete house crowns plus native terminal strips. The roof compiler consumes that
+  same partition largest-first with at most one recognizable gable crown per parent shoulder;
+  arbitrary branching voxel shelves are rejected or an optional
+  crown is truncated. A compound gable does not exempt neighboring rooms from measured visual
+  clearance, so a valley collision selects the matching plain shell or one coherent flat service
+  closure instead of overlapping roofs. True one-storey tower/slim closers preferentially use their integrated chimney roofs.
+  Adjacent compact roof ends are editor-baked to exact 3 m runs: each keeps its authored exterior
+  gable and terminates at the shared open party seam, so equal-datum neighbours touch without
+  overlap or runtime scaling. Compatible one-valley building/long T-neighbourhoods use the existing
+  atomic bisected-host/open-branch construction; a compact crossing which has no authored watertight
+  junction rejects the atomic construction instead of overhanging or flattening its 3 m house.
+  Pitched compact and slim roofs may receive measured dormers. Each uses one complete authored
+  attic-window shell, retaining its window, cheeks, sill, supports, and closed gabled or shed crown
+  as one coherent asset. The reviewed steep gable stays at 56% scale; the broader shed uses 50%,
+  a lower 0.22 m registration, and a 0.22 m downslope shift so its tail stays below the host ridge.
+  The blue compact tower retains the reviewed steep
+  gable; the warm compact tower uses the lower-profile shed instead of the weaker shallow gable.
+  Gabled and lower-profile shed families use separate registrations so their feet and open backs remain buried in the host slope without
+  hiding the glazing or exposing a roof hatch. Compact/wide eave offsets are 1.15/2.15 m.
+  Long roofs may select a bilateral recipe with one dormer on each opposing pitch. True wraparound
+  balcony recipes own two continuous 3 m deck rows, a native half-width third cell on the direct
+  doorway circulation line, a 1.5 m side return, nine exposed-boundary guard sections, two
+  complete one-storey timber pillars beneath real outer deck cells, and a planted corner. The
+  doorway seam and both of its guard endpoints are keep-clear zones, so neither the direct rail
+  nor an adjacent repeat's terminal post can block the aperture; structural supports sit off the
+  doorway axis. Their complete authored stair is a
+  switchback, not a two-lane straight flight: one measured low tread lands on an existing
+  `PUBLIC_FLOOR`, the opposite high tread meets the deck through one exact guard opening, and the
+  module contract aligns the high tread plane rather than the taller handrail AABB. Compact and
+  deep walk-out balconies use a four-cell-wide platform with the doorway in an inner bay, at least
+  one full cell of lateral clearance to each side guard, one complete 3 m centre guard plus two
+  complete 1.5 m end guards, and four measured supports. The nearest side-railing terminal post
+  therefore cannot sit on the threshold, and both front-guard joins sit at the outer quarter points
+  rather than on either handed doorway axis. Balconies are never
+  inferred from an accidentally exposed lower roof. None of these private visual treatments invents
+  public walkability. Every candidate's
+  complete transformed semantic solid volume is checked against the sealed 3D public-air grid—not
+  just its first band—and every collidable authored placement is checked against the player-width
+  protected lane inside that air. Shallow eaves may still brush a route cell's outer corner, but a
+  gable or eave entering the walkable body lane rejects that roof candidate.
+  An unsupported or unresolved multi-valley result rejects the construction before materialization;
+  no late pass flattens roofs or emits a fictional pitched-junction module. Stone is concentrated
+  at real terrain bearing and retaining work; a sparse building-level rule may continue that masonry
+  through the first upper storey as a coherent plinth, but never as arbitrary high cladding or a
+  hidden podium. The sparse rule now offers one in three complete low lineages, in deterministic
+  hash order, but admits them only while their exact exterior-face contribution stays at or below
+  22% town-wide; the bound is computed before material selection, so a compact town with one large
+  candidate cannot turn into a fortress and masonry never fragments panel by panel. When any column of a generated building needs that plinth, the complete building
+  footprint receives one shared bottom course with a closed four-sided perimeter; every module is
+  source-mass-backed and its lowest edge meets terrain or an authored path surface. Individual
+  facade patches and floating partial courses are invalid. A house footprint may span at most the
+  explicit one-storey plinth budget in sampled terrain height; larger risers must split into
+  narrower terrain-rooted buildings rather than becoming masonry podiums. The buildable frontier
+  is the tapered 3D envelope's real capacity boundary, never a radial outskirts ring. An outer
+  parcel whose shallowest boundary column has deeper massif immediately behind it is capped to one
+  storey plus roof at that edge, then gains one storey per inward boundary-depth ring. An isolated
+  edge house with no deeper neighbour is not shortened. This puts occupied foreground roofs in
+  front of taller mass instead of leaving one flat vertical city face. Every
+  frontier parcel must either reach terrain directly or be the one typed 3 x 6 m covered gateway;
+  optional terrain-level residual houses require a multi-face connection to already established
+  circulation, preventing unsupported one-cell tails around the edge. The gateway's
+  one bay is terrain-borne while the other crosses an already-authored lower route and its exact
+  headroom, with a measured bracket/diagonal support reserved in the same transaction. An
+  unsupported frontier parcel invalidates the whole parcel plan. Large and grand
+  topologies must also contain one typed 6 x 6 m third-storey courtyard: its floor is four bands
+  above the local terrain, supported by complete mass or a lower route, and addressed by buildings
+  on at least three sides. The court additionally reserves explicit open-sky columns and proves
+  actual public walk surfaces both below and above its XZ projection; swept headroom alone never
+  counts as the over-court route. The
+  final exact selector also recognizes broad irregular roof courts assembled by the ordinary room
+  transaction. A court must contain at least twenty connected 1.5 m floor cells, meet the canonical
+  upper route through a player-width seam, remain irregular rather than a narrow strip, and bear on
+  multiple occupied buildings. The courtless-fallback rule that used to sit here -- retain the
+  first valid courtless candidate while compiling the next three ranked partition variants -- was
+  a property of the searched frontier and died with it in task F1. There is one partition and one
+  composition, so a compact or standard town either forms its route-connected roof court or ships
+  without one, and the shortfall is published.
+  The
+  fine-grid volumetric front end selects exactly one covered market and its measured
+  skywalk set before room composition, in one pass and without a search
+  (`WarrenVolumetricSolver._maze_feature_pass`). Straight and corner skywalk recipes share an explicit blue
+  or orange roof campaign; an L-link chooses the corner matching its arms (mixed arms resolve to
+  slate), so the turn cannot expose a one-piece warm patch inside an otherwise cool roof. The market attaches the atomic 6 x 3 m reviewed canopy plus
+  authored stocked-table recipe to one exact terrain-rooted room `MARKET` socket. Four central
+  public cells remain negative space beneath the canopy; when their lattice phase does not already
+  meet one route episode, a bounded two-cell-wide aisle throat is carved to a two-lane seam. Every
+  aisle cell is newly carved canonical `PUBLIC_AIR`, carries its public floor and named construction
+  seam, and is projected by `WarrenSpatialPublicRealmAdapter` as one supplemental covered route
+  node. The market body, aisle, terrain bearing, visual clearance, backing room, and construction
+  record commit atomically; its decorated variant keeps a measured leafy plant in one post bay and a
+  barrel with tabletop lantern in the other, outside the four-cell aisle. Room/roof packing and the
+  skywalk beam must yield to that reservation. The final room transaction recomputes support from
+  the complete surviving partition. An unsupported ordinary elevated building may yield only as one
+  complete lineage/dependent closure; market, court, skywalk, and other exact feature sockets veto
+  that fallback, so neither a doorway nor an upper-room fragment can remain floating.
+  Candidate order measures bounded sight rays from every aisle edge and prefers the arcade whose
+  views terminate in inhabited mass soonest, before considering room displacement, so cheap empty
+  perimeter space cannot pull the bazaar out of the city. A canopy may meet the underside of an
+  existing upper public route: that already-sealed `PUBLIC_FLOOR` is the single shared interface,
+  rather than being overwritten with a duplicate roof claim. All other market face conflicts still
+  reject the transaction. The exact market/court/landmark/skywalk preflight also recomposes the
+  rooms and rejects any survivor that still contains more than two consecutive storeys with an
+  identical tower floorplate unless that exact lineage carries the hard quota of two occupied,
+  roofed room annexes. The feature transaction rejects the entire town when even one required annex
+  cannot seal, so the exception changes the building silhouette rather than disguising it with props.
+  Three-storey narrow houses receive one such occupied annex. The composition records are one storey
+  each, so a forced second storey does not
+  accidentally protect an optional third-storey crown from truncation. That check runs inside the
+  bounded hero-feature loops, while another court or market candidate can still be selected, rather
+  than after the first superficially compatible set has become irreversible. Tower-risk ordering uses
+  that same three-storey repetition threshold rather than the separate four-storey annex threshold.
+  Exact room-preflight failures are cached within one market candidate by the complete court body,
+  clearance and forced offsets; landmark protected cells; skywalk components, owners, clearance,
+  priority and forced offsets; and required transition owners. Authored palette recipe names are
+  deliberately absent, so visually different prefabs reuse a proof only when every consumed 3D
+  composition fact is identical.
+  When exact composition proves that the selected court's forced parcel/block/offset obligation
+  creates even one repeated shaft, the remaining visual variants of only that identical obligation
+  reuse the failure, even when the same composition reports additional unrelated bad lineages. Other
+  court geometry and other market sites remain searchable. A failure owned only by unrelated rooms
+  is never promoted into a court-wide shortcut.
+  The four typed third-storey court nodes
+  retain explicit owner identities through public-realm projection; the visual adapter tiles only
+  their exact 6 x 6 m union with alternating reviewed 1.5 m boards. Collision still comes from the
+  common sealed surface union, and no court is inferred from the shape of an arbitrary platform.
+  The one-pass feature selection (`WarrenVolumetricSolver._maze_feature_pass`) stamps the
+  scale-selected zero, one, two, or three reviewed prefab landmarks before generic rooms, from the
+  asset plots the source placed -- it does not search for them. Compact towns keep identity inside the connected room
+  mountain instead of appending a detached manor. Each anchor is a complete measured terrain-rooted recipe with its real baked
+  entrance aligned to a canonical ground-street landing, conservative shell/private volume,
+  visual envelope, exact contact-point bearing cells, doorway face, and construction transform.
+  Its source siting transaction publishes every massif column touched by that measured body/eave
+  reach plus a street-side future-house buffer. Generic parcel partitioning may reuse those columns
+  only above the prefab's top, so a selected complete asset cannot be displaced by a later low house
+  while higher terrace mass remains legal. The exact terrain-bearing columns are separately carried
+  through the final shoulder rebuild. An asset source plot is only this coarse measured search and
+  clearance reservation: after the prefab claims its real body, every unused cell in that plot
+  envelope is released to exterior air rather than retained as a full-height stone box. Support
+  below the prefab floor remains typed rock, so the landmark stays grounded without a quarry block
+  wrapping its walls.
+  Candidate pairs may touch across a canonical face only through the joint transaction's explicit
+  deterministic `PARTY_WALL` (horizontal) or `CONSTRUCTION_JOINT` (vertical) claim. Both landmark
+  transactions reuse that one canonical joint owner, so measured anchors can form coherent dense
+  fabric without double-claiming exterior facades or accepting a mesh overlap. Candidate
+  pairs rank by their measured contact
+  with surviving ordinary room mass on multiple sides before parcel displacement, surplus corridors,
+  separation, and visual variety. Blocked parcels and other hero features never count as that contact,
+  and the exact terrain-rooted transition houses which do count become required members of the final
+  room transaction. Ranking precomputes the
+  exact blocked-skywalk index set for each individual landmark and unions those sets per pair; this is
+  an exact factorization of the former pair-by-skywalk collision loop, not a shortlist. Identical
+  ordered candidate corpora reuse their complete pair frontier across court variants, while every
+  court-specific skywalk score is recomputed. This keeps a landmark
+  from winning merely because it preserves dozens of links when production needs the selected count;
+  arbitrary detached prefabs are never added after packing. Large/grand landmark groups require at
+  least one enclosed skywalk to terminate in a real landmark
+  ROOM/BEARING socket. That intentional two-cell interface is the only deferred landmark shell
+  seam, and the skywalk owns both the open face and its persistent clearance halo so later balconies
+  and roofs cannot pierce it. Landmark-owned private cells are feature volume rather than synthetic
+  `WarrenBuildingVolume` stacks, and their terrain bearing replaces any hidden support podium.
+  The exact hero preflight also mirrors final phase-A/phase-B room-envelope selection for every
+  unrelated room pair. If both measured facade phases collide, it may drop one complete optional
+  parcel and re-run the transaction; it may never drop an addressed/court/market/skywalk parcel or a
+  selected landmark-transition house. Room overhangs are preflighted together with the exact
+  measured bracket or arcade course that will bear them. When that support envelope intersects a
+  fixed market/court/skywalk feature, an ordinary optional parcel may still yield as a whole. A
+  required lineage instead feeds the exact upper-room cells back through the semantic
+  `ROOM_SUPPORT_CLEARANCE_OWNER_ID`: because composition records are one storey each, the planner
+  can terminate only an unforced crown above the last required room even when the earlier offset
+  packer grouped both storeys in one coarse band. This is a structural load-path transaction, not a
+  mesh offset or visual repair; a collision at or below a required socket rejects the candidate.
+  The covered-market backing phase is selected by one helper shared by candidate validation, exact
+  preflight, and final composition, and the recomposed room probe must still contain its exact typed
+  backing cell after every crown retry. The audit separates feature-clearance displacement,
+  room-pair displacement, support-clearance crown termination, and the persisted exact exclusion
+  cells.
+  `WarrenRoomCompositionPlanner` then treats every remaining upper band as a mutable 3D room field,
+  never as a 2D parcel to extrude. Its deterministic band tiler may replace adjacent source-lineage
+  blocks with one measured long/slim/square room when the exact occupied-cell union, support overlap,
+  protected reservations, and later lineage handoffs all remain valid. A second residual-mass pass
+  can grow a room into genuinely unclaimed inhabited massif cells beyond its source footprint; an
+  addressed upper room is eligible only when the transformed authored door and exact public frontage
+  remain unchanged. If an unforced crown can no longer fit around a hero reservation, composition
+  may terminate the lineage after its last required storey, subject to the two-storey tower cap; it may never discard or truncate
+  through a later door, court wall, market socket, or bridge endpoint. The selected court's occupied
+  bridge-house body and final recomposed room cells must still address three distinct sides before
+  any building is committed—source parcel silhouettes do not count. Cardinal adjacency is deliberately not rejected by a blanket fine-cell moat:
+  exact cell ownership protects topology, compatible contact becomes a typed party wall, and the
+  selected recipes' measured envelopes decide sub-cell eave/facade clearance. A recomposed addressed
+  room derives its authored door phase from the final world origin, yaw, frontage, and threshold;
+  inheriting the source parcel's half-cell phase is forbidden because it can move a door 1.5 m away
+  from topology. Stone upper storeys participate in the same finite balcony/skywalk portal variants
+  as timber families. Skywalk constraints
+  preserve the exact authored centre-facade room socket rather than accepting any perimeter cell.
+  After hero composition, a bounded residual 3D backfill stamps complete one-storey rooms into
+  remaining inhabited cells. It ranks genuinely new occupied cover over public route cells first,
+  accepts either the selected room recipe's exact transformed public threshold or a private parent
+  edge (mere adjacency to a street is not a doorway), and requires terrain or an
+  existing building for physical bearing. The selected scale caps both its total and per-kind room
+  count, and those rooms are added to the final inhabited-room budget. Exact roof clearance remains the construction contract;
+  an additional symmetric eave halo prevents a later facade or roof from rising through an earlier
+  pitched eave without forbidding legal same-height roof meetings. The residual pass is ordinary
+  building volume, never decorative mass, and its audit reports newly covered route cells and newly
+  closed street-frontage sides independently.
+  Storey diversity is audited from world-space floorplate columns rather than room
+  kind or local origin, because even-cell rotations and origin changes can describe the same visible
+  shaft. No accepted lineage may retain more than two consecutive identical tower floorplates, and
+  no accepted tall lineage may remain a repeated world-space extrusion. Every occupied
+  composition feature owns private volume through the same sealed exact-reservation contract; final
+  ownership validation is intentionally feature-kind-agnostic. Full-scale annex/corner-union recipes
+  remain diagnostic-only and have zero production quota; no dormer, straight pasted-on room, flue bay,
+  or other decoration may silently substitute for them.
+  After exact room composition, the same fine grid admits the scale-selected number of usable
+  balconies across multiple building owners. Each is one measured L-shaped private occupied-floor recipe with
+  two full-width deck rows, a third doorway-throat cell, a half-depth return, full two-band headroom, a
+  reviewed door facade, nine exposed-boundary railing sections, two full-storey diagonal supports, one
+  exact authored switchback stair, one exact room/bearing socket, and a named visual seam to only its
+  source parcel stack. Selection permits at most two per building and forbids equal XZ/facing
+  facade coordinates at different heights, so balconies cannot recreate a vertically repeated
+  tower pattern. Their body, visual clearance, room endpoint, guard/open-seam/soffit faces, support,
+  and construction transform commit atomically before roof selection. Candidate admission compares
+  the balcony's authored AABB with both possible facade phases of every unrelated final room, so a
+  lattice-clear bracket or eave cannot clip neighbouring construction. It also compares that exact
+  AABB with every earlier feature construction record—especially the diagonal and shallow support
+  courses owned by room-scale outcroppings—because those oblique meshes are not represented by the
+  private-volume raster alone. Complete terminal room crowns also publish their finite measured
+  gable alternatives into this admission pass; an optional balcony is rejected when it would block
+  every valid roof for any house, rather than being discovered after reservation. Measured brace clearance may
+  enter lower public air only as an explicit covered-street construction seam, and a brace foot may
+  pass below the grid only within its horizontal bounds so it visibly embeds in immutable terrain.
+  Flowered balconies
+  are separate measured recipes rather than props stamped onto the plain structural form; the same
+  transactional rule owns the garden versions of stocked markets and the planter/flower variants
+  of roof terraces and setback gardens. Their five reviewed flower families remain inside each
+  recipe's visual-clearance and fallback contract.
+  Diagnostic whole-room outcroppings are either shifted final upper-room floorplates or same-storey
+  diagonal corner unions, never small houses pasted beyond a facade. Production currently selects
+  neither form. Each diagnostic recipe owns roof, floor, exposed side shells, and support while the
+  corner union deliberately omits its shared parent quadrant. Small embedded
+  oriels use an authored shallow tiled eave rather than a bare deck cap. A diagonal corner union uses
+  two opposed, end-trimmed authored low pitches whose measured high edges meet exactly as one convex
+  gable; the clipped runs preserve the exterior eaves while removing the decorative curls that used
+  to overlap at the seam. It therefore avoids the old wooden tabletop, a concave valley, and two
+  complete roofs crossing as a pinwheel. The preferred support is a measured
+  diagonal timber course whose full 3D sweep must avoid public/daylight/service air, unrelated rooms,
+  and feature clearance; a shallow bracket course is the explicit fallback, never horizontal trim
+  masquerading as structure. Every accepted cantilever is either directly terrain/building-borne or
+  owns one of those exact support courses; odd 4.5/7.5 m bearing edges close with an authored
+  one-brace terminal after their complete 3 m courses, never a scaled brace. A room with no direct
+  bearing remains invalid. After every room has been composed, the planner re-audits the final 3D
+  solid claims rather than trusting proposal-time ancestry: it may relocate an unsupported
+  floorplate, hand the load to a lower parent floorplate, or omit an optional terminal crown, while
+  exact door and skywalk interface rooms remain fixed. The final audit permits zero unsupported
+  room transitions, unresolved cantilevers, or irregular projections.
+  The assembler recognizes disjoint upper walk surfaces across existing exterior air. It claims
+  every disjoint lower-public-street crossing first, then may add separately valid upper open-air
+  lanes; every supplement obeys the same two walkable end bearings, gap, and headroom proof and
+  never replaces a real street crossing. Even runs of complete 3 m bays, up to three bays long,
+  become 3 m-wide enclosed pitched-roof bridge-houses: complete tiled floors, complete windowed
+  side walls, and one compact roof repeat per bay. The source span, its two endpoint rooms, occupied
+  bridge room, lower public-air tunnel, and support ancestry are one topology compound before public
+  air is carved. The source transaction reserves the complete inhabited body, both endpoint shell
+  interfaces, and the complete repeated roof envelope before ordinary room composition; later
+  feature reservations merge with those claims and may not replace them by priority. The bridge
+  room's exact recipe integrates its two-ended supports, inhabited body, and one full compact roof
+  repeat per source bay, including both authored eaves. The source endpoint-to-roof seam identity is
+  carried through room recomposition into the final unit IDs, and each endpoint receives a
+  seam-clipped party gable whose ridge follows the source span. Both sockets must be opposite and terminate on distinct terrain-borne building lineages;
+  perpendicular contacts and same-building returns are cantilevers, never skywalks. A bridge cannot
+  survive as a floating roof, independent room, or post-hoc visual link. Two parallel public lanes use full end portals.
+  A single public lane may instead carry a typed 1.5 m lateral half-bay: the public lane bears at
+  both ends and the
+  unused companion lane is reserved as air. That form does not draw a full doorway into the empty
+  half-landing. No corbel is rendered under either end of any span (they read as hanging stair
+  flights); `SKYWALK_BEARER_DROP` still reserves the same headroom beneath the deck; they
+  may not spill sideways into an unrelated lower street. Each compact roof is rotated about its bay centre so its authored ridge follows the
+  crossing and its bearing plane stays exactly on the wall tops; no detached entrance posts or magic
+  roof offset remain. The floor, wall, and ceiling visuals opt out of their source assets' overbroad
+  baked hulls and use exact worker-side box claims committed on the main thread instead. The
+  side/ceiling boxes are inset at both landings, and enclosure admission checks lower public headroom
+  under every occupied lane plus public surfaces throughout the complete two-band roof volume, so
+  the real player capsule retains every open endpoint gate, lower lane, and stacked upper walk
+  without making the walls nonphysical. Every walked lane has structural end surfaces with
+  continuing support; the passage may be open below, but its occupied upper shell can never be
+  detached from a terrain-reaching building/public-surface chain. An open timber link reserves the
+  one band above its deck required by the player capsule; the optional enclosed shell separately
+  reserves two complete bands over every shell lane. A separate public walk in either occupied head
+  band rejects the structural span because its player lane has priority. The conservative surrounding
+  shell must also remain free of solid/occluding mass. Failing the enclosure-only check changes the
+  presentation to the open timber bridge when that bridge's own player headroom remains valid; it
+  never weakens the structural clearance. A one-cell gap remains the smaller railed timber bridge
+  because the authored house shell cannot fit it without narrowing the player lane.
+  Separately, already-clad massif faces may receive non-occupying facade bays or half-cell bump-outs
+  only after the exact lower-course, route-headroom, built-mass, and blocked-feature tests pass.
+  Their combined deterministic rate is 67%, capped at one projection per facade column, and every
+  accepted projection is gated on the two measured corbel stations as a clearance proof only --
+  nothing is rendered beneath it; this visual channel never invents a room or
+  support fact. Ordinary two-column room jetties use the same rule structurally: one invisible
+  support course per bearing column, sealed with the corbel's declared envelope. A broad
+  attachment bracket or loose horizontal plank is not an eligible shallow
+  jetty support. Green massif tops and the planned village green are generated by
+  `TerrainChunkMesher.flat_ground_surface` as one exact union of their logical cells, not by scaled
+  or overlapping KayKit grass panels. The production adapter binds that union to the same
+  `ground_palette.tres` UV/material and fills its vertices from the same world-space
+  `BiomeRegistry.ground_tint_at` field as streamed terrain. Exposed rims use
+  `CliffDressing.TERRAIN_SKIN_ASSETS` and `CliffDressing.tint_at`, so their wall/lip assets and biome
+  colour follow the terrain authority too. Shared cell boundaries and a rim derived from the final
+  union make grass gaps, duplicate coplanar panels, and misaligned lips impossible by construction.
+  Retained source stone is finalized only after measured roofs and structural cells are accepted:
+  exact roof-placement volumes are subtracted, then the completed fine-lattice solid union is
+  flood-solved from the sampled terrain bearing. A face-disconnected source component is discarded
+  before skinning even when its obsolete envelope happens to touch finished structure; the sealed
+  room/foundation bearing DAG, not incidental source stone, is the authority for building support.
+  Detached construction-envelope scaffolding can therefore never appear as a rock cube around a
+  roof or silently carry a floating building. Transition-owned and buried raw faces are removed
+  before adjacent stone cells are paired, then face pairs and their treatments are rebuilt from the
+  final exposed set; suppressing one surface can therefore never leave its former partner missing.
+  Masonry panels are inset by their
+  measured half-depth so their visible outer faces share the timber facade's lattice plane, keeping
+  the grass lip continuous through material transitions. Tall retained faces alternate complete
+  authored facade and coursed-stone storeys from the top down, so no pair of white/timber courses
+  can form one uninterrupted multi-storey wall. Both upright courses and horizontal retained caps
+  inherit one blue/orange/amber district stone wash; the near-white facets of the authored rock
+  atlas can therefore never reappear as detached polygon scraps where a wall turns into its cap.
+  Retained faces are capped at two storeys in the
+  production audit, while the outer parcel profile steps to one-storey pitched-roof houses before
+  the central mass rises. One deterministic narrow building on the lowest occupied datum may retain
+  its seeded tower height as a vertical accent, but it still commits as one complete floor-to-roof
+  house plot through the ordinary carved-volume, street-stranding, and terrain-bearing gates. More
+  generally, a storey may be a public walkway/undercroft or a building may cantilever across it only
+  when the occupied mass above owns an explicit endpoint, stack, bracket, or foundation ancestry that
+  reaches terrain; elevated circulation is encouraged, unsupported upper architecture is invalid.
+  The source's plaza deck is also a typed plan fact, not whichever decorative lawn happens to be
+  largest: reservation grows one complete aspect-bounded macro rectangle, the public surface solver
+  proves its entries and support, and `SettlementFabricPlan.planned_plaza_cells` carries that exact
+  reachable square into the terrain-parity turf and threshold pass. Because those turf cells remain
+  sealed public floor, late centre features and boundary planting are ineligible there; unwalked
+  roof greens may still receive measured furniture. Tiny 1x1 leftover caps never become public
+  plazas. Optional facade, roof, and garden decor is accepted only when its measured authored
+  AABB misses the exact player-width swept prism over every exterior walk surface; suppression may
+  remove an optional prop but cannot move a route, wall, roof, or seed-specific coordinate.
+  Exact third-storey court frontage freezes only the contacted facade columns, not an entire room;
+  half-storey paired relief indexes every occupied fine-Y slice and may atomically repartition two
+  neighboring rooms before either is rejected in isolation. Addressed replacement rooms use the
+  same two measured door phases as ordinary construction, and a load-bearing room below that
+  threshold may still reshape while preserving the exact support column. The global support
+  allocator may join collinear measured cantilever courses into one explicit timber frame; the
+  compiler records those structural joins as semantic visual seams, while every unrelated room,
+  feature, and support overlap remains forbidden.
+  Lived-in roof, market, balcony, and facade dressing draws from measured collisionless plants,
+  benches, chairs, bags, buckets, crates, barrels, lanterns, and firewood. Those props participate
+  with their full authored AABBs in the same construction transaction as the room or structural
+  surface that bears them; they are not a post-pass scatter that may clip walls or circulation.
+  The fast diagnostic
+  `tests/harness/warren_spatial_review.tscn` renders the already-sealed fine-grid candidate directly
+  and adds route-transition, authored-facing dormer, outcrop-oblique, and front/underside balcony
+  falsification views. `tests/harness/dormer_recipe_review.gd` separately renders the exact compiled
+  dormer recipes from catalog meshes to verify their roof intersection without town occlusion. It deliberately bypasses corpus
+  selection and is not evidence that the production selector accepted a seed. Its
+  `--production-terrain-site` mode instead runs the real selected settlement transaction, commits
+  the exact production entry list (including terrain-derived support posts), renders surrounding
+  `TerrainChunkMesher` chunks in the town's local frame, and omits the diagnostic road skin so paths
+  remain the actual terrain or structural surfaces production owns. The spatial fabric
+  compiler assigns every segmented building lineage one of three deterministic authored
+  construction styles, independently of streaming. Each exact tower/slim/row/square/long footprint
+  has a flush and rich recipe in that style with identical solids, inhabited volume, sockets, and
+  entrances; storeys alternate only within the lineage's pair. Theme/form/style-selected ivy,
+  clothes, signs, or planter-and-flower windowboxes form the measured rich phase, which retries its
+  paired flush recipe when the projection conflicts with already accepted construction. Before that
+  choice it derives a finite mandatory weather-closure domain from the sealed occupancy/roof faces:
+  complete terminal plates reserve an exact tiled gable profile, private partial rows reserve their
+  handed clipped-gable alternatives, and plank backing is eligible only when that row already owns
+  a sealed public floor. The same closure groups are preserved against optional features before
+  final face regions exist, then rechecked semantically and by measured AABB after each roof choice,
+  so a facade, balcony, or earlier crown cannot consume every valid roof of a later house. A
+  bay/laundry/sign phase may fall back, but cannot make the later roof pass impossible. Every pitched roof placement is aligned from its measured visual
+  lower bound to the logical wall-top bearing plane; composite row/slim crowns may vary horizontally
+  but may not raise one neighboring shell above another. `SettlementFabricPlan.add_unit()` also
+  rejects every complete pitched roof whose measured visual XZ centre or wall-top bearing differs
+  from its logical solid footprint, so an offset crown cannot enter the sealed transaction. It stages
+  semantic occupancy and publishes
+  it only after visual-envelope validation, so a rejected rich phase cannot leave ghost claims that
+  poison that exact fallback transaction.
+  Production then compiles the sealed spatial plan and rejects it unless inhabited/structural mass
+  covers at least 38% of public route cells, all-height through-core sightlines are at most 48, and
+  ground through-core sightlines are at most 20. These are screenshot-backed acceptance gates, not
+  decorative scores: a feature-complete town with an open plaza or horizon-length street is not a
+  production result. Diagnostic review disables no visual-overlap rule; every captured candidate
+  must pass the same strict measured-envelope transaction as production.
+  Skywalk reservations are solved against the fixed exact parcel partition and preserved through
+  asset compilation; do not fake extra links when no independent measured corridor exists. Rules
+  that read a plot-model fact are guarded by `mass_context.has(&"maze_source_plan")` so a
+  hand-built fixture volume cannot trip them.
+  `WarrenVolumeEnvelope` is the shared height/address envelope the sealed `WarrenVolumePlan`
+  carries; `WarrenMazeVolumeAdapter` builds one for every town through
+  `WarrenExcavationVolumeAdapter.envelope_from_massif`, and `VillageWarrenFabricSolver` samples
+  real terrain against it. That plan distinguishes remaining building `MASS`, abstract `WALK`
+  floor planes, swept `PUBLIC_AIR`, and deliberate `DAYLIGHT_VOID`. `WarrenVolumeTransition` owns both endpoints and complete swept air;
+  every edge changes by at most one 1.5 m circulation band. Vertical edges always reserve a physical
+  span between two square landings: a two-macro-cell edge owns a complete 3 m stair, while a
+  three-or-more-cell edge owns at least 6 m and becomes a sloped walkway. Perpendicular vertical
+  turns require square landings; adjacent full platform squares are never accepted as a zero-length
+  stair. The parcel contract itself is unchanged by who produces it: only roofable 1x1,
+  narrow/deep 1x2, and 2x2 macro footprints, never a frontage wider than its depth, and only
+  complete 3 m inhabited storeys on arbitrary 1.5 m base phases. The parcel's real transformed
+  authored door must land inside its addressed public square; a facade-wide proxy address is
+  invalid.
+  `WarrenVolumePublicRealmAdapter` expands the route losslessly into the common two-lane lattice.
+  Its only added surfaces are small one/two-ring courts owned by existing elevated route nodes;
+  optional one-cell galleries preferentially cross a lower public route or terminate in a pocket
+  bounded by two inhabited facades. Both remain short route-fused strips with exact support,
+  headroom, guard, and connectivity proofs; neither can become a detached suspended platform.
+  Ground-street cells without inhabited or structural overhead are flood-audited as same-level
+  components; no accepted component may exceed twelve 1.5 m cells. After hard raw-core closure,
+  optional galleries are chosen by the reduction they make to the largest such component before
+  aesthetic scores break ties. `WarrenPrunedMassPlan` owns whether provisional Gaussian mass is
+  real structure: only `BUILDING` and `BEARING_OPPORTUNITY` block headroom. An `OUTSIDE_CORE` cell
+  may support an upper-gallery extension only when that cell directly shelters an already sealed
+  lower public route, so tapered-envelope air cannot act like an invisible ceiling or authorize
+  arbitrary suspended terraces. `WarrenVolumeTransition.surface_cells()` is the shared exact
+  two-lane stair/ramp footprint; platform discovery reserves that surface plus its full headroom
+  before admitting any gallery.
+  Lightwells are subtracted after the full union is known only when every cardinal side is public
+  surface or inhabited wall and a flood proves every surviving extension cell still reaches its
+  owning route square; an explicit unbounded hole is rejected. Raw
+  parcel-stage openings are audited before infill and no cardinal component may exceed
+  four macro columns; post-infill permits no unclassified 3 m core aperture at all. Only
+  isolated, bounded, guarded 1.5 m lightwells may then be subtracted, with at least three
+  fine cells between their XZ projections even across different levels. This prevents a broad
+  failed cavity from being hidden beneath one low deck. Incidental court contact beside a
+  transition is reduced to a deterministic non-overlapping seam subset rather than duplicating
+  stair lanes.
+  The compiler derives facade openings, guards, and collision-bearing ramp/stair meshes from
+  those same facts; each vertical transition covers every logical stair cell, owns two side rails,
+  and meets both landings across exact two-lane seams. Horizontal courts render reviewed fixed
+  board assets while the generated union remains collision-only, avoiding the duplicate dark skin.
+  The fine spatial plan additionally proves the source volume's exact route surface is a subset of
+  the final connected route (late market aisles may only extend it), and the common spatial surface
+  compiler must receive that immutable volume lineage so every logical vertical edge has matching
+  render and collision geometry. The review harness includes low-landing transition captures; a
+  connected graph without a visible/collidable climb is a failure.
+  stair/ramp meshes use a stable plank shader. Sparse timber supports derive from exposed court
+  cells down to an explicit datum, while a court only one half-level above terrain is enclosed by
+  fixed retaining-wall modules instead of becoming a crawl-height undercroft. The production
+  terrain adapter likewise derives posts from exposed public-surface boundary corners and repeats
+  them at the authored 3 m structural rhythm; fully enclosed interior cells are omitted so a broad
+  deck gains a legible perimeter load path without becoming a forest of posts.
+  `WarrenSpatialFabricCompiler` compiles the measured terrain-rooted stacks, complete roofs,
+  occupied skywalks, and roofed outcroppings through one common fabric/air/solid-void transaction;
+  `WarrenAssetCompiler` survives as its vocabulary helper (facade-family selection, room and parcel
+  socket endpoints, skywalk compatibility, the partition asset cache) after task F1 deleted its own
+  `solve` entry along with the searched town it compiled. Visually one-storey proposals and every
+  frontage-wider-than-depth orientation are ineligible. Equal-height, equal-family neighbours may
+  meet only through an exact collinear-eave party-wall seam; unequal, gable, corner, and overlapping
+  contacts remain conflicts. Occupied straight skywalks use a measured pitched repeat-and-gable
+  roof run; a floor module is never reused as their ceiling. Complete stocked-market candidates
+  prefer residual open-core columns before their stable hashed tie-break. Exact frontage, overhead,
+  occupied-link, and sightline audits own the final no-through-street decision -- as GUIDANCE
+  carried in the audit, not as gates: there is one candidate, so a metric a town misses is a
+  recorded fact rather than a rejection. The composed-enclosure viability floor, the ranked
+  eight-plan frontier and its rescue-plan tier were properties of the searched frontier and died
+  with it in task F1, together with the terrain-level arcade branch grammar
+  (`WarrenGroundArcadeSolver`) that ran before parcel packing.
+  HISTORICAL, and kept only because the invariants it names are still enforced: the four-seed
+  measured gate and the 44-image cleanup review above were measured on the SEARCHED pipeline that
+  task F1 deleted, so their per-seed counts describe towns nothing builds any more. The structural
+  facts they pinned do survive as gates in the compiler and the plan seals -- distinct
+  maze/construction signatures, connected roofed buildings, zero visually short parcels, no stair
+  endpoint gap, isolated guarded lightwells, no unclassified 3 m core aperture, a bounded largest
+  uncovered lower-route component, and zero public-air/occupied or visual-envelope overlap -- and
+  the falsification findings behind them still hold: four lightwells could leave one broad opaque
+  upper court where six bounded fine-cell wells break that surface without reopening a
+  top-to-ground shaft, and cardinally bounded subtraction could still sever a one-cell route neck
+  until route-connectivity validation was added. The CURRENT corpus measurement is the sweep's:
+  24 of 24 towns seal, and the four planner seeds (12/4 compact, 3/9 standard) are solved
+  end to end by `tests/test_warren_maze_composition.gd`. Visual review is Phase G's battery.
+  `VillageWarrenFabricSolver` aligns the selected volumetric landing to the production road,
+  resamples immutable terrain bands, and materializes that sealed fabric through `VillagePlan`.
+  The route node is where the arriving road ends, so the entry's terrain contact -- the foot of the
+  handoff ramp plus the road's half width -- is anchored on that node: a gate that faces the road
+  meets it head-on, and a gate the terrain forced sideways meets it as a right-angled T instead of
+  swallowing the road's last metres under its edge houses. Every quarter is also tried with the
+  older entry-cell anchoring, ordered after the contact-anchored frames of the same alignment, so a
+  seed whose secondary gate loses its projection at the shifted frame still builds. Each gate
+  handoff quad chooses its winding per contact (the lateral tangent is a cell-order convention, not
+  a handedness), so no ramp is back-face culled from above.
+  Missing common fabric vocabulary is a construction error, never a request to invoke an older
+  terrain-led fallback.
+  Village contracts live under `features/villages/`: `VillageProgram` caps anchors at
+  144 m and records at the settlement's 192 m inset; `VillageFrame` freezes the accepted route
+  signature; `VillageRecord` seals sorted semantic output; `VillageOccupancy` is a bucketed typed
+  3D index (`SOLID`, `WALK_SURFACE`, `HEADROOM`, `GROUND_EXCLUSIVE`, `WALK_GUARD`). Public
+  `WALK_GUARD` rails may meet only walk surfaces or sibling guards in their explicitly declared
+  walk network; generic solids never inherit that seam permission. `FoundationSolver` proves
+  enterable floors above natural terrain and tiles fixed perimeter modules; `SupportSolver`
+  composes fixed-height stacks with bounded burial and atomic occupancy. `VillagePlan` solves one
+  atomic `VillageUrbanFabricPlan`; its furnishing belongs to that same transaction and there is no
+  legacy post-pass for standalone props. A rejected urban solve emits no village payload, so a tent or campfire can never
+  masquerade as a settlement. `VillageRecord.urban_fabric` is the canonical typed structural
+  record; the older fixed `VillageElevatedDistrict` and its isolated regression test have been
+  removed. Production rolls only
+  village/town; the compiled hamlet vocabulary stays dormant until it can satisfy the same
+  inhabited multi-level contract.
+  `VillageOutskirtsSolver` runs only after an accepted urban transaction. Every painted outskirts
+  lane, including the final spur to a prefab doorstep, is the ordinary `PathProgram.PATH_WIDTH`;
+  only the spur's reserved headroom narrows to the measured doorway. The edge district is meant to
+  RING the dense core (2026-09-04): each exit's neighbourhood reaches sixteen grid steps so the
+  flanking runs of two or three gates wrap most of a silhouette, six roots per side are ranked,
+  and `VillageOutskirtsProgram.target_houses` asks for 6/9 houses or three per sealed exit. The
+  town's terrain-qualified perimeter stalls are published on `VillageUrbanFabricPlan.frontage_sites`;
+  the perimeter grid blocks them like mass so the lane runs in FRONT of the stalls, and a root
+  facing a stall row is a MARKET lot: its house stands one `MARKET_STALL_BAND` (three cells) back
+  from the lane's outer edge, and every town stall fronting that lane gets a TWIN of the same
+  reviewed asset directly across it (slid sideways past the door spur when the house is centred
+  on it), standing as close to the lane as the lane clearance allows and under the prefab's
+  eave, its occupancy clipped at the headroom line exactly as the house's own eave is; each twin
+  is proved on level dry ground and against district occupancy, keyed by the town stall it
+  mirrors so two market lots cannot double it. The street then has market fronts on both sides
+  and a building behind. For production volumetric
+  warrens every sealed terrain exit seeds one bounded entrance-neighbourhood street graph. The
+  solver rasterizes the exact union of `SOLID`, `WALK_SURFACE`, and `WALK_GUARD` volumes on the
+  shared 3 m world/village lattice. Lots stay on its nearby one-cell exterior contour, from
+  one through sixteen grid steps from their nearest exit; street routing may use the bounded
+  three-cell exterior band to avoid copying every facade notch. Direction-aware search minimizes
+  turns first and length second. Each demanded route roots back to the primary road contact,
+  rather than ending in an isolated secondary-exit fragment. It never draws a belt road around the bounding
+  box or offers parcels no exit neighbourhood reaches. A local street occupies the single grid cell between the urban fabric
+  and the prefab frontage; district/ecology clearances and the union's bounding rectangle cannot
+  create a vacant moat. Candidate perches are qualified inside that bounded corridor *before*
+  terrain ranking is capped, and alternate roots remain at least one compact-house frontage apart.
+  The corridor derives each candidate centre from the exact oriented support radius, so even- and
+  odd-cell footprints both put their wall immediately beyond the lane without a later offset. A
+  broad prefab's authored off-centre door projects onto that same continuous contour lane, but its
+  bearing remains cardinal and its measured support footprint must remain immediately outside the
+  lane. The complete house is transformed in the same uniform 2x authored-to-world frame as the
+  dense warren; visual meshes, attachments, collision, support, doorway, and occupancy all share
+  that transform. The full upper/eave envelope is still reserved above public headroom, while
+  ground-route collision uses the borne support footprint below headroom and the broader visual
+  envelope above it, so an eave cannot masquerade as a wall. Its door
+  faces a short connected doorstep spur; its reservation may taper to the authored threshold,
+  while all painted paths retain the normal 4 m width. Complete polylines remove collinear
+  segmentation and use `PathProgram.filleted_path_shapes`: the normal road's 4 m centreline
+  radius (limited by short runs), with 32 capsule chords per quarter turn. Both producers paint
+  through the same terrain path/spot surface, not a second road material or overlay. Finished
+  curved paint is checked against ground-level solids, without rejecting valid overhead roofs.
+  One exit may serve multiple nearby houses, but
+  every sealed exit must retain a proved neighbourhood connection. The production entry comes from
+  the sealed source volume's exact world transform; local frontage selection remains separate from
+  its connection to the shared primary-root street tree. Repeated reservation edges deduplicate
+  by stable identity, and coincident paint is a field union rather than overlapping mesh sheets on shared
+  paths. Houses are complete enterable authored assets placed once at ground level, with attachments, a measured
+  perimeter foundation, a proved public lane, and the same typed occupancy transaction as the
+  dense core; tents and detached prop shelters are ineligible. Failure remains optional and leaves
+  no partial edge payload. This makes the settlement taper into an immediate inhabited ground-level
+  entrance district without growing a disconnected radial camp or a gratuitous full-town ring.
+  `VillageTerrainView` is the only cross-block terrain/water query adapter;
+  `VillageTerrainSurvey` discovers and spatially buckets guarded-source-dry buildable perches
+  without mutating the heightfield (exact water remains a final-transaction check); and
+  `VillageMassingSolver` uses a bounded, composition-diverse beam plus a ranked complete-plan
+  frontier to pack 7–15 inhabited buildings into a 42 m core (10/15 authored targets for
+  village/town). It tries comparable ranks
+  across building counts instead of exhausting near-duplicate dense failures first. The massing
+  contract requires at least three irregular elevation bands, short neighbours, and real
+  half-rises while preferring direct terrain contact over bounded retaining-terrace variants.
+  `VillageVerticalProfile` derives its 12 m full / 6 m half-level cadence from the tallest
+  stackable furnished house plus roof clearance; terrain storeys remain an unrelated landform
+  unit. The route landing and already-solved ground market are hard reservations, each accepted
+  footprint expands into both legitimate facade directions, and reviewed door/stair access is
+  qualified before beam search. Larger furnished houses are ground-only accents, so adding asset
+  variety cannot silently increase the vertical cadence or erase the compact-house vocabulary.
+  `VillageMarketSolver` runs first and selects one connected orthogonal alley topology before any
+  building is admitted; reviewed stalls line both sides where terrain and exact 3D occupancy
+  permit. The market's street/headroom volumes participate in the same massing transaction rather
+  than being optional decoration added after the town exists.
+  `VillageCirculationSolver` owns topology only. It first builds all cheap direct right-angle
+  terrain edges, then asks `VillageGroundRouter` for bounded A* detours solely between remaining
+  disconnected components. Ground routes may cross natural height bands only through frozen
+  fixed-module `VillageStairTransition`s. `VillageRouteStairFabricSolver` materializes each flight
+  on the exact requesting terrain edge, keeps the worn street continuous beneath it, derives two
+  slope-aligned collision-bearing side rails per stair module, and treats intersecting ground
+  flights as one public-circulation compound. `VillageAerialRouter` derives a
+  bounded acyclic set of short rounded links and one-module-deep public forecourts that exist only
+  at inhabited facade seams. There is no long-span or empty suspended-platform fallback.
+  `VillageRouteGeometry` owns the shared swept-headroom facts. The graph must connect every door to
+  the route landing, contain a useful ground-street fabric, at least two local aerial links, and at
+  least one inhabited shared platform; aerial links remain at most 24 m.
+  The support compiler freezes each massed floor and chooses one typed atomic mode from terrain
+  opportunity: naturally supported perches receive the ordinary fixed perimeter foundation,
+  while retained perches receive the compact rock core. Exact 1.5 m timber cells
+  exist only outside that core under the unsupported part of the building (plus one skirt-apron
+  row), or on a thin route; a whole tile is removed when its OBB overlaps any core. There are no
+  substantial uninhabited suspended platforms. Exposed timber edges derive exact compound
+  railings, with graph openings at doors and stairs. Sparse fixed timber support stacks sample
+  exposed boundary corners at roughly one stack per three modules and never use non-uniform scale;
+  individual candidates are
+  omitted if they hit a core, stair, water, unsupported ground span, terrain above the deck, or a
+  lower walk surface. Required rock stacks reference the lowest ground under their broad stencil,
+  may bury by less than two storeys on the high side, and use at most eight fixed modules, so they
+  seal natural slopes without stretching or floating. Rock cores, buildings, skirts, routes,
+  stairs, railings, and protected undercroft headroom beneath the lowest viable inhabited overhang
+  all validate before the district materializes. Bound ground activity is optional and cannot
+  veto a complete inhabited district; any required-structure failure omits the whole transaction.
+  `VillageOutskirtsSolver` may then place sparse houses immediately outside the exact occupied-volume
+  contour. Every sealed terrain exit feeds its bounded local entrance-neighbourhood street graph;
+  no street is extended around unrelated sides of the settlement. Each complete prefab sits one
+  shared 3 m lane outside the core, remains aligned to the town lattice, faces its doorstep connection, and is shown in
+  corpus review together with the dense city rather than as an isolated facade. Sparse ground houses never
+  substitute for the required dense urban transaction. Production outskirts use complete
+  enterable furnished houses across blue/orange runtime variants, including the larger SFV homes
+  that remain awkward inside the sectional grammar. Selection is a bounded measured construction
+  search: each lot tries the upper support-area cohort first, then independently surveys progressively
+  smaller complete prefabs only when the exact terrain contour, doorway, or neighboring mass cannot
+  carry a larger candidate. Tents and closed-front shelters remain catalogued but are excluded from
+  this inhabited taper. Freestanding tables are never facade-gap filler; table dressing appears only
+  inside a complete reviewed market envelope whose support and clearance were admitted together.
+- **`field/WorldFieldBlockCache.gd`** — the worker-confined canonical owner of independently lazy
+  terrain regions and exact water contexts. Half-open 192 m keys and deterministic bounded LRU
+  make planning, meshing, water, and dressing share the same live field objects without locks or
+  output dependence on query order. `TerrainSurfaceField.is_walkable_edge` is likewise the one
+  symmetric exposed-boundary fact shared by path traversal and the rendered mesh.
+- **Environment assets** (`scripts/terrain/environment/`, `terrain/environment/`) — source-pack
+  scenes are editor-baked into lightweight descriptors plus self-contained meshes, materials,
+  textures, typed visual pieces, and optional typed collision pieces. Manifest scale is applied
+  exactly once at bake time: KayKit retains its legacy wrapper scales and LPFV nature uses a 3.25×
+  pack correction. Reviewed KayKit primitives are preserved from bake-only collision templates
+  where they fit: the owner's original three-cylinder proxy remains on KayKit rock 1, while
+  rock 2's oversized sphere is replaced by a mesh-derived flat-topped hull. KayKit trees 2 and 4
+  are intentionally absent from the catalogue.
+  LPFV rigid assets normally use one snag-free primitive per disconnected hard component. Trees use
+  a rotated capsule around only the grounded lower trunk, fitted from true mesh cross-sections so
+  sparse/leaning low-poly vertices cannot pull it off-centre. The strongly curved LPFV tree 2 uses
+  an explicit four-capsule chain instead: short capsules follow successive cross-sections and
+  adjacent capsule axis endpoints are the exact same point, making their hemispherical caps
+  concentric at each rounded joint; one global chord can no longer protrude from the bend. Logs use
+  flat-ended rotated cylinders, the
+  fallen branch uses a rotated capsule, stumps use flat-topped cylinders, and rocks use an inset
+  box or a convex hull whose top is flattened into a face. Multi-rock source clusters declare their
+  hard-component count in the manifest, so each visible stone receives its own disjoint hull rather
+  than one collider bridging the empty space between them. Decorative foliage and mushrooms never
+  enlarge physics. This deliberately avoids overlapping compound-shape lips, point-topped walkable
+  objects, and collision that bridges empty space. Low rocks tagged `walkover` cap their collision
+  height so their largest authored dressing scale remains below the character's step height; a
+  catalogue test couples those values and prevents later tuning from breaking traversal. Assets
+  tagged `tree`, `rock`, or `deadwood` are rejected by
+  the bake unless they declare collision, so rigid dressing cannot silently become non-blocking.
+  Runtime consumers use
+  stable asset IDs through the
+  lightweight `EnvironmentCatalog`; the main-thread `EnvironmentRenderCache` selectively loads
+  only active visuals. `EnvironmentInstancePayload` may mask collision on an individual visual
+  placement and carry resource-free box transforms/sizes when a generated construction has a
+  tighter reviewed traversal contract than the reusable asset's baked hull; only
+  `EnvironmentCollisionBuilder` and `FeatureCommitQueue` create those `BoxShape3D` resources on
+  the main thread. Both adapters must honor the per-placement collision mask; visual-only bridge
+  shells may never silently regain their broad baked hulls while crossing the village record.
+  Environment runtime resources never depend on the source packs under
+  `assets/`. `tools/environment_bake/` is the only owner of those source paths. Generated palette
+  variants may selectively recolour foliage texels. The dense-grass bake may select an authored
+  subtree and merge/simplify either separate or indexed-component ribbon leaves, optionally
+  spreading whole components radially and retaining per-component root XZ in UV2 for local
+  deformation; the current
+  collision-free Collection 5 patch is about 1.10–1.27 m tall after authored variation and does
+  not participate in ordinary dressing. The
+  Fantasy Village man-made feature pack uses
+  a reviewed 2× human-scale bake correction for its freestanding arches and lamp. A manifest
+  fallback supplies the orange atlas missing from the second large arch's source material, so the
+  correction is baked into the self-contained runtime asset. Its bridge
+  retains the independently calibrated `[1.2, 1.0, 6.0]` vector scale that supplies a human-scale
+  deck and rails plus the required crossing span. Large arches use compound collision following
+  four posts, upper beams, diagonal braces, and both roof slopes; the character-height opening
+  stays clear while collision reaches the visual top and depth.
+  The reviewed village-structure bake likewise treats collision as structural geometry, never a
+  prefab-wide box. The campfire/spit uses six cylinders (ring, crossbar, and four stands); the
+  walk-in tent uses one two-sided triangular roof shell, four rectangular posts, a rectangular ridge, and a
+  triangular back prism; stalls use four posts plus three canopy panels; stocked tables use a top
+  and four legs; the well uses eight disjoint ring segments, two posts, and two roof slopes; fence,
+  railing, and quest-board assets preserve their separate rails/posts/boards. Catalog tests pin
+  these primitive mixes and piece counts. `environment_lineup.tscn -- --asset ID
+  --show-collision --collision-closeup` is the required visual check; add
+  `--depth-test-collision` to expose only proxy material outside the rendered mesh.
+  Every active material still multiplies
+  the independent per-instance biome tint. `terrain/materials/forest.tres` is a self-contained
+  bake-compatibility path for Godot's imported KayKit scene UID, not a runtime material owner.
+- **`field/FieldTerrainStreamer.gd`** — the only scene-tree node (`Node3D` in `world.tscn`,
+  wired to the player). Builds field chunks within `CHUNK_RADIUS` of the player on **one
+  background worker thread**. It compiles dressing, grass, and the composed `FeatureProgram`,
+  then warms terrain, nature, and grass resources on the main thread before starting the worker.
+  Man-made feature assets are deliberately excluded from eager warm-up and demand-loaded by the
+  commit queue.
+  The worker returns only arrays/transforms/sampler payloads. Terrain and feature generations are
+  independent, but queued requests for one block widen into one job. Typed grass jobs reuse the
+  canonical `WorldFieldBlockCache`/`WorldFeaturePlan`, are eligible only after their containing terrain is
+  committed, and sit behind player-critical and grass-underlay terrain but ahead of the outer
+  terrain ring. Grass never gates terrain readiness. A completed terrain payload waits in one nearest-first
+  list until every key in its footprint-derived feature halo is ready; v1's maximum footprint
+  yields exactly the lexicographically sorted 3×3 square. Empty feature blocks are explicit ready
+  records and allocate no node/resource. `FeatureCommitQueue` demand-loads sorted assets and
+  incrementally creates collision under count + elapsed-time budgets; only a collision-complete
+  block attaches under `ManmadeFeatures` and becomes ready, while visuals remain independently
+  budgeted. Terrain then
+  commits in terrain → water → dressing collision → `add_child` → FX → dressing visual order,
+  `MAX_BUILD_PER_FRAME` per frame, nearest-first, evicting beyond
+  `KEEP_RADIUS` (features use `KEEP_RADIUS + feature_halo`). The worker exclusively owns its
+  `_settlements`/`_features`/`_water`/field/mesher instances, so their
+  caches need no locks. `FieldTerrainStreamer` also remains the only owner allowed to attach the
+  grass and trample roots to the scene tree; grass runtime is skipped in headless terrain runs.
+  Each sealed village's complete instance/collision payload belongs to the feature block that
+  contains its canonical centre. Its ground and clearance shapes remain query-projected. Because
+  the compiled record reach is less than one block, the existing one-block feature halo keeps that
+  owner resident anywhere the village can intersect terrain while avoiding duplicate per-asset
+  MultiMesh and physics batches across several blocks.
+  At startup the player is frozen until every chunk within one logical terrain cell of spawn
+  and its feature square is ready. The production spawn is inset 0.5 m into chunk `(0, 0)` so its
+  capsule has one collision owner, but the camera-visible startup boundary still covers all four
+  origin quadrants; later, a missing current
+  chunk freezes them during teleports or when outrunning the worker. Collision therefore cannot
+  pop in after movement starts. Ordinary radius terrain is not queued until this startup set and
+  its feature dependencies finish, preventing unrelated mesh work from extending the loading
+  screen; the cold river/path spike stays off the main thread. Owns the
+  `world_seed` (random per run). `TerrainWorldTuning` is the single owner of
+  `HEIGHTFIELD_AMPLITUDE`, `HEIGHTFIELD_MAX_STOREYS`, and `MAX_CLIFF_STEP`; the streamer has no
+  inert inspector mirrors whose values look editable but are ignored.
+
+## Shared fields & utilities (`scripts/core/`)
+
+- **`TraversalEnvelope.gd`** — resource-free canonical player capsule, aperture, headroom, and
+  finished/planning step limits. Village solvers consume it and a scene contract test pins it to
+  the live character collision and controller constants.
+
+- **`Helper.gd`** — deterministic, infinite-terrain-safe noise fields, all pure functions of
+  `(pos, world_seed)`: `macro_density01`, biome fields `biome_forest01` / `biome_rocky01` /
+  `biome_foliage_density` / `biome_weights5`, value-noise
+  (`_value_noise01`), and hashing helpers (`_cell_hash01`, splitmix64 `_mix64`). Also
+  transform/AABB/collision helpers. `HeightfieldPlan._height01` samples these for landform shape.
+  (Some doc comments here still name the retired `TerrainGenerator` — ignore those references.)
+- **`Distribution.gd` / `PriorityQueue.gd`** — small generic helpers.
+
+## Terrain tools & water
+
+- **`terrain/tools/CoordOverlay.gd`** — the F3 debug HUD (in `world.tscn`): a crosshair plus a
+  readout of the seed, the player's cell, the crosshair-target cell, and the 3×3 storey grid
+  around it. A screenshot alone then pins down exactly where a terrain issue is — use it to
+  reproduce a reported bug by its seed and coordinates. Storeys come from immutable snapshots
+  attached to committed chunks; the main-thread HUD never reads the worker-owned plan or caches.
+- **`terrain/tools/SlopeProfile.gd` / `SlopeAtlas.gd`** — the `smootherstep` slope profile math
+  and grass/rock UV sampling from KayKit pieces, shared by the field and mesher.
+- **Water** (`scripts/terrain/water/`): a deterministic **river network carved into the
+  heightfield** — `WaterPlan` surveys four stratified candidates per 768 m district,
+  climbs the highest to a prominent summit, and uses an 85% source roll. Its bounded
+  2D contour walk prefers modest descent, keeps a winding handedness and clearance from
+  old reaches, and drifts outward so it cannot close a loop around itself. Natural terrain
+  can rise along a proposed open cutting, but the bank-contained hydraulic bed never rises.
+  Raw routes allow 4.32 km of arc inside a 2.4 km displacement bound; basin termination
+  starts at 2.64 km. The finite discovery halo includes summit ascent and the lake bound.
+  Junction resolution selects a prefix of the cached raw route, never retraces the mountain.
+  Odd-depth dependency prefixes remain contained in the realized depth-two network, so a
+  tributary cannot join a part of another river that subsequently disappears.
+  Raw bounds reject distant sources before expanding junction dependencies; neighbour queries
+  use an immutable spatial index with canonical precedence. Terminal `PondStamp` bowls vary
+  in size, axis and elongation within the same conservative radius bound. Carve applies
+  inside `HeightfieldPlan.raw_height`. The 20–26 m channel half-width exceeds half a terrain
+  cell's diagonal: diagonal centreline crossings fully excavate both intermediate cells,
+  preserving a finite cardinal passage rather than corner-only contact. Channel carving
+  projects each terrain sample onto the same
+  variable-width trace **segment capsule** used by `WaterField` (not isolated trace-point
+  discs), so bathymetry cannot leave uncarved 12m gaps beneath continuous rendered water.
+  `WaterPlan.planning_signed_distance` / `planning_intervals` expose that same source geometry
+  with one fixed guard for cheap route planning; they never build hydrostatic water.
+  `WaterFieldContext.wet_intervals` is the exact, lazily contour-cached counterpart for final
+  route and bridge validation, so feature consumers never reproduce water geometry.
+  Beds obey **containment** (`CONTAIN_DROP`): every bed is
+  capped a full storey below the lowest flanking bank's natural storey, so channels always
+  quantize bounded by ground on both sides — never a sheet hanging off a hillside. The
+  hydraulic trace bed and rendered bathymetry are intentionally separate: ordinary reaches
+  excavate another `CARVE_BED_EXTRA` below the trace bed so 4m storey quantization cannot
+  leave only centimetres of cover, while reaches whose trace-bed grade is already a fall face
+  keep the original shallow carve (never turn a vertical film into a deep swim volume).
+  Pure data flows `WaterField → WaterContour → WaterSkin`, turned into nodes by
+  `WaterSurfaceBuilder`; one shader renders it all:
+  - `WaterField` — profile and canonical-region caches identify both the immutable trace
+    and its terrain-plan owner, preventing different worlds or junction prefixes with the
+    same source cell from sharing stale levels. The continuous water surface is ONE height field `level_at(x,z)`, with
+    **no cuts anywhere**: `profile()` is a single monotone, continuous curve per river.
+    Ordinary reaches ride a smooth trend between anchors or hug a nearby steep face
+    (unchanged in spirit); but a genuine multi-segment descent — several storeys down a
+    real slope — is instead reshaped as ONE smooth **sill-riding envelope**: monotone C1
+    cubic-Hermite, knots at the two span anchors plus any sill the naive curve would
+    otherwise duck under, fit THROUGH the knots rather than clamped-then-corrected — so the
+    water rides OVER intervening terrain instead of staircasing down it (the owner's
+    round-4 reversal of run-2's terrain-hugging descent). Every floor-pinned point sits at
+    `ground + DESCENT_CLAMP` (0.10m), a UNIFORM floor that must strictly clear the
+    hydrostatic fill's own wetness epsilon `EPS` (0.05m) — at `DESCENT_CLAMP == EPS` the
+    fill dries the exact band the envelope shaped to keep wet (r3 Task 12b). `steep_spans()`
+    separately reports where the RENDERED terrain (not the level curve) drops more than
+    `FALL_DROP_MIN` == 4m inside a 24m sliding window — purely a shader/mesh attribute bake,
+    never geometry-forking. Static wetness beyond the channel/pond seeds themselves comes
+    from a **hydrostatic fill**: river seeds are variable-width **segment capsules** whose
+    levels interpolate at each lattice point's own longitudinal projection (not overlapping
+    constant-level sample discs, which rebuilt terraces after the smooth profile); those
+    flowing-channel lattice values are authoritative against a lower downstream flood. Seeds
+    placed in channels and ponds spread outward only
+    DOWNHILL-OR-LEVEL over connected ground sitting below the seed's own level (never
+    uphill), with the LOWER level winning wherever two spreads meet. Those flood labels decide
+    the deterministic **wet mask**, not the final flowing surface: five fixed Jacobi passes,
+    anchored by the continuous river profile, relax the wet labels across river/pond joins so a
+    lower flood cannot leave a one-cell sideways water cliff. Complete source extents are solved before the labels are projected into
+    each 42m chunk margin; the five local passes then have a 30m radius. The canonical surface stays
+    on a 6m world-space lattice; mixed coarse cells seed a sparse, topology-only 3m rescue where
+    real terrain exposes a submerged passage between dry 6m endpoints. The rescue walks only
+    downhill-or-level through points the coarse continuous field calls dry, lower level still wins,
+    and untouched samples remain bit-identical to the 6m field. Across a mixed wet/dry lattice
+    cell the field interpolates **signed depth**: dry corners contribute a small negative
+    depth, capped so a high bank never pulls the surface uphill. Water therefore thins to
+    zero depth on a contour inside the cell instead of ending as a square fill-grid edge —
+    the field source of the rounded/blob-like shoreline. Pure and deterministic — no
+    rendering, no nodes.
+  - `WaterContour` — waterline → smooth, chunk-welded G1 polylines. Six-step pipeline:
+    presence grid → per-edge crossing refinement → chain into polylines → two Chaikin
+    passes + uniform 1.5m resample → clip to rect LAST → per-point level/normal/wall
+    attributes from the curve's own frame. One dry-side orientation is chosen for the whole
+    G1 curve, so a zero-gradient saddle cannot reverse adjacent outward normals and fold the
+    rim into a bow tie. Wall detection probes that outward normal plus ±45° corner guards, so
+    a tangent that bisects two cliff faces cannot look through their diagonal notch and
+    misclassify the corner as a gentle blob shore; a 1–3-sample gap bracketed
+    by real walls is closed only when their normals form a turn. Clipping LAST (after smoothing) is what makes
+    the chunk weld: two neighbouring chunks both smooth the SAME margin-grown polyline
+    before either clips it, so they land on bit-identical border-crossing points. SADDLE
+    cells (marching-squares' standard ambiguous case: two diagonally-opposite corners wet)
+    are resolved by sampling the field at the cell's own CENTRE (world-grid-aligned, so
+    neighbouring chunks agree) rather than falling through a generic two-crossing path that
+    used to silently drop the diagonal wedge (r3 Task 15). CLOSED curves resample by EVEN
+    DIVISION of the circumference (`cnt = round(circ/spacing)` equal arcs, no remainder)
+    instead of a fixed-spacing walk that left an arbitrary leftover segment.
+  - `WaterCurrentField` — pure deterministic horizontal current constraints. `WaterSkin`
+    seeds a world-aligned 3m lattice from downstream trace tangents; width/depth provide a
+    readable base current even on flat reaches (about 2.3m/s at the pinned representative
+    reach, clamped 1.4–6.5m/s) and grade only adds speed. A finite two-cell
+    signed-distance bank field zeros dry samples and removes bank-entering velocity, then
+    finite differences derive vorticity and compression for turning packets and generated
+    foam. Production chunks solve with a two-cell halo, so adjacent chunks bake bit-identical
+    retained border values. The velocity/diagnostics live in mesh `CUSTOM1` and the frozen
+    `WaterSampler`; GPU and CPU consumers never reconstruct separate flow fields.
+  - `WaterForces` — pure, scene-free force laws shared by water consumers: displaced-column
+    buoyancy, horizontal drag toward `WaterSampler.velocity_at()`, and vertical water drag.
+    Bodies keep their own volume-to-mass/drag tuning and integration adapter; never copy a
+    separate approximation of the current or character-only buoyancy math into future props.
+  - `WaterSkin` — the ONE mesh builder (the old marching-squares mesher is retired, r3 Task
+    7; its own boundary was raw ~45-90° grid corners). Welds a 2m world-aligned render
+    lattice to a boundary strip that sits directly ON `WaterContour`'s curves (zip-stitched
+    via nearest-curve ring ownership — narrow-channel safe), plus a **meniscus rim** that
+    curls the strip's own outer edge. Rising banks receive a compact overshoot; a wall-flagged
+    point reaches the KayKit wall's true 1.5m recess (`TILE/2 - CliffDressing.PLACE`) only when
+    its own outward column confirms high ground there. A short sustained-high witness handles
+    diagonal cliff arms that leave the normal column before the long probe. Because contour
+    smoothing can move the visual curve inside the final signed-depth wet region, every column
+    first stays level through its initial continuous wet run; this closes inner-corner and saddle
+    gaps without bridging a dry cliff arm to water on its far side. A confirmed wall column then
+    measures any remaining contact distance,
+    then stays at water level through the 1.5m recess and another 0.3m behind the visible face before
+    curling down. Adjacent confirmed columns whose wall normals turn use the intersection of their
+    wall tangents as a bounded miter, so their outer edge follows the actual L-shaped cliff corner
+    instead of cutting it off with a diagonal chord. The visible surface therefore meets rounded
+    cliff corners flat instead of using the lower curl to fill them. That direct-contact
+    gate stops a flanking wall from stretching a genuinely unbounded edge into a skirt. Free/drop
+    edges instead form a finite convex lobe: a +4cm crest followed by -6/-28/-55/-65cm rows over
+    only 0.64m, with monotonically outward/downward-turning tangents. Every
+    free edge is accounted for (a chunk border, a bank-buried outer row, or that compact lobe),
+    so no zero-thickness plane ends sharply in open air. The first rim row also advances
+    outward (no vertical repair-skirt seam). Open contours may border several disconnected
+    interior-lattice rings where a narrow channel falls below the render grid; the boundary zipper
+    splits those into local components and partitions the contour among them instead of joining
+    them with non-local fan triangles. Remaining over-scale faces are adaptively subdivided, and
+    only tiny local closed surface holes are triangulated. Level shelves also use level normals, including still-wet columns between diagonal banks;
+    a free-edge curl normal on such a shelf creates a false reflective crease.
+    Per-vertex CUSTOM0 bakes `(s, d,
+    slope, shore_dist)` — arc length / signed cross-channel distance / continuous profile
+    slope along the nearest river trace, plus shore distance. `CUSTOM1` bakes `(velocity.x,
+    velocity.z, vorticity, compression)` from the shared `WaterCurrentField`. Vertex normals are real
+    (heightfield-derived interior, rim-curl frame on the meniscus), not a blanket up vector.
+    `ARRAY_COLOR.r` bakes a displacement scale from BOTH shore distance and actual static
+    bed clearance; it covers the ambient spectrum plus packet-field trough bound. The shader,
+    `WaterSampler.wave_scale_at()`, and character buoyancy use the same scale, so dynamic
+    geometry cannot uncover a shallow bed while the CPU float height claims otherwise.
+    `WaterSkin.build()` also returns `triggers`: one box per 24m wet tile, footprint from
+    the mesh's own built vertices. r3 Task 12b RETIRED the whole-tile/sub-tile level-SPREAD
+    suppression Tasks 7/9 had layered on top (`_tile_level_spread`,
+    `TRIGGER_LEVEL_SPREAD_MAX`, `TRIGGER_SUB_TILE_SPREAD_MAX`) once the phantom-depth class
+    it guarded against was proven dead by construction under the smooth descent envelope —
+    triggers are simple wet-tile coverage again. `STEEP_UNSWIMMABLE` stays: a tile whose own
+    max grade exceeds it gets **no trigger at all** — a steep fall face is not swimmable
+    water, so a character falls/slides through it rather than floats. A single frozen
+    `WaterSampler` snapshot of the water FIELD across the chunk (full wet footprint,
+    shoreline band included; NaN only where the field itself says dry) backs every trigger
+    for swim-depth queries.
+  `WaterSurfaceBuilder` is a thin adapter: worker-safe `compute_chunk` calls `WaterSkin.build`;
+  main-thread `commit_chunk` calls `WaterSkin.commit` and emits one `Area3D` swim trigger per
+  `triggers` entry (never more than one per tile —
+  the steep gate above means a tile either has one trigger or none), each carrying
+  `set_meta("sampler", sampler)` so a probe anywhere inside reads its exact water height
+  from that one shared, chunk-frozen sampler instead of a per-cell plane. The sampler freezes
+  the field's native 6m fill lattice, sparse 3m topology rescue, and required terrain-height twins,
+  then applies the identical dual-resolution signed-depth shoreline evaluation; do not resample
+  levels through the render mesh grid, which
+  double-interpolates steep shorelines and can turn dry/wade probes into false swimming. It also still owns
+  the shared `ShaderMaterial` and the river-trace `surface_profile`/`steepness_profile`
+  helpers.
+  `water_unified.gdshader` is the ONLY water shader and renders the whole continuous network;
+  no river/pond material fork or separate swept waterfall mesh exists. Its one
+  `water_dynamic_height()` combines the slow ambient spectrum, persistent compact asymmetric
+  wavelets, and interactive ripple height. Both vertex and fragment stages sample that SAME
+  height: it displaces the 2m mesh and derives normals, refraction, curvature caustics, and
+  reflection tilt, so a moving feature cannot become a detached albedo scroll. The old
+  repeated river trains and fragment-only `water_distort_wobble` are deleted. Water is
+  spectrally manual-composited: Beer–Lambert transmission
+  (`absorption=(0.003,0.001,0.0005)`) stays in `EMISSION` because the refracted scene is
+  already lit, while the real displaced normal uses Godot's PBR specular response. That split
+  keeps the bottom dominant without losing the old clear swim-ripple highlight. Weak depth
+  scattering and a broad Fresnel sky sheen supply the remaining body read. A short screen-space reflection
+  ray march was actively rejected in the exact review view because its finite hit iterations
+  formed concentric far-bank bands. White is legal only from generated energy:
+  packet breaking or local flow compression. Swim/entry/ambient ripple impulses stay clear;
+  their narrow height gradients refract and reflect the sky, and there is no foam/streak texture.
+  `WaterRippleSim` owns two player-centred GPU fields. Its ping-pong wave equation carries
+  swim wakes, entry splashes, and ambient clear rings; semi-Lagrangian backtracing advects it
+  through a 32×32 current texture over the restored 96m interaction domain. Its second pass
+  rasterizes at most 16 persistent world-space Morlet-style wavelets (compact, Gaussian-
+  windowed 6–10m oscillating crests, not closed blur bubbles or repeated trains). Their CPU
+  centres/lifetimes/directions/phases are transported through the same
+  `WaterSampler.velocity_at()` field and turn with the shared vorticity as that field bends.
+  The packet height is
+  CPU-mirrored to character buoyancy. Plunge mist (particle spray at fall landings) is currently
+  unwired — a follow-up; the shared particle resources it needs are no longer warmed on
+  startup. `tests/tools/water_review_spots.gd` emits F4 review teleports
+  (`ReviewTeleporter.gd` reads `review_teleports.json` and lifts the player onto streamed
+  ground if a stale spot height would bury them).
+  **Character depth gate** (`characters/character.gd`): classification is **static-field
+  depth**, full stop — `depth = sampler.level_at(xz) - global_position.y`, read from the
+  overlapping trigger's frozen `WaterSampler` snapshot (the knee-height probe only finds
+  which triggers overlap; it plays no part in the depth number itself). Swim and wade are
+  each hysteretic against that static number — swim ENTER at depth > 0.8m, EXIT at < 0.6m;
+  wade ENTER at depth > 0.05m, EXIT at < 0.03m — so a reading sitting right on one boundary
+  can't dither the state every frame. `wading = in_water or (deepest static depth clears the
+  wade gate)` (since h-task-4): swimming is a DEEPER case of being in water at all, so a
+  swimming character always reads wading too — never independently false while `in_water` is
+  true. The **dynamic height** (ambient `_swell_offset` plus `WaterRippleSim`'s exact CPU
+  packet mirror) feeds ONLY `water_surface_y`, the float-height buoyancy chase — NEVER the depth gate: letting the
+  swell's own crest nudge the gate used to be able to latch a false swim state on a single
+  crest-timed frame at a knife-edge shoreline depth, which is why classification reads the
+  static field alone.
+- **One ground appearance field**: the shared `ground_palette.tres` atlas and
+  `BiomeRegistry.ground_tint_at` still identify turf, rock and path. Terrain,
+  rolled turf lips and dense grass all apply `ground_style.gdshaderinc` to turf,
+  sampling `BiomeGroundMap`'s seven weights and canonical linear substrate
+  colours. Broad moss, chalk, silt, petal and earth patterns remain world-aligned.
+  Rock and path texels retain their authored palette. Change the shared field
+  once; never give a ground consumer its own copied colour.
+- **Global lighting and local atmosphere**: `AtmosphereDirector` owns one fixed
+  warm sun (energy 1.2, shadow opacity 0.65), cool ambient fill, restrained glow,
+  matte contact shading and adjustable camera focus. It updates only the
+  deterministic ground lookup as the player travels; a biome boundary can never
+  change distant lighting. World mist supplies regional depth and colour.
+
+## Character & camera
+
+- **`characters/character.gd`** (`CharacterBody3D`) — movement (accel / friction / turn),
+  `_try_step_up` (climb ≤ `MAX_STEP_HEIGHT` ledges), jump, and **force-based swimming**: water
+  tiles expose an `Area3D` on collision layer 8; while a knee-height probe is inside it,
+  `WaterForces` supplies buoyancy proportional to submerged fraction and enough full-submersion
+  lift for a stable passive float. Horizontal drag carries the character toward the exact
+  `WaterSampler` current while player steering remains relative to that moving water. Holding
+  jump adds thrust, and pressing toward a nearby bank wall launches the character out. Verified
+  by `tests/harness/swim_harness.tscn`.
+- **`scripts/controllers/`** — a pluggable `CharacterController` resource: `PlayerController`
+  (keyboard, camera-relative) and `TestController` (steers toward a target node, for harnesses).
+- **`scripts/camera/camera.gd`** — orbit camera (Q/E orbit) following the character. The general
+  `CameraObstructionSolver` sweeps one sphere upward to lower the framing pivot beneath ceilings
+  and outward to shorten the boom against world collision. It excludes the player body, snaps
+  inward for safety, and releases pivot/boom length smoothly even while the player is stationary;
+  buildings, cliffs, decks, and future dungeons need no camera-specific hooks.
+
+## Startup loading screen
+
+- **`ui/loading_screens/mythos_loading_screen.tscn`** is the project main scene. It loads
+  `world.tscn` on Godot's threaded resource loader, installs the live world behind a high
+  `CanvasLayer`, and keeps its animated atlas visible until `FieldTerrainStreamer` reports
+  every chunk within one terrain cell of the player's spawn integrated. The production spawn sits
+  0.5 m inside the origin chunk, avoiding a four-way collision seam, while the readiness gate still
+  includes every nearby quadrant the camera can reveal. Startup progress is real weighted
+  work: threaded scene-resource loading, worker
+  FeatureContext/heightfield/mesh/water/dressing milestones for those support jobs and
+  their required feature halo, then main-thread integration. Never replace it with elapsed-time
+  progress. `MythosLoadingScreen.gd` owns the handoff,
+  `MythosTaperedProgressBar.gd` draws the hairline/tapered fill, and
+  `mythos_loading_screen.gdshader` composites transparent city/cloud/chart textures from
+  `ui/loading_screens/layers/` over the genuinely cloud-free
+  `mythos_mythic_atlas_background_cloudless.png` plate; never restore the older plate's static
+  corner-cloud duplicates. Only the chart texture rotates; four cloud groups translate
+  independently. The stationary river is the actual original atlas painting, with a second atlas
+  sample travelling downstream along a hand-fitted river spine for most of each cycle and
+  cross-fading only at wrap. Its moving mask is the narrower inner channel, never the full painted
+  bank width. Fine distant wavelets are low-contrast and screen-horizontal for perspective even
+  though the underlying texture advection follows the spline. The title/progress Control remains
+  outside every rotation.
+
+## Conventions & code style
+
+- **Typed GDScript.** Annotate function signatures, exported vars, and members. Inline `:=`
+  type inference is used freely for locals — match the surrounding code.
+- **Purity boundary.** Terrain computation (plan / field / mesher / dressing) stays
+  scene-free and deterministic so it can be unit-tested headless. Push scene-tree work into the
+  streamer or scene glue.
+- **Simplify — the owner strongly prefers root-cause re-architecture over band-aids.** If the
+  same logic appears in several places, consolidate it. If you're adding retries, attempt loops,
+  or a special case for "only when tag/config X", step back and redesign so the normal path just
+  works. Prefer shorter code. (This is why the socket engine was replaced wholesale rather than
+  patched.)
+
+## Tests & harnesses (`tests/`)
+
+- Unit tests mirror the pipeline: `test_heightfield_plan`, `test_heightfield_region`,
+  `test_heightfield_clamp_step`, `test_terrain_surface_field`, `test_terrain_chunk_mesher`,
+  `test_cliff_dressing`, `test_dressing_field`, `test_dressing_ecology`,
+  `test_dressing_collision_builder`, `test_dressing_commit_queue`,
+  `test_environment_catalog`, `test_water_field_context`, `test_field_streamer`, `test_biomes`,
+  `test_helper`, `test_world_field_block_cache`, `test_water_path_queries`, `test_settlement_plan`, `test_path_program`,
+  `test_path_plan_nodes`, `test_path_bridge_sites`, `test_path_route_solver`,
+  `test_path_context`, `test_path_features`, and the `test_slope_*` profile/geometry guards. Continuity guards
+  (`test_slope_tile_continuity`, `test_diag_seams`, `test_slope_socket_grounding`) assert the
+  surface is gap-free and dressing sits on the mesh — the invariants above, encoded.
+- **`tests/harness/`** — visual/screenshot scenes for eyeballing behavior a unit test can't
+  (`heightfield_shot.tscn`, `hf_shapes.tscn`, `swim_harness.tscn`,
+  `environment_lineup.tscn`, `teleport_deco_harness.tscn`, `debug_water.tscn`, …). The lineup
+  pages the full generated catalogue with stable IDs, provenance, measured AABBs, a one-metre
+  scale marker, and optional collision overlays (`--show-collision`). The teleport harness streams
+  a fixed nine-chunk site through the real world pipeline, requires structural collision, and
+  waits for both terrain integration and the independent dressing commit queue before capturing it.
+  `path_review.tscn` renders straight/L/T/X/logical-node masks through the real terrain mesher beside the
+  rejected offset-width alternative; `path_corpus.gd` is the deterministic smoke/full path gate.
+
+## Adding terrain content
+
+- **New environment visual**: add a stable-ID entry to the relevant manifest under
+  `tools/environment_bake/manifests/`, including its canonical bake scale and either
+  `collision_source`, a supported `collision_profile`, or intentionally neither. `tree`, `rock`,
+  and `deadwood` tags require collision by construction. Prefer one close-fitting simple shape:
+  `trunk_capsule` for a straight grounded lower trunk or `trunk_capsule_chain` for a reviewed
+  curved trunk. A forked or root-heavy silhouette can explicitly provide
+  `collision_joint_points_m` and `collision_segment_radii_m` in corrected asset-local metres,
+  keeping asset-specific art direction in the manifest rather than the generic baker.
+  Use `oriented_cylinder` for a log,
+  `stump_cylinder` for a flat cut, `flat_box`/`flat_rock` for a walkable rock, and set
+  `collision_component_count` when one source visual contains several disconnected stones; use
+  `collision_max_height` plus the `walkover` tag for a low obstacle that must remain below the
+  character step at every active population scale; use `oriented_capsule` for a branch. Use
+  `collision_source` only for reviewed authored primitives.
+  Run the bake tool and review every rigid asset beside its mesh in
+  `environment_lineup.tscn -- --show-collision`; a proxy must not stray materially outside the
+  mesh or collapse to an unusably thin line. Never add a runtime wrapper scene or a source-pack
+  path.
+- **New ambient population or variant**: author a `DressingSet`/`DressingChoice` under
+  `terrain/dressing/` and add it to `terrain/dressing/index.tres`. The set owns direct per-biome
+  fill and may share habitat/community channels with related sets; visual choices affect mix,
+  never population. Structural sets must share the appropriate spacing group so their collision
+  cannot overlap. The compiler derives proposal slots and margins and rejects illegal
+  water/support/radius combinations. Author `feature_clearance` explicitly (`2.0` m for rigid
+  structure, `0.3` m for small ground cover, `0.0` for floating lilies); the compiler rejects a
+  margin outside `PathProgram`'s saturated clearance coverage.
+- **New man-made path feature**: add its self-contained visual/collision through the environment
+  manifest, then add only primitive footprint/support/opening semantics to `PathProgram`. Keep the
+  decision inside `PathPlan` after final route-mask merge, add its footprint to the shared
+  reservation union, derive its stable ID from the canonical world site, and let the existing
+  environment payload/builder/queue and derived feature halo handle streaming. Do not add a
+  sibling planner, scene wrapper, feature-specific streamer dependency list, or alternate water/
+  terrain classifier. Review paths in `tests/harness/path_review.tscn`, assets in
+  `environment_lineup.tscn -- --show-collision`, and deterministic statistics with
+  `tests/harness/path_corpus.gd`.
+- **Different cliff dressing**: change the stable asset IDs in `CliffDressing.ASSETS` (pieces
+  must tile on the 3 m / 10.5 grid — mismatched module widths leave slits at the corners).
+- **Tuning terrain shape**: `FieldTerrainStreamer` exports (amplitude, storey cap, cliff step,
+  radii), `HeightfieldPlan` constants (`STOREY_HEIGHT`, `LEVELS_PER_STOREY`, aggregation), and
+  `Helper` field scales (`MACRO_SCALE`, biome/water scales).
+
+## Before finishing
+
+- **Run the tests** (`godot-test`) and fix regressions before considering a change done. For
+  anything visual, also open a relevant `tests/harness/` scene (or the game) and look.
+- **For a reported visual defect, use red-first TDD plus active falsification.** Pin the exact
+  seed/world coordinates and camera pose, write the smallest failing invariant before the fix,
+  then rerun it green. When an F3 screenshot supplies `player world` + `crosshair world`, use
+  `ReviewCam.solve_cam`/`ReviewCam.shoot`; never substitute a hand-authored camera transform.
+  Capture the same-angle before/after view and deliberately
+  try to prove the defect still exists: inspect alternate times/nearby angles, paired animation
+  frames, seams, and likely collateral regressions. Reject a change if the unit test passes but
+  the matched render exposes the original problem or a new artifact. Keep a deterministic
+  self-driving harness for recurring review sites; `tests/harness/water_reported_qa.tscn` is the
+  water example and accepts `-- --spot <name>` for a focused run.
+- If you rename/move a `class_name` script, run the `--import` step above.
+
+## Historical docs (stale — do not follow as current)
+
+These predate or partially describe the retired socket engine and are kept only for history:
+`terrain/TERRAIN_README.md`, `docs/known-issues/*`, most of `docs/future-work/*`, the older
+`docs/superpowers/plans|specs/*`, and `docs/superpowers/terrain-status-2026-06-24.md`. When they
+conflict with the code, the code and this file win. The living design reference is
+`docs/mythosunwritten-master-design.md`.
+# September 8 garden border follow-up
+
+Continuous horizontal facade runs select one shared available outcrop depth
+before emitting their paired panels. They do not alternate deep and shallow
+projections along one garden edge. Shallow covering boards fit their own
+projection depth and retain the wall-top bearing plane. The matched September 8
+photo 1 and nearby views, actual board bounds, and identical west-town clearance
+across 140 cells and 205 crossings verify the change.

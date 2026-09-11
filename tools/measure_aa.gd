@@ -157,7 +157,7 @@ func _finish_mode() -> void:
 
 func _report() -> void:
 	var world = _shell.get("_sim").world
-	var profile: BiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
+	var profile: SimBiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
 	var primitives := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
 	print("")
 	print("measured at         (%.1f, %.1f) in %s, %d primitives in the frame" % [

@@ -47,11 +47,11 @@ var terrain: TerrainQuery = null
 
 ## The ground's height and its biomes, reachable directly for the things that
 ## want one layer rather than the composed answer. Both are the query's.
-var surface_field: TerrainSurfaceField = null
+var surface_field: SimTerrainSurfaceField = null
 var biome_field: BiomeField = null
 
 ## Turns the fields into per-chunk geometry.
-var chunk_mesher: TerrainChunkMesher = null
+var chunk_mesher: SimTerrainChunkMesher = null
 
 ## Keeps the chunks near the observer built and drops the rest.
 var terrain_streamer: TerrainStreamer = null
@@ -193,7 +193,7 @@ func reset(seed_value: int) -> void:
 	island_field = terrain.island_field
 	settlement_field = terrain.settlement_field
 	path_network = terrain.path_network
-	chunk_mesher = TerrainChunkMesher.new(terrain)
+	chunk_mesher = SimTerrainChunkMesher.new(terrain)
 	terrain_streamer = TerrainStreamer.new(chunk_mesher)
 	island_streamer = IslandStreamer.new(island_field, IslandMesher.new())
 	settlement_streamer = SettlementStreamer.new(settlement_field, path_network)
@@ -545,7 +545,7 @@ func observer_biome() -> String:
 ## the caller: a viewer that writes into it changes nothing here. This is the
 ## whole surface through which the world's mood reaches a viewer -- colours,
 ## fog, sky and ambient light are read off it, never decided by it.
-func observer_profile() -> BiomeProfile:
+func observer_profile() -> SimBiomeProfile:
 	return biome_field.profile_at(observer_x, observer_z)
 
 
@@ -618,7 +618,7 @@ func snapshot() -> Dictionary:
 	return {
 		"seed": world_seed,
 		"tick": tick,
-		"chunk_size": TerrainChunkMesher.CHUNK_SIZE,
+		"chunk_size": SimTerrainChunkMesher.CHUNK_SIZE,
 		"observer_x": observer_x,
 		"observer_z": observer_z,
 		"observer_y": observer_y,

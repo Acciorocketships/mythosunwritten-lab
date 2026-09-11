@@ -27,14 +27,14 @@ func run() -> void:
 
 
 func _field_is_a_pure_function() -> void:
-	var field := TerrainSurfaceField.new(SEED)
+	var field := SimTerrainSurfaceField.new(SEED)
 	var probes := [
 		Vector2(0.0, 0.0), Vector2(13.5, -207.25), Vector2(-1024.0, 512.0),
 		Vector2(3.125, 3.125), Vector2(-0.5, -0.5),
 	]
 
 	# Same question, asked twice, from two separate field objects.
-	var again := TerrainSurfaceField.new(SEED)
+	var again := SimTerrainSurfaceField.new(SEED)
 	for probe in probes:
 		equal(field.height_at(probe.x, probe.y), again.height_at(probe.x, probe.y),
 			"two fields with the same seed disagree at (%f, %f)" % [probe.x, probe.y])
@@ -71,8 +71,8 @@ func _field_is_a_pure_function() -> void:
 
 
 func _field_depends_on_the_seed() -> void:
-	var field := TerrainSurfaceField.new(SEED)
-	var other := TerrainSurfaceField.new(OTHER_SEED)
+	var field := SimTerrainSurfaceField.new(SEED)
+	var other := SimTerrainSurfaceField.new(OTHER_SEED)
 	var differences := 0
 	for i in 50:
 		var x := float(i) * 9.0
@@ -91,17 +91,17 @@ func _mesher_ignores_build_order() -> void:
 	]
 
 	# A mesher that has never built anything.
-	var fresh := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var fresh := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var reference := fresh.build(subject.x, subject.y)
 
 	# A mesher that has built a pile of other chunks first, in one order...
-	var busy := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var busy := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	for key in neighbours:
 		busy.build(key.x, key.y)
 	var after_others := busy.build(subject.x, subject.y)
 
 	# ...and another that built the same chunks in the opposite order.
-	var reversed := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var reversed := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	for index in range(neighbours.size() - 1, -1, -1):
 		var key: Vector2i = neighbours[index]
 		reversed.build(key.x, key.y)
@@ -126,7 +126,7 @@ func _mesher_ignores_build_order() -> void:
 	not_equal(fresh.build(0, 0).digest(), reference.digest(),
 		"two different chunk coordinates produced identical geometry")
 
-	var expected_triangles := TerrainChunkMesher.CELLS * TerrainChunkMesher.CELLS * 2
+	var expected_triangles := SimTerrainChunkMesher.CELLS * SimTerrainChunkMesher.CELLS * 2
 	equal(reference.triangle_count(), expected_triangles,
 		"a chunk should be %d triangles" % expected_triangles)
 
@@ -136,7 +136,7 @@ func _a_chunk_fingerprint_follows_its_contents() -> void:
 	# what it held when it was built. Anything that caches the answer at build
 	# time makes every later change invisible to every check that compares
 	# fingerprints -- which is the one thing those checks exist to catch.
-	var mesher := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var mesher := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var geometry := mesher.build(3, -2)
 
 	var before := geometry.digest()
@@ -170,14 +170,14 @@ func _chunks_agree_along_their_shared_edge() -> void:
 	# Neighbouring chunks are built independently, so their shared edge only
 	# lines up if both derived it from world position rather than from each
 	# other. Compare the vertices they each placed on the boundary.
-	var mesher := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var mesher := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var left := mesher.build(0, 0)
 	var right := mesher.build(1, 0)
-	var boundary_x := TerrainChunkMesher.CHUNK_SIZE
+	var boundary_x := SimTerrainChunkMesher.CHUNK_SIZE
 
 	var from_left := _heights_on_edge(left, boundary_x)
 	var from_right := _heights_on_edge(right, boundary_x)
-	check(from_left.size() >= TerrainChunkMesher.CELLS,
+	check(from_left.size() >= SimTerrainChunkMesher.CELLS,
 		"expected vertices along the chunk boundary, found %d" % from_left.size())
 	equal(from_left, from_right,
 		"neighbouring chunks disagree about the ground along their shared edge")
@@ -198,7 +198,7 @@ func _chunks_match_across_processes() -> void:
 		"two separate runs of seed 1234 produced different chunk geometry")
 
 	# And the same chunks, built here in this process, come out identical again.
-	var mesher := TerrainChunkMesher.new(TerrainQuery.for_seed(1234))
+	var mesher := SimTerrainChunkMesher.new(TerrainQuery.for_seed(1234))
 	var reported: PackedStringArray = first["chunks"]
 	var rebuilt := PackedStringArray()
 	for line in reported:

@@ -63,7 +63,7 @@ func _measure(sim: Simulation, patches: Array, tinted: bool) -> Dictionary:
 	var built: Array[Node] = []
 	for patch in patches:
 		for item in patch.items:
-			var profile: BiomeProfile = null
+			var profile: SimBiomeProfile = null
 			if tinted:
 				profile = sim.world.terrain.profile_at(
 					float(item["x"]), float(item["z"])

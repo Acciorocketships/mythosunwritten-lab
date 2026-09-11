@@ -219,7 +219,7 @@ func camera_attributes() -> CameraAttributes:
 ## is a blend rather than a lookup, crossing a border slides the fog, the sky and
 ## the fill light from one biome's numbers to the next over the width of the
 ## border instead of switching them.
-func take(profile: BiomeProfile, observer: Vector3) -> void:
+func take(profile: SimBiomeProfile, observer: Vector3) -> void:
 	_sky_material.sky_top_color = profile.sky_top
 	_sky_material.sky_horizon_color = profile.sky_horizon
 	_sky_material.ground_horizon_color = profile.sky_horizon
@@ -270,7 +270,7 @@ func drift(seconds: float) -> void:
 ## the art direction's signature precisely because its lanterns light the ground
 ## around them. What glows is the simulation's decision -- it placed a
 ## `lantern_post` -- and how brightly is this layer's.
-func light_for(tag: String, profile: BiomeProfile) -> OmniLight3D:
+func light_for(tag: String, profile: SimBiomeProfile) -> OmniLight3D:
 	if not GLOWING_TAGS.has(tag):
 		return null
 	var settings: Dictionary = GLOWING_TAGS[tag]
@@ -303,7 +303,7 @@ func hold_orb(node: Node3D, world_seed: int) -> void:
 ## carries. The same measure the motes are counted by, so "dark enough for a
 ## toadstool to be a light source" and "dark enough for fireflies to be thick"
 ## are one number rather than two that could drift apart.
-static func gloom_of(profile: BiomeProfile) -> float:
+static func gloom_of(profile: SimBiomeProfile) -> float:
 	return clampf(profile.fog_density / MoteField.GLOOM_FULL, 0.0, 1.0)
 
 

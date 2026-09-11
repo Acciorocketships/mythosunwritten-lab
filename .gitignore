@@ -55,3 +55,36 @@ __pycache__/
 # run outliving the sandbox that started it still has the files its closing
 # checks read. The runner's own EXIT trap removes them when a run ends.
 .testruns/
+
+# --- Adopted from mythosunwritten (commit f3203d96, see ADOPTION.md) ---
+# Its reproducible run artifacts: bulk deterministic village screenshots,
+# review reports, and September manual-review render sequences. Small
+# regression pins and review contracts stay versioned, exactly as its own
+# ignore file kept them.
+tests/artifacts/village_review_runs/
+/.artifacts/
+/artifacts/
+/renders/
+/docs/qa/2026-09-06-terrain/*.png
+/docs/qa/2026-09-07-manual/**/*.png
+/docs/qa/2026-09-07-manual/*.png
+/docs/qa/2026-09-07-manual/**/*.gif
+/docs/qa/2026-09-07-manual/*.gif
+/docs/qa/2026-09-07-manual/**/*.log
+/docs/qa/2026-09-07-manual/*.log
+/docs/qa/2026-09-08-manual/**/*.png
+/docs/qa/2026-09-08-manual/*.png
+/docs/qa/2026-09-08-manual/**/*.gif
+/docs/qa/2026-09-08-manual/*.gif
+/docs/qa/2026-09-08-manual/**/*.log
+/docs/qa/2026-09-08-manual/*.log
+
+# The source repo also ignored addons/ (its GUT test framework was a local,
+# uncommitted install). Kept ignored here until the suite-certification item
+# decides how the adopted GUT suite is run from this repo.
+/addons/
+
+# The source repo ignored *.uid; this repo commits them (the sidecars Godot
+# 4.7 generates for the adopted scripts are committed so their ids are stable
+# from here on). Its blanket assets/ ignore is NOT adopted: this repo's
+# assets/ tracking is fine-grained, see the rules above.

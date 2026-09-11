@@ -21,13 +21,13 @@ class_name TerrainQuery
 var world_seed: int = 0
 
 ## The uncarved ground: the shape of the land before water is cut out of it.
-var surface_field: TerrainSurfaceField = null
+var surface_field: SimTerrainSurfaceField = null
 
 ## Which biome the ground is, and what that biome looks like.
 var biome_field: BiomeField = null
 
 ## Where the rivers, ponds and lakes are, and how deep.
-var water_field: WaterField = null
+var water_field: SimWaterField = null
 
 ## Where the floating islands are: the aerial layer over all of the above.
 var island_field: IslandField = null
@@ -81,8 +81,8 @@ const SHORE_FLOOR := 0.05
 ## nothing but a seed gets a query that agrees with every other one.
 static func for_seed(seed_value: int) -> TerrainQuery:
 	var biomes := BiomeField.new(seed_value)
-	var surface := TerrainSurfaceField.new(seed_value, biomes)
-	var water := WaterField.new(surface, biomes)
+	var surface := SimTerrainSurfaceField.new(seed_value, biomes)
+	var water := SimWaterField.new(surface, biomes)
 	var islands := IslandField.new(water, biomes)
 	var settlements := SettlementField.new(water, biomes, islands)
 	return TerrainQuery.new(
@@ -91,9 +91,9 @@ static func for_seed(seed_value: int) -> TerrainQuery:
 
 
 func _init(
-	surface: TerrainSurfaceField = null,
+	surface: SimTerrainSurfaceField = null,
 	biomes: BiomeField = null,
-	water: WaterField = null,
+	water: SimWaterField = null,
 	islands: IslandField = null,
 	settlements: SettlementField = null,
 	paths: PathNetwork = null,
@@ -101,7 +101,7 @@ func _init(
 	surface_field = surface
 	world_seed = surface.world_seed if surface != null else 0
 	biome_field = biomes if biomes != null else BiomeField.new(world_seed)
-	water_field = water if water != null else WaterField.new(surface_field, biome_field)
+	water_field = water if water != null else SimWaterField.new(surface_field, biome_field)
 	island_field = islands if islands != null else IslandField.new(water_field, biome_field)
 	settlement_field = settlements if settlements != null \
 		else SettlementField.new(water_field, biome_field, island_field)
@@ -444,7 +444,7 @@ func biome_at(x: float, z: float) -> String:
 
 
 ## The blended look of this position, as plain data.
-func profile_at(x: float, z: float) -> BiomeProfile:
+func profile_at(x: float, z: float) -> SimBiomeProfile:
 	return biome_field.profile_at(x, z)
 
 

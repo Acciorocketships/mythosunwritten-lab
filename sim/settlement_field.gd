@@ -384,7 +384,7 @@ var world_seed: int = 0
 
 ## The ground a village is levelled out of: the carved bed, the same ground
 ## anything walks on before this layer touches it.
-var water: WaterField = null
+var water: SimWaterField = null
 
 ## Which biome a candidate stands in, which gates it and tints it.
 var biomes: BiomeField = null
@@ -405,7 +405,7 @@ var _pad_tiles := {}
 
 
 func _init(
-	water_field: WaterField = null,
+	water_field: SimWaterField = null,
 	biome_field: BiomeField = null,
 	island_field: IslandField = null,
 ) -> void:

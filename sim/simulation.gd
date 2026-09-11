@@ -713,7 +713,7 @@ func scatter_report(
 					item["size"], item["kind"], item["context"],
 				])
 	var chunks := (2 * reach + 1) * (2 * reach + 1)
-	var area := float(chunks) * TerrainChunkMesher.CHUNK_SIZE * TerrainChunkMesher.CHUNK_SIZE
+	var area := float(chunks) * SimTerrainChunkMesher.CHUNK_SIZE * SimTerrainChunkMesher.CHUNK_SIZE
 	lines.append("scatter-summary chunks=%d placed=%d per_chunk=%.2f per_1000=%.2f" % [
 		chunks, placed, float(placed) / float(chunks), 1000.0 * float(placed) / area,
 	])
@@ -743,8 +743,8 @@ func _scatter_survey(reach: int, step: int) -> PackedStringArray:
 			kinds["%s/%s" % [id, kind]] = 0
 	for chunk_x in range(-reach, reach + 1, step):
 		for chunk_z in range(-reach, reach + 1, step):
-			var middle_x := (float(chunk_x) + 0.5) * TerrainChunkMesher.CHUNK_SIZE
-			var middle_z := (float(chunk_z) + 0.5) * TerrainChunkMesher.CHUNK_SIZE
+			var middle_x := (float(chunk_x) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
+			var middle_z := (float(chunk_z) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
 			var biome := world.terrain.biome_at(middle_x, middle_z)
 			chunks[biome] = int(chunks[biome]) + 1
 			for item in world.scatter_field.build(chunk_x, chunk_z).items:
@@ -976,7 +976,7 @@ func snap_report(
 						continue
 					clear += 1
 			var open_ground := float(clear) / cells
-			var chunk_size := TerrainChunkMesher.CHUNK_SIZE
+			var chunk_size := SimTerrainChunkMesher.CHUNK_SIZE
 			var flora := world.scatter_field.build(
 				int(floorf(x / chunk_size)), int(floorf(z / chunk_size))
 			).count()

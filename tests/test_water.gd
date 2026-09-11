@@ -107,7 +107,7 @@ func _water_ignores_chunk_build_order() -> void:
 	# A mesher that has built the whole neighbourhood must answer exactly as one
 	# that has built nothing.
 	var busy := TerrainQuery.for_seed(RIVER_SEED)
-	var mesher := TerrainChunkMesher.new(busy)
+	var mesher := SimTerrainChunkMesher.new(busy)
 	var fresh := TerrainQuery.for_seed(RIVER_SEED)
 	var probes := _probe_positions()
 
@@ -200,11 +200,11 @@ func _banks_are_the_dry_edge_of_the_water() -> void:
 				"(%f, %f) is reported as both water and a bank" % [x, z])
 			# ...with water within reach of it.
 			var near_water := false
-			for direction in WaterField.BANK_DIRECTIONS:
-				var angle := TAU * float(direction) / float(WaterField.BANK_DIRECTIONS)
+			for direction in SimWaterField.BANK_DIRECTIONS:
+				var angle := TAU * float(direction) / float(SimWaterField.BANK_DIRECTIONS)
 				if terrain.is_water_at(
-					x + cos(angle) * WaterField.BANK_REACH,
-					z + sin(angle) * WaterField.BANK_REACH,
+					x + cos(angle) * SimWaterField.BANK_REACH,
+					z + sin(angle) * SimWaterField.BANK_REACH,
 				):
 					near_water = true
 					break
@@ -267,7 +267,7 @@ func _the_sheet_is_one_world_lattice_not_a_tile_per_chunk() -> void:
 	# One sheet spans many chunks. If the water were tiled per chunk this could
 	# not be true of a single build.
 	var sheet := builder.build(Vector2.ZERO)
-	var span_in_chunks := (sheet.max_x - sheet.min_x) / TerrainChunkMesher.CHUNK_SIZE
+	var span_in_chunks := (sheet.max_x - sheet.min_x) / SimTerrainChunkMesher.CHUNK_SIZE
 	check(span_in_chunks >= 4.0,
 		"one sheet spans %f chunks, which is not enough to be a sheet" % span_in_chunks)
 	check(sheet.wet_cells > 0,

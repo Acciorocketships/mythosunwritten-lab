@@ -17,7 +17,7 @@ extends RefCounted
 ## Two profiles are also blended into a third along a border, which is the whole
 ## reason this is a small bag of independently interpolatable values rather than
 ## an opaque handle to something.
-class_name BiomeProfile
+class_name SimBiomeProfile
 
 ## Stable identifier, e.g. "twilight_marsh". This is what other layers key on.
 var id: String = ""
@@ -80,8 +80,8 @@ func _init(biome_id: String = "", name_for_display: String = "") -> void:
 ## never handed out directly, because the engine's packed arrays share storage
 ## when assigned -- a holder that wrote into the prop tags of a profile it was
 ## merely shown would be writing into the catalog every later sample reads.
-func detached_copy() -> BiomeProfile:
-	var copy := BiomeProfile.new(id, display_name)
+func detached_copy() -> SimBiomeProfile:
+	var copy := SimBiomeProfile.new(id, display_name)
 	copy.ground_tint = ground_tint
 	copy.tree_tint = tree_tint
 	copy.rock_tint = rock_tint

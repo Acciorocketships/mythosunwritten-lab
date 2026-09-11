@@ -69,7 +69,7 @@ func _process(_delta: float) -> void:
 ## The ground, the light and the air the sheet stands in. Deliberately the same
 ## cool-ambient, warm-key setup the world uses, so a lantern reads here the way
 ## it will read there.
-func _build_stage(profile: BiomeProfile, span: Vector2) -> void:
+func _build_stage(profile: SimBiomeProfile, span: Vector2) -> void:
 	var ground := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(span.x + CELL.x * 2.0, span.y + CELL.y * 2.0)

@@ -231,7 +231,7 @@ func _measure(mix: float, on: Image) -> Dictionary:
 
 func _report() -> void:
 	var world = _shell.get("_sim").world
-	var profile: BiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
+	var profile: SimBiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
 	print("")
 	print("measured at         (%.1f, %.1f) in %s, %d tufts drawn" % [
 		world.observer_x, world.observer_z, profile.display_name,

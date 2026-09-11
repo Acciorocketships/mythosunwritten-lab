@@ -26,7 +26,7 @@ extends RefCounted
 ## seed. It stores nothing that sampling changes, it does not know that chunks
 ## exist, and it never looks at a clock -- so whether you are standing in water
 ## is the same answer whichever chunk asked, in what order, and in which process.
-class_name WaterField
+class_name SimWaterField
 
 ## World units across the broadest bend of the river field. Wider than a biome
 ## is not wanted here: a river should cross a region, not define one.
@@ -105,7 +105,7 @@ const TABLE_SEED_OFFSET := 0x6A09E667
 var world_seed: int = 0
 
 ## The uncarved ground. Water is cut out of it, so it has to be asked first.
-var surface: TerrainSurfaceField = null
+var surface: SimTerrainSurfaceField = null
 
 ## Which biome the ground is. Only the moisture axis is read, and only to decide
 ## how high the water table stands.
@@ -115,7 +115,7 @@ var _river: ValueNoise = null
 var _table: ValueNoise = null
 
 
-func _init(surface_field: TerrainSurfaceField = null, biome_field: BiomeField = null) -> void:
+func _init(surface_field: SimTerrainSurfaceField = null, biome_field: BiomeField = null) -> void:
 	surface = surface_field
 	world_seed = surface_field.world_seed if surface_field != null else 0
 	biomes = biome_field if biome_field != null else BiomeField.new(world_seed)

@@ -106,12 +106,12 @@ func _props_near(
 ) -> Array:
 	var reach := back + FoliageFade.WIDEST_CROWN
 	var found: Array = []
-	var steps := int(ceil(reach / TerrainChunkMesher.CHUNK_SIZE)) + 1
-	var here := TerrainChunkMesher.chunk_at(stand.x, stand.y)
+	var steps := int(ceil(reach / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
+	var here := SimTerrainChunkMesher.chunk_at(stand.x, stand.y)
 	for offset_x in range(-steps, steps + 1):
 		for offset_z in range(-steps, steps + 1):
 			var key := Vector2i(here.x + offset_x, here.y + offset_z)
-			if TerrainChunkMesher.distance_to_chunk(key, stand.x, stand.y) > reach:
+			if SimTerrainChunkMesher.distance_to_chunk(key, stand.x, stand.y) > reach:
 				continue
 			if not patches.has(key):
 				patches[key] = scatter.build(key.x, key.y)

@@ -30,7 +30,7 @@ func run() -> void:
 
 
 func _new_streamer() -> TerrainStreamer:
-	return TerrainStreamer.new(TerrainChunkMesher.new(TerrainQuery.for_seed(SEED)))
+	return TerrainStreamer.new(SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED)))
 
 
 func _loads_around_a_standing_observer() -> void:
@@ -44,7 +44,7 @@ func _loads_around_a_standing_observer() -> void:
 	for x in range(-reach, reach + 1):
 		for z in range(-reach, reach + 1):
 			var key := Vector2i(x, z)
-			if TerrainChunkMesher.distance_to_chunk(key, 0.0, 0.0) <= TerrainStreamer.LOAD_RADIUS:
+			if SimTerrainChunkMesher.distance_to_chunk(key, 0.0, 0.0) <= TerrainStreamer.LOAD_RADIUS:
 				expected.append(key)
 	expected.sort()
 
@@ -83,12 +83,12 @@ func _walking_a_path_gives_the_expected_set() -> void:
 	for key in _candidates_near(path):
 		var was_reached := false
 		for point in path:
-			if TerrainChunkMesher.distance_to_chunk(key, point.x, point.y) <= TerrainStreamer.LOAD_RADIUS:
+			if SimTerrainChunkMesher.distance_to_chunk(key, point.x, point.y) <= TerrainStreamer.LOAD_RADIUS:
 				was_reached = true
 				break
 		if not was_reached:
 			continue
-		var now := TerrainChunkMesher.distance_to_chunk(key, final_point.x, final_point.y)
+		var now := SimTerrainChunkMesher.distance_to_chunk(key, final_point.x, final_point.y)
 		if now <= TerrainStreamer.UNLOAD_RADIUS:
 			expected.append(key)
 	expected.sort()
@@ -190,18 +190,18 @@ func _check_invariants(
 	for key in streamer.loaded_keys():
 		var nearest := INF
 		for observer in observers:
-			nearest = minf(nearest, TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y))
+			nearest = minf(nearest, SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y))
 		check(nearest <= TerrainStreamer.UNLOAD_RADIUS,
 			"chunk %v is %f from the nearest observer at %v, past the unload radius"
 			% [key, nearest, at])
 
-	var reach := int(ceil(TerrainStreamer.LOAD_RADIUS / TerrainChunkMesher.CHUNK_SIZE)) + 1
+	var reach := int(ceil(TerrainStreamer.LOAD_RADIUS / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
 	for observer in observers:
-		var centre := TerrainChunkMesher.chunk_at(observer.x, observer.y)
+		var centre := SimTerrainChunkMesher.chunk_at(observer.x, observer.y)
 		for offset_x in range(-reach, reach + 1):
 			for offset_z in range(-reach, reach + 1):
 				var key := Vector2i(centre.x + offset_x, centre.y + offset_z)
-				if TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > TerrainStreamer.LOAD_RADIUS:
+				if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > TerrainStreamer.LOAD_RADIUS:
 					continue
 				check(streamer.is_loaded(key),
 					"chunk %v is within the load radius of %v but is not loaded"
@@ -227,9 +227,9 @@ func _straight_path(start: Vector2, direction: Vector2, steps: int) -> Array[Vec
 ## considering, so the expectation above does not have to scan the plane.
 func _candidates_near(path: Array[Vector2]) -> Array[Vector2i]:
 	var seen := {}
-	var reach := int(ceil(TerrainStreamer.UNLOAD_RADIUS / TerrainChunkMesher.CHUNK_SIZE)) + 1
+	var reach := int(ceil(TerrainStreamer.UNLOAD_RADIUS / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
 	for point in path:
-		var centre := TerrainChunkMesher.chunk_at(point.x, point.y)
+		var centre := SimTerrainChunkMesher.chunk_at(point.x, point.y)
 		for offset_x in range(-reach, reach + 1):
 			for offset_z in range(-reach, reach + 1):
 				seen[Vector2i(centre.x + offset_x, centre.y + offset_z)] = true

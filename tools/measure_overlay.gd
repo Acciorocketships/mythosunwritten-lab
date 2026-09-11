@@ -64,7 +64,7 @@ func _initialize() -> void:
 	var builder := CombatBoardBuilder.new(terrain)
 	print("overlay-measure seed=%d cell=%.2f span=%.1f fill=%.2f ground_mesh_cell=%.2f" % [
 		seed_value, CombatBoard.CELL_SIZE, CombatBoardBuilder.DEFAULT_SPAN, FILL,
-		TerrainChunkMesher.CELL_SIZE,
+		SimTerrainChunkMesher.CELL_SIZE,
 	])
 
 	if sites.is_empty():
@@ -313,7 +313,7 @@ func _mesh_above_field(board: CombatBoard, terrain: TerrainQuery) -> Dictionary:
 	var over := {}
 	for candidate in LIFTS:
 		over[candidate] = 0
-	var mesh_cell := TerrainChunkMesher.CELL_SIZE
+	var mesh_cell := SimTerrainChunkMesher.CELL_SIZE
 	var lattice := {}
 	for row in board.cells_deep:
 		for column in board.cells_across:

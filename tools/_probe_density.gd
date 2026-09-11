@@ -11,7 +11,7 @@ func _initialize() -> void:
 		var wet := 0
 		var steep := 0
 		for k in keys:
-			var d := TerrainChunkMesher.distance_to_chunk(k, w.observer_x, w.observer_z)
+			var d := SimTerrainChunkMesher.distance_to_chunk(k, w.observer_x, w.observer_z)
 			if not GrassLayer.wanted_at(d): continue
 			var v = layer.build(w.terrain_streamer.geometry(k))
 			chunks += 1

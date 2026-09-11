@@ -43,7 +43,7 @@ func run() -> void:
 ## Which cell a position is drawn at grows with how far away it is, and the
 ## sizes are the doubling the layer says they are.
 func _the_cell_coarsens_with_distance() -> void:
-	var previous := TerrainChunkMesher.CELL_SIZE
+	var previous := SimTerrainChunkMesher.CELL_SIZE
 	for level in range(1, DistantGround.LEVELS + 1):
 		var cell := DistantGround.cell_size(level)
 		equal(cell, previous * 2.0,
@@ -104,7 +104,7 @@ func _the_coarse_ground_covers_the_view_exactly() -> void:
 ## How many surfaces are drawn over one position.
 func _covers(lod: DistantGround, loaded: Dictionary, x: float, z: float) -> int:
 	var cover := 0
-	if loaded.has(TerrainChunkMesher.chunk_at(x, z)):
+	if loaded.has(SimTerrainChunkMesher.chunk_at(x, z)):
 		cover += 1
 	for level in range(1, DistantGround.LEVELS + 1):
 		var side := DistantGround.tile_size(level)
@@ -128,7 +128,7 @@ func _covers(lod: DistantGround, loaded: Dictionary, x: float, z: float) -> int:
 ## Checked against the streamer's own rule rather than against one run of it:
 ## the unload radius is what bounds how far a loaded chunk can be.
 func _level_one_contains_every_chunk_the_streamer_could_load() -> void:
-	var reach := TerrainStreamer.UNLOAD_RADIUS + TerrainChunkMesher.CHUNK_SIZE
+	var reach := TerrainStreamer.UNLOAD_RADIUS + SimTerrainChunkMesher.CHUNK_SIZE
 	var worst := INF
 	for at in [Vector2(0.0, 0.0), Vector2(15.9, 31.9), Vector2(-7.3, 48.1), Vector2(602.4, -318.6)]:
 		var block := DistantGround.block_of(1, at.x, at.y)
@@ -156,7 +156,7 @@ func _the_radius_grows_without_the_count_growing_quadratically() -> void:
 	lod.update(world.observer_x, world.observer_z, loaded)
 
 	var radius := DistantGround.guaranteed_radius()
-	var uniform := int(PI * radius * radius / (TerrainChunkMesher.CHUNK_SIZE * TerrainChunkMesher.CHUNK_SIZE))
+	var uniform := int(PI * radius * radius / (SimTerrainChunkMesher.CHUNK_SIZE * SimTerrainChunkMesher.CHUNK_SIZE))
 	var drawn := loaded.size() + lod.wanted().size()
 	check(drawn < uniform / 20,
 		"the layer draws %d pieces where a uniform mesh of the same %d-unit "
@@ -275,7 +275,7 @@ func _the_world_reports_one_height_whichever_level_drew_it() -> void:
 ## Which level is drawing a position: 0 for the simulation's own chunks, -1 for
 ## nothing at all.
 func _level_drawing(lod: DistantGround, loaded: Dictionary, x: float, z: float) -> int:
-	if loaded.has(TerrainChunkMesher.chunk_at(x, z)):
+	if loaded.has(SimTerrainChunkMesher.chunk_at(x, z)):
 		return 0
 	for level in range(1, DistantGround.LEVELS + 1):
 		var side := DistantGround.tile_size(level)

@@ -49,7 +49,7 @@ extends RefCounted
 class_name DecorationScatter
 
 ## How wide one cell of each lattice is, in world units. Both divide
-## TerrainChunkMesher.CHUNK_SIZE exactly, which is what keeps a cell inside one
+## SimTerrainChunkMesher.CHUNK_SIZE exactly, which is what keeps a cell inside one
 ## chunk, and a lattice's cell size is also the closest two of its things can
 ## ever stand.
 const FLORA_CELL := 2.0
@@ -176,7 +176,7 @@ func build(chunk_x: int, chunk_z: int) -> ScatterPatch:
 	var patch := ScatterPatch.new(Vector2i(chunk_x, chunk_z))
 	for lattice in ScatterCatalog.LATTICES:
 		var size := cell_size(lattice)
-		var per_chunk := int(round(TerrainChunkMesher.CHUNK_SIZE / size))
+		var per_chunk := int(round(SimTerrainChunkMesher.CHUNK_SIZE / size))
 		for step_x in per_chunk:
 			for step_z in per_chunk:
 				var cell := Vector2i(

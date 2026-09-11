@@ -187,7 +187,7 @@ func _forge_a_row_per_tier() -> Dictionary:
 ## Nothing here decides where anything goes. The offsets are `GroundItems`', the
 ## items are the forge's, and the only thing the sheet does is multiply both by
 ## the same number so the heap is big enough to photograph.
-func _add_a_pile(profile: BiomeProfile) -> void:
+func _add_a_pile(profile: SimBiomeProfile) -> void:
 	var middle := Vector3.ZERO
 	for index in PILE:
 		var item := ItemForge.forge(_seed, "pile#%d" % index, LEVEL, (
@@ -222,7 +222,7 @@ func _add_a_pile(profile: BiomeProfile) -> void:
 ## The size printed for each tag is measured off the built node and multiplied by
 ## the shell's own `scale_for()`, so the line under a model is what that model
 ## would really occupy lying on the grass, not what its row claims.
-func _add_the_gear_sheet(profile: BiomeProfile) -> void:
+func _add_the_gear_sheet(profile: SimBiomeProfile) -> void:
 	var tags := AssetTags.in_category(AssetTags.GEAR)
 	var columns := 5
 	var rows := int(ceil(float(tags.size()) / float(columns)))
@@ -291,7 +291,7 @@ func _reached_by(tag: String) -> String:
 
 ## One cell: the item as the table draws it, standing on the ground, with what it
 ## is and which name it went through written under it.
-func _add_item(item: Item, tag: String, at: Vector3, profile: BiomeProfile) -> void:
+func _add_item(item: Item, tag: String, at: Vector3, profile: SimBiomeProfile) -> void:
 	var built := AssetLibrary.build(tag, profile)
 	if built == null:
 		push_error("item sheet: '%s' would not build" % tag)
@@ -336,7 +336,7 @@ func _bounds_of(node: Node, so_far: Transform3D) -> AABB:
 ## The stage the pile picture stands on: the same ground and light, seen from
 ## almost directly above, because a heap's *spread* is what the picture is of and
 ## a low camera hides the far half of it behind the near half.
-func _build_pile_stage(profile: BiomeProfile) -> void:
+func _build_pile_stage(profile: SimBiomeProfile) -> void:
 	var reach := GroundItems.SPACING * MAGNIFIED * sqrt(float(PILE)) + 2.0
 	_build_stage(profile, Vector2(reach * 2.0, reach * 2.0))
 	for child in get_children():
@@ -349,7 +349,7 @@ func _build_pile_stage(profile: BiomeProfile) -> void:
 
 ## The ground, the light and the air the sheet stands in: the same cool-ambient,
 ## warm-key setup the world uses, so steel reads here the way it will read there.
-func _build_stage(profile: BiomeProfile, span: Vector2) -> void:
+func _build_stage(profile: SimBiomeProfile, span: Vector2) -> void:
 	var ground := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(span.x + CELL.x * 2.6, span.y + CELL.y * 1.6)

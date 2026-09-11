@@ -131,11 +131,11 @@ func _the_lattice_is_fixed_to_the_world() -> void:
 ## and is not a whole number of cells to a chunk -- so a board's cells straddle
 ## chunk borders and the two grids cannot start standing in for one another.
 func _the_cell_is_coarser_than_the_ground_it_reads() -> void:
-	check(CombatBoard.CELL_SIZE > TerrainChunkMesher.CELL_SIZE,
+	check(CombatBoard.CELL_SIZE > SimTerrainChunkMesher.CELL_SIZE,
 		"the board's cell (%.2f) must be coarser than the ground's (%.2f)" % [
-			CombatBoard.CELL_SIZE, TerrainChunkMesher.CELL_SIZE,
+			CombatBoard.CELL_SIZE, SimTerrainChunkMesher.CELL_SIZE,
 		])
-	var per_chunk := TerrainChunkMesher.CHUNK_SIZE / CombatBoard.CELL_SIZE
+	var per_chunk := SimTerrainChunkMesher.CHUNK_SIZE / CombatBoard.CELL_SIZE
 	check(absf(per_chunk - roundf(per_chunk)) > 0.01,
 		"the board's cell must not divide the chunk, got %.4f cells per chunk" % per_chunk)
 

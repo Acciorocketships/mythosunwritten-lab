@@ -272,8 +272,8 @@ func _attempt_c() -> void:
 		"%s -> %s" % [moved, control.digest()])
 
 	# C4. Read sim/ for any world-generation file that names an item class.
-	var world_classes := ["TerrainSurfaceField", "TerrainStreamer", "BiomeField",
-		"WaterField", "IslandField", "SettlementField", "DecorationScatter",
+	var world_classes := ["SimTerrainSurfaceField", "TerrainStreamer", "BiomeField",
+		"SimWaterField", "IslandField", "SettlementField", "DecorationScatter",
 		"ScatterStreamer", "MountainField", "PathNetwork", "ValueNoise"]
 	var item_classes := ["Item", "ItemBudget", "ItemRarity", "ItemEffect",
 		"ItemForge", "ItemDrop", "ItemFrontier"]

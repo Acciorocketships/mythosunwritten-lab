@@ -97,14 +97,14 @@ func live_patch(key: Vector2i) -> ScatterPatch:
 
 
 func _load_around(observer: Vector2) -> void:
-	var reach := int(ceil(LOAD_RADIUS / TerrainChunkMesher.CHUNK_SIZE)) + 1
-	var here := TerrainChunkMesher.chunk_at(observer.x, observer.y)
+	var reach := int(ceil(LOAD_RADIUS / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
+	var here := SimTerrainChunkMesher.chunk_at(observer.x, observer.y)
 	for offset_x in range(-reach, reach + 1):
 		for offset_z in range(-reach, reach + 1):
 			var key := Vector2i(here.x + offset_x, here.y + offset_z)
 			if _loaded.has(key):
 				continue
-			if TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > LOAD_RADIUS:
+			if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > LOAD_RADIUS:
 				continue
 			_loaded[key] = scatter.build(key.x, key.y)
 			patches_built += 1
@@ -115,7 +115,7 @@ func _unload_far_from(observers: Array[Vector2]) -> void:
 	for key in _loaded:
 		var nearest := INF
 		for observer in observers:
-			nearest = minf(nearest, TerrainChunkMesher.distance_to_chunk(
+			nearest = minf(nearest, SimTerrainChunkMesher.distance_to_chunk(
 				key, observer.x, observer.y
 			))
 		if nearest > UNLOAD_RADIUS:

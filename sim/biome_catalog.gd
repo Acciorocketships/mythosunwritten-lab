@@ -41,13 +41,13 @@ const TRODDEN_TINT_MIX := 0.34
 ## bleed in proportionally, but a prop belonging to it would look misplaced.
 const PROP_TAG_MIN_WEIGHT := 0.15
 
-# id -> BiomeProfile. Built once, never handed out directly.
+# id -> SimBiomeProfile. Built once, never handed out directly.
 static var _catalog := {}
 
 
 ## The profile for one biome id, as a detached copy, or null for an unknown id.
-static func profile(id: String) -> BiomeProfile:
-	var found: BiomeProfile = _built().get(id, null)
+static func profile(id: String) -> SimBiomeProfile:
+	var found: SimBiomeProfile = _built().get(id, null)
 	if found == null:
 		return null
 	return found.detached_copy()
@@ -56,7 +56,7 @@ static func profile(id: String) -> BiomeProfile:
 ## The ground colour of one biome, without building a whole profile around it.
 ## Color is a value, so handing it out shares nothing.
 static func ground_tint_of(id: String) -> Color:
-	var found: BiomeProfile = _built().get(id, null)
+	var found: SimBiomeProfile = _built().get(id, null)
 	if found == null:
 		return Color(0.5, 0.5, 0.5)
 	return found.ground_tint
@@ -64,7 +64,7 @@ static func ground_tint_of(id: String) -> Color:
 
 ## The water colour of one biome, the same way.
 static func water_tint_of(id: String) -> Color:
-	var found: BiomeProfile = _built().get(id, null)
+	var found: SimBiomeProfile = _built().get(id, null)
 	if found == null:
 		return Color(0.30, 0.55, 0.70)
 	return found.water_tint
@@ -74,7 +74,7 @@ static func water_tint_of(id: String) -> Color:
 ## including the cliff round the rim of a floating island, which is a piece of
 ## the ground below it and is coloured like one.
 static func rock_tint_of(id: String) -> Color:
-	var found: BiomeProfile = _built().get(id, null)
+	var found: SimBiomeProfile = _built().get(id, null)
 	if found == null:
 		return Color(0.5, 0.5, 0.5)
 	return found.rock_tint
@@ -113,14 +113,14 @@ static func has_biome(id: String) -> bool:
 ##
 ## The id and display name are the strongest contributor's, so a blend still
 ## answers "where am I" with a single name.
-static func blend(weights: Dictionary) -> BiomeProfile:
+static func blend(weights: Dictionary) -> SimBiomeProfile:
 	var total := 0.0
 	for id in IDS:
 		total += maxf(0.0, float(weights.get(id, 0.0)))
 	if total <= 0.0:
 		return profile(MEADOW)
 
-	var blended := BiomeProfile.new()
+	var blended := SimBiomeProfile.new()
 	var ground := Color(0, 0, 0)
 	var tree := Color(0, 0, 0)
 	var rock := Color(0, 0, 0)
@@ -139,7 +139,7 @@ static func blend(weights: Dictionary) -> BiomeProfile:
 		var share := maxf(0.0, float(weights.get(id, 0.0))) / total
 		if share <= 0.0:
 			continue
-		var source: BiomeProfile = _built()[id]
+		var source: SimBiomeProfile = _built()[id]
 		ground += source.ground_tint * share
 		tree += source.tree_tint * share
 		rock += source.rock_tint * share
@@ -158,7 +158,7 @@ static func blend(weights: Dictionary) -> BiomeProfile:
 			strongest = share
 			strongest_id = id
 
-	var lead: BiomeProfile = _built()[strongest_id]
+	var lead: SimBiomeProfile = _built()[strongest_id]
 	blended.id = lead.id
 	blended.display_name = lead.display_name
 	blended.ground_tint = ground
@@ -179,7 +179,7 @@ static func _built() -> Dictionary:
 	if not _catalog.is_empty():
 		return _catalog
 
-	var meadow := BiomeProfile.new(MEADOW, "Meadow")
+	var meadow := SimBiomeProfile.new(MEADOW, "Meadow")
 	meadow.ground_tint = Color(0.48, 0.72, 0.34)
 	meadow.tree_tint = Color(0.30, 0.55, 0.30)
 	meadow.rock_tint = Color(0.62, 0.60, 0.55)
@@ -195,7 +195,7 @@ static func _built() -> Dictionary:
 		AssetTags.FENCE, AssetTags.LANTERN_POST, AssetTags.CART, AssetTags.SIGNPOST,
 	])
 
-	var deep_forest := BiomeProfile.new(DEEP_FOREST, "Deep forest")
+	var deep_forest := SimBiomeProfile.new(DEEP_FOREST, "Deep forest")
 	deep_forest.ground_tint = Color(0.20, 0.38, 0.22)
 	deep_forest.tree_tint = Color(0.13, 0.30, 0.18)
 	deep_forest.rock_tint = Color(0.40, 0.42, 0.38)
@@ -211,7 +211,7 @@ static func _built() -> Dictionary:
 		AssetTags.FALLEN_LOG, AssetTags.FERN, AssetTags.PEBBLE,
 	])
 
-	var highland := BiomeProfile.new(HIGHLAND, "Highland")
+	var highland := SimBiomeProfile.new(HIGHLAND, "Highland")
 	highland.ground_tint = Color(0.52, 0.56, 0.46)
 	highland.tree_tint = Color(0.34, 0.44, 0.36)
 	highland.rock_tint = Color(0.60, 0.62, 0.64)
@@ -227,7 +227,7 @@ static func _built() -> Dictionary:
 		AssetTags.STONE_HENGE, AssetTags.GRAVEL,
 	])
 
-	var blossom := BiomeProfile.new(BLOSSOM_GROVE, "Blossom grove")
+	var blossom := SimBiomeProfile.new(BLOSSOM_GROVE, "Blossom grove")
 	blossom.ground_tint = Color(0.62, 0.74, 0.46)
 	blossom.tree_tint = Color(0.92, 0.66, 0.78)
 	blossom.rock_tint = Color(0.72, 0.66, 0.66)
@@ -243,7 +243,7 @@ static func _built() -> Dictionary:
 		AssetTags.BUSH, AssetTags.GRASS,
 	])
 
-	var marsh := BiomeProfile.new(TWILIGHT_MARSH, "Twilight marsh")
+	var marsh := SimBiomeProfile.new(TWILIGHT_MARSH, "Twilight marsh")
 	marsh.ground_tint = Color(0.18, 0.30, 0.34)
 	marsh.tree_tint = Color(0.12, 0.22, 0.28)
 	marsh.rock_tint = Color(0.24, 0.30, 0.34)

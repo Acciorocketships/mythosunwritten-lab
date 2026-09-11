@@ -142,7 +142,7 @@ func _time_the_build() -> Dictionary:
 	var observer := Vector2(world.observer_x, world.observer_z)
 	var wanted: Array = []
 	for key in keys:
-		if GrassLayer.wanted_at(TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)):
+		if GrassLayer.wanted_at(SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)):
 			wanted.append(key)
 
 	var best := INF
@@ -188,7 +188,7 @@ func _report() -> void:
 		AssetTags.GRASS, GrassLayer.PATCH_COPIES, GrassLayer.PATCH_SPAN
 	)
 	var world = _shell.get("_sim").world
-	var profile: BiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
+	var profile: SimBiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
 	var weights: Dictionary = world.terrain.biome_field.weights_at(
 		world.observer_x, world.observer_z
 	)
@@ -227,8 +227,8 @@ func _report() -> void:
 	# none, and are deliberately counted, because the question the coverage
 	# number answers is how thick the grass is over a meadow rather than how
 	# thick it is over the parts of a meadow that grow grass.
-	var ground := float(_with["patches"]) * TerrainChunkMesher.CHUNK_SIZE \
-		* TerrainChunkMesher.CHUNK_SIZE
+	var ground := float(_with["patches"]) * SimTerrainChunkMesher.CHUNK_SIZE \
+		* SimTerrainChunkMesher.CHUNK_SIZE
 	print("ground with grass   %.0f square units over %d chunks" % [
 		ground, _with["patches"],
 	])

@@ -25,7 +25,7 @@ extends RefCounted
 ## there were two fields. `height_at` remains a pure function of position and
 ## seed, and outside a range it answers the same float it answered before the
 ## mountains existed.
-class_name TerrainSurfaceField
+class_name SimTerrainSurfaceField
 
 ## How many layers of noise are summed. More layers means finer detail and more
 ## work per sample.

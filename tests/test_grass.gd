@@ -213,14 +213,14 @@ func _every_tuft_stands_on_the_ground_the_shell_is_drawing() -> void:
 		if view == null:
 			continue
 		var buffer: PackedFloat32Array = view.multimesh.buffer
-		var origin_x := float(key.x) * TerrainChunkMesher.CHUNK_SIZE
-		var origin_z := float(key.y) * TerrainChunkMesher.CHUNK_SIZE
+		var origin_x := float(key.x) * SimTerrainChunkMesher.CHUNK_SIZE
+		var origin_z := float(key.y) * SimTerrainChunkMesher.CHUNK_SIZE
 		for at in view.multimesh.instance_count:
 			var x := buffer[at * STRIDE + AT_X]
 			var y := buffer[at * STRIDE + AT_Y]
 			var z := buffer[at * STRIDE + AT_Z]
-			if x < origin_x or x > origin_x + TerrainChunkMesher.CHUNK_SIZE \
-					or z < origin_z or z > origin_z + TerrainChunkMesher.CHUNK_SIZE:
+			if x < origin_x or x > origin_x + SimTerrainChunkMesher.CHUNK_SIZE \
+					or z < origin_z or z > origin_z + SimTerrainChunkMesher.CHUNK_SIZE:
 				outside += 1
 				continue
 			var surface := _surface_under(geometry, x, z)
@@ -297,8 +297,8 @@ func _how_much_grows_and_what_colour_it_is_come_from_the_biome_profile() -> void
 	# used; the biome census below is what says the sweep was worth making.
 	for chunk_x in range(-30, 31, 6):
 		for chunk_z in range(-30, 31, 6):
-			var origin_x := float(chunk_x) * TerrainChunkMesher.CHUNK_SIZE
-			var origin_z := float(chunk_z) * TerrainChunkMesher.CHUNK_SIZE
+			var origin_x := float(chunk_x) * SimTerrainChunkMesher.CHUNK_SIZE
+			var origin_z := float(chunk_z) * SimTerrainChunkMesher.CHUNK_SIZE
 			if world.terrain.settlement_at(origin_x + 8.0, origin_z + 8.0) != null:
 				continue
 			var leaf := PackedColorArray()
@@ -306,8 +306,8 @@ func _how_much_grows_and_what_colour_it_is_come_from_the_biome_profile() -> void
 			for row in 2:
 				for column in 2:
 					var profile := world.terrain.profile_at(
-						origin_x + float(column) * TerrainChunkMesher.CHUNK_SIZE,
-						origin_z + float(row) * TerrainChunkMesher.CHUNK_SIZE
+						origin_x + float(column) * SimTerrainChunkMesher.CHUNK_SIZE,
+						origin_z + float(row) * SimTerrainChunkMesher.CHUNK_SIZE
 					)
 					leaf.append(profile.tree_tint)
 			# What the rule asks for, written out here rather than taken from the
@@ -330,7 +330,7 @@ func _how_much_grows_and_what_colour_it_is_come_from_the_biome_profile() -> void
 				) / float(GrassLayer.LATTICE * GrassLayer.LATTICE)
 			for row in GrassLayer.FIELD_SIDE:
 				for column in GrassLayer.FIELD_SIDE:
-					var step := TerrainChunkMesher.CHUNK_SIZE \
+					var step := SimTerrainChunkMesher.CHUNK_SIZE \
 						/ float(GrassLayer.FIELD_SIDE - 1)
 					if world.terrain.path_strength_at(
 						origin_x + float(column) * step, origin_z + float(row) * step
@@ -367,7 +367,7 @@ func _how_much_grows_and_what_colour_it_is_come_from_the_biome_profile() -> void
 				var here := Vector2(
 					buffer[at * STRIDE + AT_X] - origin_x,
 					buffer[at * STRIDE + AT_Z] - origin_z
-				) / TerrainChunkMesher.CHUNK_SIZE
+				) / SimTerrainChunkMesher.CHUNK_SIZE
 				var expected := _expected_tint(ground, leaf[0].lerp(leaf[1], here.x).lerp(
 					leaf[2].lerp(leaf[3], here.x), here.y
 				), reference)
@@ -550,9 +550,9 @@ func _the_clearing_mask_is_a_pure_function_of_world_position_and_the_seed() -> v
 ## BOUNDARY_WANDER_SCALE. This requires the behaviour those numbers are there to
 ## produce, so a change to them that broke the look would be caught here.
 func _the_mask_wanders_rather_than_flickering_from_cell_to_cell() -> void:
-	check(GrassLayer.CLEARING_SCALE > TerrainChunkMesher.CHUNK_SIZE * 2.0,
+	check(GrassLayer.CLEARING_SCALE > SimTerrainChunkMesher.CHUNK_SIZE * 2.0,
 		"the clearing field's scale of %.0f units is not broad against a %.0f-unit "
-		% [GrassLayer.CLEARING_SCALE, TerrainChunkMesher.CHUNK_SIZE]
+		% [GrassLayer.CLEARING_SCALE, SimTerrainChunkMesher.CHUNK_SIZE]
 		+ "chunk, so a clearing would not span one")
 	check(GrassLayer.BOUNDARY_PATH > GrassLayer.CELL * 4.0,
 		"a bare path %.1f units wide is only %.1f lattice cells across, which is "
@@ -907,8 +907,8 @@ func _the_level_of_detail_hides_tufts_and_rebuilds_nothing() -> void:
 		% [thinned["span"].x, thinned["span"].y]
 		+ "span %.1f by %.1f" % [whole["span"].x, whole["span"].y])
 	var drift: Vector2 = thinned["middle"] - whole["middle"]
-	check(absf(drift.x) < TerrainChunkMesher.CHUNK_SIZE * 0.08
-		and absf(drift.y) < TerrainChunkMesher.CHUNK_SIZE * 0.08,
+	check(absf(drift.x) < SimTerrainChunkMesher.CHUNK_SIZE * 0.08
+		and absf(drift.y) < SimTerrainChunkMesher.CHUNK_SIZE * 0.08,
 		"thinning moved the middle of the chunk's grass by (%.2f, %.2f), so it is "
 		% [drift.x, drift.y] + "clearing one side rather than thinning evenly")
 	view.free()
@@ -1337,7 +1337,7 @@ func _the_world_is_byte_identical_with_and_without_the_grass() -> void:
 
 
 ## A flat chunk of ground at DRY_HEIGHT, one colour, facing straight up, laid out
-## exactly the way TerrainChunkMesher lays a chunk out.
+## exactly the way SimTerrainChunkMesher lays a chunk out.
 ## The walkable islands within SCAN_CELLS of the origin, in a fixed order.
 func _walkable_islands(world: SimWorld) -> Array[FloatingIsland]:
 	var found: Array[FloatingIsland] = []
@@ -1437,10 +1437,10 @@ func _island_digest(view: MultiMeshInstance3D) -> String:
 
 func _flat_chunk(chunk_x: int, chunk_z: int, tint: Color) -> TerrainChunkGeometry:
 	var geometry := TerrainChunkGeometry.new(chunk_x, chunk_z)
-	var origin_x := float(chunk_x) * TerrainChunkMesher.CHUNK_SIZE
-	var origin_z := float(chunk_z) * TerrainChunkMesher.CHUNK_SIZE
-	var cells := TerrainChunkMesher.CELLS
-	var size := TerrainChunkMesher.CELL_SIZE
+	var origin_x := float(chunk_x) * SimTerrainChunkMesher.CHUNK_SIZE
+	var origin_z := float(chunk_z) * SimTerrainChunkMesher.CHUNK_SIZE
+	var cells := SimTerrainChunkMesher.CELLS
+	var size := SimTerrainChunkMesher.CELL_SIZE
 	for row in cells:
 		for column in cells:
 			var corners: Array[Vector2] = [

@@ -112,9 +112,9 @@ func _time_queries(seed_value: int) -> void:
 
 
 func _new_field(seed_value: int) -> IslandField:
-	var surface := TerrainSurfaceField.new(seed_value)
+	var surface := SimTerrainSurfaceField.new(seed_value)
 	var biomes := BiomeField.new(seed_value)
-	return IslandField.new(WaterField.new(surface, biomes), biomes)
+	return IslandField.new(SimWaterField.new(surface, biomes), biomes)
 
 
 ## What dressing an island costs, and what that comes to per streamed chunk.
@@ -180,7 +180,7 @@ func _time_dressing(seed_value: int) -> void:
 	# out of holds a known number of chunks, and the dressing of everything in
 	# it is spread over them.
 	var span := float(BUILD_CELLS) * IslandField.AERIAL_CELL
-	var chunk_size := TerrainChunkMesher.CHUNK_SIZE
+	var chunk_size := SimTerrainChunkMesher.CHUNK_SIZE
 	var chunks := (span * span) / (chunk_size * chunk_size)
 	print(("bench cover-streamed span=%.0f chunks=%.0f islands_per_chunk=%.4f "
 		+ "usec_per_chunk=%.2f") % [

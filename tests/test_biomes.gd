@@ -116,18 +116,18 @@ func _chunk_colours_ignore_build_order() -> void:
 		Vector2i(4, -3), Vector2i(6, -3),
 	]
 
-	var fresh := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var fresh := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	var reference := fresh.build(subject.x, subject.y)
 	check(reference.colors.size() == reference.vertices.size(),
 		"a built chunk should carry one ground colour per vertex, got %d for %d"
 		% [reference.colors.size(), reference.vertices.size()])
 
-	var busy := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var busy := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	for key in neighbours:
 		busy.build(key.x, key.y)
 	var after_others := busy.build(subject.x, subject.y)
 
-	var reversed := TerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var reversed := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
 	for index in range(neighbours.size() - 1, -1, -1):
 		var key: Vector2i = neighbours[index]
 		reversed.build(key.x, key.y)
@@ -275,8 +275,8 @@ func _borders_blend_rather_than_snap() -> void:
 	var samples := 240
 	var span := 24.0
 
-	var blended: Array[BiomeProfile] = []
-	var snapped: Array[BiomeProfile] = []
+	var blended: Array[SimBiomeProfile] = []
+	var snapped: Array[SimBiomeProfile] = []
 	for i in samples:
 		var offset := (float(i) / float(samples - 1) - 0.5) * 2.0 * span
 		var point := at + along * offset
@@ -432,7 +432,7 @@ func _find_border(field: BiomeField) -> Dictionary:
 ## How far apart two profiles look, as one number. The colours dominate; fog
 ## density is scaled up because it lives in thousandths of a fraction per world
 ## unit, and foliage density is already in [0, 1].
-func _profile_distance(a: BiomeProfile, b: BiomeProfile) -> float:
+func _profile_distance(a: SimBiomeProfile, b: SimBiomeProfile) -> float:
 	var total := 0.0
 	var pairs := [
 		[a.ground_tint, b.ground_tint], [a.tree_tint, b.tree_tint],

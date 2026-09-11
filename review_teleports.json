@@ -1,0 +1,50 @@
+[
+ {
+  "look": [
+   240.0,
+   -360.0
+  ],
+  "name": "V1: sealed warren village (city seed 166029932451774690, compact) super (0,-1)",
+  "pos": [
+   240.0,
+   80.0,
+   -384.0
+  ]
+ },
+ {
+  "look": [
+   48.0,
+   -1092.0
+  ],
+  "name": "R5-V1: skirt + sudden-change site \u2014 falls green at crest, no pale skirt (cell 1,-46)",
+  "pos": [
+   34.4,
+   9.5,
+   -1103.4
+  ]
+ },
+ {
+  "look": [
+   20.0,
+   -1494.0
+  ],
+  "name": "L1: level terraces \u2014 meadow ridge steps 4.5->5.0->4.5 as short grass slopes, seams sealed green (cell 1,-62)",
+  "pos": [
+   48.0,
+   6.5,
+   -1500.0
+  ]
+ },
+ {
+  "look": [
+   1080.0,
+   -960.0
+  ],
+  "name": "L2: level terraces \u2014 meadow band, 0.5m steps ramp like slope tiles, no rock dressing (cell 45,-42)",
+  "pos": [
+   1080.0,
+   6.0,
+   -1008.0
+  ]
+ }
+]

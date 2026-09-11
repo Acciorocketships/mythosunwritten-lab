@@ -349,7 +349,7 @@ static func _forget_measurements() -> void:
 ## carry a tint role take their colour from it, so the same fir is deep green
 ## under canopy and bright green in the meadow without the table knowing either
 ## colour. Passing null gives every part its own fallback colour.
-static func build(tag: String, profile: BiomeProfile = null) -> Node3D:
+static func build(tag: String, profile: SimBiomeProfile = null) -> Node3D:
 	var row: AssetVisual = _built().get(tag, null)
 	if row == null:
 		return null
@@ -1029,7 +1029,7 @@ static func _gather_triangles(
 		_gather_triangles(child, here, into)
 
 
-static func _build_part(entry: Dictionary, profile: BiomeProfile) -> MeshInstance3D:
+static func _build_part(entry: Dictionary, profile: SimBiomeProfile) -> MeshInstance3D:
 	var view := MeshInstance3D.new()
 	view.mesh = _mesh_for(entry["shape"], entry["size"])
 	view.position = entry["offset"]
@@ -1042,7 +1042,7 @@ static func _build_part(entry: Dictionary, profile: BiomeProfile) -> MeshInstanc
 
 ## The colour a part ends up: its own, or a mix towards the biome's colour for
 ## the role it carries.
-static func _colour_of(entry: Dictionary, profile: BiomeProfile) -> Color:
+static func _colour_of(entry: Dictionary, profile: SimBiomeProfile) -> Color:
 	var own: Color = entry["color"]
 	var role: String = entry["tint_role"]
 	if profile == null or role == AssetVisual.TINT_NONE:
@@ -1073,7 +1073,7 @@ static func _colour_of(entry: Dictionary, profile: BiomeProfile) -> Color:
 ## proportion -- darker and cooler under canopy, unchanged in the meadow, pink in
 ## a blossom grove. The compromise is that the trunk does move: reports/model-tint.md
 ## says so and shows it.
-static func _scene_tint(row: AssetVisual, profile: BiomeProfile) -> Color:
+static func _scene_tint(row: AssetVisual, profile: SimBiomeProfile) -> Color:
 	if profile == null or not row.takes_scene_tint():
 		return Color(1.0, 1.0, 1.0)
 	var reference: Color = REFERENCE_TINTS.get(row.scene_tint_role, Color(1.0, 1.0, 1.0))
@@ -1094,7 +1094,7 @@ static func _channel_gain(biome: float, reference: float) -> float:
 
 
 ## The biome's colour for a tint role, or a fallback for TINT_NONE.
-static func _role_colour(role: String, profile: BiomeProfile, fallback: Color) -> Color:
+static func _role_colour(role: String, profile: SimBiomeProfile, fallback: Color) -> Color:
 	match role:
 		AssetVisual.TINT_TREE:
 			return profile.tree_tint

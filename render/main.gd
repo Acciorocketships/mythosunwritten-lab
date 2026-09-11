@@ -1599,7 +1599,7 @@ func _sync_foliage(observer: Vector3) -> void:
 	var reach := _camera_offset.length() + FoliageFade.WIDEST_CROWN
 	var named := {}
 	for key in _scatter_views:
-		if TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.z) > reach:
+		if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.z) > reach:
 			continue
 		for node in (_scatter_views[key] as Node3D).get_children():
 			if not (node is Node3D):
@@ -2036,7 +2036,7 @@ func _sync_grass(snapshot: Dictionary) -> void:
 
 	for key in _grass_views.keys():
 		if GrassLayer.dropped_at(
-			TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
+			SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
 		):
 			(_grass_views[key] as Node3D).queue_free()
 			_grass_views.erase(key)
@@ -2045,7 +2045,7 @@ func _sync_grass(snapshot: Dictionary) -> void:
 		if _grass_views.has(key):
 			continue
 		if not GrassLayer.wanted_at(
-			TerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
+			SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
 		):
 			continue
 		var geometry := _sim.world.terrain_streamer.geometry(key)
@@ -2068,7 +2068,7 @@ func _sync_grass(snapshot: Dictionary) -> void:
 		var view := _grass_views[key] as MultiMeshInstance3D
 		if view.multimesh == null:
 			continue
-		_grass.set_detail(view, TerrainChunkMesher.distance_to_chunk(
+		_grass.set_detail(view, SimTerrainChunkMesher.distance_to_chunk(
 			key, observer.x, observer.y
 		))
 		var counts := GrassLayer.counts_of(view)
@@ -2127,7 +2127,7 @@ func _walkers(snapshot: Dictionary) -> Array[Vector3]:
 
 ## One scattered thing, at the height and the size the simulation gave it.
 func _add_scattered(
-	parent: Node3D, item: Dictionary, profile: BiomeProfile = null
+	parent: Node3D, item: Dictionary, profile: SimBiomeProfile = null
 ) -> Node3D:
 	var node := _add_placed(parent, item, float(item["y"]), profile)
 	if node == null:
@@ -2160,7 +2160,7 @@ func _add_placed(
 	parent: Node3D,
 	placed: Dictionary,
 	height: float,
-	profile: BiomeProfile = null,
+	profile: SimBiomeProfile = null,
 ) -> Node3D:
 	var tag := String(placed["tag"])
 	var x := float(placed["x"])
