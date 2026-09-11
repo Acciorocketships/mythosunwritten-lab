@@ -1,0 +1,56 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+=== the shipped table, 2026-09-09
+    recorded 2026-09-09 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 20 replies
+  what this draw's trader did:
+    a trade_accept of his finished ok: yes -- t= 67  Hob    finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=1 gave=0 gave_money=0
+    the lantern is in the person's pack: true
+    the person's purse: 15 (started 20, the price is 4)
+    the trader still carries the lantern: false
+    the trader's purse: 11 (he is after 10)
+    the closing examine shows a pack: false
+  the machinery, whatever he did:
+    coins in the two purses: 26 at the end, 26 at the start
+    the lantern has exactly one holder: true
+    honoured trades on the scene ledger: 2
+    every purse moves by what the ledger says: true (person -5, trader +5)
+    the pack window opened exactly while a trade stood: true (46 ticks with a trade standing, 0 ticks that disagreed)
+    the person's ask named the lantern and stood: true -- trade_propose ok to=2 give=0 give_money=4 want=1 want_money=0
+    every answer either of them got carried the engine's words: true (2 refusals, 0 of them wordless)
+
+=== the first bargain table, 2026-09-07 (9871350)
+    recorded 2026-09-07 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 22 replies, shipped at 9871350
+  what this draw's trader did:
+    a trade_accept of his finished ok: yes -- t= 67  Hob    finished trade_accept(target=1) -> trade_accept ok from=1 took=0 took_money=1 gave=0 gave_money=0
+    the lantern is in the person's pack: true
+    the person's purse: 15 (started 20, the price is 4)
+    the trader still carries the lantern: false
+    the trader's purse: 11 (he is after 10)
+    the closing examine shows a pack: false
+  the machinery, whatever he did:
+    coins in the two purses: 26 at the end, 26 at the start
+    the lantern has exactly one holder: true
+    honoured trades on the scene ledger: 2
+    every purse moves by what the ledger says: true (person -5, trader +5)
+    the pack window opened exactly while a trade stood: true (76 ticks with a trade standing, 0 ticks that disagreed)
+    the person's ask named the lantern and stood: true -- trade_propose ok to=2 give=0 give_money=4 want=1 want_money=0
+    every answer either of them got carried the engine's words: true (1 refusals, 0 of them wordless)
+
+=== the first draw of 2026-09-09 (6c79f56), which closed no sale
+    recorded 2026-09-09 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 18 replies, shipped at 6c79f56
+  what this draw's trader did:
+    a trade_accept of his finished ok: no
+    the lantern is in the person's pack: false
+    the person's purse: 20 (started 20, the price is 4)
+    the trader still carries the lantern: true
+    the trader's purse: 6 (he is after 10)
+    the closing examine shows a pack: true
+  the machinery, whatever he did:
+    coins in the two purses: 26 at the end, 26 at the start
+    the lantern has exactly one holder: true
+    honoured trades on the scene ledger: 0
+    every purse moves by what the ledger says: true (person +0, trader +0)
+    the pack window opened exactly while a trade stood: true (70 ticks with a trade standing, 0 ticks that disagreed)
+    the person's ask named the lantern and stood: true -- trade_propose ok to=2 give=0 give_money=4 want=1 want_money=0
+    every answer either of them got carried the engine's words: true (2 refusals, 0 of them wordless)

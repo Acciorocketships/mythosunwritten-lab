@@ -133,6 +133,12 @@ suite hard-asserts an end-to-end purchase made by a language model, so
 re-recording this one table is a lottery with the suite's colour as the prize.
 See `reports/observation-position.md`.
 
+**Since fixed**, and the numbers in the table above are now read rather than
+asserted: the suite's claims are the machinery, checked over the failing draw as
+well as this one, and the end-to-end purchase is checked against a written-down
+counterparty instead of a model. See
+[bargain-machinery.md](bargain-machinery.md).
+
 ## 4. The dialogue panel
 
 `render/ui/dialogue_panel.gd`: what a character said and what it heard, up to
@@ -331,4 +337,6 @@ they reach a label. Neither is this page's step.
   `tests/test_bargain.gd` pin what this draw did (the gift honoured, the
   counter left standing, the denial) and say so where a different draw could
   differ; re-recording rolls a new story, and an earlier, derailed draw was
-  thrown away whole rather than edited.
+  thrown away whole rather than edited. *(Since answered: only one check in that
+  suite now turns on the draw at all, and it says so in its own name. See
+  [bargain-machinery.md](bargain-machinery.md).)*

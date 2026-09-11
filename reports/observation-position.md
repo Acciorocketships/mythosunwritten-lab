@@ -185,6 +185,11 @@ which needs the model to succeed at haggling. Filed as a finding rather than
 fixed here, because the action catalogue and the bargain suite are outside this
 item's boundary.
 
+**Since fixed.** The suite now asserts the machinery over every recorded draw
+there is — including the failing one, kept verbatim in `net/bargain_draws.gd` —
+and asserts the end-to-end purchase against a written-down counterparty with no
+model in the run. See [bargain-machinery.md](bargain-machinery.md).
+
 ## Reproducing everything above
 
 ```
