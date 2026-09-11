@@ -167,17 +167,27 @@ const SKELETON_MINION := "skeleton_minion"
 # its own attack pattern (`Weapon.dagger()`), `ItemModel.BY_SHAPE` has always had
 # a "dagger" key, and until it had a name of its own that key pointed at
 # `gear_blade` -- so a dagger was drawn as the sword the same table draws a
-# sword as. An axe, a crossbow, a wand and a spellbook are the ones that did not
-# earn a name: the packs have models for all four, but nothing the forge draws
-# and nothing the catalogue ships can produce an item of that shape, so the tag
-# would be a name no item could ever carry. Giving them one needs an attack
-# pattern first, which is a change to the combat catalogue and not to this list.
+# sword as.
+#
+# The five below it earned theirs the same way and at the same price. An axe, a
+# two-handed sword, a crossbow, a wand and a spellbook had models in the packs
+# and no way to be: nothing the catalogue shipped had their pattern, so each tag
+# would have been a name no item could carry. What closed that was five weapons
+# in `sim/weapon.gd` -- `Weapon.axe()`, `greatsword()`, `crossbow()`, `wand()`
+# and `spellbook()`, each with its own cells, its own wait and its own motion --
+# and five rows in `ItemModel.BY_SHAPE` that reach them. The tag is still the
+# last of the three steps and never the first.
 
 const GEAR_BLADE := "gear_blade"
 const GEAR_DAGGER := "gear_dagger"
+const GEAR_GREATSWORD := "gear_greatsword"
+const GEAR_AXE := "gear_axe"
 const GEAR_SPEAR := "gear_spear"
 const GEAR_BOW := "gear_bow"
+const GEAR_CROSSBOW := "gear_crossbow"
 const GEAR_STAFF := "gear_staff"
+const GEAR_WAND := "gear_wand"
+const GEAR_SPELLBOOK := "gear_spellbook"
 const GEAR_FLAIL := "gear_flail"
 const GEAR_BUCKLER := "gear_buckler"
 
@@ -275,7 +285,8 @@ const BY_CATEGORY := {
 		SKELETON_WARRIOR, SKELETON_ROGUE, SKELETON_MAGE, SKELETON_MINION,
 	],
 	GEAR: [
-		GEAR_BLADE, GEAR_DAGGER, GEAR_SPEAR, GEAR_BOW, GEAR_STAFF,
+		GEAR_BLADE, GEAR_DAGGER, GEAR_GREATSWORD, GEAR_AXE, GEAR_SPEAR,
+		GEAR_BOW, GEAR_CROSSBOW, GEAR_STAFF, GEAR_WAND, GEAR_SPELLBOOK,
 		GEAR_FLAIL, GEAR_BUCKLER,
 		GEAR_BOOTS, GEAR_LEGGINGS, GEAR_CHESTPLATE, GEAR_HELMET,
 		GEAR_DRAUGHT, GEAR_BUNDLE,

@@ -1,0 +1,68 @@
+
+the catalogue, one line per attack:
+  weapon      attack         cells  wait   share  movement    sprite  motion properties
+  spear       thrust             2     1 100.00%  instant     point   lunge  
+  dagger      stab               2     1 100.00%  instant     blade   slash  
+  sword       cut                3     1  38.46%  instant     blade   slash  
+  sword       cleave             6     3  61.54%  instant     blade   swing  
+  bow         loose            248     3 100.00%  projectile  arrow   shoot  
+  staff       fireball           9     5 100.00%  instant     flame   cast   
+  flail       sweep              8     1 100.00%  instant     impact  spin   
+  shield      shove              1     2   0.00%  instant     impact  bash   push=1
+  axe         hew                6     3 100.00%  instant     blade   swing  push=1
+  greatsword  arc                8     3 100.00%  instant     blade   swing  
+  crossbow    bolt              15     4 100.00%  projectile  bolt    shoot  
+  wand        magic missile    104     3 100.00%  projectile  bolt    cast   split=3 homing=1
+  spellbook   flare             20     5 100.00%  instant     flame   cast   
+
+what reaches each of the five, and what it is drawn as:
+  word        weapon      forged as              drawn as
+  axe         axe         common axe             gear_axe
+  greatsword  greatsword  common greatsword      gear_greatsword
+  crossbow    crossbow    common crossbow        gear_crossbow
+  wand        wand        common wand            gear_wand
+  spellbook   spellbook   common spellbook       gear_spellbook
+
+the domination walk: 132 ordered pairs of 12 weapons
+  flail over dagger
+
+the seeded fight: seed 1234, 240 ticks, began=true, 58 blows
+  weapon      swung landed    cells    dealt motion
+  axe            13    13        6       54 swing
+  greatsword     14    14        8       58 swing
+  crossbow       10    10       11       40 shoot
+  wand           13    13      104      104 cast
+  spellbook       8     8       20       64 cast
+
+  the first blow of each, and the frame the shell would have drawn:
+    axe         t=1    motion swing  clip Melee_1H_Attack_Slice_Horizontal
+    greatsword  t=2    motion swing  clip Melee_1H_Attack_Slice_Horizontal
+    crossbow    t=3    motion shoot  clip Ranged_Bow_Release
+    wand        t=4    motion cast   clip Ranged_Magic_Shoot
+    spellbook   t=5    motion cast   clip Ranged_Magic_Shoot
+the armoury rack, every catalogue shape in somebody's hands
+
+
+seed 1234, 13 on the stage
+
+the rack, before anything is stepped:
+  who      holds (sim)      snapshot tag   right socket   left socket   
+  Sword    common sword     gear_blade     gear_blade     -             
+  Spear    common spear     gear_spear     gear_spear     -             
+  Dagger   common dagger    gear_dagger    gear_dagger    -             
+  Bow      common bow       gear_bow       gear_bow       -             
+  Staff    common staff     gear_staff     gear_staff     -             
+  Flail    common flail     gear_flail     gear_flail     -             
+  Shield   common shield    gear_buckler   -              gear_buckler  
+  Greatsword common greatsword gear_greatsword gear_greatsword -             
+  Axe      common axe       gear_axe       gear_axe       -             
+  Crossbow common crossbow  gear_crossbow  gear_crossbow  -             
+  Wand     common wand      gear_wand      gear_wand      -             
+  Spellbook common spellbook gear_spellbook gear_spellbook -             
+  Hazel    common sword     gear_blade     gear_blade     -             
+
+the changer, wherever the snapshot's hand changes:
+  t=1   hand slot gear_blade     right socket gear_blade     left socket -
+  t=16  hand slot gear_buckler   right socket -              left socket gear_buckler
+  t=34  hand slot gear_blade     right socket gear_blade     left socket -
+  t=51  hand slot -              right socket -              left socket -

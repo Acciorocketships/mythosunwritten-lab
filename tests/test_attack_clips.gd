@@ -134,8 +134,16 @@ func run() -> void:
 ## Nothing is drawn and no window is opened. The snapshot is the same dictionary
 ## `render/main.gd` draws a frame from, so a claim proved against these rows is a
 ## claim about what the shell puts on screen.
-static func play(ticks: int = TICKS, seed_value: int = SEED) -> Dictionary:
-	var staged := stage(seed_value)
+static func play(
+	ticks: int = TICKS,
+	seed_value: int = SEED,
+	shapes: Array = [],
+	names: Array = [],
+	looks: Array = [],
+	spread: float = APART,
+	offsets: Array = [],
+) -> Dictionary:
+	var staged := stage(seed_value, shapes, names, looks, spread, offsets)
 	var frames: Array[Dictionary] = []
 	for _step in maxi(0, ticks):
 		var snapshot := advance(staged)
@@ -160,23 +168,43 @@ static func play(ticks: int = TICKS, seed_value: int = SEED) -> Dictionary:
 ## What comes back: `roster` (which holds the scene), `loop` (which moves the
 ## clock), `weapons` (world id -> the weapon that id carries), `looks` (world id
 ## -> the model tag it wears) and `began`.
-static func stage(seed_value: int = SEED) -> Dictionary:
+static func stage(
+	seed_value: int = SEED,
+	shapes: Array = [],
+	names: Array = [],
+	appearances: Array = [],
+	spread: float = APART,
+	offsets: Array = [],
+) -> Dictionary:
+	# Empty means "the seven this suite is about". A caller that hands its own
+	# three lists stages the same fight with its own weapons in it -- which is
+	# what `tests/test_weapon_patterns.gd` does with the five the catalogue
+	# gained -- and every number and every rule below is the same for both.
+	var weapons: Array = _weapons() if shapes.is_empty() else shapes
+	var who: Array = FIGHTERS if names.is_empty() else names
+	var wearing: Array = LOOKS if appearances.is_empty() else appearances
 	var roster := CombatantRoster.new()
 	roster.scene.terrain = TerrainQuery.for_seed(seed_value)
-	var weapons := _weapons()
 	var carried := {}
 	var looks := {}
 	var anchor: Combatant = null
-	for i in FIGHTERS.size():
-		var angle := TAU * float(i) / float(FIGHTERS.size())
-		var at := WHERE + Vector2(cos(angle), sin(angle)) * APART
+	for i in who.size():
+		# A ring by default, and a written-down set of world offsets when a
+		# caller hands one: where a fighter stands decides which of them can
+		# reach which, and a run that wants every weapon used says so rather
+		# than hoping a radius happens to suit all of them.
+		var angle := TAU * float(i) / float(who.size())
+		var at := WHERE + (
+			Vector2(cos(angle), sin(angle)) * spread if offsets.is_empty()
+			else offsets[i] as Vector2
+		)
 		var one := roster.add(Combatant.commander_at(
-			at.x, at.y, 0.0, 0.0, LEVEL, LOOKS[i]))
-		(one.piece as Commander).adopt(Character.make(FIGHTERS[i], LEVEL))
+			at.x, at.y, 0.0, 0.0, LEVEL, String(wearing[i])))
+		(one.piece as Commander).adopt(Character.make(String(who[i]), LEVEL))
 		(one.piece as Commander).wield(Weapon.held(weapons[i], WEAPON_LEVEL))
 		one.settle(roster.scene.terrain)
-		carried[one.id] = weapons[i].weapon_name
-		looks[one.id] = LOOKS[i]
+		carried[one.id] = (weapons[i] as Weapon).weapon_name
+		looks[one.id] = String(wearing[i])
 		if anchor == null:
 			anchor = one
 	var began := roster.scene.begin_fight(anchor.id)

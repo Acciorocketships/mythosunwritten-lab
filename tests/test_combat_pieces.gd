@@ -715,17 +715,26 @@ func _the_five_examples_are_expressible_the_same_way() -> void:
 		Vector2i(5, 7), Vector2i(6, 7), Vector2i(7, 7),
 	] as Array[Vector2i], "a flail reaches every cell touching its wielder")
 
-	# Two of the six have a front and four do not, and that is a fact about the
-	# pattern rather than a flag anybody set.
+	# Nine of the catalogue's thirteen attacks have a front and four do not, and
+	# that is a fact about the pattern rather than a flag anybody set: a ring and
+	# an all-round burst rotate onto themselves, and everything written towards
+	# one side does not.
 	var fronted := PackedStringArray()
+	var symmetric := PackedStringArray()
 	for weapon in Weapon.catalogue():
 		for attack in weapon.attacks:
-			if not attack.is_symmetric():
-				fronted.append("%s/%s" % [weapon.weapon_name, attack.attack_name])
+			var where := "%s/%s" % [weapon.weapon_name, attack.attack_name]
+			if attack.is_symmetric():
+				symmetric.append(where)
+			else:
+				fronted.append(where)
 	equal(fronted, PackedStringArray([
 		"spear/thrust", "dagger/stab", "sword/cut", "sword/cleave", "staff/fireball",
-		"shield/shove",
-	]), "the bow and the flail are the symmetric ones; everything else has a front")
+		"shield/shove", "axe/hew", "greatsword/arc", "crossbow/bolt",
+	]), "these are the attacks with a front")
+	equal(symmetric, PackedStringArray([
+		"bow/loose", "flail/sweep", "wand/magic missile", "spellbook/flare",
+	]), "and these are the four that rotate onto themselves")
 
 
 ## The pattern turns with the commander. An attack aimed at the front is not

@@ -649,6 +649,20 @@ minions are still standing.
 The four minions, the loadout table, the weapon catalogue and the mutation check
 are in [reports/combat-pieces.md](reports/combat-pieces.md).
 
+**The catalogue ships twelve weapons, and the last five are trades rather than
+upgrades.** An axe, a two-handed sword, a crossbow, a wand and a spellbook had
+models sitting in the installed art packs and no way for anything in the
+simulation to be one of them, because a shape is reached by a word and a word
+with no pattern behind it is a name no item can carry. Each has a pattern now —
+the axe's arc takes in the two cells beside its wielder and shoves what it hits,
+the crossbow's lane starts where the bow's ring has a hole, the spellbook goes
+off in every direction two cells out — and each is checked against everything
+older for domination rather than described: covering at least the same cells, on
+at most the same wait, for at least as much per landing, with at least as big a
+shove. Of the 132 ordered pairs of the twelve, exactly one holds, and it predates
+the five. [reports/weapon-patterns.md](reports/weapon-patterns.md) is the work,
+with what each one beats and what it loses to.
+
 ## Real time, and the snap onto the board
 
 The overworld runs in real time: characters walk on floating-point positions
@@ -2085,10 +2099,15 @@ two-handed sword. **Four stay on their primitives, and they are a real gap:** no
 pack on this machine ships worn armour as a separate model at all, so
 `gear_boots`, `gear_leggings`, `gear_chestplate` and `gear_helmet` keep shapes
 that are at least the right thing. The nearest misses are measured in
-[reports/gear-models.md](reports/gear-models.md), which also lists five weapon
-silhouettes the packs have and the simulation cannot yet be — an axe, a
-two-handed sword, a crossbow, a wand and a spellbook, each of which needs an
-attack pattern in the combat catalogue before a tag would mean anything.
+[reports/gear-models.md](reports/gear-models.md), which also listed five weapon
+silhouettes the packs had and the simulation could not be — an axe, a two-handed
+sword, a crossbow, a wand and a spellbook, each of which needed an attack pattern
+in the combat catalogue before a tag would mean anything.
+
+Those five have their patterns now, so the count is **fourteen of eighteen** and
+the four that stay on primitives are exactly the worn slots no pack ships. The
+picture below is the whole `gear` category redrawn, each name with the model it
+resolves to and the word or slot that reaches it.
 
 ![Every gear tag, each with the model file it resolves to and the shape word or worn slot that reaches it](reports/assets/gear-tag-sheet.png)
 

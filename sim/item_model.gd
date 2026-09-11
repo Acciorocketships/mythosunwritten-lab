@@ -42,26 +42,38 @@ class_name ItemModel
 ## Held shapes, as the forge and the weapon catalogue spell them, to the name
 ## each is drawn under.
 ##
-## Nine keys for seven tags, because two vocabularies meet here. The forge draws
-## from its own six held shapes -- blade, spear, bow, staff, flail, buckler --
-## and the weapon catalogue ships a sword, a dagger and a shield. A sword is a
-## blade and a shield is a buckler; that is a fact about what they look like, so
-## it is recorded here and not in either of the two files that use the words.
+## Fourteen keys for twelve tags, because two vocabularies meet here. The forge
+## draws from its own six held shapes -- blade, spear, bow, staff, flail,
+## buckler -- and the weapon catalogue ships twelve weapons. A sword is a blade
+## and a shield is a buckler; that is a fact about what they look like, so it is
+## recorded here and not in either of the two files that use the words.
 ##
-## A dagger used to be one too, and is not any more. It is the one catalogue
-## shape whose *silhouette* differs from the shape it was folded into: the blade
+## A dagger used to be folded into the blade, and is not any more. It is the one
+## shape whose *silhouette* differed from the shape it was folded into: the blade
 ## draws a long straight cruciform sword and a dagger is a short curved knife,
 ## and they are already different things to use -- the dagger's one diagonal cut
 ## is the shortest cooldown in the catalogue. So it has its own name now.
-## Nothing else in either vocabulary earned one: see the note in `AssetTags` for
-## the shapes the packs have models for and the simulation has no way to be.
+##
+## The last five keys are the ones this table could not have before the
+## catalogue could: a greatsword, an axe, a crossbow, a wand and a spellbook are
+## weapons now (`sim/weapon.gd`), each with its own cells, wait and motion, so
+## each is a shape an item can *be* and therefore a shape worth drawing apart.
+## The forge does not draw any of the five yet -- its own list of held shapes is
+## the six it always had, and the note in `sim/weapon.gd` says what changing that
+## list costs -- so today they are reached by the catalogue's own names rather
+## than by a roll.
 const BY_SHAPE := {
 	"blade": AssetTags.GEAR_BLADE,
 	"sword": AssetTags.GEAR_BLADE,
 	"dagger": AssetTags.GEAR_DAGGER,
+	"greatsword": AssetTags.GEAR_GREATSWORD,
+	"axe": AssetTags.GEAR_AXE,
 	"spear": AssetTags.GEAR_SPEAR,
 	"bow": AssetTags.GEAR_BOW,
+	"crossbow": AssetTags.GEAR_CROSSBOW,
 	"staff": AssetTags.GEAR_STAFF,
+	"wand": AssetTags.GEAR_WAND,
+	"spellbook": AssetTags.GEAR_SPELLBOOK,
 	"flail": AssetTags.GEAR_FLAIL,
 	"buckler": AssetTags.GEAR_BUCKLER,
 	"shield": AssetTags.GEAR_BUCKLER,

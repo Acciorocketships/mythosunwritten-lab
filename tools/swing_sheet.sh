@@ -4,6 +4,8 @@
 #
 #   xvfb-run -a ./tools/swing_sheet.sh \
 #       --screenshot-ticks "6:$PWD/reports/assets/swings-tick-6.png"
+#   xvfb-run -a ./tools/swing_sheet.sh --patterns \
+#       --screenshot-ticks "13:$PWD/reports/assets/patterns-tick-13.png"
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 source ./godot_env.sh

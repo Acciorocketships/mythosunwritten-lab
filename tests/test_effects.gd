@@ -22,43 +22,68 @@ const SIM_DIR := "res://sim"
 const CATALOGUE := [
 	{
 		"weapon": "spear", "attack": "thrust", "cells": 2, "cooldown": 1,
-		"damage": 8, "push": 0, "symmetric": false,
+		"damage": 8, "push": 0, "symmetric": false, "strikes": 1, "first": 8,
 		"movement": "instant", "sprite": "point", "animation": "lunge",
 	},
 	{
 		"weapon": "dagger", "attack": "stab", "cells": 2, "cooldown": 1,
-		"damage": 6, "push": 0, "symmetric": false,
+		"damage": 6, "push": 0, "symmetric": false, "strikes": 1, "first": 6,
 		"movement": "instant", "sprite": "blade", "animation": "slash",
 	},
 	{
 		"weapon": "sword", "attack": "cut", "cells": 3, "cooldown": 1,
-		"damage": 10, "push": 0, "symmetric": false,
+		"damage": 10, "push": 0, "symmetric": false, "strikes": 1, "first": 10,
 		"movement": "instant", "sprite": "blade", "animation": "slash",
 	},
 	{
 		"weapon": "sword", "attack": "cleave", "cells": 6, "cooldown": 3,
-		"damage": 16, "push": 0, "symmetric": false,
+		"damage": 16, "push": 0, "symmetric": false, "strikes": 1, "first": 16,
 		"movement": "instant", "sprite": "blade", "animation": "swing",
 	},
 	{
 		"weapon": "bow", "attack": "loose", "cells": 248, "cooldown": 3,
-		"damage": 12, "push": 0, "symmetric": true,
+		"damage": 12, "push": 0, "symmetric": true, "strikes": 1, "first": 12,
 		"movement": "projectile", "sprite": "arrow", "animation": "shoot",
 	},
 	{
 		"weapon": "staff", "attack": "fireball", "cells": 9, "cooldown": 5,
-		"damage": 4, "push": 0, "symmetric": false,
+		"damage": 4, "push": 0, "symmetric": false, "strikes": 1, "first": 4,
 		"movement": "instant", "sprite": "flame", "animation": "cast",
 	},
 	{
 		"weapon": "flail", "attack": "sweep", "cells": 8, "cooldown": 1,
-		"damage": 5, "push": 0, "symmetric": true,
+		"damage": 5, "push": 0, "symmetric": true, "strikes": 1, "first": 5,
 		"movement": "instant", "sprite": "impact", "animation": "spin",
 	},
 	{
 		"weapon": "shield", "attack": "shove", "cells": 1, "cooldown": 2,
-		"damage": 0, "push": 1, "symmetric": false,
+		"damage": 0, "push": 1, "symmetric": false, "strikes": 1, "first": 0,
 		"movement": "instant", "sprite": "impact", "animation": "bash",
+	},
+	{
+		"weapon": "axe", "attack": "hew", "cells": 6, "cooldown": 3,
+		"damage": 14, "push": 1, "symmetric": false, "strikes": 1, "first": 14,
+		"movement": "instant", "sprite": "blade", "animation": "swing",
+	},
+	{
+		"weapon": "greatsword", "attack": "arc", "cells": 8, "cooldown": 3,
+		"damage": 20, "push": 0, "symmetric": false, "strikes": 1, "first": 20,
+		"movement": "instant", "sprite": "blade", "animation": "swing",
+	},
+	{
+		"weapon": "crossbow", "attack": "bolt", "cells": 15, "cooldown": 4,
+		"damage": 18, "push": 0, "symmetric": false, "strikes": 1, "first": 18,
+		"movement": "projectile", "sprite": "bolt", "animation": "shoot",
+	},
+	{
+		"weapon": "wand", "attack": "magic missile", "cells": 104, "cooldown": 3,
+		"damage": 10, "push": 0, "symmetric": true, "strikes": 3, "first": 4,
+		"movement": "projectile", "sprite": "bolt", "animation": "cast",
+	},
+	{
+		"weapon": "spellbook", "attack": "flare", "cells": 20, "cooldown": 5,
+		"damage": 6, "push": 0, "symmetric": true, "strikes": 1, "first": 6,
+		"movement": "instant", "sprite": "flame", "animation": "cast",
 	},
 ]
 
@@ -66,13 +91,16 @@ const CATALOGUE := [
 ## attacks alike. The scan looks for these written down as string literals.
 const CATALOGUE_NAMES := [
 	"spear", "dagger", "sword", "bow", "staff", "flail", "shield",
+	"axe", "greatsword", "crossbow", "spellbook",
 	"thrust", "stab", "cut", "cleave", "loose", "fireball", "sweep", "shove",
+	"hew", "arc", "bolt", "flare",
 	"hunting bow", "wand", "arrow", "magic missile",
 ]
 
 ## The constructors that hand out one particular weapon.
 const CONSTRUCTORS := [
 	"spear", "dagger", "sword", "bow", "staff", "flail", "shield",
+	"axe", "greatsword", "crossbow", "wand", "spellbook",
 	"arrow", "magic_missile",
 ]
 
@@ -188,7 +216,8 @@ func _an_effect_that_asks_for_nothing_does_nothing() -> void:
 func _the_catalogue_is_unchanged() -> void:
 	var rows := _catalogue_rows()
 	equal(rows.size(), CATALOGUE.size(),
-		"the catalogue carries %d attacks across its seven weapons" % CATALOGUE.size())
+		"the catalogue carries %d attacks across its twelve weapons" % CATALOGUE.size())
+	equal(Weapon.catalogue().size(), 12, "the catalogue ships twelve weapons")
 	if rows.size() != CATALOGUE.size():
 		return
 
@@ -205,9 +234,10 @@ func _the_catalogue_is_unchanged() -> void:
 		equal(attack.push, expected["push"], "%s: the push" % where)
 		equal(attack.is_symmetric(), expected["symmetric"],
 			"%s: whether it has a front" % where)
-		equal(attack.strike_count(), 1, "%s: it lands once" % where)
-		equal(attack.damage_share(0), expected["damage"],
-			"%s: and reads its whole damage off that one landing" % where)
+		equal(attack.strike_count(), expected["strikes"],
+			"%s: how many landings one use makes" % where)
+		equal(attack.damage_share(0), expected["first"],
+			"%s: and what the first of those landings is worth" % where)
 
 	# Broken: the same comparison against a table with one number moved fails.
 	# So the run above means "these numbers" and not "any numbers".

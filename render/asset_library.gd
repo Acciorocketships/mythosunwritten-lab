@@ -1904,8 +1904,8 @@ static func _built() -> Dictionary:
 
 	# --- Gear ------------------------------------------------------------
 
-	# What a generated item looks like. Thirteen rows for the thirteen names in
-	# the catalog's gear category: seven shapes a held thing comes in, four worn
+	# What a generated item looks like. Eighteen rows for the eighteen names in
+	# the catalog's gear category: twelve shapes a held thing comes in, four worn
 	# slots, a draught, and the bundle an item nobody recorded a shape for is
 	# drawn as.
 	#
@@ -1916,8 +1916,8 @@ static func _built() -> Dictionary:
 	# than inherited, because these are the rows most likely to be repointed at a
 	# bought armoury pack later.
 	#
-	# Nine of the thirteen name an installed model; four keep their placeholder,
-	# and all four are worn armour. The three bought armoury packs hold 293 gear
+	# Fourteen of the eighteen name an installed model; four keep their
+	# placeholder, and all four are worn armour. The three bought armoury packs hold 293 gear
 	# models between them and not one piece of armour off a body: the whole of
 	# what exists is `SFFA_Armor_001`, a 2.243-unit display suit welded to its own
 	# stand in one 9,780-triangle mesh -- helm, breast, greaves and post together,
@@ -1955,6 +1955,37 @@ static func _built() -> Dictionary:
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.14, 0.05), Vector3(0.0, 0.07, 0.0),
 			LEATHER),
 	], 1.206, AssetVisual.TINT_NONE, 0.0)
+	# The two-handed sword, and the first of five rows that could not exist until
+	# the combat catalogue could hold their shapes: a greatsword, an axe, a
+	# crossbow, a wand and a spellbook are weapons now (`Weapon.greatsword()` and
+	# the four beside it), each with its own cells, wait and motion, so each is a
+	# thing an item can be and therefore a thing worth drawing apart. All five
+	# models were already installed and measured; what was missing was the word
+	# that reaches them.
+	#
+	# 2.366 along its height and 412 triangles -- the tallest gear model in any
+	# pack, a third again the one-handed sword above it, which is the whole point
+	# of a silhouette that has to read as two-handed at a glance.
+	_row(rows, AssetTags.GEAR_GREATSWORD, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/sword_2handed.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.13, 0.92, 0.04), Vector3(0.0, 0.80, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.38, 0.06, 0.07), Vector3(0.0, 0.32, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.07, 0.30, 0.07), Vector3(0.0, 0.16, 0.0),
+			LEATHER),
+	], 2.366, AssetVisual.TINT_NONE, 0.0)
+	# The one-handed axe: a wedge head on a short haft, 1.244 along its height and
+	# 274 triangles. The pack ships a two-handed one as well, at 1.725 -- the
+	# one-handed shape is taken because the catalogue's axe is a one-handed weapon
+	# beside the greatsword, and a two-handed grip rule does not exist to draw.
+	_row(rows, AssetTags.GEAR_AXE, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/axe_1handed.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.06, 0.86, 0.06), Vector3(0.0, 0.43, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.30, 0.30, 0.06), Vector3(0.16, 0.76, 0.0),
+			STEEL),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.07, 0.18, 0.07), Vector3(0.0, 0.09, 0.0),
+			LEATHER),
+	], 1.244, AssetVisual.TINT_NONE, 0.0)
 	# A plain leaf point on a plain shaft, which is what the tag means and what
 	# the forge packs' eighteen "spears" are not: `SFFA_Weapon_Spear_Iron_001`
 	# through `_006` are ornate glaives and halberds with curved or winged heads.
@@ -1976,12 +2007,49 @@ static func _built() -> Dictionary:
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.02, 1.16, 0.02), Vector3(0.14, 0.60, 0.0),
 			CREAM),
 	], 0.156, AssetVisual.TINT_NONE, 0.0)
+	# The crossbow lies along its depth like the bow above it -- 0.911 x 0.406 x
+	# 1.222, so the row's height is the small number and the stock is the long
+	# one. 584 triangles, the heaviest weapon model in the adventurers' pack.
+	_row(rows, AssetTags.GEAR_CROSSBOW, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/crossbow_1handed.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.10, 0.09, 0.86), Vector3(0.0, 0.20, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.74, 0.05, 0.09), Vector3(0.0, 0.24, -0.24),
+			WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.03, 0.72, 0.03), Vector3(0.0, 0.24, -0.20),
+			CREAM, AssetVisual.TINT_NONE, 0.0, Vector3(0.0, 0.0, 90.0)),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.08, 0.22, 0.10), Vector3(0.0, 0.10, 0.30),
+			LEATHER),
+	], 0.406, AssetVisual.TINT_NONE, 0.0)
 	_row(rows, AssetTags.GEAR_STAFF, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/staff.gltf", [
 		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.06, 1.30, 0.06), Vector3(0.0, 0.65, 0.0),
 			DARK_WOOD),
 		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.22, 0.22, 0.22), Vector3(0.0, 1.40, 0.0),
 			MARSH_GLOW, AssetVisual.TINT_NONE, 1.4),
 	], 2.155, AssetVisual.TINT_NONE, 0.0)
+	# The staff's small sibling: a 0.966-tall rod with a bound grip, 150 triangles
+	# and the lightest gear model in the pack. The catalogue's wand throws the
+	# magic missile, which is the one attack that splits and homes, so a wand is
+	# emphatically not a short staff to use -- and now not one to look at either.
+	_row(rows, AssetTags.GEAR_WAND, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/wand.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.04, 0.62, 0.04), Vector3(0.0, 0.31, 0.0),
+			DARK_WOOD),
+		AssetVisual.part(AssetVisual.SHAPE_CYLINDER, Vector3(0.05, 0.16, 0.05), Vector3(0.0, 0.08, 0.0),
+			LEATHER),
+		AssetVisual.part(AssetVisual.SHAPE_SPHERE, Vector3(0.11, 0.11, 0.11), Vector3(0.0, 0.66, 0.0),
+			MARSH_GLOW, AssetVisual.TINT_NONE, 1.4),
+	], 0.966, AssetVisual.TINT_NONE, 0.0)
+	# The closed book rather than the open one. Both are 292 triangles and the
+	# pack ships them as a pair; a spellbook lying on the grass or hanging at
+	# somebody's side is shut, and the open one is a pose rather than an object.
+	# 0.575 along its height.
+	_row(rows, AssetTags.GEAR_SPELLBOOK, "res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Assets/gltf/spellbook_closed.gltf", [
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.30, 0.42, 0.10), Vector3(0.0, 0.21, 0.0),
+			CREAM),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.34, 0.46, 0.05), Vector3(0.0, 0.21, -0.06),
+			LEATHER),
+		AssetVisual.part(AssetVisual.SHAPE_BOX, Vector3(0.06, 0.46, 0.12), Vector3(-0.16, 0.21, 0.0),
+			LEATHER),
+	], 0.575, AssetVisual.TINT_NONE, 0.0)
 	# A spiked ball on a haft. Not a chain, and no pack on this machine has one --
 	# 4,689 models were searched for a chained weapon and the three loose forge
 	# chains are smithy dressing. What is lost by taking the mace is exactly what

@@ -37,12 +37,16 @@ const FORGED := 400
 ##
 ## Written down rather than merely counted, so that an item added with no shape
 ## recorded moves a number a test compares instead of quietly becoming another
-## anonymous bundle on the ground. The seventh is the volley's wand: a composed
-## weapon whose shape word no model table row has earned, so it lies down as
-## the anonymous bundle exactly as the rule says it must. The report beside it
-## is `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll
-## call.
-const SHIPPED_FALLBACKS := 7
+## anonymous bundle on the ground. The report beside it is
+## `reports/ground-items.md`; `tools/ground_items_probe.sh` prints the roll call.
+##
+## Seven until the weapon catalogue grew. The seventh was the volley's wand -- a
+## composed weapon whose shape word no model row had earned, so it lay down as
+## the anonymous bundle exactly as the rule said it must. The wand is a catalogue
+## shape now, with its own pattern and its own row, so it lies down as a wand and
+## the count falls by one. That is the rule working in the other direction, which
+## is the only way a fallback is ever meant to be retired.
+const SHIPPED_FALLBACKS := 6
 
 ## And how many items the scenarios ship altogether, for the same reason:
 ##
@@ -52,9 +56,11 @@ const SHIPPED_FALLBACKS := 7
 ## person can be handed. Up nine more since the armoury landed: one forged
 ## weapon per catalogue shape on the rack, and the changer's sword and shield.
 ## Up three more since the volley landed: the archer's bow, the mage's wand and
-## the swordsman's sword.
+## the swordsman's sword. Up five more since the armoury rack grew to hold every
+## catalogue shape again: a greatsword, an axe, a crossbow, a wand and a
+## spellbook, the five the art packs were already carrying.
 ## a fallback count means nothing without the total it is out of.
-const SHIPPED_ITEMS := 49
+const SHIPPED_ITEMS := 54
 
 ## How many of the catalog's gear names are drawn by a model out of an installed
 ## pack, and how many are still the primitives written in code.
@@ -67,7 +73,12 @@ const SHIPPED_ITEMS := 49
 ## pack on this machine ships worn armour off a body: see the note at the head of
 ## the gear section of `render/asset_library.gd` for the two near misses and
 ## their measurements.
-const GEAR_ON_A_MODEL := 9
+##
+## Nine on models until the catalogue grew: a greatsword, an axe, a crossbow, a
+## wand and a spellbook all had models sitting in the installed packs and no way
+## for anything in the simulation to be one of them, and five attack patterns is
+## what let those five rows be written.
+const GEAR_ON_A_MODEL := 14
 const GEAR_ON_A_PRIMITIVE := 4
 
 ## How far from `GroundItems.DRAWN_SPAN` a normalised item's longest side may

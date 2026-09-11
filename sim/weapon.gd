@@ -20,7 +20,7 @@ extends RefCounted
 ## it is why the catalogue lives here as constructors rather than as special
 ## cases elsewhere.
 ##
-## ## The seven, and why the numbers are shaped the way they are
+## ## The twelve, and why the numbers are shaped the way they are
 ##
 ## | weapon | attack | cells | cooldown | damage | movement | sprite | animation |
 ## |---|---|---|---|---|---|---|---|
@@ -32,6 +32,16 @@ extends RefCounted
 ## | staff | fireball | 9 | 5 | 4 | instant | flame | cast |
 ## | flail | sweep | 8 | 1 | 5 | instant | impact | spin |
 ## | shield | shove | 1 | 2 | 0, pushes 1 | instant | impact | bash |
+## | axe | hew | 6 | 3 | 14, pushes 1 | instant | blade | swing |
+## | greatsword | arc | 8 | 3 | 20 | instant | blade | swing |
+## | crossbow | bolt | 15 | 4 | 18 | projectile | bolt | shoot |
+## | wand | magic missile | 104 | 3 | 10, splits 3, homes 1 | projectile | bolt | cast |
+## | spellbook | flare | 20 | 5 | 6 | instant | flame | cast |
+##
+## The last five are the shapes the art packs had models for and the simulation
+## had no way to be; the section at the foot of this file says what each one
+## beats and what it loses to, which is the only thing that makes a twelfth
+## weapon worth adding to a catalogue of eleven.
 ##
 ## The damage column is no longer a number the fight reads directly. It is the
 ## *weight* by which an attack takes its share of the item's effects axis, so a
@@ -132,10 +142,15 @@ static func held(
 	var defending := clampi(spent_on_defending, 0, total - moving)
 	var weights: Array[int] = [moving, defending, total - moving - defending]
 	var names: Array[String] = [shape.weapon_name]
+	# The item is told both halves of what it is: the name it is drawn under and
+	# the shape word that reaches this pattern again. Without the second, an item
+	# forged from a catalogue shape and then read back through `for_item()` --
+	# dropped, picked up, equipped out of a pack -- would come back as
+	# `around()`, a budget with nothing to spend it swinging.
 	return from_item(shape, Item.weapon(
 		"%s %s" % [of_rarity, shape.weapon_name], at_level, of_rarity,
 		Ability.STR, weights, names, [] as Array[int],
-		ItemModel.for_shape(shape.weapon_name)
+		ItemModel.for_shape(shape.weapon_name), shape.weapon_name
 	))
 
 
@@ -157,24 +172,40 @@ static func around(behind: Item) -> Weapon:
 
 ## The catalogue shape a word names, or null for a word that names none.
 ##
-## The forge draws one of six words for a held item and the catalogue ships seven
-## shapes under nine names; this is the two vocabularies meeting, and it is the
-## same meeting `ItemModel.BY_SHAPE` records for what the thing looks like. A
-## sword and a dagger are both a blade -- to the eye by that table, and to the
-## hand by this one, where a blade swings as the sword because the sword is the
-## blade the catalogue writes in full.
+## The forge draws one of six words for a held item and the catalogue ships
+## twelve shapes under fourteen names; this is the two vocabularies meeting, and
+## it is the same meeting `ItemModel.BY_SHAPE` records for what the thing looks
+## like. A sword and a dagger are both a blade -- to the eye by that table, and
+## to the hand by this one, where a blade swings as the sword because the sword
+## is the blade the catalogue writes in full.
+##
+## Five of the fourteen are words the forge does not draw: greatsword, axe,
+## crossbow, wand and spellbook. They are reached by name -- a scenario that
+## hands one out, a catalogue reading, a shape recorded on an item -- and not by
+## a roll. See "The five the packs were already carrying" further down this file
+## for what putting them in the forge's own list would cost.
 static func shaped_like(shape: String) -> Weapon:
 	match shape:
 		"blade", "sword":
 			return sword()
 		"dagger":
 			return dagger()
+		"greatsword":
+			return greatsword()
+		"axe":
+			return axe()
 		"spear":
 			return spear()
 		"bow":
 			return bow()
+		"crossbow":
+			return crossbow()
 		"staff":
 			return staff()
+		"wand":
+			return wand()
+		"spellbook":
+			return spellbook()
 		"flail":
 			return flail()
 		"buckler", "shield":
@@ -410,10 +441,207 @@ static func shield() -> Weapon:
 	])
 
 
+# --- The five the packs were already carrying -----------------------------
+#
+# Five weapon silhouettes were installed, imported and measured before anything
+# in the simulation could be one: an axe, a two-handed sword, a crossbow, a wand
+# and a spellbook. What was missing was never art. A shape is reachable only
+# through a word -- a word the forge draws, or a word this catalogue answers to
+# -- and a word with no pattern behind it is a name no item can carry. These
+# five constructors are those patterns.
+#
+# ## Each is written to lose to something
+#
+# Section 3.1 asks for a non-transitive space rather than a ladder, so none of
+# the five may be one of the seven with better numbers. The catalogue cannot
+# express "better numbers" anyway, and that is worth saying plainly: for a weapon
+# carrying one attack, *the whole effects axis goes to that attack whatever the
+# damage column says*, so two one-attack weapons forged at the same level and
+# rarity deal exactly the same damage per landing. The damage column is a weight
+# among an item's own attacks and a reading for the catalogue's table; it is not
+# a way for one weapon to out-scale another.
+#
+# What is left to differ with is therefore the whole of what a weapon is here:
+# which cells it covers, how long it waits, whether it has a front, whether what
+# it throws crosses the ground, whether it splits or bends or shoves, and how
+# many attacks the one budget is divided between. Every one of the five differs
+# from everything before it on at least one of those and is worse on at least one
+# other. `tests/test_weapon_patterns.gd` states that as arithmetic and checks it:
+# no pattern here covers a superset of an older pattern's cells on a
+# shorter-or-equal wait with a larger-or-equal share and no less push.
+#
+# ## The forge still does not draw them
+#
+# `ItemForge.HAND_SHAPES` is the list a *random* held item is drawn from, and
+# these five are deliberately not in it yet. Adding a word there changes the shape
+# drawn for every seeded item in the world, which renames the items characters
+# carry -- and those names are written into the observation packets that go to a
+# language model, whose replies are recorded under the hash of the prompt they
+# answered. So that one-line change would invalidate every recorded run and have
+# to be paid for with a live pass. It is worth doing and it is not free, so it is
+# left named here rather than smuggled in beside the patterns.
+
+
+## A broad chopping blow that moves what it hits: the three cells in front, the
+## two beside the wielder, and one more up the haft.
+##
+## The only attack in the catalogue that wounds and shoves at once. The shield's
+## shove moves a target and does nothing to it; every other blow does something
+## to a target and leaves it standing.
+##
+## **Beats** anything that means to stand in contact and stay there. It covers
+## the two cells beside its wielder, which no sword attack reaches, so stepping
+## to an axe's flank is not stepping out of its arc -- and what it hits is a cell
+## further away when the blow lands, out of the reach of anything that only
+## reaches one.
+##
+## **Loses to** the sword, which cuts on every turn of the axe's three-turn wait,
+## and to every pattern with reach: a spear at two cells, a bow, a crossbow. Its
+## shove is worth a cell of ground and nothing at all when there is nothing
+## behind the target to be pushed into.
+static func axe() -> Weapon:
+	var front: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1)]
+	var beside: Array[Vector2i] = [Vector2i(-1, 0), Vector2i(1, 0)]
+	var haft: Array[Vector2i] = [Vector2i(0, -2)]
+	return make("axe", [
+		Attack.compose({
+			"name": "hew",
+			"shape": PieceGeometry.union([front, beside, haft]),
+			"cooldown": 3,
+			"damage": 14,
+			Attack.PUSH: 1,
+			"sprite": AssetTags.EFFECT_BLADE,
+			"animation": AssetTags.ANIM_SWING,
+		}),
+	])
+
+
+## The two-handed sword: one swing, the widest forward arc there is -- a rank of
+## five cells at arm's length and a rank of three behind it.
+##
+## The sword's answer to "a stronger attack waits longer" is two attacks, a quick
+## cut and a slow cleave, and the budget divided between them. This is the other
+## answer: one attack, and all of the budget on it.
+##
+## **Beats** armour. Defence is subtracted from every landing, so the same
+## budget arriving as one blow keeps more of itself than the same budget arriving
+## as two or three -- against a defence of five, one landing loses five points
+## and three landings lose fifteen. It also reaches two cells wide of the front,
+## which the sword's own V-shaped cleave does not.
+##
+## **Loses to** tempo. The sword cuts on all three turns of the greatsword's
+## wait, and eight cells is eight points of the movement axis for every turn
+## shaved off that wait, where the cut's three cells cost three. Anything quick
+## enough to step out of the arc between swings is fighting a wielder with
+## nothing to do.
+static func greatsword() -> Weapon:
+	var rank: Array[Vector2i] = [
+		Vector2i(-2, -1), Vector2i(-1, -1), Vector2i(0, -1),
+		Vector2i(1, -1), Vector2i(2, -1),
+	]
+	var behind: Array[Vector2i] = [Vector2i(-1, -2), Vector2i(0, -2), Vector2i(1, -2)]
+	return make("greatsword", [
+		Attack.compose({
+			"name": "arc",
+			"shape": PieceGeometry.union([rank, behind]),
+			"cooldown": 3,
+			"damage": 20,
+			"sprite": AssetTags.EFFECT_BLADE,
+			"animation": AssetTags.ANIM_SWING,
+		}),
+	])
+
+
+## A lane of cells two to sixteen ahead, crossed rather than covered. The bow's
+## opposite number: a bolt goes where it is pointed and nowhere else.
+##
+## **Beats** the bow at both ends of the range. The ring is five to ten cells, so
+## a bow cannot shoot anything closer than five and cannot reach past ten; the
+## bolt starts at two and carries to sixteen. An archer who has let something
+## close is holding a weapon with a hole where the fight is.
+##
+## **Loses to** the bow off the front. A ring is symmetric, so it rotates onto
+## itself and an archer never has to turn; a lane is one direction, and a target
+## on the flank is not in it. And a longer lane is more ground to be blocked on:
+## a bolt crosses every cell between its wielder and where it lands, so whatever
+## is standing in the fifteen cells of it takes the bolt instead. Four turns is
+## the second-longest wait in the catalogue.
+static func crossbow() -> Weapon:
+	var ahead: Array[Vector2i] = [Vector2i(0, -1)]
+	return make("crossbow", [
+		Attack.compose({
+			"name": "bolt",
+			"shape": PieceGeometry.line(ahead, 2, 16),
+			"cooldown": 4,
+			"damage": 18,
+			"movement": Attack.PROJECTILE,
+			"sprite": AssetTags.EFFECT_BOLT,
+			"animation": AssetTags.ANIM_SHOOT,
+		}),
+	])
+
+
+## The wand: one magic missile, and nothing else on the item.
+##
+## The missile itself is `magic_missile()` below -- the composition the effect
+## base was built to make sayable, a projectile that splits three ways and bends
+## one cell to find something. It has been in this file since the base landed,
+## carried by a weapon nobody could be handed. This is that weapon, and it is a
+## catalogue shape now: a word, a pattern, a wait, a motion and a silhouette.
+##
+## **Beats** a scattered crowd and anybody standing just off the pattern. Three
+## landings is three separate targets where one blow is one, and a homing reach
+## of one brings every cell's eight neighbours with it, so the cell somebody
+## stepped to is covered too.
+##
+## **Loses to** armour, by the same arithmetic that makes the greatsword beat it:
+## the damage divides into three before the defence is taken off each, so against
+## anything well armoured a wand is three small blows where a greatsword is one
+## large one. And its ring starts two cells out -- anything that closes to
+## contact is inside the pattern, where the wand has nothing at all.
+static func wand() -> Weapon:
+	return make("wand", [magic_missile()])
+
+
+## The spellbook: everything within two cells of the caster, all at once, every
+## fifth turn.
+##
+## The widest pattern in the catalogue that is not thrown somewhere else, and
+## the only one with no front that reaches further than a flail's arm. It is the
+## greatsword's arc turned the whole way round -- the same cells, and the same
+## cells again behind the caster.
+##
+## **Beats** a swarm that has closed. Twenty cells, no front to be flanked or
+## backstabbed around, and a rank of chaff standing shoulder to shoulder around a
+## caster is standing in all of it.
+##
+## **Loses to** distance, and to time. It reaches two cells and not one more, so
+## anything at three is safe from it entirely -- a staff's fireball lands four
+## cells away and a bow's ring at ten, and both are looking at a caster who
+## cannot answer. Five turns is the longest wait there is, and twenty cells is
+## twenty points of the movement axis for every turn shaved off it, so it is also
+## the hardest wait in the catalogue to buy down.
+static func spellbook() -> Weapon:
+	return make("spellbook", [
+		Attack.compose({
+			"name": "flare",
+			"shape": PieceGeometry.ring(1.0, 2.5),
+			"cooldown": 5,
+			"damage": 6,
+			"effects": ["flame"],
+			"sprite": AssetTags.EFFECT_FLAME,
+			"animation": AssetTags.ANIM_CAST,
+		}),
+	])
+
+
 ## Every weapon the catalogue holds, in a fixed order. What a report tabulates
 ## and what a test walks.
 static func catalogue() -> Array[Weapon]:
-	return [spear(), dagger(), sword(), bow(), staff(), flail(), shield()]
+	return [
+		spear(), dagger(), sword(), bow(), staff(), flail(), shield(),
+		axe(), greatsword(), crossbow(), wand(), spellbook(),
+	]
 
 
 # --- Two the earlier representation could not hold ------------------------
@@ -475,5 +703,5 @@ static func magic_missile() -> Attack:
 static func composed() -> Array[Weapon]:
 	return [
 		make("hunting bow", [arrow()]),
-		make("wand", [magic_missile()]),
+		wand(),
 	]

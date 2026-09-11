@@ -6,8 +6,10 @@ extends RefCounted
 ##
 ##   * **the rack** -- one commander per catalogue shape, in a west-to-east
 ##     line, each wielding a forged weapon of one shape: sword, spear, dagger,
-##     bow, staff, flail, shield. Nobody moves and nobody fights -- everyone is
-##     enrolled into one band, so the engagement rule has nobody to pair.
+##     bow, staff, flail, shield, and then the five the art packs were already
+##     carrying before anything could be one -- greatsword, axe, crossbow, wand,
+##     spellbook. Nobody moves and nobody fights -- everyone is enrolled into one
+##     band, so the engagement rule has nobody to pair.
 ##   * **the changer** -- one more commander, standing apart, holding a sword
 ##     and carrying a shield. On a tick schedule it swaps the shield into its
 ##     hand, swaps the sword back, and finally takes everything off -- through
@@ -76,7 +78,8 @@ const CHANGER := "Hazel"
 ## The rack, in line order: the shape each bearer wields and the character tag
 ## it is drawn as. Every rigged adventurer and skeleton tag the table ships is
 ## someone here, so the same frame also shows the shared rig wearing gear on
-## more than one body.
+## more than one body -- twelve bearers across ten tags, the two repeats being
+## the knight who holds both swords and the barbarian who holds both hafts.
 const RACK := [
 	{"shape": "sword", "tag": AssetTags.KNIGHT},
 	{"shape": "spear", "tag": AssetTags.BARBARIAN},
@@ -85,6 +88,11 @@ const RACK := [
 	{"shape": "staff", "tag": AssetTags.MAGE},
 	{"shape": "flail", "tag": AssetTags.SKELETON_WARRIOR},
 	{"shape": "shield", "tag": AssetTags.HOODED_ROGUE},
+	{"shape": "greatsword", "tag": AssetTags.KNIGHT},
+	{"shape": "axe", "tag": AssetTags.BARBARIAN},
+	{"shape": "crossbow", "tag": AssetTags.SKELETON_ROGUE},
+	{"shape": "wand", "tag": AssetTags.SKELETON_MAGE},
+	{"shape": "spellbook", "tag": AssetTags.SKELETON_MINION},
 ]
 
 

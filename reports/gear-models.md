@@ -115,6 +115,15 @@ This is raised as a finding: **the drawing layer is now ahead of the combat
 catalogue.** Five weapon silhouettes are installed, imported, measured and
 unreachable, and what unlocks them is attack patterns, not models.
 
+> **Since answered.** All five were given attack patterns and catalogue entries
+> — `Weapon.axe()`, `greatsword()`, `crossbow()`, `wand()` and `spellbook()` —
+> so each is now a shape an item can be, with a tag, a model row and a word that
+> reaches it. `reports/weapon-patterns.md` is that work, including what each of
+> the five beats and what it loses to. The gear sheet below has been redrawn and
+> shows eighteen tags rather than thirteen. The second of the two routes in the
+> list above, adding a word to `ItemForge.HAND_SHAPES`, is still not taken, and
+> that report says why.
+
 ### One name that is reached by no shape and is not a gap
 
 `gear_draught` has no forge shape and no worn slot either — a consumable has

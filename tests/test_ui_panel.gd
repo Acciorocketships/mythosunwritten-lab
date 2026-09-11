@@ -216,12 +216,16 @@ func _every_drawn_icon_is_sixteen_by_sixteen_in_three_colours() -> void:
 			"the icon '%s' did not come out one cell square" % named)
 
 
-## How many of the drawn icons exist only for the gear faces: the eight of
-## `PixelIcons.GEAR`'s thirteen rows that do not reuse an icon already on the
+## How many of the drawn icons exist only for the gear faces: the thirteen of
+## `PixelIcons.GEAR`'s eighteen rows that do not reuse an icon already on the
 ## sheet (the four armour slots and the hand's sword carry five tags between
 ## them). Written down so an icon drawn for nothing, or a face quietly dropped,
 ## moves a number a test compares.
-const GEAR_ONLY_ICONS := 8
+##
+## Eight until the weapon catalogue grew: a greatsword, an axe, a crossbow, a
+## wand and a spellbook became shapes an item can be, so each got a face of its
+## own rather than borrowing the sword's or the staff's.
+const GEAR_ONLY_ICONS := 13
 
 
 ## Every score, every slot, every minion and every gear tag has an icon, because
@@ -262,7 +266,12 @@ func _there_is_an_icon_for_every_score_and_every_slot() -> void:
 	# honest answer, by name, that the ground gives an unnamed item.
 	check(PixelIcons.gear(ItemModel.NOTHING) == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
 		"a thing with no tag should show the parcel")
-	check(PixelIcons.gear("gear_axe") == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
+	# The stand-in used to be `gear_axe`, which is a real tag with a real face
+	# now; the example has to be a name nothing ships, or the claim would be
+	# about a hole that has since been filled.
+	check(not AssetTags.is_tag("gear_halberd"),
+		"'gear_halberd' is a tag now, so it cannot stand for one nobody drew")
+	check(PixelIcons.gear("gear_halberd") == PixelIcons.of(PixelIcons.GEAR_FALLBACK),
 		"a tag nobody drew should show the parcel, not a hole")
 	equal(String(PixelIcons.GEAR.get(GroundItems.FALLBACK_TAG, "")),
 		PixelIcons.GEAR_FALLBACK,

@@ -3,6 +3,7 @@ extends Node3D
 ## each drawn with its own motion at the tick the record says it began on.
 ##
 ##   xvfb-run -a ./tools/swing_sheet.sh --screenshot-ticks "6:six.png,16:sixteen.png"
+##   xvfb-run -a ./tools/swing_sheet.sh --patterns --screenshot-ticks "13:five.png"
 ##
 ## The run is `TestAttackClips.stage()` -- the same fixture the suite asserts
 ## over and `tools/measure_swings.sh` prints -- stepped at the shell's own twenty
@@ -43,6 +44,11 @@ var _wanted := {}
 var _only := {}
 var _tick := 0
 var _seed := TestAttackClips.SEED
+
+# Which fight is photographed: the seven-weapon ring by default, or -- with
+# --patterns -- the five the catalogue gained, standing in a line two cells
+# apart. Both are the suites' own fixtures, stepped by the same loop below.
+var _patterns := false
 var _saving := false
 
 
@@ -61,6 +67,8 @@ func _ready() -> void:
 			for named in args[index + 1].split(",", false):
 				_only[named] = true
 			index += 1
+		elif arg == "--patterns":
+			_patterns = true
 		elif arg == "--screenshot-ticks" and index + 1 < args.size():
 			for pair in args[index + 1].split(",", false):
 				var halves := pair.split(":", false, 1)
@@ -69,7 +77,8 @@ func _ready() -> void:
 			index += 1
 		index += 1
 
-	_staged = TestAttackClips.stage(_seed)
+	_staged = TestWeaponPatterns.stage(_seed) if _patterns \
+		else TestAttackClips.stage(_seed)
 	var looks: Dictionary = _staged["looks"]
 	var weapons: Dictionary = _staged["weapons"]
 	for id in looks:
