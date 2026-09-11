@@ -56,8 +56,21 @@ var driven_id: int = 0
 var here := Vector2.ZERO
 
 ## Everything that can be named as a target, nearest first: one row of
-## `{"id": int, "kind": String, "label": String, "distance": float,
-## "in_sight": bool, "inside": PackedStringArray}`.
+## `{"id": int, "kind": String, "type": String, "label": String,
+## "unnamed": String, "distance": float, "in_sight": bool,
+## "inside": PackedStringArray}`.
+##
+## `kind` is which of the three sorts of row this is; `type` is the packet's own
+## word for what the thing is -- `commander`, `cat`, `frog`, `pile` -- which is
+## what anybody looking would see.
+##
+## `label` is what the character calls it and is never empty. `unnamed` is empty
+## when the character knows the thing's name, and otherwise carries the
+## observation's own reason there is none -- it has not met it, it has no name,
+## it is not in line of sight. A row used to go out with the name simply
+## missing, so a stranger across the meadow was offered to a person as a bare
+## number with a gap where a name goes; the packet never leaves a field blank
+## without saying why, and neither does this now.
 ##
 ## `inside` is what can be seen lying in the thing -- empty for a character, for
 ## a shut chest and for anything that holds nothing.
@@ -113,7 +126,9 @@ static func of(scene: ActionScene, id: int) -> Surroundings:
 		view.aims.append({
 			"id": int(row["id"]),
 			"kind": CHARACTER,
+			"type": String(row["type"]),
 			"label": label,
+			"unnamed": _unnamed_of(row),
 			"distance": float(row["distance"]),
 			"in_sight": bool(row["line_of_sight"]),
 			# What can be seen inside a character is the packet's own answer:
@@ -128,7 +143,9 @@ static func of(scene: ActionScene, id: int) -> Surroundings:
 		view.aims.append({
 			"id": int(row["id"]),
 			"kind": PILE if String(row["type"]) == PILE else OBJECT,
-			"label": String(row["name"]),
+			"type": String(row["type"]),
+			"label": _label_of(row),
+			"unnamed": _unnamed_of(row),
 			"distance": float(row["distance"]),
 			"in_sight": bool(row["line_of_sight"]),
 			# What is in it is the object's own answer, and only for one that can
@@ -204,3 +221,18 @@ static func _label_of(row: Dictionary) -> String:
 	if named is String and String(named) != "":
 		return String(named)
 	return ANONYMOUS % int(row.get("speaker", row.get("id", 0)))
+
+
+# Why a row has no name, in the packet's own words, and "" for one that has.
+#
+# Not decided here. `Observation` writes every absence with a reason beside it
+# -- `name_absent` is "this character has not met it", "it has no name" or "not
+# in line of sight" -- and this carries that sentence out unchanged so that
+# whatever reads the row can say why rather than leaving a gap. A row whose name
+# is missing with no reason given is a packet older than the reasons; it reads
+# as having no name, which is the one thing that is certainly true of it.
+static func _unnamed_of(row: Dictionary) -> String:
+	var named: Variant = row.get("name", null)
+	if named is String and String(named) != "":
+		return ""
+	return String(row.get("name_absent", Observation.NAMELESS))

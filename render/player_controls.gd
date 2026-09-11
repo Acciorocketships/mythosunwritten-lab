@@ -69,7 +69,10 @@ extends RefCounted
 ##
 ## Picking:
 ##
-##   * **Tab** -- aim at the next thing in sight. **F** -- hold the next thing
+##   * **Tab** -- aim at the next thing in sight, and **`** -- the key directly
+##     above it -- at the one before. A ring that only turned one way meant that
+##     overshooting what you wanted cost you a lap of everything in sight, and
+##     the ring is as long as the world is crowded. **F** -- hold the next thing
 ##     you carry, or nothing. **C** -- pick the next thing you can see inside
 ##     what you have aimed at. **B** -- pick the next thing to say. **-** and
 ##     **=** -- the coins in your next offer.
@@ -160,6 +163,10 @@ const KEY_HOP := KEY_J
 const KEY_LEAP := KEY_K
 
 const KEY_AIM := KEY_TAB
+## The other way round the same ring. `\`` because every letter on the keyboard
+## already means something and this one sits directly above Tab, so the pair is
+## under one finger.
+const KEY_AIM_BACK := KEY_QUOTELEFT
 const KEY_HOLD := KEY_F
 const KEY_INSIDE := KEY_C
 const KEY_LINE := KEY_B
@@ -256,7 +263,10 @@ func press(keycode: int, view: Surroundings) -> Action:
 				return null
 			return go_to_place(view.place)
 		KEY_AIM:
-			_aim_next(view)
+			_aim_along(view, 1)
+			return null
+		KEY_AIM_BACK:
+			_aim_along(view, -1)
 			return null
 		KEY_HOLD:
 			_hold_next(view)
@@ -363,6 +373,21 @@ func _at_what_is_aimed(keycode: int, view: Surroundings) -> Action:
 	return null
 
 
+## Whether a key picks or dials something rather than building an action: the
+## three rings, the line of speech and the coin dial.
+##
+## They share one thing, which is why they share a list: pressing one
+## changes nothing in the world and there is nothing for the world to answer, so
+## what there is to say afterwards is what has been picked. The shell prints that
+## line off this, rather than off a copy of the list -- a copy is how the key that
+## turns the aim ring backwards came to change the aim and say nothing.
+static func picks(keycode: int) -> bool:
+	return [
+		KEY_AIM, KEY_AIM_BACK, KEY_HOLD, KEY_INSIDE, KEY_LINE,
+		KEY_FEWER_COINS, KEY_MORE_COINS,
+	].has(keycode)
+
+
 # Whether a key is one of the ones aimed at something. A shout is on the list
 # because it is the same key row as the rest of speech and because a person who
 # has aimed at nobody is more likely to have meant to aim than to have meant to
@@ -377,20 +402,32 @@ static func _needs_a_target(keycode: int) -> bool:
 # --- The three rings ------------------------------------------------------
 
 
-# Aim at the next thing the world says is in sight, wrapping round. What is
-# being taken is forgotten with it: it named something inside the last thing.
-func _aim_next(view: Surroundings) -> void:
+# Aim one place along the ring the world says is in sight, wrapping round in
+# whichever direction was asked for. What is being taken is forgotten with it: it
+# named something inside the last thing.
+#
+# The ring is `view.aims` in the order the observation put it, which is nearest
+# first, and `way` is +1 for the next thing along and -1 for the one before. From
+# nothing aimed at, forward starts at the nearest and back starts at the
+# furthest, which is what wrapping round from before the start of the list means.
+func _aim_along(view: Surroundings, way: int) -> void:
 	if view.aims.is_empty():
 		aimed_id = 0
 		taking = ""
 		note = "there is nothing in sight to aim at"
 		return
+	var ring := view.aims.size()
 	var at := -1
-	for index in view.aims.size():
+	for index in ring:
 		if int((view.aims[index] as Dictionary)["id"]) == aimed_id:
 			at = index
 			break
-	aimed_id = int((view.aims[(at + 1) % view.aims.size()] as Dictionary)["id"])
+	# With nothing aimed at yet there is no place on the ring to step from, so
+	# each direction starts at its own end of it. Otherwise posmod, so that
+	# stepping back off the front of the list lands on the end of it rather than
+	# on a negative index.
+	var to := (0 if way > 0 else ring - 1) if at < 0 else posmod(at + way, ring)
+	aimed_id = int((view.aims[to] as Dictionary)["id"])
 	taking = ""
 	_take_next(view)
 
@@ -424,16 +461,31 @@ static func inside_of(view: Surroundings, id: int) -> PackedStringArray:
 ## What is aimed at, in one line, for a readout: what it is called, what sort of
 ## thing it is and how far off. "nothing aimed" when nothing is.
 func aim_line(view: Surroundings) -> String:
-	var row := view.aim_of(aimed_id)
+	return row_line(view.aim_of(aimed_id))
+
+
+## The same, from the row itself, so a test can pin every shape of the line with
+## no world anywhere.
+##
+## A thing this character has never met has no name. The line used to be its id
+## and then a gap -- `#3 (character) 30.0 away` -- which is a thing offered with
+## nothing to know it by. What goes in the gap now is the packet's own reason
+## there is no name, quoted: `Observation` writes "this character has not met
+## it", "not in line of sight" or "it has no name" beside every absence, and
+## which of those it is is not decided here. What sort of thing it is is the
+## packet's word too -- `commander`, `cat`, `pile` -- rather than the three-way
+## sort the projection files it under, because that is what anybody looking would
+## see.
+static func row_line(row: Dictionary) -> String:
 	if row.is_empty():
 		return "nothing aimed"
-	# A thing this character has never met has no name, and what the world hands
-	# back for it is the id it is known by -- so the id is not written twice.
-	var label := String(row["label"])
-	var named := label if label.begins_with("#") else "#%d %s" % [
-		int(row["id"]), label,
+	var why := String(row.get("unnamed", ""))
+	var named := "#%d %s" % [
+		int(row["id"]), String(row["label"]) if why == "" else why,
 	]
-	return "%s (%s) %.1f away" % [named, String(row["kind"]), float(row["distance"])]
+	return "%s (%s) %.1f away" % [
+		named, String(row.get("type", row["kind"])), float(row["distance"]),
+	]
 
 
 ## What is held, what is being taken and what is on the coin dial, in one line.
@@ -496,6 +548,7 @@ static func bindings() -> PackedStringArray:
 		"J            hop (%.1f units)" % HOP,
 		"K            leap (%.1f units, further than an ordinary DEX reaches)" % LEAP,
 		"Tab          aim at the next thing in sight",
+		"`            aim at the one before it",
 		"F            hold the next thing you carry, or nothing",
 		"C            pick the next thing inside what you have aimed at",
 		"B            pick the next thing to say",

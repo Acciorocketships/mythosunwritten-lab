@@ -151,30 +151,12 @@ const BOARD_FILL := 0.86
 ## rather than an omission.
 const PIECE_LIFT := 0.0
 
-## What each kind of cell is drawn in. Cool white for ground a piece may stand
-## on, a paler cool tint one storey up, warm amber for a cliff edge it can be
-## shoved off, dull red for something built on, and a dark plate at the anchor's
-## own height for a hole -- water, or the void off an island's rim -- so a hole
-## reads as a missing square rather than as nothing at all.
-const BOARD_GROUND := Color(0.86, 0.94, 1.0, 0.20)
-const BOARD_AERIAL := Color(0.62, 0.92, 0.86, 0.34)
-const BOARD_CLIFF := Color(1.0, 0.66, 0.26, 0.52)
-const BOARD_BUILT := Color(0.92, 0.36, 0.36, 0.5)
-const BOARD_HOLE := Color(0.05, 0.07, 0.12, 0.44)
-
-## What the cells offered to whoever is taking a turn are drawn in, over the
-## lattice: cool green for where the commander may step, warm rose for what its
-## weapons cover from where it stands as it is facing, pale blue for where the
-## picked minion may go, and a bright plate for whichever cell is picked right
-## now.
-##
-## Not one of the four is worked out here. Every cell in them comes back from
-## `BoardControls.marks`, which asks the simulation's own `BoardTurn`; this is
-## the colour a list of cells is painted in and nothing else.
-const BOARD_MOVE := Color(0.30, 1.0, 0.42, 0.62)
-const BOARD_REACH := Color(1.0, 0.30, 0.40, 0.62)
-const BOARD_MINION := Color(0.34, 0.68, 1.0, 0.62)
-const BOARD_PICKED := Color(1.0, 0.99, 0.70, 0.88)
+# What each kind of cell is drawn in, and what each colour means, are both out of
+# one table now: `render/board_legend.gd`. The colours used to be nine constants
+# here and the screen said nothing about any of them, so a fight could be fought
+# across a field of amber squares with nothing to say that amber is a cliff edge.
+# The legend panel is generated from the same table this paints from, so the
+# ground and the legend cannot disagree.
 
 ## How far above the lattice the offered cells are painted, in world units. Just
 ## clear of it, so a square that is both drawn and offered reads as the offer
@@ -883,11 +865,22 @@ func _ready() -> void:
 	# -- `CombatPanel.refresh` -- so a play run with no fight in it looks exactly
 	# as it did before.
 	var with_readout: bool = options["readout"] or _playing
+	# And the legend, for the same reason again: a colour painted on the ground
+	# with nothing on screen saying what it means is a colour a person has to
+	# guess at, and one of them is a cliff edge. It hides itself while no board
+	# is drawn -- `LegendPanel.show_board` -- so a play run with no fight in it
+	# looks exactly as it did before.
+	#
+	# For a run with somebody playing, and not for every run that draws a
+	# lattice: `--board` on its own is how a frame of the squares is taken for a
+	# report, and a panel over that frame is a panel in the photograph. A legend
+	# is for whoever is at the keyboard.
+	var with_legend: bool = _playing
 	if options["sheet"] or with_readout or _playing \
-			or with_dialogue or with_trade or options["territory"]:
+			or with_dialogue or with_trade or options["territory"] or with_legend:
 		_sheet_ui = PixelUi.build(
 			options["sheet"], with_readout, _playing,
-			with_dialogue, with_trade, options["territory"])
+			with_dialogue, with_trade, options["territory"], with_legend)
 		if _sheet_ui == null:
 			printerr(
 				"render-shell --sheet/--readout: the Sprout Lands UI pack is not"
@@ -955,6 +948,14 @@ func _exit_tree() -> void:
 		print("render-shell territory scale=%d x=%d y=%d w=%d h=%d" % [
 			_sheet_ui.art_scale, ground.position.x, ground.position.y,
 			ground.size.x, ground.size.y,
+		])
+	# And the legend, with how many colours it drew, so a run says from outside
+	# whether the key to the ground was on the screen and how much of it.
+	if _sheet_ui != null and _sheet_ui.legend != null and _sheet_ui.legend.visible:
+		var key := _sheet_ui.geometry_of(_sheet_ui.legend)
+		print("render-shell legend scale=%d x=%d y=%d w=%d h=%d colours=%d" % [
+			_sheet_ui.art_scale, key.position.x, key.position.y,
+			key.size.x, key.size.y, LegendPanel.lines().size(),
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
 	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d faded=%d deepest=%.2f fade_us=%.1f frame_ms=%.2f timed=%d digest=%s" % [
@@ -1130,11 +1131,7 @@ func _drive(keycode: int) -> bool:
 		if _controls.note != "":
 			print("render-shell play t=%d %s" % [_sim.world.tick, _controls.note])
 			return true
-		if keycode == PlayerControls.KEY_AIM or keycode == PlayerControls.KEY_HOLD \
-				or keycode == PlayerControls.KEY_INSIDE \
-				or keycode == PlayerControls.KEY_LINE \
-				or keycode == PlayerControls.KEY_FEWER_COINS \
-				or keycode == PlayerControls.KEY_MORE_COINS:
+		if PlayerControls.picks(keycode):
 			print("render-shell play t=%d aims at %s · %s" % [
 				_sim.world.tick, _controls.aim_line(view), _controls.holding_line(),
 			])
@@ -1295,12 +1292,9 @@ func _sync_choice() -> void:
 	# Painted in this order so that the brighter, narrower answer is the one on
 	# top: where you may go, then what you could hit from here, then where the
 	# minion may go, then the cell actually picked.
-	for layer in [
-		["move", BOARD_MOVE], ["reach", BOARD_REACH],
-		["minion", BOARD_MINION], ["picked", BOARD_PICKED],
-	]:
-		var tint: Color = layer[1]
-		for cell in (marks[layer[0]] as Array[Vector2i]):
+	for layer in BoardLegend.OFFERS:
+		var tint := Color((layer as Dictionary)["tint"])
+		for cell in (marks[String((layer as Dictionary)["key"])] as Array[Vector2i]):
 			if not board.contains(cell):
 				continue
 			_paint_cell(board, cell, tint, kept, vertices, colors)
@@ -2306,16 +2300,14 @@ func _sync_board(snapshot: Dictionary) -> void:
 		for column in board.cells_across:
 			var cell := board.min_cell + Vector2i(column, row)
 			var middle := board.centre(cell)
-			var tint := BOARD_GROUND
-			if board.is_hole(cell):
+			# Which of the legend's rows this cell reads as, and the colour
+			# filed under it. The order the five are tested in is the table's,
+			# not this loop's, so the legend is read in the order the painting
+			# decides.
+			var key := BoardLegend.lattice_key(board, cell)
+			if key == BoardLegend.HOLE:
 				holes += 1
-				tint = BOARD_HOLE
-			elif board.blocks_move(cell):
-				tint = BOARD_BUILT
-			elif board.is_cliff_edge(cell):
-				tint = BOARD_CLIFF
-			elif board.storey_at(cell) > CombatBoard.GROUND_STOREY:
-				tint = BOARD_AERIAL
+			var tint := BoardLegend.tint_for(key)
 			var surface := _cell_surface(board, cell, kept)
 
 			# The square, as BOARD_CUTS x BOARD_CUTS quads bounded in x and z by
@@ -2340,7 +2332,7 @@ func _sync_board(snapshot: Dictionary) -> void:
 			# reads as an edge and not only as a shade. It walks the same
 			# sub-vertices the fill is built from, so the edge of a square is the
 			# edge of the square and never floats off it.
-			var edge := Color(tint.r, tint.g, tint.b, minf(1.0, tint.a * 2.4))
+			var edge := BoardLegend.edge_of(tint)
 			var ring := PackedInt32Array()
 			for step in BOARD_CUTS:
 				ring.append(step)
@@ -2522,6 +2514,10 @@ func _sync_sheet() -> void:
 		_sheet_ui.trade.watch(_sim.world, read_id)
 	if _sheet_ui.territory != null:
 		_sheet_ui.territory.watch(_sim.world, read_id)
+	# The legend is the key to the lattice, so it is shown exactly when there is
+	# a lattice on screen. The shell is the one that knows; the panel is told.
+	if _sheet_ui.legend != null:
+		_sheet_ui.legend.show_board(_board_view != null and _board_view.mesh != null)
 
 
 func _sync_combat(snapshot: Dictionary) -> void:

@@ -108,6 +108,8 @@ func run() -> void:
 	_what_can_be_aimed_at_is_what_can_be_observed()
 	_the_interface_invents_no_verb_and_holds_no_rule()
 	_an_aim_is_kept_by_id_and_not_by_position()
+	_the_aim_ring_turns_both_ways()
+	_nothing_is_offered_with_a_blank_name()
 	_the_keyboard_refuses_nothing_the_world_allows()
 	_one_condition_has_one_wording()
 
@@ -423,6 +425,133 @@ func _an_aim_is_kept_by_id_and_not_by_position() -> void:
 		"nothing should be chosen at a target that is no longer there")
 	equal(controls.note, "nothing is aimed at",
 		"the interface should say what is missing rather than aim at something else")
+
+
+# --- 7: the ring turns both ways -------------------------------------------
+
+
+## Aiming used to go one way only, so overshooting what you wanted cost a lap of
+## everything in sight. What is pinned here is the ring itself: its order, its
+## contents, and that a step back is the step forward undone.
+func _the_aim_ring_turns_both_ways() -> void:
+	var world := SimWorld.new(SEED)
+	ScriptedPlay.muster(world)
+	var id := world.follow_id
+	var view := world.surroundings_of(id)
+	check(view.aims.size() >= 3,
+		"the scenario should have enough in sight for a ring to be a ring")
+
+	# The ring is the observation's own list, in the observation's own order,
+	# and the whole of it: forward from nothing lands on the first row and comes
+	# back round to it after exactly as many presses as there are rows.
+	var order := PackedInt32Array()
+	for row in view.aims:
+		order.append(int((row as Dictionary)["id"]))
+	var forwards := PackedInt32Array()
+	var controls := PlayerControls.new()
+	for _each in order.size():
+		controls.press(PlayerControls.KEY_AIM, view)
+		forwards.append(controls.aimed_id)
+	equal(forwards, order,
+		"aiming forward should walk the observation's own list, nearest first")
+	controls.press(PlayerControls.KEY_AIM, view)
+	equal(controls.aimed_id, order[0], "the ring should come round to the start")
+
+	# And back the other way, from where the forward walk left off: the same
+	# list, read from the end.
+	var backwards := PackedInt32Array()
+	for _each in order.size():
+		controls.press(PlayerControls.KEY_AIM_BACK, view)
+		backwards.append(controls.aimed_id)
+	var reversed := PackedInt32Array()
+	for at in order.size():
+		reversed.append(order[order.size() - 1 - at])
+	equal(backwards, reversed,
+		"aiming back should walk the same list the other way")
+
+	# One press forward and one back is where you started, which is the whole of
+	# what the complaint was about.
+	var here := controls.aimed_id
+	controls.press(PlayerControls.KEY_AIM, view)
+	not_equal(controls.aimed_id, here, "a press should move the aim")
+	controls.press(PlayerControls.KEY_AIM_BACK, view)
+	equal(controls.aimed_id, here, "a press back should undo a press forward")
+
+	# From nothing aimed at, each direction starts at its own end of the ring.
+	var fresh := PlayerControls.new()
+	fresh.press(PlayerControls.KEY_AIM_BACK, view)
+	equal(fresh.aimed_id, order[order.size() - 1],
+		"aiming back from nothing should start at the far end of the ring")
+
+	# With nothing in sight, both directions say the same thing and aim at
+	# nothing -- the interface's own note, because the simulation was asked
+	# nothing.
+	var empty := Surroundings.new()
+	for key in [PlayerControls.KEY_AIM, PlayerControls.KEY_AIM_BACK]:
+		var alone := PlayerControls.new()
+		equal(alone.press(key, empty), null, "an empty ring should build no action")
+		equal(alone.aimed_id, 0, "an empty ring should leave nothing aimed at")
+		equal(alone.note, "there is nothing in sight to aim at",
+			"an empty ring should say so, whichever way it was turned")
+
+
+# --- 8: nothing is offered with a blank name -------------------------------
+
+
+## A stranger across the meadow used to be offered as `#3 (character) 30.0 away`
+## -- a number and a gap where a name goes. What goes in the gap is the packet's
+## own reason there is no name, and which reason it is is `Observation`'s answer
+## and not the interface's.
+func _nothing_is_offered_with_a_blank_name() -> void:
+	var world := SimWorld.new(SEED)
+	ScriptedPlay.muster(world)
+	var id := world.follow_id
+	var view := world.surroundings_of(id)
+	var reasons := [Observation.UNMET, Observation.NAMELESS, Observation.UNSEEN]
+	var unnamed := 0
+	for row in view.aims:
+		var entry := row as Dictionary
+		not_equal(String(entry["label"]), "",
+			"nothing should be offered with nothing to call it")
+		not_equal(String(entry["type"]), "",
+			"every row should say what sort of thing it is, in the packet's word")
+		var why := String(entry["unnamed"])
+		if why != "":
+			unnamed += 1
+			check(reasons.has(why),
+				"a nameless row should carry the packet's own reason, not '%s'" % why)
+		var line := PlayerControls.row_line(entry)
+		check(line.contains(String(entry["type"])),
+			"the line for %s should say what sort of thing it is" % entry["id"])
+		check(line.contains(why if why != "" else String(entry["label"])),
+			"the line for %s should say its name or why it has none" % entry["id"])
+		# And no gap where something was left out: two spaces in a row is what a
+		# missing field looked like.
+		check(not line.contains("  "),
+			"the line for %s should have nothing missing out of it: %s" % [
+				entry["id"], line,
+			])
+	check(unnamed > 0,
+		"the scenario should hold somebody this character has not met")
+
+	# The reason really is the packet's: a character that has met the stranger
+	# knows its name, and the row stops carrying a reason at all.
+	var stranger := 0
+	for row in view.aims:
+		if String((row as Dictionary)["unnamed"]) == Observation.UNMET \
+				and String((row as Dictionary)["kind"]) == Surroundings.CHARACTER:
+			stranger = int((row as Dictionary)["id"])
+			break
+	if stranger != 0:
+		# The world's own record that something passed between them -- a line
+		# heard, which is one of the four things that make an edge -- rather than
+		# anything written on either sheet.
+		world.combat.scene.relationships.heard(stranger, id, "well met", false)
+		var known := world.surroundings_of(id).aim_of(stranger)
+		equal(String(known["unnamed"]), "",
+			"a character that has been met should be offered by name")
+		not_equal(String(known["label"]), Surroundings.ANONYMOUS % stranger,
+			"a character that has been met should be called something")
 
 
 # --- The driver -----------------------------------------------------------

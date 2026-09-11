@@ -119,7 +119,7 @@ func _every_panel_is_inside(sheet_open: bool, fighting: bool, what: String) -> v
 	if not SproutPack.is_installed():
 		return
 	var world := _fighting_world() if fighting else _played_world()
-	var layer := PixelUi.build(sheet_open, true, true, true, true, true)
+	var layer := PixelUi.build(sheet_open, true, true, true, true, true, true)
 	check(layer != null, "the interface did not build")
 	if layer == null:
 		return
@@ -138,7 +138,7 @@ func _every_panel_is_inside(sheet_open: bool, fighting: bool, what: String) -> v
 		var showing := 0
 		for named in _panels_of(layer):
 			var which: Control = named[1]
-			if which == null or not which.visible:
+			if not which.visible:
 				continue
 			showing += 1
 			var at := layer.geometry_of(which)
@@ -186,13 +186,27 @@ func _watch(layer: PixelUi, world: SimWorld) -> void:
 	layer.territory.watch(world, id)
 	layer.trade.watch(world, id)
 	layer.dialogue.watch(world, id)
+	# The legend reads no world -- it is the key to the picture and not a view of
+	# anything -- so what it is told is that there is a board on screen for it to
+	# be the key to, which is what the shell tells it.
+	layer.legend.show_board(true)
 	for named in _panels_of(layer):
-		(named[1] as Control).call("refresh")
+		var which := named[1] as Control
+		if which.has_method("refresh"):
+			which.call("refresh")
 
 
-## The panels, each with the name a failure should call it by.
+## The panels the layer actually built, each with the name a failure should call
+## it by.
+##
+## Only the ones that exist: a run may ask for any of them, all of them or none,
+## and a caller walking this list should not have to know which. It used to
+## return the lot, null entries included, and `TestUiDigits` -- which builds a
+## layer without the legend -- called `refresh` on a null the day the legend was
+## added to it.
 static func _panels_of(layer: PixelUi) -> Array:
-	return [
+	var built := []
+	for named in [
 		["character sheet", layer.panel],
 		["combat readout", layer.readout],
 		["play", layer.play],
@@ -200,7 +214,11 @@ static func _panels_of(layer: PixelUi) -> Array:
 		["territory", layer.territory],
 		["trade", layer.trade],
 		["dialogue", layer.dialogue],
-	]
+		["legend", layer.legend],
+	]:
+		if (named as Array)[1] != null:
+			built.append(named)
+	return built
 
 
 ## Lay the whole interface out now, rather than on the idle frame that will

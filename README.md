@@ -589,6 +589,16 @@ more per-frame uniforms on the material every grass chunk already shares, so a
 blade standing on a painted square stands short and the lattice reads through the
 meadow. See [reports/board-overlay.md](reports/board-overlay.md).
 
+**And the board says what its colours mean.** Nine colours are painted on the
+ground -- five for what a cell is, four for what the turn is offering you -- and
+a legend panel names every one of them while a lattice is on screen. It is
+generated rather than written: `render/board_legend.gd` is the table the shell
+paints from, the panel draws one swatch and one word per row of it, and a test
+scans the whole render layer for a second copy of any of those colours. So the
+amber squares a fight is fought across say `a cliff edge` on screen, which is
+worth a character's whole life if they are shoved off one. See
+[reports/board-legend.md](reports/board-legend.md).
+
 ![Grid squares painted on a meadow hillside, with the grass standing in the gutters between them](reports/assets/board-grass-after.png)
 
 ## The two-tier army
@@ -2342,7 +2352,11 @@ the interface quotes the refusal rather than writing one of its own.
 The other nine of section 2.1's twelve actions are aimed at something, so there
 is an aim list and it is not the interface's: **Tab** walks along what your
 character can actually make out, which is `Observation` -- the same packet a
-language-model mind is handed -- and nothing else is in it. **F** picks up and
+language-model mind is handed -- and nothing else is in it, and **`** walks the
+same ring the other way, so overshooting what you wanted costs one press rather
+than a lap. Nothing on that ring is offered blank: a stranger reads
+`#3 this character has not met it (commander) 30.0 away`, and which reason is
+printed there is the packet's answer and not the keyboard's. **F** picks up and
 puts down what is in your hands (or nothing, which is a real choice), **C**
 picks one of the things you can see inside whatever you have aimed at, **B**
 picks something to say and **-** / **=** dial the coins in your next offer.

@@ -278,8 +278,13 @@ func _watch(layer: PixelUi, world: SimWorld) -> void:
 	layer.territory.watch(world, id)
 	layer.trade.watch(world, id)
 	layer.dialogue.watch(world, id)
+	# Whatever this layer was built with, read off the world once. The legend is
+	# not one of them here and would have nothing to read if it were: it is the
+	# key to the colours on the ground and holds no world.
 	for named in TestUiFit._panels_of(layer):
-		(named[1] as Control).call("refresh")
+		var which := named[1] as Control
+		if which.has_method("refresh"):
+			which.call("refresh")
 
 
 # --- Measuring --------------------------------------------------------------

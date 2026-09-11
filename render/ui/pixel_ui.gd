@@ -25,15 +25,16 @@ extends CanvasLayer
 ## shrinks back. An interface that changed size every time somebody spoke would
 ## be worse than one that is a step smaller than it strictly had to be.
 ##
-## ## Seven panels, one theme
+## ## Eight panels, one theme
 ##
 ## The character sheet sits in the top-left corner, the combat readout in the
-## top-right, the two a person playing needs -- what they have aimed at and
-## what the world answered -- stack along the bottom left, and the ones they
+## top-right with the key to the board's colours under it, the two a person
+## playing needs -- what they have aimed at and what the world answered -- stack
+## along the bottom left, and the ones they
 ## read -- the standing and the ground, the trades standing and the dialogue
 ## heard -- stack along the bottom right. They are asked for
 ## separately, so a run may have any of them, all of them or none. What they
-## may not have is seven ideas of what the interface looks like, so the theme is
+## may not have is eight ideas of what the interface looks like, so the theme is
 ## built once here and carried by the frame the panels sit in; no panel builds a
 ## style of its own and none names a file on disk.
 ##
@@ -73,8 +74,13 @@ var trade: TradePanel = null
 
 ## How the followed character stands with the characters it knows of and who
 ## owns the point it is standing on, or null in a run that did not ask for it.
-## Top of the reading stack in the same corner.
+## In the reading stack in the same corner.
 var territory: TerritoryPanel = null
+
+## What the colours painted on the ground mean, or null in a run that draws no
+## board. Under the combat readout in the top-right corner: it is the key to the
+## board, and the board is what that corner is about.
+var legend: LegendPanel = null
 
 ## What the interface is being multiplied by. Read by the measuring tool, which
 ## has to know what a whole number is before it can check for one.
@@ -101,6 +107,7 @@ static func build(
 	with_sheet: bool = true, with_readout: bool = false,
 	with_answer: bool = false, with_dialogue: bool = false,
 	with_trade: bool = false, with_territory: bool = false,
+	with_legend: bool = false,
 ) -> PixelUi:
 	var theme := SproutTheme.build()
 	if theme == null:
@@ -136,9 +143,22 @@ static func build(
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	across.add_child(gap)
+	# The top-right corner is a column rather than one panel: the combat readout,
+	# and under it the key to the colours painted on the ground. The legend goes
+	# here rather than in the reading stack at the bottom because the bottom of
+	# the window is the fullest part of it -- at the window the game ships in,
+	# with the sheet open, another panel down there is a panel off the edge, and
+	# `TestUiFit` says so.
+	var right := VBoxContainer.new()
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	across.add_child(right)
 	if with_readout:
 		layer.readout = CombatPanel.new()
-		across.add_child(layer.readout)
+		right.add_child(layer.readout)
+	if with_legend:
+		layer.legend = LegendPanel.new()
+		right.add_child(layer.legend)
 
 	# One column down the window: the two top panels in their row, whatever space
 	# is left, and the answer panel at the bottom. The row is what holds the two
