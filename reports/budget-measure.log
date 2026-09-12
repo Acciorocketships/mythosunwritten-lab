@@ -1,0 +1,28 @@
+
+RUN   test_determinism
+  ..  determinism      123 s, 2 checks: a different seed should give a different report
+  ..  determinism      242 s, 3 checks: the seed should be stored on the world
+  ..  determinism      572 s, 6 checks: reset(seed) should rebuild the same world
+  ..  determinism      704 s, 7 checks: the two orderings loaded different ground, so the digests below would...
+  ..  determinism     1162 s, 10 checks: headless run should exit 0 (stdout: Godot Engine v4.7.2.stable.offici...
+PASS  determinism    1263.3 s, 15 checks
+
+RUN   test_terrain
+  ..  terrain          370 s, 14 checks: building other chunks first changed chunk (3, -2)
+  ..  terrain          409 s, 21 checks: a built chunk should have a fingerprint
+  ..  terrain          724 s, 29 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  terrain          856 s, 32 checks: rebuilding the chunks of seed 1234 in this process gave different geo...
+PASS  terrain         856.4 s, 32 checks
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+   1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+   2  test_determinism       peak  15.14 GiB    21.2 min  quiet up to   455 s
+   3  test_terrain           peak  13.99 GiB    14.4 min  quiet up to   366 s
+  peak of the whole run: 15.14 GiB, in suite 2 (test_determinism)
+  longest quiet stretch: 455 s, in suite 2 (test_determinism)
+  wall time of the whole run: 35.7 min (0.60 h)
+  the silence budget this run ran under: 5400s
+  recorded in reports/budget-measure-memory.log
+
+all 2 suites passed (47 checks)

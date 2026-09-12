@@ -76,12 +76,23 @@ if [[ "${1:-}" == "--layers-only" ]]; then
 	shift
 fi
 
-# How long an engine may print nothing before it is taken for stuck. Measured,
-# not guessed: see the header above and the "longest quiet stretch" line any run
-# prints. The suites here print a progress line every thirty seconds of checking,
-# so this is a budget on gaps *between* checks -- the time one uninterrupted
-# piece of work inside a suite may take -- and not on the length of a suite.
-SILENCE="${RUN_TESTS_SILENCE:-900}"
+# How long an engine may print nothing before it is taken for stuck.
+#
+# Measured, not guessed. The suites here print a progress line every thirty
+# seconds of checking, so this is a budget on the gap *between* checks -- how
+# long one uninterrupted piece of work inside a suite may take -- and not on the
+# length of a suite. The two heaviest healthy suites on the adopted base were
+# measured at reports/budget-measure.log: test_determinism goes 455 s between
+# checks at its worst, test_terrain 366 s, test_asset_tags 130 s. So 455 s is
+# the worst a healthy suite is known to do, and the budget is four times it.
+#
+# Four times rather than twice because the two ways of being wrong do not cost
+# the same. Too small, and a suite that is merely slow is reported red for
+# stalling -- a wrong verdict, and the one thing this runner must not produce.
+# Too large, and a run that has already lost a suite takes longer to say so. The
+# old default of 7200 s was longer than any suite there has ever been, so it
+# could only ever catch a run that was already lost; this one is a real bound.
+SILENCE="${RUN_TESTS_SILENCE:-1800}"
 # How many suites one engine is asked to run. One is the safe bound measured on
 # this machine -- see the memory table any run prints -- and raising it trades
 # engine starts (about five seconds each, measured) for a higher peak.
