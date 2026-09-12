@@ -1,0 +1,20 @@
+
+RUN   test_rng
+PASS  rng            1325 checks
+
+RUN   test_determinism
+PASS  determinism    15 checks
+
+RUN   test_terrain
+PASS  terrain        32 checks
+
+RUN   test_streaming
+FAIL  streaming      4661 checks, 2 failed
+        - the observer only travelled 0.000000 world units, too little to stream anything out
+        - the walk never dropped any ground
+
+RUN   test_terrain_lod
+./run_tests.sh: line 305: 3712073 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+
+run_tests: nothing printed for 7200s while running suite 'test_terrain_lod'.
+run_tests: the run was killed. Nothing inside the process could end it.
