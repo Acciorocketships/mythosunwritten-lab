@@ -170,16 +170,23 @@ func _run_one(suite_script: Script) -> void:
 	print("RUN   %s" % _running)
 
 	var suite: TestSuite = suite_script.new()
+	var started := Time.get_ticks_msec()
 	suite.run()
+	# What the suite cost in time, printed beside what it cost in checks, so a
+	# reader of the transcript can say which suites a full run is made of
+	# without going back to the memory recording for the timestamps.
+	var seconds := (Time.get_ticks_msec() - started) / 1000.0
 
 	_total_checks += suite.checks
 	if suite.failures.is_empty():
-		print("PASS  %-14s %d checks" % [suite.suite_name, suite.checks])
+		print("PASS  %-14s %6.1f s, %d checks" % [
+			suite.suite_name, seconds, suite.checks,
+		])
 	else:
 		_failed_suites += 1
 		_total_failures += suite.failures.size()
-		print("FAIL  %-14s %d checks, %d failed" % [
-			suite.suite_name, suite.checks, suite.failures.size(),
+		print("FAIL  %-14s %6.1f s, %d checks, %d failed" % [
+			suite.suite_name, seconds, suite.checks, suite.failures.size(),
 		])
 		for failure in suite.failures:
 			print("        - %s" % failure)

@@ -39,14 +39,27 @@
 #     suite that had thrown. Any SCRIPT ERROR in the output fails the run here,
 #     attributed to the suite named on the last RUN line before it.
 #   * a suite that never returns -- an endless loop, or a child process that
-#     never exits -- cannot be interrupted from inside the process at all. A run
-#     that prints nothing for RUN_TESTS_SILENCE seconds (default 7200, well past
-#     the slowest suite here) is killed and reported against the suite it was in.
+#     never exits -- cannot be interrupted from inside the process at all. An
+#     engine that prints nothing for RUN_TESTS_SILENCE seconds is killed, and
+#     the suite it was inside is reported FAIL for stalling, named with the
+#     budget it crossed.
 #
 # A third way exists now that a batch is a process: the kernel can kill a batch
-# outright. The suite it was inside is named and failed, and the run carries on
-# with the suites after it, because the point of a run is a verdict for every
-# suite and one suite that cannot be afforded must not silence seventy-two.
+# outright. Both of those end the same way: the suite is named and failed, and
+# the run carries on with the suites after it, because the point of a run is a
+# verdict for every suite and one suite that cannot be afforded must not silence
+# seventy-two. A run that loses a suite to either is a failed run -- the summary
+# counts it red and the exit code says so -- so carrying on is never a way to
+# reach a green.
+#
+# For the silence budget to mean anything, a suite has to be visible while it
+# works. It used to print only when it finished, so from outside a suite
+# grinding honestly and a suite spinning forever were the same picture, and the
+# budget had to be set past the slowest suite there is -- two hours -- which is
+# a budget that catches nothing. Since tests/test_suite.gd started printing a
+# progress line every thirty seconds of checking, a gap in the transcript is a
+# gap in the work, and the budget is set from the longest gap a healthy suite
+# leaves rather than from the length of the longest suite.
 #
 # What the runner does handle is an error raised in its own frame, which used to
 # be `_initialize()` and hung the process; see the head of bin/test_main.gd.
@@ -63,7 +76,12 @@ if [[ "${1:-}" == "--layers-only" ]]; then
 	shift
 fi
 
-SILENCE="${RUN_TESTS_SILENCE:-7200}"
+# How long an engine may print nothing before it is taken for stuck. Measured,
+# not guessed: see the header above and the "longest quiet stretch" line any run
+# prints. The suites here print a progress line every thirty seconds of checking,
+# so this is a budget on gaps *between* checks -- the time one uninterrupted
+# piece of work inside a suite may take -- and not on the length of a suite.
+SILENCE="${RUN_TESTS_SILENCE:-900}"
 # How many suites one engine is asked to run. One is the safe bound measured on
 # this machine -- see the memory table any run prints -- and raising it trades
 # engine starts (about five seconds each, measured) for a higher peak.
@@ -205,7 +223,7 @@ with open(memlog, "w", buffering=1) as log:
 	log.write("# resident memory of every engine of one ./run_tests.sh run\n")
 	log.write("# this machine has %.1f GiB\n"
 	          % (psutil.virtual_memory().total / 2 ** 30))
-	log.write("# time suite engines rss_gib avail_gib\n")
+	log.write("# time suite engines rss_gib avail_gib transcript_bytes\n")
 	while True:
 		if os.getppid() != parent:
 			# The run's shell was killed outright -- by a supervisor's timeout,
@@ -240,9 +258,9 @@ with open(memlog, "w", buffering=1) as log:
 					engines += 1
 			except psutil.Error:
 				continue
-		log.write("%s %s %d %.2f %.2f\n" % (
+		log.write("%s %s %d %.2f %.2f %d\n" % (
 			time.strftime("%H:%M:%S"), suite, engines, rss / 2 ** 30,
-			psutil.virtual_memory().available / 2 ** 30,
+			psutil.virtual_memory().available / 2 ** 30, pos,
 		))
 		time.sleep(2)
 PY
@@ -388,12 +406,32 @@ else
 fi
 
 status=0
+run_began=$SECONDS
 while (( ${#pending[@]} > 0 )); do
 	chunk=("${pending[@]:0:BATCH}")
 	rest=("${pending[@]:BATCH}")
 
 	run_engine --batch "${chunk[@]}"
-	stalled_or_continue
+	readable_or_fail "$OUT" "transcript"
+	readable_or_fail "$STALLED" "stall flag"
+
+	if [[ -s "$STALLED" ]]; then
+		# The watchdog killed this engine for silence. That is a verdict about
+		# one suite and not about the run: the suite is red for stalling, and
+		# the seventy-two after it still get theirs. The flag is cleared so the
+		# next engine starts with a clean one.
+		: >"$STALLED"
+		read -r entered done_ < <(slice_counts)
+		if (( entered < 1 )); then
+			entered=1
+		fi
+		stuck="${chunk[$(( entered - 1 ))]}"
+		printf 'FAIL  %-14s stalled: printed nothing for %ss\n' "$stuck" "$SILENCE" >>"$OUT"
+		printf 'FAIL  %-14s stalled: printed nothing for %ss\n' "$stuck" "$SILENCE"
+		pending=("${chunk[@]:$entered}" "${rest[@]}")
+		status=1
+		continue
+	fi
 
 	if (( engine_status > 1 )); then
 		# Not a verdict: the engine went away. Name the suite it was inside,
@@ -438,21 +476,49 @@ sampler=""
 # of a suite stays the engine's and the arithmetic of a run stays the run's.
 # ---------------------------------------------------------------------------
 echo ""
-echo "resident memory of this run, by suite (every engine on the machine):"
+echo "what this run cost, by suite -- memory held by every engine on the machine,"
+echo "wall time, and the longest stretch in which the transcript did not grow:"
 awk '
+	function secs(hms,   t) { split(hms, t, ":"); return t[1]*3600 + t[2]*60 + t[3] }
 	!/^#/ && NF >= 5 {
-		if (!($2 in first)) { first[$2] = ++n; order[n] = $2 }
+		now = secs($1)
+		if (now < prev_t) day += 86400   # the run crossed midnight
+		prev_t = now
+		now += day
+		if (!($2 in first)) { first[$2] = now; order[++n] = $2; quiet[$2] = 0 }
+		last[$2] = now
 		if ($4 + 0 > peak[$2]) peak[$2] = $4 + 0
+		# The quiet stretch: how long the transcript went without growing. This
+		# is the very thing the silence watchdog watches, recorded rather than
+		# recalled, so the budget can be set from the worst a healthy suite does
+		# instead of from the length of the longest suite.
+		if (NF >= 6) {
+			if ($6 == seen && $2 == seen_suite) {
+				gap = now - quiet_from
+				if (gap > quiet[$2]) quiet[$2] = gap
+			} else {
+				seen = $6; seen_suite = $2; quiet_from = now
+			}
+		}
 	}
 	END {
 		for (i = 1; i <= n; i++) {
 			s = order[i]
-			printf "  %2d  %-22s peak %6.2f GiB\n", i, s, peak[s]
+			span = last[s] - first[s]
+			printf "  %2d  %-22s peak %6.2f GiB  %6.1f min  quiet up to %5.0f s\n", \
+				i, s, peak[s], span / 60.0, quiet[s]
 			if (peak[s] > worst) { worst = peak[s]; who = s; where = i }
+			if (quiet[s] > longest) { longest = quiet[s]; dullest = s; dull_at = i }
 		}
 		printf "  peak of the whole run: %.2f GiB, in suite %d (%s)\n", worst, where, who
+		if (dullest == "") { dullest = "no suite ran long enough to be quiet"; dull_at = 0 }
+		printf "  longest quiet stretch: %.0f s, in suite %d (%s)\n", longest, dull_at, dullest
 	}
 ' "$MEMLOG" 2>/dev/null || echo "  (no memory recording: $MEMLOG)"
+awk -v s="$(( SECONDS - run_began ))" 'BEGIN {
+	printf "  wall time of the whole run: %.1f min (%.2f h)\n", s / 60.0, s / 3600.0
+}'
+printf '  the silence budget this run ran under: %ss\n' "$SILENCE"
 echo "  recorded in $MEMLOG"
 
 echo ""
