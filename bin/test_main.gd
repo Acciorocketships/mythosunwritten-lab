@@ -6,6 +6,13 @@ extends SceneTree
 ##
 ## Naming suites runs only those:  ./run_tests.sh test_rng test_items
 ##
+## Two flags exist for the runner shell, not for a person. `--list` prints the
+## suite names one per line and quits, so the shell can split the run across
+## several engines without keeping a second copy of the list. `--batch` says
+## this engine is one of several in one run: it still runs its suites and still
+## exits non-zero if any failed, but it prints no summary, because the summary
+## of a run belongs to the run and there is only one of those.
+##
 ## Suites run one per idle frame, not in one loop. GDScript cannot catch a
 ## runtime error, and an error abandons the whole GDScript call chain back to
 ## the engine call that entered it -- so a suite that reads past the end of an
@@ -109,17 +116,33 @@ var _running := ""
 ## command line that turned out not to exist.
 var _total_suites := 0
 
+## Set by `--batch`: this engine is one of several, so the summary is the
+## shell's to print. Set by `--list`: nothing is run at all.
+var _batched := false
+var _listed := false
+
 var _total_checks := 0
 var _failed_suites := 0
 var _total_failures := 0
 
 
 func _initialize() -> void:
-	_queue = _selection()
+	var args := OS.get_cmdline_user_args()
+	if args.has("--list"):
+		for suite_script in SUITES:
+			print(_script_label(suite_script))
+		_listed = true
+		quit(0)
+		return
+	_batched = args.has("--batch")
+	_queue = _selection(args)
 	_total_suites += _queue.size()
 
 
 func _process(_delta: float) -> bool:
+	if _listed:
+		return true
+
 	if _running != "":
 		# The previous frame entered this suite and the frame never finished:
 		# the engine abandoned it on a runtime error, printed above this line.
@@ -164,6 +187,11 @@ func _run_one(suite_script: Script) -> void:
 
 
 func _report() -> void:
+	if _batched:
+		# One engine of several. The exit code still carries this batch's
+		# verdict; the sentence that ends the run is the shell's to write.
+		quit(1 if _failed_suites > 0 else 0)
+		return
 	print("")
 	if _failed_suites == 0:
 		print("all %d suites passed (%d checks)" % [_total_suites, _total_checks])
@@ -177,8 +205,12 @@ func _report() -> void:
 
 ## Every suite, or just the ones named after `--` on the command line. A name is
 ## a file stem under `tests/` ("test_rng") or a full `res://` path.
-func _selection() -> Array:
-	var names := OS.get_cmdline_user_args()
+func _selection(args: PackedStringArray) -> Array:
+	var names := PackedStringArray()
+	for arg in args:
+		# The runner's own flags are not suite names.
+		if not arg.begins_with("--"):
+			names.append(arg)
 	if names.is_empty():
 		return SUITES.duplicate()
 	var chosen: Array = []
