@@ -1,0 +1,1521 @@
+
+=== a run where nothing is wrong still passes
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/passing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | RUN   passing
+    | PASS  passing           0.0 s, 2 checks
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.27 GiB, in suite 1 ((starting))
+    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   wall time of the whole run: 0.1 min (0.00 h)
+    |   the silence budget this run ran under: 900s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030102.log
+    | 
+    | all 2 suites passed (1327 checks)
+    -> exit 0 after 7s
+
+=== a failed check is still a failed run
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/failing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | RUN   failing
+    | FAIL  failing           0.0 s, 2 checks, 1 failed
+    |         - a check that does not hold, on purpose
+    |       expected: 2
+    |       actual:   1
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  failing                peak   0.31 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.31 GiB, in suite 3 (failing)
+    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   wall time of the whole run: 0.1 min (0.00 h)
+    |   the silence budget this run ran under: 900s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030109.log
+    | 
+    | 1 of 2 suites failed (1 failed checks of 1327)
+    -> exit 1 after 7s
+
+=== a suite that raises a runtime error below its run()
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing runner_fixtures/passing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | RUN   throwing
+    | SCRIPT ERROR: Out of bounds get index '1' (on base: 'Array[Dictionary]')
+    |           at: RunnerThrowingFixture._reads_past_the_end (res://tests/runner_fixtures/throwing.gd:28)
+    |           GDScript backtrace (most recent call first):
+    |               [0] _reads_past_the_end (res://tests/runner_fixtures/throwing.gd:28)
+    |               [1] run (res://tests/runner_fixtures/throwing.gd:22)
+    |               [2] _run_one (res://bin/test_main.gd:174)
+    |               [3] _process (res://bin/test_main.gd:160)
+    | PASS  throwing          0.0 s, 2 checks
+    | 
+    | RUN   passing
+    | PASS  passing           0.0 s, 2 checks
+    | 
+    | run_tests: suite 'throwing' raised a runtime error (SCRIPT ERROR above).
+    | run_tests: the engine returned to the caller and the runner could not see it,
+    | run_tests: so the run is failed here whatever the summary said.
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  throwing               peak   0.31 GiB     0.0 min  quiet up to     0 s
+    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.31 GiB, in suite 3 (throwing)
+    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   wall time of the whole run: 0.2 min (0.00 h)
+    |   the silence budget this run ran under: 900s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030116.log
+    | 
+    | all 3 suites passed (1329 checks)
+    -> exit 1 after 11s
+
+=== a suite the runner itself cannot enter
+    $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/not_a_suite runner_fixtures/passing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | RUN   not_a_suite
+    | SCRIPT ERROR: Trying to assign value of type 'not_a_suite.gd' to a variable of type 'test_suite.gd'.
+    |           at: _run_one (res://bin/test_main.gd:172)
+    |           GDScript backtrace (most recent call first):
+    |               [0] _run_one (res://bin/test_main.gd:172)
+    |               [1] _process (res://bin/test_main.gd:160)
+    | FAIL  not_a_suite    threw a runtime error (see the SCRIPT ERROR above)
+    | 
+    | RUN   passing
+    | PASS  passing           0.0 s, 2 checks
+    | 
+    | run_tests: suite 'not_a_suite' raised a runtime error (SCRIPT ERROR above).
+    | run_tests: the engine returned to the caller and the runner could not see it,
+    | run_tests: so the run is failed here whatever the summary said.
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  not_a_suite            peak   0.30 GiB     0.0 min  quiet up to     0 s
+    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.30 GiB, in suite 3 (not_a_suite)
+    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   wall time of the whole run: 0.2 min (0.00 h)
+    |   the silence budget this run ran under: 900s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030127.log
+    | 
+    | 1 of 3 suites failed (1 failed checks of 1327)
+    -> exit 1 after 10s
+
+=== a suite that never returns and never says anything
+    $ env RUN_TESTS_SILENCE=20 timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/stalling runner_fixtures/passing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | RUN   stalling
+    | ./run_tests.sh: line 323: 3923746 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+    | FAIL  runner_fixtures/stalling stalled: printed nothing for 20s
+    | 
+    | RUN   passing
+    | PASS  passing           0.0 s, 2 checks
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  stalling               peak   0.30 GiB     0.4 min  quiet up to    20 s
+    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.30 GiB, in suite 3 (stalling)
+    |   longest quiet stretch: 20 s, in suite 3 (stalling)
+    |   wall time of the whole run: 0.5 min (0.01 h)
+    |   the silence budget this run ran under: 20s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030137.log
+    | 
+    | 1 of 3 suites failed (1 failed checks of 1327)
+    -> exit 1 after 31s
+
+=== a suite says where it has got to while it is still working
+    $ env RUN_TESTS_PROGRESS=0 timeout -s KILL 300 ./run_tests.sh test_rng
+    | 
+    | RUN   test_rng
+    |   ..  rng                0 s, 2 checks: seed 42 draw 1 should repeat
+    |   ..  rng                0 s, 3 checks: seed 42 draw 2 should repeat
+    |   ..  rng                0 s, 4 checks: seed 42 draw 3 should repeat
+    |   ..  rng                0 s, 5 checks: seed 42 draw 4 should repeat
+    |   ..  rng                0 s, 6 checks: seed 42 draw 5 should repeat
+    |   ..  rng                0 s, 7 checks: seed 42 draw 6 should repeat
+    |   ..  rng                0 s, 8 checks: seed 42 draw 7 should repeat
+    |   ..  rng                0 s, 9 checks: seed 42 draw 8 should repeat
+    |   ..  rng                0 s, 10 checks: seed 42 draw 9 should repeat
+    |   ..  rng                0 s, 11 checks: seed 42 draw 10 should repeat
+    |   ..  rng                0 s, 12 checks: seed 42 draw 11 should repeat
+    |   ..  rng                0 s, 13 checks: seed 42 draw 12 should repeat
+    |   ..  rng                0 s, 14 checks: seed 42 draw 13 should repeat
+    |   ..  rng                0 s, 15 checks: seed 42 draw 14 should repeat
+    |   ..  rng                0 s, 16 checks: seed 42 draw 15 should repeat
+    |   ..  rng                0 s, 17 checks: seed 42 draw 16 should repeat
+    |   ..  rng                0 s, 18 checks: seed 42 draw 17 should repeat
+    |   ..  rng                0 s, 19 checks: seed 42 draw 18 should repeat
+    |   ..  rng                0 s, 20 checks: seed 42 draw 19 should repeat
+    |   ..  rng                0 s, 21 checks: seed 42 draw 20 should repeat
+    |   ..  rng                0 s, 22 checks: seed 42 draw 21 should repeat
+    |   ..  rng                0 s, 23 checks: seed 42 draw 22 should repeat
+    |   ..  rng                0 s, 24 checks: seed 42 draw 23 should repeat
+    |   ..  rng                0 s, 25 checks: seed 42 draw 24 should repeat
+    |   ..  rng                0 s, 26 checks: seed 42 draw 25 should repeat
+    |   ..  rng                0 s, 27 checks: seed 42 draw 26 should repeat
+    |   ..  rng                0 s, 28 checks: seed 42 draw 27 should repeat
+    |   ..  rng                0 s, 29 checks: seed 42 draw 28 should repeat
+    |   ..  rng                0 s, 30 checks: seed 42 draw 29 should repeat
+    |   ..  rng                0 s, 31 checks: seed 42 draw 30 should repeat
+    |   ..  rng                0 s, 32 checks: seed 42 draw 31 should repeat
+    |   ..  rng                0 s, 33 checks: seed 42 draw 32 should repeat
+    |   ..  rng                0 s, 34 checks: seed 42 draw 33 should repeat
+    |   ..  rng                0 s, 35 checks: seed 42 draw 34 should repeat
+    |   ..  rng                0 s, 36 checks: seed 42 draw 35 should repeat
+    |   ..  rng                0 s, 37 checks: seed 42 draw 36 should repeat
+    |   ..  rng                0 s, 38 checks: seed 42 draw 37 should repeat
+    |   ..  rng                0 s, 39 checks: seed 42 draw 38 should repeat
+    |   ..  rng                0 s, 40 checks: seed 42 draw 39 should repeat
+    |   ..  rng                0 s, 41 checks: seed 42 draw 40 should repeat
+    |   ..  rng                0 s, 42 checks: seed 42 draw 41 should repeat
+    |   ..  rng                0 s, 43 checks: seed 42 draw 42 should repeat
+    |   ..  rng                0 s, 44 checks: seed 42 draw 43 should repeat
+    |   ..  rng                0 s, 45 checks: seed 42 draw 44 should repeat
+    |   ..  rng                0 s, 46 checks: seed 42 draw 45 should repeat
+    |   ..  rng                0 s, 47 checks: seed 42 draw 46 should repeat
+    |   ..  rng                0 s, 48 checks: seed 42 draw 47 should repeat
+    |   ..  rng                0 s, 49 checks: seed 42 draw 48 should repeat
+    |   ..  rng                0 s, 50 checks: seed 42 draw 49 should repeat
+    |   ..  rng                0 s, 51 checks: seed 42 draw 50 should repeat
+    |   ..  rng                0 s, 52 checks: seed 42 draw 51 should repeat
+    |   ..  rng                0 s, 53 checks: seed 42 draw 52 should repeat
+    |   ..  rng                0 s, 54 checks: seed 42 draw 53 should repeat
+    |   ..  rng                0 s, 55 checks: seed 42 draw 54 should repeat
+    |   ..  rng                0 s, 56 checks: seed 42 draw 55 should repeat
+    |   ..  rng                0 s, 57 checks: seed 42 draw 56 should repeat
+    |   ..  rng                0 s, 58 checks: seed 42 draw 57 should repeat
+    |   ..  rng                0 s, 59 checks: seed 42 draw 58 should repeat
+    |   ..  rng                0 s, 60 checks: seed 42 draw 59 should repeat
+    |   ..  rng                0 s, 61 checks: seed 42 draw 60 should repeat
+    |   ..  rng                0 s, 62 checks: seed 42 draw 61 should repeat
+    |   ..  rng                0 s, 63 checks: seed 42 draw 62 should repeat
+    |   ..  rng                0 s, 64 checks: seed 42 draw 63 should repeat
+    |   ..  rng                0 s, 65 checks: seed 42 draw 64 should repeat
+    |   ..  rng                0 s, 66 checks: seed 42 draw 65 should repeat
+    |   ..  rng                0 s, 67 checks: seed 42 draw 66 should repeat
+    |   ..  rng                0 s, 68 checks: seed 42 draw 67 should repeat
+    |   ..  rng                0 s, 69 checks: seed 42 draw 68 should repeat
+    |   ..  rng                0 s, 70 checks: seed 42 draw 69 should repeat
+    |   ..  rng                0 s, 71 checks: seed 42 draw 70 should repeat
+    |   ..  rng                0 s, 72 checks: seed 42 draw 71 should repeat
+    |   ..  rng                0 s, 73 checks: seed 42 draw 72 should repeat
+    |   ..  rng                0 s, 74 checks: seed 42 draw 73 should repeat
+    |   ..  rng                0 s, 75 checks: seed 42 draw 74 should repeat
+    |   ..  rng                0 s, 76 checks: seed 42 draw 75 should repeat
+    |   ..  rng                0 s, 77 checks: seed 42 draw 76 should repeat
+    |   ..  rng                0 s, 78 checks: seed 42 draw 77 should repeat
+    |   ..  rng                0 s, 79 checks: seed 42 draw 78 should repeat
+    |   ..  rng                0 s, 80 checks: seed 42 draw 79 should repeat
+    |   ..  rng                0 s, 81 checks: seed 42 draw 80 should repeat
+    |   ..  rng                0 s, 82 checks: seed 42 draw 81 should repeat
+    |   ..  rng                0 s, 83 checks: seed 42 draw 82 should repeat
+    |   ..  rng                0 s, 84 checks: seed 42 draw 83 should repeat
+    |   ..  rng                0 s, 85 checks: seed 42 draw 84 should repeat
+    |   ..  rng                0 s, 86 checks: seed 42 draw 85 should repeat
+    |   ..  rng                0 s, 87 checks: seed 42 draw 86 should repeat
+    |   ..  rng                0 s, 88 checks: seed 42 draw 87 should repeat
+    |   ..  rng                0 s, 89 checks: seed 42 draw 88 should repeat
+    |   ..  rng                0 s, 90 checks: seed 42 draw 89 should repeat
+    |   ..  rng                0 s, 91 checks: seed 42 draw 90 should repeat
+    |   ..  rng                0 s, 92 checks: seed 42 draw 91 should repeat
+    |   ..  rng                0 s, 93 checks: seed 42 draw 92 should repeat
+    |   ..  rng                0 s, 94 checks: seed 42 draw 93 should repeat
+    |   ..  rng                0 s, 95 checks: seed 42 draw 94 should repeat
+    |   ..  rng                0 s, 96 checks: seed 42 draw 95 should repeat
+    |   ..  rng                0 s, 97 checks: seed 42 draw 96 should repeat
+    |   ..  rng                0 s, 98 checks: seed 42 draw 97 should repeat
+    |   ..  rng                0 s, 99 checks: seed 42 draw 98 should repeat
+    |   ..  rng                0 s, 100 checks: seed 42 draw 99 should repeat
+    |   ..  rng                0 s, 101 checks: seeds 42 and 43 produced 0 identical draws out of 100
+    |   ..  rng                0 s, 102 checks: forks with different labels should start from different states
+    |   ..  rng                0 s, 103 checks: fork 'terrain' draw 0 should repeat
+    |   ..  rng                0 s, 104 checks: fork 'terrain' draw 1 should repeat
+    |   ..  rng                0 s, 105 checks: fork 'terrain' draw 2 should repeat
+    |   ..  rng                0 s, 106 checks: fork 'terrain' draw 3 should repeat
+    |   ..  rng                0 s, 107 checks: fork 'terrain' draw 4 should repeat
+    |   ..  rng                0 s, 108 checks: fork 'terrain' draw 5 should repeat
+    |   ..  rng                0 s, 109 checks: fork 'terrain' draw 6 should repeat
+    |   ..  rng                0 s, 110 checks: fork 'terrain' draw 7 should repeat
+    |   ..  rng                0 s, 111 checks: fork 'terrain' draw 8 should repeat
+    |   ..  rng                0 s, 112 checks: fork 'terrain' draw 9 should repeat
+    |   ..  rng                0 s, 113 checks: fork 'terrain' draw 10 should repeat
+    |   ..  rng                0 s, 114 checks: fork 'terrain' draw 11 should repeat
+    |   ..  rng                0 s, 115 checks: fork 'terrain' draw 12 should repeat
+    |   ..  rng                0 s, 116 checks: fork 'terrain' draw 13 should repeat
+    |   ..  rng                0 s, 117 checks: fork 'terrain' draw 14 should repeat
+    |   ..  rng                0 s, 118 checks: fork 'terrain' draw 15 should repeat
+    |   ..  rng                0 s, 119 checks: fork 'terrain' draw 16 should repeat
+    |   ..  rng                0 s, 120 checks: fork 'terrain' draw 17 should repeat
+    |   ..  rng                0 s, 121 checks: fork 'terrain' draw 18 should repeat
+    |   ..  rng                0 s, 122 checks: fork 'terrain' draw 19 should repeat
+    |   ..  rng                0 s, 123 checks: next_float() returned 0.190601, outside [0, 1)
+    |   ..  rng                0 s, 124 checks: next_float() returned 0.490341, outside [0, 1)
+    |   ..  rng                0 s, 125 checks: next_float() returned 0.213061, outside [0, 1)
+    |   ..  rng                0 s, 126 checks: next_float() returned 0.087703, outside [0, 1)
+    |   ..  rng                0 s, 127 checks: next_float() returned 0.187370, outside [0, 1)
+    |   ..  rng                0 s, 128 checks: next_float() returned 0.462525, outside [0, 1)
+    |   ..  rng                0 s, 129 checks: next_float() returned 0.459738, outside [0, 1)
+    |   ..  rng                0 s, 130 checks: next_float() returned 0.980137, outside [0, 1)
+    |   ..  rng                0 s, 131 checks: next_float() returned 0.018720, outside [0, 1)
+    |   ..  rng                0 s, 132 checks: next_float() returned 0.497714, outside [0, 1)
+    |   ..  rng                0 s, 133 checks: next_float() returned 0.689000, outside [0, 1)
+    |   ..  rng                0 s, 134 checks: next_float() returned 0.640071, outside [0, 1)
+    |   ..  rng                0 s, 135 checks: next_float() returned 0.538391, outside [0, 1)
+    |   ..  rng                0 s, 136 checks: next_float() returned 0.578135, outside [0, 1)
+    |   ..  rng                0 s, 137 checks: next_float() returned 0.529015, outside [0, 1)
+    |   ..  rng                0 s, 138 checks: next_float() returned 0.731279, outside [0, 1)
+    |   ..  rng                0 s, 139 checks: next_float() returned 0.322188, outside [0, 1)
+    |   ..  rng                0 s, 140 checks: next_float() returned 0.709054, outside [0, 1)
+    |   ..  rng                0 s, 141 checks: next_float() returned 0.480541, outside [0, 1)
+    |   ..  rng                0 s, 142 checks: next_float() returned 0.908619, outside [0, 1)
+    |   ..  rng                0 s, 143 checks: next_float() returned 0.408988, outside [0, 1)
+    |   ..  rng                0 s, 144 checks: next_float() returned 0.622347, outside [0, 1)
+    |   ..  rng                0 s, 145 checks: next_float() returned 0.022206, outside [0, 1)
+    |   ..  rng                0 s, 146 checks: next_float() returned 0.038160, outside [0, 1)
+    |   ..  rng                0 s, 147 checks: next_float() returned 0.301826, outside [0, 1)
+    |   ..  rng                0 s, 148 checks: next_float() returned 0.808435, outside [0, 1)
+    |   ..  rng                0 s, 149 checks: next_float() returned 0.989711, outside [0, 1)
+    |   ..  rng                0 s, 150 checks: next_float() returned 0.550320, outside [0, 1)
+    |   ..  rng                0 s, 151 checks: next_float() returned 0.606488, outside [0, 1)
+    |   ..  rng                0 s, 152 checks: next_float() returned 0.854998, outside [0, 1)
+    |   ..  rng                0 s, 153 checks: next_float() returned 0.840442, outside [0, 1)
+    |   ..  rng                0 s, 154 checks: next_float() returned 0.654581, outside [0, 1)
+    |   ..  rng                0 s, 155 checks: next_float() returned 0.557836, outside [0, 1)
+    |   ..  rng                0 s, 156 checks: next_float() returned 0.095078, outside [0, 1)
+    |   ..  rng                0 s, 157 checks: next_float() returned 0.304959, outside [0, 1)
+    |   ..  rng                0 s, 158 checks: next_float() returned 0.524590, outside [0, 1)
+    |   ..  rng                0 s, 159 checks: next_float() returned 0.606342, outside [0, 1)
+    |   ..  rng                0 s, 160 checks: next_float() returned 0.412388, outside [0, 1)
+    |   ..  rng                0 s, 161 checks: next_float() returned 0.886551, outside [0, 1)
+    |   ..  rng                0 s, 162 checks: next_float() returned 0.718603, outside [0, 1)
+    |   ..  rng                0 s, 163 checks: next_float() returned 0.633484, outside [0, 1)
+    |   ..  rng                0 s, 164 checks: next_float() returned 0.079381, outside [0, 1)
+    |   ..  rng                0 s, 165 checks: next_float() returned 0.002200, outside [0, 1)
+    |   ..  rng                0 s, 166 checks: next_float() returned 0.135945, outside [0, 1)
+    |   ..  rng                0 s, 167 checks: next_float() returned 0.677779, outside [0, 1)
+    |   ..  rng                0 s, 168 checks: next_float() returned 0.319427, outside [0, 1)
+    |   ..  rng                0 s, 169 checks: next_float() returned 0.061583, outside [0, 1)
+    |   ..  rng                0 s, 170 checks: next_float() returned 0.194004, outside [0, 1)
+    |   ..  rng                0 s, 171 checks: next_float() returned 0.489235, outside [0, 1)
+    |   ..  rng                0 s, 172 checks: next_float() returned 0.774297, outside [0, 1)
+    |   ..  rng                0 s, 173 checks: next_float() returned 0.747799, outside [0, 1)
+    |   ..  rng                0 s, 174 checks: next_float() returned 0.829391, outside [0, 1)
+    |   ..  rng                0 s, 175 checks: next_float() returned 0.320834, outside [0, 1)
+    |   ..  rng                0 s, 176 checks: next_float() returned 0.845484, outside [0, 1)
+    |   ..  rng                0 s, 177 checks: next_float() returned 0.152390, outside [0, 1)
+    |   ..  rng                0 s, 178 checks: next_float() returned 0.611818, outside [0, 1)
+    |   ..  rng                0 s, 179 checks: next_float() returned 0.788964, outside [0, 1)
+    |   ..  rng                0 s, 180 checks: next_float() returned 0.478691, outside [0, 1)
+    |   ..  rng                0 s, 181 checks: next_float() returned 0.672743, outside [0, 1)
+    |   ..  rng                0 s, 182 checks: next_float() returned 0.384836, outside [0, 1)
+    |   ..  rng                0 s, 183 checks: next_float() returned 0.899842, outside [0, 1)
+    |   ..  rng                0 s, 184 checks: next_float() returned 0.690721, outside [0, 1)
+    |   ..  rng                0 s, 185 checks: next_float() returned 0.396781, outside [0, 1)
+    |   ..  rng                0 s, 186 checks: next_float() returned 0.100114, outside [0, 1)
+    |   ..  rng                0 s, 187 checks: next_float() returned 0.825899, outside [0, 1)
+    |   ..  rng                0 s, 188 checks: next_float() returned 0.599139, outside [0, 1)
+    |   ..  rng                0 s, 189 checks: next_float() returned 0.325426, outside [0, 1)
+    |   ..  rng                0 s, 190 checks: next_float() returned 0.200576, outside [0, 1)
+    |   ..  rng                0 s, 191 checks: next_float() returned 0.245513, outside [0, 1)
+    |   ..  rng                0 s, 192 checks: next_float() returned 0.163485, outside [0, 1)
+    |   ..  rng                0 s, 193 checks: next_float() returned 0.806309, outside [0, 1)
+    |   ..  rng                0 s, 194 checks: next_float() returned 0.365861, outside [0, 1)
+    |   ..  rng                0 s, 195 checks: next_float() returned 0.687612, outside [0, 1)
+    |   ..  rng                0 s, 196 checks: next_float() returned 0.015900, outside [0, 1)
+    |   ..  rng                0 s, 197 checks: next_float() returned 0.936960, outside [0, 1)
+    |   ..  rng                0 s, 198 checks: next_float() returned 0.397792, outside [0, 1)
+    |   ..  rng                0 s, 199 checks: next_float() returned 0.820501, outside [0, 1)
+    |   ..  rng                0 s, 200 checks: next_float() returned 0.852451, outside [0, 1)
+    |   ..  rng                0 s, 201 checks: next_float() returned 0.000882, outside [0, 1)
+    |   ..  rng                0 s, 202 checks: next_float() returned 0.118326, outside [0, 1)
+    |   ..  rng                0 s, 203 checks: next_float() returned 0.294887, outside [0, 1)
+    |   ..  rng                0 s, 204 checks: next_float() returned 0.755261, outside [0, 1)
+    |   ..  rng                0 s, 205 checks: next_float() returned 0.046981, outside [0, 1)
+    |   ..  rng                0 s, 206 checks: next_float() returned 0.184392, outside [0, 1)
+    |   ..  rng                0 s, 207 checks: next_float() returned 0.925373, outside [0, 1)
+    |   ..  rng                0 s, 208 checks: next_float() returned 0.458295, outside [0, 1)
+    |   ..  rng                0 s, 209 checks: next_float() returned 0.310817, outside [0, 1)
+    |   ..  rng                0 s, 210 checks: next_float() returned 0.340706, outside [0, 1)
+    |   ..  rng                0 s, 211 checks: next_float() returned 0.811010, outside [0, 1)
+    |   ..  rng                0 s, 212 checks: next_float() returned 0.205409, outside [0, 1)
+    |   ..  rng                0 s, 213 checks: next_float() returned 0.281144, outside [0, 1)
+    |   ..  rng                0 s, 214 checks: next_float() returned 0.110234, outside [0, 1)
+    |   ..  rng                0 s, 215 checks: next_float() returned 0.131055, outside [0, 1)
+    |   ..  rng                0 s, 216 checks: next_float() returned 0.080813, outside [0, 1)
+    |   ..  rng                0 s, 217 checks: next_float() returned 0.447237, outside [0, 1)
+    |   ..  rng                0 s, 218 checks: next_float() returned 0.054108, outside [0, 1)
+    |   ..  rng                0 s, 219 checks: next_float() returned 0.788049, outside [0, 1)
+    |   ..  rng                0 s, 220 checks: next_float() returned 0.809509, outside [0, 1)
+    |   ..  rng                0 s, 221 checks: next_float() returned 0.818213, outside [0, 1)
+    |   ..  rng                0 s, 222 checks: next_float() returned 0.879894, outside [0, 1)
+    |   ..  rng                0 s, 223 checks: next_float() returned 0.688407, outside [0, 1)
+    |   ..  rng                0 s, 224 checks: next_float() returned 0.214765, outside [0, 1)
+    |   ..  rng                0 s, 225 checks: next_float() returned 0.070658, outside [0, 1)
+    |   ..  rng                0 s, 226 checks: next_float() returned 0.831141, outside [0, 1)
+    |   ..  rng                0 s, 227 checks: next_float() returned 0.188677, outside [0, 1)
+    |   ..  rng                0 s, 228 checks: next_float() returned 0.742851, outside [0, 1)
+    |   ..  rng                0 s, 229 checks: next_float() returned 0.193601, outside [0, 1)
+    |   ..  rng                0 s, 230 checks: next_float() returned 0.401398, outside [0, 1)
+    |   ..  rng                0 s, 231 checks: next_float() returned 0.187047, outside [0, 1)
+    |   ..  rng                0 s, 232 checks: next_float() returned 0.658427, outside [0, 1)
+    |   ..  rng                0 s, 233 checks: next_float() returned 0.092163, outside [0, 1)
+    |   ..  rng                0 s, 234 checks: next_float() returned 0.236210, outside [0, 1)
+    |   ..  rng                0 s, 235 checks: next_float() returned 0.461767, outside [0, 1)
+    |   ..  rng                0 s, 236 checks: next_float() returned 0.947901, outside [0, 1)
+    |   ..  rng                0 s, 237 checks: next_float() returned 0.165068, outside [0, 1)
+    |   ..  rng                0 s, 238 checks: next_float() returned 0.565864, outside [0, 1)
+    |   ..  rng                0 s, 239 checks: next_float() returned 0.437555, outside [0, 1)
+    |   ..  rng                0 s, 240 checks: next_float() returned 0.211062, outside [0, 1)
+    |   ..  rng                0 s, 241 checks: next_float() returned 0.735324, outside [0, 1)
+    |   ..  rng                0 s, 242 checks: next_float() returned 0.687402, outside [0, 1)
+    |   ..  rng                0 s, 243 checks: next_float() returned 0.002993, outside [0, 1)
+    |   ..  rng                0 s, 244 checks: next_float() returned 0.507451, outside [0, 1)
+    |   ..  rng                0 s, 245 checks: next_float() returned 0.677004, outside [0, 1)
+    |   ..  rng                0 s, 246 checks: next_float() returned 0.662078, outside [0, 1)
+    |   ..  rng                0 s, 247 checks: next_float() returned 0.221168, outside [0, 1)
+    |   ..  rng                0 s, 248 checks: next_float() returned 0.173105, outside [0, 1)
+    |   ..  rng                0 s, 249 checks: next_float() returned 0.850829, outside [0, 1)
+    |   ..  rng                0 s, 250 checks: next_float() returned 0.448836, outside [0, 1)
+    |   ..  rng                0 s, 251 checks: next_float() returned 0.333404, outside [0, 1)
+    |   ..  rng                0 s, 252 checks: next_float() returned 0.449681, outside [0, 1)
+    |   ..  rng                0 s, 253 checks: next_float() returned 0.479649, outside [0, 1)
+    |   ..  rng                0 s, 254 checks: next_float() returned 0.579845, outside [0, 1)
+    |   ..  rng                0 s, 255 checks: next_float() returned 0.235902, outside [0, 1)
+    |   ..  rng                0 s, 256 checks: next_float() returned 0.626732, outside [0, 1)
+    |   ..  rng                0 s, 257 checks: next_float() returned 0.031653, outside [0, 1)
+    |   ..  rng                0 s, 258 checks: next_float() returned 0.421560, outside [0, 1)
+    |   ..  rng                0 s, 259 checks: next_float() returned 0.322034, outside [0, 1)
+    |   ..  rng                0 s, 260 checks: next_float() returned 0.832069, outside [0, 1)
+    |   ..  rng                0 s, 261 checks: next_float() returned 0.940671, outside [0, 1)
+    |   ..  rng                0 s, 262 checks: next_float() returned 0.414376, outside [0, 1)
+    |   ..  rng                0 s, 263 checks: next_float() returned 0.281175, outside [0, 1)
+    |   ..  rng                0 s, 264 checks: next_float() returned 0.242854, outside [0, 1)
+    |   ..  rng                0 s, 265 checks: next_float() returned 0.477112, outside [0, 1)
+    |   ..  rng                0 s, 266 checks: next_float() returned 0.753970, outside [0, 1)
+    |   ..  rng                0 s, 267 checks: next_float() returned 0.301000, outside [0, 1)
+    |   ..  rng                0 s, 268 checks: next_float() returned 0.856840, outside [0, 1)
+    |   ..  rng                0 s, 269 checks: next_float() returned 0.606338, outside [0, 1)
+    |   ..  rng                0 s, 270 checks: next_float() returned 0.053724, outside [0, 1)
+    |   ..  rng                0 s, 271 checks: next_float() returned 0.176409, outside [0, 1)
+    |   ..  rng                0 s, 272 checks: next_float() returned 0.037672, outside [0, 1)
+    |   ..  rng                0 s, 273 checks: next_float() returned 0.095888, outside [0, 1)
+    |   ..  rng                0 s, 274 checks: next_float() returned 0.064673, outside [0, 1)
+    |   ..  rng                0 s, 275 checks: next_float() returned 0.734541, outside [0, 1)
+    |   ..  rng                0 s, 276 checks: next_float() returned 0.650902, outside [0, 1)
+    |   ..  rng                0 s, 277 checks: next_float() returned 0.071423, outside [0, 1)
+    |   ..  rng                0 s, 278 checks: next_float() returned 0.833865, outside [0, 1)
+    |   ..  rng                0 s, 279 checks: next_float() returned 0.016969, outside [0, 1)
+    |   ..  rng                0 s, 280 checks: next_float() returned 0.281167, outside [0, 1)
+    |   ..  rng                0 s, 281 checks: next_float() returned 0.455677, outside [0, 1)
+    |   ..  rng                0 s, 282 checks: next_float() returned 0.297971, outside [0, 1)
+    |   ..  rng                0 s, 283 checks: next_float() returned 0.245824, outside [0, 1)
+    |   ..  rng                0 s, 284 checks: next_float() returned 0.092982, outside [0, 1)
+    |   ..  rng                0 s, 285 checks: next_float() returned 0.236858, outside [0, 1)
+    |   ..  rng                0 s, 286 checks: next_float() returned 0.233687, outside [0, 1)
+    |   ..  rng                0 s, 287 checks: next_float() returned 0.490264, outside [0, 1)
+    |   ..  rng                0 s, 288 checks: next_float() returned 0.560209, outside [0, 1)
+    |   ..  rng                0 s, 289 checks: next_float() returned 0.305581, outside [0, 1)
+    |   ..  rng                0 s, 290 checks: next_float() returned 0.225713, outside [0, 1)
+    |   ..  rng                0 s, 291 checks: next_float() returned 0.121125, outside [0, 1)
+    |   ..  rng                0 s, 292 checks: next_float() returned 0.804041, outside [0, 1)
+    |   ..  rng                0 s, 293 checks: next_float() returned 0.841355, outside [0, 1)
+    |   ..  rng                0 s, 294 checks: next_float() returned 0.433128, outside [0, 1)
+    |   ..  rng                0 s, 295 checks: next_float() returned 0.933054, outside [0, 1)
+    |   ..  rng                0 s, 296 checks: next_float() returned 0.678585, outside [0, 1)
+    |   ..  rng                0 s, 297 checks: next_float() returned 0.588164, outside [0, 1)
+    |   ..  rng                0 s, 298 checks: next_float() returned 0.599677, outside [0, 1)
+    |   ..  rng                0 s, 299 checks: next_float() returned 0.881838, outside [0, 1)
+    |   ..  rng                0 s, 300 checks: next_float() returned 0.857322, outside [0, 1)
+    |   ..  rng                0 s, 301 checks: next_float() returned 0.925703, outside [0, 1)
+    |   ..  rng                0 s, 302 checks: next_float() returned 0.807312, outside [0, 1)
+    |   ..  rng                0 s, 303 checks: next_float() returned 0.157482, outside [0, 1)
+    |   ..  rng                0 s, 304 checks: next_float() returned 0.057285, outside [0, 1)
+    |   ..  rng                0 s, 305 checks: next_float() returned 0.263061, outside [0, 1)
+    |   ..  rng                0 s, 306 checks: next_float() returned 0.934961, outside [0, 1)
+    |   ..  rng                0 s, 307 checks: next_float() returned 0.583787, outside [0, 1)
+    |   ..  rng                0 s, 308 checks: next_float() returned 0.946038, outside [0, 1)
+    |   ..  rng                0 s, 309 checks: next_float() returned 0.092853, outside [0, 1)
+    |   ..  rng                0 s, 310 checks: next_float() returned 0.922664, outside [0, 1)
+    |   ..  rng                0 s, 311 checks: next_float() returned 0.433094, outside [0, 1)
+    |   ..  rng                0 s, 312 checks: next_float() returned 0.967086, outside [0, 1)
+    |   ..  rng                0 s, 313 checks: next_float() returned 0.792244, outside [0, 1)
+    |   ..  rng                0 s, 314 checks: next_float() returned 0.714332, outside [0, 1)
+    |   ..  rng                0 s, 315 checks: next_float() returned 0.258822, outside [0, 1)
+    |   ..  rng                0 s, 316 checks: next_float() returned 0.619808, outside [0, 1)
+    |   ..  rng                0 s, 317 checks: next_float() returned 0.475008, outside [0, 1)
+    |   ..  rng                0 s, 318 checks: next_float() returned 0.506423, outside [0, 1)
+    |   ..  rng                0 s, 319 checks: next_float() returned 0.811084, outside [0, 1)
+    |   ..  rng                0 s, 320 checks: next_float() returned 0.777220, outside [0, 1)
+    |   ..  rng                0 s, 321 checks: next_float() returned 0.199889, outside [0, 1)
+    |   ..  rng                0 s, 322 checks: next_float() returned 0.525198, outside [0, 1)
+    |   ..  rng                0 s, 323 checks: next_float() returned 0.569583, outside [0, 1)
+    |   ..  rng                0 s, 324 checks: next_float() returned 0.168216, outside [0, 1)
+    |   ..  rng                0 s, 325 checks: next_float() returned 0.028587, outside [0, 1)
+    |   ..  rng                0 s, 326 checks: next_float() returned 0.318273, outside [0, 1)
+    |   ..  rng                0 s, 327 checks: next_float() returned 0.887657, outside [0, 1)
+    |   ..  rng                0 s, 328 checks: next_float() returned 0.856490, outside [0, 1)
+    |   ..  rng                0 s, 329 checks: next_float() returned 0.628403, outside [0, 1)
+    |   ..  rng                0 s, 330 checks: next_float() returned 0.097334, outside [0, 1)
+    |   ..  rng                0 s, 331 checks: next_float() returned 0.946805, outside [0, 1)
+    |   ..  rng                0 s, 332 checks: next_float() returned 0.544352, outside [0, 1)
+    |   ..  rng                0 s, 333 checks: next_float() returned 0.097123, outside [0, 1)
+    |   ..  rng                0 s, 334 checks: next_float() returned 0.282994, outside [0, 1)
+    |   ..  rng                0 s, 335 checks: next_float() returned 0.341053, outside [0, 1)
+    |   ..  rng                0 s, 336 checks: next_float() returned 0.003765, outside [0, 1)
+    |   ..  rng                0 s, 337 checks: next_float() returned 0.723128, outside [0, 1)
+    |   ..  rng                0 s, 338 checks: next_float() returned 0.878505, outside [0, 1)
+    |   ..  rng                0 s, 339 checks: next_float() returned 0.793078, outside [0, 1)
+    |   ..  rng                0 s, 340 checks: next_float() returned 0.769794, outside [0, 1)
+    |   ..  rng                0 s, 341 checks: next_float() returned 0.878149, outside [0, 1)
+    |   ..  rng                0 s, 342 checks: next_float() returned 0.663912, outside [0, 1)
+    |   ..  rng                0 s, 343 checks: next_float() returned 0.270778, outside [0, 1)
+    |   ..  rng                0 s, 344 checks: next_float() returned 0.677714, outside [0, 1)
+    |   ..  rng                0 s, 345 checks: next_float() returned 0.433588, outside [0, 1)
+    |   ..  rng                0 s, 346 checks: next_float() returned 0.564909, outside [0, 1)
+    |   ..  rng                0 s, 347 checks: next_float() returned 0.859929, outside [0, 1)
+    |   ..  rng                0 s, 348 checks: next_float() returned 0.505797, outside [0, 1)
+    |   ..  rng                0 s, 349 checks: next_float() returned 0.098751, outside [0, 1)
+    |   ..  rng                0 s, 350 checks: next_float() returned 0.158415, outside [0, 1)
+    |   ..  rng                0 s, 351 checks: next_float() returned 0.932004, outside [0, 1)
+    |   ..  rng                0 s, 352 checks: next_float() returned 0.857555, outside [0, 1)
+    |   ..  rng                0 s, 353 checks: next_float() returned 0.691206, outside [0, 1)
+    |   ..  rng                0 s, 354 checks: next_float() returned 0.326999, outside [0, 1)
+    |   ..  rng                0 s, 355 checks: next_float() returned 0.247942, outside [0, 1)
+    |   ..  rng                0 s, 356 checks: next_float() returned 0.874701, outside [0, 1)
+    |   ..  rng                0 s, 357 checks: next_float() returned 0.285390, outside [0, 1)
+    |   ..  rng                0 s, 358 checks: next_float() returned 0.560886, outside [0, 1)
+    |   ..  rng                0 s, 359 checks: next_float() returned 0.441376, outside [0, 1)
+    |   ..  rng                0 s, 360 checks: next_float() returned 0.519761, outside [0, 1)
+    |   ..  rng                0 s, 361 checks: next_float() returned 0.327884, outside [0, 1)
+    |   ..  rng                0 s, 362 checks: next_float() returned 0.981402, outside [0, 1)
+    |   ..  rng                0 s, 363 checks: next_float() returned 0.555611, outside [0, 1)
+    |   ..  rng                0 s, 364 checks: next_float() returned 0.029098, outside [0, 1)
+    |   ..  rng                0 s, 365 checks: next_float() returned 0.940596, outside [0, 1)
+    |   ..  rng                0 s, 366 checks: next_float() returned 0.226734, outside [0, 1)
+    |   ..  rng                0 s, 367 checks: next_float() returned 0.636965, outside [0, 1)
+    |   ..  rng                0 s, 368 checks: next_float() returned 0.671812, outside [0, 1)
+    |   ..  rng                0 s, 369 checks: next_float() returned 0.908944, outside [0, 1)
+    |   ..  rng                0 s, 370 checks: next_float() returned 0.687183, outside [0, 1)
+    |   ..  rng                0 s, 371 checks: next_float() returned 0.892717, outside [0, 1)
+    |   ..  rng                0 s, 372 checks: next_float() returned 0.602883, outside [0, 1)
+    |   ..  rng                0 s, 373 checks: next_float() returned 0.167848, outside [0, 1)
+    |   ..  rng                0 s, 374 checks: next_float() returned 0.543476, outside [0, 1)
+    |   ..  rng                0 s, 375 checks: next_float() returned 0.875394, outside [0, 1)
+    |   ..  rng                0 s, 376 checks: next_float() returned 0.260699, outside [0, 1)
+    |   ..  rng                0 s, 377 checks: next_float() returned 0.488867, outside [0, 1)
+    |   ..  rng                0 s, 378 checks: next_float() returned 0.131567, outside [0, 1)
+    |   ..  rng                0 s, 379 checks: next_float() returned 0.429867, outside [0, 1)
+    |   ..  rng                0 s, 380 checks: next_float() returned 0.528299, outside [0, 1)
+    |   ..  rng                0 s, 381 checks: next_float() returned 0.979331, outside [0, 1)
+    |   ..  rng                0 s, 382 checks: next_float() returned 0.126040, outside [0, 1)
+    |   ..  rng                0 s, 383 checks: next_float() returned 0.851764, outside [0, 1)
+    |   ..  rng                0 s, 384 checks: next_float() returned 0.819460, outside [0, 1)
+    |   ..  rng                0 s, 385 checks: next_float() returned 0.193737, outside [0, 1)
+    |   ..  rng                0 s, 386 checks: next_float() returned 0.269761, outside [0, 1)
+    |   ..  rng                0 s, 387 checks: next_float() returned 0.808082, outside [0, 1)
+    |   ..  rng                0 s, 388 checks: next_float() returned 0.811436, outside [0, 1)
+    |   ..  rng                0 s, 389 checks: next_float() returned 0.293343, outside [0, 1)
+    |   ..  rng                0 s, 390 checks: next_float() returned 0.225412, outside [0, 1)
+    |   ..  rng                0 s, 391 checks: next_float() returned 0.847002, outside [0, 1)
+    |   ..  rng                0 s, 392 checks: next_float() returned 0.764391, outside [0, 1)
+    |   ..  rng                0 s, 393 checks: next_float() returned 0.786687, outside [0, 1)
+    |   ..  rng                0 s, 394 checks: next_float() returned 0.607959, outside [0, 1)
+    |   ..  rng                0 s, 395 checks: next_float() returned 0.936444, outside [0, 1)
+    |   ..  rng                0 s, 396 checks: next_float() returned 0.891936, outside [0, 1)
+    |   ..  rng                0 s, 397 checks: next_float() returned 0.143662, outside [0, 1)
+    |   ..  rng                0 s, 398 checks: next_float() returned 0.044602, outside [0, 1)
+    |   ..  rng                0 s, 399 checks: next_float() returned 0.321756, outside [0, 1)
+    |   ..  rng                0 s, 400 checks: next_float() returned 0.477014, outside [0, 1)
+    |   ..  rng                0 s, 401 checks: next_float() returned 0.146989, outside [0, 1)
+    |   ..  rng                0 s, 402 checks: next_float() returned 0.373646, outside [0, 1)
+    |   ..  rng                0 s, 403 checks: next_float() returned 0.153277, outside [0, 1)
+    |   ..  rng                0 s, 404 checks: next_float() returned 0.587308, outside [0, 1)
+    |   ..  rng                0 s, 405 checks: next_float() returned 0.009135, outside [0, 1)
+    |   ..  rng                0 s, 406 checks: next_float() returned 0.827718, outside [0, 1)
+    |   ..  rng                0 s, 407 checks: next_float() returned 0.155419, outside [0, 1)
+    |   ..  rng                0 s, 408 checks: next_float() returned 0.329156, outside [0, 1)
+    |   ..  rng                0 s, 409 checks: next_float() returned 0.561524, outside [0, 1)
+    |   ..  rng                0 s, 410 checks: next_float() returned 0.882816, outside [0, 1)
+    |   ..  rng                0 s, 411 checks: next_float() returned 0.505953, outside [0, 1)
+    |   ..  rng                0 s, 412 checks: next_float() returned 0.441533, outside [0, 1)
+    |   ..  rng                0 s, 413 checks: next_float() returned 0.584661, outside [0, 1)
+    |   ..  rng                0 s, 414 checks: next_float() returned 0.126535, outside [0, 1)
+    |   ..  rng                0 s, 415 checks: next_float() returned 0.533892, outside [0, 1)
+    |   ..  rng                0 s, 416 checks: next_float() returned 0.537397, outside [0, 1)
+    |   ..  rng                0 s, 417 checks: next_float() returned 0.564413, outside [0, 1)
+    |   ..  rng                0 s, 418 checks: next_float() returned 0.097430, outside [0, 1)
+    |   ..  rng                0 s, 419 checks: next_float() returned 0.702334, outside [0, 1)
+    |   ..  rng                0 s, 420 checks: next_float() returned 0.216975, outside [0, 1)
+    |   ..  rng                0 s, 421 checks: next_float() returned 0.449407, outside [0, 1)
+    |   ..  rng                0 s, 422 checks: next_float() returned 0.926310, outside [0, 1)
+    |   ..  rng                0 s, 423 checks: next_float() returned 0.267149, outside [0, 1)
+    |   ..  rng                0 s, 424 checks: next_float() returned 0.123407, outside [0, 1)
+    |   ..  rng                0 s, 425 checks: next_float() returned 0.892802, outside [0, 1)
+    |   ..  rng                0 s, 426 checks: next_float() returned 0.624815, outside [0, 1)
+    |   ..  rng                0 s, 427 checks: next_float() returned 0.233153, outside [0, 1)
+    |   ..  rng                0 s, 428 checks: next_float() returned 0.432816, outside [0, 1)
+    |   ..  rng                0 s, 429 checks: next_float() returned 0.787613, outside [0, 1)
+    |   ..  rng                0 s, 430 checks: next_float() returned 0.816374, outside [0, 1)
+    |   ..  rng                0 s, 431 checks: next_float() returned 0.815716, outside [0, 1)
+    |   ..  rng                0 s, 432 checks: next_float() returned 0.102571, outside [0, 1)
+    |   ..  rng                0 s, 433 checks: next_float() returned 0.116924, outside [0, 1)
+    |   ..  rng                0 s, 434 checks: next_float() returned 0.480789, outside [0, 1)
+    |   ..  rng                0 s, 435 checks: next_float() returned 0.671817, outside [0, 1)
+    |   ..  rng                0 s, 436 checks: next_float() returned 0.093400, outside [0, 1)
+    |   ..  rng                0 s, 437 checks: next_float() returned 0.249408, outside [0, 1)
+    |   ..  rng                0 s, 438 checks: next_float() returned 0.187982, outside [0, 1)
+    |   ..  rng                0 s, 439 checks: next_float() returned 0.355028, outside [0, 1)
+    |   ..  rng                0 s, 440 checks: next_float() returned 0.712675, outside [0, 1)
+    |   ..  rng                0 s, 441 checks: next_float() returned 0.410643, outside [0, 1)
+    |   ..  rng                0 s, 442 checks: next_float() returned 0.003032, outside [0, 1)
+    |   ..  rng                0 s, 443 checks: next_float() returned 0.773291, outside [0, 1)
+    |   ..  rng                0 s, 444 checks: next_float() returned 0.117206, outside [0, 1)
+    |   ..  rng                0 s, 445 checks: next_float() returned 0.940143, outside [0, 1)
+    |   ..  rng                0 s, 446 checks: next_float() returned 0.179445, outside [0, 1)
+    |   ..  rng                0 s, 447 checks: next_float() returned 0.294011, outside [0, 1)
+    |   ..  rng                0 s, 448 checks: next_float() returned 0.625564, outside [0, 1)
+    |   ..  rng                0 s, 449 checks: next_float() returned 0.435512, outside [0, 1)
+    |   ..  rng                0 s, 450 checks: next_float() returned 0.203223, outside [0, 1)
+    |   ..  rng                0 s, 451 checks: next_float() returned 0.264366, outside [0, 1)
+    |   ..  rng                0 s, 452 checks: next_float() returned 0.060389, outside [0, 1)
+    |   ..  rng                0 s, 453 checks: next_float() returned 0.533292, outside [0, 1)
+    |   ..  rng                0 s, 454 checks: next_float() returned 0.271827, outside [0, 1)
+    |   ..  rng                0 s, 455 checks: next_float() returned 0.873584, outside [0, 1)
+    |   ..  rng                0 s, 456 checks: next_float() returned 0.009876, outside [0, 1)
+    |   ..  rng                0 s, 457 checks: next_float() returned 0.784962, outside [0, 1)
+    |   ..  rng                0 s, 458 checks: next_float() returned 0.506449, outside [0, 1)
+    |   ..  rng                0 s, 459 checks: next_float() returned 0.967340, outside [0, 1)
+    |   ..  rng                0 s, 460 checks: next_float() returned 0.364212, outside [0, 1)
+    |   ..  rng                0 s, 461 checks: next_float() returned 0.012474, outside [0, 1)
+    |   ..  rng                0 s, 462 checks: next_float() returned 0.573588, outside [0, 1)
+    |   ..  rng                0 s, 463 checks: next_float() returned 0.220040, outside [0, 1)
+    |   ..  rng                0 s, 464 checks: next_float() returned 0.978323, outside [0, 1)
+    |   ..  rng                0 s, 465 checks: next_float() returned 0.565545, outside [0, 1)
+    |   ..  rng                0 s, 466 checks: next_float() returned 0.717163, outside [0, 1)
+    |   ..  rng                0 s, 467 checks: next_float() returned 0.661665, outside [0, 1)
+    |   ..  rng                0 s, 468 checks: next_float() returned 0.103299, outside [0, 1)
+    |   ..  rng                0 s, 469 checks: next_float() returned 0.510307, outside [0, 1)
+    |   ..  rng                0 s, 470 checks: next_float() returned 0.104262, outside [0, 1)
+    |   ..  rng                0 s, 471 checks: next_float() returned 0.043141, outside [0, 1)
+    |   ..  rng                0 s, 472 checks: next_float() returned 0.463163, outside [0, 1)
+    |   ..  rng                0 s, 473 checks: next_float() returned 0.286290, outside [0, 1)
+    |   ..  rng                0 s, 474 checks: next_float() returned 0.611631, outside [0, 1)
+    |   ..  rng                0 s, 475 checks: next_float() returned 0.288216, outside [0, 1)
+    |   ..  rng                0 s, 476 checks: next_float() returned 0.298289, outside [0, 1)
+    |   ..  rng                0 s, 477 checks: next_float() returned 0.589527, outside [0, 1)
+    |   ..  rng                0 s, 478 checks: next_float() returned 0.891291, outside [0, 1)
+    |   ..  rng                0 s, 479 checks: next_float() returned 0.109423, outside [0, 1)
+    |   ..  rng                0 s, 480 checks: next_float() returned 0.243772, outside [0, 1)
+    |   ..  rng                0 s, 481 checks: next_float() returned 0.020659, outside [0, 1)
+    |   ..  rng                0 s, 482 checks: next_float() returned 0.334065, outside [0, 1)
+    |   ..  rng                0 s, 483 checks: next_float() returned 0.708734, outside [0, 1)
+    |   ..  rng                0 s, 484 checks: next_float() returned 0.990322, outside [0, 1)
+    |   ..  rng                0 s, 485 checks: next_float() returned 0.900805, outside [0, 1)
+    |   ..  rng                0 s, 486 checks: next_float() returned 0.118813, outside [0, 1)
+    |   ..  rng                0 s, 487 checks: next_float() returned 0.712940, outside [0, 1)
+    |   ..  rng                0 s, 488 checks: next_float() returned 0.057928, outside [0, 1)
+    |   ..  rng                0 s, 489 checks: next_float() returned 0.558964, outside [0, 1)
+    |   ..  rng                0 s, 490 checks: next_float() returned 0.662046, outside [0, 1)
+    |   ..  rng                0 s, 491 checks: next_float() returned 0.805439, outside [0, 1)
+    |   ..  rng                0 s, 492 checks: next_float() returned 0.678433, outside [0, 1)
+    |   ..  rng                0 s, 493 checks: next_float() returned 0.900031, outside [0, 1)
+    |   ..  rng                0 s, 494 checks: next_float() returned 0.589608, outside [0, 1)
+    |   ..  rng                0 s, 495 checks: next_float() returned 0.174899, outside [0, 1)
+    |   ..  rng                0 s, 496 checks: next_float() returned 0.095279, outside [0, 1)
+    |   ..  rng                0 s, 497 checks: next_float() returned 0.023941, outside [0, 1)
+    |   ..  rng                0 s, 498 checks: next_float() returned 0.114989, outside [0, 1)
+    |   ..  rng                0 s, 499 checks: next_float() returned 0.357994, outside [0, 1)
+    |   ..  rng                0 s, 500 checks: next_float() returned 0.983308, outside [0, 1)
+    |   ..  rng                0 s, 501 checks: next_float() returned 0.847188, outside [0, 1)
+    |   ..  rng                0 s, 502 checks: next_float() returned 0.042361, outside [0, 1)
+    |   ..  rng                0 s, 503 checks: next_float() returned 0.247566, outside [0, 1)
+    |   ..  rng                0 s, 504 checks: next_float() returned 0.276267, outside [0, 1)
+    |   ..  rng                0 s, 505 checks: next_float() returned 0.839495, outside [0, 1)
+    |   ..  rng                0 s, 506 checks: next_float() returned 0.729500, outside [0, 1)
+    |   ..  rng                0 s, 507 checks: next_float() returned 0.026655, outside [0, 1)
+    |   ..  rng                0 s, 508 checks: next_float() returned 0.618274, outside [0, 1)
+    |   ..  rng                0 s, 509 checks: next_float() returned 0.538591, outside [0, 1)
+    |   ..  rng                0 s, 510 checks: next_float() returned 0.496661, outside [0, 1)
+    |   ..  rng                0 s, 511 checks: next_float() returned 0.037766, outside [0, 1)
+    |   ..  rng                0 s, 512 checks: next_float() returned 0.453860, outside [0, 1)
+    |   ..  rng                0 s, 513 checks: next_float() returned 0.895746, outside [0, 1)
+    |   ..  rng                0 s, 514 checks: next_float() returned 0.086029, outside [0, 1)
+    |   ..  rng                0 s, 515 checks: next_float() returned 0.450194, outside [0, 1)
+    |   ..  rng                0 s, 516 checks: next_float() returned 0.915270, outside [0, 1)
+    |   ..  rng                0 s, 517 checks: next_float() returned 0.055791, outside [0, 1)
+    |   ..  rng                0 s, 518 checks: next_float() returned 0.593212, outside [0, 1)
+    |   ..  rng                0 s, 519 checks: next_float() returned 0.882672, outside [0, 1)
+    |   ..  rng                0 s, 520 checks: next_float() returned 0.553658, outside [0, 1)
+    |   ..  rng                0 s, 521 checks: next_float() returned 0.283022, outside [0, 1)
+    |   ..  rng                0 s, 522 checks: next_float() returned 0.439869, outside [0, 1)
+    |   ..  rng                0 s, 523 checks: next_float() returned 0.295483, outside [0, 1)
+    |   ..  rng                0 s, 524 checks: next_float() returned 0.377241, outside [0, 1)
+    |   ..  rng                0 s, 525 checks: next_float() returned 0.097751, outside [0, 1)
+    |   ..  rng                0 s, 526 checks: next_float() returned 0.087385, outside [0, 1)
+    |   ..  rng                0 s, 527 checks: next_float() returned 0.908132, outside [0, 1)
+    |   ..  rng                0 s, 528 checks: next_float() returned 0.085422, outside [0, 1)
+    |   ..  rng                0 s, 529 checks: next_float() returned 0.543083, outside [0, 1)
+    |   ..  rng                0 s, 530 checks: next_float() returned 0.115634, outside [0, 1)
+    |   ..  rng                0 s, 531 checks: next_float() returned 0.407500, outside [0, 1)
+    |   ..  rng                0 s, 532 checks: next_float() returned 0.269033, outside [0, 1)
+    |   ..  rng                0 s, 533 checks: next_float() returned 0.696097, outside [0, 1)
+    |   ..  rng                0 s, 534 checks: next_float() returned 0.273928, outside [0, 1)
+    |   ..  rng                0 s, 535 checks: next_float() returned 0.660432, outside [0, 1)
+    |   ..  rng                0 s, 536 checks: next_float() returned 0.806798, outside [0, 1)
+    |   ..  rng                0 s, 537 checks: next_float() returned 0.281416, outside [0, 1)
+    |   ..  rng                0 s, 538 checks: next_float() returned 0.341257, outside [0, 1)
+    |   ..  rng                0 s, 539 checks: next_float() returned 0.411461, outside [0, 1)
+    |   ..  rng                0 s, 540 checks: next_float() returned 0.775509, outside [0, 1)
+    |   ..  rng                0 s, 541 checks: next_float() returned 0.783894, outside [0, 1)
+    |   ..  rng                0 s, 542 checks: next_float() returned 0.797757, outside [0, 1)
+    |   ..  rng                0 s, 543 checks: next_float() returned 0.392628, outside [0, 1)
+    |   ..  rng                0 s, 544 checks: next_float() returned 0.969537, outside [0, 1)
+    |   ..  rng                0 s, 545 checks: next_float() returned 0.380159, outside [0, 1)
+    |   ..  rng                0 s, 546 checks: next_float() returned 0.305870, outside [0, 1)
+    |   ..  rng                0 s, 547 checks: next_float() returned 0.197574, outside [0, 1)
+    |   ..  rng                0 s, 548 checks: next_float() returned 0.276004, outside [0, 1)
+    |   ..  rng                0 s, 549 checks: next_float() returned 0.228969, outside [0, 1)
+    |   ..  rng                0 s, 550 checks: next_float() returned 0.544703, outside [0, 1)
+    |   ..  rng                0 s, 551 checks: next_float() returned 0.429143, outside [0, 1)
+    |   ..  rng                0 s, 552 checks: next_float() returned 0.582220, outside [0, 1)
+    |   ..  rng                0 s, 553 checks: next_float() returned 0.390476, outside [0, 1)
+    |   ..  rng                0 s, 554 checks: next_float() returned 0.898861, outside [0, 1)
+    |   ..  rng                0 s, 555 checks: next_float() returned 0.454934, outside [0, 1)
+    |   ..  rng                0 s, 556 checks: next_float() returned 0.131621, outside [0, 1)
+    |   ..  rng                0 s, 557 checks: next_float() returned 0.246797, outside [0, 1)
+    |   ..  rng                0 s, 558 checks: next_float() returned 0.380813, outside [0, 1)
+    |   ..  rng                0 s, 559 checks: next_float() returned 0.552449, outside [0, 1)
+    |   ..  rng                0 s, 560 checks: next_float() returned 0.197003, outside [0, 1)
+    |   ..  rng                0 s, 561 checks: next_float() returned 0.401137, outside [0, 1)
+    |   ..  rng                0 s, 562 checks: next_float() returned 0.333454, outside [0, 1)
+    |   ..  rng                0 s, 563 checks: next_float() returned 0.178411, outside [0, 1)
+    |   ..  rng                0 s, 564 checks: next_float() returned 0.658113, outside [0, 1)
+    |   ..  rng                0 s, 565 checks: next_float() returned 0.198451, outside [0, 1)
+    |   ..  rng                0 s, 566 checks: next_float() returned 0.483538, outside [0, 1)
+    |   ..  rng                0 s, 567 checks: next_float() returned 0.214269, outside [0, 1)
+    |   ..  rng                0 s, 568 checks: next_float() returned 0.601044, outside [0, 1)
+    |   ..  rng                0 s, 569 checks: next_float() returned 0.298664, outside [0, 1)
+    |   ..  rng                0 s, 570 checks: next_float() returned 0.868618, outside [0, 1)
+    |   ..  rng                0 s, 571 checks: next_float() returned 0.812469, outside [0, 1)
+    |   ..  rng                0 s, 572 checks: next_float() returned 0.664649, outside [0, 1)
+    |   ..  rng                0 s, 573 checks: next_float() returned 0.523287, outside [0, 1)
+    |   ..  rng                0 s, 574 checks: next_float() returned 0.154253, outside [0, 1)
+    |   ..  rng                0 s, 575 checks: next_float() returned 0.633722, outside [0, 1)
+    |   ..  rng                0 s, 576 checks: next_float() returned 0.365423, outside [0, 1)
+    |   ..  rng                0 s, 577 checks: next_float() returned 0.239072, outside [0, 1)
+    |   ..  rng                0 s, 578 checks: next_float() returned 0.881885, outside [0, 1)
+    |   ..  rng                0 s, 579 checks: next_float() returned 0.003937, outside [0, 1)
+    |   ..  rng                0 s, 580 checks: next_float() returned 0.332095, outside [0, 1)
+    |   ..  rng                0 s, 581 checks: next_float() returned 0.810459, outside [0, 1)
+    |   ..  rng                0 s, 582 checks: next_float() returned 0.401206, outside [0, 1)
+    |   ..  rng                0 s, 583 checks: next_float() returned 0.234064, outside [0, 1)
+    |   ..  rng                0 s, 584 checks: next_float() returned 0.901450, outside [0, 1)
+    |   ..  rng                0 s, 585 checks: next_float() returned 0.365393, outside [0, 1)
+    |   ..  rng                0 s, 586 checks: next_float() returned 0.537513, outside [0, 1)
+    |   ..  rng                0 s, 587 checks: next_float() returned 0.256655, outside [0, 1)
+    |   ..  rng                0 s, 588 checks: next_float() returned 0.991521, outside [0, 1)
+    |   ..  rng                0 s, 589 checks: next_float() returned 0.628913, outside [0, 1)
+    |   ..  rng                0 s, 590 checks: next_float() returned 0.355026, outside [0, 1)
+    |   ..  rng                0 s, 591 checks: next_float() returned 0.122329, outside [0, 1)
+    |   ..  rng                0 s, 592 checks: next_float() returned 0.306034, outside [0, 1)
+    |   ..  rng                0 s, 593 checks: next_float() returned 0.535285, outside [0, 1)
+    |   ..  rng                0 s, 594 checks: next_float() returned 0.174390, outside [0, 1)
+    |   ..  rng                0 s, 595 checks: next_float() returned 0.722277, outside [0, 1)
+    |   ..  rng                0 s, 596 checks: next_float() returned 0.312834, outside [0, 1)
+    |   ..  rng                0 s, 597 checks: next_float() returned 0.818617, outside [0, 1)
+    |   ..  rng                0 s, 598 checks: next_float() returned 0.312047, outside [0, 1)
+    |   ..  rng                0 s, 599 checks: next_float() returned 0.505361, outside [0, 1)
+    |   ..  rng                0 s, 600 checks: next_float() returned 0.716350, outside [0, 1)
+    |   ..  rng                0 s, 601 checks: next_float() returned 0.417565, outside [0, 1)
+    |   ..  rng                0 s, 602 checks: next_float() returned 0.280834, outside [0, 1)
+    |   ..  rng                0 s, 603 checks: next_float() returned 0.686926, outside [0, 1)
+    |   ..  rng                0 s, 604 checks: next_float() returned 0.491922, outside [0, 1)
+    |   ..  rng                0 s, 605 checks: next_float() returned 0.194612, outside [0, 1)
+    |   ..  rng                0 s, 606 checks: next_float() returned 0.082422, outside [0, 1)
+    |   ..  rng                0 s, 607 checks: next_float() returned 0.195657, outside [0, 1)
+    |   ..  rng                0 s, 608 checks: next_float() returned 0.944983, outside [0, 1)
+    |   ..  rng                0 s, 609 checks: next_float() returned 0.691700, outside [0, 1)
+    |   ..  rng                0 s, 610 checks: next_float() returned 0.651827, outside [0, 1)
+    |   ..  rng                0 s, 611 checks: next_float() returned 0.791326, outside [0, 1)
+    |   ..  rng                0 s, 612 checks: next_float() returned 0.156705, outside [0, 1)
+    |   ..  rng                0 s, 613 checks: next_float() returned 0.401106, outside [0, 1)
+    |   ..  rng                0 s, 614 checks: next_float() returned 0.168121, outside [0, 1)
+    |   ..  rng                0 s, 615 checks: next_float() returned 0.823893, outside [0, 1)
+    |   ..  rng                0 s, 616 checks: next_float() returned 0.205155, outside [0, 1)
+    |   ..  rng                0 s, 617 checks: next_float() returned 0.304078, outside [0, 1)
+    |   ..  rng                0 s, 618 checks: next_float() returned 0.969804, outside [0, 1)
+    |   ..  rng                0 s, 619 checks: next_float() returned 0.784051, outside [0, 1)
+    |   ..  rng                0 s, 620 checks: next_float() returned 0.427795, outside [0, 1)
+    |   ..  rng                0 s, 621 checks: next_float() returned 0.678892, outside [0, 1)
+    |   ..  rng                0 s, 622 checks: next_float() returned 0.168587, outside [0, 1)
+    |   ..  rng                0 s, 623 checks: next_float() returned 0.676452, outside [0, 1)
+    |   ..  rng                0 s, 624 checks: next_float() returned 0.075532, outside [0, 1)
+    |   ..  rng                0 s, 625 checks: next_float() returned 0.331349, outside [0, 1)
+    |   ..  rng                0 s, 626 checks: next_float() returned 0.577009, outside [0, 1)
+    |   ..  rng                0 s, 627 checks: next_float() returned 0.428826, outside [0, 1)
+    |   ..  rng                0 s, 628 checks: next_float() returned 0.982333, outside [0, 1)
+    |   ..  rng                0 s, 629 checks: next_float() returned 0.010831, outside [0, 1)
+    |   ..  rng                0 s, 630 checks: next_float() returned 0.340518, outside [0, 1)
+    |   ..  rng                0 s, 631 checks: next_float() returned 0.493287, outside [0, 1)
+    |   ..  rng                0 s, 632 checks: next_float() returned 0.933148, outside [0, 1)
+    |   ..  rng                0 s, 633 checks: next_float() returned 0.682856, outside [0, 1)
+    |   ..  rng                0 s, 634 checks: next_float() returned 0.829974, outside [0, 1)
+    |   ..  rng                0 s, 635 checks: next_float() returned 0.711062, outside [0, 1)
+    |   ..  rng                0 s, 636 checks: next_float() returned 0.840120, outside [0, 1)
+    |   ..  rng                0 s, 637 checks: next_float() returned 0.186793, outside [0, 1)
+    |   ..  rng                0 s, 638 checks: next_float() returned 0.862426, outside [0, 1)
+    |   ..  rng                0 s, 639 checks: next_float() returned 0.307698, outside [0, 1)
+    |   ..  rng                0 s, 640 checks: next_float() returned 0.757968, outside [0, 1)
+    |   ..  rng                0 s, 641 checks: next_float() returned 0.007390, outside [0, 1)
+    |   ..  rng                0 s, 642 checks: next_float() returned 0.748889, outside [0, 1)
+    |   ..  rng                0 s, 643 checks: next_float() returned 0.719827, outside [0, 1)
+    |   ..  rng                0 s, 644 checks: next_float() returned 0.138489, outside [0, 1)
+    |   ..  rng                0 s, 645 checks: next_float() returned 0.372811, outside [0, 1)
+    |   ..  rng                0 s, 646 checks: next_float() returned 0.925990, outside [0, 1)
+    |   ..  rng                0 s, 647 checks: next_float() returned 0.488369, outside [0, 1)
+    |   ..  rng                0 s, 648 checks: next_float() returned 0.646619, outside [0, 1)
+    |   ..  rng                0 s, 649 checks: next_float() returned 0.593603, outside [0, 1)
+    |   ..  rng                0 s, 650 checks: next_float() returned 0.067381, outside [0, 1)
+    |   ..  rng                0 s, 651 checks: next_float() returned 0.597087, outside [0, 1)
+    |   ..  rng                0 s, 652 checks: next_float() returned 0.054770, outside [0, 1)
+    |   ..  rng                0 s, 653 checks: next_float() returned 0.244698, outside [0, 1)
+    |   ..  rng                0 s, 654 checks: next_float() returned 0.994116, outside [0, 1)
+    |   ..  rng                0 s, 655 checks: next_float() returned 0.888905, outside [0, 1)
+    |   ..  rng                0 s, 656 checks: next_float() returned 0.202368, outside [0, 1)
+    |   ..  rng                0 s, 657 checks: next_float() returned 0.184974, outside [0, 1)
+    |   ..  rng                0 s, 658 checks: next_float() returned 0.225178, outside [0, 1)
+    |   ..  rng                0 s, 659 checks: next_float() returned 0.820451, outside [0, 1)
+    |   ..  rng                0 s, 660 checks: next_float() returned 0.554468, outside [0, 1)
+    |   ..  rng                0 s, 661 checks: next_float() returned 0.056554, outside [0, 1)
+    |   ..  rng                0 s, 662 checks: next_float() returned 0.247449, outside [0, 1)
+    |   ..  rng                0 s, 663 checks: next_float() returned 0.995172, outside [0, 1)
+    |   ..  rng                0 s, 664 checks: next_float() returned 0.550389, outside [0, 1)
+    |   ..  rng                0 s, 665 checks: next_float() returned 0.102400, outside [0, 1)
+    |   ..  rng                0 s, 666 checks: next_float() returned 0.076312, outside [0, 1)
+    |   ..  rng                0 s, 667 checks: next_float() returned 0.238923, outside [0, 1)
+    |   ..  rng                0 s, 668 checks: next_float() returned 0.642275, outside [0, 1)
+    |   ..  rng                0 s, 669 checks: next_float() returned 0.099917, outside [0, 1)
+    |   ..  rng                0 s, 670 checks: next_float() returned 0.278392, outside [0, 1)
+    |   ..  rng                0 s, 671 checks: next_float() returned 0.966806, outside [0, 1)
+    |   ..  rng                0 s, 672 checks: next_float() returned 0.659489, outside [0, 1)
+    |   ..  rng                0 s, 673 checks: next_float() returned 0.111309, outside [0, 1)
+    |   ..  rng                0 s, 674 checks: next_float() returned 0.326803, outside [0, 1)
+    |   ..  rng                0 s, 675 checks: next_float() returned 0.967053, outside [0, 1)
+    |   ..  rng                0 s, 676 checks: next_float() returned 0.799015, outside [0, 1)
+    |   ..  rng                0 s, 677 checks: next_float() returned 0.498208, outside [0, 1)
+    |   ..  rng                0 s, 678 checks: next_float() returned 0.417307, outside [0, 1)
+    |   ..  rng                0 s, 679 checks: next_float() returned 0.194050, outside [0, 1)
+    |   ..  rng                0 s, 680 checks: next_float() returned 0.002162, outside [0, 1)
+    |   ..  rng                0 s, 681 checks: next_float() returned 0.336016, outside [0, 1)
+    |   ..  rng                0 s, 682 checks: next_float() returned 0.307461, outside [0, 1)
+    |   ..  rng                0 s, 683 checks: next_float() returned 0.492474, outside [0, 1)
+    |   ..  rng                0 s, 684 checks: next_float() returned 0.860006, outside [0, 1)
+    |   ..  rng                0 s, 685 checks: next_float() returned 0.669035, outside [0, 1)
+    |   ..  rng                0 s, 686 checks: next_float() returned 0.799867, outside [0, 1)
+    |   ..  rng                0 s, 687 checks: next_float() returned 0.594363, outside [0, 1)
+    |   ..  rng                0 s, 688 checks: next_float() returned 0.394726, outside [0, 1)
+    |   ..  rng                0 s, 689 checks: next_float() returned 0.269704, outside [0, 1)
+    |   ..  rng                0 s, 690 checks: next_float() returned 0.505955, outside [0, 1)
+    |   ..  rng                0 s, 691 checks: next_float() returned 0.995062, outside [0, 1)
+    |   ..  rng                0 s, 692 checks: next_float() returned 0.228283, outside [0, 1)
+    |   ..  rng                0 s, 693 checks: next_float() returned 0.958510, outside [0, 1)
+    |   ..  rng                0 s, 694 checks: next_float() returned 0.046044, outside [0, 1)
+    |   ..  rng                0 s, 695 checks: next_float() returned 0.321437, outside [0, 1)
+    |   ..  rng                0 s, 696 checks: next_float() returned 0.081904, outside [0, 1)
+    |   ..  rng                0 s, 697 checks: next_float() returned 0.677645, outside [0, 1)
+    |   ..  rng                0 s, 698 checks: next_float() returned 0.600247, outside [0, 1)
+    |   ..  rng                0 s, 699 checks: next_float() returned 0.436400, outside [0, 1)
+    |   ..  rng                0 s, 700 checks: next_float() returned 0.795655, outside [0, 1)
+    |   ..  rng                0 s, 701 checks: next_float() returned 0.603048, outside [0, 1)
+    |   ..  rng                0 s, 702 checks: next_float() returned 0.200778, outside [0, 1)
+    |   ..  rng                0 s, 703 checks: next_float() returned 0.094502, outside [0, 1)
+    |   ..  rng                0 s, 704 checks: next_float() returned 0.670232, outside [0, 1)
+    |   ..  rng                0 s, 705 checks: next_float() returned 0.782496, outside [0, 1)
+    |   ..  rng                0 s, 706 checks: next_float() returned 0.326596, outside [0, 1)
+    |   ..  rng                0 s, 707 checks: next_float() returned 0.691623, outside [0, 1)
+    |   ..  rng                0 s, 708 checks: next_float() returned 0.981991, outside [0, 1)
+    |   ..  rng                0 s, 709 checks: next_float() returned 0.612154, outside [0, 1)
+    |   ..  rng                0 s, 710 checks: next_float() returned 0.163175, outside [0, 1)
+    |   ..  rng                0 s, 711 checks: next_float() returned 0.310481, outside [0, 1)
+    |   ..  rng                0 s, 712 checks: next_float() returned 0.363725, outside [0, 1)
+    |   ..  rng                0 s, 713 checks: next_float() returned 0.718744, outside [0, 1)
+    |   ..  rng                0 s, 714 checks: next_float() returned 0.918370, outside [0, 1)
+    |   ..  rng                0 s, 715 checks: next_float() returned 0.225185, outside [0, 1)
+    |   ..  rng                0 s, 716 checks: next_float() returned 0.963087, outside [0, 1)
+    |   ..  rng                0 s, 717 checks: next_float() returned 0.282393, outside [0, 1)
+    |   ..  rng                0 s, 718 checks: next_float() returned 0.226063, outside [0, 1)
+    |   ..  rng                0 s, 719 checks: next_float() returned 0.287817, outside [0, 1)
+    |   ..  rng                0 s, 720 checks: next_float() returned 0.986413, outside [0, 1)
+    |   ..  rng                0 s, 721 checks: next_float() returned 0.500219, outside [0, 1)
+    |   ..  rng                0 s, 722 checks: next_float() returned 0.795074, outside [0, 1)
+    |   ..  rng                0 s, 723 checks: next_float() returned 0.924252, outside [0, 1)
+    |   ..  rng                0 s, 724 checks: next_float() returned 0.344217, outside [0, 1)
+    |   ..  rng                0 s, 725 checks: next_float() returned 0.024267, outside [0, 1)
+    |   ..  rng                0 s, 726 checks: next_float() returned 0.068401, outside [0, 1)
+    |   ..  rng                0 s, 727 checks: next_float() returned 0.008266, outside [0, 1)
+    |   ..  rng                0 s, 728 checks: next_float() returned 0.054259, outside [0, 1)
+    |   ..  rng                0 s, 729 checks: next_float() returned 0.898368, outside [0, 1)
+    |   ..  rng                0 s, 730 checks: next_float() returned 0.839220, outside [0, 1)
+    |   ..  rng                0 s, 731 checks: next_float() returned 0.708432, outside [0, 1)
+    |   ..  rng                0 s, 732 checks: next_float() returned 0.005866, outside [0, 1)
+    |   ..  rng                0 s, 733 checks: next_float() returned 0.324393, outside [0, 1)
+    |   ..  rng                0 s, 734 checks: next_float() returned 0.673425, outside [0, 1)
+    |   ..  rng                0 s, 735 checks: next_float() returned 0.690232, outside [0, 1)
+    |   ..  rng                0 s, 736 checks: next_float() returned 0.774094, outside [0, 1)
+    |   ..  rng                0 s, 737 checks: next_float() returned 0.248265, outside [0, 1)
+    |   ..  rng                0 s, 738 checks: next_float() returned 0.853631, outside [0, 1)
+    |   ..  rng                0 s, 739 checks: next_float() returned 0.414582, outside [0, 1)
+    |   ..  rng                0 s, 740 checks: next_float() returned 0.799284, outside [0, 1)
+    |   ..  rng                0 s, 741 checks: next_float() returned 0.119972, outside [0, 1)
+    |   ..  rng                0 s, 742 checks: next_float() returned 0.391510, outside [0, 1)
+    |   ..  rng                0 s, 743 checks: next_float() returned 0.433979, outside [0, 1)
+    |   ..  rng                0 s, 744 checks: next_float() returned 0.808046, outside [0, 1)
+    |   ..  rng                0 s, 745 checks: next_float() returned 0.620773, outside [0, 1)
+    |   ..  rng                0 s, 746 checks: next_float() returned 0.655971, outside [0, 1)
+    |   ..  rng                0 s, 747 checks: next_float() returned 0.675497, outside [0, 1)
+    |   ..  rng                0 s, 748 checks: next_float() returned 0.646129, outside [0, 1)
+    |   ..  rng                0 s, 749 checks: next_float() returned 0.374344, outside [0, 1)
+    |   ..  rng                0 s, 750 checks: next_float() returned 0.763477, outside [0, 1)
+    |   ..  rng                0 s, 751 checks: next_float() returned 0.498967, outside [0, 1)
+    |   ..  rng                0 s, 752 checks: next_float() returned 0.773066, outside [0, 1)
+    |   ..  rng                0 s, 753 checks: next_float() returned 0.333549, outside [0, 1)
+    |   ..  rng                0 s, 754 checks: next_float() returned 0.106266, outside [0, 1)
+    |   ..  rng                0 s, 755 checks: next_float() returned 0.806334, outside [0, 1)
+    |   ..  rng                0 s, 756 checks: next_float() returned 0.841743, outside [0, 1)
+    |   ..  rng                0 s, 757 checks: next_float() returned 0.813321, outside [0, 1)
+    |   ..  rng                0 s, 758 checks: next_float() returned 0.952507, outside [0, 1)
+    |   ..  rng                0 s, 759 checks: next_float() returned 0.156596, outside [0, 1)
+    |   ..  rng                0 s, 760 checks: next_float() returned 0.193567, outside [0, 1)
+    |   ..  rng                0 s, 761 checks: next_float() returned 0.614724, outside [0, 1)
+    |   ..  rng                0 s, 762 checks: next_float() returned 0.140735, outside [0, 1)
+    |   ..  rng                0 s, 763 checks: next_float() returned 0.916277, outside [0, 1)
+    |   ..  rng                0 s, 764 checks: next_float() returned 0.385689, outside [0, 1)
+    |   ..  rng                0 s, 765 checks: next_float() returned 0.869340, outside [0, 1)
+    |   ..  rng                0 s, 766 checks: next_float() returned 0.915259, outside [0, 1)
+    |   ..  rng                0 s, 767 checks: next_float() returned 0.286180, outside [0, 1)
+    |   ..  rng                0 s, 768 checks: next_float() returned 0.533659, outside [0, 1)
+    |   ..  rng                0 s, 769 checks: next_float() returned 0.470348, outside [0, 1)
+    |   ..  rng                0 s, 770 checks: next_float() returned 0.144008, outside [0, 1)
+    |   ..  rng                0 s, 771 checks: next_float() returned 0.279852, outside [0, 1)
+    |   ..  rng                0 s, 772 checks: next_float() returned 0.222633, outside [0, 1)
+    |   ..  rng                0 s, 773 checks: next_float() returned 0.355509, outside [0, 1)
+    |   ..  rng                0 s, 774 checks: next_float() returned 0.005519, outside [0, 1)
+    |   ..  rng                0 s, 775 checks: next_float() returned 0.856237, outside [0, 1)
+    |   ..  rng                0 s, 776 checks: next_float() returned 0.225280, outside [0, 1)
+    |   ..  rng                0 s, 777 checks: next_float() returned 0.856503, outside [0, 1)
+    |   ..  rng                0 s, 778 checks: next_float() returned 0.765800, outside [0, 1)
+    |   ..  rng                0 s, 779 checks: next_float() returned 0.353393, outside [0, 1)
+    |   ..  rng                0 s, 780 checks: next_float() returned 0.557386, outside [0, 1)
+    |   ..  rng                0 s, 781 checks: next_float() returned 0.900674, outside [0, 1)
+    |   ..  rng                0 s, 782 checks: next_float() returned 0.786065, outside [0, 1)
+    |   ..  rng                0 s, 783 checks: next_float() returned 0.315489, outside [0, 1)
+    |   ..  rng                0 s, 784 checks: next_float() returned 0.461725, outside [0, 1)
+    |   ..  rng                0 s, 785 checks: next_float() returned 0.897377, outside [0, 1)
+    |   ..  rng                0 s, 786 checks: next_float() returned 0.751045, outside [0, 1)
+    |   ..  rng                0 s, 787 checks: next_float() returned 0.815174, outside [0, 1)
+    |   ..  rng                0 s, 788 checks: next_float() returned 0.323242, outside [0, 1)
+    |   ..  rng                0 s, 789 checks: next_float() returned 0.832918, outside [0, 1)
+    |   ..  rng                0 s, 790 checks: next_float() returned 0.864543, outside [0, 1)
+    |   ..  rng                0 s, 791 checks: next_float() returned 0.836906, outside [0, 1)
+    |   ..  rng                0 s, 792 checks: next_float() returned 0.928379, outside [0, 1)
+    |   ..  rng                0 s, 793 checks: next_float() returned 0.580939, outside [0, 1)
+    |   ..  rng                0 s, 794 checks: next_float() returned 0.266962, outside [0, 1)
+    |   ..  rng                0 s, 795 checks: next_float() returned 0.118954, outside [0, 1)
+    |   ..  rng                0 s, 796 checks: next_float() returned 0.256238, outside [0, 1)
+    |   ..  rng                0 s, 797 checks: next_float() returned 0.348886, outside [0, 1)
+    |   ..  rng                0 s, 798 checks: next_float() returned 0.218688, outside [0, 1)
+    |   ..  rng                0 s, 799 checks: next_float() returned 0.185402, outside [0, 1)
+    |   ..  rng                0 s, 800 checks: next_float() returned 0.324795, outside [0, 1)
+    |   ..  rng                0 s, 801 checks: next_float() returned 0.912464, outside [0, 1)
+    |   ..  rng                0 s, 802 checks: next_float() returned 0.664096, outside [0, 1)
+    |   ..  rng                0 s, 803 checks: next_float() returned 0.764039, outside [0, 1)
+    |   ..  rng                0 s, 804 checks: next_float() returned 0.156454, outside [0, 1)
+    |   ..  rng                0 s, 805 checks: next_float() returned 0.616009, outside [0, 1)
+    |   ..  rng                0 s, 806 checks: next_float() returned 0.251357, outside [0, 1)
+    |   ..  rng                0 s, 807 checks: next_float() returned 0.963329, outside [0, 1)
+    |   ..  rng                0 s, 808 checks: next_float() returned 0.782865, outside [0, 1)
+    |   ..  rng                0 s, 809 checks: next_float() returned 0.637311, outside [0, 1)
+    |   ..  rng                0 s, 810 checks: next_float() returned 0.751497, outside [0, 1)
+    |   ..  rng                0 s, 811 checks: next_float() returned 0.677007, outside [0, 1)
+    |   ..  rng                0 s, 812 checks: next_float() returned 0.686722, outside [0, 1)
+    |   ..  rng                0 s, 813 checks: next_float() returned 0.141676, outside [0, 1)
+    |   ..  rng                0 s, 814 checks: next_float() returned 0.034405, outside [0, 1)
+    |   ..  rng                0 s, 815 checks: next_float() returned 0.922165, outside [0, 1)
+    |   ..  rng                0 s, 816 checks: next_float() returned 0.358225, outside [0, 1)
+    |   ..  rng                0 s, 817 checks: next_float() returned 0.946168, outside [0, 1)
+    |   ..  rng                0 s, 818 checks: next_float() returned 0.324936, outside [0, 1)
+    |   ..  rng                0 s, 819 checks: next_float() returned 0.019559, outside [0, 1)
+    |   ..  rng                0 s, 820 checks: next_float() returned 0.806483, outside [0, 1)
+    |   ..  rng                0 s, 821 checks: next_float() returned 0.835908, outside [0, 1)
+    |   ..  rng                0 s, 822 checks: next_float() returned 0.838224, outside [0, 1)
+    |   ..  rng                0 s, 823 checks: next_float() returned 0.766622, outside [0, 1)
+    |   ..  rng                0 s, 824 checks: next_float() returned 0.456712, outside [0, 1)
+    |   ..  rng                0 s, 825 checks: next_float() returned 0.767171, outside [0, 1)
+    |   ..  rng                0 s, 826 checks: next_float() returned 0.415254, outside [0, 1)
+    |   ..  rng                0 s, 827 checks: next_float() returned 0.551958, outside [0, 1)
+    |   ..  rng                0 s, 828 checks: next_float() returned 0.811139, outside [0, 1)
+    |   ..  rng                0 s, 829 checks: next_float() returned 0.351080, outside [0, 1)
+    |   ..  rng                0 s, 830 checks: next_float() returned 0.334519, outside [0, 1)
+    |   ..  rng                0 s, 831 checks: next_float() returned 0.089673, outside [0, 1)
+    |   ..  rng                0 s, 832 checks: next_float() returned 0.768177, outside [0, 1)
+    |   ..  rng                0 s, 833 checks: next_float() returned 0.962762, outside [0, 1)
+    |   ..  rng                0 s, 834 checks: next_float() returned 0.508582, outside [0, 1)
+    |   ..  rng                0 s, 835 checks: next_float() returned 0.096220, outside [0, 1)
+    |   ..  rng                0 s, 836 checks: next_float() returned 0.248844, outside [0, 1)
+    |   ..  rng                0 s, 837 checks: next_float() returned 0.089275, outside [0, 1)
+    |   ..  rng                0 s, 838 checks: next_float() returned 0.989652, outside [0, 1)
+    |   ..  rng                0 s, 839 checks: next_float() returned 0.809825, outside [0, 1)
+    |   ..  rng                0 s, 840 checks: next_float() returned 0.977245, outside [0, 1)
+    |   ..  rng                0 s, 841 checks: next_float() returned 0.981577, outside [0, 1)
+    |   ..  rng                0 s, 842 checks: next_float() returned 0.478406, outside [0, 1)
+    |   ..  rng                0 s, 843 checks: next_float() returned 0.963485, outside [0, 1)
+    |   ..  rng                0 s, 844 checks: next_float() returned 0.435645, outside [0, 1)
+    |   ..  rng                0 s, 845 checks: next_float() returned 0.388283, outside [0, 1)
+    |   ..  rng                0 s, 846 checks: next_float() returned 0.128152, outside [0, 1)
+    |   ..  rng                0 s, 847 checks: next_float() returned 0.009827, outside [0, 1)
+    |   ..  rng                0 s, 848 checks: next_float() returned 0.935358, outside [0, 1)
+    |   ..  rng                0 s, 849 checks: next_float() returned 0.625663, outside [0, 1)
+    |   ..  rng                0 s, 850 checks: next_float() returned 0.385803, outside [0, 1)
+    |   ..  rng                0 s, 851 checks: next_float() returned 0.359675, outside [0, 1)
+    |   ..  rng                0 s, 852 checks: next_float() returned 0.236949, outside [0, 1)
+    |   ..  rng                0 s, 853 checks: next_float() returned 0.640459, outside [0, 1)
+    |   ..  rng                0 s, 854 checks: next_float() returned 0.299143, outside [0, 1)
+    |   ..  rng                0 s, 855 checks: next_float() returned 0.383346, outside [0, 1)
+    |   ..  rng                0 s, 856 checks: next_float() returned 0.174554, outside [0, 1)
+    |   ..  rng                0 s, 857 checks: next_float() returned 0.138435, outside [0, 1)
+    |   ..  rng                0 s, 858 checks: next_float() returned 0.966146, outside [0, 1)
+    |   ..  rng                0 s, 859 checks: next_float() returned 0.054182, outside [0, 1)
+    |   ..  rng                0 s, 860 checks: next_float() returned 0.390782, outside [0, 1)
+    |   ..  rng                0 s, 861 checks: next_float() returned 0.203777, outside [0, 1)
+    |   ..  rng                0 s, 862 checks: next_float() returned 0.556250, outside [0, 1)
+    |   ..  rng                0 s, 863 checks: next_float() returned 0.981655, outside [0, 1)
+    |   ..  rng                0 s, 864 checks: next_float() returned 0.543006, outside [0, 1)
+    |   ..  rng                0 s, 865 checks: next_float() returned 0.911665, outside [0, 1)
+    |   ..  rng                0 s, 866 checks: next_float() returned 0.405290, outside [0, 1)
+    |   ..  rng                0 s, 867 checks: next_float() returned 0.822909, outside [0, 1)
+    |   ..  rng                0 s, 868 checks: next_float() returned 0.365337, outside [0, 1)
+    |   ..  rng                0 s, 869 checks: next_float() returned 0.603739, outside [0, 1)
+    |   ..  rng                0 s, 870 checks: next_float() returned 0.602880, outside [0, 1)
+    |   ..  rng                0 s, 871 checks: next_float() returned 0.963250, outside [0, 1)
+    |   ..  rng                0 s, 872 checks: next_float() returned 0.223809, outside [0, 1)
+    |   ..  rng                0 s, 873 checks: next_float() returned 0.631671, outside [0, 1)
+    |   ..  rng                0 s, 874 checks: next_float() returned 0.524933, outside [0, 1)
+    |   ..  rng                0 s, 875 checks: next_float() returned 0.739228, outside [0, 1)
+    |   ..  rng                0 s, 876 checks: next_float() returned 0.800041, outside [0, 1)
+    |   ..  rng                0 s, 877 checks: next_float() returned 0.993305, outside [0, 1)
+    |   ..  rng                0 s, 878 checks: next_float() returned 0.341072, outside [0, 1)
+    |   ..  rng                0 s, 879 checks: next_float() returned 0.503802, outside [0, 1)
+    |   ..  rng                0 s, 880 checks: next_float() returned 0.096509, outside [0, 1)
+    |   ..  rng                0 s, 881 checks: next_float() returned 0.510546, outside [0, 1)
+    |   ..  rng                0 s, 882 checks: next_float() returned 0.513321, outside [0, 1)
+    |   ..  rng                0 s, 883 checks: next_float() returned 0.998625, outside [0, 1)
+    |   ..  rng                0 s, 884 checks: next_float() returned 0.221157, outside [0, 1)
+    |   ..  rng                0 s, 885 checks: next_float() returned 0.325917, outside [0, 1)
+    |   ..  rng                0 s, 886 checks: next_float() returned 0.806163, outside [0, 1)
+    |   ..  rng                0 s, 887 checks: next_float() returned 0.808435, outside [0, 1)
+    |   ..  rng                0 s, 888 checks: next_float() returned 0.704372, outside [0, 1)
+    |   ..  rng                0 s, 889 checks: next_float() returned 0.981831, outside [0, 1)
+    |   ..  rng                0 s, 890 checks: next_float() returned 0.327999, outside [0, 1)
+    |   ..  rng                0 s, 891 checks: next_float() returned 0.793223, outside [0, 1)
+    |   ..  rng                0 s, 892 checks: next_float() returned 0.236877, outside [0, 1)
+    |   ..  rng                0 s, 893 checks: next_float() returned 0.512806, outside [0, 1)
+    |   ..  rng                0 s, 894 checks: next_float() returned 0.020973, outside [0, 1)
+    |   ..  rng                0 s, 895 checks: next_float() returned 0.351183, outside [0, 1)
+    |   ..  rng                0 s, 896 checks: next_float() returned 0.635469, outside [0, 1)
+    |   ..  rng                0 s, 897 checks: next_float() returned 0.014444, outside [0, 1)
+    |   ..  rng                0 s, 898 checks: next_float() returned 0.197649, outside [0, 1)
+    |   ..  rng                0 s, 899 checks: next_float() returned 0.123029, outside [0, 1)
+    |   ..  rng                0 s, 900 checks: next_float() returned 0.927199, outside [0, 1)
+    |   ..  rng                0 s, 901 checks: next_float() returned 0.516386, outside [0, 1)
+    |   ..  rng                0 s, 902 checks: next_float() returned 0.286743, outside [0, 1)
+    |   ..  rng                0 s, 903 checks: next_float() returned 0.591045, outside [0, 1)
+    |   ..  rng                0 s, 904 checks: next_float() returned 0.275978, outside [0, 1)
+    |   ..  rng                0 s, 905 checks: next_float() returned 0.481051, outside [0, 1)
+    |   ..  rng                0 s, 906 checks: next_float() returned 0.000617, outside [0, 1)
+    |   ..  rng                0 s, 907 checks: next_float() returned 0.497729, outside [0, 1)
+    |   ..  rng                0 s, 908 checks: next_float() returned 0.746009, outside [0, 1)
+    |   ..  rng                0 s, 909 checks: next_float() returned 0.499754, outside [0, 1)
+    |   ..  rng                0 s, 910 checks: next_float() returned 0.364600, outside [0, 1)
+    |   ..  rng                0 s, 911 checks: next_float() returned 0.858582, outside [0, 1)
+    |   ..  rng                0 s, 912 checks: next_float() returned 0.427329, outside [0, 1)
+    |   ..  rng                0 s, 913 checks: next_float() returned 0.644486, outside [0, 1)
+    |   ..  rng                0 s, 914 checks: next_float() returned 0.365866, outside [0, 1)
+    |   ..  rng                0 s, 915 checks: next_float() returned 0.670454, outside [0, 1)
+    |   ..  rng                0 s, 916 checks: next_float() returned 0.293590, outside [0, 1)
+    |   ..  rng                0 s, 917 checks: next_float() returned 0.043935, outside [0, 1)
+    |   ..  rng                0 s, 918 checks: next_float() returned 0.316513, outside [0, 1)
+    |   ..  rng                0 s, 919 checks: next_float() returned 0.331427, outside [0, 1)
+    |   ..  rng                0 s, 920 checks: next_float() returned 0.349415, outside [0, 1)
+    |   ..  rng                0 s, 921 checks: next_float() returned 0.554195, outside [0, 1)
+    |   ..  rng                0 s, 922 checks: next_float() returned 0.836744, outside [0, 1)
+    |   ..  rng                0 s, 923 checks: next_float() returned 0.326874, outside [0, 1)
+    |   ..  rng                0 s, 924 checks: next_float() returned 0.725714, outside [0, 1)
+    |   ..  rng                0 s, 925 checks: next_float() returned 0.215205, outside [0, 1)
+    |   ..  rng                0 s, 926 checks: next_float() returned 0.575980, outside [0, 1)
+    |   ..  rng                0 s, 927 checks: next_float() returned 0.957858, outside [0, 1)
+    |   ..  rng                0 s, 928 checks: next_float() returned 0.130532, outside [0, 1)
+    |   ..  rng                0 s, 929 checks: next_float() returned 0.164621, outside [0, 1)
+    |   ..  rng                0 s, 930 checks: next_float() returned 0.953305, outside [0, 1)
+    |   ..  rng                0 s, 931 checks: next_float() returned 0.141305, outside [0, 1)
+    |   ..  rng                0 s, 932 checks: next_float() returned 0.341913, outside [0, 1)
+    |   ..  rng                0 s, 933 checks: next_float() returned 0.037479, outside [0, 1)
+    |   ..  rng                0 s, 934 checks: next_float() returned 0.739499, outside [0, 1)
+    |   ..  rng                0 s, 935 checks: next_float() returned 0.288937, outside [0, 1)
+    |   ..  rng                0 s, 936 checks: next_float() returned 0.281472, outside [0, 1)
+    |   ..  rng                0 s, 937 checks: next_float() returned 0.981067, outside [0, 1)
+    |   ..  rng                0 s, 938 checks: next_float() returned 0.058417, outside [0, 1)
+    |   ..  rng                0 s, 939 checks: next_float() returned 0.829547, outside [0, 1)
+    |   ..  rng                0 s, 940 checks: next_float() returned 0.876858, outside [0, 1)
+    |   ..  rng                0 s, 941 checks: next_float() returned 0.192146, outside [0, 1)
+    |   ..  rng                0 s, 942 checks: next_float() returned 0.806837, outside [0, 1)
+    |   ..  rng                0 s, 943 checks: next_float() returned 0.270194, outside [0, 1)
+    |   ..  rng                0 s, 944 checks: next_float() returned 0.778383, outside [0, 1)
+    |   ..  rng                0 s, 945 checks: next_float() returned 0.872000, outside [0, 1)
+    |   ..  rng                0 s, 946 checks: next_float() returned 0.502763, outside [0, 1)
+    |   ..  rng                0 s, 947 checks: next_float() returned 0.543303, outside [0, 1)
+    |   ..  rng                0 s, 948 checks: next_float() returned 0.654853, outside [0, 1)
+    |   ..  rng                0 s, 949 checks: next_float() returned 0.006540, outside [0, 1)
+    |   ..  rng                0 s, 950 checks: next_float() returned 0.629749, outside [0, 1)
+    |   ..  rng                0 s, 951 checks: next_float() returned 0.655628, outside [0, 1)
+    |   ..  rng                0 s, 952 checks: next_float() returned 0.289245, outside [0, 1)
+    |   ..  rng                0 s, 953 checks: next_float() returned 0.784278, outside [0, 1)
+    |   ..  rng                0 s, 954 checks: next_float() returned 0.688675, outside [0, 1)
+    |   ..  rng                0 s, 955 checks: next_float() returned 0.334942, outside [0, 1)
+    |   ..  rng                0 s, 956 checks: next_float() returned 0.729428, outside [0, 1)
+    |   ..  rng                0 s, 957 checks: next_float() returned 0.788199, outside [0, 1)
+    |   ..  rng                0 s, 958 checks: next_float() returned 0.882569, outside [0, 1)
+    |   ..  rng                0 s, 959 checks: next_float() returned 0.244164, outside [0, 1)
+    |   ..  rng                0 s, 960 checks: next_float() returned 0.300664, outside [0, 1)
+    |   ..  rng                0 s, 961 checks: next_float() returned 0.317826, outside [0, 1)
+    |   ..  rng                0 s, 962 checks: next_float() returned 0.378978, outside [0, 1)
+    |   ..  rng                0 s, 963 checks: next_float() returned 0.101974, outside [0, 1)
+    |   ..  rng                0 s, 964 checks: next_float() returned 0.536198, outside [0, 1)
+    |   ..  rng                0 s, 965 checks: next_float() returned 0.999932, outside [0, 1)
+    |   ..  rng                0 s, 966 checks: next_float() returned 0.149855, outside [0, 1)
+    |   ..  rng                0 s, 967 checks: next_float() returned 0.436592, outside [0, 1)
+    |   ..  rng                0 s, 968 checks: next_float() returned 0.522347, outside [0, 1)
+    |   ..  rng                0 s, 969 checks: next_float() returned 0.926238, outside [0, 1)
+    |   ..  rng                0 s, 970 checks: next_float() returned 0.195256, outside [0, 1)
+    |   ..  rng                0 s, 971 checks: next_float() returned 0.152492, outside [0, 1)
+    |   ..  rng                0 s, 972 checks: next_float() returned 0.570086, outside [0, 1)
+    |   ..  rng                0 s, 973 checks: next_float() returned 0.576582, outside [0, 1)
+    |   ..  rng                0 s, 974 checks: next_float() returned 0.895688, outside [0, 1)
+    |   ..  rng                0 s, 975 checks: next_float() returned 0.773500, outside [0, 1)
+    |   ..  rng                0 s, 976 checks: next_float() returned 0.337428, outside [0, 1)
+    |   ..  rng                0 s, 977 checks: next_float() returned 0.940365, outside [0, 1)
+    |   ..  rng                0 s, 978 checks: next_float() returned 0.681999, outside [0, 1)
+    |   ..  rng                0 s, 979 checks: next_float() returned 0.703429, outside [0, 1)
+    |   ..  rng                0 s, 980 checks: next_float() returned 0.798331, outside [0, 1)
+    |   ..  rng                0 s, 981 checks: next_float() returned 0.778640, outside [0, 1)
+    |   ..  rng                0 s, 982 checks: next_float() returned 0.469116, outside [0, 1)
+    |   ..  rng                0 s, 983 checks: next_float() returned 0.581821, outside [0, 1)
+    |   ..  rng                0 s, 984 checks: next_float() returned 0.638770, outside [0, 1)
+    |   ..  rng                0 s, 985 checks: next_float() returned 0.358685, outside [0, 1)
+    |   ..  rng                0 s, 986 checks: next_float() returned 0.769411, outside [0, 1)
+    |   ..  rng                0 s, 987 checks: next_float() returned 0.806429, outside [0, 1)
+    |   ..  rng                0 s, 988 checks: next_float() returned 0.052424, outside [0, 1)
+    |   ..  rng                0 s, 989 checks: next_float() returned 0.423623, outside [0, 1)
+    |   ..  rng                0 s, 990 checks: next_float() returned 0.023672, outside [0, 1)
+    |   ..  rng                0 s, 991 checks: next_float() returned 0.591798, outside [0, 1)
+    |   ..  rng                0 s, 992 checks: next_float() returned 0.466090, outside [0, 1)
+    |   ..  rng                0 s, 993 checks: next_float() returned 0.521214, outside [0, 1)
+    |   ..  rng                0 s, 994 checks: next_float() returned 0.427555, outside [0, 1)
+    |   ..  rng                0 s, 995 checks: next_float() returned 0.789588, outside [0, 1)
+    |   ..  rng                0 s, 996 checks: next_float() returned 0.412672, outside [0, 1)
+    |   ..  rng                0 s, 997 checks: next_float() returned 0.844126, outside [0, 1)
+    |   ..  rng                0 s, 998 checks: next_float() returned 0.571242, outside [0, 1)
+    |   ..  rng                0 s, 999 checks: next_float() returned 0.757737, outside [0, 1)
+    |   ..  rng                0 s, 1000 checks: next_float() returned 0.763363, outside [0, 1)
+    |   ..  rng                0 s, 1001 checks: next_float() returned 0.273582, outside [0, 1)
+    |   ..  rng                0 s, 1002 checks: next_float() returned 0.807594, outside [0, 1)
+    |   ..  rng                0 s, 1003 checks: next_float() returned 0.833023, outside [0, 1)
+    |   ..  rng                0 s, 1004 checks: next_float() returned 0.191695, outside [0, 1)
+    |   ..  rng                0 s, 1005 checks: next_float() returned 0.206805, outside [0, 1)
+    |   ..  rng                0 s, 1006 checks: next_float() returned 0.383456, outside [0, 1)
+    |   ..  rng                0 s, 1007 checks: next_float() returned 0.298143, outside [0, 1)
+    |   ..  rng                0 s, 1008 checks: next_float() returned 0.174163, outside [0, 1)
+    |   ..  rng                0 s, 1009 checks: next_float() returned 0.253845, outside [0, 1)
+    |   ..  rng                0 s, 1010 checks: next_float() returned 0.513365, outside [0, 1)
+    |   ..  rng                0 s, 1011 checks: next_float() returned 0.244900, outside [0, 1)
+    |   ..  rng                0 s, 1012 checks: next_float() returned 0.339111, outside [0, 1)
+    |   ..  rng                0 s, 1013 checks: next_float() returned 0.406666, outside [0, 1)
+    |   ..  rng                0 s, 1014 checks: next_float() returned 0.594152, outside [0, 1)
+    |   ..  rng                0 s, 1015 checks: next_float() returned 0.275384, outside [0, 1)
+    |   ..  rng                0 s, 1016 checks: next_float() returned 0.175658, outside [0, 1)
+    |   ..  rng                0 s, 1017 checks: next_float() returned 0.446327, outside [0, 1)
+    |   ..  rng                0 s, 1018 checks: next_float() returned 0.876632, outside [0, 1)
+    |   ..  rng                0 s, 1019 checks: next_float() returned 0.837892, outside [0, 1)
+    |   ..  rng                0 s, 1020 checks: next_float() returned 0.853587, outside [0, 1)
+    |   ..  rng                0 s, 1021 checks: next_float() returned 0.658003, outside [0, 1)
+    |   ..  rng                0 s, 1022 checks: next_float() returned 0.550695, outside [0, 1)
+    |   ..  rng                0 s, 1023 checks: next_float() returned 0.770690, outside [0, 1)
+    |   ..  rng                0 s, 1024 checks: next_float() returned 0.730016, outside [0, 1)
+    |   ..  rng                0 s, 1025 checks: next_float() returned 0.272206, outside [0, 1)
+    |   ..  rng                0 s, 1026 checks: next_float() returned 0.436856, outside [0, 1)
+    |   ..  rng                0 s, 1027 checks: next_float() returned 0.708643, outside [0, 1)
+    |   ..  rng                0 s, 1028 checks: next_float() returned 0.814684, outside [0, 1)
+    |   ..  rng                0 s, 1029 checks: next_float() returned 0.363849, outside [0, 1)
+    |   ..  rng                0 s, 1030 checks: next_float() returned 0.997249, outside [0, 1)
+    |   ..  rng                0 s, 1031 checks: next_float() returned 0.654465, outside [0, 1)
+    |   ..  rng                0 s, 1032 checks: next_float() returned 0.623031, outside [0, 1)
+    |   ..  rng                0 s, 1033 checks: next_float() returned 0.628034, outside [0, 1)
+    |   ..  rng                0 s, 1034 checks: next_float() returned 0.479175, outside [0, 1)
+    |   ..  rng                0 s, 1035 checks: next_float() returned 0.724220, outside [0, 1)
+    |   ..  rng                0 s, 1036 checks: next_float() returned 0.398032, outside [0, 1)
+    |   ..  rng                0 s, 1037 checks: next_float() returned 0.128482, outside [0, 1)
+    |   ..  rng                0 s, 1038 checks: next_float() returned 0.635547, outside [0, 1)
+    |   ..  rng                0 s, 1039 checks: next_float() returned 0.090484, outside [0, 1)
+    |   ..  rng                0 s, 1040 checks: next_float() returned 0.556662, outside [0, 1)
+    |   ..  rng                0 s, 1041 checks: next_float() returned 0.605721, outside [0, 1)
+    |   ..  rng                0 s, 1042 checks: next_float() returned 0.466499, outside [0, 1)
+    |   ..  rng                0 s, 1043 checks: next_float() returned 0.699788, outside [0, 1)
+    |   ..  rng                0 s, 1044 checks: next_float() returned 0.224670, outside [0, 1)
+    |   ..  rng                0 s, 1045 checks: next_float() returned 0.648150, outside [0, 1)
+    |   ..  rng                0 s, 1046 checks: next_float() returned 0.512546, outside [0, 1)
+    |   ..  rng                0 s, 1047 checks: next_float() returned 0.383275, outside [0, 1)
+    |   ..  rng                0 s, 1048 checks: next_float() returned 0.919032, outside [0, 1)
+    |   ..  rng                0 s, 1049 checks: next_float() returned 0.674767, outside [0, 1)
+    |   ..  rng                0 s, 1050 checks: next_float() returned 0.408212, outside [0, 1)
+    |   ..  rng                0 s, 1051 checks: next_float() returned 0.062620, outside [0, 1)
+    |   ..  rng                0 s, 1052 checks: next_float() returned 0.357751, outside [0, 1)
+    |   ..  rng                0 s, 1053 checks: next_float() returned 0.159556, outside [0, 1)
+    |   ..  rng                0 s, 1054 checks: next_float() returned 0.527336, outside [0, 1)
+    |   ..  rng                0 s, 1055 checks: next_float() returned 0.190061, outside [0, 1)
+    |   ..  rng                0 s, 1056 checks: next_float() returned 0.087705, outside [0, 1)
+    |   ..  rng                0 s, 1057 checks: next_float() returned 0.879202, outside [0, 1)
+    |   ..  rng                0 s, 1058 checks: next_float() returned 0.964485, outside [0, 1)
+    |   ..  rng                0 s, 1059 checks: next_float() returned 0.065294, outside [0, 1)
+    |   ..  rng                0 s, 1060 checks: next_float() returned 0.439675, outside [0, 1)
+    |   ..  rng                0 s, 1061 checks: next_float() returned 0.505778, outside [0, 1)
+    |   ..  rng                0 s, 1062 checks: next_float() returned 0.145670, outside [0, 1)
+    |   ..  rng                0 s, 1063 checks: next_float() returned 0.583868, outside [0, 1)
+    |   ..  rng                0 s, 1064 checks: next_float() returned 0.697549, outside [0, 1)
+    |   ..  rng                0 s, 1065 checks: next_float() returned 0.868205, outside [0, 1)
+    |   ..  rng                0 s, 1066 checks: next_float() returned 0.639109, outside [0, 1)
+    |   ..  rng                0 s, 1067 checks: next_float() returned 0.717563, outside [0, 1)
+    |   ..  rng                0 s, 1068 checks: next_float() returned 0.795875, outside [0, 1)
+    |   ..  rng                0 s, 1069 checks: next_float() returned 0.331966, outside [0, 1)
+    |   ..  rng                0 s, 1070 checks: next_float() returned 0.988302, outside [0, 1)
+    |   ..  rng                0 s, 1071 checks: next_float() returned 0.715712, outside [0, 1)
+    |   ..  rng                0 s, 1072 checks: next_float() returned 0.564505, outside [0, 1)
+    |   ..  rng                0 s, 1073 checks: next_float() returned 0.787956, outside [0, 1)
+    |   ..  rng                0 s, 1074 checks: next_float() returned 0.588984, outside [0, 1)
+    |   ..  rng                0 s, 1075 checks: next_float() returned 0.186290, outside [0, 1)
+    |   ..  rng                0 s, 1076 checks: next_float() returned 0.720237, outside [0, 1)
+    |   ..  rng                0 s, 1077 checks: next_float() returned 0.180983, outside [0, 1)
+    |   ..  rng                0 s, 1078 checks: next_float() returned 0.572280, outside [0, 1)
+    |   ..  rng                0 s, 1079 checks: next_float() returned 0.232907, outside [0, 1)
+    |   ..  rng                0 s, 1080 checks: next_float() returned 0.774009, outside [0, 1)
+    |   ..  rng                0 s, 1081 checks: next_float() returned 0.850599, outside [0, 1)
+    |   ..  rng                0 s, 1082 checks: next_float() returned 0.294193, outside [0, 1)
+    |   ..  rng                0 s, 1083 checks: next_float() returned 0.353054, outside [0, 1)
+    |   ..  rng                0 s, 1084 checks: next_float() returned 0.197090, outside [0, 1)
+    |   ..  rng                0 s, 1085 checks: next_float() returned 0.803306, outside [0, 1)
+    |   ..  rng                0 s, 1086 checks: next_float() returned 0.492817, outside [0, 1)
+    |   ..  rng                0 s, 1087 checks: next_float() returned 0.021560, outside [0, 1)
+    |   ..  rng                0 s, 1088 checks: next_float() returned 0.005628, outside [0, 1)
+    |   ..  rng                0 s, 1089 checks: next_float() returned 0.702915, outside [0, 1)
+    |   ..  rng                0 s, 1090 checks: next_float() returned 0.537890, outside [0, 1)
+    |   ..  rng                0 s, 1091 checks: next_float() returned 0.402431, outside [0, 1)
+    |   ..  rng                0 s, 1092 checks: next_float() returned 0.231521, outside [0, 1)
+    |   ..  rng                0 s, 1093 checks: next_float() returned 0.140280, outside [0, 1)
+    |   ..  rng                0 s, 1094 checks: next_float() returned 0.222661, outside [0, 1)
+    |   ..  rng                0 s, 1095 checks: next_float() returned 0.610672, outside [0, 1)
+    |   ..  rng                0 s, 1096 checks: next_float() returned 0.360583, outside [0, 1)
+    |   ..  rng                0 s, 1097 checks: next_float() returned 0.013167, outside [0, 1)
+    |   ..  rng                0 s, 1098 checks: next_float() returned 0.161436, outside [0, 1)
+    |   ..  rng                0 s, 1099 checks: next_float() returned 0.104669, outside [0, 1)
+    |   ..  rng                0 s, 1100 checks: next_float() returned 0.612371, outside [0, 1)
+    |   ..  rng                0 s, 1101 checks: next_float() returned 0.420464, outside [0, 1)
+    |   ..  rng                0 s, 1102 checks: next_float() returned 0.721364, outside [0, 1)
+    |   ..  rng                0 s, 1103 checks: next_float() returned 0.415932, outside [0, 1)
+    |   ..  rng                0 s, 1104 checks: next_float() returned 0.430941, outside [0, 1)
+    |   ..  rng                0 s, 1105 checks: next_float() returned 0.035132, outside [0, 1)
+    |   ..  rng                0 s, 1106 checks: next_float() returned 0.262447, outside [0, 1)
+    |   ..  rng                0 s, 1107 checks: next_float() returned 0.253526, outside [0, 1)
+    |   ..  rng                0 s, 1108 checks: next_float() returned 0.391029, outside [0, 1)
+    |   ..  rng                0 s, 1109 checks: next_float() returned 0.500787, outside [0, 1)
+    |   ..  rng                0 s, 1110 checks: next_float() returned 0.345109, outside [0, 1)
+    |   ..  rng                0 s, 1111 checks: next_float() returned 0.673812, outside [0, 1)
+    |   ..  rng                0 s, 1112 checks: next_float() returned 0.909348, outside [0, 1)
+    |   ..  rng                0 s, 1113 checks: next_float() returned 0.278150, outside [0, 1)
+    |   ..  rng                0 s, 1114 checks: next_float() returned 0.950816, outside [0, 1)
+    |   ..  rng                0 s, 1115 checks: next_float() returned 0.476510, outside [0, 1)
+    |   ..  rng                0 s, 1116 checks: next_float() returned 0.093478, outside [0, 1)
+    |   ..  rng                0 s, 1117 checks: next_float() returned 0.895692, outside [0, 1)
+    |   ..  rng                0 s, 1118 checks: next_float() returned 0.883433, outside [0, 1)
+    |   ..  rng                0 s, 1119 checks: next_float() returned 0.232891, outside [0, 1)
+    |   ..  rng                0 s, 1120 checks: next_float() returned 0.393422, outside [0, 1)
+    |   ..  rng                0 s, 1121 checks: next_float() returned 0.911093, outside [0, 1)
+    |   ..  rng                0 s, 1122 checks: next_float() returned 0.148422, outside [0, 1)
+    |   ..  rng                0 s, 1123 checks: 1000 draws never went below 0.1 (lowest was 0.000617)
+    |   ..  rng                0 s, 1124 checks: 1000 draws never went above 0.9 (highest was 0.999932)
+    |   ..  rng                0 s, 1125 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1126 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1127 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1128 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1129 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1130 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1131 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1132 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1133 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1134 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1135 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1136 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1137 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1138 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1139 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1140 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1141 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1142 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1143 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1144 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1145 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1146 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1147 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1148 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1149 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1150 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1151 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1152 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1153 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1154 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1155 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1156 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1157 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1158 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1159 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1160 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1161 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1162 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1163 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1164 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1165 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1166 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1167 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1168 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1169 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1170 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1171 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1172 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1173 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1174 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1175 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1176 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1177 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1178 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1179 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1180 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1181 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1182 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1183 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1184 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1185 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1186 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1187 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1188 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1189 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1190 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1191 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1192 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1193 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1194 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1195 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1196 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1197 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1198 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1199 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1200 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1201 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1202 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1203 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1204 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1205 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1206 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1207 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1208 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1209 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1210 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1211 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1212 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1213 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1214 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1215 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1216 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1217 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1218 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1219 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1220 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1221 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1222 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1223 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1224 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1225 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1226 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1227 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1228 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1229 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1230 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1231 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1232 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1233 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1234 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1235 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1236 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1237 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1238 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1239 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1240 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1241 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1242 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1243 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1244 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1245 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1246 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1247 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1248 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1249 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1250 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1251 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1252 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1253 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1254 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1255 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1256 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1257 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1258 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1259 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1260 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1261 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1262 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1263 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1264 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1265 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1266 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1267 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1268 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1269 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1270 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1271 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1272 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1273 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1274 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1275 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1276 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1277 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1278 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1279 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1280 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1281 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1282 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1283 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1284 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1285 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1286 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1287 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1288 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1289 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1290 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1291 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1292 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1293 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1294 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1295 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1296 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1297 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1298 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1299 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1300 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1301 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1302 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1303 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1304 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1305 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1306 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1307 checks: next_int(3, 9) returned 4
+    |   ..  rng                0 s, 1308 checks: next_int(3, 9) returned 9
+    |   ..  rng                0 s, 1309 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1310 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1311 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1312 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1313 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1314 checks: next_int(3, 9) returned 6
+    |   ..  rng                0 s, 1315 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1316 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1317 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1318 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1319 checks: next_int(3, 9) returned 7
+    |   ..  rng                0 s, 1320 checks: next_int(3, 9) returned 5
+    |   ..  rng                0 s, 1321 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1322 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1323 checks: next_int(3, 9) returned 8
+    |   ..  rng                0 s, 1324 checks: next_int(3, 9) returned 3
+    |   ..  rng                0 s, 1325 checks: next_int with an empty range should return the bound
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.27 GiB, in suite 1 ((starting))
+    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   wall time of the whole run: 0.1 min (0.00 h)
+    |   the silence budget this run ran under: 900s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030208.log
+    | 
+    | all 1 suites passed (1325 checks)
+    -> exit 0 after 3s
+
+=== a run whose transcript is deleted under it
+    $ env RUN_TESTS_RUNDIR=/tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | run_tests: the run's transcript is missing or unreadable: /tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x/transcript.qF6iyCgu
+    | run_tests: it was written at the start of this run and is gone now, so
+    | run_tests: neither the runtime-error check nor the stall check could be
+    | run_tests: run. Nothing can be concluded about this run; it is failed here.
+    -> exit 2 after 4s
+
+=== a run killed for silence whose stall flag is deleted under it
+    $ env RUN_TESTS_SILENCE=20 RUN_TESTS_RUNDIR=/tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/stalling
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | run_tests: the run's stall flag is missing or unreadable: /tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x/stalled.SUeoj6Ph
+    | run_tests: it was written at the start of this run and is gone now, so
+    | run_tests: neither the runtime-error check nor the stall check could be
+    | run_tests: run. Nothing can be concluded about this run; it is failed here.
+    -> exit 2 after 3s
+
+runner guard OK: each of the three is named, none of them hangs, a
+runner guard OK: stalled suite costs only itself, a suite says where it
+runner guard OK: has got to, and a check that could not be read fails the run
