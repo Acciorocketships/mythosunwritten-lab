@@ -156,3 +156,44 @@ catching a text cursor in `tools/measure_ui.gd:500` — all three already report
 as finding `I-59d87f7cd259` by the work that preceded this. This change adds no
 failure and removes none of theirs; what it changes in that log is one line,
 from `PASS  bargain 46 checks` to `PASS  bargain 2083 checks`.
+
+## 6. What that green is a green on — and what it is not
+
+Said plainly, because the ground moved under this work after it shipped: **the
+bargain suite has not been run since the base was adopted.**
+
+The certifying log above was produced on the tree this work shipped
+(`42afe10` on 2026-09-11, reported at `a4d7030`/`50b9dac`). Four commits later,
+`faf11f55` adopted the mythosunwritten tree as this project's base, and
+`b80bf504`, `cb48019b`, `515ff662` and `2755a797` followed it. So line 2887 —
+`PASS  bargain        2083 checks` — certifies the **pre-adoption** tree, and
+nothing here claims otherwise.
+
+Two things are worth separating, because they pull in opposite directions.
+
+**The suite's own text is untouched.** The files this work wrote are
+byte-identical to what was certified:
+
+```
+$ git diff --stat 42afe10..HEAD -- tests/test_bargain.gd net/bargain_draws.gd \
+      tools/bargain_draws_probe.gd tools/bargain_draws_probe.sh
+$                       # no output: nothing changed
+```
+
+Every claim in §1–§3 is a claim about those files and survives the adoption
+unchanged: the cause is still the six lines named at `182a191`, the three draws
+are still in the repository, and exactly one check still turns on a recorded
+reply.
+
+**The suite's subject did move.** Its every run opens with `SimWorld.new(SEED)`,
+and `sim/` changed across 22 files (+749 / −101) between the certifying commit
+and `HEAD`, `sim/world.gd` among them. A suite whose subject moved has to be run
+again before its old colour means anything about the new tree, and this one has
+not been. The one full-suite run started since the adoption had not reached the
+bargain suite.
+
+That re-run is `W-adopt-suites`' acceptance line, not this one's, and the three
+reds in the committed log — `walk motion`, `scenario`, `agent`, shown in §5 to
+predate this work — are its to settle on the adopted base. This item claims only
+what the committed log carries: green on the tree that produced it, and no
+failure of its own anywhere in that run.
