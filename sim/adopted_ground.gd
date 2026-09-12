@@ -48,11 +48,31 @@ const STANDING_PROBE := 9.0
 ## an acceptable blur, since the distinction only steers village siting.
 const STANDING_EPS := 0.01
 
-## One shared context per seed per process. The plans under it memoise their
-## expensive work (river traces, region builds) per instance, so two contexts
-## for one seed would pay the cold cost twice for identical answers -- and the
-## adopted WaterField keys some static caches by plan instance id, so keeping
-## one instance alive per seed also keeps those keys stable.
+## How many block-cache entries each of the two field caches may hold. A block
+## is 192 world units square and its entry is dominated by the water context,
+## which costs on the order of a hundred megabytes to hold and about two
+## seconds to rebuild (measured in the cycle-3726 memory probe) -- so this is
+## a memory ceiling first and a performance knob second. Sixteen blocks cover
+## every window the sim-layer suites sweep and any fight or walk's working
+## set; a survey that ranges wider evicts and rebuilds, which costs seconds,
+## not correctness: every answer is a pure function of seed and position.
+const FIELD_BLOCKS := 16
+
+## How many seeds' contexts are kept alive at once, oldest dropped first. One
+## is the game (a process lives in one world); the second is for the suites,
+## which routinely hold two queries side by side to check that different
+## seeds differ. Beyond that a suite walking a seed list (eight in the
+## settlement shore check) would otherwise accumulate every world it visited:
+## the certification batch reached 19 GB and the kernel killed it. Dropping a
+## seed loses only time -- a revisit pays the cold build again -- and each
+## eviction also empties the adopted WaterField's static caches (see
+## _purge_water_statics below), because those pin every visited seed whole.
+const SHARED_SEEDS := 2
+
+## One shared context per seed per process, most recently used last. The plans
+## under a context memoise their expensive work (river traces, region builds)
+## per instance, so two contexts for one seed would pay the cold cost twice
+## for identical answers.
 static var _shared: Dictionary = {}
 
 ## The seed the whole adopted stack descends from.
@@ -78,9 +98,40 @@ var base_fields: WorldFieldBlockCache = null
 
 
 static func shared_for_seed(seed_value: int) -> AdoptedGround:
-	if not _shared.has(seed_value):
-		_shared[seed_value] = AdoptedGround.new(seed_value)
+	if _shared.has(seed_value):
+		# Re-append so the dictionary's insertion order stays the recency
+		# order the eviction below reads.
+		var kept: AdoptedGround = _shared[seed_value]
+		_shared.erase(seed_value)
+		_shared[seed_value] = kept
+		return kept
+	if _shared.size() >= SHARED_SEEDS:
+		while _shared.size() >= SHARED_SEEDS:
+			_shared.erase(_shared.keys()[0])
+		_purge_water_statics()
+	_shared[seed_value] = AdoptedGround.new(seed_value)
 	return _shared[seed_value]
+
+
+## Empty the adopted WaterField's static caches. Called only when a seed is
+## evicted above, which a game process (one seed for its whole life) never
+## does -- so the adopted stack's own behaviour is untouched in play.
+##
+## These statics are why eviction alone was not enough: their values hold
+## regions, and a region holds its plan, so every seed a process ever visited
+## stayed pinned whole. Measured in the cycle-3726 memory probe: three worlds
+## of three seeds left 9362 MB allocated after every reference was dropped,
+## and clearing these three dictionaries returned the process to 70 MB. They
+## are pure caches -- rebuilt lazily, about two seconds per water block -- so
+## the surviving seed loses warmth here, never an answer.
+static func _purge_water_statics() -> void:
+	WaterField._profiles_lock.lock()
+	WaterField._profiles.clear()
+	WaterField._trace_regions.clear()
+	WaterField._profiles_lock.unlock()
+	WaterField._basin_lock.lock()
+	WaterField._basin_cache.clear()
+	WaterField._basin_lock.unlock()
 
 
 func _init(seed_value: int = 0) -> void:
@@ -88,8 +139,8 @@ func _init(seed_value: int = 0) -> void:
 	water_plan = TerrainWorldTuning.make_water(seed_value)
 	height_plan = TerrainWorldTuning.make_heightfield(seed_value, water_plan)
 	base_plan = TerrainWorldTuning.make_heightfield(seed_value)
-	fields = WorldFieldBlockCache.new(height_plan, water_plan, 0.0, 0.0, 128)
-	base_fields = WorldFieldBlockCache.new(base_plan, water_plan, 0.0, 0.0, 128)
+	fields = WorldFieldBlockCache.new(height_plan, water_plan, 0.0, 0.0, FIELD_BLOCKS)
+	base_fields = WorldFieldBlockCache.new(base_plan, water_plan, 0.0, 0.0, FIELD_BLOCKS)
 
 
 ## The carved ground height: what you stand on, rivers and basins already cut.
