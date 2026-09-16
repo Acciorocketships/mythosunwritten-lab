@@ -1,0 +1,16 @@
+
+RUN   stalling_heavy
+./run_tests.sh: line 377: 3493964 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+FAIL  runner_fixtures/stalling_heavy stalled: printed nothing for 120s, budget 120s
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+   1  (starting)             peak   0.30 GiB     0.0 min  quiet up to     0 s
+   2  stalling_heavy         peak  22.56 GiB     2.0 min  quiet up to   118 s
+  peak of the whole run: 22.56 GiB, in suite 2 (stalling_heavy)
+  longest quiet stretch: 118 s, in suite 2 (stalling_heavy)
+  wall time of the whole run: 2.1 min (0.03 h)
+  the silence budget this run ran under: 120s
+  recorded in reports/watchdog/drift-after-engine22-memory.log
+
+1 of 1 suites failed (1 failed checks of 0)

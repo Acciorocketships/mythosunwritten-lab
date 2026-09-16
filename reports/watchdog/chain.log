@@ -1,0 +1,44 @@
+
+######## after / busy machine / budget 120s ########
+2026-09-15T18:22:03-04:00
+busy_load: 1200 runnable shells, load average now 447.08 408.80 300.61
+exit 1, wall 132 s
+
+######## after / engine holding 22 GiB / budget 120s ########
+2026-09-15T18:24:30-04:00
+exit 1, wall 124 s
+
+######## test_terrain_lod alone, budget 3600s (the corrected one) ########
+2026-09-15T18:26:34-04:00
+exit 1, wall 4733 s
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+   1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+   2  test_terrain_lod       peak  10.62 GiB    78.8 min  quiet up to  3600 s
+  peak of the whole run: 10.62 GiB, in suite 2 (test_terrain_lod)
+  longest quiet stretch: 3600 s, in suite 2 (test_terrain_lod)
+  wall time of the whole run: 78.9 min (1.31 h)
+  the silence budget this run ran under: 3600s
+  recorded in reports/watchdog/test_terrain_lod-memory.log
+
+1 of 1 suites failed (1 failed checks of 0)
+
+######## test_window_glow alone, budget 3600s (the corrected one) ########
+2026-09-15T19:45:27-04:00
+exit 1, wall 2263 s
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+   1  (starting)             peak   0.30 GiB     0.0 min  quiet up to     0 s
+   2  test_window_glow       peak  11.53 GiB    37.6 min  quiet up to  1115 s
+  peak of the whole run: 11.53 GiB, in suite 2 (test_window_glow)
+  longest quiet stretch: 1115 s, in suite 2 (test_window_glow)
+  wall time of the whole run: 37.7 min (0.63 h)
+  the silence budget this run ran under: 3600s
+  recorded in reports/watchdog/test_window_glow-memory.log
+
+1 of 1 suites failed (1 failed checks of 20651)
+
+######## chain finished ########
+2026-09-15T20:23:10-04:00

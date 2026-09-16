@@ -78,21 +78,46 @@ fi
 
 # How long an engine may print nothing before it is taken for stuck.
 #
-# Measured, not guessed. The suites here print a progress line every thirty
-# seconds of checking, so this is a budget on the gap *between* checks -- how
-# long one uninterrupted piece of work inside a suite may take -- and not on the
-# length of a suite. The two heaviest healthy suites on the adopted base were
-# measured at reports/budget-measure.log: test_determinism goes 455 s between
-# checks at its worst, test_terrain 366 s, test_asset_tags 130 s. So 455 s is
-# the worst a healthy suite is known to do, and the budget is four times it.
+# Measured over every suite there is, not over a sample of three. The suites
+# here print a progress line every thirty seconds of checking, so this is a
+# budget on the gap *between* checks -- how long one uninterrupted piece of work
+# inside a suite may take -- and not on the length of a suite.
 #
-# Four times rather than twice because the two ways of being wrong do not cost
-# the same. Too small, and a suite that is merely slow is reported red for
-# stalling -- a wrong verdict, and the one thing this runner must not produce.
-# Too large, and a run that has already lost a suite takes longer to say so. The
-# old default of 7200 s was longer than any suite there has ever been, so it
-# could only ever catch a run that was already lost; this one is a real bound.
-SILENCE="${RUN_TESTS_SILENCE:-1800}"
+# It was first set at 1800 s from three suites: 455 s was the worst gap seen
+# among them and four times it was the margin. Then the certifying run put all
+# seventy-three under the same recording, and the three were not the heavy end
+# of anything. Among the seventy suites that reached a verdict, the worst gap
+# between checks is
+#
+#   test_scatter 1735 s, test_atmosphere 1664 s, test_islands 1658 s,
+#   test_grass 1571 s, test_ui_panel 1564 s, test_ui_territory 1390 s
+#
+# -- so 1800 s stood 65 s, 3.6%, above honest work, not four times it, and the
+# two suites the run killed for stalling were 67 s and 117 s over that same
+# line. A budget that close cannot tell slow from stuck.
+#
+# The margin comes from the same measurement in two parts. The worst honest gap
+# is 1735 s, and the top of that list is a cluster rather than a spike -- five
+# suites inside 11% of each other -- so it is the cost of the heaviest work
+# these suites do and not one suite's bad luck; a sixth suite sitting just above
+# it is an ordinary thing for the next run to produce. And whatever a busy
+# machine does to the watchdog it does to the work as well: 1200 runnable shells
+# were measured here stretching a 120 s budget to 162 s, 35%, and that same 35%
+# stretches 1735 s to about 2342 s. Twice the worst honest gap, rounded up to
+# the hour, covers the stretched worst gap with half as much again to spare.
+#
+# Too small, and a suite that is merely slow is reported red for stalling -- a
+# wrong verdict, and the one thing this runner must not produce. Too large, and
+# a run that has already lost a suite takes an extra hour to say so. One hour
+# against sixteen is the trade this makes.
+#
+# Where the measurement stops: three suites never reached a verdict in that run,
+# so their own honest gaps are unknown and none of the above is set from them --
+# test_terrain_lod and test_window_glow, killed at the old budget, and
+# test_settlements, which the kernel took at 23.15 GiB before any budget
+# applied. The last of those is a size problem and not a silence one; no
+# silence budget short of never firing would have caught it.
+SILENCE="${RUN_TESTS_SILENCE:-3600}"
 # How many suites one engine is asked to run. One is the safe bound measured on
 # this machine -- see the memory table any run prints -- and raising it trades
 # engine starts (about five seconds each, measured) for a higher peak.
@@ -309,20 +334,38 @@ run_engine() {
 	# The bounded wait. It measures silence rather than total time, so an honest
 	# run of several hours is left alone and a run with nothing left to say is
 	# not.
+	#
+	# The budget is spent in seconds off the clock, not in turns round this
+	# loop. It used to be the latter: `quiet` rose by one for every `sleep 1`
+	# plus one `stat`, and that pair was taken to be one second whatever it
+	# really cost. What it costs is not fixed. Measured on this machine at a
+	# budget of 120 s (reports/watchdog/): an idle machine spent 121 s of clock
+	# to reach it, an engine holding 22.56 GiB of this machine's 27.4 spent
+	# 118 s -- and a machine whose run queue was full, 1200 runnable shells at
+	# load average 482, spent 162 s. So the counter loosened by 35% exactly
+	# when the machine was busy, which is exactly when a suite is slow and the
+	# verdict matters. The certifying run went further: test_settlements was
+	# silent for 3234 s under a 1800 s budget and the watchdog never fired, the
+	# kernel reaching the engine first.
+	#
+	# Reading the clock instead makes the printed budget the enforced one. The
+	# kill can still be late by at most one turn of this loop -- the clock is
+	# only read where the loop reads it -- and that is one loop body, a second
+	# or a few, not a fraction of the budget. The elapsed time actually reached
+	# is written down and reported, so the number in the transcript is measured
+	# rather than assumed.
 	(
-		quiet=0
+		quiet_since=$SECONDS
 		seen=-1
 		while [[ -d "/proc/$engine" ]]; do
 			sleep 1
 			size="$(stat -c %s "$OUT" 2>/dev/null || echo 0)"
-			if [[ "$size" == "$seen" ]]; then
-				quiet=$(( quiet + 1 ))
-			else
-				quiet=0
+			if [[ "$size" != "$seen" ]]; then
 				seen="$size"
+				quiet_since=$SECONDS
 			fi
-			if (( quiet >= SILENCE )); then
-				echo "yes" >"$STALLED"
+			if (( SECONDS - quiet_since >= SILENCE )); then
+				echo "$(( SECONDS - quiet_since ))" >"$STALLED"
 				kill -KILL "$engine" 2>/dev/null || true
 				break
 			fi
@@ -376,7 +419,8 @@ stalled_or_continue() {
 	readable_or_fail "$STALLED" "stall flag"
 	if [[ -s "$STALLED" ]]; then
 		echo ""
-		echo "run_tests: nothing printed for ${SILENCE}s while running suite '$(last_named)'." >&2
+		echo "run_tests: nothing printed for $(cat "$STALLED")s -- the budget is ${SILENCE}s --" >&2
+		echo "run_tests: while running suite '$(last_named)'." >&2
 		echo "run_tests: the run was killed. Nothing inside the process could end it." >&2
 		exit 2
 	fi
@@ -431,14 +475,17 @@ while (( ${#pending[@]} > 0 )); do
 		# one suite and not about the run: the suite is red for stalling, and
 		# the seventy-two after it still get theirs. The flag is cleared so the
 		# next engine starts with a clean one.
+		silent_for="$(cat "$STALLED")"
 		: >"$STALLED"
 		read -r entered done_ < <(slice_counts)
 		if (( entered < 1 )); then
 			entered=1
 		fi
 		stuck="${chunk[$(( entered - 1 ))]}"
-		printf 'FAIL  %-14s stalled: printed nothing for %ss\n' "$stuck" "$SILENCE" >>"$OUT"
-		printf 'FAIL  %-14s stalled: printed nothing for %ss\n' "$stuck" "$SILENCE"
+		printf 'FAIL  %-14s stalled: printed nothing for %ss, budget %ss\n' \
+			"$stuck" "$silent_for" "$SILENCE" >>"$OUT"
+		printf 'FAIL  %-14s stalled: printed nothing for %ss, budget %ss\n' \
+			"$stuck" "$silent_for" "$SILENCE"
 		pending=("${chunk[@]:$entered}" "${rest[@]}")
 		status=1
 		continue

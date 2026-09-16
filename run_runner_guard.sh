@@ -27,6 +27,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 WAIT="${RUNNER_GUARD_WAIT:-300}"
 STALL_WAIT="${RUNNER_GUARD_STALL_WAIT:-20}"
+# How many runnable shells the stall-under-load check puts on this machine. It
+# only has to be enough that the watchdog cannot have the processor whenever it
+# asks: measured here, 1200 on 32 processors took a 120 s budget to 162 s.
+GUARD_BUSY="${RUNNER_GUARD_BUSY:-1200}"
 LOG="$(mktemp)"
 # Somewhere we can reach the runner's own transcript and stall flag, so the two
 # checks at the end can delete them on purpose.
@@ -84,18 +88,70 @@ has "suite 'not_a_suite' raised a runtime error" "the wrapper blamed the wrong s
 has '^PASS  passing ' "the run did not carry on to the suite after it"
 has ' suites failed ' "the summary was not printed"
 
+# What a stalled suite must say now, and what it must have cost. The budget is
+# spent off the clock, so the check is a wall-time one: the run may not end
+# before the budget, the silence it reports must be at least the budget, and it
+# must not be much more than it -- a watchdog that overshoots by half its budget
+# is the bug this replaced. The slack is one loop body plus the engine's own
+# start, which is seconds; a tenth of the budget or five seconds, whichever is
+# larger, covers that without covering a 35% drift.
+# $1 is the budget the run was given, $2 how long the rest of the run -- engine
+# starts, the suites after the stalled one -- is allowed to take on top of it.
+stall_is_wall_time() {
+	local budget="$1" overhead="$2" line silent_for slack
+	line="$(grep -o 'stalled: printed nothing for [0-9]*s, budget [0-9]*s' "$LOG" | head -1)"
+	if [[ -z "$line" ]]; then
+		note "the stalled suite is not reported red, named with what it cost and the budget"
+		return
+	fi
+	echo "    | measured: $line"
+	silent_for="$(awk '{print $5}' <<<"$line" | tr -cd '0-9')"
+	slack=$(( budget / 10 )); (( slack < 5 )) && slack=5
+	(( silent_for >= budget )) \
+		|| note "the run reports ${silent_for}s of silence, less than the ${budget}s budget"
+	(( silent_for <= budget + slack )) \
+		|| note "the run reports ${silent_for}s of silence against a ${budget}s budget: the budget the run prints is not the budget it enforces"
+	(( elapsed >= budget )) || note "the run ended too soon to have been killed by the watchdog"
+	(( elapsed <= budget + slack + overhead )) \
+		|| note "the run took ${elapsed}s to enforce a ${budget}s budget"
+}
+
 attempt "a suite that never returns and never says anything" \
 	env RUN_TESTS_SILENCE="$STALL_WAIT" \
 	timeout -s KILL "$WAIT" ./run_tests.sh test_rng runner_fixtures/stalling runner_fixtures/passing
 [[ $status -ne 0 ]] || note "a suite hung and the run exited 0"
-(( elapsed >= STALL_WAIT )) || note "the run ended too soon to have been killed by the watchdog"
 has '^RUN   stalling$' "the stalling suite was not named before it ran"
-has "stalling.*stalled: printed nothing for ${STALL_WAIT}s" \
-	"the stalled suite is not reported red, named with the budget it crossed"
+stall_is_wall_time "$STALL_WAIT" 30
 # The whole point of one engine per suite: a suite nobody can afford to wait for
 # costs itself a verdict and nothing else.
 has '^PASS  passing ' "the run did not carry on to the suite after the stalled one"
 has ' suites failed ' "a run with a stalled suite in it did not end on its own summary line"
+
+# The same thing on a machine that cannot get round to the watchdog. This is the
+# check the old watchdog could not pass: it counted `sleep 1` plus one `stat` as
+# one second, so on a full run queue its budget stretched by 35% and the number
+# the run printed stopped being the number it enforced. The load is put on and
+# taken off inside this check so nothing else on the machine has to know.
+tools/busy_load.sh "$GUARD_BUSY" 300 >"$RUNDIR/busy.log" 2>&1 &
+busy=$!
+for _ in $(seq 1 60); do grep -q 'load average' "$RUNDIR/busy.log" && break; sleep 1; done
+sed 's/^/    | /' "$RUNDIR/busy.log"
+# Only the stalling suite: on a machine this busy the engine needs longer than
+# this check's own twenty-second budget just to start, so a second suite after
+# it would be killed for the silence of its own startup. That is the budget
+# being small, not the watchdog being wrong, and the real budget is measured in
+# hours. What the run does after a stalled suite is checked above, unloaded.
+attempt "a stalled suite on a machine with no time for the watchdog" \
+	env RUN_TESTS_SILENCE="$STALL_WAIT" \
+	timeout -s KILL "$WAIT" ./run_tests.sh runner_fixtures/stalling
+kill -TERM "$busy" 2>/dev/null || true
+[[ $status -ne 0 ]] || note "a suite hung under load and the run exited 0"
+# Not the RUN line: on a machine this busy the engine can be killed before it
+# gets as far as printing one, and the run then names the suite from the batch
+# it was given. Either way the suite must be named, red, and counted.
+has '^FAIL  runner_fixtures/stalling stalled' "the stalled suite is not named and red"
+has ' suites failed ' "a run with a stalled suite in it did not end on its own summary line"
+stall_is_wall_time "$STALL_WAIT" 60
 
 attempt "a suite says where it has got to while it is still working" \
 	env RUN_TESTS_PROGRESS=0 \
@@ -137,8 +193,9 @@ has "stall flag is missing or unreadable" "the run does not name the stall flag 
 echo ""
 if [[ $failed -eq 0 ]]; then
 	echo "runner guard OK: each of the three is named, none of them hangs, a"
-	echo "runner guard OK: stalled suite costs only itself, a suite says where it"
-	echo "runner guard OK: has got to, and a check that could not be read fails the run"
+	echo "runner guard OK: stalled suite costs only itself and is killed at the budget"
+	echo "runner guard OK: the run prints -- on a busy machine too -- a suite says where"
+	echo "runner guard OK: it has got to, and a check that could not be read fails the run"
 	exit 0
 fi
 echo "runner guard FAILED"

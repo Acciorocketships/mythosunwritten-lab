@@ -1,0 +1,10 @@
+# resident memory of every engine of one ./run_tests.sh run
+# this machine has 27.4 GiB
+# time suite engines rss_gib avail_gib transcript_bytes
+18:04:57 (starting) 1 0.06 24.52 0
+18:04:59 (starting) 1 0.29 24.31 1
+18:05:01 stalling_heavy 1 4.55 20.05 22
+18:05:03 stalling_heavy 1 9.35 15.23 22
+18:05:05 stalling_heavy 1 14.23 10.33 22
+18:05:07 stalling_heavy 1 18.93 5.62 22
+18:05:09 stalling_heavy 1 22.69 1.86 22

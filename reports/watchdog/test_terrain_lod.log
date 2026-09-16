@@ -1,0 +1,20 @@
+
+RUN   test_terrain_lod
+  ..  terrain_lod       86 s, 8 checks: only 61825 positions were sampled around (0.0, 0.0)
+  ..  terrain_lod      181 s, 14 checks: only 61825 positions were sampled around (-1502.5, 883.1)
+  ..  terrain_lod      304 s, 24 checks: only 32544 vertices were compared against the world's height
+  ..  terrain_lod     1130 s, 26 checks: 0 positions gave a different ground height once a different level was...
+./run_tests.sh: line 377: 3496220 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+FAIL  test_terrain_lod stalled: printed nothing for 3600s, budget 3600s
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+   1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+   2  test_terrain_lod       peak  10.62 GiB    78.8 min  quiet up to  3600 s
+  peak of the whole run: 10.62 GiB, in suite 2 (test_terrain_lod)
+  longest quiet stretch: 3600 s, in suite 2 (test_terrain_lod)
+  wall time of the whole run: 78.9 min (1.31 h)
+  the silence budget this run ran under: 3600s
+  recorded in reports/watchdog/test_terrain_lod-memory.log
+
+1 of 1 suites failed (1 failed checks of 0)
