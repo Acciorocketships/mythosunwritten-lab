@@ -16,6 +16,24 @@ it… only edit the code in this repo."
   2026-09-10)
 - The source repository was read only; nothing there was changed.
 
+The two lines above are the only full statement of the pin in this repository:
+`tools/upstream_watch.sh` reads both of them rather than carrying its own copy,
+and `tools/upstream_watch.sh --pins` audits the tree for a second one. Editing
+the pin here is therefore the whole of advancing it.
+
+## Is the pin still upstream's HEAD?
+
+Upstream keeps developing, so the pin is a moving target. Ask:
+
+    $ ./tools/upstream_watch.sh
+    upstream-watch: base is CURRENT -- ADOPTION.md pin f3203d96 == upstream HEAD f3203d96 (https://github.com/Acciorocketships/mythosunwritten)
+
+About a quarter of a second, no clone, exit 0 when current, 3 when upstream has
+moved (the new HEAD is printed) and 2 when it could not ask at all — it never
+reports "current" without an answer from upstream. It runs on a ten-cycle probe
+cadence, and a move obliges a finding in the planning inbox rather than an
+in-passing fix. See [docs/upstream-watch.md](docs/upstream-watch.md).
+
 ## Import method: squash import of the pinned commit
 
 The tree at `f3203d96` was copied in as ordinary files in one adoption commit,
