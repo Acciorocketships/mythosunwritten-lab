@@ -10,14 +10,14 @@
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    3  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.27 GiB, in suite 1 ((starting))
-    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   --  (starting)             peak   0.30 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.30 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 0 s, in the start-up, before any suite was named
     |   wall time of the whole run: 0.1 min (0.00 h)
-    |   the silence budget this run ran under: 900s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030102.log
+    |   the silence budget this run ran under: 3600s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131414.log
     | 
     | all 2 suites passed (1327 checks)
     -> exit 0 after 7s
@@ -36,17 +36,17 @@
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    3  failing                peak   0.31 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.31 GiB, in suite 3 (failing)
-    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   --  (starting)             peak   0.29 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  failing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.29 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 0 s, in the start-up, before any suite was named
     |   wall time of the whole run: 0.1 min (0.00 h)
-    |   the silence budget this run ran under: 900s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030109.log
+    |   the silence budget this run ran under: 3600s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131421.log
     | 
     | 1 of 2 suites failed (1 failed checks of 1327)
-    -> exit 1 after 7s
+    -> exit 1 after 6s
 
 === a suite that raises a runtime error below its run()
     $ timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing runner_fixtures/passing
@@ -73,15 +73,15 @@
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    3  throwing               peak   0.31 GiB     0.0 min  quiet up to     0 s
-    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.31 GiB, in suite 3 (throwing)
-    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   --  (starting)             peak   0.29 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  throwing               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.29 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 0 s, in the start-up, before any suite was named
     |   wall time of the whole run: 0.2 min (0.00 h)
-    |   the silence budget this run ran under: 900s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030116.log
+    |   the silence budget this run ran under: 3600s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131427.log
     | 
     | all 3 suites passed (1329 checks)
     -> exit 1 after 11s
@@ -109,15 +109,15 @@
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    3  not_a_suite            peak   0.30 GiB     0.0 min  quiet up to     0 s
-    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.30 GiB, in suite 3 (not_a_suite)
-    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   --  (starting)             peak   0.29 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  not_a_suite            peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    3  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.29 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 0 s, in the start-up, before any suite was named
     |   wall time of the whole run: 0.2 min (0.00 h)
-    |   the silence budget this run ran under: 900s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030127.log
+    |   the silence budget this run ran under: 3600s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131438.log
     | 
     | 1 of 3 suites failed (1 failed checks of 1327)
     -> exit 1 after 10s
@@ -129,26 +129,47 @@
     | PASS  rng               0.0 s, 1325 checks
     | 
     | RUN   stalling
-    | ./run_tests.sh: line 323: 3923746 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
-    | FAIL  runner_fixtures/stalling stalled: printed nothing for 20s
+    | ./run_tests.sh: line 377: 1283699 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+    | FAIL  runner_fixtures/stalling stalled: printed nothing for 20s, budget 20s
     | 
     | RUN   passing
     | PASS  passing           0.0 s, 2 checks
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    2  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |    3  stalling               peak   0.30 GiB     0.4 min  quiet up to    20 s
-    |    4  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.30 GiB, in suite 3 (stalling)
-    |   longest quiet stretch: 20 s, in suite 3 (stalling)
+    |   --  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               peak   0.27 GiB     0.0 min  quiet up to     0 s
+    |    2  stalling               peak   0.30 GiB     0.4 min  quiet up to    20 s
+    |    3  passing                peak   0.00 GiB     0.0 min  quiet up to     0 s
+    |   peak of the whole run: 0.30 GiB, in suite 2 (stalling)
+    |   longest quiet stretch: 20 s, in suite 2 (stalling)
     |   wall time of the whole run: 0.5 min (0.01 h)
     |   the silence budget this run ran under: 20s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030137.log
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131448.log
     | 
     | 1 of 3 suites failed (1 failed checks of 1327)
-    -> exit 1 after 31s
+    -> exit 1 after 30s
+    | measured: stalled: printed nothing for 20s, budget 20s
+    | busy_load: 1200 runnable shells, load average now 291.13 184.73 92.94
+
+=== a stalled suite on a machine with no time for the watchdog
+    $ env RUN_TESTS_SILENCE=20 timeout -s KILL 300 ./run_tests.sh runner_fixtures/stalling
+    | 
+    | ./run_tests.sh: line 377: 1286086 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+    | FAIL  runner_fixtures/stalling stalled: printed nothing for 20s, budget 20s
+    | 
+    | what this run cost, by suite -- memory held by every engine on the machine,
+    | wall time, and the longest stretch in which the transcript did not grow:
+    |   --  (starting)             peak   0.18 GiB     0.3 min  quiet up to    17 s
+    |   peak of the whole run: 0.18 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 17 s, in the start-up, before any suite was named
+    |   wall time of the whole run: 0.4 min (0.01 h)
+    |   the silence budget this run ran under: 20s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131536.log
+    | 
+    | 1 of 1 suites failed (1 failed checks of 0)
+    -> exit 1 after 33s
+    | measured: stalled: printed nothing for 20s, budget 20s
 
 === a suite says where it has got to while it is still working
     $ env RUN_TESTS_PROGRESS=0 timeout -s KILL 300 ./run_tests.sh test_rng
@@ -1482,40 +1503,42 @@
     | 
     | what this run cost, by suite -- memory held by every engine on the machine,
     | wall time, and the longest stretch in which the transcript did not grow:
-    |    1  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
-    |   peak of the whole run: 0.27 GiB, in suite 1 ((starting))
-    |   longest quiet stretch: 0 s, in suite 0 (no suite ran long enough to be quiet)
+    |   --  (starting)             peak   0.28 GiB     0.0 min  quiet up to     0 s
+    |    1  test_rng               not sampled: no 2 s sample fell inside it
+    |   peak of the whole run: 0.28 GiB, in the start-up, before any suite was named
+    |   longest quiet stretch: 0 s, in the start-up, before any suite was named
     |   wall time of the whole run: 0.1 min (0.00 h)
-    |   the silence budget this run ran under: 900s
-    |   recorded in /home/ryko/proj/game/.testruns/memory.20260912-030208.log
+    |   the silence budget this run ran under: 3600s
+    |   recorded in /home/ryko/proj/game/.testruns/memory.20260917-131600.log
     | 
     | all 1 suites passed (1325 checks)
-    -> exit 0 after 3s
+    -> exit 0 after 4s
 
 === a run whose transcript is deleted under it
-    $ env RUN_TESTS_RUNDIR=/tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing
+    $ env RUN_TESTS_RUNDIR=/tmp/lab-sbx-wpr1t23y/tmp/tmp.VHABVj0yFR timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/throwing
     | 
     | RUN   test_rng
     | PASS  rng               0.0 s, 1325 checks
     | 
-    | run_tests: the run's transcript is missing or unreadable: /tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x/transcript.qF6iyCgu
-    | run_tests: it was written at the start of this run and is gone now, so
-    | run_tests: neither the runtime-error check nor the stall check could be
-    | run_tests: run. Nothing can be concluded about this run; it is failed here.
-    -> exit 2 after 4s
-
-=== a run killed for silence whose stall flag is deleted under it
-    $ env RUN_TESTS_SILENCE=20 RUN_TESTS_RUNDIR=/tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/stalling
-    | 
-    | RUN   test_rng
-    | PASS  rng               0.0 s, 1325 checks
-    | 
-    | run_tests: the run's stall flag is missing or unreadable: /tmp/lab-sbx-w1gvgzw1/tmp/tmp.z715YAki8x/stalled.SUeoj6Ph
+    | run_tests: the run's transcript is missing or unreadable: /tmp/lab-sbx-wpr1t23y/tmp/tmp.VHABVj0yFR/transcript.oK16qkmB
     | run_tests: it was written at the start of this run and is gone now, so
     | run_tests: neither the runtime-error check nor the stall check could be
     | run_tests: run. Nothing can be concluded about this run; it is failed here.
     -> exit 2 after 3s
 
+=== a run killed for silence whose stall flag is deleted under it
+    $ env RUN_TESTS_SILENCE=20 RUN_TESTS_RUNDIR=/tmp/lab-sbx-wpr1t23y/tmp/tmp.VHABVj0yFR timeout -s KILL 300 ./run_tests.sh test_rng runner_fixtures/stalling
+    | 
+    | RUN   test_rng
+    | PASS  rng               0.0 s, 1325 checks
+    | 
+    | run_tests: the run's stall flag is missing or unreadable: /tmp/lab-sbx-wpr1t23y/tmp/tmp.VHABVj0yFR/stalled.X982Fh3W
+    | run_tests: it was written at the start of this run and is gone now, so
+    | run_tests: neither the runtime-error check nor the stall check could be
+    | run_tests: run. Nothing can be concluded about this run; it is failed here.
+    -> exit 2 after 4s
+
 runner guard OK: each of the three is named, none of them hangs, a
-runner guard OK: stalled suite costs only itself, a suite says where it
-runner guard OK: has got to, and a check that could not be read fails the run
+runner guard OK: stalled suite costs only itself and is killed at the budget
+runner guard OK: the run prints -- on a busy machine too -- a suite says where
+runner guard OK: it has got to, and a check that could not be read fails the run

@@ -1,0 +1,81 @@
+# The certifying run's cost table, its suites numbered as the run entered them.
+# Replayed by run_tests.sh's own table over adopted-base-full-suite.log and
+# adopted-base-full-suite-memory.log, after the numbering and the missing last
+# row were fixed. The run itself printed this table one suite short and every
+# suite one number too high; nothing else in it has changed.
+  --  (starting)             peak   0.30 GiB     0.1 min  quiet up to     2 s
+   1  test_rng               peak   0.25 GiB     0.0 min  quiet up to     0 s
+   2  test_determinism       peak  15.18 GiB    14.0 min  quiet up to   263 s
+   3  test_terrain           peak  13.97 GiB     8.2 min  quiet up to   208 s
+   4  test_streaming         peak   5.95 GiB    15.1 min  quiet up to   200 s
+   5  test_terrain_lod       peak   9.86 GiB    48.6 min  quiet up to  1802 s
+   6  test_mountains         peak   8.43 GiB     8.0 min  quiet up to   358 s
+   7  test_biomes            peak  14.06 GiB     7.2 min  quiet up to   200 s
+   8  test_water             peak  17.77 GiB    32.1 min  quiet up to   392 s
+   9  test_islands           peak  19.28 GiB    74.2 min  quiet up to  1658 s
+  10  test_island_cover      peak  15.12 GiB    29.0 min  quiet up to  1176 s
+  11  test_settlements       peak  23.15 GiB    68.8 min  quiet up to  3234 s
+  12  test_scatter           peak  25.46 GiB    51.8 min  quiet up to  1735 s
+  13  test_combat_board      peak  11.83 GiB    17.2 min  quiet up to   392 s
+  14  test_combat_pieces     peak   5.02 GiB     3.2 min  quiet up to   183 s
+  15  test_combat_resolution peak   0.44 GiB     0.1 min  quiet up to     4 s
+  16  test_combat_snap       peak  13.87 GiB    27.2 min  quiet up to   425 s
+  17  test_live_world        peak   9.76 GiB    16.6 min  quiet up to   372 s
+  18  test_layering          peak   0.27 GiB     0.1 min  quiet up to     2 s
+  19  test_asset_tags        peak  12.42 GiB     7.6 min  quiet up to   227 s
+  20  test_characters        peak   4.94 GiB     1.7 min  quiet up to    96 s
+  21  test_character_sheet   peak   0.27 GiB     0.0 min  quiet up to     0 s
+  22  test_items             peak   0.27 GiB     0.0 min  quiet up to     0 s
+  23  test_inventory         peak   0.43 GiB     0.1 min  quiet up to     2 s
+  24  test_drops             peak   5.62 GiB     8.9 min  quiet up to   355 s
+  25  test_ground_items      peak   9.75 GiB     8.3 min  quiet up to   293 s
+  26  test_effects           peak   0.30 GiB     0.1 min  quiet up to     2 s
+  27  test_actions           peak  10.83 GiB     9.6 min  quiet up to   399 s
+  28  test_control_loop      peak  10.83 GiB     9.7 min  quiet up to   403 s
+  29  test_walk_motion       peak   5.36 GiB     3.5 min  quiet up to   160 s
+  30  test_observation       peak   5.43 GiB     5.8 min  quiet up to   196 s
+  31  test_scenario          peak  10.83 GiB    11.0 min  quiet up to   220 s
+  32  test_agent             peak  10.81 GiB    10.2 min  quiet up to   260 s
+  33  test_memory            peak  10.81 GiB    11.2 min  quiet up to   345 s
+  34  test_goals             peak  10.81 GiB     9.0 min  quiet up to   176 s
+  35  test_upkeep            peak   5.43 GiB     2.5 min  quiet up to    88 s
+  36  test_tool_budget       peak   5.64 GiB     2.3 min  quiet up to   129 s
+  37  test_relationships     peak   5.43 GiB     2.8 min  quiet up to    90 s
+  38  test_ownership         peak   5.43 GiB     1.9 min  quiet up to   106 s
+  39  test_checks            peak  10.82 GiB     5.7 min  quiet up to   206 s
+  40  test_goodwill          peak  10.82 GiB     7.1 min  quiet up to   237 s
+  41  test_territory         peak   5.43 GiB     4.1 min  quiet up to   238 s
+  42  test_orchestrator      peak  10.89 GiB     5.9 min  quiet up to   218 s
+  43  test_fight_driver      peak   5.43 GiB     2.4 min  quiet up to   119 s
+  44  test_enemies           peak  13.20 GiB    12.2 min  quiet up to   168 s
+  45  test_turn_seam         peak  10.83 GiB     5.5 min  quiet up to   325 s
+  46  test_strike_record     peak   5.43 GiB     2.2 min  quiet up to   122 s
+  47  test_attack_clips      peak   5.43 GiB     1.6 min  quiet up to    88 s
+  48  test_weapon_patterns   peak   5.43 GiB     1.6 min  quiet up to    88 s
+  49  test_flights           peak  13.11 GiB    15.6 min  quiet up to   836 s
+  50  test_held_items        peak   5.72 GiB     4.7 min  quiet up to   267 s
+  51  test_player_input      peak   5.68 GiB     5.0 min  quiet up to   200 s
+  52  test_player_actions    peak   5.68 GiB     5.5 min  quiet up to   289 s
+  53  test_bargain           peak   5.68 GiB    16.0 min  quiet up to   491 s
+  54  test_player_inventory  peak   5.68 GiB     3.5 min  quiet up to   200 s
+  55  test_player_combat     peak   5.68 GiB     3.5 min  quiet up to   205 s
+  56  test_walk_in_fight     peak   5.67 GiB     4.7 min  quiet up to   274 s
+  57  test_fight_cooloff     peak   6.37 GiB     7.8 min  quiet up to   285 s
+  58  test_window_glow       peak  11.51 GiB    31.0 min  quiet up to  1852 s
+  59  test_board_overlay     peak   5.97 GiB     7.8 min  quiet up to   291 s
+  60  test_board_legend      peak   0.26 GiB     0.1 min  quiet up to     4 s
+  61  test_grass             peak  18.68 GiB    69.6 min  quiet up to  1571 s
+  62  test_camera_read       peak   0.26 GiB     0.1 min  quiet up to     2 s
+  63  test_atmosphere        peak  11.47 GiB    39.2 min  quiet up to  1664 s
+  64  test_reflection        peak   6.49 GiB    19.0 min  quiet up to   952 s
+  65  test_anti_aliasing     peak   6.19 GiB    21.8 min  quiet up to  1043 s
+  66  test_render_shell      peak  11.11 GiB    32.2 min  quiet up to  1081 s
+  67  test_ui_panel          peak  11.08 GiB    34.1 min  quiet up to  1564 s
+  68  test_ui_readout        peak  13.03 GiB    27.4 min  quiet up to  1264 s
+  69  test_ui_exchange       peak   5.68 GiB     3.8 min  quiet up to   195 s
+  70  test_ui_territory      peak  13.03 GiB    27.8 min  quiet up to  1390 s
+  71  test_ui_fit            peak   5.67 GiB     3.8 min  quiet up to   200 s
+  72  test_ui_digits         peak   5.69 GiB     3.5 min  quiet up to   201 s
+  73  test_panel_sentences   not sampled: no 2 s sample fell inside it
+  peak of the whole run: 25.46 GiB, in suite 12 (test_scatter)
+  longest quiet stretch: 3234 s, in suite 11 (test_settlements)

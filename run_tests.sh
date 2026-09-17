@@ -536,14 +536,42 @@ sampler=""
 echo ""
 echo "what this run cost, by suite -- memory held by every engine on the machine,"
 echo "wall time, and the longest stretch in which the transcript did not grow:"
-awk '
+awk -v transcript="$OUT" '
 	function secs(hms,   t) { split(hms, t, ":"); return t[1]*3600 + t[2]*60 + t[3] }
+	# One row of the table: what the recording holds for this suite, or the fact
+	# that it holds nothing for it. A suite the sampler never caught used to
+	# leave no row at all, so the table quietly ran out one suite short of the
+	# run -- the certifying run of cycle 3866 named seventy-two of its seventy-
+	# three, and the one it dropped was the last, a suite that finished in 0.0 s.
+	# A gap in a measurement is a thing to print, not a thing to omit.
+	function row(tag, s,   span) {
+		if (s in first) {
+			span = last[s] - first[s]
+			printf "  %2s  %-22s peak %6.2f GiB  %6.1f min  quiet up to %5.0f s\n", \
+				tag, s, peak[s], span / 60.0, quiet[s]
+		} else {
+			printf "  %2s  %-22s not sampled: no 2 s sample fell inside it\n", tag, s
+		}
+	}
+	# The transcript first, for which suites the run entered and in what order.
+	# The numbers in this table are that order, so "suite 12" is the twelfth
+	# suite of the run. They used to be the order of labels in the recording,
+	# which begins with the stretch before the first engine has said anything --
+	# a phase of the run and not a suite of it -- and so numbered every suite
+	# one higher than it really was.
+	FILENAME == transcript {
+		if (/^RUN   /) {
+			s = substr($0, 7); sub(/[ \t]+$/, "", s)
+			if (!(s in num)) { num[s] = ++n; entered[n] = s }
+		}
+		next
+	}
 	!/^#/ && NF >= 5 {
 		now = secs($1)
 		if (now < prev_t) day += 86400   # the run crossed midnight
 		prev_t = now
 		now += day
-		if (!($2 in first)) { first[$2] = now; order[++n] = $2; quiet[$2] = 0 }
+		if (!($2 in first)) { first[$2] = now; quiet[$2] = 0 }
 		last[$2] = now
 		if ($4 + 0 > peak[$2]) peak[$2] = $4 + 0
 		# The quiet stretch: how long the transcript went without growing. This
@@ -560,19 +588,42 @@ awk '
 		}
 	}
 	END {
+		if ("(starting)" in first) {
+			row("--", "(starting)")
+			worst = peak["(starting)"]; who = "(starting)"; where = "--"
+			longest = quiet["(starting)"]; dullest = who; dull_at = where
+		}
 		for (i = 1; i <= n; i++) {
-			s = order[i]
-			span = last[s] - first[s]
-			printf "  %2d  %-22s peak %6.2f GiB  %6.1f min  quiet up to %5.0f s\n", \
-				i, s, peak[s], span / 60.0, quiet[s]
+			s = entered[i]
+			row(i, s)
+			if (!(s in first)) continue
 			if (peak[s] > worst) { worst = peak[s]; who = s; where = i }
 			if (quiet[s] > longest) { longest = quiet[s]; dullest = s; dull_at = i }
 		}
-		printf "  peak of the whole run: %.2f GiB, in suite %d (%s)\n", worst, where, who
-		if (dullest == "") { dullest = "no suite ran long enough to be quiet"; dull_at = 0 }
-		printf "  longest quiet stretch: %.0f s, in suite %d (%s)\n", longest, dull_at, dullest
+		# A suite the recording knows and the transcript does not. The
+		# transcript is where the run accounts for itself, so this means a suite
+		# that never printed a RUN line; named here rather than dropped.
+		for (s in first) {
+			if (s != "(starting)" && !(s in num)) row("??", s)
+		}
+		# The heaviest and the quietest stretch of the run. Either can fall in
+		# the start-up, before the first engine has named a suite -- on a run of
+		# one cheap suite it usually does -- and that is a stretch of the run to
+		# say plainly rather than a suite to name.
+		if (who == "")
+			print "  peak of the whole run: nothing was sampled"
+		else if (where == "--")
+			printf "  peak of the whole run: %.2f GiB, in the start-up, before any suite was named\n", worst
+		else
+			printf "  peak of the whole run: %.2f GiB, in suite %s (%s)\n", worst, where, who
+		if (dullest == "")
+			print "  longest quiet stretch: no suite ran long enough to be quiet"
+		else if (dull_at == "--")
+			printf "  longest quiet stretch: %.0f s, in the start-up, before any suite was named\n", longest
+		else
+			printf "  longest quiet stretch: %.0f s, in suite %s (%s)\n", longest, dull_at, dullest
 	}
-' "$MEMLOG" 2>/dev/null || echo "  (no memory recording: $MEMLOG)"
+' "$OUT" "$MEMLOG" 2>/dev/null || echo "  (no memory recording: $MEMLOG)"
 awk -v s="$(( SECONDS - run_began ))" 'BEGIN {
 	printf "  wall time of the whole run: %.1f min (%.2f h)\n", s / 60.0, s / 3600.0
 }'
