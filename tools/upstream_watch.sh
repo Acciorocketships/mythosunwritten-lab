@@ -46,10 +46,12 @@ audit_pins() {
   # instance) and are not pins of the base; a token that resolves nowhere here
   # is an upstream hash, and a drifted second copy of one fails the audit.
   local bad=0 line file text tok n=0 skipped=0
-  # Three files are the watch itself and quote hashes for a living: the pin's
-  # own home, this script (asserted below to carry no hash at all), and the
-  # documentation, whose transcripts quote upstream commits on purpose.
-  local self_docs=" $ADOPTION docs/upstream-watch.md tools/upstream_watch.sh "
+  # Four files are the watch and the import themselves, and quote hashes for a
+  # living: the pin's own home, this script (asserted below to carry no hash at
+  # all), and the two documents whose transcripts quote upstream commits on
+  # purpose -- the delta-import rehearsal necessarily names an older upstream
+  # commit, which is not a pin of the base and must not be read as one.
+  local self_docs=" $ADOPTION docs/upstream-watch.md docs/upstream-delta-import.md tools/upstream_watch.sh "
   if grep -q -E '\b[0-9a-f]{7,40}\b' tools/upstream_watch.sh; then
     echo "upstream-watch: SECOND PIN -- tools/upstream_watch.sh has grown a hash of its own" >&2
     bad=1

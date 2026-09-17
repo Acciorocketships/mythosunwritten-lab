@@ -50,6 +50,98 @@ rather than merged with `git merge --allow-unrelated-histories`. Reasons:
   performed its history consolidation and archived its branches; this import
   inherits that consolidated state, not the branch churn behind it.
 
+## Taking an upstream update: the delta import
+
+Because the import was a squash copy and not a merge, the two repositories
+share no ancestor, and `git merge` has nothing to merge — there is no common
+commit for it to diff against. The equivalent of "merge upstream in" here is:
+take the delta between the pinned commit and upstream's new HEAD, apply it to
+the paths this repository adopted, decide by hand the places where this project
+has since built on one of them, and then move the pin. The procedure below is
+that, written out; `tools/upstream_delta.sh` performs its mechanical half, and
+`tools/upstream_delta_rehearsal.sh` proves it against a delta whose answer is
+already known. The full rehearsal transcript is
+[docs/upstream-delta-import.md](docs/upstream-delta-import.md).
+
+**1. Establish that upstream has actually moved.**
+
+    $ ./tools/upstream_watch.sh
+    upstream-watch: upstream has MOVED -- ...      # exit 3, and it prints the new HEAD
+
+Exit 0 means there is nothing to import and the rest of this section does not
+run. The pin is advanced only against a real move (step 6).
+
+**2. Produce the delta, sorted into what may be applied and what may not.**
+
+    $ ./tools/upstream_delta.sh --out ../delta-work
+
+It reads the pin and the URL out of the Provenance section above, clones the
+source repo blobless and read-only (`--filter=blob:none`, about 2 MB of commits
+and trees against ~189 MB for a full history), checks out the two trees, and
+writes four things next to a printed classification:
+
+| File | What it holds |
+| --- | --- |
+| `delta-apply.patch` | every changed adopted path that may be applied as-is |
+| `delta-rename.patch` | the one path the import renamed, already retargeted |
+| `decide-project.godot.patch` | for reference; this file is re-merged, not patched |
+| `decide-gitignore.patch` | for reference; this file is merged by hand |
+
+Nothing in the work directory touches this checkout.
+
+**3. Drop the carve-outs.** Every path in the table under "What was
+deliberately left out" stays out. The script excludes them from the patch by
+pathspec; if that list and the table below ever disagree, the table is right
+and the script is wrong.
+
+**4. Apply the mechanical half.**
+
+    $ git apply --check --binary ../delta-work/delta-apply.patch   # refuse to guess
+    $ git apply --binary ../delta-work/delta-apply.patch
+    $ git apply --binary ../delta-work/delta-rename.patch
+
+`--check` first, always: a hunk that does not apply is a file this project has
+edited since the import, which is a decision and not a failure to route around.
+
+**5. Decide the rest by hand.** The classification names four kinds:
+
+- **`project.godot`** — re-run the merge instead of patching it:
+  `python3 tools/upstream_merge_project_godot.py <this repo's pre-adoption
+  project.godot> <their project.godot at the new commit> <new short hash>`.
+  That script *is* the collision resolution recorded below, written as a rule,
+  and it warns on any section of theirs the rule does not cover.
+- **`.gitignore`** — theirs lives in this repo as a labelled block inside a
+  much longer file of ours, so their hunk has no context to apply against and
+  `git apply` refuses it. Rebuild the block rather than splicing into it: it
+  holds the rules the adoption took from them, **kept in their order at the new
+  commit**, its membership being what the block already held plus what the
+  delta adds. There is no line to add new rules *after* — a rule they add may
+  belong above the ones already there, and the rehearsal caught exactly that.
+- **Adopted paths this repository has rewritten since the import** — the script
+  derives this list by diffing the adoption commit against `HEAD`; do not
+  recall it. Rebuild on their new version rather than re-applying ours over it
+  (the standing direction: start from their code, do not write adapters).
+- **Adopted scripts this project's own code calls into** — derived the same
+  way, by matching the global `class_name`s our files name against the adopted
+  files the delta changes. These apply cleanly and are still decisions: a
+  constant they retune changes every world we generate from it.
+
+Any global `class_name` the delta *introduces* is a fresh collision risk
+against this repository's own globals; the script lists them and says which
+collide. A collision is resolved on our side, as the four below were.
+
+**6. Re-import, re-run, and only then advance the pin.**
+
+    $ ./tools/godot/godot4 --headless --path . --import   # new scripts have no .uid yet
+    $ ./run_tests.sh                                      # hours; see README
+
+Then edit the two Provenance lines at the top of this file to the new hash and
+date — that edit *is* advancing the pin, because nothing else in the tree holds
+a copy — and confirm it:
+
+    $ ./tools/upstream_watch.sh          # exit 0, base is current again
+    $ ./tools/upstream_watch.sh --pins   # no second copy of the new hash appeared
+
 ## What was deliberately left out
 
 | Left out | Size | Why |
