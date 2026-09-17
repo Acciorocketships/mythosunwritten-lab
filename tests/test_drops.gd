@@ -53,12 +53,12 @@ const WORLD_TICKS := 20
 ## these: the two are separate streams, and the cheapest way to keep them
 ## separate is for neither to be able to reach the other.
 const WORLD_CLASSES := [
-	"SimWorld", "Simulation", "TerrainQuery", "SimTerrainSurfaceField",
+	"SimWorld", "Simulation", "TerrainQuery", "AdoptedGround",
 	"TerrainStreamer", "SimTerrainChunkMesher", "TerrainChunkGeometry",
-	"BiomeField", "BiomeCatalog", "SimBiomeProfile", "SimWaterField", "WaterSheet",
+	"BiomeCatalog", "SimBiomeProfile", "WaterSheet",
 	"IslandField", "FloatingIsland", "IslandStreamer", "SettlementField",
 	"Settlement", "SettlementStreamer", "PathNetwork", "DecorationScatter",
-	"ScatterPatch", "ScatterStreamer", "MountainField", "ValueNoise",
+	"ScatterPatch", "ScatterStreamer", "ValueNoise",
 ]
 
 ## The item layer's files, by the class each one declares.

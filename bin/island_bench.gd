@@ -112,9 +112,7 @@ func _time_queries(seed_value: int) -> void:
 
 
 func _new_field(seed_value: int) -> IslandField:
-	var surface := SimTerrainSurfaceField.new(seed_value)
-	var biomes := BiomeField.new(seed_value)
-	return IslandField.new(SimWaterField.new(surface, biomes), biomes)
+	return IslandField.new(AdoptedGround.shared_for_seed(seed_value))
 
 
 ## What dressing an island costs, and what that comes to per streamed chunk.

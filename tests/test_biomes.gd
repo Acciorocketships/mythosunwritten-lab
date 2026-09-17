@@ -38,20 +38,23 @@ func run() -> void:
 
 
 func _the_biome_is_a_pure_function() -> void:
-	var field := BiomeField.new(SEED)
-	var again := BiomeField.new(SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
+	var again := AdoptedGround.shared_for_seed(SEED)
 	var probes := [
 		Vector2(0.0, 0.0), Vector2(37.5, -412.25), Vector2(-2048.0, 1024.0),
 		Vector2(6.25, 6.25), Vector2(-0.5, -0.5), Vector2(9000.0, 9000.0),
 	]
 
-	# Two field objects with the same seed answer identically.
+	# Two ground objects with the same seed answer identically. The second is
+	# the shared one for that seed, which is the object every other layer in
+	# the process reads through -- the claim is that nothing a caller does to
+	# one of them can change what the other answers.
 	for probe in probes:
-		equal(again.biome_at(probe.x, probe.y), field.biome_at(probe.x, probe.y),
+		equal(again.biome(probe.x, probe.y), field.biome(probe.x, probe.y),
 			"two biome fields with the same seed disagree at (%f, %f)"
 			% [probe.x, probe.y])
-		equal(again.profile_at(probe.x, probe.y).digest(),
-			field.profile_at(probe.x, probe.y).digest(),
+		equal(again.profile(probe.x, probe.y).digest(),
+			field.profile(probe.x, probe.y).digest(),
 			"two biome fields with the same seed blend differently at (%f, %f)"
 			% [probe.x, probe.y])
 
@@ -60,22 +63,22 @@ func _the_biome_is_a_pure_function() -> void:
 	var first_pass: Array[String] = []
 	for probe in probes:
 		first_pass.append("%s/%s" % [
-			field.biome_at(probe.x, probe.y), field.profile_at(probe.x, probe.y).digest(),
+			field.biome(probe.x, probe.y), field.profile(probe.x, probe.y).digest(),
 		])
 	for i in 500:
-		field.profile_at(float(i) * 7.3, float(i) * -3.1)
+		field.profile(float(i) * 7.3, float(i) * -3.1)
 	for index in range(probes.size() - 1, -1, -1):
 		var probe: Vector2 = probes[index]
 		equal("%s/%s" % [
-				field.biome_at(probe.x, probe.y),
-				field.profile_at(probe.x, probe.y).digest(),
+				field.biome(probe.x, probe.y),
+				field.profile(probe.x, probe.y).digest(),
 			], first_pass[index],
 			"the biome field changed its answer at (%f, %f) after other samples"
 			% [probe.x, probe.y])
 
 	# The axes are continuous, so a step of a millimetre is a step of nothing.
-	var here := field.axes_at(120.0, -64.0)
-	var nearby := field.axes_at(120.001, -64.0)
+	var here := field.axes(120.0, -64.0)
+	var nearby := field.axes(120.001, -64.0)
 	check(here.distance_to(nearby) < 0.001,
 		"the biome axes jumped %f over a millimetre" % here.distance_to(nearby))
 
@@ -83,7 +86,7 @@ func _the_biome_is_a_pure_function() -> void:
 	for probe in probes:
 		var total := 0.0
 		for id in BiomeCatalog.IDS:
-			var weight := float(field.weights_at(probe.x, probe.y)[id])
+			var weight := float(field.weights(probe.x, probe.y)[id])
 			check(weight >= 0.0 and weight <= 1.0,
 				"weight for %s at (%f, %f) is %f, outside [0, 1]"
 				% [id, probe.x, probe.y, weight])
@@ -94,12 +97,12 @@ func _the_biome_is_a_pure_function() -> void:
 
 
 func _the_biome_depends_on_the_seed() -> void:
-	var field := BiomeField.new(SEED)
-	var other := BiomeField.new(OTHER_SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
+	var other := AdoptedGround.shared_for_seed(OTHER_SEED)
 	var differences := 0
 	for i in 60:
 		var x := float(i) * 37.0
-		if field.biome_at(x, 12.0) != other.biome_at(x, 12.0):
+		if field.biome(x, 12.0) != other.biome(x, 12.0):
 			differences += 1
 	check(differences > 20,
 		"two seeds produced nearly the same biome map: %d of 60 samples differed"
@@ -158,7 +161,7 @@ func _chunk_colours_ignore_build_order() -> void:
 
 
 func _all_five_named_biomes_are_resolvable() -> void:
-	var counts := _census(BiomeField.new(SEED), Vector2.ZERO, 90, 18.0)
+	var counts := _census(AdoptedGround.shared_for_seed(SEED), Vector2.ZERO, 90, 18.0)
 	var total := 0
 	for id in BiomeCatalog.IDS:
 		total += int(counts[id])
@@ -175,7 +178,7 @@ func _the_marsh_is_a_scattered_pocket() -> void:
 	# The design asks for the twilight marsh to turn up anywhere as an isolated
 	# hollow, at the doorstep as readily as at the frontier. Census two regions
 	# far apart and compare how much of each it takes.
-	var field := BiomeField.new(SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
 	var near := _census(field, Vector2.ZERO, 90, 18.0)
 	var far := _census(field, FAR_FROM_SPAWN, 90, 18.0)
 	var samples := 181 * 181
@@ -205,7 +208,7 @@ func _the_marsh_is_a_scattered_pocket() -> void:
 				for column in 12:
 					var x := float(block_column * 12 + column - 36) * 18.0
 					var z := float(block_row * 12 + row - 36) * 18.0
-					if field.biome_at(x, z) == BiomeCatalog.TWILIGHT_MARSH:
+					if field.biome(x, z) == BiomeCatalog.TWILIGHT_MARSH:
 						found = true
 						break
 				if found:
@@ -263,7 +266,7 @@ func _every_named_biome_carries_a_full_profile() -> void:
 
 
 func _borders_blend_rather_than_snap() -> void:
-	var field := BiomeField.new(SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
 	var border := _find_border(field)
 	check(border.has("at"),
 		"no biome border was found to sample -- the map may have collapsed to one biome")
@@ -280,10 +283,10 @@ func _borders_blend_rather_than_snap() -> void:
 	for i in samples:
 		var offset := (float(i) / float(samples - 1) - 0.5) * 2.0 * span
 		var point := at + along * offset
-		blended.append(field.profile_at(point.x, point.y))
+		blended.append(field.profile(point.x, point.y))
 		# What the same walk would look like if the profile were looked up by
 		# whichever biome happened to be strongest: the thing being ruled out.
-		snapped.append(BiomeCatalog.profile(field.biome_at(point.x, point.y)))
+		snapped.append(BiomeCatalog.profile(field.biome(point.x, point.y)))
 
 	var blended_total := _profile_distance(blended[0], blended[samples - 1])
 	var snapped_total := _profile_distance(snapped[0], snapped[samples - 1])
@@ -349,12 +352,12 @@ func _a_handed_out_profile_is_detached() -> void:
 	equal(after.prop_tags, before.prop_tags,
 		"writing into a handed-out profile changed the catalog's prop tags")
 
-	var field := BiomeField.new(SEED)
-	var sampled := field.profile_at(0.0, 0.0)
+	var field := AdoptedGround.shared_for_seed(SEED)
+	var sampled := field.profile(0.0, 0.0)
 	var digest_before := sampled.digest()
 	sampled.prop_tags.append("smuggled_in")
 	sampled.fog_density = 99.0
-	var resampled := field.profile_at(0.0, 0.0)
+	var resampled := field.profile(0.0, 0.0)
 	equal(resampled.digest(), digest_before,
 		"writing into a sampled profile changed what the field answers next time")
 
@@ -374,17 +377,17 @@ func _biomes_match_across_processes() -> void:
 		"two separate runs of seed 1234 produced different biomes")
 
 	# And the same positions, resolved here in this process, come out identical.
-	var field := BiomeField.new(1234)
+	var field := AdoptedGround.shared_for_seed(1234)
 	var rebuilt := PackedStringArray()
 	var named := {}
 	for line in lines:
 		var parts := line.split(" ")
 		var x := float(parts[1])
 		var z := float(parts[2])
-		var id := field.biome_at(x, z)
+		var id := field.biome(x, z)
 		named[id] = true
 		rebuilt.append("biome %.1f %.1f %s %.6f %s" % [
-			x, z, id, float(field.weights_at(x, z)[id]), field.profile_at(x, z).digest(),
+			x, z, id, float(field.weights(x, z)[id]), field.profile(x, z).digest(),
 		])
 	equal(rebuilt, lines,
 		"resolving seed 1234's biomes in this process gave a different map")
@@ -394,7 +397,7 @@ func _biomes_match_across_processes() -> void:
 
 
 ## How many of each biome a square region of samples resolves to.
-func _census(field: BiomeField, centre: Vector2, span: int, spacing: float) -> Dictionary:
+func _census(field: AdoptedGround, centre: Vector2, span: int, spacing: float) -> Dictionary:
 	var counts := {}
 	for id in BiomeCatalog.IDS:
 		counts[id] = 0
@@ -402,27 +405,27 @@ func _census(field: BiomeField, centre: Vector2, span: int, spacing: float) -> D
 		for column in range(-span, span + 1):
 			var x := centre.x + float(column) * spacing
 			var z := centre.y + float(row) * spacing
-			counts[field.biome_at(x, z)] += 1
+			counts[field.biome(x, z)] += 1
 	return counts
 
 
 ## A place where the strongest biome changes, and the direction to walk to cross
 ## it. Returns {} if the search found nothing, which would itself be a failure.
-func _find_border(field: BiomeField) -> Dictionary:
+func _find_border(field: AdoptedGround) -> Dictionary:
 	var step := 3.0
 	for line in 8:
 		var z := float(line) * 137.0
-		var previous := field.biome_at(-1200.0, z)
+		var previous := field.biome(-1200.0, z)
 		for i in range(1, 800):
 			var x := -1200.0 + float(i) * step
-			var here := field.biome_at(x, z)
+			var here := field.biome(x, z)
 			if here == previous:
 				continue
 			previous = here
 			# Only a border worth measuring: the two sides must actually look
 			# different, or "gradual" would be indistinguishable from "flat".
-			var left := BiomeCatalog.profile(field.biome_at(x - 24.0, z))
-			var right := BiomeCatalog.profile(field.biome_at(x + 24.0, z))
+			var left := BiomeCatalog.profile(field.biome(x - 24.0, z))
+			var right := BiomeCatalog.profile(field.biome(x + 24.0, z))
 			if left.id == right.id or _profile_distance(left, right) < 0.3:
 				continue
 			return {"at": Vector2(x, z), "along": Vector2(1.0, 0.0)}

@@ -1,17 +1,26 @@
 extends RefCounted
-## The adopted ground: this repo's discrete sim reading mythosunwritten's
-## continuous fields.
+## The ground: this repo's discrete sim reading mythosunwritten's continuous
+## fields, written against those fields directly.
 ##
 ## The base adoption (see ADOPTION.md) brought in a far richer terrain stack --
 ## a streamed, storey-quantised heightfield with river carving (HeightfieldPlan
 ## / TerrainSurfaceField), a hydrostatically filled water plan (WaterPlan /
 ## WaterFieldContext), and biome fields (Helper.biome_*) -- all pure functions
-## of world position and seed. This file is the whole of the seam between that
-## stack and this repo's sim: it owns the adopted plans for a seed, and its
-## three inner classes stand in for the retired from-scratch ground fields by
-## extending them and overriding every sampling primitive, so everything layered
-## above (TerrainQuery, IslandField, SettlementField, PathNetwork, the combat
-## board, the walk) keeps its one read surface and now reads their ground.
+## of world position and seed. This file is the whole of the sim's ground
+## reading: it owns the adopted plans for a seed and answers every question the
+## layers above ask about a patch of land, in their terms. There is no second
+## ground regime underneath it and nothing here translates between two: what a
+## caller gets is the adopted stack's own answer, named the way this project's
+## layers ask for it.
+##
+## It is written in the base's idiom. Positions go in as Vector2 world points
+## and Vector3 world positions, heights come out of TerrainSurfaceField.surface_y
+## over a HeightfieldRegion, wetness and level come off a WaterFieldContext, and
+## the biome mix is Helper.biome_weights5 -- the base's own calls, on the base's
+## own plans, reached through the base's own WorldFieldBlockCache. The only
+## thing this file adds is the arithmetic the sim needs and the base does not
+## have a name for: a dry column's two ordered surfaces, whether a dry position
+## is a bank, and whether the water standing on a position is still or running.
 ##
 ## **The cell-to-patch mapping, stated once.** The sim's spatial unit is the
 ## combat cell: cell (i, j) is the fixed, world-anchored patch of heightfield
@@ -47,6 +56,20 @@ const STANDING_PROBE := 9.0
 ## STANDING_PROBE except on a dead-flat reach, which reads as standing --
 ## an acceptable blur, since the distinction only steers village siting.
 const STANDING_EPS := 0.01
+
+## How far from dry land water has to be for that land to count as a bank, and
+## how many directions the test looks in.
+##
+## Banks are where the scatter layer puts reeds, cattails and lily pads, and
+## where a path meeting one becomes a bridge. The base has a shore *distance*
+## (WaterFieldContext.shore_distance_at) but reaching it obliges every block
+## cache to carry a shore-contour limit, which is a streaming cost paid on
+## every block for an answer four layers want at a handful of positions. So
+## this stays what it has always been in this project: dry here, wet within
+## reach in one of eight directions. Eight is enough to catch a channel from
+## any angle without making the query expensive.
+const BANK_REACH := 2.0
+const BANK_DIRECTIONS := 8
 
 ## How many block-cache entries each of the two field caches may hold. A block
 ## is 192 world units square and its entry is dominated by the water context,
@@ -143,15 +166,29 @@ func _init(seed_value: int = 0) -> void:
 	base_fields = WorldFieldBlockCache.new(base_plan, water_plan, 0.0, 0.0, FIELD_BLOCKS)
 
 
+# ---------------------------------------------------------------------------
+# The land
+# ---------------------------------------------------------------------------
+
 ## The carved ground height: what you stand on, rivers and basins already cut.
+##
+## This is the height the terrain is meshed at, so a river bed is a real dip in
+## the geometry rather than a texture on a flat plain.
 func ground_height(x: float, z: float) -> float:
 	return TerrainSurfaceField.surface_y(fields.region_at(Vector2(x, z)), x, z)
 
 
 ## The uncarved ground height: the land before water was cut out of it.
+##
+## Wanted only by things reasoning about the carving itself. Everything that
+## means "the ground" wants ground_height().
 func base_height(x: float, z: float) -> float:
 	return TerrainSurfaceField.surface_y(base_fields.region_at(Vector2(x, z)), x, z)
 
+
+# ---------------------------------------------------------------------------
+# The water
+# ---------------------------------------------------------------------------
 
 ## The two surfaces of the water column here: x = the bed you would stand on,
 ## y = the water surface, below the bed on dry ground. This is the adopted
@@ -172,10 +209,41 @@ func is_wet(x: float, z: float) -> bool:
 	return fields.water_at(point).is_wet(point)
 
 
+## How deep the water is here, in world units. Zero on dry land.
+func water_depth(x: float, z: float) -> float:
+	var column := water_column(x, z)
+	return maxf(0.0, column.y - column.x)
+
+
+## How high the water surface reaches here. Below the bed on dry land, which is
+## the same thing as saying there is no water.
+func water_surface(x: float, z: float) -> float:
+	return water_column(x, z).y
+
+
+## Whether this position is a bank: dry ground with water within reach.
+##
+## Asking for it here rather than working it out again in each of the layers
+## that want it is what keeps them all agreeing about where the water's edge
+## is.
+func is_bank(x: float, z: float, reach: float = BANK_REACH) -> bool:
+	if is_wet(x, z):
+		return false
+	for direction in BANK_DIRECTIONS:
+		var angle := TAU * float(direction) / float(BANK_DIRECTIONS)
+		if is_wet(x + cos(angle) * reach, z + sin(angle) * reach):
+			return true
+	return false
+
+
 ## The level standing water is filled to here, or the dry column's sunken
 ## surface. Standing water -- a pond or lake, filled to one flat level -- is
 ## told from a river by probing the level a little way out: a pond's level
 ## holds, a river's falls with the ground.
+##
+## The village layer is the only caller: a site is refused a running-water
+## shore, and accepted on a still one. The adopted stack has no water table to
+## compare against, so "still" is measured rather than looked up.
 func standing_level(x: float, z: float) -> float:
 	var column := water_column(x, z)
 	if column.y <= column.x:
@@ -191,14 +259,22 @@ func standing_level(x: float, z: float) -> float:
 	return column.y
 
 
-## Their seven biome weights folded onto this repo's five named biomes.
+# ---------------------------------------------------------------------------
+# The biomes
+# ---------------------------------------------------------------------------
+
+## Their seven biome weights folded onto this project's five named biomes.
 ##
 ## Five of their names are this project's own roster, kept one for one. The
-## two extras fold into meadow: amber_heath is open warm ground and
-## jade_wetlands common lush lowland, and folding both into the open-grass
-## baseline keeps highland genuinely rocky and the twilight marsh the rare
-## eerie pocket the design asks for. The render seam may later adopt their
-## full profile set; this mapping is the sim's until it does.
+## two extras fold into meadow, and that fold is a recorded decision
+## (M-biome-roster-stays-five-for-now), not a default: amber_heath is open
+## warm ground and jade_wetlands common lush lowland, and both are open,
+## walkable, unremarkable country -- which is what meadow is here. Folding
+## jade_wetlands into twilight_marsh instead was considered and rejected: the
+## marsh is a rare eerie pocket in this design and jade_wetlands is not rare,
+## so that fold would have put marsh fog over a fifth of the world. Adopting
+## all seven names reaches the palette, the prop tags, the scatter catalog and
+## the item drops, which is its own item rather than this one.
 func weights(x: float, z: float) -> Dictionary:
 	var theirs := Helper.biome_weights5(Vector3(x, 0.0, z), world_seed)
 	return {
@@ -211,7 +287,34 @@ func weights(x: float, z: float) -> Dictionary:
 	}
 
 
-## The adopted style axes in the old field's convention:
+## The name of the biome with the largest share here.
+##
+## Ties are broken by the catalog's fixed order rather than by whichever was
+## looked at first, so the answer does not depend on how a dictionary happened
+## to be walked.
+func biome(x: float, z: float) -> String:
+	var mix := weights(x, z)
+	var best := BiomeCatalog.IDS[0]
+	var best_weight := -1.0
+	for id in BiomeCatalog.IDS:
+		var weight := float(mix[id])
+		if weight > best_weight:
+			best_weight = weight
+			best = id
+	return best
+
+
+## The blended profile here: the look of this position, as plain data.
+##
+## What comes back is built fresh from the catalog on every call, so it is a
+## detached value that no one else holds a reference to. Colours, fog, ambient
+## light and foliage density are all weighted averages, which is why walking
+## across a border shifts the mood gradually instead of switching it.
+func profile(x: float, z: float) -> SimBiomeProfile:
+	return BiomeCatalog.blend(weights(x, z))
+
+
+## The adopted style axes in this project's convention:
 ## x = how wooded, y = how rocky, z = how wet.
 func axes(x: float, z: float) -> Vector3:
 	var pos := Vector3(x, 0.0, z)
@@ -222,76 +325,42 @@ func axes(x: float, z: float) -> Vector3:
 	)
 
 
-## The old BiomeField, answering from the adopted biome fields. Only the
-## sampling primitives are overridden; every derived answer (biome_at,
-## profile_at, the tints) is inherited and routes through weights_at.
-class Biomes extends BiomeField:
-	var ground: AdoptedGround = null
-
-	func _init(adopted: AdoptedGround) -> void:
-		super(adopted.world_seed)
-		ground = adopted
-
-	func axes_at(x: float, z: float) -> Vector3:
-		return ground.axes(x, z)
-
-	func moisture_at(x: float, z: float) -> float:
-		return ground.axes(x, z).z
-
-	func marsh_strength_at(x: float, z: float) -> float:
-		return float(ground.weights(x, z)[BiomeCatalog.TWILIGHT_MARSH])
-
-	func weights_at(x: float, z: float) -> Dictionary:
-		return ground.weights(x, z)
+## How wet the land is here, in [0, 1]: the moisture axis on its own.
+func moisture(x: float, z: float) -> float:
+	return Helper.biome_moisture01(Vector3(x, 0.0, z), world_seed)
 
 
-## The old uncarved-surface field, answering from the adopted heightfield.
-## There is no separate mountain layer any more -- the adopted field's ridged
-## spine is simply part of the ground -- so the uplift decomposition answers
-## zero and the hills are the whole surface.
-class Surface extends SimTerrainSurfaceField:
-	var ground: AdoptedGround = null
-
-	func _init(adopted: AdoptedGround, biome_field: BiomeField) -> void:
-		super(adopted.world_seed, biome_field)
-		ground = adopted
-
-	func height_at(x: float, z: float) -> float:
-		return ground.base_height(x, z)
-
-	func hill_height_at(x: float, z: float) -> float:
-		return ground.base_height(x, z)
-
-	func uplift_at(_x: float, _z: float) -> float:
-		return 0.0
-
-	func uplift_mask_at(_x: float, _z: float) -> float:
-		return 0.0
+## How much of a marsh pocket there is here, in [0, 1].
+func marsh_strength(x: float, z: float) -> float:
+	return Helper.biome_marsh_pocket01(Vector3(x, 0.0, z), world_seed)
 
 
-## The old water field, answering from the adopted water plan. sample_column
-## is the primitive every inherited answer (depth_at, is_water_at, is_bank_at,
-## surface_level_at, bed_height_at) reads through, so overriding it and the
-## two callers that want more than the column is the whole rebind.
-class Water extends SimWaterField:
-	var ground: AdoptedGround = null
+## Just the ground colour here. The mesher wants this per corner and nothing
+## else, and going through it avoids building a whole profile per corner.
+func ground_tint(x: float, z: float) -> Color:
+	return _blended_tint(x, z, BiomeCatalog.ground_tint_of)
 
-	func _init(
-		adopted: AdoptedGround, surface_field: SimTerrainSurfaceField, biome_field: BiomeField
-	) -> void:
-		super(surface_field, biome_field)
-		ground = adopted
 
-	func sample_column(x: float, z: float) -> Vector2:
-		return ground.water_column(x, z)
+## Just the water colour here, wanted per vertex of the water sheet the same
+## way the ground colour is wanted per corner of a chunk.
+func water_tint(x: float, z: float) -> Color:
+	return _blended_tint(x, z, BiomeCatalog.water_tint_of)
 
-	func is_water_at(x: float, z: float) -> bool:
-		return ground.is_wet(x, z)
 
-	## The old table was how standing water was told from running water: a
-	## pond's surface equals it, a river's does not. The adopted stack has no
-	## table; what it has is hydrostatic fill, flat over standing water, so
-	## this answers the column's own level exactly where that level stands
-	## still and something strictly below it where the water is running.
-	func table_level_at(x: float, z: float) -> float:
-		return ground.standing_level(x, z)
+## Just the rock colour here, wanted per vertex of a cliff the same way. The
+## rim of a floating island is the one that asks for it so far.
+func rock_tint(x: float, z: float) -> Color:
+	return _blended_tint(x, z, BiomeCatalog.rock_tint_of)
+
+
+## One of the catalog's colours, averaged over whichever biomes have a share of
+## this position. Which colour is the caller's business; the weighting is the
+## same for all of them, and is the same weighting a whole profile would use.
+func _blended_tint(x: float, z: float, colour_of: Callable) -> Color:
+	var mix := weights(x, z)
+	var tint := Color(0, 0, 0)
+	for id in BiomeCatalog.IDS:
+		var share := float(mix[id])
+		if share > 0.0:
+			tint += (colour_of.call(id) as Color) * share
+	return tint

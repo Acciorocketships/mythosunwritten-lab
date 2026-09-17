@@ -120,7 +120,7 @@ func _villages(query: TerrainQuery, span: float) -> Array[Settlement]:
 ## ring that meets water, so a village standing on a shore costs a handful of
 ## probes and one in the middle of dry country costs the whole search.
 func _nearest_water(query: TerrainQuery, site: Settlement) -> Dictionary:
-	var water := query.water_field
+	var water := query.ground
 	var steps := int(ceil((site.radius + SEARCH_REACH) / SEARCH_STEP))
 	for step in range(0, steps + 1):
 		var reach := float(step) * SEARCH_STEP
@@ -129,10 +129,10 @@ func _nearest_water(query: TerrainQuery, site: Settlement) -> Dictionary:
 			var angle := TAU * float(direction) / float(directions)
 			var x := site.centre_x + cos(angle) * reach
 			var z := site.centre_z + sin(angle) * reach
-			var column := water.sample_column(x, z)
+			var column := water.water_column(x, z)
 			if column.y <= column.x:
 				continue
-			var standing := absf(column.y - water.table_level_at(x, z)) < 0.0001
+			var standing := absf(column.y - water.standing_level(x, z)) < 0.0001
 			return {
 				"gap": maxf(0.0, reach - site.radius),
 				"reach": reach,

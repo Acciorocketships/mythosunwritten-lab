@@ -325,7 +325,7 @@ func _how_much_grows_and_what_colour_it_is_come_from_the_biome_profile() -> void
 				wanted += GrassLayer.grown_share(
 					GrassLayer.clearing_at(at_x, at_z, world.world_seed),
 					GrassLayer.coverage_for(
-						world.terrain.biome_field.weights_at(at_x, at_z)
+						world.terrain.ground.weights(at_x, at_z)
 					)
 				) / float(GrassLayer.LATTICE * GrassLayer.LATTICE)
 			for row in GrassLayer.FIELD_SIDE:
@@ -599,7 +599,7 @@ func _the_mask_wanders_rather_than_flickering_from_cell_to_cell() -> void:
 		var z := -318.25 + float(at) * GrassLayer.CELL * 0.21
 		var grown := GrassLayer.grown_share(
 			GrassLayer.clearing_at(x, z, SEED),
-			GrassLayer.coverage_for(terrain.biome_field.weights_at(x, z))
+			GrassLayer.coverage_for(terrain.ground.weights(x, z))
 		)
 		var now := 2
 		if grown <= 0.0:
@@ -676,7 +676,7 @@ func _the_curve_sends_weak_ground_bare_and_moderate_ground_closed() -> void:
 		var z := 640.0 - float(at) * 0.43
 		var grown := GrassLayer.grown_share(
 			GrassLayer.clearing_at(x, z, SEED),
-			GrassLayer.coverage_for(terrain.biome_field.weights_at(x, z))
+			GrassLayer.coverage_for(terrain.ground.weights(x, z))
 		)
 		if grown <= 0.0:
 			bare += 1
@@ -754,7 +754,7 @@ func _grass_is_thicker_in_the_open_than_under_a_closed_canopy() -> void:
 			var id := terrain.biome_at(x, z)
 			totals[id] = float(totals[id]) + GrassLayer.grown_share(
 				GrassLayer.clearing_at(x, z, SEED),
-				GrassLayer.coverage_for(terrain.biome_field.weights_at(x, z))
+				GrassLayer.coverage_for(terrain.ground.weights(x, z))
 			)
 			counts[id] = int(counts[id]) + 1
 	var in_meadow := float(totals[BiomeCatalog.MEADOW]) \
@@ -803,7 +803,7 @@ func _grass_coverage_blends_across_a_biome_border() -> void:
 		var last_id := ""
 		for at in 1200:
 			var x := -900.0 + float(at) * 1.5
-			var weights := terrain.biome_field.weights_at(x, z)
+			var weights := terrain.ground.weights(x, z)
 			var here := GrassLayer.coverage_for(weights)
 			var id := terrain.biome_at(x, z)
 			# The same table read by switching on the strongest biome instead of

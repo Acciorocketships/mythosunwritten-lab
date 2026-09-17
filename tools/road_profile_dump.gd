@@ -79,7 +79,7 @@ func _dump(query: TerrainQuery, edge: Dictionary, junction: Vector2, way: float)
 		last = at
 		if travelled > SPAN:
 			break
-		var bed := query.water_field.bed_height_at(at.x, at.y)
+		var bed := query.ground.ground_height(at.x, at.y)
 		rows.append("%.4f,%.4f,%.4f,%.4f,%.4f" % [
 			way * travelled, at.x, at.y, query.ground_height_at(at.x, at.y),
 			bed + query.settlement_field.ground_delta_at(at.x, at.y, bed),

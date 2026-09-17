@@ -200,11 +200,11 @@ func _banks_are_the_dry_edge_of_the_water() -> void:
 				"(%f, %f) is reported as both water and a bank" % [x, z])
 			# ...with water within reach of it.
 			var near_water := false
-			for direction in SimWaterField.BANK_DIRECTIONS:
-				var angle := TAU * float(direction) / float(SimWaterField.BANK_DIRECTIONS)
+			for direction in AdoptedGround.BANK_DIRECTIONS:
+				var angle := TAU * float(direction) / float(AdoptedGround.BANK_DIRECTIONS)
 				if terrain.is_water_at(
-					x + cos(angle) * SimWaterField.BANK_REACH,
-					z + sin(angle) * SimWaterField.BANK_REACH,
+					x + cos(angle) * AdoptedGround.BANK_REACH,
+					z + sin(angle) * AdoptedGround.BANK_REACH,
 				):
 					near_water = true
 					break

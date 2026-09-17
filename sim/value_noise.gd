@@ -87,33 +87,6 @@ func sample(x: float, z: float) -> float:
 	return total
 
 
-## The same layers folded into ridges, summed: `1 - |value|` per layer instead
-## of the value itself, in [0, sum of the layer amplitudes].
-##
-## The fold is what turns a field of rounded swells into a field of ridges. An
-## ordinary layer has its maximum at isolated points; a folded one has its
-## maximum wherever the raw layer crosses zero, and the set of positions where a
-## smooth field is zero is a *curve*. So the tops of this are lines running
-## across the world rather than dots, which is what a mountain range is and what
-## a river band already uses the same trick for.
-##
-## The fold does not change how steep a layer can be -- `1 - |v|` has the same
-## slope as `v` everywhere except exactly at the crease -- so a field summed
-## this way is no harder to walk on than the same field sampled the ordinary
-## way. It only moves where the high ground is.
-func ridged_sample(x: float, z: float) -> float:
-	var total := 0.0
-	var layer_period := period
-	var layer_amplitude := amplitude
-	for octave in octaves:
-		total += layer_amplitude * (
-			1.0 - absf(_layer(octave, x / layer_period, z / layer_period))
-		)
-		layer_period /= lacunarity
-		layer_amplitude *= gain
-	return total
-
-
 ## The same value squashed into [0, 1], which is the form the biome axes want.
 ##
 ## The squash is a soft one rather than a clamp of sample() / theoretical range:

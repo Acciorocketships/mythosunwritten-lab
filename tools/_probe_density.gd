@@ -28,7 +28,7 @@ func _initialize() -> void:
 			str(spot), p.id, p.foliage_density,
 			GrassLayer.grown_share(
 				GrassLayer.clearing_at(w.observer_x, w.observer_z, 1234),
-				GrassLayer.coverage_for(w.terrain.biome_field.weights_at(
+				GrassLayer.coverage_for(w.terrain.ground.weights(
 					w.observer_x, w.observer_z
 				))
 			),

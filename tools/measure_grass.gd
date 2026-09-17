@@ -189,7 +189,7 @@ func _report() -> void:
 	)
 	var world = _shell.get("_sim").world
 	var profile: SimBiomeProfile = world.terrain.profile_at(world.observer_x, world.observer_z)
-	var weights: Dictionary = world.terrain.biome_field.weights_at(
+	var weights: Dictionary = world.terrain.ground.weights(
 		world.observer_x, world.observer_z
 	)
 	var cover := GrassLayer.coverage_for(weights)

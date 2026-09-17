@@ -164,7 +164,7 @@ var world_seed: int = 0
 var settlements: SettlementField = null
 
 ## The water a road may have to cross, and the ground it is carved into.
-var water: SimWaterField = null
+var ground: AdoptedGround = null
 
 # Vector2i tile -> PackedVector2Array of segment endpoints, in pairs.
 var _tiles := {}
@@ -173,10 +173,10 @@ var _tiles := {}
 var _edges := {}
 
 
-func _init(settlement_field: SettlementField = null, water_field: SimWaterField = null) -> void:
+func _init(settlement_field: SettlementField = null, adopted: AdoptedGround = null) -> void:
 	settlements = settlement_field
-	water = water_field if water_field != null else settlement_field.water
-	world_seed = water.world_seed if water != null else 0
+	ground = adopted if adopted != null else settlement_field.ground
+	world_seed = ground.world_seed if ground != null else 0
 
 
 ## Which tile of the lookup lattice a world position falls in.
@@ -373,14 +373,14 @@ func _line(id: String, from: Vector2, to: Vector2, candidate: int) -> PackedVect
 ## asking a question of an answer that does not exist yet.
 func _route_cost(line: PackedVector2Array) -> float:
 	var cost := 0.0
-	var previous := water.bed_height_at(line[0].x, line[0].y)
+	var previous := ground.ground_height(line[0].x, line[0].y)
 	var at := line[0]
 	for step in range(1, line.size()):
 		var span := line[step - 1].distance_to(line[step])
 		var substeps := maxi(1, int(ceil(span / ROUTE_SAMPLE_STEP)))
 		for sub in range(1, substeps + 1):
 			var next := line[step - 1].lerp(line[step], float(sub) / float(substeps))
-			var height := water.bed_height_at(next.x, next.y)
+			var height := ground.ground_height(next.x, next.y)
 			var allowed := ROUTE_GRADE_LIMIT * at.distance_to(next)
 			var climbed := absf(height - previous) - allowed
 			if climbed > 0.0:
@@ -555,7 +555,7 @@ func roads_over(x: float, z: float) -> int:
 func ground_delta_at(x: float, z: float, level: float) -> float:
 	# A road never touches water: the crossing is the bridge's job, and carving
 	# here would cut a notch in a river bank or drain the river itself.
-	if water.is_water_at(x, z):
+	if ground.is_wet(x, z):
 		return 0.0
 	var carving := _carving_at(x, z)
 	if carving.is_empty():
@@ -617,7 +617,7 @@ func _carving_at(x: float, z: float) -> Dictionary:
 	var best_at := Vector2.ZERO
 	for owner in nearest:
 		var point: Vector2 = nearest[owner]["at"]
-		if water.is_water_at(point.x, point.y):
+		if ground.is_wet(point.x, point.y):
 			continue
 		var share := 1.0 - smoothstep(
 			PATH_HALF_WIDTH, reach, float(nearest[owner]["away"])
@@ -648,7 +648,7 @@ func _carving_at(x: float, z: float) -> Dictionary:
 ## roadway, which is what a claim about a road being level across its width has
 ## to be asked of.
 func level_strength_at(x: float, z: float) -> float:
-	if water.is_water_at(x, z):
+	if ground.is_wet(x, z):
 		return 0.0
 	var carving := _carving_at(x, z)
 	return 0.0 if carving.is_empty() else float(carving["owned"])
@@ -658,7 +658,7 @@ func level_strength_at(x: float, z: float) -> float:
 ## and nothing else. Asked rather than passed in, because the levelling along a
 ## road is measured at points other than the one being asked about.
 func _ground_before_roads(x: float, z: float) -> float:
-	var bed := water.bed_height_at(x, z)
+	var bed := ground.ground_height(x, z)
 	return bed + settlements.ground_delta_at(x, z, bed)
 
 
@@ -677,7 +677,7 @@ func _bridges_on(edge: Dictionary) -> Array:
 	var bridges := []
 	var run_start := -1
 	for index in walked.size():
-		var wet: bool = water.is_water_at(walked[index].x, walked[index].y)
+		var wet: bool = ground.is_wet(walked[index].x, walked[index].y)
 		if wet and run_start < 0:
 			run_start = index
 		elif not wet and run_start >= 0:
@@ -704,7 +704,7 @@ func _bridge_over(walked: PackedVector2Array, first: int, last: int) -> Array:
 		else AssetTags.BRIDGE_WOOD
 	var units := maxi(1, int(round(deck / float(BRIDGE_UNIT[tag]))))
 	var unit := deck / float(units)
-	var height := water.surface_level_at(middle.x, middle.y) + BRIDGE_RISE
+	var height := ground.water_surface(middle.x, middle.y) + BRIDGE_RISE
 	# A bridge is drawn lying along its own +Z, so the yaw that points +Z along
 	# the crossing is the crossing's bearing measured the same way.
 	var yaw := atan2(along.x, along.y)
@@ -778,7 +778,7 @@ func _point_along(walked: PackedVector2Array, distance: float, from_start: bool)
 	if index < 1 or index >= walked.size() - 1:
 		return {}
 	var here := walked[index]
-	if water.is_water_at(here.x, here.y):
+	if ground.is_wet(here.x, here.y):
 		return {}
 	var along := (walked[index + 1] - walked[index - 1]).normalized()
 	return {"x": here.x, "z": here.y, "yaw": atan2(along.x, along.y)}

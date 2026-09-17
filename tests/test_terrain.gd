@@ -1,12 +1,13 @@
 extends TestSuite
 ## The ground is a function of where you are, and nothing else.
 ##
-## Two claims are checked here. First, that the surface field is pure: the
-## height at a world position depends only on that position and the seed -- not
-## on which chunk asked, in what order, or in which process. Second, that the
-## chunk mesher inherits that purity: the geometry for a chunk coordinate is the
-## same whether it was the first chunk built or the last, and the same in a
-## fresh process as in this one.
+## Two claims are checked here. First, that the ground is pure: the height at a
+## world position depends only on that position and the seed -- not on which
+## chunk asked, in what order, or in which process. Since the base adoption the
+## field asked is the adopted heightfield itself, through AdoptedGround.
+## Second, that the chunk mesher inherits that purity: the geometry for a chunk
+## coordinate is the same whether it was the first chunk built or the last, and
+## the same in a fresh process as in this one.
 class_name TestTerrain
 
 const SEED := 20250824
@@ -27,16 +28,18 @@ func run() -> void:
 
 
 func _field_is_a_pure_function() -> void:
-	var field := SimTerrainSurfaceField.new(SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
 	var probes := [
 		Vector2(0.0, 0.0), Vector2(13.5, -207.25), Vector2(-1024.0, 512.0),
 		Vector2(3.125, 3.125), Vector2(-0.5, -0.5),
 	]
 
-	# Same question, asked twice, from two separate field objects.
-	var again := SimTerrainSurfaceField.new(SEED)
+	# Same question, asked twice, from two separate field objects. The second
+	# is built rather than shared, because "two fields with the same seed
+	# agree" is only a claim if there really are two stacks of plans.
+	var again := AdoptedGround.new(SEED)
 	for probe in probes:
-		equal(field.height_at(probe.x, probe.y), again.height_at(probe.x, probe.y),
+		equal(field.base_height(probe.x, probe.y), again.base_height(probe.x, probe.y),
 			"two fields with the same seed disagree at (%f, %f)" % [probe.x, probe.y])
 
 	# Same questions, asked in a different order, with unrelated samples in
@@ -44,18 +47,18 @@ func _field_is_a_pure_function() -> void:
 	# cannot.
 	var first_pass: Array[float] = []
 	for probe in probes:
-		first_pass.append(field.height_at(probe.x, probe.y))
+		first_pass.append(field.base_height(probe.x, probe.y))
 	for i in 500:
-		field.height_at(float(i) * 7.3, float(i) * -3.1)
+		field.base_height(float(i) * 7.3, float(i) * -3.1)
 	for index in range(probes.size() - 1, -1, -1):
 		var probe: Vector2 = probes[index]
-		equal(field.height_at(probe.x, probe.y), first_pass[index],
+		equal(field.base_height(probe.x, probe.y), first_pass[index],
 			"the field changed its answer at (%f, %f) after other samples"
 			% [probe.x, probe.y])
 
 	# The surface is continuous: a tiny step sideways is a tiny step in height.
-	var here := field.height_at(40.0, -18.0)
-	var nearby := field.height_at(40.001, -18.0)
+	var here := field.base_height(40.0, -18.0)
+	var nearby := field.base_height(40.001, -18.0)
 	check(absf(here - nearby) < 0.05,
 		"the surface jumped %f over a millimetre" % absf(here - nearby))
 
@@ -63,7 +66,7 @@ func _field_is_a_pure_function() -> void:
 	var lowest := INF
 	var highest := -INF
 	for i in 400:
-		var height := field.height_at(float(i) * 5.0, float(i % 20) * 11.0)
+		var height := field.base_height(float(i) * 5.0, float(i % 20) * 11.0)
 		lowest = minf(lowest, height)
 		highest = maxf(highest, height)
 	check(highest - lowest > 2.0,
@@ -71,12 +74,12 @@ func _field_is_a_pure_function() -> void:
 
 
 func _field_depends_on_the_seed() -> void:
-	var field := SimTerrainSurfaceField.new(SEED)
-	var other := SimTerrainSurfaceField.new(OTHER_SEED)
+	var field := AdoptedGround.shared_for_seed(SEED)
+	var other := AdoptedGround.shared_for_seed(OTHER_SEED)
 	var differences := 0
 	for i in 50:
 		var x := float(i) * 9.0
-		if absf(field.height_at(x, 4.0) - other.height_at(x, 4.0)) > 0.001:
+		if absf(field.base_height(x, 4.0) - other.base_height(x, 4.0)) > 0.001:
 			differences += 1
 	check(differences > 40,
 		"two seeds produced nearly the same ground: %d of 50 samples differed"

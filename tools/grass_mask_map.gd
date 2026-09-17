@@ -65,7 +65,7 @@ func _initialize() -> void:
 			var z := at.y + (float(row) / float(side) - 0.5) * span
 			var grown := GrassLayer.grown_share(
 				GrassLayer.clearing_at(x, z, world_seed),
-				GrassLayer.coverage_for(terrain.biome_field.weights_at(x, z))
+				GrassLayer.coverage_for(terrain.ground.weights(x, z))
 			)
 			if grown <= 0.0:
 				bare += 1

@@ -353,7 +353,7 @@ func _corner(level: int, index_x: int, index_z: int, x: float, z: float) -> Arra
 	if level <= SHAPE_DETAIL_LEVEL:
 		column = terrain.water_column_at(x, z)
 	else:
-		column = terrain.water_field.sample_column(x, z)
+		column = terrain.ground.water_column(x, z)
 	var tint: Color
 	if column.y > column.x:
 		# Water, at every coarse level. The world's one sheet of water only
@@ -363,11 +363,11 @@ func _corner(level: int, index_x: int, index_z: int, x: float, z: float) -> Arra
 		# same way everything else here is; the vertex stays at the bed, under
 		# where the sheet would be, so the two never fight for a pixel in the
 		# stretch where both are drawn.
-		tint = terrain.biome_field.water_tint_at(x, z)
+		tint = terrain.ground.water_tint(x, z)
 	elif level <= TINT_DETAIL_LEVEL:
 		tint = terrain.ground_tint_at(x, z)
 	else:
-		tint = terrain.biome_field.ground_tint_at(x, z)
+		tint = terrain.ground.ground_tint(x, z)
 	_height[key] = column.x
 	_tint[key] = tint
 	corners_sampled += 1

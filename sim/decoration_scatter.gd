@@ -412,11 +412,11 @@ func _placed(
 ## ground is, and asking anyway would cost more than the rest of the layer put
 ## together.
 func _site_at(x: float, z: float) -> Dictionary:
-	var column := terrain.water_field.sample_column(x, z)
+	var column := terrain.ground.water_column(x, z)
 	return {
 		"x": x,
 		"z": z,
-		"shares": terrain.biome_field.weights_at(x, z),
+		"shares": terrain.ground.weights(x, z),
 		"bed": column.x,
 		"water_surface": column.y,
 		"water": column.y > column.x,
@@ -458,8 +458,8 @@ func _too_steep(site: Dictionary) -> bool:
 	var x := float(site["x"])
 	var z := float(site["z"])
 	var here := float(site["bed"])
-	var across := absf(terrain.water_field.bed_height_at(x + SLOPE_STEP, z) - here)
-	var along := absf(terrain.water_field.bed_height_at(x, z + SLOPE_STEP) - here)
+	var across := absf(terrain.ground.ground_height(x + SLOPE_STEP, z) - here)
+	var along := absf(terrain.ground.ground_height(x, z + SLOPE_STEP) - here)
 	site["steep"] = maxf(across, along) / SLOPE_STEP > SLOPE_LIMIT
 	return bool(site["steep"])
 
@@ -524,7 +524,7 @@ func _is_clearing(site: Dictionary) -> bool:
 		var high := low
 		for step in CLEARING_DIRECTIONS:
 			var angle := TAU * float(step) / float(CLEARING_DIRECTIONS)
-			var around := terrain.water_field.bed_height_at(
+			var around := terrain.ground.ground_height(
 				x + cos(angle) * CLEARING_RADIUS, z + sin(angle) * CLEARING_RADIUS
 			)
 			low = minf(low, around)

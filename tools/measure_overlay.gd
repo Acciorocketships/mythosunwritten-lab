@@ -254,7 +254,7 @@ func _run(
 			var began := Time.get_ticks_usec()
 			var anchor := 0.0
 			if not sample_exactly and not hole:
-				anchor = terrain.water_field.sample_column(middle.x, middle.y).x
+				anchor = terrain.ground.water_column(middle.x, middle.y).x
 				samples += 1
 			var span := float(maxi(n, 1))
 			for down in n + 1:
@@ -269,7 +269,7 @@ func _run(
 								y = found
 						else:
 							y = height + (
-								terrain.water_field.sample_column(x, z).x - anchor
+								terrain.ground.water_column(x, z).x - anchor
 							)
 						samples += 1
 					corner[down * (n + 1) + across] = y

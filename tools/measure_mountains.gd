@@ -12,7 +12,8 @@ extends SceneTree
 ##     is the one number "the world has mountains now" has to move.
 ##   * **windows** -- the same question asked of each square of a tiling, so
 ##     that "mountains are a place" can be shown rather than asserted: a window
-##     with no uplift under it prints the identical relief before and after.
+##     whose relief is flat prints flat numbers while a window over a ridge
+##     does not.
 ##   * **climb** -- whether a route to a summit exists *under the terrain
 ##     query's own step limits*, found by breadth-first search over the real
 ##     height function on the tactical lattice. Nothing here is inferred from
@@ -91,7 +92,6 @@ func _initialize() -> void:
 	])
 
 	_report_relief(query, span)
-	_report_uplift(query, span)
 	_report_biomes(query, span)
 
 	var grid := _lattice_grid(query, span)
@@ -112,10 +112,9 @@ func _initialize() -> void:
 ## Both come out of one pass over one grid of samples, so the windows and the
 ## whole-square number can never disagree about a position.
 ##
-## The windows are what shows a mountain to be a place rather than a tax. A
-## window the uplift does not reach prints the identical numbers before and
-## after the uplift exists -- identical rather than close, because the mask is
-## exactly zero out there and multiplying by exactly zero changes no float.
+## The windows are what shows a mountain to be a place rather than a tax: a
+## window away from any ridge prints a few units of relief while a window over
+## one prints tens.
 func _report_relief(query: TerrainQuery, span: float) -> void:
 	var across := int(round(2.0 * span / RELIEF_STEP)) + 1
 	var heights := PackedFloat64Array()
@@ -163,55 +162,17 @@ func _report_relief(query: TerrainQuery, span: float) -> void:
 			])
 
 
-## How much of the world the uplift reaches, and how hard.
-##
-## This is the "mountains are a place" number stated directly rather than read
-## off the windows: the share of the square the mask leaves completely alone,
-## and the shares it lifts by more than a house, more than a cliff, and more
-## than the whole world's old relief.
-func _report_uplift(query: TerrainQuery, span: float) -> void:
-	var bands := [1.0, 10.0, 30.0, 50.0]
-	var counts := PackedInt32Array()
-	counts.resize(bands.size())
-	var count := 0
-	var highest := 0.0
-	var mask_total := 0.0
-	var z := -span
-	while z <= span + 0.0001:
-		var x := -span
-		while x <= span + 0.0001:
-			var uplift := query.surface_field.uplift_at(x, z)
-			highest = maxf(highest, uplift)
-			mask_total += query.surface_field.uplift_mask_at(x, z)
-			for band in bands.size():
-				if uplift > float(bands[band]):
-					counts[band] += 1
-			count += 1
-			x += RELIEF_STEP
-		z += RELIEF_STEP
-	var shares := []
-	for band in bands.size():
-		shares.append("over_%.0f=%.2f%%" % [
-			float(bands[band]), 100.0 * float(counts[band]) / float(count),
-		])
-	print("uplift samples=%d highest=%.2f mean_mask=%.4f %s" % [
-		count, highest, mask_total / float(count), " ".join(shares),
-	])
-
-
-## What each biome's ground now does, so that "the rocky axis drives the uplift"
-## can be read off the world rather than off the code. Until this layer existed
-## the rocky axis reached the palette, the fog and the boulder scatter and never
-## reached the height of anything, so every biome's mean height was the same
-## number within noise. The line to look at is highland's.
+## What each biome's ground does, so that "rocky country stands high" can be
+## read off the world rather than off the code. There is no separate uplift
+## layer to decompose on the adopted ground -- the ridged relief is simply the
+## heightfield -- so the column that used to print the uplift is gone and the
+## height itself is what is compared. The line to look at is highland's.
 func _report_biomes(query: TerrainQuery, span: float) -> void:
 	var counts := {}
-	var uplift_total := {}
 	var height_total := {}
 	var height_max := {}
 	for id in BiomeCatalog.IDS:
 		counts[id] = 0
-		uplift_total[id] = 0.0
 		height_total[id] = 0.0
 		height_max[id] = -INF
 	var z := -span
@@ -220,7 +181,6 @@ func _report_biomes(query: TerrainQuery, span: float) -> void:
 		while x <= span + 0.0001:
 			var id := query.biome_at(x, z)
 			counts[id] += 1
-			uplift_total[id] += query.surface_field.uplift_at(x, z)
 			var height := query.ground_height_at(x, z)
 			height_total[id] += height
 			height_max[id] = maxf(height_max[id], height)
@@ -235,9 +195,8 @@ func _report_biomes(query: TerrainQuery, span: float) -> void:
 		if here == 0:
 			print("biome %-14s share=0.00%% (none in the square)" % id)
 			continue
-		print("biome %-14s share=%5.2f%% mean_uplift=%6.2f mean_height=%6.2f max_height=%6.2f" % [
+		print("biome %-14s share=%5.2f%% mean_height=%6.2f max_height=%6.2f" % [
 			id, 100.0 * float(here) / float(total),
-			float(uplift_total[id]) / float(here),
 			float(height_total[id]) / float(here),
 			float(height_max[id]),
 		])

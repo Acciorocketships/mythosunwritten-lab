@@ -914,7 +914,7 @@ func build(geometry: TerrainChunkGeometry) -> MultiMeshInstance3D:
 	var leaf := PackedColorArray()
 	for row in PROFILE_SIDE:
 		for column in PROFILE_SIDE:
-			var weights := _terrain.biome_field.weights_at(
+			var weights := _terrain.ground.weights(
 				origin_x + float(column) * profile_step,
 				origin_z + float(row) * profile_step
 			)

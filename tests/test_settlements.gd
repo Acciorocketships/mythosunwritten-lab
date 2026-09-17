@@ -318,8 +318,8 @@ func _the_shore_village_has_a_shore(site: Settlement, terrain: TerrainQuery) -> 
 				continue
 			# Standing water, not a river: the surface is the table's rather than
 			# a level following the ground downhill.
-			if absf(terrain.water_field.surface_level_at(x, z)
-					- terrain.water_field.table_level_at(x, z)) < 0.0001:
+			if absf(terrain.ground.water_surface(x, z)
+					- terrain.ground.standing_level(x, z)) < 0.0001:
 				wet += 1
 	check(wet >= SettlementField.SHORE_WET_MIN,
 		"the shore village at (%.1f, %.1f) has %d standing-water probes beside it, "
@@ -599,7 +599,7 @@ func _the_ground_under_a_village_is_levelled(
 			if terrain.path_strength_at(x, z) > 0.0 or terrain.is_water_at(x, z):
 				continue
 			check(absf(
-				terrain.ground_height_at(x, z) - terrain.water_field.bed_height_at(x, z)
+				terrain.ground_height_at(x, z) - terrain.ground.ground_height(x, z)
 			) < 0.001, "the ground %.0f units outside a village has been moved" % out)
 
 
@@ -616,7 +616,7 @@ func _relief(site: Settlement, terrain: TerrainQuery, before: bool) -> float:
 			var angle := TAU * float(direction) / float(directions)
 			var x := site.centre_x + cos(angle) * site.core_radius * ratio
 			var z := site.centre_z + sin(angle) * site.core_radius * ratio
-			var height := terrain.water_field.bed_height_at(x, z) if before \
+			var height := terrain.ground.ground_height(x, z) if before \
 				else terrain.ground_height_at(x, z)
 			lowest = minf(lowest, height)
 			highest = maxf(highest, height)
@@ -903,7 +903,7 @@ func _a_road_is_a_levelled_dirt_track(
 			# It reads as dirt: its ground colour is at least halfway from the
 			# biome's own ground colour to bare earth.
 			var tint := terrain.ground_tint_at(point.x, point.y)
-			var plain := terrain.biome_field.ground_tint_at(point.x, point.y)
+			var plain := terrain.ground.ground_tint(point.x, point.y)
 			if _from_dirt(tint) <= _from_dirt(plain) * 0.5 + 0.0001:
 				browner += 1
 
@@ -944,8 +944,8 @@ func _a_road_is_a_levelled_dirt_track(
 				continue
 			var left := terrain.ground_height_at(left_x, left_z)
 			var right := terrain.ground_height_at(right_x, right_z)
-			var bare_left := terrain.water_field.bed_height_at(left_x, left_z)
-			var bare_right := terrain.water_field.bed_height_at(right_x, right_z)
+			var bare_left := terrain.ground.ground_height(left_x, left_z)
+			var bare_right := terrain.ground.ground_height(right_x, right_z)
 			levelled += absf(left - right)
 			untouched += absf(bare_left - bare_right)
 			across_checked += 1
@@ -1091,7 +1091,7 @@ func _share_of(total: float, count: int) -> float:
 ## back -- it is a step in the middle of its own arithmetic -- so it is put back
 ## together here out of the two layers underneath.
 func _ground_before_roads(terrain: TerrainQuery, x: float, z: float) -> float:
-	var bed := terrain.water_field.bed_height_at(x, z)
+	var bed := terrain.ground.ground_height(x, z)
 	return bed + terrain.settlement_field.ground_delta_at(x, z, bed)
 
 
@@ -1155,7 +1155,7 @@ func _a_bridge_stands_wherever_a_road_crosses_water(terrain: TerrainQuery) -> vo
 					# ...and the road is not carved out from under it.
 					equal(terrain.ground_height_at(
 							float(bridge["x"]), float(bridge["z"])),
-						terrain.water_field.bed_height_at(
+						terrain.ground.ground_height(
 							float(bridge["x"]), float(bridge["z"])),
 						"the river bed under a bridge has been carved by the road")
 			across += step
@@ -1194,16 +1194,18 @@ func _crosses_water(terrain: TerrainQuery, road: Dictionary) -> bool:
 # --- The water invariant --------------------------------------------------
 
 func _the_layer_never_creates_or_destroys_water(terrain: TerrainQuery) -> void:
-	var bare := SimWaterField.new(
-		SimTerrainSurfaceField.new(SEED), BiomeField.new(SEED)
-	)
+	# The ground before this layer touches it: the adopted fields themselves,
+	# the same object the composed query reads through. Comparing the two is
+	# what makes "the settlement layer never creates or destroys water" a
+	# statement about the layer rather than about two generators agreeing.
+	var bare := AdoptedGround.shared_for_seed(SEED)
 	# Two squares, because one cannot answer both halves of the claim any more.
 	# The square on the origin is where the villages and the roads are, so it is
 	# what shows the layer running at all; on this seed the range that now stands
 	# over that origin has lifted the land far above the water table, and there
 	# is no water left in it to check. The second square is the wettest
 	# 360-unit square within a kilometre of the origin, found by sweeping the
-	# water field with tools/measure_mountains.sh's sibling probe, and it is what
+	# water field with tools/measure_shore.sh, and it is what
 	# shows the layer leaving water alone.
 	var dry := 0
 	var wet := 0
@@ -1222,7 +1224,7 @@ func _the_layer_never_creates_or_destroys_water(terrain: TerrainQuery) -> void:
 
 ## One 360-unit square of the water invariant, as {dry, wet, moved}.
 func _water_invariant_over(
-	terrain: TerrainQuery, bare: SimWaterField, middle: Vector2
+	terrain: TerrainQuery, bare: AdoptedGround, middle: Vector2
 ) -> Dictionary:
 	var dry := 0
 	var wet := 0
@@ -1233,13 +1235,13 @@ func _water_invariant_over(
 			var z := middle.y + float(row) * 6.0 - 180.0
 			# Being water is the water field's answer, and this layer cannot
 			# change it: the composed query and the bare field agree everywhere.
-			equal(terrain.is_water_at(x, z), bare.is_water_at(x, z),
+			equal(terrain.is_water_at(x, z), bare.is_wet(x, z),
 				"the settlement layer changed whether (%.1f, %.1f) is water"
 				% [x, z])
-			if bare.is_water_at(x, z):
+			if bare.is_wet(x, z):
 				wet += 1
 				# Water is never shaped: the bed under it is the water field's.
-				equal(terrain.ground_height_at(x, z), bare.bed_height_at(x, z),
+				equal(terrain.ground_height_at(x, z), bare.ground_height(x, z),
 					"the bed under water at (%.1f, %.1f) was moved" % [x, z])
 				continue
 			dry += 1
@@ -1247,6 +1249,6 @@ func _water_invariant_over(
 			check(terrain.water_surface_at(x, z) <= terrain.ground_height_at(x, z),
 				"dry ground at (%.1f, %.1f) was carved below the water line"
 				% [x, z])
-			if absf(terrain.ground_height_at(x, z) - bare.bed_height_at(x, z)) > 0.001:
+			if absf(terrain.ground_height_at(x, z) - bare.ground_height(x, z)) > 0.001:
 				moved += 1
 	return {"dry": dry, "wet": wet, "moved": moved}

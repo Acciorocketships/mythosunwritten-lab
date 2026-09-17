@@ -431,15 +431,11 @@ const CANDIDATE_MEMO_LIMIT := 8192
 ## The seed the whole island layer descends from.
 var world_seed: int = 0
 
-## The ground an aerial island has to hang clear of. This is the carved bed --
-## the same ground anything walks on -- so an island over a river valley is
-## measured against the valley floor rather than against the land before the
-## river cut it.
-var water: SimWaterField = null
-
-## Which biome the ground below an island is, which is the biome the island
-## takes its colours from.
-var biomes: BiomeField = null
+## The ground an aerial island has to hang clear of, and whose biome it takes
+## its colours from. This is the carved bed -- the same ground anything walks
+## on -- so an island over a river valley is measured against the valley floor
+## rather than against the land before the river cut it.
+var ground: AdoptedGround = null
 
 ## Whether the shared cell scan asks each cell's candidate bound before building
 ## it. On is what the world runs with, and turning it off changes no answer --
@@ -461,10 +457,9 @@ var _memo := {}
 var _candidate_memo := {}
 
 
-func _init(water_field: SimWaterField = null, biome_field: BiomeField = null) -> void:
-	water = water_field
-	world_seed = water_field.world_seed if water_field != null else 0
-	biomes = biome_field if biome_field != null else BiomeField.new(world_seed)
+func _init(adopted: AdoptedGround = null) -> void:
+	ground = adopted
+	world_seed = adopted.world_seed if adopted != null else 0
 
 
 ## World units across one cell of a band's lattice. Both aerial storeys share
@@ -724,7 +719,7 @@ func _build(band: int, cell: Vector2i) -> FloatingIsland:
 		# The lower storey stands on the ground, so what is under it is the
 		# carved bed -- the same ground anything walks on.
 		placed = _place_over(island, cell, func(x: float, z: float) -> float:
-			return water.bed_height_at(x, z))
+			return ground.ground_height(x, z))
 	elif band == FloatingIsland.AERIAL_UPPER:
 		placed = _place_upper(island, cell, below)
 	else:
@@ -905,7 +900,7 @@ func _place_upper(
 	var under := func(x: float, z: float) -> float:
 		if below.covers(x, z):
 			return below.top_height_at(x, z)
-		return water.bed_height_at(x, z)
+		return ground.ground_height(x, z)
 	return _place_over(island, cell, under)
 
 
@@ -996,10 +991,10 @@ func _shape(island: FloatingIsland, cell: Vector2i) -> void:
 ## The colours an island is dressed in: the biome under its centre, so an island
 ## over deep forest is a dark green plate and one over a marsh is a teal one.
 func _dress(island: FloatingIsland) -> void:
-	island.biome = biomes.biome_at(island.centre_x, island.centre_z)
-	island.ground_tint = biomes.ground_tint_at(island.centre_x, island.centre_z)
-	island.rock_tint = biomes.rock_tint_at(island.centre_x, island.centre_z)
-	island.water_tint = biomes.water_tint_at(island.centre_x, island.centre_z)
+	island.biome = ground.biome(island.centre_x, island.centre_z)
+	island.ground_tint = ground.ground_tint(island.centre_x, island.centre_z)
+	island.rock_tint = ground.rock_tint(island.centre_x, island.centre_z)
+	island.water_tint = ground.water_tint(island.centre_x, island.centre_z)
 
 
 ## Cut the basin in the island's middle, fill it, and decide whether it runs

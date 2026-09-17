@@ -217,7 +217,7 @@ func _no_handle_hands_out_anything_the_world_still_holds() -> void:
 			world.settlement_streamer.live_settlement(village_key),
 			world.settlement_streamer.settlement(village_key),
 		]
-	var biome := world.biome_field.biome_at(world.observer_x, world.observer_z)
+	var biome := world.ground.biome(world.observer_x, world.observer_z)
 	handles["biome profile"] = [
 		BiomeCatalog._built().get(biome, null), BiomeCatalog.profile(biome),
 	]

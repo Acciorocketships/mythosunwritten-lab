@@ -173,7 +173,7 @@ func _measure(world_seed: int, at: Vector2, within: float) -> Dictionary:
 ## The ground at a position with the villages levelled but no road carved into
 ## it: the land a road was worn into.
 func _before_roads(query: TerrainQuery, x: float, z: float) -> float:
-	var bed := query.water_field.bed_height_at(x, z)
+	var bed := query.ground.ground_height(x, z)
 	return bed + query.settlement_field.ground_delta_at(x, z, bed)
 
 

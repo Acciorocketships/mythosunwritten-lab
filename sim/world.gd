@@ -45,10 +45,9 @@ var tick: int = 0
 ## about the picture of it.
 var terrain: TerrainQuery = null
 
-## The ground's height and its biomes, reachable directly for the things that
-## want one layer rather than the composed answer. Both are the query's.
-var surface_field: SimTerrainSurfaceField = null
-var biome_field: BiomeField = null
+## The adopted ground itself, reachable directly for the things that want the
+## raw field rather than the composed answer. It is the query's.
+var ground: AdoptedGround = null
 
 ## Turns the fields into per-chunk geometry.
 var chunk_mesher: SimTerrainChunkMesher = null
@@ -188,8 +187,7 @@ func reset(seed_value: int) -> void:
 	world_seed = seed_value
 	tick = 0
 	terrain = TerrainQuery.for_seed(seed_value)
-	surface_field = terrain.surface_field
-	biome_field = terrain.biome_field
+	ground = terrain.ground
 	island_field = terrain.island_field
 	settlement_field = terrain.settlement_field
 	path_network = terrain.path_network
@@ -536,7 +534,7 @@ func place_near_observer(reach: float = PLACE_REACH) -> Dictionary:
 
 ## Which biome the observer is standing in.
 func observer_biome() -> String:
-	return biome_field.biome_at(observer_x, observer_z)
+	return ground.biome(observer_x, observer_z)
 
 
 ## The blended look of where the observer is standing, as plain data.
@@ -546,7 +544,7 @@ func observer_biome() -> String:
 ## whole surface through which the world's mood reaches a viewer -- colours,
 ## fog, sky and ambient light are read off it, never decided by it.
 func observer_profile() -> SimBiomeProfile:
-	return biome_field.profile_at(observer_x, observer_z)
+	return ground.profile(observer_x, observer_z)
 
 
 ## The water around the observer, as anyone outside the simulation gets it: a

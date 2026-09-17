@@ -383,11 +383,9 @@ const MEMO_LIMIT := 1024
 var world_seed: int = 0
 
 ## The ground a village is levelled out of: the carved bed, the same ground
-## anything walks on before this layer touches it.
-var water: SimWaterField = null
-
-## Which biome a candidate stands in, which gates it and tints it.
-var biomes: BiomeField = null
+## anything walks on before this layer touches it, and the biome a candidate
+## stands in, which gates it and tints it.
+var ground: AdoptedGround = null
 
 ## The aerial layer. A village is refused under a floating island: the plate
 ## would sit on the rooftops, and it also keeps this layer from ever changing
@@ -405,14 +403,12 @@ var _pad_tiles := {}
 
 
 func _init(
-	water_field: SimWaterField = null,
-	biome_field: BiomeField = null,
+	adopted: AdoptedGround = null,
 	island_field: IslandField = null,
 ) -> void:
-	water = water_field
-	world_seed = water_field.world_seed if water_field != null else 0
-	biomes = biome_field if biome_field != null else BiomeField.new(world_seed)
-	islands = island_field if island_field != null else IslandField.new(water, biomes)
+	ground = adopted
+	world_seed = adopted.world_seed if adopted != null else 0
+	islands = island_field if island_field != null else IslandField.new(ground)
 
 
 ## The furthest anything belonging to a village can be from its cell position.
@@ -654,7 +650,7 @@ func _build_inland(
 		var size := radius * sweep
 		for attempt in attempts:
 			var at := _candidate_at(cell, attempt, is_spawn)
-			var biome := biomes.biome_at(at.x, at.y)
+			var biome := ground.biome(at.x, at.y)
 			# The biome gate, as a threshold on the roll the cell already made.
 			var share := float(BIOME_SHARE.get(biome, 0.0))
 			if share <= 0.0:
@@ -713,7 +709,7 @@ func _build_shore(cell: Vector2i, wants: float, radius: float) -> Settlement:
 				# apart, and it is not this rule's to spend.
 				if not _inside_jitter_band(cell, at):
 					continue
-				var biome := biomes.biome_at(at.x, at.y)
+				var biome := ground.biome(at.x, at.y)
 				var share := float(BIOME_SHARE.get(biome, 0.0))
 				if share <= 0.0 or wants >= SITE_CHANCE * share:
 					continue
@@ -747,7 +743,7 @@ func _water_edge(from: Vector2, heading: Vector2) -> float:
 	for step in range(1, steps + 1):
 		var reach := float(step) * SHORE_EDGE_STEP
 		var at := from + heading * reach
-		if not water.is_water_at(at.x, at.y):
+		if not ground.is_wet(at.x, at.y):
 			return reach
 	return INF
 
@@ -800,10 +796,10 @@ func _shore_leads(cell: Vector2i) -> Array[Vector2]:
 ## the table and the river's falling level stands higher -- so which one it is
 ## here is which of the two won, and that is what this reads.
 func _is_standing_water(x: float, z: float) -> bool:
-	var column := water.sample_column(x, z)
+	var column := ground.water_column(x, z)
 	if column.y <= column.x:
 		return false
-	return absf(column.y - water.table_level_at(x, z)) < 0.0001
+	return absf(column.y - ground.standing_level(x, z)) < 0.0001
 
 
 ## What the ground under a shore candidate is like.
@@ -825,7 +821,7 @@ func _shore_ground(x: float, z: float, radius: float) -> Dictionary:
 	for direction in PAD_RIM_DIRECTIONS:
 		var angle := TAU * float(direction) / float(PAD_RIM_DIRECTIONS)
 		var out := core + SHORE_DRY_MARGIN
-		if water.is_water_at(x + cos(angle) * out, z + sin(angle) * out):
+		if ground.is_wet(x + cos(angle) * out, z + sin(angle) * out):
 			return {"ok": false, "level": 0.0}
 	if not _has_shore(x, z, core, radius):
 		return {"ok": false, "level": 0.0}
@@ -901,7 +897,7 @@ func _pad_ground(x: float, z: float, radius: float) -> Dictionary:
 	for direction in PAD_RIM_DIRECTIONS:
 		var angle := TAU * float(direction) / float(PAD_RIM_DIRECTIONS)
 		var out := radius + PAD_DRY_MARGIN
-		if water.is_water_at(x + cos(angle) * out, z + sin(angle) * out):
+		if ground.is_wet(x + cos(angle) * out, z + sin(angle) * out):
 			return {"ok": false, "level": 0.0}
 	if not _clear_overhead(x, z, radius):
 		return {"ok": false, "level": 0.0}
@@ -916,7 +912,7 @@ func _outer_is_dry(x: float, z: float, core: float, radius: float) -> bool:
 		var directions: int = PAD_OUTER_RINGS[ring]
 		for direction in directions:
 			var angle := TAU * float(direction) / float(directions)
-			if water.is_water_at(x + cos(angle) * reach, z + sin(angle) * reach):
+			if ground.is_wet(x + cos(angle) * reach, z + sin(angle) * reach):
 				return false
 	return true
 
@@ -990,7 +986,7 @@ func _pad_scan(x: float, z: float, radius: float, rings: Array) -> Dictionary:
 			var reach := radius * ratio
 			var at_x := x + cos(angle) * reach
 			var at_z := z + sin(angle) * reach
-			var column := water.sample_column(at_x, at_z)
+			var column := ground.water_column(at_x, at_z)
 			if column.y > column.x:
 				return {"ok": false, "level": 0.0}
 			total += column.x
@@ -1061,10 +1057,10 @@ func _lay_out(site: Settlement) -> void:
 ## its four corners, which for a rectangle whose sides are a couple of units
 ## long is the whole of it at the scale water bodies change on.
 func _footprint_is_wet(building: Dictionary) -> bool:
-	if water.is_water_at(float(building["x"]), float(building["z"])):
+	if ground.is_wet(float(building["x"]), float(building["z"])):
 		return true
 	for corner in Settlement.footprint_corners(building):
-		if water.is_water_at(corner.x, corner.y):
+		if ground.is_wet(corner.x, corner.y):
 			return true
 	return false
 
@@ -1299,7 +1295,7 @@ func _place_water_wheel(site: Settlement) -> void:
 		var out := site.radius + PAD_DRY_MARGIN + 2.0
 		var x := site.centre_x + cos(angle) * out
 		var z := site.centre_z + sin(angle) * out
-		if not water.is_bank_at(x, z):
+		if not ground.is_bank(x, z):
 			continue
 		site.props.append({
 			"tag": AssetTags.WATER_WHEEL,
@@ -1338,11 +1334,11 @@ func _build_landmark(cell: Vector2i) -> Dictionary:
 	# it has no opinion about what is in the sky above it. The two tests are in
 	# this order because the water is one field sample and the villages are a
 	# scan of the settlement lattice, and most candidates that fail, fail here.
-	if water.is_water_at(x, z) or water.is_bank_at(x, z):
+	if ground.is_wet(x, z) or ground.is_bank(x, z):
 		return {}
 	if not settlements_near(x, z, LANDMARK_CLEAR).is_empty():
 		return {}
-	var biome := biomes.biome_at(x, z)
+	var biome := ground.biome(x, z)
 	return {
 		"id": "l%d,%d" % [cell.x, cell.y],
 		"cell": cell,

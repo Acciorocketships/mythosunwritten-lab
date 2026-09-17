@@ -20,14 +20,11 @@ class_name TerrainQuery
 ## The seed the whole stack descends from.
 var world_seed: int = 0
 
-## The uncarved ground: the shape of the land before water is cut out of it.
-var surface_field: SimTerrainSurfaceField = null
-
-## Which biome the ground is, and what that biome looks like.
-var biome_field: BiomeField = null
-
-## Where the rivers, ponds and lakes are, and how deep.
-var water_field: SimWaterField = null
+## The ground itself: the adopted heightfield, water plan and biome fields for
+## this seed. How high the land is, where the water is, and which biome the
+## ground is are all one object's answers, because in the adopted stack they
+## are one stack of plans rather than three independent noise fields.
+var ground: AdoptedGround = null
 
 ## Where the floating islands are: the aerial layer over all of the above.
 var island_field: IslandField = null
@@ -80,60 +77,36 @@ const SHORE_FLOOR := 0.05
 ## The whole stack for one seed. This is how a world, a test or a tool that has
 ## nothing but a seed gets a query that agrees with every other one.
 ##
-## Since the base adoption (ADOPTION.md) the ground under this stack is the
-## adopted heightfield, water plan and biome fields: the three ground layers
-## are AdoptedGround's adapters, which answer every sample from the adopted
-## stack, and the layers of this repo's own that have no adopted counterpart
-## -- the floating islands, the villages, the roads -- generate on that ground
-## exactly as they did on the old one. A sim cell is a fixed patch of that
-## heightfield; the mapping is stated once, in AdoptedGround's own doc.
+## Since the base adoption (ADOPTION.md) the ground under this stack *is* the
+## adopted heightfield, water plan and biome fields, read through AdoptedGround
+## and through nothing else: there is no second generation regime in the tree
+## and no switch between them. The layers of this repo's own that have no
+## adopted counterpart -- the floating islands, the villages, the roads --
+## generate on that ground exactly as they did on the old one. A sim cell is a
+## fixed patch of that heightfield; the mapping is stated once, in
+## AdoptedGround's own doc.
 static func for_seed(seed_value: int) -> TerrainQuery:
 	var ground := AdoptedGround.shared_for_seed(seed_value)
-	var biomes := AdoptedGround.Biomes.new(ground)
-	var surface := AdoptedGround.Surface.new(ground, biomes)
-	var water := AdoptedGround.Water.new(ground, surface, biomes)
-	var islands := IslandField.new(water, biomes)
-	var settlements := SettlementField.new(water, biomes, islands)
+	var islands := IslandField.new(ground)
+	var settlements := SettlementField.new(ground, islands)
 	return TerrainQuery.new(
-		surface, biomes, water, islands, settlements, PathNetwork.new(settlements, water)
-	)
-
-
-## The retired from-scratch ground: the flat-board era's own noise fields,
-## kept behind this named switch rather than deleted because the suites that
-## certified that generation stack (mountains, rivers, biome resolution) still
-## document its behaviour, and because the render seam has not yet finished
-## moving every visual idiom onto the adopted base. Nothing in the sim
-## constructs a world through this; a caller that does is asking for the old
-## world on purpose.
-static func for_seed_legacy(seed_value: int) -> TerrainQuery:
-	var biomes := BiomeField.new(seed_value)
-	var surface := SimTerrainSurfaceField.new(seed_value, biomes)
-	var water := SimWaterField.new(surface, biomes)
-	var islands := IslandField.new(water, biomes)
-	var settlements := SettlementField.new(water, biomes, islands)
-	return TerrainQuery.new(
-		surface, biomes, water, islands, settlements, PathNetwork.new(settlements, water)
+		ground, islands, settlements, PathNetwork.new(settlements, ground)
 	)
 
 
 func _init(
-	surface: SimTerrainSurfaceField = null,
-	biomes: BiomeField = null,
-	water: SimWaterField = null,
+	adopted: AdoptedGround = null,
 	islands: IslandField = null,
 	settlements: SettlementField = null,
 	paths: PathNetwork = null,
 ) -> void:
-	surface_field = surface
-	world_seed = surface.world_seed if surface != null else 0
-	biome_field = biomes if biomes != null else BiomeField.new(world_seed)
-	water_field = water if water != null else SimWaterField.new(surface_field, biome_field)
-	island_field = islands if islands != null else IslandField.new(water_field, biome_field)
+	ground = adopted
+	world_seed = ground.world_seed if ground != null else 0
+	island_field = islands if islands != null else IslandField.new(ground)
 	settlement_field = settlements if settlements != null \
-		else SettlementField.new(water_field, biome_field, island_field)
+		else SettlementField.new(ground, island_field)
 	path_network = paths if paths != null \
-		else PathNetwork.new(settlement_field, water_field)
+		else PathNetwork.new(settlement_field, ground)
 
 
 ## How high the ground is here: the height you would stand on, with the water's
@@ -160,7 +133,7 @@ func ground_height_at(x: float, z: float) -> float:
 ## the island out of reach; a village is refused such a site anyway, so this only
 ## catches a road passing underneath one.
 func water_column_at(x: float, z: float) -> Vector2:
-	var column := water_field.sample_column(x, z)
+	var column := ground.water_column(x, z)
 	if column.y > column.x:
 		return column
 	var levelled := column.x + settlement_field.ground_delta_at(x, z, column.x)
@@ -176,7 +149,7 @@ func water_column_at(x: float, z: float) -> Vector2:
 ## What the ground's colour is mixed by, and what the scatter layer will read to
 ## keep a fern out of a cart track.
 func path_strength_at(x: float, z: float) -> float:
-	if water_field.is_water_at(x, z):
+	if ground.is_wet(x, z):
 		return 0.0
 	return path_network.strength_at(x, z)
 
@@ -189,7 +162,7 @@ func path_strength_at(x: float, z: float) -> float:
 ## scatter layer wants -- a fence stands beside a road and lines up with it, and
 ## neither of those is a question about the ground it is standing on.
 func road_beside(x: float, z: float) -> Dictionary:
-	if water_field.is_water_at(x, z):
+	if ground.is_wet(x, z):
 		return {}
 	return path_network.road_beside(x, z)
 
@@ -221,7 +194,7 @@ func is_reserved_at(x: float, z: float, margin: float = 0.0) -> bool:
 ## The uncarved height, before water. Wanted only by things reasoning about the
 ## carving itself; everything that wants "the ground" wants ground_height_at().
 func base_height_at(x: float, z: float) -> float:
-	return surface_field.height_at(x, z)
+	return ground.base_height(x, z)
 
 
 ## Which way the ground faces here, taken from the carved ground by sampling a
@@ -252,7 +225,7 @@ func is_water_at(x: float, z: float, from_height: float = -INF) -> bool:
 		var island := _storey_at(x, z, from_height)
 		if island != null:
 			return island.holds_water_at(x, z)
-	return water_field.is_water_at(x, z)
+	return ground.is_wet(x, z)
 
 
 ## How deep the water is on the storey reached from `from_height`, in world
@@ -261,7 +234,7 @@ func water_depth_at_height(x: float, z: float, from_height: float) -> float:
 	var island := _storey_at(x, z, from_height)
 	if island != null:
 		return island.pond_depth_at(x, z)
-	return water_field.depth_at(x, z)
+	return ground.water_depth(x, z)
 
 
 ## The surface someone at `from_height` would come to rest on here even where
@@ -313,17 +286,17 @@ func _storey_at(
 ## the later layers put reeds and lily pads, and where a path that meets one
 ## becomes a bridge.
 func is_bank_at(x: float, z: float) -> bool:
-	return water_field.is_bank_at(x, z)
+	return ground.is_bank(x, z)
 
 
 ## How deep the water is here, in world units. Zero on dry land.
 func water_depth_at(x: float, z: float) -> float:
-	return water_field.depth_at(x, z)
+	return ground.water_depth(x, z)
 
 
 ## How high the water surface reaches here. Below the ground on dry land.
 func water_surface_at(x: float, z: float) -> float:
-	return water_field.surface_level_at(x, z)
+	return ground.water_surface(x, z)
 
 
 ## Every surface anyone could stand on above this position, lowest first.
@@ -467,12 +440,12 @@ func surface_height_at(x: float, z: float) -> float:
 
 ## Which biome this position resolves to.
 func biome_at(x: float, z: float) -> String:
-	return biome_field.biome_at(x, z)
+	return ground.biome(x, z)
 
 
 ## The blended look of this position, as plain data.
 func profile_at(x: float, z: float) -> SimBiomeProfile:
-	return biome_field.profile_at(x, z)
+	return ground.profile(x, z)
 
 
 ## The ground colour here, blended across whichever biomes have a share of it.
@@ -486,8 +459,8 @@ func profile_at(x: float, z: float) -> SimBiomeProfile:
 ## earth it is comes out of the biome catalog, so a track through a marsh is a
 ## darker track than one across a meadow.
 func ground_tint_at(x: float, z: float) -> Color:
-	var tint := biome_field.ground_tint_at(x, z)
-	if water_field.is_water_at(x, z):
+	var tint := ground.ground_tint(x, z)
+	if ground.is_wet(x, z):
 		return tint
 	var road := path_network.strength_at(x, z)
 	if road > 0.0:
@@ -503,7 +476,7 @@ func ground_tint_at(x: float, z: float) -> Color:
 ## The colour water takes here, blended the same way -- bright in the meadow,
 ## dark and green under a canopy, near-black teal in a marsh.
 func water_tint_at(x: float, z: float) -> Color:
-	return biome_field.water_tint_at(x, z)
+	return ground.water_tint(x, z)
 
 
 ## Everything at once, for a caller that wants several of the answers above and
@@ -520,13 +493,13 @@ func ground_at(x: float, z: float) -> Dictionary:
 		"x": x,
 		"z": z,
 		"height": column.x,
-		"base_height": surface_field.height_at(x, z),
+		"base_height": ground.base_height(x, z),
 		"water": is_water,
 		"water_surface": column.y,
 		"water_depth": maxf(0.0, column.y - column.x),
-		"bank": water_field.is_bank_at(x, z),
+		"bank": ground.is_bank(x, z),
 		"passable": not is_water,
-		"biome": biome_field.biome_at(x, z),
+		"biome": ground.biome(x, z),
 		"path": path_strength_at(x, z),
 		"reserved": is_reserved_at(x, z),
 		"island": island != null,

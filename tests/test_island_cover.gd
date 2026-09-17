@@ -149,26 +149,26 @@ func _cover_names_only_tags_its_own_biome_can_grow(
 func _an_island_wears_the_colours_of_its_own_biome(
 	islands: Array[FloatingIsland]
 ) -> void:
-	var biomes := BiomeField.new(SEED)
+	var ground := AdoptedGround.shared_for_seed(SEED)
 	for island in islands:
 		check(BiomeCatalog.has_biome(island.biome),
 			"an island claims the biome '%s', which is not one" % island.biome)
-		equal(island.biome, biomes.biome_at(island.centre_x, island.centre_z),
+		equal(island.biome, ground.biome(island.centre_x, island.centre_z),
 			"an island's biome is not the biome of the ground under its centre")
 		check(island.ground_tint.is_equal_approx(
-			biomes.ground_tint_at(island.centre_x, island.centre_z)),
+			ground.ground_tint(island.centre_x, island.centre_z)),
 			"an island is not the ground colour of the country it broke off")
 		check(island.rock_tint.is_equal_approx(
-			biomes.rock_tint_at(island.centre_x, island.centre_z)),
+			ground.rock_tint(island.centre_x, island.centre_z)),
 			"an island is not the rock colour of the country it broke off")
 		check(island.water_tint.is_equal_approx(
-			biomes.water_tint_at(island.centre_x, island.centre_z)),
+			ground.water_tint(island.centre_x, island.centre_z)),
 			"an island does not hold the water colour of the country it broke off")
 		# And the blended profile at the island's centre -- which is what the
 		# render layer dresses an island's cover with -- carries those same two
 		# colours, so a boulder on an island is the colour of the cliff it
 		# stands beside rather than of whatever is far below.
-		var profile := biomes.profile_at(island.centre_x, island.centre_z)
+		var profile := ground.profile(island.centre_x, island.centre_z)
 		check(profile.ground_tint.is_equal_approx(island.ground_tint),
 			"the profile at an island's centre is not the island's ground colour")
 		check(profile.rock_tint.is_equal_approx(island.rock_tint),
@@ -451,7 +451,7 @@ func _a_basin_holds_water_that_is_a_hole_in_the_board() -> void:
 	# And the same call, with no height, still answers for the ground far below,
 	# which is what everything that walks the ground plane depends on.
 	equal(terrain.is_water_at(wet.x, wet.y),
-		terrain.water_field.is_water_at(wet.x, wet.y),
+		terrain.ground.is_wet(wet.x, wet.y),
 		"asking about the ground under an island stopped answering for the ground")
 
 	# Dry ground on the same island is still ground.
@@ -565,9 +565,7 @@ func _two_processes_dress_the_same_islands() -> void:
 # --- Helpers -------------------------------------------------------------
 
 func _new_field(seed_value: int) -> IslandField:
-	var surface := SimTerrainSurfaceField.new(seed_value)
-	var biomes := BiomeField.new(seed_value)
-	return IslandField.new(SimWaterField.new(surface, biomes), biomes)
+	return IslandField.new(AdoptedGround.shared_for_seed(seed_value))
 
 
 func _walkable_islands(field: IslandField) -> Array[FloatingIsland]:

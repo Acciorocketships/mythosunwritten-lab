@@ -2,7 +2,7 @@ extends RefCounted
 ## The named biomes of the design, and the profile each one carries.
 ##
 ## This is a table, not a decision: which biome a world position falls in is
-## BiomeField's job, and what that biome looks like is this file's. Keeping the
+## AdoptedGround's job, and what that biome looks like is this file's. Keeping the
 ## two apart means the palette can be retuned without touching the fields, and
 ## the fields can be retuned without touching the palette.
 ##

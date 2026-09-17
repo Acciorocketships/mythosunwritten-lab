@@ -185,7 +185,7 @@ func _one_biome_against_its_own_ground(world: SimWorld, world_seed: int) -> void
 		for column in PURE_SIDE:
 			var x := origin + float(column) * PURE_STEP
 			var z := origin + float(row) * PURE_STEP
-			var weights := world.terrain.biome_field.weights_at(x, z)
+			var weights := world.terrain.ground.weights(x, z)
 			for biome in BiomeCatalog.IDS:
 				if float(weights.get(biome, 0.0)) >= PURE_SHARE:
 					(pure[biome] as Array[float]).append(GrassLayer.grown_share(

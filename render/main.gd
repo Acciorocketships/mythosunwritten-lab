@@ -1059,7 +1059,7 @@ func _aim_reflection() -> void:
 	_reflection.aim(
 		_camera.global_transform,
 		_camera.fov,
-		_sim.world.terrain.water_field.table_level_at(
+		_sim.world.terrain.ground.standing_level(
 			_sim.world.observer_x, _sim.world.observer_z
 		),
 		get_viewport().size,

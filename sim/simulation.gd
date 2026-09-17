@@ -799,10 +799,10 @@ func biome_report(span: int = 10, spacing: float = 24.0) -> PackedStringArray:
 		for column in range(-span, span + 1):
 			var x := float(column) * spacing
 			var z := float(row) * spacing
-			var weights := world.biome_field.weights_at(x, z)
-			var id := world.biome_field.biome_at(x, z)
+			var weights := world.ground.weights(x, z)
+			var id := world.ground.biome(x, z)
 			lines.append("biome %.1f %.1f %s %.6f %s" % [
-				x, z, id, float(weights[id]), world.biome_field.profile_at(x, z).digest(),
+				x, z, id, float(weights[id]), world.ground.profile(x, z).digest(),
 			])
 	return lines
 

@@ -303,7 +303,7 @@ func _the_simplified_shape_stays_inside_its_stated_envelope() -> void:
 		var x := float((i * 977) % 4000) - 2000.0
 		var z := float((i * 1861) % 4000) - 2000.0
 		var full := terrain.ground_height_at(x, z)
-		var carved := terrain.water_field.sample_column(x, z).x
+		var carved := terrain.ground.water_column(x, z).x
 		total += 1
 		if absf(full - carved) > 0.0005:
 			differed += 1
@@ -442,7 +442,7 @@ func _the_skirt_is_deeper_than_the_worst_seam() -> void:
 
 func _drawn_height(terrain: TerrainQuery, carved_only: bool, at: Vector2) -> float:
 	if carved_only:
-		return terrain.water_field.sample_column(at.x, at.y).x
+		return terrain.ground.water_column(at.x, at.y).x
 	return terrain.ground_height_at(at.x, at.y)
 
 
