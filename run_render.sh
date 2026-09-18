@@ -62,11 +62,58 @@
 # only useful for photographing what the biome tint is doing. --no-fade stops
 # the trees between the camera and your character from thinning out of the way,
 # which is only useful for pricing that rule against a run that differs in
-# nothing else. --grass-give-way <thin> <fade> is the same kind of flag for the
-# grass over a board square: how much shorter a blade stands over one, and what
-# share of its pixels are thrown away instead. The shipped pair is in
-# render/grass_layer.gd; this is how the runs that priced the choice were told
-# apart. See tools/measure_board_read.sh.
+# nothing else.
+#
+# THE CAPTURE DIALS, and what became of the ones that are gone.
+#
+# The world is drawn by the adopted base's own shell now: render/main.tscn is an
+# inherited scene of res://scenes/world.tscn, so the ground, its water, its
+# grass, its villages, its sun and its sky are FieldTerrainStreamer's and
+# AtmosphereDirector's. The dials that still mean something mean the same thing
+# they did:
+#
+#   --camera X Y Z   where the camera sits relative to the person. It is now
+#                    handed to the adopted camera as its height (Y) and its
+#                    distance (the length of X and Z), which is the pair that
+#                    camera is steered by.
+#   --aim N          how far above the person it looks. Their camera looked at
+#                    the body; `aim_lift` was added to scripts/camera/camera.gd
+#                    for this, in their own idiom, and defaults to 0 for them.
+#   --fov N          how wide the view is. Set on their Camera3D directly.
+#   --paused         hold the world still. A held frame also asks the adopted
+#                    camera for its settled pose outright rather than easing
+#                    into one over frames it will never get.
+#   --focus N        where the miniature depth of field is focused. The band is
+#                    AtmosphereDirector's, built in its own _ready; this moves
+#                    that band rather than building a second one, keeping the
+#                    near/far ratio it was composed with.
+#   --no-grass       is now the adopted streamer's own GRASS_ENABLED, set
+#                    before its _ready runs: nothing baked, nothing instanced.
+#   --no-atmosphere  switches off THIS GAME'S half of the atmosphere -- the warm
+#                    point lights, the orbs, the motes, the ground mist. The
+#                    adopted world still lights itself.
+#
+# Gone, with what replaced each:
+#
+#   --no-distant-ground   there is no second, coarser ground to switch off. The
+#                         adopted streamer fills the distance itself, out to its
+#                         own KEEP_RADIUS.
+#   --lod-levels          the coarse-ring diagnostic went with that layer. The
+#                         adopted streamer's own diagnostics are its
+#                         PROFILE_STREAMING export and TerrainStreamingTelemetry.
+#   --lod-centre          the same.
+#   --no-reflection       this project's mirror drew the retired water sheet.
+#   --mirror-aa           the same.
+#   --grass-give-way      priced this project's grass giving way over a board
+#                         square. The adopted grass's equivalent is its own
+#                         TrampleField; nothing tunes it from the command line
+#                         yet.
+#
+# One thing worth knowing about a capture: nothing steps until the ground has
+# been built. The adopted streamer builds a chunk a frame and says when its
+# startup chunks have landed ("render-shell ground ready frames=N"), and the
+# world is held at tick 0 until then -- so `--screenshot-tick N` photographs a
+# world with ground under it however long the machine took to mesh it.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 source ./godot_env.sh

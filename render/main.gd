@@ -118,6 +118,14 @@ const CAMERA_FAR := 900.0
 ## chunks land -- and after that it is the smoothed follow it is meant to be.
 const CAMERA_SNAP_FRAMES := 2
 
+## How far past what `--focus` names the far blur begins, as a multiple of it.
+##
+## The adopted director focuses for a third-person camera about seven units off
+## the person, with the far band opening at 190; this is that ratio kept, so a
+## capture that names a focus gets the same depth of field moved rather than a
+## differently shaped one.
+const DOF_FAR_SHARE := 1.8
+
 ## How far the board overlay is lifted off the ground it describes, in world
 ## units, so its quads do not fight the terrain for the same pixels.
 ##
@@ -2773,6 +2781,20 @@ func _build_scenery() -> void:
 	_camera_rig.set("distance", Vector2(_camera_offset.x, _camera_offset.z).length())
 	_camera_rig.set("aim_lift", _camera_aim)
 	_camera_rig.set("target", _observer_holder())
+	# Where the miniature depth of field is focused, when a capture asks for
+	# somewhere other than the person. The band itself is the adopted
+	# director's -- it built the CameraAttributes in its own `_ready`, which
+	# has already run by the time this does -- so this moves that band rather
+	# than building a second one. The two distances keep their ratio to the
+	# focus, which is what stops a detail shot going soft all over.
+	if _camera_focus > 0.0:
+		var attributes := _camera.attributes as CameraAttributesPractical
+		if attributes != null:
+			var was := attributes.dof_blur_far_distance
+			var near_share := attributes.dof_blur_near_distance / maxf(was, 0.001)
+			attributes.dof_blur_far_distance = _camera_focus * DOF_FAR_SHARE
+			attributes.dof_blur_near_distance = \
+				_camera_focus * DOF_FAR_SHARE * near_share
 
 	# This game's half of the atmosphere: the warm point lights, the orbs, the
 	# motes and the ground mist. The sun, the sky, the fog, the bloom, the fill

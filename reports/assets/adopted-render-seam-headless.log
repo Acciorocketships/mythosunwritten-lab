@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234
+cast 4 following #1
+  Pip     #1 commander band=1 at (0.000, 0.000, 0.000) hp=26/26 walking  <- followed
+  Nettle  #2 commander band=1 at (-7.000, 0.000, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 0.000, -5.000) hp=26/26 walking
+  Scholar(-1,-1) #4 commander band=-1 at (-23.279, 0.000, -35.501) hp=26/26 walking
+tick 0 patches=32 islands=9 villages=1 roads=5 props=406 cover=0 cast=4 biome=meadow water=0 on_island=0 on_path=0.00 a6a1cc2ab68d02d0
+  t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+  t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+  t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+  t=  1  Scholar(-1,-1) began go_to(target=(-5.711, -39.422)), 20 ticks
+  t=  6  Pip    thought again at 5/20t, wanted the same thing
+  t=  6  Nettle thought again at 5/20t, wanted the same thing
+  t=  6  Corin  thought again at 5/20t, wanted the same thing
+  t=  6  Scholar(-1,-1) thought again at 5/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
+tick 10 patches=33 islands=9 villages=1 roads=5 props=418 cover=0 cast=4 biome=meadow water=0 on_island=0 on_path=0.00 0f3343d2f4ef5407
+  t= 11  Pip    thought again at 10/20t, wanted the same thing
+  t= 11  Nettle thought again at 10/20t, wanted the same thing
+  t= 11  Corin  thought again at 10/20t, wanted the same thing
+  t= 11  Scholar(-1,-1) thought again at 10/20t, kept go_to(target=(-5.711, -39.422)) over go_to(target=(-8.921, -24.363))
+  t= 16  Pip    thought again at 15/20t, wanted the same thing
+  t= 16  Nettle thought again at 15/20t, wanted the same thing
+  t= 16  Corin  thought again at 15/20t, wanted the same thing
+  t= 16  Scholar(-1,-1) changed its mind at 15/20t, dropped go_to(target=(-5.711, -39.422)) for go_to(target=(-8.921, -24.363))
+  t= 16  Scholar(-1,-1) began go_to(target=(-8.921, -24.363)), 16 ticks
+tick 20 patches=38 islands=9 villages=1 roads=5 props=487 cover=0 cast=4 biome=meadow water=0 on_island=0 on_path=0.00 f858a3bdc5470a94
+done ticks=20 patches=38 built=38 final=f858a3bdc5470a94
+assets visual-files found=16837 loaded=0
+assets render-scripts found=37 loaded=0
+assets adopted-scene-scripts found=11 loaded=0
+assets sim-scripts found=123 loaded=98 -> res://sim/island_geometry.gd,res://sim/path_network.gd,res://sim/spawn_roll.gd,res://sim/world_object.gd,+94 more
+assets adopted-scene-script res://scripts/camera/camera.gd cached=0
+assets adopted-scene-script res://scripts/terrain/tools/CoordOverlay.gd cached=0
+assets adopted-scene-script res://scripts/terrain/tools/ReviewTeleporter.gd cached=0
+assets adopted-scene-script res://scripts/terrain/biome/SpiritOrb.gd cached=0
+assets adopted-scene-script res://scripts/terrain/biome/AtmosphereDirector.gd cached=0
+assets adopted-scene-script res://scripts/terrain/field/FieldTerrainStreamer.gd cached=0
+assets adopted-scene-script res://scripts/terrain/grass/TrampleField.gd cached=0
+assets adopted-scene-script res://scripts/terrain/water/WaterRippleSim.gd cached=0
+assets adopted-scene-script res://ui/loading_screens/MythosLoadingScreen.gd cached=0
+assets adopted-scene-script res://ui/loading_screens/MythosTaperedProgressBar.gd cached=0
+assets adopted-scene-script res://characters/character.gd cached=0

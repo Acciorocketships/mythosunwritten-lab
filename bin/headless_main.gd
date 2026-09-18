@@ -26,7 +26,13 @@ const VISUAL_EXTENSIONS := [
 
 ## Directories the asset scan does not walk: the engine binary and its home, and
 ## the write-ups. Neither is part of the game.
-const UNSCANNED := ["tools", "reports"]
+##
+## Full paths rather than bare names, and that is a correction rather than a
+## style: as bare names they matched *any* directory so called at any depth, and
+## the adopted base has a `scripts/terrain/tools/` of its own -- which quietly
+## hid two of its scene scripts from the purity scan until the render seam came
+## to lean on it.
+const UNSCANNED := ["res://tools", "res://reports"]
 
 
 func _initialize() -> void:
@@ -147,16 +153,33 @@ func _initialize() -> void:
 ## The simulation's own scripts are counted too, and are expected to be loaded.
 ## Without that line the report could not be told apart from one taken in a
 ## process that had loaded nothing at all.
+##
+## Since the base adoption there is a fourth group, and it is the one that
+## matters most now. The world is drawn by the adopted base's own code under
+## `res://scripts/`, `res://characters/` and `res://ui/` -- and the simulation
+## legitimately reads part of that same directory, because its ground is the
+## adopted heightfield (`sim/adopted_ground.gd` calls `TerrainSurfaceField`,
+## `WaterField`, `Helper`). "The simulation loads nothing of the render layer"
+## can therefore no longer be answered by a directory name. It is answered by
+## what a file *is*: a script that `extends` a scene-tree type only exists
+## inside a running tree, so a headless process that has loaded one has loaded
+## a piece of the picture. Those are the adopted files this report insists on
+## finding uncached, and they include the terrain streamer, the grass streamer,
+## the camera, the controllers, the character and every panel of their
+## interface.
 func _asset_report() -> PackedStringArray:
 	var visual_files := PackedStringArray()
 	var render_scripts := PackedStringArray()
+	var adopted_scene_scripts := PackedStringArray()
 	var sim_scripts := PackedStringArray()
 	for path in _project_files("res://"):
 		var extension := path.get_extension().to_lower()
 		if extension in VISUAL_EXTENSIONS:
 			visual_files.append(path)
 		elif extension == "gd":
-			if path.begins_with("res://render/"):
+			if _is_an_adopted_scene_script(path):
+				adopted_scene_scripts.append(path)
+			elif path.begins_with("res://render/"):
 				render_scripts.append(path)
 			elif path.begins_with("res://sim/"):
 				sim_scripts.append(path)
@@ -165,6 +188,7 @@ func _asset_report() -> PackedStringArray:
 	for group in [
 		["visual-files", visual_files],
 		["render-scripts", render_scripts],
+		["adopted-scene-scripts", adopted_scene_scripts],
 		["sim-scripts", sim_scripts],
 	]:
 		var label: String = group[0]
@@ -183,7 +207,68 @@ func _asset_report() -> PackedStringArray:
 			label, paths.size(), loaded.size(),
 			"" if loaded.is_empty() else " -> " + ",".join(named),
 		])
+	# The adopted scene scripts are named whether or not any of them loaded.
+	# The group is small, it is the one the render seam's purity argument rests
+	# on, and a count alone could be zero because the scan found nothing rather
+	# than because the run loaded nothing.
+	for path in adopted_scene_scripts:
+		report.append("assets adopted-scene-script %s cached=%d" % [
+			path, 1 if ResourceLoader.has_cached(path) else 0,
+		])
 	return report
+
+
+## The adopted directories whose scripts may be either: part of the fields the
+## simulation reads, or part of the picture. Which one a file is is decided by
+## what it extends, below.
+const ADOPTED_DIRS := [
+	"res://scripts/", "res://characters/", "res://ui/",
+]
+
+## The scene-tree types a script can extend. A script that extends one of these
+## cannot do anything outside a running tree, so it is a piece of the picture
+## however it is filed.
+const SCENE_TREE_BASES := [
+	"Node", "Node2D", "Node3D", "CanvasLayer", "CanvasItem", "Control",
+	"CharacterBody3D", "RigidBody3D", "StaticBody3D", "Area3D", "Camera3D",
+	"MeshInstance3D", "MultiMeshInstance3D", "Sprite2D", "Sprite3D",
+	"Label", "RichTextLabel", "Button", "Panel", "PanelContainer", "TextureRect",
+	"ColorRect", "NinePatchRect", "VBoxContainer", "HBoxContainer",
+	"GridContainer", "MarginContainer", "CenterContainer", "ScrollContainer",
+	"SubViewport", "WorldEnvironment", "DirectionalLight3D", "OmniLight3D",
+	"GPUParticles3D", "AnimationPlayer", "AnimationTree", "BoneAttachment3D",
+	"Skeleton3D", "SceneTree",
+]
+
+
+## Whether an adopted script only exists inside a scene tree.
+##
+## Read off the file's own `extends` line rather than off a list kept here, so a
+## file the base adds tomorrow is classified by what it is. A script extending
+## another script by path (`extends "res://..."`) is followed one step, which is
+## how the base's panels reach their own base class.
+func _is_an_adopted_scene_script(path: String) -> bool:
+	var adopted := false
+	for directory in ADOPTED_DIRS:
+		if path.begins_with(directory):
+			adopted = true
+			break
+	if not adopted:
+		return false
+	var text := FileAccess.get_file_as_string(path)
+	if text.is_empty():
+		return false
+	for line in text.split("\n"):
+		var trimmed := line.strip_edges()
+		if not trimmed.begins_with("extends "):
+			continue
+		var base := trimmed.substr(8).strip_edges()
+		if base.begins_with("\""):
+			# `extends "res://..."` -- ask the file it names instead.
+			var other := base.trim_prefix("\"").trim_suffix("\"")
+			return other != path and _is_an_adopted_scene_script(other)
+		return base in SCENE_TREE_BASES
+	return false
 
 
 ## Every file in the project, minus the hidden directories and the ones that
@@ -196,10 +281,10 @@ func _project_files(dir_path: String) -> PackedStringArray:
 	dir.list_dir_begin()
 	var entry := dir.get_next()
 	while entry != "":
-		if entry.begins_with(".") or entry in UNSCANNED:
+		var full := dir_path.path_join(entry)
+		if entry.begins_with(".") or full in UNSCANNED:
 			entry = dir.get_next()
 			continue
-		var full := dir_path.path_join(entry)
 		if dir.current_is_dir():
 			found.append_array(_project_files(full))
 		else:

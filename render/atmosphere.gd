@@ -97,17 +97,27 @@ const GLOWING_TAGS := {
 const ORB_WANDER := 0.85
 const ORB_RATE := 0.11
 
-## How high above the observer the ground mist lies and how thick it is, as a
-## multiple of the biome's own fog density.
+## How high above the observer the ground mist lies, and how thick it gets in
+## the gloomiest biome, as a multiple of the air the adopted world already has.
 ##
-## This is the one piece of the fog that is not simply the biome's number turned
-## into a knob: depth fog alone fades the distance evenly, and mist in the
-## reference images pools in the low ground and thins out above it. The height is
-## carried with the observer rather than fixed to the world, so the mist lies
-## over the valley floor you are standing in rather than at some absolute
-## altitude that would bury a highland and miss a marsh.
+## Depth fog alone fades the distance evenly; mist in the reference images pools
+## in the low ground and thins out above it. The height is carried with the
+## observer rather than fixed to the world, so the mist lies over the valley
+## floor you are standing in rather than at some absolute altitude that would
+## bury a highland and miss a marsh.
+##
+## The thickness is a multiple of the adopted Environment's OWN depth-fog
+## density, read off it at `attach()`, rather than this project's own absolute
+## number. That is not tidiness. This project's biome profiles carry fog
+## densities chosen against an Environment this layer used to build itself, and
+## they are one to two orders of magnitude above the 0.00035 the adopted
+## director sets; writing one of them straight into their height fog whited out
+## a whole frame the first time it was photographed. Expressed as a multiple,
+## the mist is as thick as the world it is lying in says its air is, and the
+## multiplier below is how much thicker it gets down at ground level in the
+## gloomiest country there is.
 const MIST_HEIGHT := 7.0
-const MIST_SCALE := 0.20
+const MIST_SCALE := 4.0
 
 ## How many warm point lights this layer has handed out, cumulative. Reported on
 ## the shell's stop line, which is how a test tells a run with the stack from a
@@ -119,6 +129,10 @@ var lights_made := 0
 ## the ground mist -- so that the mist is part of the same air the base's own
 ## depth fog is, rather than a second fog fighting it.
 var _environment: Environment = null
+
+## The adopted Environment's own depth-fog density, read once at `attach()`.
+## The ground mist is a multiple of it; see MIST_SCALE.
+var _base_fog_density := 0.0
 var _motes: MoteField = null
 
 # The glowing orbs on screen, as {node, anchor, phase}. Kept as its own list so
@@ -142,6 +156,7 @@ func _init(world_seed: int) -> void:
 func attach(parent: Node3D, world_environment: WorldEnvironment) -> void:
 	if world_environment != null:
 		_environment = world_environment.environment
+		_base_fog_density = _environment.fog_density
 	parent.add_child(_motes.view())
 
 
@@ -156,9 +171,12 @@ func take(profile: SimBiomeProfile, observer: Vector3) -> void:
 	if _environment != null:
 		# The mist that lies in the low ground, on top of the base's own even
 		# depth fade. Its ceiling follows the observer, so it is always the air
-		# of the place being stood in.
+		# of the place being stood in, and how thick it is is how gloomy the
+		# simulation says this country is -- as a multiple of the air the world
+		# already has, never as a number of this layer's own.
 		_environment.fog_height = observer.y + MIST_HEIGHT
-		_environment.fog_height_density = profile.fog_density * MIST_SCALE
+		_environment.fog_height_density = \
+			_base_fog_density * MIST_SCALE * gloom_of(profile)
 	_motes.take(profile)
 	_motes.look_from(observer)
 
