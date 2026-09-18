@@ -1,0 +1,100 @@
+
+RUN   test_streaming
+  ..  streaming        118 s, 3581 checks: chunk (9.000000, 1.000000) is 55.267113 from the nearest observer at ...
+  ..  streaming        256 s, 4137 checks: walking the same path twice loaded different ground
+  ..  streaming        464 s, 4139 checks: the chunk (0.000000, 0.000000) should have unloaded once the observer...
+  ..  streaming        494 s, 4144 checks: the chunk both observers stand on should be loaded
+  ..  streaming        650 s, 4145 checks: ground unloaded while an observer was still standing on it
+  ..  streaming        751 s, 4146 checks: ground stayed loaded with no observer near it
+  ..  streaming        869 s, 4147 checks: a fresh world should have ground under its observer
+PASS  streaming       959.7 s, 4679 checks
+
+RUN   test_live_world
+  ..  live world        30 s, 57 checks: two worlds of one seed lived different lives
+  ..  live world       147 s, 58 checks: two seeds lived the same life
+  ..  live world       183 s, 59 checks: the report does not say who is in the world
+  ..  live world       225 s, 65 checks: the market scenario could not be photographed
+  ..  live world       424 s, 75 checks: the river world stood nobody up
+SCRIPT ERROR: Out of bounds get index '5' (on base: 'Dictionary')
+          at: TestLiveWorld._a_cast_is_stood_where_it_can_walk_from (res://tests/test_live_world.gd:296)
+          GDScript backtrace (most recent call first):
+              [0] _a_cast_is_stood_where_it_can_walk_from (res://tests/test_live_world.gd:296)
+              [1] run (res://tests/test_live_world.gd:59)
+              [2] _run_one (res://bin/test_main.gd:174)
+              [3] _process (res://bin/test_main.gd:160)
+PASS  live world      516.8 s, 79 checks
+
+RUN   test_fight_driver
+  ..  fight driver     120 s, 38 checks: two plays of the skirmish print identical transcripts
+FAIL  fight driver    136.8 s, 51 checks, 4 failed
+        - the skirmish begins exactly one fight
+      expected: 1
+      actual:   0
+        - and it is over before the run is
+      expected: 1
+      actual:   0
+        - all three commanders were on the board, two bands against one
+      expected: 3
+      actual:   0
+        - and somebody fell, so the fight was fought
+
+RUN   test_walk_in_fight
+FAIL  walk-in fight   126.2 s, 54 checks, 3 failed
+        - the fight ended because the brawler went down
+        - the person who walked into it is still standing
+        - and the trader who came along is untouched at the end of it
+      expected: 32
+      actual:   0
+WARNING: 45 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2735)
+WARNING: 2758 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 64 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+
+RUN   test_observation
+  ..  observation       33 s, 146 checks: the packet says where the character stands, in world coordinates:   y...
+  ..  observation       74 s, 154 checks: and the shipped run's observations fingerprint the same twice over
+FAIL  observation     181.8 s, 248 checks, 6 failed
+        - and the observation says that is why
+      expected: nothing is driving this scene
+      actual:   not in line of sight
+        - it prints the reason a field is absent, in words
+        - on open ground everybody is in sight
+      expected: true
+      actual:   false
+        - so how hurt they look is filled in
+        - and so is what they have on
+        - somebody is standing on the tactical board at tick 80
+
+RUN   test_ground_items
+  ..  ground items     196 s, 2577 checks: the shipped scenarios hold 51 items, not 54
+  ..  ground items     299 s, 2596 checks: nobody fell in 140 ticks of the skirmish
+FAIL  ground items    298.7 s, 2607 checks, 2 failed
+        - the shipped scenarios hold 51 items, not 54
+      expected: 54
+      actual:   51
+        - nobody fell in 140 ticks of the skirmish
+
+run_tests: suite 'test_live_world' raised a runtime error (SCRIPT ERROR above).
+run_tests: the engine returned to the caller and the runner could not see it,
+run_tests: so the run is failed here whatever the summary said.
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+   1  test_streaming         peak   5.95 GiB    16.1 min  quiet up to   206 s
+   2  test_live_world        peak   9.76 GiB     8.7 min  quiet up to   198 s
+   3  test_fight_driver      peak   5.43 GiB     2.3 min  quiet up to   118 s
+   4  test_walk_in_fight     peak   5.68 GiB     2.1 min  quiet up to   124 s
+   5  test_observation       peak   5.43 GiB     3.1 min  quiet up to   121 s
+   6  test_ground_items      peak   9.82 GiB     5.0 min  quiet up to   194 s
+  peak of the whole run: 9.82 GiB, in suite 6 (test_ground_items)
+  longest quiet stretch: 206 s, in suite 1 (test_streaming)
+  wall time of the whole run: 37.5 min (0.63 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260917-225247.log
+
+4 of 6 suites failed (15 failed checks of 7718)

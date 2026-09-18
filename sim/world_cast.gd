@@ -132,6 +132,28 @@ const CAST := [
 const LANDING_REACH := 60.0
 const LANDING_STEP := 3.0
 
+## And how far to keep looking when that found nothing, at what spacing.
+##
+## Sixty units used to be the whole search, and on the adopted ground it is
+## exactly the wrong distance. `HeightfieldPlan.height01` ends by multiplying
+## the height by a falloff that is zero inside sixty units of the world origin
+## and fades back in over the next hundred and eighty, so every seed has a flat
+## disc of exactly-zero ground around the origin that it did not choose. A seed
+## whose water table there stands above zero floods the whole disc -- and the
+## near search, whose reach is the disc's own radius, then has nowhere to put
+## anybody and hands back the spot it was given, which is in the water. At seed
+## 7 all three of `CAST` are stood in a lake and refuse every walk they choose
+## for the rest of the run; the nearest ground anybody can stand on is 192 units
+## out, where the falloff has lifted the land clear of the water again.
+##
+## So the search carries on past the disc, out to where the ground is fully
+## itself, at a spacing four times coarser because what is wanted out there is
+## somewhere to stand rather than the nearest such place. The near rings are
+## untouched: a world that already found a landing finds the same one, and the
+## only worlds this changes are the ones that were putting a character in water.
+const LANDING_FAR_REACH := 240.0
+const LANDING_FAR_STEP := 12.0
+
 ## The six ability scores everybody in the ordinary cast is rolled at.
 ##
 ## One roll shared by all three, for the reason the scenario's cast shares one:
@@ -276,16 +298,33 @@ static func hand_over(world: SimWorld, id: int) -> LiveChoice:
 static func _standable_near(terrain: TerrainQuery, at: Vector2) -> Vector2:
 	if terrain == null or terrain.is_passable_at(at.x, at.y):
 		return at
-	var rings := int(LANDING_REACH / LANDING_STEP)
-	for ring in range(1, rings + 1):
-		var radius := float(ring) * LANDING_STEP
+	var near := _standable_on_rings(terrain, at, LANDING_STEP, LANDING_REACH, 0.0)
+	if near != Vector2.INF:
+		return near
+	var far := _standable_on_rings(
+		terrain, at, LANDING_FAR_STEP, LANDING_FAR_REACH, LANDING_REACH)
+	return at if far == Vector2.INF else far
+
+
+## The first standable position on a lattice of rings around a spot, or
+## `Vector2.INF`. Rings from just past `beyond` out to `reach`, `step` apart,
+## with `ring * 8` samples on the ring that is `ring` steps out -- so the samples
+## on a ring are the same spacing apart whichever ring it is, and the same
+## positions are asked about in whichever process asks.
+static func _standable_on_rings(
+	terrain: TerrainQuery, at: Vector2, step_size: float, reach: float, beyond: float
+) -> Vector2:
+	for ring in range(1, int(reach / step_size) + 1):
+		var radius := float(ring) * step_size
+		if radius <= beyond:
+			continue
 		var around := ring * 8
 		for step in around:
 			var angle := float(step) * TAU / float(around)
 			var here := at + Vector2(cos(angle), sin(angle)) * radius
 			if terrain.is_passable_at(here.x, here.y):
 				return here
-	return at
+	return Vector2.INF
 
 
 ## A heading turned by up to `TURN` either way, or into the back half when the

@@ -70,11 +70,16 @@ written down below; the lighting stack is a later one:
   fine as the one before. Every layer's value is drawn from a *hash of the
   position* rather than from a random stream, because a stream's numbers depend
   on how many were drawn before them — two chunks covering the same ground would
-  then disagree about it. Every continuous field in the stack is made of this.
-* **`SimTerrainSurfaceField`** — how high the land is at a world position, before
-  water is cut out of it. It is a pure function of that position and the world
-  seed: it stores nothing that sampling changes, it does not know that chunks
-  exist, and it never looks at a clock.
+  then disagree about it. The aerial islands are made of this; the ground itself
+  is the adopted base's own heightfield, below.
+* **`AdoptedGround`** — the adopted base's heightfield, water plan and biome
+  fields for one seed, behind one object: how high the land is at a world
+  position before and after the water carves it, whether that position is wet
+  and how deep, and which biome it is. It is a pure function of that position
+  and the world seed: it stores nothing that sampling changes, it does not know
+  that chunks exist, and it never looks at a clock. It replaced a stack of
+  separate noise fields of this project's own when the base was adopted —
+  reports/ground-rebuild.md.
 * **`TerrainQuery`** — the one surface the rest of the project reads the ground
   through. It composes the fields and answers the questions anything actually
   has: how high the ground is *after* the water has carved it, which biome this
@@ -137,7 +142,7 @@ simulation next to the ground's height, and the render shell only reads them.
 
 Three continuous fields are sampled per world position — how wooded the land is,
 how rocky, how wet — plus a fourth, sparse field that carves out twilight marsh
-pockets. `BiomeField` resolves them into the five named biomes of the design:
+pockets. `AdoptedGround` resolves them into the five named biomes of the design:
 meadow, deep forest, highland, blossom grove and twilight marsh. Each name
 carries a **profile** (`SimBiomeProfile`): ground, tree and rock tint, fog colour
 and density, a sky gradient, ambient colour, foliage density, and the set of prop
