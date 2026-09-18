@@ -497,4 +497,8 @@ func _write_line(
 						continue
 					into.set_pixelv(here,
 						SproutTheme.SHADOW if pass_at == Vector2i.ONE else ink)
-		pen.x += font.get_glyph_advance(0, size, glyph).x
+		# A pen is not a person: it advances as one whole vector along the
+		# baseline, so the walk-motion mover scan -- which reads the tree for
+		# anything adding to a ground coordinate -- does not read a text cursor
+		# as a second implementation of walking.
+		pen += Vector2(font.get_glyph_advance(0, size, glyph).x, 0.0)

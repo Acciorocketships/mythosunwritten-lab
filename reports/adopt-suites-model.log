@@ -1,0 +1,40 @@
+
+RUN   test_agent
+  ..  agent             52 s, 10 checks, 4.16 GiB: a person's decision function takes two arguments
+  ..  agent            101 s, 90 checks, 5.08 GiB: the run gave the cast too few turns to measure: 76
+  ..  agent            163 s, 923 checks, 5.08 GiB: the cast table does not say which character a model drives
+  ..  agent            193 s, 1089 checks, 5.08 GiB: the run staged 6 characters, too few to make the claim
+  ..  agent            223 s, 1140 checks, 5.08 GiB: Rook was asked 56 times, which is not 14 calls + 10 held + 32 polled
+  ..  agent            253 s, 1161 checks, 5.08 GiB: the transcript has no volume table
+  ..  agent            453 s, 1211 checks, 5.08 GiB: ./run_agent.sh exits 0
+PASS  agent           453.1 s, 1215 checks
+
+RUN   test_memory
+  ..  memory            67 s, 4 checks, 5.08 GiB: one character's lesson landed in another character's memory
+  ..  memory           103 s, 28 checks, 5.08 GiB: the run left too little in the memory to tell recent from older: 43
+  ..  memory           135 s, 41 checks, 5.08 GiB: there is no older entry to look for
+  ..  memory           214 s, 75 checks, 5.08 GiB: an arm of the comparison was not played
+  ..  memory           247 s, 99 checks, 5.08 GiB: the run does not report 'entries'
+  ..  memory           537 s, 102 checks, 5.08 GiB: ./run_lesson.sh exits 0
+PASS  memory          537.0 s, 106 checks
+
+RUN   test_goals
+  ..  goals             53 s, 34 checks, 4.16 GiB: standing on the position it is after: the world answered "0.0 from (8...
+  ..  goals            147 s, 122 checks, 5.08 GiB: an arm did not run
+  ..  goals            294 s, 131 checks, 5.08 GiB: the goal run exited non-zero
+  ..  goals            441 s, 132 checks, 5.08 GiB: two runs of the goal comparison printed different bytes
+PASS  goals           440.9 s, 133 checks
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.30 GiB     0.0 min  quiet up to     0 s
+   1  test_agent             peak  10.03 GiB     7.6 min  quiet up to   198 s
+   2  test_memory            peak  10.04 GiB     9.0 min  quiet up to   289 s
+   3  test_goals             peak  10.04 GiB     7.3 min  quiet up to   144 s
+  peak of the whole run: 10.04 GiB, in suite 2 (test_memory)
+  longest quiet stretch: 289 s, in suite 2 (test_memory)
+  wall time of the whole run: 24.1 min (0.40 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260918-164122.log
+
+all 3 suites passed (1454 checks)

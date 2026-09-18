@@ -2,78 +2,78 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 does a goal change what is chosen? seed=1234, 100 ticks watched
   channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
-  recording  recorded 2026-09-11 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 116 replies
+  recording  recorded 2026-09-18 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 93 replies
   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
 
 the same moment, four times
-  observation fingerprint    01a5108de4fead0e in all four arms: yes
+  observation fingerprint    53861151a43ec423 in all four arms: yes
   what it remembers          identical in all four arms: yes
   prompt outside its goals   identical in all four arms: yes
   so the only thing that differs between the arms is what the character is after
 
-arm: no goal -- prompt f256a9e7201e9ba3
+arm: no goal -- prompt 090790218ee1f7f0
   what it is after, as the prompt carried it:
     What you are after: nothing in particular.
   what the world answered about each, before the question:
     (it is after nothing, so there was nothing to answer)
-  the model said:     say text="just me, sorry" target=#1
-  which read back as: say(text="just me, sorry" target=1)
+  the model said:     say text="just the wind, I think" target=#1
+  which read back as: say(text="just the wind, I think" target=1)
 
-arm: the empty stall -- prompt e120ce0dc35266be
+arm: the empty stall -- prompt 6f7f4a0c09401924
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
-      1  short be at (-471.0, 416.0)                          the world says when this one is done
+      1  short be at (93.5, 290.0)                            the world says when this one is done
   what the world answered about each, before the question:
-    be at (-471.0, 416.0)                          not yet -- 7.8 from (-471.0, 416.0)
-  the model said:     go_to target=(-471.0, 416.0)
-  which read back as: go_to(target=(-471.000, 416.000))
+    be at (93.5, 290.0)                            not yet -- 7.8 from (93.5, 290.0)
+  the model said:     go_to target=(93.5, 290.0)
+  which read back as: go_to(target=(93.500, 290.000))
 
-arm: a trade with Rook -- prompt 55bf4364b6bc36bb
+arm: a trade with Rook -- prompt 77e576eb1280f1c9
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  short have traded with #2                            the world says when this one is done
   what the world answered about each, before the question:
     have traded with #2                            not yet -- no trade of its has been honoured
-  the model said:     trade_propose target=#2 give_money=4
-  which read back as: trade_propose(target=2 give_money=4)
+  the model said:     trade_propose target=#2 give_money=5 want=[]
+  which read back as: trade_propose(target=2 give_money=5 want=[])
 
-arm: thought well of here -- prompt d5e52485b38c6f16
+arm: thought well of here -- prompt adec6dbac136e231
   what it is after, as the prompt carried it:
     What you are after, the most pressing first:
       1  long  be thought well of in this market              answer `done goal=1` when you judge it done
   what the world answered about each, before the question:
     be thought well of in this market              not yet -- nothing in the world answers this one
-  the model said:     say text=I heard nothing amiss, Wren. All is well here. target=#1
-  which read back as: say(text=I heard nothing amiss, Wren. All is well here. target=1)
+  the model said:     say text=just the wind, I think target=#1
+  which read back as: say(text=just the wind, I think target=1)
 
 what the goals changed
   two columns, because the two are different claims: a different action, and a different
   choice of any sort including the same action with other words in it
   arm                    which action     chose                                      action     choice
-  no goal                say at #1        say(text="just me, sorry" target=1)        --         --
-  the empty stall        go_to at nobody  go_to(target=(-471.000, 416.000))          differs    differs
-  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=4)       differs    differs
-  thought well of here   say at #1        say(text=I heard nothing amiss, Wren. All… same       differs
+  no goal                say at #1        say(text="just the wind, I think" target=… --         --
+  the empty stall        go_to at nobody  go_to(target=(93.500, 290.000))            differs    differs
+  a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=5 want=… differs    differs
+  thought well of here   say at #1        say(text=just the wind, I think target=1)  same       differs
   2 of 3 goals changed which action was chosen; 3 changed the choice at all
 
-  being after "be at (-471.0, 416.0)"
-    after nothing it chose  say(text="just me, sorry" target=1)
-    after that one it chose go_to(target=(-471.000, 416.000))
+  being after "be at (93.5, 290.0)"
+    after nothing it chose  say(text="just the wind, I think" target=1)
+    after that one it chose go_to(target=(93.500, 290.000))
     which is a different action: go_to at nobody rather than say at #1
 
   being after "have traded with #2"
-    after nothing it chose  say(text="just me, sorry" target=1)
-    after that one it chose trade_propose(target=2 give_money=4)
+    after nothing it chose  say(text="just the wind, I think" target=1)
+    after that one it chose trade_propose(target=2 give_money=5 want=[])
     which is a different action: trade_propose at #2 rather than say at #1
 
   being after "be thought well of in this market"
-    after nothing it chose  say(text="just me, sorry" target=1)
-    after that one it chose say(text=I heard nothing amiss, Wren. All is well here. target=1)
+    after nothing it chose  say(text="just the wind, I think" target=1)
+    after that one it chose say(text=just the wind, I think target=1)
     which is the same action, say at #1, said in other words
 
 who answers each of these goals
   arm                    what it is after                               answered by
-  the empty stall        be at (-471.0, 416.0)                          the world, out of its own state
+  the empty stall        be at (93.5, 290.0)                            the world, out of its own state
   a trade with Rook      have traded with #2                            the world, out of its own state
   thought well of here   be thought well of in this market              the character: the world holds no state for it
   a goal the world answers is closed by the world and by nothing else; the section below

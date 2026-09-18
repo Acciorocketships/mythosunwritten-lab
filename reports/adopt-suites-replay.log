@@ -1,0 +1,9 @@
+== the replay below runs with OPENROUTER_API_KEY and every local-model variable unset
+== first run exit=0
+== second run exit=0
+== two keyless processes printed identical bytes
+== and identical to the checked-in reports/agent-evidence.txt
+  channel    replay -- the shipped run replays the recorded exchange, so it needs no key, no network and no model, and two processes print the same bytes
+  recording  recorded 2026-09-18 from z-ai/glm-5.3-flash at https://openrouter.ai/api/v1/chat/completions, 93 replies
+0
+  fingerprint 038b35d091e8725e

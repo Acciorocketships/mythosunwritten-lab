@@ -113,9 +113,26 @@ const ALONE := "alone"
 ## this and not typed a second time.
 ##
 ## `at` is an offset from `WHERE` in world units. The market stands at the
-## meeting place itself; the quarrel is far enough east that the whole of it is
+## meeting place itself; the quarrel is far enough away that the whole of it is
 ## outside `Encounter.JOIN_RADIUS` of the market, so the traders cannot be pulled
-## into a fight they are not in; Odo is further out again, along z.
+## into a fight they are not in; Odo is further out again.
+##
+## The three offsets away from the market were re-measured when the base
+## adoption (ADOPTION.md) put the adopted heightfield and water plan under the
+## terrain query. `WHERE` moved to a lakeside, and the offsets written for the
+## old ground then named open water: Bram and Sable stood *in* the lake and
+## could not take a stride, so the quarrel never began and the run certified a
+## world with no fight in it. `tools/scenario_sites.gd` is that measurement --
+## it sweeps offsets around `WHERE` and keeps the ones where both quarrellers
+## stand on ground, every stride of the straight line between them is ground,
+## the whole quarrel is outside `Encounter.JOIN_RADIUS` of both traders with
+## eight units to spare, and a tactical board at their meeting is at least
+## nine-tenths standable. Of 2401 offsets swept at three-unit spacing on seed
+## 1234, 1219 stand (846 refused for standing in water, 336 for being close
+## enough to pull a trader in); this is the one nearest the offsets written for
+## the old ground that also has a board to fight on -- 41.2 units from them,
+## 36.4 units from the nearest trader, and a board 90.0% open, the remaining
+## tenth being the lake shore running across one corner of it.
 const CAST := [
 	{
 		"name": WREN, "side": MARKET, "level": 2,
@@ -127,11 +144,11 @@ const CAST := [
 	},
 	{
 		"name": BRAM, "side": GREEN, "level": 3,
-		"tag": AssetTags.KNIGHT, "at": Vector2(44.0, -13.0),
+		"tag": AssetTags.KNIGHT, "at": Vector2(12.0, -39.0),
 	},
 	{
 		"name": SABLE, "side": AMBER, "level": 3,
-		"tag": AssetTags.BARBARIAN, "at": Vector2(56.0, -13.0),
+		"tag": AssetTags.BARBARIAN, "at": Vector2(24.0, -39.0),
 	},
 	{
 		"name": ODO, "side": ALONE, "level": 1,
@@ -197,9 +214,21 @@ const REST := 30
 const WREN_WAITS := 8
 const WREN_LINGERS := 24
 
-## Where Odo walks to, as an offset from `WHERE`: further out along z, away from
-## everything. It never comes back and never joins anything.
-const ODO_WALKS_TO := Vector2(-4.0, 94.0)
+## Where Odo walks to, as an offset from `WHERE`: away from everything. It never
+## comes back and never joins anything.
+##
+## Re-measured with the quarrel, and for the same reason: the walk written for
+## the old ground ran due north off the shore, and every one of its strides past
+## the water's edge was refused, so Odo spent the whole run failing to set off.
+## `tools/scenario_sites.gd` looks for a destination the straight walk from
+## Odo's own starting offset reaches over standable ground, about as far as the
+## written walk went -- 42 units, give or take six, because the run is 160 ticks
+## and a walk is lived one stride a tick, so a destination three times further
+## away would still be being walked to when the transcript ends. Fifty-eight
+## destinations answer; this is the one that ends up furthest from the market,
+## which is Odo's whole part in the run: 47.0 units walked, ending 73.4 units
+## from the nearer trader.
+const ODO_WALKS_TO := Vector2(-51.0, 54.0)
 
 ## Which tick each rendered frame is taken at. A frame is a picture of this run
 ## at a stated tick and nothing else: `muster()` plays the run to the tick and

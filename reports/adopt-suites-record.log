@@ -1,0 +1,285 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+recorder: https://openrouter.ai/api/v1/chat/completions
+  model      z-ai/glm-5.3-flash
+  credential OPENROUTER_API_KEY is set
+  putting    the character runs' questions only -- the shipped run, the lesson comparison and the goal comparison; every other table is written back unchanged
+  asked      87 questions for the shipped run, 85 answered
+    Rook   42fa9024f9abc205 go_to target=#6
+    Bram   ad9d4b05dbd8f7ca say text=Hello there, travelers. What brings you this way? target=#4
+    Sable  b77913aac977364d go_to target=#6
+    Odo    cf0f5290ec91f22a go_to offset=(-6, 0)
+    Pell   8b367a48277d16ac go_to target=#2
+    Rook   b106955102ef8ef1 say text="good morning, Wren" target=#1
+    Bram   103e9bfd58717f02 go_to target=#4
+    Pell   b95d7023ff4fb5cb go_to target=#2
+    Odo    3aec243a3b78c4be go_to offset=(3.0, 0.0)
+    Pell   18f3c894184424f6 pick_up item=brass lantern target=#6
+    Rook   edc5dcff3cdce540 say text=what's in the pile? target=#1
+    Odo    0a0bc42d6e93be0f go_to offset=(3.0, 0.0)
+    Pell   ef628e7424fac034 pick_up item=brass lantern target=#6
+    Odo    158af24827ecab7e go_to offset=(0, -3)
+    Rook   6dbd68eae7af2bf5 say text="a pile of goods, over that way — care to look?" target=#1
+    Pell   4054c489bf8760cb say text=Do you have a brass lantern I could buy or trade for? target=#1
+    Bram   3d26e6f24b93c6f8 say text=We should keep clear of those strangers by the buildings, or greet them properly. target=#4
+    Odo    d739856920f5c5e7 go_to offset=(-3, 0)
+    Rook   93937cda8494cc27 trade_accept target=#1
+    Pell   fa5034ade9640987 say text="Do you have a brass lantern I could buy or trade for?" target=#2
+    Odo    6a1c724584c4874d go_to offset=(0.0, 2.7)
+    Bram   75340bb492ed6ba0 say text=Strangers, if you can hear me, we mean no harm. Will you show yourselves? target=#1
+    Rook   120e9afbf37503b2 say text="let's head over and see what's in it" target=#1
+    Odo    45f60d910e0b733f go_to offset=(-6, 6)
+    Pell   71aa825d9f875f4b trade_propose target=#2 give=[9 coins] want=[brass lantern]
+    Rook   816ee3f69c59b44b say text="I don't have a brass lantern, Pell — sorry." target=#7
+    Bram   75340bb492ed6ba0 go_to target=#4
+    Pell   5e8fce1b6f088926 trade_propose target=#1 give=[coins] give_money=9 want=[brass lantern]
+    Odo    1aa05fff98cea36b go_to offset=(0, -3)
+    Rook   34931c902db13037 go_to target=#4
+    Bram   75340bb492ed6ba0 say text=Perhaps we should approach them together, carefully. target=#4
+    Sable  72d629f8e7f7cad0 say text=Agreed, let's greet them properly. I'll approach with you. target=#3
+    Odo    a7735fe9bf161659 go_to target=(75, 342)
+    Pell   2c6ca24cec9b5646 trade_propose target=#1 give=[coins] give_money=9 want=[brass lantern]
+    Bram   9c77a7fc1a4956fe say text=Let's move toward them slowly, Sable — stay close in case they turn hostile. target=#4
+    Odo    f799890dd37789c4 go_to offset=(0.0, 3.0)
+    Pell   1379886cec61c58b trade_propose target=#1 give=[coins] give_money=9 want=[brass lantern]
+    Sable  b82955e279f54cf4 go_to offset=(-8, +15)
+    Odo    9e8250ab515d2ac0 go_to offset=(0.0, 2.7)
+    Pell   b7f54f3a72695a70 trade_propose target=#1 give=[coins] want=[brass lantern]
+    Bram   b6f4b2f976713b88 go_to offset=(-10.0, +20.0)
+    Rook   38b9a04cbf072241 go_to target=#1
+    Odo    f88980a8c177fcf8 examine target=#5
+    Pell   1d98aecd2a59fe7c say text="Wren, you mentioned a fair bargain — would you trade me a brass lantern?" target=#1
+    Odo    70becf59423f8e30 go_to offset=(0, -3)
+    Pell   c8ad15dec3a8791e say text="Wren, you said 'a fair bargain' — what would you want for a brass lantern?" target=#1
+    Odo    4a7a74ebe1fa61e4 go_to offset=(0, -3)
+    Sable  95b9f0299a7e6ea3 go_to target=#2
+    Pell   ab20d61f30d5ae39 say text="Wren, what would you want in trade for a brass lantern?" target=#1
+    Odo    418cb2a1563ba9ea explore
+    Bram   ad04df18a9051bc3 go_to offset=(2.0, 10.0)
+    Odo    b3c1d8984308f2ad go_to offset=(0, 3)
+    Rook   98665ff2ce2ed0f0 say text="Wren, Pell — there's a stranger nearby, #3, armed with a sword. Anyone know them?" target=#1
+    Odo    6f0acf28a5f32ceb go_to offset=(0.0, 2.7)
+    Pell   e9799de345adedd8 say text="Wren, please — name your price for the brass lantern. I have coins." target=#1
+    Odo    6cd4bcbc2aab0e89 go_to offset=(0.0, -3.0)
+    Rook   ad12a7877180520e say text=#3, I see you there with that sword — friend or foe? State your business. target=#3
+    Odo    4a7a74ebe1fa61e4 go_to offset=(3, 0)
+    Bram   e560219ebb913913 say text="Greetings, strangers. We come in peace — may we approach?" target=#2
+    Pell   f2c7812f65d79aff say text="Rook, anyone — I have 9 coins. Who will sell me a brass lantern, or tell me where to find one?" target=#2
+    Rook   458e226ff3a8492c say text="Pell, I have no lantern, but I have 20 coins if you'd rather buy one somewhere." target=#7
+    Odo    f1169286ebc49b90 go_to offset=(-3.0, 0.0)
+    Sable  6dfa29a7398abdc0 go_to offset=(0.0, 6.0)
+    Bram   7b24e0f0c76f01ac say text="I am Bram, and this is Sable. We're exploring — no quarrel with you." target=#2
+    Odo    d7ca5be2f9987af1 go_to offset=(0.9, 0.9)
+    Pell   ffe4862f24d52e15 trade_propose target=#1 give_money=9 want=[brass lantern]
+    Odo    4e7ec63cce596458 examine target=x
+    Rook   809774e134a8454d say text="Aye, approach slowly and keep hands visible, Bram." target=#3
+    Bram   b80da6c7e5be7f05 say text="I am Bram, and this is Sable. We're exploring — no quarrel with you." target=#2
+    Sable  726f3b382044ba23 say text="Staying close, Bram. Let's greet them — hello there, friends!" target=#1
+    Odo    c80de70b3d63a74a go_to target=#x
+    Pell   a5d5f3962c3a45c9 trade_propose target=#1 give_money=9 want=[brass lantern]
+    Rook   3bfe9865b21ccbb6 say text="Sable, is it? Welcome, Bram and Sable. We're four on this ground — no trouble from us either." target=#4
+    Sable  f348f825eea56fde say text="Hello there, friends! We come in peace — mind if we join you?" target=#1
+    Bram   1af5909181cd0566 go_to offset=(1, 0)
+    Pell   b0c81294fcaf6d92 say text=Wren, I have 9 coins — will you sell me the brass lantern for them? target=#1
+    Sable  68849ed38755023e say text="Hello there, friends! We come in peace — mind if we join you?" target=#2
+    Rook   eb5f6565c760e773 recall about=brass lantern
+    Bram   2259545345f9397c say text="Thank you, Rook. We'll keep our hands visible — may we come closer and talk?" target=#2
+    Odo    c80de70b3d63a74a wait ticks=10
+    Pell   d24f121a12ac23db say text=Wren, I have 9 coins and Rook has 20 — between you, who will sell me a brass lantern? target=#1
+    Sable  8969b66ef51cd4ec say text="Good to meet you, Rook. Mind telling me your friend's name?" target=#2
+    Rook   fa111fb063992a46 say text="Pell, we should search the buildings nearby for a lantern — Sable, Bram, seen any around?" target=#7
+    Bram   e5945891b56db033 say text="Thank you, Rook. We'll approach slowly, hands visible. May I ask your names and what brings you here?" target=#2
+    Pell   a5ff5cd448148c31 say text="Wren, I have 9 coins and Rook has 20 — who among you will sell me a brass lantern?" target=#1
+    | does a lesson change what is chosen? seed=1234, 100 ticks watched
+    |   channel    record -- recording: 0 replies already written down, the rest asked of z-ai/glm-5.3-flash
+    |   recording  nothing recorded yet
+    |   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
+    | 
+    | the same moment, four times
+    |   observation fingerprint    53861151a43ec423 in all four arms: yes
+    |   prompt outside its memory  identical in all four arms: yes
+    |   so the only thing that differs between the arms is what the character remembers
+    |   what it lived through   7 things in its log before any lesson
+    | 
+    | arm: no lesson -- prompt 090790218ee1f7f0, 7 things remembered
+    |   lesson kept: none
+    |   what it remembers, as the prompt carried it:
+    |     What you remember:
+    |       lessons    0 you have kept
+    |       lately     the last 7 of 7 things you remember
+    |         - I saw Rook (#2), a commander, about 6m away.
+    |         - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+    |         - I saw Wren (#1), a commander, about 9m away.
+    |         - I saw Wren (#1), a commander, about 6m away.
+    |         - I saw Wren (#1), a commander, about 7m away.
+    |         - Wren (#1) shouted: "a fair bargain"
+    |         - Wren (#1) shouted: "what was that noise?"
+    |   the model said:     say text=just me, sorry if I startled you target=#1
+    |   which read back as: say(text=just me, sorry if I startled you target=1)
+    | 
+    | arm: the ground first -- prompt 2e6bd489416263b0, 8 things remembered
+    |   lesson kept: Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not.
+    |   what it remembers, as the prompt carried it:
+    |     What you remember:
+    |       lessons    1 you have kept
+    |         - Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not.
+    |       lately     the last 7 of 7 things you remember
+    |         - I saw Rook (#2), a commander, about 6m away.
+    |         - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+    |         - I saw Wren (#1), a commander, about 9m away.
+    |         - I saw Wren (#1), a commander, about 6m away.
+    |         - I saw Wren (#1), a commander, about 7m away.
+    |         - Wren (#1) shouted: "a fair bargain"
+    |         - Wren (#1) shouted: "what was that noise?"
+    |   the model said:     recall about=pile #6
+    |   which read back as: -- nothing readable --
+    | 
+    | arm: Rook, not Wren -- prompt 2268a9d4e3b21d12, 8 things remembered
+    |   lesson kept: Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me.
+    |   what it remembers, as the prompt carried it:
+    |     What you remember:
+    |       lessons    1 you have kept
+    |         - Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me.
+    |       lately     the last 7 of 7 things you remember
+    |         - I saw Rook (#2), a commander, about 6m away.
+    |         - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+    |         - I saw Wren (#1), a commander, about 9m away.
+    |         - I saw Wren (#1), a commander, about 6m away.
+    |         - I saw Wren (#1), a commander, about 7m away.
+    |         - Wren (#1) shouted: "a fair bargain"
+    |         - Wren (#1) shouted: "what was that noise?"
+    |   the model said:     say text=what noise? target=#1
+    |   which read back as: say(text=what noise? target=1)
+    | 
+    | arm: let them come -- prompt fc029e7ee3c7efb9, 8 things remembered
+    |   lesson kept: The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me.
+    |   what it remembers, as the prompt carried it:
+    |     What you remember:
+    |       lessons    1 you have kept
+    |         - The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me.
+    |       lately     the last 7 of 7 things you remember
+    |         - I saw Rook (#2), a commander, about 6m away.
+    |         - I saw a pile (#6) about 8m away, open, holding 1 thing and 0 coins.
+    |         - I saw Wren (#1), a commander, about 9m away.
+    |         - I saw Wren (#1), a commander, about 6m away.
+    |         - I saw Wren (#1), a commander, about 7m away.
+    |         - Wren (#1) shouted: "a fair bargain"
+    |         - Wren (#1) shouted: "what was that noise?"
+    |   the model said:     recall about=noise
+    |   which read back as: -- nothing readable --
+    | 
+    | what the lessons changed
+    |   two columns, because the two are different claims: a different action, and a different
+    |   choice of any sort including the same action with other words in it
+    |   arm                which action     chose                                          action     choice
+    |   no lesson          say at #1        say(text=just me, sorry if I startled you tar… --         --
+    |   the ground first   --               -- nothing readable --                         differs    differs
+    |   Rook, not Wren     say at #1        say(text=what noise? target=1)                 same       differs
+    |   let them come      --               -- nothing readable --                         differs    differs
+    |   2 of 3 lessons changed which action was chosen; 3 changed the choice at all
+    | 
+    |   keeping "Whenever I have been slow to go and look at what is lying on the ground here, it has been gone by the time I turned round. Wren's bargains keep; the ground does not."
+    |     with no lesson it chose  say(text=just me, sorry if I startled you target=1)
+    |     with that one it chose   -- nothing readable --
+    |     which is a different action: -- rather than say at #1
+    | 
+    |   keeping "Wren calls the whole market to every bargain and has never yet meant me. Rook is the only one here who has ever actually traded with me."
+    |     with no lesson it chose  say(text=just me, sorry if I startled you target=1)
+    |     with that one it chose   say(text=what noise? target=1)
+    |     which is the same action, say at #1, said in other words
+    | 
+    |   keeping "The three times I have answered a shout in this market, the one who shouted had already turned away and I was left talking to nobody. I do better letting them come to me."
+    |     with no lesson it chose  say(text=just me, sorry if I startled you target=1)
+    |     with that one it chose   -- nothing readable --
+    |     which is a different action: -- rather than say at #1
+  asked      4 questions for the lesson comparison, 4 answered
+    | does a goal change what is chosen? seed=1234, 100 ticks watched
+    |   channel    record -- recording: 0 replies already written down, the rest asked of z-ai/glm-5.3-flash
+    |   recording  nothing recorded yet
+    |   character  Pell, standing in the market, choosing nothing while the 100 ticks go by
+    | 
+    | the same moment, four times
+    |   observation fingerprint    53861151a43ec423 in all four arms: yes
+    |   what it remembers          identical in all four arms: yes
+    |   prompt outside its goals   identical in all four arms: yes
+    |   so the only thing that differs between the arms is what the character is after
+    | 
+    | arm: no goal -- prompt 090790218ee1f7f0
+    |   what it is after, as the prompt carried it:
+    |     What you are after: nothing in particular.
+    |   what the world answered about each, before the question:
+    |     (it is after nothing, so there was nothing to answer)
+    |   the model said:     say text="just the wind, I think" target=#1
+    |   which read back as: say(text="just the wind, I think" target=1)
+    | 
+    | arm: the empty stall -- prompt 6f7f4a0c09401924
+    |   what it is after, as the prompt carried it:
+    |     What you are after, the most pressing first:
+    |       1  short be at (93.5, 290.0)                            the world says when this one is done
+    |   what the world answered about each, before the question:
+    |     be at (93.5, 290.0)                            not yet -- 7.8 from (93.5, 290.0)
+    |   the model said:     go_to target=(93.5, 290.0)
+    |   which read back as: go_to(target=(93.500, 290.000))
+    | 
+    | arm: a trade with Rook -- prompt 77e576eb1280f1c9
+    |   what it is after, as the prompt carried it:
+    |     What you are after, the most pressing first:
+    |       1  short have traded with #2                            the world says when this one is done
+    |   what the world answered about each, before the question:
+    |     have traded with #2                            not yet -- no trade of its has been honoured
+    |   the model said:     trade_propose target=#2 give_money=5 want=[]
+    |   which read back as: trade_propose(target=2 give_money=5 want=[])
+    | 
+    | arm: thought well of here -- prompt adec6dbac136e231
+    |   what it is after, as the prompt carried it:
+    |     What you are after, the most pressing first:
+    |       1  long  be thought well of in this market              answer `done goal=1` when you judge it done
+    |   what the world answered about each, before the question:
+    |     be thought well of in this market              not yet -- nothing in the world answers this one
+    |   the model said:     say text=just the wind, I think target=#1
+    |   which read back as: say(text=just the wind, I think target=1)
+    | 
+    | what the goals changed
+    |   two columns, because the two are different claims: a different action, and a different
+    |   choice of any sort including the same action with other words in it
+    |   arm                    which action     chose                                      action     choice
+    |   no goal                say at #1        say(text="just the wind, I think" target=… --         --
+    |   the empty stall        go_to at nobody  go_to(target=(93.500, 290.000))            differs    differs
+    |   a trade with Rook      trade_propose at #2 trade_propose(target=2 give_money=5 want=… differs    differs
+    |   thought well of here   say at #1        say(text=just the wind, I think target=1)  same       differs
+    |   2 of 3 goals changed which action was chosen; 3 changed the choice at all
+    | 
+    |   being after "be at (93.5, 290.0)"
+    |     after nothing it chose  say(text="just the wind, I think" target=1)
+    |     after that one it chose go_to(target=(93.500, 290.000))
+    |     which is a different action: go_to at nobody rather than say at #1
+    | 
+    |   being after "have traded with #2"
+    |     after nothing it chose  say(text="just the wind, I think" target=1)
+    |     after that one it chose trade_propose(target=2 give_money=5 want=[])
+    |     which is a different action: trade_propose at #2 rather than say at #1
+    | 
+    |   being after "be thought well of in this market"
+    |     after nothing it chose  say(text="just the wind, I think" target=1)
+    |     after that one it chose say(text=just the wind, I think target=1)
+    |     which is the same action, say at #1, said in other words
+    | 
+    | who answers each of these goals
+    |   arm                    what it is after                               answered by
+    |   the empty stall        be at (93.5, 290.0)                            the world, out of its own state
+    |   a trade with Rook      have traded with #2                            the world, out of its own state
+    |   thought well of here   be thought well of in this market              the character: the world holds no state for it
+    |   a goal the world answers is closed by the world and by nothing else; the section below
+    |   tries the `done` tool on one of each, and the shipped run's own goals table shows
+    |   the world closing one out of its own state -- see reports/goals.md
+    | 
+    | both hands, tried -- the `done` line below is written down by this run, not said by
+    |   the model, which was offered the tool in all four arms above and did not use it
+    |   no  what it is after                               answered by              what `done` did
+    |   1   be carrying 900 money or more                  the world                refused: the world answers this one
+    |   2   be thought well of in this market              the character itself     closed: the character said so
+  asked      4 questions for the goal comparison, 4 answered
+  wrote      res://net/model_recording.gd, 85 replies, 4 lesson, 4 goal, 4 check, 10 world, 4 goodwill and 20 bargain replies
+  now run:   ./run_agent.sh > reports/agent-evidence.txt
+             ./run_lesson.sh > reports/lesson-evidence.txt
+             ./run_goal.sh > reports/goal-evidence.txt
