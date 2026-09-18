@@ -1,0 +1,11 @@
+dump: reports/ground-world-dump-before.txt
+bound: 65.0 units for an ordinary cell, 104.0 for the cell holding the origin
+villages checked: 19
+worst offset, as a share of its own cell's bound: 0.9841
+OK every village stands inside the bound its cell states
+
+dump: reports/ground-world-dump-after.txt
+bound: 65.0 units for an ordinary cell, 104.0 for the cell holding the origin
+villages checked: 19
+worst offset, as a share of its own cell's bound: 0.9841
+OK every village stands inside the bound its cell states

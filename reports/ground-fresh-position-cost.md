@@ -238,3 +238,46 @@ suite alone, so it was re-run alone, with nothing else on the machine, and
 reached its verdict there. This machine has 27.4 GiB and this suite has always
 run within a couple of gigabytes of it; the batch is not how it was measured
 before and is not how it is measured here.
+
+## 7. The bound, checked against the villages themselves
+
+The skip added in section 2 is only exact if `centre_reach()` is really a bound,
+so it is checked against the world rather than only argued from the placement
+rule. `tools/centre_reach_check.py` (new) reads the numbers out of
+`sim/settlement_field.gd` -- so nothing is copied here to drift -- and measures
+every village in a dump against the bound its own cell states. It needs no
+engine.
+
+```
+python3 tools/centre_reach_check.py reports/ground-world-dump-before.txt
+python3 tools/centre_reach_check.py reports/ground-world-dump-after.txt
+```
+
+Both sides, `reports/ground-centre-reach-check.log`:
+
+```
+bound: 65.0 units for an ordinary cell, 104.0 for the cell holding the origin
+villages checked: 19
+worst offset, as a share of its own cell's bound: 0.9841
+OK every village stands inside the bound its cell states
+```
+
+Nineteen villages stand in the 49 cells the dump covers and not one is outside
+the bound, while the furthest stands at 98.4% of it. So the bound is a bound,
+and it is tight enough that there is nothing left in it to give back: widening
+it would buy no cells and narrowing it would start dropping villages.
+
+The three places the bound is read off the code are each checked by hand as
+well: the inland candidate is jittered into `JITTER_LOW`..`JITTER_HIGH` of its
+cell (`sim/settlement_field.gd:915`), the shore candidate is dropped unless it
+lands in that same band (`:758`, `_inside_jitter_band` at `:801`), and the spawn
+cell's candidate is placed on the ring at `SPAWN_RING_MIN`..`SPAWN_RING_MAX`
+around the origin, which is that cell's own middle (`:909`). Those are the only
+three ways a village centre is ever set.
+
+The `places_near` change has the same kind of check behind it:
+`Settlement.distance_to` (`sim/settlement.gd:101`) returns
+`max(0, |centre - position| - radius)`, which is never more than the distance to
+the centre, so every village whose centre is within `reach` is still returned
+when the lattice is asked for `reach` itself -- which is exactly the set the
+line after it keeps.
