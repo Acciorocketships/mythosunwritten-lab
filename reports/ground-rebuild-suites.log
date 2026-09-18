@@ -1,0 +1,261 @@
+
+RUN   test_layering
+PASS  layering          0.3 s, 63 checks
+
+RUN   test_terrain
+  ..  terrain          219 s, 14 checks: building other chunks first changed chunk (3, -2)
+  ..  terrain          425 s, 29 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  terrain          502 s, 32 checks: rebuilding the chunks of seed 1234 in this process gave different geo...
+FAIL  terrain         502.1 s, 32 checks, 1 failed
+        - two seeds produced nearly the same ground: 37 of 50 samples differed
+
+RUN   test_biomes
+  ..  biomes            72 s, 57 checks: a built chunk should carry one ground colour per vertex, got 384 for 384
+  ..  biomes           229 s, 58 checks: building other chunks first changed the ground colours of chunk (5, -3)
+  ..  biomes           440 s, 208 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+PASS  biomes          439.7 s, 212 checks
+
+RUN   test_mountains
+  ..  mountains        105 s, 3 checks: the highest ground in the box is only 20.99 units up; there is no mou...
+  ..  mountains        444 s, 11 checks: only 4614 steps of road were walked
+FAIL  mountains       445.6 s, 13 checks, 5 failed
+        - the highest ground in the box is only 20.99 units up; there is no mountain here
+        - the route to the top is only 12 steps long
+        - the route only climbed 21.29 units
+        - 42 steps of road are laid on land that climbs more than 3.0 in one cell; the worst is 9.169
+      expected: 0
+      actual:   42
+        - 42 of 4614 steps of finished roadway climb more than 3.0 in one cell, so the carving has put a wall in the middle of a road
+      expected: 0
+      actual:   42
+
+RUN   test_water
+  ..  water            273 s, 19 checks: the water changed its answer at (101.750000, -88.500000) after other ...
+  ..  water            388 s, 30 checks: two seeds produced nearly the same water: 387 of 400 samples differed
+  ..  water            589 s, 31 checks: building forty chunks changed the water at (0.000000, 0.000000)
+  ..  water            701 s, 49 checks: a world thirty ticks in disagreed with a bare query at (0.000000, 0.0...
+  ..  water            756 s, 60 checks: depth at (0.000000, 0.000000) is not the surface above the bed
+  ..  water            800 s, 63 checks: depth at (-1024.000000, 512.000000) is not the surface above the bed
+  ..  water            835 s, 69 checks: dry ground at (-140.000000, -140.000000) has its water surface above it
+  ..  water            868 s, 869 checks: dry ground at (-140.000000, 0.000000) has its water surface above it
+  ..  water            969 s, 1672 checks: passability at (-120.000000, -120.000000) does not follow the water
+  ..  water           1029 s, 2752 checks: passability at (-120.000000, -48.000000) does not follow the water
+  ..  water           1185 s, 5309 checks: one sheet spans 7.000000 chunks, which is not enough to be a sheet
+  ..  water           1310 s, 5313 checks: a fresh builder for the same seed produced different water
+  ..  water           1431 s, 5314 checks: a fresh world should have its water built
+  ..  water           1833 s, 5316 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  water           1945 s, 5319 checks: answering seed 19's water in this process gave a different map
+FAIL  water          1971.8 s, 5320 checks, 7 failed
+        - expected water in view of seed 19, found 0 wet samples
+        - expected banks around the water of seed 19, found 0
+        - expected water to check passability against, found 0
+        - expected water in the sheet at the origin of seed 19
+        - the two windows only shared 0 vertices, so the comparison is weak
+        - expected water at the origin of seed 19 for this check
+        - the reported lattice found no water at all, so the comparison is weak
+
+RUN   test_determinism
+  ..  determinism      120 s, 2 checks: a different seed should give a different report
+  ..  determinism      203 s, 3 checks: the seed should be stored on the world
+  ..  determinism      395 s, 6 checks: reset(seed) should rebuild the same world
+  ..  determinism      473 s, 7 checks: the two orderings loaded different ground, so the digests below would...
+  ..  determinism      741 s, 10 checks: headless run should exit 0 (stdout: Godot Engine v4.7.2.stable.offici...
+PASS  determinism     836.9 s, 15 checks
+
+RUN   test_drops
+  ..  drops            198 s, 20 checks: the documented command exits 0
+  ..  drops            286 s, 59 checks: two worlds from one seed start out identical, or nothing below means ...
+PASS  drops           288.6 s, 65 checks
+
+RUN   test_combat_board
+  ..  combat board      77 s, 332 checks: boards at (0.0, 0.0) and (17.0, -11.0) should share a wide band, shar...
+  ..  combat board     275 s, 338 checks: a board built after forty unrelated boards is not the board built fresh
+  ..  combat board     308 s, 342 checks: two worlds of seed 1234 read a different board at (48.0, -33.0)
+  ..  combat board     416 s, 343 checks: a different seed should read a different board at the origin
+FAIL  combat board    441.0 s, 23362 checks, 2 failed
+        - the four sample boards should hold both holes and ground, got 0 and 1634
+        - expected at least one thing standing on a cell the board reads as a hole or an island
+
+SCRIPT ERROR: Parse Error: Could not find base class "GutTest".
+          at: GDScript::reload (res://tests/test_path_features.gd:1)
+          GDScript backtrace (most recent call first):
+              [0] _selection (res://bin/test_main.gd:233)
+              [1] _initialize (res://bin/test_main.gd:138)
+ERROR: Failed to load script "res://tests/test_path_features.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+   GDScript backtrace (most recent call first):
+       [0] _selection (res://bin/test_main.gd:233)
+       [1] _initialize (res://bin/test_main.gd:138)
+RUN   test_path_features
+SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.
+          at: _run_one (res://bin/test_main.gd:172)
+          GDScript backtrace (most recent call first):
+              [0] _run_one (res://bin/test_main.gd:172)
+              [1] _process (res://bin/test_main.gd:160)
+FAIL  test_path_features threw a runtime error (see the SCRIPT ERROR above)
+
+RUN   test_streaming
+  ..  streaming        128 s, 3581 checks: chunk (9.000000, 1.000000) is 55.267113 from the nearest observer at ...
+  ..  streaming        272 s, 4137 checks: walking the same path twice loaded different ground
+  ..  streaming        484 s, 4139 checks: the chunk (0.000000, 0.000000) should have unloaded once the observer...
+  ..  streaming        515 s, 4140 checks: the chunk (0.000000, 0.000000) should have loaded again on returning
+  ..  streaming        677 s, 4145 checks: ground unloaded while an observer was still standing on it
+  ..  streaming        782 s, 4146 checks: ground stayed loaded with no observer near it
+  ..  streaming        857 s, 4147 checks: a fresh world should have ground under its observer
+FAIL  streaming       952.1 s, 4661 checks, 2 failed
+        - the observer only travelled 0.000000 world units, too little to stream anything out
+        - the walk never dropped any ground
+
+RUN   test_island_cover
+  ..  island cover      60 s, 894 checks: found only 2 overlapping pairs to compare cover on
+        island cover: 2 overlapping storey pairs, 4 things in the laps, 0 coincidences
+  ..  island cover     188 s, 897 checks: no dressed island was loaded to test reloading with
+  ..  island cover     241 s, 898 checks: walking four thousand units away did not unload the island
+  ..  island cover     305 s, 902 checks: only 991 things were placed across four seeds, too few to conclude from
+        island cover: 991 placements over 4 seeds -- 0 hovering, 0 past the lip, 0 in water, 0 on a face
+  ..  island cover     340 s, 1181 checks: an island's step up is 2.371, which is not a hop
+  ..  island cover     380 s, 1201 checks: an island's step up is 2.044, which is not a hop
+        island cover: 45 islands over 4 seeds -- 16 with a basin, 16 overflowing, 16 dipping below their own rim, 0 boundary samples below it
+  ..  island cover     427 s, 1222 checks: the terrain query offers the floor of a pond as somewhere to stand
+  ..  island cover     495 s, 1230 checks: no island in seed 11 holds a pond
+  ..  island cover    1025 s, 1242 checks: the island report should exit 0
+FAIL  island cover   1042.9 s, 1245 checks, 3 failed
+        - found only 2 overlapping pairs to compare cover on
+        - only 4 things stand in the overlaps, which is too few to conclude from
+        - only 991 things were placed across four seeds, too few to conclude from
+
+RUN   test_islands
+  ..  islands           36 s, 295 checks: the outline reaches nowhere at angle 0.000 of island (-3.000000, 0.00...
+  ..  islands           75 s, 1159 checks: the outline reaches nowhere at angle 0.000 of island (1.000000, -2.00...
+  ..  islands          109 s, 9553 checks: island (-3.000000, 0.000000, 0.000000) reaches 20.651580 at angle 0.0...
+  ..  islands          147 s, 25387 checks: island (1.000000, -2.000000, 0.000000) reaches 12.510661 at angle 0.0...
+  ..  islands          180 s, 34366 checks: could_reach says nothing of band 0 is within 36.0 of (-350.0, -350.0)...
+  ..  islands          219 s, 34856 checks: could_reach says nothing of band 0 is within 36.0 of (-350.0, -140.0)...
+        islands: candidate bound ruled out 515 of 968 asks, 46 had an island
+  ..  islands          254 s, 37794 checks: the cell gate changed what covers (-250.0, -250.0) of band 0 on seed ...
+  ..  islands          295 s, 43194 checks: the cell gate changed what covers (-250.0, -250.0) of band 0 on seed ...
+        islands: cell gate matched the ungated scan on 10800 asks, 1296 with an island, building 317 cells against 1984
+  ..  islands          331 s, 45907 checks: islands (-4.000000, 3.000000, 0.000000) and (-3.000000, 0.000000, 0.0...
+  ..  islands          370 s, 45937 checks: islands (-2.000000, -4.000000, 0.000000) and (1.000000, -2.000000, 0....
+  ..  islands          509 s, 59805 checks: an island's underside reaches below what is beneath it: -1,4 band 2, ...
+  ..  islands          553 s, 59806 checks: 0 island(s) have no point on their rim within one hop (3.00) of anyth...
+  ..  islands          584 s, 59815 checks: an observer put on an island is not standing on it
+  ..  islands          616 s, 59831 checks: the world should be looking through somebody
+  ..  islands          656 s, 59835 checks: the middle of an island is being reported as a hole
+  ..  islands          695 s, 59862 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          730 s, 59891 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          766 s, 59896 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          799 s, 59901 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          843 s, 59954 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          882 s, 59972 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          913 s, 59987 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          976 s, 60009 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands         1029 s, 60023 checks: a far-sky island turned up in the list of walkable surfaces
+  ..  islands         1124 s, 60044 checks: seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+  ..  islands         1275 s, 60046 checks: seed 7 has no aerial island in cell (-4.000000, -2.000000)
+  ..  islands         1415 s, 60047 checks: seed 99991 has no aerial island in cell (-4.000000, -1.000000)
+  ..  islands         1530 s, 60075 checks: a fresh world loaded no islands at all around its observer
+  ..  islands         2355 s, 60179 checks: the island report should exit 0 (stdout: Godot Engine v4.7.2.stable.o...
+  ..  islands         2451 s, 60184 checks: the placed run should exit 0
+FAIL  islands        2468.6 s, 60185 checks, 10 failed
+        - only 16 islands were sampled for the ratio check
+        - only 11 islands were checked for the cell scan
+        - only 7 islands were checked for relief
+        - only 7 islands were checked for keel spurs
+        - found no water at all to check, so nothing was checked
+        - seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+        - seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+        - seed 7 has no aerial island in cell (-4.000000, -2.000000)
+        - seed 99991 has no aerial island in cell (-4.000000, -1.000000)
+        - an observer placed on an island did not report standing on one:
+
+seed 1234
+cast 3 following #0
+  Pip     #1 commander band=1 at (0.000, 0.000, 0.000) hp=26/26 walking
+  Nettle  #2 commander band=1 at (-7.000, 0.000, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 0.000, -5.000) hp=26/26 walking
+tick 0 chunks=30 islands=11 villages=1 roads=2 props=622 cover=0 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 77008998121f6ff8
+  t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+  t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+  t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+tick 4 chunks=30 islands=11 villages=1 roads=2 props=622 cover=0 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 f0dda094e8c4651d
+done ticks=4 chunks=30 built=62 final=f0dda094e8c4651d
+
+
+RUN   test_terrain_lod
+  ..  terrain_lod       85 s, 8 checks: only 61825 positions were sampled around (0.0, 0.0)
+  ..  terrain_lod      180 s, 14 checks: only 61825 positions were sampled around (-1502.5, 883.1)
+  ..  terrain_lod      301 s, 24 checks: only 32544 vertices were compared against the world's height
+  ..  terrain_lod     1122 s, 26 checks: 0 positions gave a different ground height once a different level was...
+./run_tests.sh: line 377: 1636438 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+FAIL  test_terrain_lod stalled: printed nothing for 3600s, budget 3600s
+
+RUN   test_render_shell
+  ..  render shell     924 s, 31 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  render shell    1851 s, 36 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+FAIL  render shell   2092.9 s, 46 checks, 1 failed
+        - the handle sweep covered 5 of the 9 handle kinds; something the world hands out was not loaded to test
+      expected: 9
+      actual:   5
+
+RUN   test_grass
+  ..  grass            245 s, 20 checks: only 20632 tufts were there to check; the world under the observer gr...
+  ..  grass            301 s, 28 checks: a tuft at chunk (-30, -30) is not the colour the biome profile asks f...
+  ..  grass            336 s, 36 checks: a tuft at chunk (-30, -24) is not the colour the biome profile asks f...
+  ..  grass            366 s, 52 checks: chunk (-30, -12) grew nothing where the rule asks for 0.000
+  ..  grass            398 s, 93 checks: a tuft at chunk (-30, 24) is not the colour the biome profile asks fo...
+  ..  grass            455 s, 109 checks: chunk (-24, -30) grew nothing where the rule asks for 0.000
+  ..  grass            486 s, 414 checks: a tuft at chunk (0, 24) is not the colour the biome profile asks for ...
+  ..  grass            547 s, 510 checks: a tuft at chunk (12, -30) is not the colour the biome profile asks fo...
+  ..  grass            627 s, 551 checks: a tuft at chunk (12, 12) is not the colour the biome profile asks for...
+  ..  grass            754 s, 847 checks: no chunk near the observer grew enough grass to test on
+  ..  grass            988 s, 856 checks: the two seeds shared no loaded chunk to compare
+  ..  grass           1103 s, 858 checks: only 7 islands grew any grass at all, which is too few to conclude from
+  ..  grass           1866 s, 871 checks: found only 7 overlapping pairs with grass in the lap on both plates
+        island grass: 7 overlapping storey pairs, 343 patches in the laps, 202 sharing a world cell, 0 coincidences
+  ..  grass           2111 s, 875 checks: the island grass probe should exit 0 (output: Godot Engine v4.7.2.sta...
+  ..  grass           2341 s, 876 checks: the probe reported only 5 islands, not enough to compare
+  ..  grass           2581 s, 880 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  grass           4232 s, 885 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+FAIL  grass          4245.5 s, 894 checks, 2 failed
+        - the same island grew 1036 patches here and 1035 after being moved 137, 219: its grass is being decided by where it hangs
+      expected: 1036
+      actual:   1035
+        - the probe reported only 5 islands, not enough to compare
+
+RUN   test_settlements
+  ..  settlements      191 s, 3 checks: cell (3, 3) came out differently when asked from the other end
+  ..  settlements      395 s, 52 checks: two different seeds produced exactly the same villages
+./run_tests.sh: line 377: 1686725 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+FAIL  test_settlements: the engine died (exit 137) before the suite returned
+
+run_tests: suite 'test_combat_board' raised a runtime error (SCRIPT ERROR above).
+run_tests: the engine returned to the caller and the runner could not see it,
+run_tests: so the run is failed here whatever the summary said.
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.27 GiB     0.0 min  quiet up to     0 s
+   1  test_layering          peak   0.30 GiB     0.0 min  quiet up to     2 s
+   2  test_terrain           peak  13.97 GiB     8.4 min  quiet up to   216 s
+   3  test_biomes            peak  14.03 GiB     7.5 min  quiet up to   208 s
+   4  test_mountains         peak   8.45 GiB     7.5 min  quiet up to   336 s
+   5  test_water             peak  17.77 GiB    33.0 min  quiet up to   401 s
+   6  test_determinism       peak  15.14 GiB    14.0 min  quiet up to   266 s
+   7  test_drops             peak   5.61 GiB     4.9 min  quiet up to   196 s
+   8  test_combat_board      peak  11.83 GiB     7.5 min  quiet up to   197 s
+   9  test_path_features     peak   0.27 GiB     0.0 min  quiet up to     0 s
+  10  test_streaming         peak   5.95 GiB    15.9 min  quiet up to   216 s
+  11  test_island_cover      peak  16.01 GiB    17.4 min  quiet up to   528 s
+  12  test_islands           peak  19.57 GiB    41.2 min  quiet up to   823 s
+  13  test_terrain_lod       peak  10.63 GiB    78.8 min  quiet up to  3599 s
+  14  test_render_shell      peak  11.13 GiB    35.0 min  quiet up to  1164 s
+  15  test_grass             peak  18.69 GiB    71.0 min  quiet up to  1648 s
+  16  test_settlements       peak  23.31 GiB    53.1 min  quiet up to  2628 s
+  peak of the whole run: 23.31 GiB, in suite 16 (test_settlements)
+  longest quiet stretch: 3599 s, in suite 13 (test_terrain_lod)
+  wall time of the whole run: 395.9 min (6.60 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260917-140612.log
+
+12 of 16 suites failed (36 failed checks of 96113)

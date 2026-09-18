@@ -13,6 +13,15 @@ class_name TestTerrain
 const SEED := 20250824
 const OTHER_SEED := 99
 
+## How far the adopted base's flat spawn clearing reaches, in world units:
+## HeightfieldPlan.height01's falloff is exactly zero inside this radius.
+const SPAWN_CLEARING := 60.0
+
+## Where the two-seeds line starts, in world units. Past 60 + 180 = 240, where
+## the clearing's falloff has fully faded back in, so every sample on the line
+## is ground the seed actually chose.
+const SEED_LINE_START := 300.0
+
 
 func _init() -> void:
 	suite_name = "terrain"
@@ -73,12 +82,43 @@ func _field_is_a_pure_function() -> void:
 		"the surface is nearly flat: range %f world units" % (highest - lowest))
 
 
+## Two seeds are two worlds -- outside the spawn clearing, which is the same
+## flat ground in every one of them.
+##
+## The clearing is the adopted base's own doing and is deliberate:
+## HeightfieldPlan.height01 multiplies the whole layered field by
+## smootherstep((|pos| - 60) / 180) clamped to [0, 1], so within sixty units of
+## the origin the height is exactly 0.0 whatever the seed is, and it fades back
+## in over the next hundred and eighty. Asking "do two seeds differ" along a
+## line that starts at the origin therefore spends its first thirteen samples
+## inside a clearing neither seed chose, which is what the 37-of-50 reading
+## that first failed this check was measuring. So the clearing is asserted
+## here in its own right, and the difference is asked of ground outside it.
+##
+## The count below is the bar this check has always used, unchanged: more than
+## forty of fifty samples must differ. It currently reads forty-one, which is a
+## thin margin -- nine samples agree even out there, on flat cells where both
+## seeds happen to sit on the same storey.
 func _field_depends_on_the_seed() -> void:
 	var field := AdoptedGround.shared_for_seed(SEED)
 	var other := AdoptedGround.shared_for_seed(OTHER_SEED)
+
+	# The clearing: exactly zero, exactly the same, on both seeds. Exactly
+	# rather than nearly, because the falloff multiplies by exactly 0.0 in
+	# there and multiplying by exactly zero changes no float.
+	for index in 20:
+		var angle := TAU * float(index) / 20.0
+		var x := cos(angle) * SPAWN_CLEARING * 0.667
+		var z := sin(angle) * SPAWN_CLEARING * 0.667
+		equal(field.base_height(x, z), 0.0,
+			"the spawn clearing is not flat at (%f, %f)" % [x, z])
+		equal(other.base_height(x, z), field.base_height(x, z),
+			"two seeds disagree inside the spawn clearing at (%f, %f)" % [x, z])
+
+	# And outside it, the two worlds are different ground.
 	var differences := 0
 	for i in 50:
-		var x := float(i) * 9.0
+		var x := SEED_LINE_START + float(i) * 9.0
 		if absf(field.base_height(x, 4.0) - other.base_height(x, 4.0)) > 0.001:
 			differences += 1
 	check(differences > 40,

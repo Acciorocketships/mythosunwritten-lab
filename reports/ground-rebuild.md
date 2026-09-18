@@ -217,32 +217,171 @@ compared byte for byte:
 
 ## 7. The suites
 
-See §8 below for the run and its verdicts.
+Run by name, one engine per suite, through the project's own runner:
 
-Two suites changed shape rather than expectation:
+    $ ./run_tests.sh test_layering test_terrain test_biomes test_mountains \
+        test_water test_determinism test_drops test_combat_board \
+        test_path_features test_streaming test_island_cover test_islands \
+        test_terrain_lod test_render_shell test_grass test_settlements
 
-* **`tests/test_mountains.gd`** loses four of its seven checks:
-  `_ridged_sample_is_the_folded_field`, `_the_uplift_is_a_pure_function`,
-  `_the_mask_is_exactly_zero_outside_a_range` and `_the_uplift_is_regional`.
-  All four were about the retired `MountainField` and about
-  `SimTerrainSurfaceField`'s decomposition of its own height into hills plus
-  uplift. The adopted heightfield has no such decomposition — its ridged relief
-  *is* the ground — so those four had nothing left to be about and went with the
-  layer they documented. The three that assert something about the *world* are
-  kept: rocky country stands high (re-pointed from the uplift to the ground's
-  own uncarved height, because a height has a datum and an uplift did not), a
-  summit can be climbed, and a road is never laid on ground nobody could walk
-  up.
-* **`tests/test_settlements.gd`**'s water invariant used to build a second,
-  bare copy of the retired water field to compare the composed query against.
-  It now compares against `AdoptedGround` itself — the same object the query
-  reads through — which makes "the settlement layer never creates or destroys
-  water" a statement about the layer rather than about two generators agreeing.
+    12 of 16 suites failed (36 failed checks of 96113)
 
-No suite was deleted: none of them tested *only* the deleted generation stack.
-Every other touched suite is re-pointed at the rebuilt types and asserts exactly
-what it asserted before.
+6.60 h of wall time, peak 23.31 GiB in `test_settlements`. The transcript is
+[reports/ground-rebuild-suites.log](ground-rebuild-suites.log). `test_terrain`
+was re-run on its own afterwards, once its seed check was rewritten (§7.3);
+the verdict below is that re-run.
 
-## 8. Verdicts
+### 7.1 Every verdict, quoted
 
-*(filled in by the suite run; see the table below.)*
+| Suite | Verdict, as printed | Against the certifying run (cycle 3765) |
+| --- | --- | --- |
+| `test_layering` | `PASS  layering          0.3 s, 63 checks` | green then, green now |
+| `test_terrain` | `PASS  terrain         492.1 s, 72 checks` | green then; see §7.3 |
+| `test_biomes` | `PASS  biomes          439.7 s, 212 checks` | **was red** (1 of 212), now green: see §7.2 |
+| `test_mountains` | `FAIL  mountains       445.6 s, 13 checks, 5 failed` | was 6 of 3030; see §7.4 |
+| `test_water` | `FAIL  water          1971.8 s, 5320 checks, 7 failed` | the same 7 of 5320, unchanged |
+| `test_determinism` | `PASS  determinism     836.9 s, 15 checks` | green then, green now |
+| `test_drops` | `PASS  drops           288.6 s, 65 checks` | green then, green now |
+| `test_combat_board` | `FAIL  combat board    441.0 s, 23362 checks, 2 failed` | the same 2 of 23362, unchanged |
+| `test_path_features` | `FAIL  test_path_features threw a runtime error` | not this project's suite: see §7.5 |
+| `test_streaming` | `FAIL  streaming       952.1 s, 4661 checks, 2 failed` | the same 2 of 4661, unchanged |
+| `test_island_cover` | `FAIL  island cover   1042.9 s, 1245 checks, 3 failed` | **was green**; see §7.2 |
+| `test_islands` | `FAIL  islands        2468.6 s, 60185 checks, 10 failed` | was 32 of 105160; see §7.2 |
+| `test_terrain_lod` | `FAIL  test_terrain_lod stalled: printed nothing for 3600s, budget 3600s` | stalled then too; a cost item, not a port one |
+| `test_render_shell` | `FAIL  render shell   2092.9 s, 46 checks, 1 failed` | the same 1 of 46, unchanged |
+| `test_grass` | `FAIL  grass          4245.5 s, 894 checks, 2 failed` | the same 2 of 894, unchanged |
+| `test_settlements` | `FAIL  test_settlements: the engine died (exit 137) before the suite returned` | kernel-killed then too, at 23.15 GiB against 23.31 now; `W-settlements-oom` |
+
+No suite was deleted: not one of the sixteen tested *only* the deleted
+generation stack. No suite's assertions were weakened; two were rewritten and
+both got stronger, which §7.3 and §7.4 set out.
+
+### 7.2 Three suites were green, or greener, because they were testing code that no longer ran
+
+This is the rebuild's most useful finding and it is worth stating plainly.
+
+`tests/test_islands.gd` and `tests/test_island_cover.gd` each built their own
+field like this, at HEAD `29fd00ac`:
+
+```gdscript
+func _new_field(seed_value: int) -> IslandField:
+	var surface := SimTerrainSurfaceField.new(seed_value)
+	var biomes := BiomeField.new(seed_value)
+	return IslandField.new(SimWaterField.new(surface, biomes), biomes)
+```
+
+— that is, on the **retired** ground, while the world the game ran was on the
+adopted one. `tests/test_terrain.gd`'s seed check did the same with
+`SimTerrainSurfaceField.new(SEED)` directly. Those suites were not measuring the
+world; they were measuring a generation stack nothing else constructed any more.
+Deleting that stack forced them onto the real ground, and what they say changed:
+
+* `test_island_cover` went from green to 3 of 1245, all of the form "found only
+  2 overlapping pairs to compare cover on" and "only 991 things were placed
+  across four seeds, too few to conclude from". The adopted ground places fewer
+  and sparser aerial islands than the retired one did, so the suite's samples no
+  longer reach the sizes its conclusions need.
+* `test_islands` went from 32 of 105160 to **10 of 60185**, and the twelve
+  repeats of "the observer fell through the island at (234.494044,
+  -332.536384)" are gone. They were exactly the disagreement described above:
+  the suite's islands hung over one ground and the world's observer walked on
+  another. Now there is one ground and the observer does not fall through.
+* `test_terrain`'s seed check is §7.3.
+
+None of this is a regression the rebuild caused. It is a measurement the
+retired stack had been standing in front of, and the shape of it — "too few
+islands to conclude from" — belongs to `W-adopt-suites`.
+
+`test_biomes` moved the other way, from red to green. Its one red was
+"resolving seed 1234's biomes in this process gave a different map"; it built
+`BiomeField.new(SEED)` twice and now reads the one shared `AdoptedGround` for
+the seed, which is the object every other layer in the process reads, so there
+is no longer a second answer to disagree with.
+
+### 7.3 `test_terrain`: the spawn clearing, asserted instead of diluting a count
+
+Re-pointed at the real ground, `_field_depends_on_the_seed` failed: "two seeds
+produced nearly the same ground: 37 of 50 samples differed", against a bar of
+more than forty. Measured rather than guessed at, the thirteen agreeing samples
+were the first thirteen — `x` from 0 to 108 along `z = 4` — and every one of
+them was **exactly** `0.000000000` on both seeds.
+
+That is the adopted base's own flat spawn clearing.
+`HeightfieldPlan.height01` ends with
+
+```gdscript
+var falloff: float = SlopeProfile.smootherstep(
+    clampf((Vector2(pos.x, pos.z).length() - 60.0) / 180.0, 0.0, 1.0))
+return clampf(h * falloff, 0.0, 1.0)
+```
+
+so inside sixty units of the origin the height is exactly zero for every seed,
+and it fades back in over the next hundred and eighty. A line of samples
+starting at the origin spends its first quarter inside a clearing neither seed
+chose.
+
+The bar was **not** lowered. The clearing is now asserted in its own right —
+twenty points on a ring inside it, each exactly `0.0` and each identical across
+the two seeds — and the difference is asked of ground outside it, from
+`x = 300` where the falloff has fully faded back in. There the same
+more-than-forty-of-fifty bar reads forty-one, and the suite passes with 72
+checks where it had 32. The margin is thin and the suite says so: nine samples
+agree even out there, on flat cells where both seeds sit on the same storey.
+
+### 7.4 `test_mountains`: four checks deleted with the layer they documented
+
+The suite loses `_ridged_sample_is_the_folded_field`,
+`_the_uplift_is_a_pure_function`, `_the_mask_is_exactly_zero_outside_a_range`
+and `_the_uplift_is_regional`. All four were about the retired `MountainField`
+and about `SimTerrainSurfaceField`'s decomposition of its height into hills plus
+uplift. The adopted heightfield has no such decomposition — its ridged relief
+*is* the ground — so those four had nothing left to be about. What they guarded
+is not lost: the ground's purity is `TestTerrain`'s first claim, and "a mountain
+is a place you walk into" is what the surviving claims say in terms of the world
+rather than of a mask.
+
+The three claims about the *world* are kept, and one moved:
+
+* **Rocky country stands high** was asked of the uplift the mountain layer
+  added; it is now asked of the ground's own uncarved height, compared against
+  the meadow's mean rather than against zero, because a height has a datum and
+  an uplift did not. It **passes** — which is new information, because the same
+  claim read "highland averages 0.00 units of uplift against the meadow's 0.00"
+  in the certifying run, the adapter having answered zero for the whole
+  decomposition.
+* **A summit can be climbed** and **a road is never laid on unwalkable land**
+  are unchanged and still red, with the same numbers the certifying run
+  printed: "the highest ground in the box is only 20.99 units up" and "42 of
+  4614 steps of road climb more than 3.0 in one cell". The climb box's centre
+  was found on the retired height field by `tools/measure_mountains.sh` and has
+  deliberately **not** been re-derived here; moving it would be choosing the
+  answer. Re-finding the adopted ground's tall places belongs to
+  `W-adopt-suites`, and the constant's own doc comment now says so.
+
+So `test_mountains` reads 5 failed of 13 where it read 6 of 3030. The lost
+3017 checks are the four deleted claims' sample loops; the lost failure is the
+uplift one, which passed as soon as it was asked of a height.
+
+### 7.5 `test_path_features` is not this project's suite
+
+It was named in the run by mistake. `tests/test_path_features.gd` is one of the
+adopted base's own GUT suites (`extends GutTest`), and the GUT addon is a
+carve-out of the import, so it has never parsed in this checkout and does not
+run under this project's runner. Its failure is a pre-existing parse error and
+has nothing to do with the rebuild — and, because the runner attributes a
+`SCRIPT ERROR` to the last suite named before it, it is also why the run's tail
+says "suite 'test_combat_board' raised a runtime error". `test_combat_board`
+did not: it reported its own 2-of-23362 verdict cleanly first.
+
+## 8. The layer split still holds
+
+Nothing under `sim/` names a render type or a resource path. Re-derived with the
+project's own scan rather than asserted:
+
+    $ ./run_tests.sh --layers-only
+    layer check: OK -- res://sim references nothing in the render layer
+    combat check: OK -- res://render draws the fight and holds none of it
+    interface check: OK -- res://render/ui names its art through sprout_pack.gd alone
+    asset check: OK -- res://sim names asset tags and no asset
+
+and as a suite, `PASS  layering          0.3 s, 63 checks`.
