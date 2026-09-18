@@ -127,20 +127,29 @@ func _the_lattice_is_fixed_to_the_world() -> void:
 		"the position just below the origin is in the cell below it, not in the cell above")
 
 
-## The board's lattice is coarser than the lattice the ground is drawn on, and
-## is not a whole number of cells to one of the adopted streamer's chunks -- so
-## a board's cells straddle chunk borders and the two grids cannot start
-## standing in for one another. The ground's numbers are the adopted mesher's:
-## `TerrainChunkMesher.STEP` is how far apart the ground samples are and
-## `CHUNK_WORLD` is how wide one of its chunks is.
+## The board's lattice is coarser than the lattice the ground is sampled on, and
+## is not a whole number of ground samples -- so a board's cells straddle the
+## ground's own corners and the two grids cannot start standing in for one
+## another.
+##
+## The ground's number is the adopted mesher's `TerrainChunkMesher.STEP`, which
+## is how far apart it samples the heightfield. It used to be a chunk of this
+## project's retired mesher that the board's cell had to not divide; on the
+## adopted ground that form of the claim is simply false -- their chunk is 192
+## units and the board's cell is 3.0, which divides it exactly 64 times -- and a
+## claim that is false about the ground that is actually drawn is not worth
+## keeping in that shape. The thing it was protecting is the sampling grid,
+## which is 2.0 units and which 3.0 does not divide, so the claim is made about
+## that instead.
 func _the_cell_is_coarser_than_the_ground_it_reads() -> void:
 	check(CombatBoard.CELL_SIZE > TerrainChunkMesher.STEP,
 		"the board's cell (%.2f) must be coarser than the ground's (%.2f)" % [
 			CombatBoard.CELL_SIZE, TerrainChunkMesher.STEP,
 		])
-	var per_chunk := TerrainChunkMesher.CHUNK_WORLD / CombatBoard.CELL_SIZE
-	check(absf(per_chunk - roundf(per_chunk)) > 0.01,
-		"the board's cell must not divide the chunk, got %.4f cells per chunk" % per_chunk)
+	var per_cell := CombatBoard.CELL_SIZE / TerrainChunkMesher.STEP
+	check(absf(per_cell - roundf(per_cell)) > 0.01,
+		"the board's cell is %.4f ground samples across, a whole number, so the "
+		% per_cell + "two lattices line up and can start standing in for one another")
 
 
 ## The two thresholds a piece moves by are the terrain query's own walking

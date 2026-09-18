@@ -1,0 +1,54 @@
+
+RUN   test_render_shell
+ERROR: Attempted to push_back a variable of type 'Nil' into a TypedArray of type 'Dictionary'.
+   at: _internal_validate (./core/variant/container_type_validate.h:73)
+   GDScript backtrace (most recent call first):
+       [0] _shared_between (res://tests/test_render_shell.gd:265)
+       [1] _shared_between (res://tests/test_render_shell.gd:258)
+       [2] _no_handle_hands_out_anything_the_world_still_holds (res://tests/test_render_shell.gd:241)
+       [3] run (res://tests/test_render_shell.gd:46)
+       [4] _run_one (res://bin/test_main.gd:171)
+       [5] _process (res://bin/test_main.gd:157)
+ERROR: Condition "!_p->typed.validate(value, "push_back")" is true.
+   at: push_back (core/variant/array.cpp:285)
+   GDScript backtrace (most recent call first):
+       [0] _shared_between (res://tests/test_render_shell.gd:265)
+       [1] _shared_between (res://tests/test_render_shell.gd:258)
+       [2] _no_handle_hands_out_anything_the_world_still_holds (res://tests/test_render_shell.gd:241)
+       [3] run (res://tests/test_render_shell.gd:46)
+       [4] _run_one (res://bin/test_main.gd:171)
+       [5] _process (res://bin/test_main.gd:157)
+ERROR: Condition "p_size < 0" is true. Returning: ERR_INVALID_PARAMETER
+   at: resize (./core/templates/cowdata.h:404)
+   GDScript backtrace (most recent call first):
+       [0] _shared_between (res://tests/test_render_shell.gd:267)
+       [1] _shared_between (res://tests/test_render_shell.gd:258)
+       [2] _no_handle_hands_out_anything_the_world_still_holds (res://tests/test_render_shell.gd:241)
+       [3] run (res://tests/test_render_shell.gd:46)
+       [4] _run_one (res://bin/test_main.gd:171)
+       [5] _process (res://bin/test_main.gd:157)
+  ..  render shell     258 s, 37 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  render shell     515 s, 42 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+PASS  render shell    617.6 s, 52 checks
+
+RUN   test_combat_board
+  ..  combat board      77 s, 332 checks: boards at (0.0, 0.0) and (17.0, -11.0) should share a wide band, shar...
+  ..  combat board     269 s, 338 checks: a board built after forty unrelated boards is not the board built fresh
+  ..  combat board     301 s, 342 checks: two worlds of seed 1234 read a different board at (48.0, -33.0)
+  ..  combat board     402 s, 343 checks: a different seed should read a different board at the origin
+FAIL  combat board    425.9 s, 23362 checks, 2 failed
+        - the four sample boards should hold both holes and ground, got 0 and 1634
+        - expected at least one thing standing on a cell the board reads as a hole or an island
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.26 GiB     0.0 min  quiet up to     0 s
+   1  test_render_shell      peak  16.67 GiB    10.4 min  quiet up to   255 s
+   2  test_combat_board      peak  11.90 GiB     7.1 min  quiet up to   190 s
+  peak of the whole run: 16.67 GiB, in suite 1 (test_render_shell)
+  longest quiet stretch: 255 s, in suite 1 (test_render_shell)
+  wall time of the whole run: 17.6 min (0.29 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260918-032727.log
+
+1 of 2 suites failed (2 failed checks of 23414)

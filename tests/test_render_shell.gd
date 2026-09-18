@@ -173,15 +173,21 @@ func _a_write_through_the_render_handle_cannot_reach_the_world() -> void:
 ## found by writing a value and looking for it on the other side).
 func _no_handle_hands_out_anything_the_world_still_holds() -> void:
 	var world := SimWorld.new(SEED)
-	# Somewhere with an island in view, so its four handles are testable.
-	var island := world.island_field.island_in_cell(FloatingIsland.AERIAL, Vector2i(-4, -4))
-	if island != null:
-		world.place_observer(island.centre_x, island.centre_z)
 	world.step()
 
+	# Whichever island the streamer actually has in view, so its four handles are
+	# testable. Naming a cell instead is what this check used to do, and the cell
+	# it named stopped holding an island when the ground became the adopted one:
+	# the sweep then covered three of seven kinds and said so, which is the check
+	# working. Asking the streamer cannot go stale that way.
+	var island: FloatingIsland = null
+	var island_keys := world.island_streamer.loaded_keys()
+	if not island_keys.is_empty():
+		island = world.island_streamer.live_island(island_keys[0])
+
 	var handles := {}
-	if island != null and world.island_streamer.is_loaded(island.key()):
-		var island_key := island.key()
+	if island != null:
+		var island_key: Vector3i = island_keys[0]
 		handles["island"] = [
 			world.island_streamer.live_island(island_key),
 			world.island_streamer.island(island_key),
@@ -366,12 +372,14 @@ func _copying_a_chunk_is_paid_per_chunk_not_per_frame(slow: Dictionary) -> void:
 		"the two runs did not cover the same simulated time, so their copy counts "
 		+ "are not comparable")
 
-	# Four things are copied for each island the shell draws -- the island, its
-	# geometry, its cover and its pond -- and each is asked for once, when the
-	# island first appears. So the count is four per island view built, and not
-	# one per frame, which is the claim.
-	equal(slow_counts["handles"], slow_counts["views"] * 4,
-		"the shell asked for %d copies to draw %d islands, which is not the four "
+	# Three things are counted for each island the shell draws -- its geometry,
+	# its cover and its pond -- and each is asked for once, when the island first
+	# appears. (The island's own placement is handed over as a copy too, and is
+	# deliberately not counted: `IslandStreamer.island()` is the one accessor
+	# that does not touch the counter.) So the count is three per island view
+	# built, and not one per frame, which is the claim.
+	equal(slow_counts["handles"], slow_counts["views"] * 3,
+		"the shell asked for %d copies to draw %d islands, which is not the three "
 		% [slow_counts["handles"], slow_counts["views"]]
 		+ "an island costs: something is copying an island it already had")
 	equal(fast_counts["handles"], slow_counts["handles"],

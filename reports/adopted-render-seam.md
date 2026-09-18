@@ -281,18 +281,106 @@ tick 1.
 
 ## 9. The suites that answer for this
 
-Thirteen suites were run on the changed tree; the transcript is
-`assets/adopted-render-seam-suites.log`. Several of them had to be repointed
-rather than re-run, because they were testing code that no longer exists, and
-each repointing keeps the *claim* and moves it to the layer that still makes it:
+Thirteen suites were run on the changed tree, as one supervised job:
+
+    ./run_tests.sh test_layering test_terrain test_water test_streaming test_biomes \
+      test_render_shell test_atmosphere test_anti_aliasing test_board_overlay \
+      test_combat_board test_determinism test_characters test_held_items
+
+It took 106.0 min and ended on its own summary line:
+
+    4 of 13 suites failed (11 failed checks of 35357)
+
+The transcript is `assets/adopted-render-seam-suites.log`. Suite by suite:
+
+| Suite | Verdict | |
+|---|---|---|
+| `test_layering` | `PASS  layering 0.3 s, 63 checks` | the sim/render split holds |
+| `test_terrain` | `PASS  terrain 0.9 s, 53 checks` | the field's purity, on the adopted heightfield |
+| `test_water` | `FAIL  water 1594.0 s, 5313 checks, 4 failed` | **inherited** — see below |
+| `test_streaming` | `PASS  streaming 949.2 s, 4679 checks` | the streaming rule, repointed onto `ScatterStreamer` |
+| `test_biomes` | `PASS  biomes 177.9 s, 206 checks` | |
+| `test_render_shell` | `FAIL  render shell 601.3 s, 40 checks, 2 failed` | **this seam's own; fixed** — see below |
+| `test_atmosphere` | `FAIL  atmosphere 790.2 s, 90 checks, 2 failed` | **inherited** — see below |
+| `test_anti_aliasing` | `PASS  anti-alias 590.4 s, 50 checks` | |
+| `test_board_overlay` | `PASS  board overlay 132.8 s, 12 checks` | the board still hugs the ground it reads |
+| `test_combat_board` | `FAIL  combat board 428.5 s, 23362 checks, 3 failed` | two inherited, one this seam's own and fixed |
+| `test_determinism` | `PASS  determinism 825.0 s, 15 checks` | |
+| `test_characters` | `PASS  characters 75.3 s, 1315 checks` | the rig on the adopted character scene |
+| `test_held_items` | `PASS  held items 103.5 s, 159 checks` | the hand sockets at the base's own node paths |
+
+**The two reds this seam caused, and what they were.** `test_render_shell` failed
+on exactly the two checks the repointing got wrong, and both are fixed:
+
+    - the handle sweep covered 3 of the 7 handle kinds; something the world hands out
+      was not loaded to test
+    - the shell asked for 30 copies to draw 10 islands, which is not the four an
+      island costs: something is copying an island it already had
+
+The first is the check working: the sweep named a fixed island cell, and that
+cell holds no island on the adopted ground, so four of the seven handle kinds
+were never reached. It now asks the streamer which island it actually has in
+view, which cannot go stale that way. The second was an arithmetic error of mine
+— three of `IslandStreamer`'s four accessors touch the handle counter and
+`island()` deliberately does not, so an island costs three copies, not four.
+
+`test_combat_board`'s third failure is the same kind of thing:
+
+    - the board's cell must not divide the chunk, got 64.0000 cells per chunk
+
+That claim was about *this project's retired* chunk, which was 16 units wide. The
+adopted chunk is 192, and 192 / 3.0 is exactly 64, so the claim as written is
+false about the ground that is actually drawn. What it was protecting is the
+sampling grid — the board's cell must not line up with the corners the ground is
+sampled at — and `TerrainChunkMesher.STEP` is 2.0, which 3.0 does not divide
+(1.5 cells). The check is made about that instead.
+
+Re-run after the fixes, as a second supervised job
+(`assets/adopted-render-seam-suites-refix.log`, 17.6 min):
+
+    PASS  render shell    617.6 s, 52 checks
+    FAIL  combat board    425.9 s, 23362 checks, 2 failed
+    1 of 2 suites failed (2 failed checks of 23414)
+
+`test_render_shell` is green. `test_combat_board` is down from three failures to
+two, and the two that remain are the inherited ones below — neither mentions a
+cell, a chunk or a lattice:
+
+    - the four sample boards should hold both holes and ground, got 0 and 1634
+    - expected at least one thing standing on a cell the board reads as a hole
+      or an island
+
+**The reds this seam did not cause.** `test_water`'s four, `test_atmosphere`'s
+two and `test_combat_board`'s other two are all one shape, and it is the shape
+the ground rebuild already filed in `reports/terrain-seam-sim-suites.md`: a
+suite names a fixed world position that was chosen against the retired ground
+and means something else on the adopted one.
+
+    test_water        - expected banks around the water of seed 19, found 0
+    test_atmosphere   - the spot this check stands in is not a twilight marsh any more
+                        expected: twilight_marsh   actual: deep_forest
+    test_combat_board - the four sample boards should hold both holes and ground,
+                        got 0 and 1634
+
+`test_water` was already red before this work — the earlier reading recorded
+`FAIL  water 1971.8 s, 5320 checks, 7 failed`, all of the form "expected water in
+view of seed 19, found 0 wet samples". It is **smaller** now, at 4 of 5313,
+because two of the seven belonged to the retired water sheet and went with it.
+The same report names `test_combat_board`'s `WATER_SAMPLE_AT` as a spot that is
+dry on the adopted ground. Re-choosing those constants belongs with the suite
+certification (`W-adopt-suites`), not here.
+
+Several suites had to be repointed rather than merely re-run, because they were
+testing code that no longer exists, and each repointing keeps the *claim* and
+moves it to the layer that still makes it:
 
 | Suite | What changed |
 |---|---|
 | `test_streaming` | the whole suite now streams `ScatterStreamer` on `ScatterPatch`'s lattice — the same rule, on the layer that still follows it |
 | `test_terrain` | the four mesher claims go; the field's purity stays. The base's own `test_terrain_chunk_mesher` answers for the mesh |
 | `test_water` | the two sheet claims go; the field's claims stay. The base's `test_water_plan`/`test_water_skin` answer for the surface |
-| `test_render_shell` | the isolation claims move from chunk geometry to the scatter patch, and the copy-cost claim to the islands (four handles per island, frame-independent) |
-| `test_atmosphere` | the grade claims are asked of `AtmosphereDirector` instead; the two the base's own rule contradicts are dropped with the reason |
+| `test_render_shell` | the isolation claims move from chunk geometry to the scatter patch, and the copy-cost claim to the islands |
+| `test_atmosphere` | the grade claims are asked of `AtmosphereDirector` instead; the two the base's own rule contradicts are dropped with the reason; the headless check now names the adopted director as a file that must stay uncached |
 | `test_biomes`, `test_settlements`, `test_combat_board`, `test_combat_snap`, `test_scatter`, `test_drops`, `test_determinism`, `test_board_overlay`, `test_anti_aliasing` | repointed off the retired names |
 
 Four suites were retired outright, because the layer each tested is out of the

@@ -114,3 +114,316 @@ RUN   test_water
   ..  water            859 s, 869 checks: dry ground at (-140.000000, 0.000000) has its water surface above it
   ..  water            957 s, 1672 checks: passability at (-120.000000, -120.000000) does not follow the water
   ..  water           1015 s, 2752 checks: passability at (-120.000000, -48.000000) does not follow the water
+  ..  water           1439 s, 5309 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  water           1566 s, 5312 checks: answering seed 19's water in this process gave a different map
+FAIL  water          1594.0 s, 5313 checks, 4 failed
+        - expected water in view of seed 19, found 0 wet samples
+        - expected banks around the water of seed 19, found 0
+        - expected water to check passability against, found 0
+        - the reported lattice found no water at all, so the comparison is weak
+
+RUN   test_streaming
+  ..  streaming        105 s, 3646 checks: patch (9.000000, 2.000000) is 49.702744 from the nearest observer at ...
+  ..  streaming        240 s, 4137 checks: walking the same path twice loaded different patches
+  ..  streaming        445 s, 4139 checks: the patch (0.000000, 0.000000) should have unloaded once the observer...
+  ..  streaming        632 s, 4145 checks: a patch unloaded while an observer was still standing on it
+  ..  streaming        737 s, 4146 checks: a patch stayed loaded with no observer near it
+  ..  streaming        848 s, 4147 checks: a fresh world should have dressing around its observer
+PASS  streaming       949.2 s, 4679 checks
+
+RUN   test_biomes
+  ..  biomes           178 s, 202 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+PASS  biomes          177.9 s, 206 checks
+
+RUN   test_render_shell
+  ..  render shell     251 s, 25 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  render shell     499 s, 30 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+FAIL  render shell    601.3 s, 40 checks, 2 failed
+        - the handle sweep covered 3 of the 7 handle kinds; something the world hands out was not loaded to test
+      expected: 7
+      actual:   3
+        - the shell asked for 30 copies to draw 10 islands, which is not the four an island costs: something is copying an island it already had
+      expected: 40
+      actual:   30
+
+RUN   test_atmosphere
+  ..  atmosphere        85 s, 63 checks: the spot this check stands in is not a twilight marsh any more
+  ..  atmosphere       199 s, 72 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  atmosphere       684 s, 80 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  atmosphere       790 s, 89 checks: the shell with the atmosphere reached a different world from a headle...
+FAIL  atmosphere      790.2 s, 90 checks, 2 failed
+        - the spot this check stands in is not a twilight marsh any more
+      expected: twilight_marsh
+      actual:   deep_forest
+        - a twilight marsh view holds 0 glowing orbs beside 0 reeds and cattails, which is not a pocket lit by orbs
+WARNING: 6 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+
+RUN   test_anti_aliasing
+  ..  anti-alias       483 s, 41 checks: render shell should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  anti-alias       590 s, 46 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+PASS  anti-alias      590.4 s, 50 checks
+
+RUN   test_board_overlay
+  ..  board overlay     32 s, 5 checks: the overlay is a fill and an outline
+PASS  board overlay   132.8 s, 12 checks
+
+RUN   test_combat_board
+  ..  combat board      77 s, 332 checks: boards at (0.0, 0.0) and (17.0, -11.0) should share a wide band, shar...
+  ..  combat board     270 s, 338 checks: a board built after forty unrelated boards is not the board built fresh
+  ..  combat board     303 s, 342 checks: two worlds of seed 1234 read a different board at (48.0, -33.0)
+  ..  combat board     405 s, 343 checks: a different seed should read a different board at the origin
+FAIL  combat board    428.5 s, 23362 checks, 3 failed
+        - the board's cell must not divide the chunk, got 64.0000 cells per chunk
+        - the four sample boards should hold both holes and ground, got 0 and 1634
+        - expected at least one thing standing on a cell the board reads as a hole or an island
+
+RUN   test_determinism
+  ..  determinism      118 s, 2 checks: a different seed should give a different report
+  ..  determinism      200 s, 3 checks: the seed should be stored on the world
+  ..  determinism      374 s, 6 checks: reset(seed) should rebuild the same world
+  ..  determinism      450 s, 7 checks: the two orderings loaded different patches, so the digests below woul...
+  ..  determinism      732 s, 10 checks: headless run should exit 0 (stdout: Godot Engine v4.7.2.stable.offici...
+PASS  determinism     825.0 s, 15 checks
+
+RUN   test_characters
+WARNING: res://characters/character.tscn:3 - ext_resource, invalid UID: uid://bhux0txcw1afy - using text path instead: res://characters/character.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/knight.tscn:3 - ext_resource, invalid UID: uid://fbfr42g3pbmn - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:5 - ext_resource, invalid UID: uid://bb8ia06ag8nwf - using text path instead: res://scripts/controllers/player_controller.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/rogue.tscn:3 - ext_resource, invalid UID: uid://c0dm1l0p08x3r - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/ranger.tscn:3 - ext_resource, invalid UID: uid://bkt3266nj8cnf - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/mage.tscn:3 - ext_resource, invalid UID: uid://b6ytyld4iw3pe - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_swapped_model_carries_on_animating (res://tests/test_characters.gd:471)
+         [1] run (res://tests/test_characters.gd:71)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+PASS  characters       75.3 s, 1315 checks
+
+RUN   test_held_items
+WARNING: res://characters/character.tscn:3 - ext_resource, invalid UID: uid://bhux0txcw1afy - using text path instead: res://characters/character.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/knight.tscn:3 - ext_resource, invalid UID: uid://fbfr42g3pbmn - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:5 - ext_resource, invalid UID: uid://bb8ia06ag8nwf - using text path instead: res://scripts/controllers/player_controller.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/rogue.tscn:3 - ext_resource, invalid UID: uid://c0dm1l0p08x3r - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/ranger.tscn:3 - ext_resource, invalid UID: uid://bkt3266nj8cnf - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/mage.tscn:3 - ext_resource, invalid UID: uid://b6ytyld4iw3pe - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_mounts_what_the_snapshot_says (res://tests/test_held_items.gd:124)
+         [1] run (res://tests/test_held_items.gd:40)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:3 - ext_resource, invalid UID: uid://bhux0txcw1afy - using text path instead: res://characters/character.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/knight.tscn:3 - ext_resource, invalid UID: uid://fbfr42g3pbmn - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:5 - ext_resource, invalid UID: uid://bb8ia06ag8nwf - using text path instead: res://scripts/controllers/player_controller.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/rogue.tscn:3 - ext_resource, invalid UID: uid://c0dm1l0p08x3r - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/ranger.tscn:3 - ext_resource, invalid UID: uid://bkt3266nj8cnf - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/mage.tscn:3 - ext_resource, invalid UID: uid://b6ytyld4iw3pe - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:159)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:3 - ext_resource, invalid UID: uid://bhux0txcw1afy - using text path instead: res://characters/character.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/knight.tscn:3 - ext_resource, invalid UID: uid://fbfr42g3pbmn - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:5 - ext_resource, invalid UID: uid://bb8ia06ag8nwf - using text path instead: res://scripts/controllers/player_controller.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/rogue.tscn:3 - ext_resource, invalid UID: uid://c0dm1l0p08x3r - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/ranger.tscn:3 - ext_resource, invalid UID: uid://bkt3266nj8cnf - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/mage.tscn:3 - ext_resource, invalid UID: uid://b6ytyld4iw3pe - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _the_view_keeps_no_copy (res://tests/test_held_items.gd:165)
+         [1] run (res://tests/test_held_items.gd:41)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:3 - ext_resource, invalid UID: uid://bhux0txcw1afy - using text path instead: res://characters/character.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/knight.tscn:3 - ext_resource, invalid UID: uid://fbfr42g3pbmn - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/character.tscn:5 - ext_resource, invalid UID: uid://bb8ia06ag8nwf - using text path instead: res://scripts/controllers/player_controller.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/rogue.tscn:3 - ext_resource, invalid UID: uid://c0dm1l0p08x3r - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Rogue.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/ranger.tscn:3 - ext_resource, invalid UID: uid://bkt3266nj8cnf - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+WARNING: res://characters/models/mage.tscn:3 - ext_resource, invalid UID: uid://b6ytyld4iw3pe - using text path instead: res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Mage.glb
+     at: load (scene/resources/resource_format_text.cpp:501)
+     GDScript backtrace (most recent call first):
+         [0] _a_change_in_the_world_reaches_the_sockets (res://tests/test_held_items.gd:193)
+         [1] run (res://tests/test_held_items.gd:42)
+         [2] _run_one (res://bin/test_main.gd:171)
+         [3] _process (res://bin/test_main.gd:157)
+PASS  held items      103.5 s, 159 checks
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.28 GiB     0.0 min  quiet up to     0 s
+   1  test_layering          peak   0.60 GiB     0.1 min  quiet up to     2 s
+   2  test_terrain           peak   0.60 GiB     0.1 min  quiet up to     2 s
+   3  test_water             peak  17.83 GiB    26.7 min  quiet up to   422 s
+   4  test_streaming         peak   6.02 GiB    15.9 min  quiet up to   202 s
+   5  test_biomes            peak   5.90 GiB     3.0 min  quiet up to   175 s
+   6  test_render_shell      peak  16.66 GiB    10.1 min  quiet up to   350 s
+   7  test_atmosphere        peak  17.03 GiB    13.3 min  quiet up to   482 s
+   8  test_anti_aliasing     peak  12.32 GiB     9.9 min  quiet up to   483 s
+   9  test_board_overlay     peak   5.72 GiB     2.3 min  quiet up to   122 s
+  10  test_combat_board      peak  11.90 GiB     7.2 min  quiet up to   191 s
+  11  test_determinism       peak  15.23 GiB    13.8 min  quiet up to   281 s
+  12  test_characters        peak   4.98 GiB     1.3 min  quiet up to    74 s
+  13  test_held_items        peak   5.57 GiB     1.7 min  quiet up to    92 s
+  peak of the whole run: 17.83 GiB, in suite 3 (test_water)
+  longest quiet stretch: 483 s, in suite 8 (test_anti_aliasing)
+  wall time of the whole run: 106.0 min (1.77 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260918-012530.log
+
+4 of 13 suites failed (11 failed checks of 35357)
