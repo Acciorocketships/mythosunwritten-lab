@@ -49,12 +49,6 @@ var terrain: TerrainQuery = null
 ## raw field rather than the composed answer. It is the query's.
 var ground: AdoptedGround = null
 
-## Turns the fields into per-chunk geometry.
-var chunk_mesher: SimTerrainChunkMesher = null
-
-## Keeps the chunks near the observer built and drops the rest.
-var terrain_streamer: TerrainStreamer = null
-
 ## Where the floating islands are. The query's, reachable directly for the same
 ## reason the height and biome fields are.
 var island_field: IslandField = null
@@ -91,9 +85,6 @@ var enemy_field: EnemyField = null
 ## character in the world's own scene: same roster, same control loop, same
 ## engine. See sim/enemy_streamer.gd for the bound on how many at once.
 var enemy_streamer: EnemyStreamer = null
-
-## Builds the one sheet of water around the observer.
-var water_sheet_builder: WaterSheetBuilder = null
 
 ## Reads a rectangle of the world as a tactical board. Nothing streams it and
 ## nothing keeps one: a board is built for a fight when there is a fight, and
@@ -132,21 +123,6 @@ var follow_id: int = 0
 ## carries it rather than the entry point, because a fight is something that
 ## happened in the world.
 var combat_lines := PackedStringArray()
-
-## How many times the water sheet has been rebuilt. A viewer watches this rather
-## than the sheet itself, so it only re-reads the water when there is new water
-## to read -- the sheet is one object covering a wide window, and most ticks do
-## not move the window at all.
-var water_sheet_version: int = 0
-
-## How many detached copies water_sheet() has ever handed out. Diagnostic only,
-## and the same diagnostic the streamer keeps for chunks.
-var water_sheets_handed_out: int = 0
-
-# The live sheet, and the window centre it was built for. Handed out only as a
-# copy, for the same reason chunk geometry is.
-var _water_sheet: WaterSheet = null
-var _water_sheet_centre := Vector2.ZERO
 
 ## Where the observer is standing, in world units.
 ##
@@ -191,15 +167,12 @@ func reset(seed_value: int) -> void:
 	island_field = terrain.island_field
 	settlement_field = terrain.settlement_field
 	path_network = terrain.path_network
-	chunk_mesher = SimTerrainChunkMesher.new(terrain)
-	terrain_streamer = TerrainStreamer.new(chunk_mesher)
 	island_streamer = IslandStreamer.new(island_field, IslandMesher.new())
 	settlement_streamer = SettlementStreamer.new(settlement_field, path_network)
 	scatter_field = DecorationScatter.new(terrain)
 	scatter_streamer = ScatterStreamer.new(scatter_field)
 	enemy_field = EnemyField.new(terrain)
 	enemy_streamer = EnemyStreamer.new(enemy_field)
-	water_sheet_builder = WaterSheetBuilder.new(terrain)
 	combat_board_builder = CombatBoardBuilder.new(terrain)
 	_empty_the_cast()
 
@@ -209,9 +182,6 @@ func reset(seed_value: int) -> void:
 	observer_heading = 0.0
 	observer_speed = 0.0
 	observer_rise = 0.0
-	_water_sheet = null
-	water_sheet_version = 0
-	water_sheets_handed_out = 0
 	_settle_observer()
 	# The people who live here, and the one the world looks through. A scenario
 	# that wants a different cast clears this one and stands up its own.
@@ -375,11 +345,9 @@ func _restream() -> void:
 	# that streams characters in and out for hours keeps no row per departure.
 	for id in enemy_streamer.update(combat.scene, observers()):
 		loop.forget(id)
-	terrain_streamer.update(observers())
 	island_streamer.update(observers())
 	settlement_streamer.update(observers())
 	scatter_streamer.update(observers())
-	_refresh_water_sheet()
 
 
 ## Everyone the streamer keeps ground under. One for now.
@@ -547,39 +515,6 @@ func observer_profile() -> SimBiomeProfile:
 	return ground.profile(observer_x, observer_z)
 
 
-## The water around the observer, as anyone outside the simulation gets it: a
-## detached copy of the one sheet. Copying is what keeps a viewer from editing
-## the world's water, exactly as it does for chunk geometry, and it is paid once
-## per rebuild rather than once per frame because a viewer watches
-## water_sheet_version to decide when to ask again.
-func water_sheet() -> WaterSheet:
-	if _water_sheet == null:
-		return null
-	water_sheets_handed_out += 1
-	return _water_sheet.detached_copy()
-
-
-## The live sheet itself. Only the simulation may use this -- writing into what
-## it returns changes the world, which is why the world's fingerprint reads the
-## water through here rather than through a copy of it.
-func live_water_sheet() -> WaterSheet:
-	return _water_sheet
-
-
-## Rebuild the water sheet if the observer has left the window it was built for.
-##
-## The window is snapped, so walking mostly does not move it; when it does, the
-## new sheet is built on the same world-fixed lattice as the old one, so the
-## water does not shift under the viewer at the moment of the rebuild.
-func _refresh_water_sheet() -> void:
-	var centre := WaterSheetBuilder.window_centre_for(observer_x, observer_z)
-	if _water_sheet != null and centre.is_equal_approx(_water_sheet_centre):
-		return
-	_water_sheet_centre = centre
-	_water_sheet = water_sheet_builder.build(centre)
-	water_sheet_version += 1
-
-
 ## The tactical board over a rectangle of world around a position, read on the
 ## storey reached from `from_height`.
 ##
@@ -616,7 +551,7 @@ func snapshot() -> Dictionary:
 	return {
 		"seed": world_seed,
 		"tick": tick,
-		"chunk_size": SimTerrainChunkMesher.CHUNK_SIZE,
+		"patch_size": ScatterPatch.PATCH_SIZE,
 		"observer_x": observer_x,
 		"observer_z": observer_z,
 		"observer_y": observer_y,
@@ -636,13 +571,11 @@ func snapshot() -> Dictionary:
 		# an observer of its own needs to know when the observer it would draw is
 		# already on screen as one of the characters.
 		"observer_follows": follow_id,
-		"loaded_chunks": terrain_streamer.loaded_keys(),
 		"loaded_islands": island_streamer.loaded_keys(),
 		"loaded_settlements": settlement_streamer.loaded_keys(),
 		"loaded_scatter": scatter_streamer.loaded_keys(),
 		"loaded_roads": settlement_streamer.loaded_roads(),
 		"observer_on_path": observer_on_path(),
-		"water_sheet_version": water_sheet_version,
 		# The combat layer, as one nested dictionary of plain numbers and tags.
 		# Everything a viewer needs to draw a fight is in here; there is nothing
 		# else for it to read and nothing for it to remember between frames.
@@ -668,12 +601,9 @@ func digest() -> String:
 	parts.append("island=%d" % (1 if observer_on_island() else 0))
 	parts.append("path=%.4f" % observer_on_path())
 	parts.append("biome=%s:%s" % [observer_biome(), observer_profile().digest()])
-	parts.append("water=%s:%s" % [
+	parts.append("water=%s" % [
 		"in" if observer_in_water() else ("bank" if observer_on_bank() else "dry"),
-		_water_sheet.digest() if _water_sheet != null else "none",
 	])
-	for key in terrain_streamer.loaded_keys():
-		parts.append("%d,%d:%s" % [key.x, key.y, terrain_streamer.live_geometry(key).digest()])
 	# The islands are folded in the same way and for the same reason: in sorted
 	# key order, through the live geometry rather than a copy, so the fingerprint
 	# answers for the aerial layer that actually exists.

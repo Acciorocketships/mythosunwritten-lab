@@ -1,7 +1,7 @@
 extends RefCounted
 ## Everything the scatter layer put down inside one chunk.
 ##
-## Plain data, in the same spirit as TerrainChunkGeometry and Settlement: a list
+## Plain data, in the same spirit as IslandGeometry and Settlement: a list
 ## of placed things, each of which is a tag, a position, a facing and a size.
 ## Nothing in here knows what any of it looks like.
 ##
@@ -15,7 +15,40 @@ extends RefCounted
 ## without having to be told anything about each other.
 class_name ScatterPatch
 
-## Which chunk this is, in the same coordinates the terrain mesher uses.
+## How wide one patch of ground is, in world units, and the two radii the
+## content streamers load and drop by.
+##
+## These three numbers used to live on the retired ground mesher and streamer,
+## because the dressing was loaded with the ground it stood on. The ground on
+## screen is the adopted base's now and streams on its own, far coarser lattice
+## (`TerrainChunkMesher.CHUNK_WORLD` is 192 units against this 16), so the
+## lattice this project's *content* is streamed on is this layer's own fact and
+## lives here, beside the thing it divides up. The values are unchanged, which
+## is why the same observer loads the same patch set as before.
+##
+## The two radii differ so that walking back and forth across the boundary does
+## not rebuild anything.
+const PATCH_SIZE := 16.0
+const LOAD_RADIUS := 40.0
+const UNLOAD_RADIUS := 56.0
+
+
+## Which patch a world position falls in.
+static func patch_at(x: float, z: float) -> Vector2i:
+	return Vector2i(floori(x / PATCH_SIZE), floori(z / PATCH_SIZE))
+
+
+## How far a world position is from the nearest point of a patch, in world
+## units. Zero for a position inside it.
+static func distance_to_patch(key: Vector2i, x: float, z: float) -> float:
+	var min_x := float(key.x) * PATCH_SIZE
+	var min_z := float(key.y) * PATCH_SIZE
+	var nearest_x := clampf(x, min_x, min_x + PATCH_SIZE)
+	var nearest_z := clampf(z, min_z, min_z + PATCH_SIZE)
+	return Vector2(x - nearest_x, z - nearest_z).length()
+
+
+## Which patch this is, in patch coordinates (not world units).
 var chunk := Vector2i.ZERO
 
 ## The placed things, in lattice order then cell order. Each is a dictionary:

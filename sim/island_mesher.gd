@@ -8,10 +8,11 @@ extends RefCounted
 ## on the outline the island itself defines. That is what gives it a real cliff:
 ## the edge is a curve the island knows, not a contour anyone had to hunt for.
 ##
-## What comes out is the same TerrainChunkGeometry the ground is made of, so an
-## island streams, is fingerprinted, is handed out as a detached copy and is
-## drawn through exactly the same machinery the ground already has. Its chunk
-## coordinate is the island's lattice cell.
+## What comes out is `IslandGeometry` -- the one piece of ground this project
+## still generates, because the adopted base has no aerial layer to build one
+## on. An island streams, is fingerprinted, is handed out as a detached copy and
+## is drawn from plain arrays of numbers. Its cell coordinate is the island's
+## lattice cell.
 ##
 ## Three surfaces are built, in one piece:
 ##
@@ -112,8 +113,8 @@ const RIM_SHADING := 0.12
 
 
 ## Build the geometry for one island.
-func build(island: FloatingIsland) -> TerrainChunkGeometry:
-	var geometry := TerrainChunkGeometry.new(island.cell.x, island.cell.y)
+func build(island: FloatingIsland) -> IslandGeometry:
+	var geometry := IslandGeometry.new(island.cell.x, island.cell.y)
 	var ratios := ring_ratios(island)
 	var angles := sector_angles(island)
 	var sectors := angles.size()
@@ -167,8 +168,8 @@ func build(island: FloatingIsland) -> TerrainChunkGeometry:
 ## The corners are the same radial lattice the island's own surface is built on,
 ## so the pond's shore lands on the mesh edges of the ground under it and the
 ## two cannot disagree about where the water stops.
-func build_water(island: FloatingIsland) -> WaterSheet:
-	var sheet := WaterSheet.new()
+func build_water(island: FloatingIsland) -> IslandWater:
+	var sheet := IslandWater.new()
 	if not island.has_basin():
 		return sheet
 	var reach := island.max_reach()
@@ -307,7 +308,7 @@ static func _spaced(values: PackedFloat32Array, apart: float) -> PackedFloat32Ar
 ## One side of the island -- the top surface or the keel -- as rings of quads
 ## with a fan at the middle.
 func _build_fan(
-	geometry: TerrainChunkGeometry,
+	geometry: IslandGeometry,
 	island: FloatingIsland,
 	ratios: PackedFloat32Array,
 	rings: Array,
@@ -345,7 +346,7 @@ func _build_fan(
 ## The cliff at the rim: the band between the top surface's edge and the
 ## underside's lip, facing outwards all the way round.
 func _build_cliff(
-	geometry: TerrainChunkGeometry,
+	geometry: IslandGeometry,
 	island: FloatingIsland,
 	top_rings: Array,
 	bottom_rings: Array,
@@ -392,7 +393,7 @@ func _surface_tint(island: FloatingIsland, ratio: float, upward: bool) -> Color:
 ## because a radial mesh runs in both directions round the island and a fixed
 ## order would leave half of every surface inside out.
 func _add_triangle(
-	geometry: TerrainChunkGeometry,
+	geometry: IslandGeometry,
 	a: Vector3,
 	b: Vector3,
 	c: Vector3,
@@ -423,7 +424,7 @@ func _add_triangle(
 ## sheet's rule, applied to a body of water that happens to be forty units in
 ## the air, so a shore fades out rather than ending on a line.
 func _add_water_triangle(
-	sheet: WaterSheet, corners: Array, tints: Array
+	sheet: IslandWater, corners: Array, tints: Array
 ) -> void:
 	var a: Vector3 = corners[0]
 	var b: Vector3 = corners[1]

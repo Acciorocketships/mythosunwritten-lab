@@ -347,7 +347,7 @@ static func tick_line(world: SimWorld) -> String:
 	var roster := world.combat
 	return "tick %d %s chunks=%d islands=%d props=%d begun=%d ended=%d standing=%d %s" % [
 		world.tick, roster.phase(),
-		world.terrain_streamer.loaded_count(),
+		world.scatter_streamer.loaded_count(),
 		world.island_streamer.loaded_count(),
 		world.scatter_streamer.item_count(),
 		roster.fights_begun, roster.fights_ended, roster.size(),

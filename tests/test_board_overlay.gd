@@ -44,7 +44,6 @@ func run() -> void:
 	_the_outline_stands_on_the_same_heights_as_the_fill()
 	_following_the_surface_beats_one_height_per_cell()
 	_a_sampled_cell_is_sampled_once_however_often_the_board_is_rebuilt()
-	_the_grass_hears_about_the_board_through_the_walkers_own_uniforms()
 	# The shells were never added to a scene tree, so nothing else will free
 	# them.
 	for shell in _shells:
@@ -221,39 +220,6 @@ func _a_sampled_cell_is_sampled_once_however_often_the_board_is_rebuilt() -> voi
 		not is_same(first, elsewhere),
 		"a different cell is a different surface"
 	)
-
-
-## The grass is told about the board through the material every chunk shares, so
-## one write covers the whole world -- the same path and cost as the walkers.
-func _the_grass_hears_about_the_board_through_the_walkers_own_uniforms() -> void:
-	var terrain := TerrainQuery.for_seed(SEED)
-	var grass := GrassLayer.new(terrain, SEED)
-	var material := grass.material()
-	# Nothing is drawn until a board says so.
-	grass.stand_clear()
-	var clear: Plane = material.get_shader_parameter("board_rect")
-	equal(clear.d, 0.0, "with no board the grass is told the board reaches nowhere")
-	grass.stand_over_board(Vector2(12.0, -8.0), Vector2(31.5, 31.5), 4.0, 6.0, 3.0, 0.86)
-	var reach: Plane = material.get_shader_parameter("board_rect")
-	equal(Vector2(reach.x, reach.y), Vector2(12.0, -8.0), "the board's middle reaches the shader")
-	equal(Vector2(reach.z, reach.d), Vector2(31.5, 31.5), "so does how far it reaches")
-	var level: Vector2 = material.get_shader_parameter("board_level")
-	equal(level.x, 4.0, "so does the height the board's middle sits at")
-	check(level.y >= 3.0, "the band covers the board's own relief: %.2f" % level.y)
-	equal(material.get_shader_parameter("board_cell"), 3.0, "so does the cell size")
-	# And the blades give way by being shortened, on the same number the walkers
-	# shorten them by, rather than by being made transparent.
-	equal(
-		material.get_shader_parameter("board_thin"), GrassLayer.BOARD_THIN,
-		"the grass over a square stands shorter"
-	)
-	equal(
-		material.get_shader_parameter("board_fade"), GrassLayer.BOARD_FADE,
-		"and is not faded, because shortening read better"
-	)
-	grass.stand_clear()
-	var gone: Plane = material.get_shader_parameter("board_rect")
-	equal(gone.z, 0.0, "switching the board off stands the grass back up")
 
 
 ## A render shell with a world under it, standing where it is told to stand. It

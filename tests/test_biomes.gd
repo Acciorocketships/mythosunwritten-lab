@@ -28,7 +28,6 @@ func _init() -> void:
 func run() -> void:
 	_the_biome_is_a_pure_function()
 	_the_biome_depends_on_the_seed()
-	_chunk_colours_ignore_build_order()
 	_all_five_named_biomes_are_resolvable()
 	_the_marsh_is_a_scattered_pocket()
 	_every_named_biome_carries_a_full_profile()
@@ -107,57 +106,6 @@ func _the_biome_depends_on_the_seed() -> void:
 	check(differences > 20,
 		"two seeds produced nearly the same biome map: %d of 60 samples differed"
 		% differences)
-
-
-func _chunk_colours_ignore_build_order() -> void:
-	# The ground's colour is part of the chunk the mesher builds, so the claim
-	# that build order cannot change the biome is the same claim as the terrain
-	# suite's, extended to the colours.
-	var subject := Vector2i(5, -3)
-	var neighbours: Array[Vector2i] = [
-		Vector2i(0, 0), Vector2i(-9, 4), Vector2i(5, -2), Vector2i(300, -700),
-		Vector2i(4, -3), Vector2i(6, -3),
-	]
-
-	var fresh := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
-	var reference := fresh.build(subject.x, subject.y)
-	check(reference.colors.size() == reference.vertices.size(),
-		"a built chunk should carry one ground colour per vertex, got %d for %d"
-		% [reference.colors.size(), reference.vertices.size()])
-
-	var busy := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
-	for key in neighbours:
-		busy.build(key.x, key.y)
-	var after_others := busy.build(subject.x, subject.y)
-
-	var reversed := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
-	for index in range(neighbours.size() - 1, -1, -1):
-		var key: Vector2i = neighbours[index]
-		reversed.build(key.x, key.y)
-	var after_reverse := reversed.build(subject.x, subject.y)
-
-	equal(after_others.colors, reference.colors,
-		"building other chunks first changed the ground colours of chunk (5, -3)")
-	equal(after_reverse.colors, reference.colors,
-		"the order chunks were built in changed the ground colours of chunk (5, -3)")
-
-	# The colours are inside the chunk's fingerprint, so a change to them cannot
-	# slip past the determinism checks that compare fingerprints.
-	var before := reference.digest()
-	var original: Color = reference.colors[0]
-	reference.colors[0] = Color(original.r + 0.25, original.g, original.b)
-	not_equal(reference.digest(), before,
-		"repainting a chunk's ground did not change its fingerprint")
-	reference.colors[0] = original
-	equal(reference.digest(), before,
-		"undoing the repaint did not restore the chunk's fingerprint")
-
-	# A chunk built for a world and a chunk built from that world's seed alone
-	# are coloured the same, so a test may build either.
-	var world := SimWorld.new(SEED)
-	var from_world := world.chunk_mesher.build(subject.x, subject.y)
-	equal(from_world.colors, after_others.colors,
-		"the world and a bare mesher of the same seed coloured chunk (5, -3) differently")
 
 
 func _all_five_named_biomes_are_resolvable() -> void:

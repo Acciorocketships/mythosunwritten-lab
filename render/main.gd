@@ -4,50 +4,48 @@ extends Node3D
 ## snapshot and moves visuals to match. Deleting this whole directory would leave
 ## the simulation fully runnable.
 ##
-## The terrain it draws is not generated here. The simulation's field, mesher and
-## streamer decide what ground exists and what shape it is; this file only asks
-## the streamer for the geometry of the chunks the snapshot says are loaded, and
-## hands those numbers to the graphics card. What comes back from that ask is a
-## detached copy of the chunk, so nothing done to it here -- deliberately or by
-## accident -- can reach the ground the simulation is standing on.
+## **The world it draws is the adopted base's own, and so is the scene.**
+## `render/main.tscn` is an *inherited* scene: its parent is
+## `res://scenes/world.tscn`, the world scene this repository adopted, and this
+## script is that scene's root script. Everything that puts the ground on the
+## screen is therefore theirs and runs exactly where they hung it -- the
+## streamed, storey-quantised heightfield with its rivers and cliffs, the shader
+## water, the villages and paths, the dressing, the grass, the sun and the sky,
+## all of it `FieldTerrainStreamer` and its neighbours under `scripts/`. This
+## file does not mesh a chunk, build a blade of grass or lay a sheet of water,
+## and the code that used to do each of those is out of the tree rather than
+## sitting beside theirs.
 ##
-## The floating islands are not generated here either. The simulation streams
-## them one island at a time, exactly as it streams the ground in chunks, and
-## hands over the same kind of geometry -- so an island becomes a drawable
-## through the very same code a chunk does. The far-sky ones drift, and even that
-## is not decided here: how far and how fast each one wanders is placement data
-## the simulation hashed out of the island's cell, and this file only turns the
-## clock. The islands anyone can stand on do not move at all.
+## What this file does is the other half: this game's conventions, built as
+## children of their world. The tactical lattice and the cells it paints, the
+## pieces standing on them, the blows that travel, what is lying on the ground,
+## the floating islands, the props and villages the *simulation* placed, the
+## characters, and the pixel interface over all of it.
 ##
-## The water is not generated here either, and it is not drawn per chunk. The
-## simulation builds one sheet over a wide window of the world, on a lattice
-## fixed to the world origin, and this file turns that one sheet into one
-## drawable with one animated material. There is no tile boundary anywhere in it
-## for a seam to show on, and the ripples are a function of world position, so
-## they do not restart when the sheet is rebuilt around a moving viewer.
+## The two halves meet at exactly one number. The simulation's ground
+## (`sim/adopted_ground.gd`) and the streamer that draws it both build their
+## plans with `TerrainWorldTuning.make_water(seed)` and
+## `TerrainWorldTuning.make_heightfield(seed, water)`, so handing the streamer
+## the simulation's seed is the whole of making the ground drawn the ground the
+## simulation is reading. That is done in `_enter_tree` below, before the
+## streamer's own `_ready` runs.
 ##
-## The grass is the one layer that *is* built here, and that is a decision with a
-## reason: nothing in the world can interact with a blade of grass, so it is a
-## property of the picture rather than of the place. It is instanced per chunk
-## out of the ground the simulation handed over, animated by a wind shader, and
-## bent aside by wherever the characters are standing -- and a headless process,
-## which never loads a single file of this directory, therefore creates none of
-## it at all. reports/grass.md is the write-up.
+## The floating islands are the one piece of ground this shell still draws
+## itself, and that is named rather than assumed: the adopted base has no aerial
+## layer at all, so there is nothing of theirs to build one on. The simulation
+## streams them one island at a time and hands over geometry; the far-sky ones
+## drift, and even that is not decided here -- how far and how fast each one
+## wanders is placement data the simulation hashed out of the island's cell, and
+## this file only turns the clock.
 ##
-## The colours are not decided here either. Every chunk arrives with a ground
-## tint per vertex, blended by the simulation from whichever biomes have a share
-## of that corner, and the fog, sky and ambient light are read each frame off the
-## blended biome profile where the observer is standing. This file chooses none
-## of those values -- it only decides which knob each one is turned into. Walk
-## across a biome border and the mood shifts because the simulation says it does.
-##
-## How the world is *lit* is not here either, and for the same reason the grass
-## is not in the simulation: render/atmosphere.gd owns the key light and its long
-## soft shadows, the sky, the fog and the ground mist, the warm-neutral fill, the
-## bloom, the miniature depth of field, the warm point lights on every glowing
-## tag, the wandering of the twilight orbs, and the drifting motes. It is one
-## layer with one switch -- `--no-atmosphere` draws the identical world with none
-## of it -- and reports/atmosphere.md is the write-up.
+## How the world is *lit* is theirs too. `AtmosphereDirector`, hung in their
+## world scene, owns the sun, the sky, the fog, the bloom, the ambient fill and
+## the depth of field. `render/atmosphere.gd` is what is left over for this
+## game: the warm point lights on every glowing tag, the wandering of the
+## twilight orbs, the drifting motes, and the mist that pools in the low ground
+## -- written onto their Environment rather than onto a second one. It is one
+## layer with one switch, and `--no-atmosphere` now means "none of that layer"
+## rather than "no lighting": the adopted world still lights itself.
 ##
 ## Run it with:  ./run_render.sh --seed 1234
 
@@ -108,6 +106,17 @@ const CAMERA_AIM_LIFT := 2.5
 ## How far the camera can see. Far enough for the far-sky islands, which are
 ## streamed out to several hundred units because they are the horizon.
 const CAMERA_FAR := 900.0
+
+## For how many opening frames the camera is placed outright rather than eased
+## into place.
+##
+## The adopted camera eases after the person, which is right while the game is
+## being played and wrong for the first frame of a run: the world scene authored
+## it a couple of units from the origin, and a capture at an early tick would
+## photograph it still on its way in. Two frames is enough -- the first puts it
+## where it belongs and the second holds it there while the streamer's opening
+## chunks land -- and after that it is the smoothed follow it is meant to be.
+const CAMERA_SNAP_FRAMES := 2
 
 ## How far the board overlay is lifted off the ground it describes, in world
 ## units, so its quads do not fight the terrain for the same pixels.
@@ -186,7 +195,14 @@ const TRACE_HALF_WIDTH := 1.30
 ## The colour is the simulation's: it arrives per vertex, blended from the
 ## biomes at that position, with the depth in the alpha so a shore fades out.
 ## This only turns it into light.
-const WATER_SHADER := """
+## The islands' water, as a shader.
+##
+## Only the islands': the ground's water is the adopted base's own
+## (`terrain/water/water_unified.gdshader`, laid by `WaterSurfaceBuilder` inside
+## their streamer), and this repository's wide ground sheet is out of the tree.
+## What is left is the pond in a floating island's basin, which is a piece of
+## ground the base has no equivalent for, so its surface has none either.
+const ISLAND_WATER_SHADER := """
 shader_type spatial;
 render_mode blend_mix, depth_draw_never, cull_disabled, specular_schlick_ggx;
 
@@ -388,91 +404,44 @@ var _observer_view: Node3D = null
 ## fast as it can, so a blend measured in ticks would run at whatever speed the
 ## machine happens to manage.
 var _last_delta := 0.0
-var _terrain_material: StandardMaterial3D = null
-var _water_view: MeshInstance3D = null
+## The islands' own surface material, and the material their ponds are drawn
+## with. One instance each, shared by every island on screen.
+var _island_material: StandardMaterial3D = null
 var _water_material: ShaderMaterial = null
 ## The waterfalls' material. One instance shared by every fall on screen, so
 ## they all run off the same clock -- and so a fall that streams in mid-flight
 ## does not start its animation from the beginning.
 var _fall_material: ShaderMaterial = null
-## The version of the water sheet currently on screen. The simulation counts its
-## rebuilds, so comparing counters is how this asks for the water again only
-## when there is new water, rather than once a frame.
-var _water_sheet_version := -1
-## The world drawn a second time upside down so the water can mirror it, or null
-## when the run was started with --no-reflection. Null is the whole of turning it
-## off: no second viewport, no second camera, and the water shader's mirror
-## strength left at zero, which is the branch it never takes.
-var _reflection: WaterReflection = null
-## How much of the mirror the water shows, when there is one. Set once, on the
-## one material every stretch of water on screen shares.
-const REFLECTION_AMOUNT := 1.0
-## The lighting and atmosphere stack, or null when the run was started with
-## --no-atmosphere. Null is the whole of turning it off: no environment, no key
-## light, no bloom, no depth of field, no warm point lights, no motes.
+## Whether the adopted streamer has finished the chunks it holds a run back for.
+##
+## The base waits on exactly this before letting anybody walk -- that is what
+## `ui/loading_screens/MythosLoadingScreen.gd` is -- and this shell waits on it
+## for the same reason and one more. The reason: a character cannot stand on
+## ground that has not been built, and the streamer builds a chunk a frame, so a
+## world stepped from the first frame would have its cast fall through the floor
+## and its first frames photographed over empty sky. The one more: it makes a
+## capture reproducible, because the tick a frame is taken at is then a tick of
+## a world with ground under it however long the machine took to mesh it.
+var _ground_ready := false
+
+## This game's own half of the atmosphere, or null when the run was started with
+## --no-atmosphere. Null is the whole of turning it off: no warm point lights,
+## no orbs, no motes, no ground mist. The adopted world's own grade -- sun, sky,
+## fog, bloom, fill, depth of field -- is `AtmosphereDirector`'s and stays.
 var _atmosphere: Atmosphere = null
 
-# Chunk coordinate (Vector2i) -> the node drawing it. One entry per loaded chunk.
-var _chunk_views := {}
+## The adopted world scene's own nodes, found by name in `_enter_tree` because
+## this scene *is* that scene. Nothing here is built: the shell reaches for what
+## the world it inherited already hung in the tree.
+var _ground: FieldTerrainStreamer = null
+var _world_environment: WorldEnvironment = null
+var _sun: DirectionalLight3D = null
+var _atmosphere_director: AtmosphereDirector = null
+var _camera_rig: Node = null
+var _characters: Node = null
 
-## The ground past the streamed chunks, drawn at a cell that doubles with the
-## level, or null when the run was started with --no-distant-ground. Null is the
-## whole of turning it off: no tile, no sample, no drawable, and the picture is
-## the forty-unit disc it was before.
-var _distant: DistantGround = null
-
-# Vector3i(level, tile_x, tile_z) -> {view, sig, triangles}: the node drawing one
-# coarse tile, the signature of the cells it was built to emit, and how many
-# triangles that came to. A tile is rebuilt only when its signature changes,
-# which happens when the ground it is standing in for is meshed at a finer level.
-var _distant_views := {}
-
-# The snapshot the last sync read, kept only so that a paused run can go on
-# filling in the distance from it. Nothing else reads it.
+# The snapshot the last sync read, kept so a paused run can be re-read from it.
 var _last_snapshot := {}
-
-## How many coarse tiles and triangles are on screen, and how long the last
-## batch of tile building took. Reported on the stop line, which is how the cost
-## measurement and the tests read them without a screen to look at.
-var _distant_tiles := 0
-var _distant_triangles := 0
-var _distant_build_usec := 0
-
-## Where the coarse rings are centred, when a capture wants them somewhere other
-## than under the observer, and whether that override is on.
-##
-## Walking is what normally moves the rings, and it moves the camera with them,
-## so a frame before and a frame after are two different views and cannot be
-## compared. This holds the camera still and moves the rings instead: the same
-## ground, meshed at a different level, from the same place. It is only ever used
-## to photograph a boundary; see reports/terrain-lod.md.
-var _lod_centre := Vector2.ZERO
-var _lod_centre_set := false
-
-## Whether each coarse level is drawn in its own tint, so a capture can show
-## where the boundaries between them actually are. A diagnostic overlay, like the
-## tactical lattice: it changes the colours and nothing else.
-var _lod_levels := false
-
-## The tint each level is washed with under --lod-levels, coarsest last.
-const LOD_LEVEL_TINTS := [
-	Color(0.55, 1.00, 0.55),
-	Color(1.00, 0.92, 0.45),
-	Color(1.00, 0.60, 0.40),
-	Color(0.70, 0.65, 1.00),
-	Color(1.00, 0.45, 0.85),
-]
-
-## How long a frame may spend building coarse tiles.
-##
-## The whole ring is about 1.4 seconds of work on this machine and it is all
-## paid in the first second of a run, so it is spread over frames rather than
-## taken as one stall: at this budget the view fills out from the observer
-## outwards over about fifty frames and is complete well before a capture at
-## frame 140. Afterwards it is almost never reached -- walking only ever adds
-## the few tiles the rings have moved onto, and rebuilding a tile whose boundary
-## has shifted re-uses every corner it already sampled.
-const DISTANT_BUDGET_USEC := 40000
 
 # Island key (Vector3i) -> the node drawing it. One entry per loaded island.
 var _island_views := {}
@@ -487,27 +456,6 @@ var _road_views := {}
 # put on that chunk. One entry per loaded patch.
 var _scatter_views := {}
 
-# Chunk coordinate (Vector2i) -> the one drawable holding that chunk's grass.
-# A smaller set than the chunks: grass is built over a shorter radius than the
-# ground it stands on.
-var _grass_views := {}
-
-# Island key (Vector3i) -> {view, at}: the drawable holding that island's grass
-# and where its middle is, for the level of detail. The view itself hangs off the
-# island's own node, so dropping the island drops its grass with it; this is only
-# the handle the per-frame detail pass needs, and it is pruned alongside
-# _island_views.
-var _island_grass := {}
-
-## The grass layer, or null when the run was started with --no-grass. Null is the
-## whole of turning it off: no material, no baked mesh, no drawable, nothing.
-var _grass: GrassLayer = null
-
-## How many tufts are loaded and how many are being drawn, reported on the stop
-## line so a test can tell a run with grass from a run without one.
-var _grass_blades := 0
-var _grass_drawn := 0
-
 # The far-sky islands that drift, as {view, island}. Kept as its own list so the
 # per-frame drift does not have to walk every island to find the few that move.
 var _drifting := []
@@ -519,11 +467,11 @@ const TIMED_FROM_FRAME := 90
 var _timed_seconds := 0.0
 var _timed_frames := 0
 
-## How many chunk views have ever been built, including ones since dropped. One
-## per chunk handed over, so it is also the number of copies this shell has asked
-## the simulation for -- reported at exit next to the frame count, which is how a
-## test can see that the copying does not repeat per frame.
-var _chunk_views_built := 0
+## How many island views have ever been built, including ones since dropped.
+## One per island handed over, so it is also the number of copies this shell has
+## asked the simulation for -- reported at exit next to the frame count, which
+## is how a test can see that the copying does not repeat per frame.
+var _island_views_built := 0
 
 ## The tactical lattice drawn over the ground, or null when it is switched off.
 ## One drawable for the whole board: a filled quad per cell and an outline round
@@ -750,8 +698,52 @@ var _camera_fov := 0.0
 var _camera_focus := 0.0
 
 
+## What the arguments said, kept from `_enter_tree` to `_ready`.
+var _options := {}
+
+
+## Before anything in the inherited world scene has had its own `_ready`.
+##
+## That timing is the whole reason this function exists. The world scene hangs
+## the adopted terrain streamer in the tree with a seed of its own, and a node's
+## `_ready` runs before its parent's -- so by the time this shell's `_ready`
+## could speak, the streamer would already have built its plans for the wrong
+## world and started its worker thread on them. `_enter_tree` runs the other way
+## round, parent first, which is where the simulation's seed is put on the
+## streamer and where the base's two in-world debug overlays are taken back off.
+func _enter_tree() -> void:
+	_options = _parse_args()
+	_sim = Simulation.new(_options["seed"])
+	_ground = $FieldTerrain
+	_world_environment = $WorldEnvironment
+	_sun = $DirectionalLight3D
+	_atmosphere_director = $AtmosphereDirector
+	_camera_rig = $Camera3D
+	_camera = $Camera3D
+	_characters = $Characters
+	# The observer is the world scene's own character, wearing this game's view
+	# script (render/main.tscn overrides it there). Their camera, their terrain
+	# streamer, their water ripples and their atmosphere director were all
+	# authored pointing at this node, so making it the observer is the whole of
+	# making the adopted world follow the simulation about.
+	_observer_view = $Characters/Character
+	# One number is the whole of drawing the ground the simulation is standing
+	# on: both sides build their plans from the seed through the same two calls
+	# in `TerrainWorldTuning`, so the same seed is the same world.
+	_ground.SEED_OVERRIDE = _sim.world.world_seed
+	_ground.GRASS_ENABLED = _options["grass"]
+	# The base's own in-world development tools: a teleport menu and a
+	# coordinate read-out, both drawn over the picture. They belong to somebody
+	# building the terrain, not to somebody playing the game or photographing a
+	# frame of it, so this scene does not carry them.
+	for tool_name in ["ReviewTeleporter", "CoordOverlay"]:
+		var node := get_node_or_null(NodePath(tool_name))
+		if node != null:
+			node.queue_free()
+
+
 func _ready() -> void:
-	var options := _parse_args()
+	var options := _options
 	_camera_offset = options["camera"]
 	_camera_aim = float(options["aim"])
 	_camera_focus = float(options["focus"])
@@ -765,7 +757,6 @@ func _ready() -> void:
 		printerr("render-shell unknown --aa %s, keeping %s" % [
 			aa, AntiAliasing.from_project_settings(),
 		])
-	_sim = Simulation.new(options["seed"])
 	# The scenario first, because it stands up a cast of its own in place of the
 	# world's and puts the view where that cast is; --start then has the last
 	# word on where the camera goes, which is what somebody typing both means and
@@ -787,27 +778,15 @@ func _ready() -> void:
 	_paused = options["paused"]
 	AssetLibrary.model_tint_enabled = options["model_tint"]
 	_fade_foliage = options["fade"]
-	if options["grass"]:
-		_grass = GrassLayer.new(_sim.world.terrain, _sim.world.world_seed)
-		# How the grass over a board square gives way, when a run is pricing
-		# that choice rather than playing. Nothing but a measurement wants
-		# this: the shipped pair is GrassLayer.BOARD_THIN and BOARD_FADE, and
-		# every other run leaves them alone.
-		if options["give_way"]:
-			_grass.give_way(
-				float(options["give_way_thin"]), float(options["give_way_fade"])
-			)
-	if options["distant"]:
-		_distant = DistantGround.new(_sim.world.terrain)
-	_lod_levels = options["lod_levels"]
-	_lod_centre_set = options["lod_centre"]
-	_lod_centre = Vector2(float(options["lod_centre_x"]), float(options["lod_centre_z"]))
 	if options["atmosphere"]:
 		_atmosphere = Atmosphere.new(_sim.world.world_seed)
-	if options["reflection"]:
-		_reflection = WaterReflection.new()
-		if String(options["mirror_aa"]) != "":
-			_reflection.anti_aliasing = String(options["mirror_aa"])
+	# Nothing steps until the ground the cast stands on has been built. The
+	# streamer says so itself; asking as well covers a run whose startup landed
+	# before this line (the signal has already been emitted and will not be
+	# again).
+	_ground.startup_loading_completed.connect(_on_ground_ready, CONNECT_ONE_SHOT)
+	if _ground.startup_loading_complete():
+		_ground_ready = true
 	if String(options["trace"]) != "":
 		_build_trace(String(options["trace"]))
 	# Built for a run that asked for the lattice and for one that asked to play.
@@ -903,10 +882,9 @@ func _ready() -> void:
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
 	# aa= stays last on purpose: tests/test_anti_aliasing.gd reads it as the rest
 	# of the line, so anything added here goes in front of it.
-	print("render-shell boot seed=%d chunks=%d far=%d fartris=%d islands=%d grass=%d motes=%d sheet=%d/%d aa=%s" % [
-		_sim.world.world_seed, _chunk_views.size(),
-		_distant_tiles, _distant_triangles, _island_views.size(),
-		_grass_blades, motes.y,
+	print("render-shell boot seed=%d ground=%d islands=%d motes=%d sheet=%d/%d aa=%s" % [
+		_sim.world.world_seed, _ground.world_seed, _island_views.size(),
+		motes.y,
 		0 if _sheet_ui == null else _sheet_ui.art_scale,
 		0 if _sheet_ui == null or _sheet_ui.panel == null \
 			else _sheet_ui.panel.sheets.size(),
@@ -966,24 +944,16 @@ func _exit_tree() -> void:
 			key.size.x, key.size.y, LegendPanel.lines().size(),
 		])
 	var motes := Vector2i.ZERO if _atmosphere == null else _atmosphere.mote_counts()
-	print("render-shell stop tick=%d frames=%d views=%d handles=%d far=%d fartris=%d farbuilt=%d farcorners=%d faruse=%d islands=%d water=%d grass=%d drawn=%d patches=%d isles=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d mirror=%d faded=%d deepest=%.2f fade_us=%.1f frame_ms=%.2f timed=%d digest=%s" % [
-		_sim.world.tick, _frames, _chunk_views_built,
-		_sim.world.terrain_streamer.handles_handed_out,
-		_distant_tiles, _distant_triangles,
-		0 if _distant == null else _distant.tiles_built,
-		0 if _distant == null else _distant.corners_sampled,
-		_distant_build_usec,
+	print("render-shell stop tick=%d frames=%d views=%d handles=%d ground=%d islands=%d motes=%d lights=%d orbs=%d board=%d/%d pieces=%d faded=%d deepest=%.2f fade_us=%.1f frame_ms=%.2f timed=%d digest=%s" % [
+		_sim.world.tick, _frames, _island_views_built,
 		_sim.world.island_streamer.handles_handed_out,
-		_sim.world.water_sheets_handed_out,
-		_grass_blades, _grass_drawn,
-		0 if _grass == null else _grass.chunks_built,
-		0 if _grass == null else _grass.islands_grown,
+		_ground.world_seed,
+		_island_views.size(),
 		motes.y,
 		0 if _atmosphere == null else _atmosphere.lights_made,
 		0 if _atmosphere == null else _atmosphere.orb_count(),
 		_board_cells, _board_holes,
 		_pieces_drawn,
-		0 if _reflection == null else _reflection.frames_drawn,
 		_foliage_thinned,
 		_foliage_deepest,
 		0.0 if _foliage_frames == 0 else float(_foliage_usec) / float(_foliage_frames),
@@ -1002,6 +972,12 @@ func _process(delta: float) -> void:
 	if _frames > TIMED_FROM_FRAME and is_finite(delta):
 		_timed_seconds += delta
 		_timed_frames += 1
+	if not _ground_ready:
+		# The ground is still being built. The world is held at tick 0 and the
+		# views are synced anyway, so the observer is standing where it belongs
+		# and the camera is already framing it when the first chunk lands.
+		_sync_views()
+		return
 	if not _paused:
 		_accumulator += delta
 		var tick_seconds := 1.0 / TICKS_PER_SECOND
@@ -1013,19 +989,18 @@ func _process(delta: float) -> void:
 			_press_the_scripted_keys()
 		_sync_views()
 	_say_what_happened()
-	# Outside the pause check, for the same reason the drifting sky is: how much
-	# of the distance has been meshed yet is a property of the picture and not of
-	# the world, so a held frame goes on filling out to the far plane instead of
-	# being captured with whatever fitted in the opening frame.
-	if _paused and not _last_snapshot.is_empty():
-		_sync_distant(_last_snapshot)
 	# Outside the pause check: the sky keeps breathing while the world is paused,
 	# because where a far-sky island has drifted to is a property of the picture
 	# rather than of the world. The orbs wander for the same reason.
 	_drift_far_islands()
 	if _atmosphere != null:
 		_atmosphere.drift(float(Time.get_ticks_msec()) / 1000.0)
-	_aim_reflection()
+	# A held frame has no later frames to ease the camera into place over, so it
+	# asks the adopted camera for the pose it is easing towards outright. The
+	# same call on the opening frames is what stops a capture at an early tick
+	# photographing the camera still on its way in from the scene's own pose.
+	if _paused or _frames < CAMERA_SNAP_FRAMES:
+		(_camera_rig as Node).call("snap")
 	# Waiting for a tick rather than a frame makes a capture reproducible: the
 	# world is at the same place every time, however fast the machine drew it.
 	if not _screenshot_ticks.is_empty():
@@ -1038,33 +1013,6 @@ func _process(delta: float) -> void:
 		var path := _screenshot_path
 		_screenshot_path = ""
 		_save_screenshot(path)
-
-
-## Point the mirror at whatever the camera is looking at, through the plane the
-## standing water there is level with.
-##
-## Outside the pause check, with the drifting sky and the wandering orbs, and for
-## the same reason: where the mirror is aimed is a property of the picture rather
-## than of the world. A paused capture still gets a reflection of the frame it is
-## holding still on.
-##
-## The plane is the *water table* at the observer, read out of the water field.
-## Standing water is defined as ground that has fallen below that table, so every
-## pond and lake is exactly level with it -- which makes one number the right
-## plane for every still surface in the frame, without anyone having to find the
-## pond first.
-func _aim_reflection() -> void:
-	if _reflection == null:
-		return
-	_reflection.aim(
-		_camera.global_transform,
-		_camera.fov,
-		_sim.world.terrain.ground.standing_level(
-			_sim.world.observer_x, _sim.world.observer_z
-		),
-		get_viewport().size,
-		_water_view.visible,
-	)
 
 
 ## The key that opens and shuts the character sheet.
@@ -1101,8 +1049,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Restart from the next seed along, to show a different world.
 			_sim = Simulation.new(_sim.world.world_seed + 1)
 			_playing = false
-			_clear_chunk_views()
-			_water_sheet_version = -1
+			_clear_world_views()
+			_restart_ground()
 			_sync_views()
 			return
 	if _playing:
@@ -1488,44 +1436,16 @@ func _parse_input_script(script: String) -> Array:
 func _sync_views() -> void:
 	var snapshot := _sim.world.snapshot()
 	_last_snapshot = snapshot
-	var loaded: Array = snapshot["loaded_chunks"]
 
-	# Chunks the streamer has since dropped stop being drawn.
-	var still_loaded := {}
-	for key in loaded:
-		still_loaded[key] = true
-	for key in _chunk_views.keys():
-		if not still_loaded.has(key):
-			(_chunk_views[key] as Node3D).queue_free()
-			_chunk_views.erase(key)
-
-	# Chunks it has built since last frame start being drawn. Geometry never
-	# changes once built, so a chunk is asked for, copied and turned into a mesh
-	# exactly once, however many frames it then stays on screen for.
-	for key in loaded:
-		if _chunk_views.has(key):
-			continue
-		var geometry := _sim.world.terrain_streamer.geometry(key)
-		if geometry == null:
-			continue
-		var view := _build_chunk_view(geometry)
-		add_child(view)
-		_chunk_views[key] = view
-		_chunk_views_built += 1
-
-	_sync_distant(snapshot)
+	# No chunk loop any more. The ground on the screen is the adopted streamer's
+	# and it is not asked for once a frame: `FieldTerrainStreamer` follows the
+	# observer on its own worker thread and hangs its chunks in this scene. The
+	# only thing this shell says about the ground is where the observer is, and
+	# it says that by being the node the streamer was pointed at.
 	_sync_islands(snapshot)
 	_sync_settlements(snapshot)
 	_sync_scatter(snapshot)
-	# The board before the grass, because the grass is told where the board is
-	# and how to give way over it, and a rectangle worked out after that telling
-	# is a rectangle a frame late. That cost nothing while the world was
-	# running -- the next frame caught up -- and cost everything while it was
-	# not: a --paused run syncs its views exactly once, so every held frame was
-	# photographed with grass that had never heard of the board under it.
 	_sync_board(snapshot)
-	_sync_grass(snapshot)
-	_sync_water(snapshot)
 	_sync_choice()
 	_sync_combat(snapshot)
 	_sync_flights(snapshot)
@@ -1554,12 +1474,12 @@ func _sync_views() -> void:
 	(_observer_view as CharacterView).apply(
 		CharacterView.observer_state(snapshot), _last_delta
 	)
-	_camera.position = observer + _camera_offset
-	_camera.look_at_from_position(
-		_camera.position, observer + Vector3(0.0, _camera_aim, 0.0), Vector3.UP
-	)
-	# And last, because it is the only thing here that needs the camera to be
-	# where it has just been put.
+	# The camera is not placed here any more. The adopted world scene's own
+	# camera follows the observer in its own `_physics_process`, smoothing,
+	# swinging behind a walk and easing round anything that would come between
+	# it and the person. What this shell still decides is the *framing* -- how
+	# far behind, how far above, how far up the aim is lifted and how wide the
+	# view is -- and that is said once, in `_build_scenery`, on their camera.
 	_sync_foliage(observer)
 
 
@@ -1599,7 +1519,7 @@ func _sync_foliage(observer: Vector3) -> void:
 	var reach := _camera_offset.length() + FoliageFade.WIDEST_CROWN
 	var named := {}
 	for key in _scatter_views:
-		if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.z) > reach:
+		if ScatterPatch.distance_to_patch(key, observer.x, observer.z) > reach:
 			continue
 		for node in (_scatter_views[key] as Node3D).get_children():
 			if not (node is Node3D):
@@ -1664,69 +1584,9 @@ func _wash(node: Node, amount: float) -> void:
 
 ## Put the floating islands on screen, one drawable per island.
 ##
-## Fill the view out past the streamed ground, at a cell that doubles the further
-## it goes.
-##
-## The same three steps the chunks get -- drop, add, leave the rest alone -- with
-## one extra: a coarse tile is also dropped when the *cells it emits* change,
-## because the simulation has meshed some of the ground under it at full
-## resolution and the coarse tile must stop drawing that part. That is what the
-## signature is; it changes rarely, and only for the handful of tiles at a
-## boundary.
-##
-## Nothing about this reaches the simulation. The observer's position and the
-## list of loaded chunks are read out of the snapshot; every vertex comes from
-## the world's own height function; and the world's fingerprint is the same with
-## this layer and without it.
-func _sync_distant(snapshot: Dictionary) -> void:
-	if _distant == null:
-		return
-	var loaded := {}
-	for key in snapshot["loaded_chunks"]:
-		loaded[key] = true
-	var centre := Vector2(
-		float(snapshot["observer_x"]), float(snapshot["observer_z"])
-	)
-	if _lod_centre_set:
-		centre = _lod_centre
-	_distant.update(centre.x, centre.y, loaded)
-	var wanted := _distant.wanted()
-
-	# Tiles the rings have moved past, and tiles whose hole has changed shape.
-	for key in _distant_views.keys():
-		var held: Dictionary = _distant_views[key]
-		if not wanted.has(key) or wanted[key] != held["sig"]:
-			(held["view"] as Node3D).queue_free()
-			_distant_views.erase(key)
-
-	# Tiles that are missing, nearest level first, so the view fills outwards. A
-	# frame spends at most DISTANT_BUDGET_USEC on this and the rest arrive on the
-	# frames after, which is invisible because everything this layer draws is
-	# hundreds of units away.
-	var started := Time.get_ticks_usec()
-	var deadline := started + DISTANT_BUDGET_USEC
-	for key in _distant.wanted_keys():
-		if _distant_views.has(key):
-			continue
-		var geometry := _distant.build(key)
-		if _lod_levels:
-			_wash_level(geometry, key.x)
-		var view := _build_chunk_view(geometry)
-		add_child(view)
-		_distant_views[key] = {
-			"view": view, "sig": wanted[key], "triangles": geometry.triangle_count(),
-		}
-		if Time.get_ticks_usec() >= deadline:
-			break
-	_distant_build_usec = Time.get_ticks_usec() - started
-
-	_distant_tiles = _distant_views.size()
-	_distant_triangles = 0
-	for key in _distant_views:
-		_distant_triangles += int((_distant_views[key] as Dictionary)["triangles"])
-
-
-## The same three steps the chunks get, for the same reasons: drop the views of
+## The one piece of ground this shell still meshes, and the reason is named
+## rather than assumed: the adopted base has no aerial layer, so there is
+## nothing of theirs to build an island on. Three steps -- drop the views of
 ## islands the streamer has let go, build a view for each new one, and never
 ## rebuild a view for an island that is still loaded -- an island's geometry
 ## never changes once built. What arrives is a detached copy, so the islands the
@@ -1740,7 +1600,6 @@ func _sync_islands(snapshot: Dictionary) -> void:
 		if not still_loaded.has(key):
 			(_island_views[key] as Node3D).queue_free()
 			_island_views.erase(key)
-			_island_grass.erase(key)
 	if _drifting.size() > 0:
 		var kept := []
 		for entry in _drifting:
@@ -1755,7 +1614,8 @@ func _sync_islands(snapshot: Dictionary) -> void:
 		var island := _sim.world.island_streamer.island(key)
 		if geometry == null or island == null:
 			continue
-		var view := _build_chunk_view(geometry)
+		var view := _build_island_view(geometry)
+		_island_views_built += 1
 		if not island.walkable:
 			# The far-sky band does not cast. It is scenery hundreds of units
 			# off, tens of units wide, and a shadow from something that big and
@@ -1784,20 +1644,8 @@ func _sync_islands(snapshot: Dictionary) -> void:
 ## in what the simulation handed over; this turns each tag into something
 ## drawable and each list of numbers into a mesh.
 func _dress_island(
-	view: Node3D, key: Vector3i, island: FloatingIsland, geometry: TerrainChunkGeometry
+	view: Node3D, key: Vector3i, island: FloatingIsland, geometry: IslandGeometry
 ) -> void:
-	# The grass, grown off the same geometry this island is drawn from, so an
-	# island's top is a field of tufts rather than flat colour beside the ground.
-	# It is the island's child, so it streams out with the island in one call and
-	# would travel with a far-sky island if one ever grew any.
-	if _grass != null:
-		var grass := _grass.build_island(geometry, island)
-		if grass != null:
-			view.add_child(grass)
-			_island_grass[key] = {
-				"view": grass, "at": Vector2(island.centre_x, island.centre_z),
-			}
-
 	var cover := _sim.world.island_streamer.cover_of(key)
 	if cover != null and cover.count() > 0:
 		var grown := Node3D.new()
@@ -1830,7 +1678,6 @@ func _dress_island(
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		surface.mesh = mesh
 		surface.material_override = _water_material
-		surface.layers = WaterReflection.HIDDEN_LAYER
 		surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		view.add_child(surface)
 
@@ -2016,115 +1863,6 @@ func _sync_scatter(snapshot: Dictionary) -> void:
 		_scatter_views[key] = view
 
 
-## Grow the grass on the chunks near enough to be worth it, and tell the shader
-## where the view is and who is walking through it.
-##
-## The same three steps every other layer gets -- drop what is far, build what is
-## new, never rebuild what is still there -- on a shorter radius than the ground,
-## because a thirty-centimetre tuft forty units away is a few pixels and there are
-## thousands of them.
-##
-## What is *not* the same is the level of detail. A chunk is built once, at full
-## density, with its tufts in a shuffled order; how many of them are drawn is a
-## single integer on the multimesh, changed as the observer moves. Nothing is
-## rebuilt to thin a chunk out, which is the whole reason it is done this way
-## round -- see reports/grass.md.
-func _sync_grass(snapshot: Dictionary) -> void:
-	if _grass == null:
-		return
-	var observer := Vector2(snapshot["observer_x"], snapshot["observer_z"])
-
-	for key in _grass_views.keys():
-		if GrassLayer.dropped_at(
-			SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
-		):
-			(_grass_views[key] as Node3D).queue_free()
-			_grass_views.erase(key)
-
-	for key in snapshot["loaded_chunks"]:
-		if _grass_views.has(key):
-			continue
-		if not GrassLayer.wanted_at(
-			SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y)
-		):
-			continue
-		var geometry := _sim.world.terrain_streamer.geometry(key)
-		if geometry == null:
-			continue
-		var view := _grass.build(geometry)
-		if view == null:
-			# Nothing grows on this chunk -- all water, all cliff, all village
-			# floor. Remembered as nothing rather than as an absence, so it is
-			# not tried again every frame.
-			_grass_views[key] = _empty_grass(key)
-			add_child(_grass_views[key])
-			continue
-		add_child(view)
-		_grass_views[key] = view
-
-	_grass_blades = 0
-	_grass_drawn = 0
-	for key in _grass_views:
-		var view := _grass_views[key] as MultiMeshInstance3D
-		if view.multimesh == null:
-			continue
-		_grass.set_detail(view, SimTerrainChunkMesher.distance_to_chunk(
-			key, observer.x, observer.y
-		))
-		var counts := GrassLayer.counts_of(view)
-		_grass_blades += counts.x
-		_grass_drawn += counts.y
-
-	# The islands' grass, on the same level-of-detail rule. Distance is measured
-	# to the island's middle rather than to its nearest edge, because an island
-	# is one drawable however wide it is and the count has to be one number.
-	for key in _island_grass:
-		var entry: Dictionary = _island_grass[key]
-		var view := entry["view"] as MultiMeshInstance3D
-		if view.multimesh == null:
-			continue
-		_grass.set_detail(view, (entry["at"] as Vector2).distance_to(observer))
-		var counts := GrassLayer.counts_of(view)
-		_grass_blades += counts.x
-		_grass_drawn += counts.y
-
-	_grass.look_from(observer, _walkers(snapshot))
-	# One write for the whole world however many chunks are drawn, exactly as the
-	# walkers above are: the grass over the board's squares stands shorter so the
-	# lattice reads through it.
-	if _board_view != null and _board_reach.size.x > 0.0:
-		_grass.stand_over_board(
-			_board_reach.get_center(),
-			_board_reach.size * 0.5,
-			_board_level,
-			_board_relief,
-			CombatBoard.CELL_SIZE,
-			BOARD_FILL,
-		)
-	else:
-		_grass.stand_clear()
-
-
-## An empty stand-in for a chunk nothing grows on, so that the answer is
-## remembered instead of recomputed.
-func _empty_grass(key: Vector2i) -> MultiMeshInstance3D:
-	var view := MultiMeshInstance3D.new()
-	view.name = "grass_%d_%d_bare" % [key.x, key.y]
-	return view
-
-
-## Everyone the grass has to part around, in world units.
-##
-## One entry today, because the world holds one observer and it is a placeholder
-## for a character. When there are characters this is the list of them, and
-## nothing else in the layer changes: the shader already carries eight slots and
-## reads whichever are filled.
-func _walkers(snapshot: Dictionary) -> Array[Vector3]:
-	return [Vector3(
-		snapshot["observer_x"], snapshot["observer_y"], snapshot["observer_z"]
-	)]
-
-
 ## One scattered thing, at the height and the size the simulation gave it.
 func _add_scattered(
 	parent: Node3D, item: Dictionary, profile: SimBiomeProfile = null
@@ -2220,36 +1958,6 @@ func _add_window_glow(parent: Node3D, site: Settlement, glow: Dictionary) -> Nod
 		"z": fitted["z"],
 		"yaw": fitted["yaw"],
 	}, ground + float(fitted["height"]) - AssetLibrary.WINDOW_HEIGHT)
-
-
-## Put the world's water on screen, as one drawable.
-##
-## The sheet the simulation hands over spans far more than a chunk and is
-## rebuilt only when the viewer leaves the window it was built for, so this
-## replaces the mesh a couple of times a minute rather than every frame. What
-## arrives is a detached copy, so the water the simulation is holding cannot be
-## reached from here any more than the ground can.
-func _sync_water(snapshot: Dictionary) -> void:
-	var version: int = snapshot["water_sheet_version"]
-	if version == _water_sheet_version:
-		return
-	_water_sheet_version = version
-	var sheet := _sim.world.water_sheet()
-	if sheet == null or sheet.triangle_count() == 0:
-		_water_view.visible = false
-		return
-
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = sheet.vertices
-	arrays[Mesh.ARRAY_NORMAL] = sheet.normals
-	arrays[Mesh.ARRAY_COLOR] = sheet.colors
-	arrays[Mesh.ARRAY_INDEX] = sheet.indices
-
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	_water_view.mesh = mesh
-	_water_view.visible = true
 
 
 ## Draw the tactical lattice the observer is standing on.
@@ -2701,21 +2409,12 @@ func _bounds_of(node: Node, so_far: Transform3D) -> AABB:
 	return box
 
 
-## Wash one tile's colours towards the tint that stands for its level, so a
-## capture can show where a boundary is. Nothing but the colours changes, and it
-## happens only when --lod-levels asked for it.
-func _wash_level(geometry: TerrainChunkGeometry, level: int) -> void:
-	var tint: Color = LOD_LEVEL_TINTS[(level - 1) % LOD_LEVEL_TINTS.size()]
-	for at in geometry.colors.size():
-		geometry.colors[at] = geometry.colors[at].lerp(tint, 0.6)
-
-
-## Turn one chunk's geometry -- plain arrays of numbers, copied out of the
+## Turn one island's geometry -- plain arrays of numbers, copied out of the
 ## simulation -- into something the graphics card can draw. The arrays go
 ## straight into the mesh, which is the whole reason the copy has to be a real
 ## one: a mesh built from arrays that still belonged to the world would leave the
 ## world reachable from here.
-func _build_chunk_view(geometry: TerrainChunkGeometry) -> MeshInstance3D:
+func _build_island_view(geometry: IslandGeometry) -> MeshInstance3D:
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = geometry.vertices
@@ -2728,23 +2427,19 @@ func _build_chunk_view(geometry: TerrainChunkGeometry) -> MeshInstance3D:
 
 	var view := MeshInstance3D.new()
 	view.mesh = mesh
-	view.material_override = _terrain_material
+	view.material_override = _island_material
 	return view
 
 
-func _clear_chunk_views() -> void:
-	for key in _chunk_views.keys():
-		(_chunk_views[key] as Node3D).queue_free()
-	_chunk_views.clear()
-	for key in _distant_views.keys():
-		((_distant_views[key] as Dictionary)["view"] as Node3D).queue_free()
-	_distant_views.clear()
-	if _distant != null:
-		_distant = DistantGround.new(_sim.world.terrain)
+## Forget everything drawn, for a restart into a different world.
+##
+## The ground is not in this list and cannot be: the adopted streamer owns its
+## own chunks and its own worker thread, so a new world means a new streamer.
+## `_restart_ground` does that; this drops what *this* shell built.
+func _clear_world_views() -> void:
 	for key in _island_views.keys():
 		(_island_views[key] as Node3D).queue_free()
 	_island_views.clear()
-	_island_grass.clear()
 	_drifting.clear()
 	for key in _settlement_views.keys():
 		(_settlement_views[key] as Node3D).queue_free()
@@ -2752,11 +2447,6 @@ func _clear_chunk_views() -> void:
 	for key in _scatter_views.keys():
 		(_scatter_views[key] as Node3D).queue_free()
 	_scatter_views.clear()
-	for key in _grass_views.keys():
-		(_grass_views[key] as Node3D).queue_free()
-	_grass_views.clear()
-	_grass_blades = 0
-	_grass_drawn = 0
 	for key in _road_views.keys():
 		(_road_views[key] as Node3D).queue_free()
 	_road_views.clear()
@@ -2773,16 +2463,13 @@ func _parse_args() -> Dictionary:
 		"seed": DEFAULT_SEED, "screenshot": "", "screenshot_frame": 60, "screenshot_tick": 0,
 		"start": false, "start_x": 0.0, "start_z": 0.0, "paused": false,
 		"model_tint": true, "grass": true, "atmosphere": true, "board": false,
-		"distant": true, "lod_levels": false, "lod_centre": false,
-		"lod_centre_x": 0.0, "lod_centre_z": 0.0,
 		"scenario": Simulation.SCENARIO_NONE, "frozen": false,
 		"sheet": false, "readout": false, "dialogue": false, "trade": false,
 		"territory": false,
-		"reflection": true, "aa": "", "mirror_aa": "", "trace": "",
+		"aa": "", "trace": "",
 		"play": false, "journal": false, "input": "", "screenshot_ticks": "",
 		"camera": CAMERA_OFFSET, "aim": CAMERA_AIM_LIFT, "focus": 0.0, "fov": 0.0,
 		"fade": true,
-		"give_way": false, "give_way_thin": 0.0, "give_way_fade": 0.0,
 	}
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
@@ -2843,13 +2530,6 @@ func _parse_args() -> Dictionary:
 				# nothing about the world.
 				if has_value:
 					options["aa"] = args[i + 1]
-			"--mirror-aa":
-				# Draw the water's mirror with a named anti-aliasing mode. It
-				# ships with none, deliberately; this is how a frame of the
-				# alternative gets taken so the decision is answered with a
-				# picture. See WaterReflection.anti_aliasing.
-				if has_value:
-					options["mirror_aa"] = args[i + 1]
 			"--scenario":
 				# Set a named scenario out in the world before the first frame:
 				# the encounter on the ground, or the one on a floating island's
@@ -2942,69 +2622,29 @@ func _parse_args() -> Dictionary:
 				# draws it; it changes nothing, which is why the world's
 				# fingerprint is the same with it and without it.
 				options["board"] = true
-			"--lod-levels":
-				# Draw each coarse level in its own tint, so a capture can show
-				# where the boundaries between them are. A diagnostic overlay
-				# and nothing else: the geometry, the world and the fingerprint
-				# are the same with it and without it.
-				options["lod_levels"] = true
-			"--lod-centre":
-				# Put the coarse rings somewhere other than under the observer.
-				# Walking moves the rings and the camera together, so a frame
-				# before and a frame after cannot be compared; this moves the
-				# rings alone, which is how the same ground gets photographed at
-				# two different levels from one place.
-				if i + 2 < args.size() and args[i + 1].is_valid_float() \
-						and args[i + 2].is_valid_float():
-					options["lod_centre"] = true
-					options["lod_centre_x"] = args[i + 1].to_float()
-					options["lod_centre_z"] = args[i + 2].to_float()
-			"--no-distant-ground":
-				# Draw only the ground the simulation streams: the forty-unit
-				# disc of chunks and nothing beyond it. It exists so that "the
-				# distant ground changes nothing about the world" can be shown
-				# by running the same seed both ways and comparing fingerprints,
-				# which is what tests/test_terrain_lod.gd does, and so the layer
-				# can be priced against its absence.
-				options["distant"] = false
 			"--no-fade":
 				# Foliage stops giving way in front of the person. Nothing but a
 				# cost measurement wants this: it is the other half of the pair
 				# of runs that prices the rule.
 				options["fade"] = false
-			"--grass-give-way":
-				# How much of a blade over a board square is taken, and what
-				# share of its pixels are thrown away instead: the two uniforms
-				# `GrassLayer.give_way` writes, overridden for a run. Nothing
-				# but a measurement wants this either -- it is how the pair of
-				# runs that priced the choice differ in nothing else.
-				if i + 2 < args.size() and args[i + 1].is_valid_float() \
-						and args[i + 2].is_valid_float():
-					options["give_way"] = true
-					options["give_way_thin"] = args[i + 1].to_float()
-					options["give_way_fade"] = args[i + 2].to_float()
 			"--no-grass":
-				# Draw the world with no grass layer at all: nothing baked,
-				# nothing instanced, no shader. It exists so that "the grass
+				# Draw the world with no grass at all. The switch is now the
+				# adopted streamer's own `GRASS_ENABLED`, set before its `_ready`
+				# runs, so nothing is baked, instanced or shaded. It exists so
+				# that "the grass changes nothing about the world" can be shown
+				# by running the same seed both ways and comparing fingerprints,
+				# which is what tests/test_grass.gd does.
+				options["grass"] = false
+			"--no-atmosphere":
+				# Draw the world with none of *this game's* atmosphere layer: no
+				# warm point lights, no orbs, no motes, no ground mist. The
+				# adopted world still lights itself -- the sun, the sky, the
+				# fog, the bloom and the depth of field belong to
+				# AtmosphereDirector in the world scene this one inherits, and
+				# they are not a render option. It exists so that "this layer
 				# changes nothing about the world" can be shown by running the
 				# same seed both ways and comparing fingerprints, which is what
-				# tests/test_grass.gd does.
-				options["grass"] = false
-			"--no-reflection":
-				# Draw the water with no reflection at all: no second viewport,
-				# no second camera, and the shader's mirror branch never taken.
-				# It exists so that "the reflection changes nothing about the
-				# world" can be shown by running the same seed both ways and
-				# comparing fingerprints, which is what tests/test_water.gd
-				# does, and so that the mirror can be priced against its absence.
-				options["reflection"] = false
-			"--no-atmosphere":
-				# Draw the world with no lighting or atmosphere stack at all: no
-				# environment, no key light, no fog, no bloom, no depth of field,
-				# no warm point lights and no motes. It exists so that "the
-				# atmosphere changes nothing about the world" can be shown by
-				# running the same seed both ways and comparing fingerprints,
-				# which is what tests/test_atmosphere.gd does.
+				# tests/test_atmosphere.gd does.
 				options["atmosphere"] = false
 			"--no-model-tint":
 				# Draw the pack models in the colours they ship in, instead of
@@ -3111,95 +2751,120 @@ func _save_screenshot(path: String, then_quit: bool = true) -> void:
 
 
 func _build_scenery() -> void:
-	_camera = Camera3D.new()
+	# The camera is the adopted world scene's own, found in `_enter_tree`, and
+	# what happens here is framing rather than building. Their camera holds the
+	# person from behind and above, eases after a walk and swings round anything
+	# that would come between it and the body; this says how far behind, how far
+	# above, how far up the aim is lifted and how wide the view is, which is
+	# exactly the three dials `--camera`, `--aim` and `--fov` turn.
+	#
 	# Pushing the far plane out to the far-sky islands stretches the depth
 	# buffer, and moving the near plane out with it keeps the precision where
 	# the world is, which is what stops the ground shadow-fighting with itself.
-	# A unit is still short of anything that matters now the camera plays from
-	# 16.7 units rather than 66.8: the nearest thing it can meet is a tree
-	# standing right beside the person, and that is metres away, not
-	# centimetres.
 	_camera.near = 1.0
 	_camera.far = CAMERA_FAR
 	if _camera_fov > 0.0:
 		_camera.fov = _camera_fov
-	add_child(_camera)
+	# `--camera x y z` is an offset from the person: how far above is the y, and
+	# how far behind is the length of the other two, which is the pair their
+	# camera is steered by. The default (0, 10.5, 13.0) is 10.5 up and 13.0
+	# back, which is the framing reports/camera-read.md was composed at.
+	_camera_rig.set("height", maxf(_camera_offset.y, 1.4))
+	_camera_rig.set("distance", Vector2(_camera_offset.x, _camera_offset.z).length())
+	_camera_rig.set("aim_lift", _camera_aim)
+	_camera_rig.set("target", _observer_holder())
 
-	# The whole lighting and atmosphere stack, in one object with one switch:
-	# the key light and its shadows, the sky, the fog, the fill, the bloom, the
-	# depth of field and the motes. With --no-atmosphere none of it is built and
-	# the world underneath is unchanged, which is what tests/test_atmosphere.gd
-	# checks by fingerprinting the two runs against each other.
+	# This game's half of the atmosphere: the warm point lights, the orbs, the
+	# motes and the ground mist. The sun, the sky, the fog, the bloom, the fill
+	# and the depth of field are the adopted `AtmosphereDirector`'s, hung in the
+	# world scene this one inherits, and they stay whatever this switch says.
+	# With --no-atmosphere none of *this* layer is built and the world underneath
+	# is unchanged, which is what tests/test_atmosphere.gd checks by
+	# fingerprinting the two runs against each other.
 	if _atmosphere != null:
-		_atmosphere.attach(self)
-		_atmosphere.focus_at(
-			_camera_focus if _camera_focus > 0.0 else _camera_offset.length()
-		)
-		_camera.attributes = _atmosphere.camera_attributes()
-
-	# Flat-shaded and untextured on purpose: the shape is placeholder geometry.
-	# The colour is not chosen here -- the material takes it from the per-vertex
-	# ground tint the simulation generated, so the palette lives in the biome
-	# catalog and this is only the wiring that shows it.
-	_terrain_material = StandardMaterial3D.new()
-	_terrain_material.albedo_color = Color(1.0, 1.0, 1.0)
-	_terrain_material.vertex_color_use_as_albedo = true
-	# The tints the simulation writes are ordinary colours, the same numbers a
-	# painter would name; the renderer works in linear light. Saying so here is
-	# what keeps a dark marsh floor dark instead of washing it out by two stops.
-	_terrain_material.vertex_color_is_srgb = true
-
-	# Start on the mood of wherever the observer opened its eyes, so the first
-	# frame is already the right biome rather than a default that fades away.
-	if _atmosphere != null:
+		_atmosphere.attach(self, _world_environment)
+		# Start on the mood of wherever the observer opened its eyes, so the
+		# first frame already has the right air in it.
 		_atmosphere.take(_sim.world.observer_profile(), Vector3(
 			_sim.world.observer_x, _sim.world.observer_y, _sim.world.observer_z
 		))
 
-	# The water, as one drawable for the whole sheet. Its mesh is replaced when
-	# the simulation rebuilds the sheet; its material never changes, so the
-	# animation runs continuously across those replacements.
-	_water_view = MeshInstance3D.new()
+	# The islands' own surfaces. Flat-shaded and untextured on purpose: the
+	# colour is not chosen here -- the material takes it from the per-vertex
+	# tint the simulation generated, so the palette lives in the biome catalog
+	# and this is only the wiring that shows it.
+	# The observer wears whichever model OBSERVER_TAG names. Nothing about it
+	# reaches the simulation, which holds a position, a heading and how fast it
+	# is going and has never heard of an animation.
+	(_observer_view as CharacterView).set_model(OBSERVER_TAG)
+
+	_island_material = StandardMaterial3D.new()
+	_island_material.albedo_color = Color(1.0, 1.0, 1.0)
+	_island_material.vertex_color_use_as_albedo = true
+	# The tints the simulation writes are ordinary colours, the same numbers a
+	# painter would name; the renderer works in linear light. Saying so here is
+	# what keeps a dark marsh floor dark instead of washing it out by two stops.
+	_island_material.vertex_color_is_srgb = true
+
+	# The islands' ponds and waterfalls, as two materials built once and shared
+	# by every pond and every fall on screen, so they all run off one clock and
+	# a fall that streams in mid-flight does not start from the beginning.
 	_water_material = ShaderMaterial.new()
 	var water_shader := Shader.new()
-	water_shader.code = WATER_SHADER
+	water_shader.code = ISLAND_WATER_SHADER
 	_water_material.shader = water_shader
-	_water_view.material_override = _water_material
-	# The waterfalls' material, built once here for the same reason: every fall
-	# on screen shares it, so they all run off one clock.
 	_fall_material = ShaderMaterial.new()
 	var fall_shader := Shader.new()
 	fall_shader.code = FALL_SHADER
 	_fall_material.shader = fall_shader
-	_water_view.visible = false
-	# Water is a wide, flat thing whose bounding box the engine cannot guess from
-	# a mesh that keeps being replaced; without this it is culled at the edges of
-	# the view as the camera turns.
-	_water_view.extra_cull_margin = 200.0
-	# Off the layer the mirror camera draws. Water reflecting water is a feedback
-	# loop with nothing in it, and the sheet is between the mirror camera and
-	# everything it is there to see.
-	_water_view.layers = WaterReflection.HIDDEN_LAYER
-	add_child(_water_view)
 
-	# The mirror. It is a second view of this same scene rather than a scene of
-	# its own, so it has to be hung in the tree beside everything it draws.
-	if _reflection != null:
-		_reflection.attach(self)
-		_water_material.set_shader_parameter(
-			"reflection_map", _reflection.texture()
-		)
-		_water_material.set_shader_parameter("reflection_amount", REFLECTION_AMOUNT)
 
-	# The observer, as a character standing on the ground and animated.
-	#
-	# It used to be a 0.6-unit emissive sphere -- a marker for the camera to
-	# follow while there was nothing to look at but terrain. There is something
-	# to look at now: one CharacterView, wearing whichever model OBSERVER_TAG
-	# names, playing whichever clip the snapshot works out to. Nothing about it
-	# reaches the simulation, which still holds a position, a heading and how fast
-	# it is going and has never heard of an animation.
-	var character: PackedScene = load(CharacterView.SCENE)
-	_observer_view = character.instantiate()
-	add_child(_observer_view)
-	(_observer_view as CharacterView).set_model(OBSERVER_TAG)
+## The adopted streamer has finished the chunks it holds a run back for.
+func _on_ground_ready() -> void:
+	_ground_ready = true
+	print("render-shell ground ready frames=%d seed=%d" % [_frames, _ground.world_seed])
+	# The camera has been framing an observer standing over nothing; now that
+	# there is ground it is put where it belongs outright rather than eased.
+	(_camera_rig as Node).call("snap")
+
+
+## Start the adopted ground again on a different seed.
+##
+## The streamer builds its plans once, in its own `_ready`, and runs a worker
+## thread off them, so a new world is a new streamer rather than a reseeded one.
+## Freeing the node is what stops that thread -- `FieldTerrainStreamer._exit_tree`
+## joins it -- and the replacement is stood up with the same exports the world
+## scene authored, pointed at the same observer, with the new seed.
+func _restart_ground() -> void:
+	var settings := {
+		"CHUNK_RADIUS": _ground.CHUNK_RADIUS,
+		"KEEP_RADIUS": _ground.KEEP_RADIUS,
+		"GRASS_ENABLED": _ground.GRASS_ENABLED,
+	}
+	var old := _ground
+	remove_child(old)
+	old.queue_free()
+	var fresh := FieldTerrainStreamer.new()
+	fresh.name = "FieldTerrain"
+	for key in settings:
+		fresh.set(key, settings[key])
+	fresh.SEED_OVERRIDE = _sim.world.world_seed
+	fresh.player = _observer_view
+	fresh.terrain_parent = fresh
+	add_child(fresh)
+	_ground = fresh
+	_ground_ready = false
+	fresh.startup_loading_completed.connect(_on_ground_ready, CONNECT_ONE_SHOT)
+	if _atmosphere_director != null:
+		_atmosphere_director.streamer = fresh
+
+
+## The node the adopted camera and the adopted streamer follow.
+##
+## Both were pointed at the world scene's own `Characters/Character` when the
+## scene was authored, and that is the node this shell keeps them on: the
+## observer *is* that character. Handing them a node this shell made instead
+## would be the base's world following ours around, which is the thing this
+## seam is not allowed to do.
+func _observer_holder() -> Node3D:
+	return _observer_view

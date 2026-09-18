@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://c0ur3edoqhm4s"]
 
-[ext_resource type="Texture2D" uid="uid://bu4oo76lgwrvj" path="res://assets/KayKitAdventurers/Characters/gltf/Knight_knight_texture.png" id="1_cou54"]
+[ext_resource type="Texture2D" uid="uid://bu4oo76lgwrvj" path="res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight_knight_texture.png" id="1_cou54"]
 
 [resource]
 resource_name = "knight"

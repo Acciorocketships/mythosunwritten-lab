@@ -127,15 +127,18 @@ func _the_lattice_is_fixed_to_the_world() -> void:
 		"the position just below the origin is in the cell below it, not in the cell above")
 
 
-## The board's lattice is coarser than the lattice the ground is generated on,
-## and is not a whole number of cells to a chunk -- so a board's cells straddle
-## chunk borders and the two grids cannot start standing in for one another.
+## The board's lattice is coarser than the lattice the ground is drawn on, and
+## is not a whole number of cells to one of the adopted streamer's chunks -- so
+## a board's cells straddle chunk borders and the two grids cannot start
+## standing in for one another. The ground's numbers are the adopted mesher's:
+## `TerrainChunkMesher.STEP` is how far apart the ground samples are and
+## `CHUNK_WORLD` is how wide one of its chunks is.
 func _the_cell_is_coarser_than_the_ground_it_reads() -> void:
-	check(CombatBoard.CELL_SIZE > SimTerrainChunkMesher.CELL_SIZE,
+	check(CombatBoard.CELL_SIZE > TerrainChunkMesher.STEP,
 		"the board's cell (%.2f) must be coarser than the ground's (%.2f)" % [
-			CombatBoard.CELL_SIZE, SimTerrainChunkMesher.CELL_SIZE,
+			CombatBoard.CELL_SIZE, TerrainChunkMesher.STEP,
 		])
-	var per_chunk := SimTerrainChunkMesher.CHUNK_SIZE / CombatBoard.CELL_SIZE
+	var per_chunk := TerrainChunkMesher.CHUNK_WORLD / CombatBoard.CELL_SIZE
 	check(absf(per_chunk - roundf(per_chunk)) > 0.01,
 		"the board's cell must not divide the chunk, got %.4f cells per chunk" % per_chunk)
 

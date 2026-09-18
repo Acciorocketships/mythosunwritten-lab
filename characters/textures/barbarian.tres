@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://cfngsqu6cqduq"]
 
-[ext_resource type="Texture2D" uid="uid://cppt7qlwvqabf" path="res://assets/KayKitAdventurers/Characters/gltf/Barbarian_barbarian_texture.png" id="1_e3xgg"]
+[ext_resource type="Texture2D" uid="uid://cppt7qlwvqabf" path="res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Barbarian_barbarian_texture.png" id="1_e3xgg"]
 
 [resource]
 resource_name = "barbarian"

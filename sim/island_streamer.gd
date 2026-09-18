@@ -23,8 +23,8 @@ class_name IslandStreamer
 
 ## Aerial islands are loaded and dropped at exactly the ground's distances, so
 ## an island never appears over ground that does not exist.
-const AERIAL_LOAD_RADIUS := TerrainStreamer.LOAD_RADIUS
-const AERIAL_UNLOAD_RADIUS := TerrainStreamer.UNLOAD_RADIUS
+const AERIAL_LOAD_RADIUS := ScatterPatch.LOAD_RADIUS
+const AERIAL_UNLOAD_RADIUS := ScatterPatch.UNLOAD_RADIUS
 
 ## Far-sky islands are the horizon, so they reach as far as the camera can see.
 const FAR_LOAD_RADIUS := 520.0
@@ -135,17 +135,17 @@ func island(key: Vector3i) -> FloatingIsland:
 ## detached copy, or null if it is not loaded. The ground streamer's geometry()
 ## in every respect, including that the copy is what keeps a viewer from editing
 ## the world it is drawing.
-func geometry(key: Vector3i) -> TerrainChunkGeometry:
+func geometry(key: Vector3i) -> IslandGeometry:
 	if not _loaded.has(key):
 		return null
 	handles_handed_out += 1
-	return (_loaded[key]["geometry"] as TerrainChunkGeometry).detached_copy()
+	return (_loaded[key]["geometry"] as IslandGeometry).detached_copy()
 
 
 ## The loaded geometry itself. Only the simulation may use this -- writing into
 ## what it returns changes the world, which is why the world's fingerprint reads
 ## the islands through here rather than through a copy of them.
-func live_geometry(key: Vector3i) -> TerrainChunkGeometry:
+func live_geometry(key: Vector3i) -> IslandGeometry:
 	if not _loaded.has(key):
 		return null
 	return _loaded[key]["geometry"]
@@ -179,15 +179,15 @@ func live_cover(key: Vector3i) -> ScatterPatch:
 
 ## The pond standing on a loaded island, as a detached copy, or null if it is
 ## not loaded. An island with no basin has one of these with no triangles in it.
-func water_of(key: Vector3i) -> WaterSheet:
+func water_of(key: Vector3i) -> IslandWater:
 	if not _loaded.has(key):
 		return null
 	handles_handed_out += 1
-	return (_loaded[key]["water"] as WaterSheet).detached_copy()
+	return (_loaded[key]["water"] as IslandWater).detached_copy()
 
 
 ## The live pond, for the same reason again.
-func live_water(key: Vector3i) -> WaterSheet:
+func live_water(key: Vector3i) -> IslandWater:
 	if not _loaded.has(key):
 		return null
 	return _loaded[key]["water"]

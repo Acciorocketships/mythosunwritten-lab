@@ -474,7 +474,7 @@ func _a_swapped_model_carries_on_animating() -> void:
 
 	equal(view.model_tag, SWAP_FROM, "the view did not take the first model")
 	var first := view.model()
-	var first_skeleton := view.skeleton()
+	var first_skeleton := view.skeleton
 	check(first != null and first_skeleton != null,
 		"the first model arrived without a skeleton")
 
@@ -506,7 +506,7 @@ func _a_swapped_model_carries_on_animating() -> void:
 	# And it carries on: same clip, same graph, and the new skeleton is posed.
 	equal(view.shown_clip(), CharacterView.CLIP_WALK,
 		"the swap stopped the walk the character was in the middle of")
-	var second_skeleton := view.skeleton()
+	var second_skeleton := view.skeleton
 	check(second_skeleton != null and second_skeleton != first_skeleton,
 		"the swap did not bring a new skeleton")
 	if second_skeleton != null:

@@ -1,16 +1,16 @@
 extends RefCounted
-## One sheet of water: plain numbers, no engine objects.
+## The pond in one floating island's basin: plain numbers, no engine objects.
 ##
-## Every river, pond and lake in view is this one surface. It is not cut up per
-## chunk and it does not know that chunks exist -- its corners sit on a lattice
-## fixed to the world origin, so the same world position always lands on the
-## same corner at the same height whatever else is loaded. That is what makes it
-## seamless: there is no tile boundary for a seam to appear on, and a river can
-## run across a dozen chunk borders as one unbroken surface.
+## This used to be the world's whole water surface, under the name `IslandWater`
+## -- one seamless sheet over every river, pond and lake in view. The ground's
+## water is the adopted base's now (`WaterPlan`, `WaterField` and
+## `WaterSurfaceBuilder`, laid inside their streamer with their own shader), and
+## what is left for this project to build is the standing water on a floating
+## island, which the base has no equivalent for because it has no islands.
 ##
-## Like chunk geometry, this is arrays of floats. The simulation produces it and
-## never draws it; a headless run just hashes it.
-class_name WaterSheet
+## Like island geometry, this is arrays of floats. The simulation produces it
+## and never draws it; a headless run just hashes it.
+class_name IslandWater
 
 ## The stretch of world this sheet was built over, in world units. Water outside
 ## it is not missing, only not built yet.
@@ -55,8 +55,8 @@ func triangle_count() -> int:
 ## assigned across, because this engine's packed arrays share their storage when
 ## assigned -- writing into an element of an array that was merely handed over
 ## would reach the original too.
-func detached_copy() -> WaterSheet:
-	var copy := WaterSheet.new()
+func detached_copy() -> IslandWater:
+	var copy := IslandWater.new()
 	copy.min_x = min_x
 	copy.min_z = min_z
 	copy.max_x = max_x

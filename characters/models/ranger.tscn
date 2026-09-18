@@ -1,5 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://cubdm0f3gvl64"]
 
-[ext_resource type="PackedScene" uid="uid://bkt3266nj8cnf" path="res://assets/KayKitAdventurers/Characters/gltf/Ranger.glb" id="1_jx8mq"]
+[ext_resource type="PackedScene" uid="uid://bkt3266nj8cnf" path="res://assets/kaykit_adventurers/KayKit_Adventurers_2.0_FREE/Characters/gltf/Ranger.glb" id="1_jx8mq"]
 
 [node name="Ranger" instance=ExtResource("1_jx8mq")]

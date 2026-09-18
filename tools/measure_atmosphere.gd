@@ -161,7 +161,7 @@ func _report() -> void:
 	print("observer          %.1f %.1f (%s)" % [
 		world.world.observer_x, world.world.observer_z, world.world.observer_biome(),
 	])
-	print("chunks loaded     %d" % (world.world.terrain_streamer.loaded_keys() as Array).size())
+	print("patches loaded    %d" % (world.world.scatter_streamer.loaded_keys() as Array).size())
 	print("ticks run         %d (has to be small: the world is held still)"
 		% world.world.tick)
 	print("motes drawn       %d of %d pooled" % [motes.y, motes.x])

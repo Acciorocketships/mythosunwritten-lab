@@ -372,16 +372,16 @@ func _the_world_goes_on_while_a_fight_is_on() -> void:
 		fingerprints[world.digest()] = true
 		if world.combat.fight != null:
 			if built_at_the_snap < 0:
-				built_at_the_snap = world.terrain_streamer.chunks_built
+				built_at_the_snap = world.scatter_streamer.patches_built
 			fighting_ticks += 1
-			chunks.append(world.terrain_streamer.loaded_count())
-			built_at_the_end = world.terrain_streamer.chunks_built
+			chunks.append(world.scatter_streamer.loaded_count())
+			built_at_the_end = world.scatter_streamer.patches_built
 	check(fighting_ticks >= 4, "the fight should span several ticks, spanned %d"
 		% fighting_ticks)
 	equal(fingerprints.size(), TICKS,
 		"every tick of the world, fight or no fight, should be a new state")
 	check(built_at_the_end > built_at_the_snap,
-		"the terrain should still be streaming during the fight (%d -> %d chunks built)"
+		"the dressing should still be streaming during the fight (%d -> %d patches built)"
 		% [built_at_the_snap, built_at_the_end])
 	check(chunks.size() > 0 and chunks[0] > 0, "and ground should stay loaded throughout")
 

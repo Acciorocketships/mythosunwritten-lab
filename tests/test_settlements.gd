@@ -692,40 +692,46 @@ func _a_village_straddling_a_chunk_border_is_the_same_either_way_round(
 	var first: Vector2i = straddling["first"]
 	var second: Vector2i = straddling["second"]
 
-	# Two independent stacks for the same seed, each meshing the two chunks in
-	# the opposite order to the other.
-	var ahead := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	# Two independent stacks for the same seed, each dressing the two patches in
+	# the opposite order to the other. The ground under a village is meshed by
+	# the adopted base now; what this project still builds per patch is the
+	# dressing, and the claim -- that what is built for a patch does not depend
+	# on what was built before it -- is the same claim on the layer that is
+	# still here.
+	var ahead_terrain := TerrainQuery.for_seed(SEED)
+	var ahead := DecorationScatter.new(ahead_terrain)
 	var ahead_first := ahead.build(first.x, first.y)
 	var ahead_second := ahead.build(second.x, second.y)
-	var behind := SimTerrainChunkMesher.new(TerrainQuery.for_seed(SEED))
+	var behind_terrain := TerrainQuery.for_seed(SEED)
+	var behind := DecorationScatter.new(behind_terrain)
 	var behind_second := behind.build(second.x, second.y)
 	var behind_first := behind.build(first.x, first.y)
 
 	equal(behind_first.digest(), ahead_first.digest(),
-		"chunk (%d, %d) under the village at (%.1f, %.1f) came out differently "
+		"patch (%d, %d) under the village at (%.1f, %.1f) came out differently "
 		% [first.x, first.y, site.centre_x, site.centre_z]
 		+ "when its neighbour was built first")
 	equal(behind_second.digest(), ahead_second.digest(),
-		"chunk (%d, %d) under the same village came out differently when it was "
+		"patch (%d, %d) under the same village came out differently when it was "
 		% [second.x, second.y]
 		+ "built first")
 
 	# And the village behind both of them is the same village either way.
 	equal(
-		behind.terrain.settlement_field.settlement_in_cell(site.cell).digest(),
-		ahead.terrain.settlement_field.settlement_in_cell(site.cell).digest(),
+		behind_terrain.settlement_field.settlement_in_cell(site.cell).digest(),
+		ahead_terrain.settlement_field.settlement_in_cell(site.cell).digest(),
 		"the village straddling the border is not the same village either way round")
 
-	# The two chunks really do share the village: it reaches into both.
+	# The two patches really do share the village: it reaches into both.
 	check(_village_reaches_chunk(site, first) and _village_reaches_chunk(site, second),
-		"the two chunks chosen do not both hold part of the village")
+		"the two patches chosen do not both hold part of the village")
 
 
 ## A village whose levelled ground reaches into two neighbouring chunks, with
 ## those two chunks. Empty when there is none, which the caller reports.
 func _straddling_village(villages: Array[Settlement]) -> Dictionary:
 	for site in villages:
-		var here := SimTerrainChunkMesher.chunk_at(site.centre_x, site.centre_z)
+		var here := ScatterPatch.patch_at(site.centre_x, site.centre_z)
 		var west := Vector2i(here.x - 1, here.y)
 		if _village_reaches_chunk(site, here) and _village_reaches_chunk(site, west):
 			return {"site": site, "first": here, "second": west}
@@ -734,7 +740,7 @@ func _straddling_village(villages: Array[Settlement]) -> Dictionary:
 
 ## Whether any of a village's levelled ground falls inside a chunk.
 func _village_reaches_chunk(site: Settlement, key: Vector2i) -> bool:
-	return SimTerrainChunkMesher.distance_to_chunk(key, site.centre_x, site.centre_z) \
+	return ScatterPatch.distance_to_patch(key, site.centre_x, site.centre_z) \
 		< site.core_radius
 
 

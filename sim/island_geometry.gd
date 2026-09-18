@@ -1,13 +1,20 @@
 extends RefCounted
-## The geometry of one chunk of ground: plain numbers, no engine objects.
+## The geometry of one floating island: plain numbers, no engine objects.
 ##
 ## The simulation produces these and never draws them. The render shell turns
 ## one into something the graphics card understands; a headless run just hashes
 ## it. Keeping the geometry as arrays of floats is what lets both do that from
 ## exactly the same generation code.
-class_name TerrainChunkGeometry
+##
+## It used to be the ground's as well, under the name `IslandGeometry`.
+## The ground is the adopted base's now -- meshed by its own
+## `TerrainChunkMesher` inside its own streamer, in the render layer -- and the
+## aerial layer is the one piece of ground this project still generates, because
+## the base has no aerial layer to build one on. So this is the islands' and
+## says so.
+class_name IslandGeometry
 
-## Which chunk this is, in chunk coordinates (not world units).
+## Which island cell this is, in island-cell coordinates (not world units).
 var chunk_x: int = 0
 var chunk_z: int = 0
 
@@ -54,8 +61,8 @@ func triangle_count() -> int:
 ## This is how the ground reaches a viewer: cheap enough to pay once per chunk
 ## (about a microsecond against the ~790 microseconds of building the chunk in
 ## the first place) and paid only when a chunk is first handed out.
-func detached_copy() -> TerrainChunkGeometry:
-	var copy := TerrainChunkGeometry.new(chunk_x, chunk_z)
+func detached_copy() -> IslandGeometry:
+	var copy := IslandGeometry.new(chunk_x, chunk_z)
 	copy.vertices = vertices.duplicate()
 	copy.normals = normals.duplicate()
 	copy.colors = colors.duplicate()

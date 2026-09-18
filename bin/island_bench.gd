@@ -178,7 +178,7 @@ func _time_dressing(seed_value: int) -> void:
 	# out of holds a known number of chunks, and the dressing of everything in
 	# it is spread over them.
 	var span := float(BUILD_CELLS) * IslandField.AERIAL_CELL
-	var chunk_size := SimTerrainChunkMesher.CHUNK_SIZE
+	var chunk_size := ScatterPatch.PATCH_SIZE
 	var chunks := (span * span) / (chunk_size * chunk_size)
 	print(("bench cover-streamed span=%.0f chunks=%.0f islands_per_chunk=%.4f "
 		+ "usec_per_chunk=%.2f") % [

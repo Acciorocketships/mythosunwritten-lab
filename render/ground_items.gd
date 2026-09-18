@@ -78,7 +78,7 @@ const GOLDEN_ANGLE := 2.39996322972865332
 ##
 ## Three quarters of a unit, which is chosen against the *grass* rather than
 ## against the models: a tuft stands between 0.36 and 0.78 units
-## (`GrassLayer.HEIGHT_MIN`/`HEIGHT_MAX`), and loot smaller than that is loot a
+## (the adopted grass layer stands about that tall), and loot smaller than that is loot a
 ## person walks past because it is inside the meadow rather than on it.
 const DRAWN_SPAN := 0.75
 

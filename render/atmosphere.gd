@@ -1,30 +1,38 @@
 extends RefCounted
-## The lighting and atmosphere stack: cool ambient against warm pinpoint light.
+## What the adopted world's own atmosphere does not do: warm pinpoint light,
+## wandering orbs, drifting motes, and the mist that pools in the low ground.
 ##
-## Everything that decides what the world is *lit* like lives here -- the key
-## light and its long soft shadows, the sky, the fog, the fill light, the bloom
-## on every warm emissive, the miniature depth of field, the warm point lights
-## on lanterns, windows, campfires and glowing toadstools, the drifting orbs of
-## the twilight pockets, and the cloud of floating motes. It is one layer with
-## one switch, which is what lets the render shell be started with `--no-atmosphere`
-## and draw the identical world with none of it.
+## The sun, the sky, the fog, the bloom, the ambient fill, the ambient occlusion
+## and the miniature depth of field are **not** here any more, and that is the
+## whole of this file's rewrite for the adopted base. They belong to the world
+## scene this shell inherits -- `AtmosphereDirector` in the base's own
+## `scripts/terrain/biome/`, hung in `scenes/world.tscn`, grading its own
+## terrain against its own biome field. Two layers cannot own one Environment,
+## and the one that ships with the world the shell draws is the one that keeps
+## it. What is left here is what theirs has no equivalent for.
 ##
-## Like the grass and the motes, all of it is in the render shell and none of it
-## is in the simulation. That is not tidiness; it is what makes "headless skips
-## the render stack" true by construction rather than by a flag. A headless
-## process never loads a single file under render/, so there is no environment,
-## no light, no bloom and no mote there to switch off. tests/test_atmosphere.gd
-## checks that from both ends: from outside, that a headless run loads none of
-## these files, and from inside, that the same seed run through the shell with
-## and without the whole stack reaches a byte-identical world.
+## Their director states its own rule for why the grade is global: "Local biome
+## mood belongs to world-space fog, vegetation and ground, so walking cannot
+## relight distant scenery." This project used to slide the sky and the fog from
+## one biome's numbers to the next as the observer crossed a border. That is
+## their call to make on their world, and it is adopted: the only per-biome
+## number this file still turns into a knob is how thick the low mist and the
+## motes are where the observer is standing, neither of which relights anything
+## in the distance.
 ##
-## None of the *values* are invented here either. The fog colour and density, the
-## sky gradient and the colour of the fill light are read every frame off the
-## blended biome profile the simulation produced for wherever the observer is
-## standing, and how thickly the motes drift is a function of two more of its
-## numbers. This file chooses which knob each one is turned into, and nothing
-## else. Walk across a biome border and the mood shifts because the simulation
-## says it does. reports/atmosphere.md is the write-up.
+## So, what this layer is: the warm point lights on lanterns, windows,
+## campfires and glowing toadstools; the slow wander of the twilight pockets'
+## orbs; the cloud of floating motes; and the ground mist, written onto the
+## adopted Environment rather than onto one of ours. It is one layer with one
+## switch, which is what lets the render shell be started with
+## `--no-atmosphere` -- and that switch now means "none of this layer", not
+## "no lighting at all": the adopted world still lights itself.
+##
+## Like the motes, all of it is in the render shell and none of it is in the
+## simulation. That is not tidiness; it is what makes "headless skips the render
+## stack" true by construction rather than by a flag. A headless process never
+## loads a single file under render/, so there is no light, no orb and no mote
+## there to switch off.
 class_name Atmosphere
 
 ## The tags whose placeholders are meant to be seen glowing, and how each one
@@ -89,61 +97,6 @@ const GLOWING_TAGS := {
 const ORB_WANDER := 0.85
 const ORB_RATE := 0.11
 
-## The key light: where the sun is, how strong it is and what colour.
-##
-## Low on purpose. At thirty-six degrees above the horizon a fir throws a shadow
-## 1.38 times its own height, which is the long raking shadow that makes a
-## diorama read as a small thing on a table rather than as a landscape at noon.
-##
-## The yaw is not free either, and it was picked from photographs rather than
-## reasoned about. At the first angle tried the shadows fell away from the
-## diorama camera and were hidden behind the things casting them -- a wide shot
-## of a village had no visible shadow anywhere in it. This is a three-quarter
-## back-light: shadows rake towards the viewer, and the faces still catch the
-## key. It is the single number that decides whether the shadows are seen at all.
-## reports/atmosphere.md has the before and after.
-const SUN_PITCH := -36.0
-const SUN_YAW := 122.0
-const SUN_ENERGY := 1.15
-const SUN_COLOR := Color(1.0, 0.92, 0.78)
-
-## How soft the shadows are: the apparent size of the sun in degrees, and how far
-## the shadow edge is blurred. The real sun is 0.53 degrees across; this is a
-## little over twice that, which turns a hard stencil edge into a penumbra that
-## widens with distance from whatever cast it. Much past this and a tree's shadow
-## stops being a shadow and becomes a smudge.
-const SUN_SOFTNESS := 1.2
-const SHADOW_BLUR := 1.2
-
-## How far shadows are cast, in world units. Well inside the streamer's own load
-## radius of 40 but not far past it: the shadow map is a fixed budget stretched
-## over whatever this covers, so every unit spent out here is resolution taken
-## from the diorama. The far-sky islands are scenery hundreds of units off and
-## shadowing them would spend the whole map on empty air.
-const SHADOW_DISTANCE := 110.0
-
-## The depth-of-field band, as fractions of how far the camera is from what it is
-## looking at. Everything much nearer than the observer and everything much
-## further away goes soft, which is the miniature look: a real lens focused this
-## close has a depth of field a few centimetres deep, and reproducing that on a
-## landscape is what makes the landscape read as a model of one.
-##
-## Fractions rather than distances because a report may move the camera closer
-## for a detail shot, and the band has to move with it or the whole frame goes
-## soft.
-const DOF_NEAR := 0.46
-const DOF_FAR := 1.80
-const DOF_TRANSITION := 1.10
-const DOF_AMOUNT := 0.06
-
-## The bloom on every warm emissive. Only genuinely bright things bloom: the
-## threshold is at white, so a lit pane, a lantern bulb, a campfire and a mote
-## all halo and a pale wall does not.
-const GLOW_INTENSITY := 0.85
-const GLOW_STRENGTH := 1.0
-const GLOW_BLOOM := 0.16
-const GLOW_THRESHOLD := 1.0
-
 ## How high above the observer the ground mist lies and how thick it is, as a
 ## multiple of the biome's own fog density.
 ##
@@ -156,22 +109,16 @@ const GLOW_THRESHOLD := 1.0
 const MIST_HEIGHT := 7.0
 const MIST_SCALE := 0.20
 
-## A gentle grade over the whole picture: a little more contrast and a little
-## more colour, which is what separates the cool ground from the warm pinpoints
-## without moving a single light.
-const GRADE_CONTRAST := 1.04
-const GRADE_SATURATION := 1.12
-
 ## How many warm point lights this layer has handed out, cumulative. Reported on
 ## the shell's stop line, which is how a test tells a run with the stack from a
 ## run without one.
 var lights_made := 0
 
+## The adopted world's Environment, handed over by `attach()`. This layer reads
+## none of it and writes exactly two numbers into it -- the height fog that is
+## the ground mist -- so that the mist is part of the same air the base's own
+## depth fog is, rather than a second fog fighting it.
 var _environment: Environment = null
-var _sky_material: ProceduralSkyMaterial = null
-var _key_light: DirectionalLight3D = null
-var _world_environment: WorldEnvironment = null
-var _camera_attributes: CameraAttributesPractical = null
 var _motes: MoteField = null
 
 # The glowing orbs on screen, as {node, anchor, phase}. Kept as its own list so
@@ -181,57 +128,37 @@ var _orbs := []
 
 
 func _init(world_seed: int) -> void:
-	_build_environment()
-	_build_key_light()
-	_camera_attributes = CameraAttributesPractical.new()
-	_camera_attributes.dof_blur_near_enabled = true
-	_camera_attributes.dof_blur_far_enabled = true
-	_camera_attributes.dof_blur_far_transition = DOF_TRANSITION
-	_camera_attributes.dof_blur_near_transition = DOF_TRANSITION
-	_camera_attributes.dof_blur_amount = DOF_AMOUNT
 	_motes = MoteField.new(world_seed)
 
 
-## Hang the whole stack off the scene. One call, because it is one layer.
-func attach(parent: Node3D) -> void:
-	parent.add_child(_world_environment)
-	parent.add_child(_key_light)
+## Hang this layer off the world the shell inherited. One call, because it is
+## one layer.
+##
+## `world_environment` is the adopted scene's own WorldEnvironment -- the node
+## `AtmosphereDirector` grades. This layer is handed it rather than building
+## one, which is the whole of the rewrite: the mist goes into the air the base
+## already lit, and switching this layer off leaves that air exactly as the
+## base set it.
+func attach(parent: Node3D, world_environment: WorldEnvironment) -> void:
+	if world_environment != null:
+		_environment = world_environment.environment
 	parent.add_child(_motes.view())
 
 
-## Focus the miniature depth of field for a camera sitting this far from what it
-## is looking at. Called once when the camera is placed, and again only if a
-## capture moves it.
-func focus_at(distance: float) -> void:
-	_camera_attributes.dof_blur_near_distance = distance * DOF_NEAR
-	_camera_attributes.dof_blur_far_distance = distance * DOF_FAR
-
-
-## The camera attributes the depth of field lives on.
-func camera_attributes() -> CameraAttributes:
-	return _camera_attributes
-
-
-## Put the biome's mood on screen.
+## Put the mist and the motes where the observer is standing.
 ##
-## Every colour here comes from the profile the simulation blended for where the
-## observer is standing; none of them is chosen in this file. Because the profile
-## is a blend rather than a lookup, crossing a border slides the fog, the sky and
-## the fill light from one biome's numbers to the next over the width of the
-## border instead of switching them.
+## Both numbers come from the profile the simulation blended for that place;
+## neither is chosen in this file. What used to be here as well -- the sky, the
+## depth fog and the fill light sliding from one biome's numbers to the next --
+## is the adopted director's now, by its own stated rule, and this keeps only
+## the two that are about the air immediately around the observer.
 func take(profile: SimBiomeProfile, observer: Vector3) -> void:
-	_sky_material.sky_top_color = profile.sky_top
-	_sky_material.sky_horizon_color = profile.sky_horizon
-	_sky_material.ground_horizon_color = profile.sky_horizon
-	_sky_material.ground_bottom_color = profile.fog_color
-	_environment.fog_light_color = profile.fog_color
-	_environment.fog_density = profile.fog_density
-	# The mist that lies in the low ground, on top of the even depth fade. Its
-	# ceiling follows the observer, so it is always the air of the place being
-	# stood in.
-	_environment.fog_height = observer.y + MIST_HEIGHT
-	_environment.fog_height_density = profile.fog_density * MIST_SCALE
-	_environment.ambient_light_color = profile.ambient_color
+	if _environment != null:
+		# The mist that lies in the low ground, on top of the base's own even
+		# depth fade. Its ceiling follows the observer, so it is always the air
+		# of the place being stood in.
+		_environment.fog_height = observer.y + MIST_HEIGHT
+		_environment.fog_height_density = profile.fog_density * MIST_SCALE
 	_motes.take(profile)
 	_motes.look_from(observer)
 
@@ -325,90 +252,19 @@ func motes() -> MoteField:
 ## RefCounted going out of scope does not take a Node with it. Without this a
 ## test run ends with a page of leaked-instance errors that would hide a real one.
 func dispose() -> void:
-	for node: Node in [_world_environment, _key_light, _motes.view()]:
+	for node: Node in [_motes.view()]:
 		if is_instance_valid(node) and node.get_parent() == null:
 			node.free()
 	_orbs.clear()
 
 
-## The engine objects the values are written into. Handed out so that a test can
-## read back what the biome profile turned into rather than take this file's word
-## for it, and so the cost measurement can switch one part of the stack off at a
-## time. Nothing in the shell writes to them.
+## The adopted Environment this layer writes the mist into, or null before
+## `attach()`. Handed out so that a test can read back what the biome profile
+## turned into rather than take this file's word for it.
 func environment() -> Environment:
 	return _environment
-
-
-func sky_material() -> ProceduralSkyMaterial:
-	return _sky_material
-
-
-func key_light() -> DirectionalLight3D:
-	return _key_light
 
 
 ## How many orbs are wandering right now.
 func orb_count() -> int:
 	return _orbs.size()
-
-
-func _build_environment() -> void:
-	_world_environment = WorldEnvironment.new()
-	_environment = Environment.new()
-	_sky_material = ProceduralSkyMaterial.new()
-	_sky_material.sky_curve = 0.25
-	_sky_material.ground_curve = 0.1
-	var sky := Sky.new()
-	sky.sky_material = _sky_material
-	_environment.background_mode = Environment.BG_SKY
-	_environment.sky = sky
-	# The fill light is a colour, not the sky. That is the whole point of it: an
-	# ambient taken from the sky would pour blue into every shadow and turn
-	# shadowed stone into shadowed slate, and the profiles carry a warm-neutral
-	# colour instead so that stone in shade still reads as stone.
-	_environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	_environment.ambient_light_energy = 0.7
-	_environment.fog_enabled = true
-	_environment.fog_sky_affect = 0.4
-	_environment.fog_aerial_perspective = 0.2
-
-	# Bloom on every warm emissive. The lower levels are where a lantern's tight
-	# halo comes from and the higher ones are the wide soft wash around a lit
-	# village; weighting the middle gives a glow that reads at both scales
-	# without smearing the whole frame.
-	_environment.glow_enabled = true
-	_environment.glow_intensity = GLOW_INTENSITY
-	_environment.glow_strength = GLOW_STRENGTH
-	_environment.glow_bloom = GLOW_BLOOM
-	_environment.glow_blend_mode = Environment.GLOW_BLEND_MODE_ADDITIVE
-	_environment.glow_hdr_threshold = GLOW_THRESHOLD
-	_environment.set_glow_level(1, 0.2)
-	_environment.set_glow_level(2, 0.7)
-	_environment.set_glow_level(3, 1.0)
-	_environment.set_glow_level(4, 0.7)
-	_environment.set_glow_level(5, 0.3)
-
-	_environment.adjustment_enabled = true
-	_environment.adjustment_contrast = GRADE_CONTRAST
-	_environment.adjustment_saturation = GRADE_SATURATION
-
-	_world_environment.environment = _environment
-
-
-func _build_key_light() -> void:
-	_key_light = DirectionalLight3D.new()
-	_key_light.name = "key_light"
-	_key_light.rotation_degrees = Vector3(SUN_PITCH, SUN_YAW, 0.0)
-	_key_light.light_energy = SUN_ENERGY
-	_key_light.light_color = SUN_COLOR
-	_key_light.light_angular_distance = SUN_SOFTNESS
-	_key_light.shadow_enabled = true
-	_key_light.shadow_blur = SHADOW_BLUR
-	_key_light.directional_shadow_max_distance = SHADOW_DISTANCE
-	# The normal bias pushes the depth comparison along the surface normal, and at
-	# a low sun that shrinks every shadow by roughly bias / tan(elevation) -- at
-	# thirty-six degrees the 2.0 inherited from the old high-sun setup ate 2.8
-	# world units off every edge, which erases a tree's shadow entirely. These are
-	# the smallest values that still keep the ground from shadow-fighting itself.
-	_key_light.shadow_normal_bias = 0.7
-	_key_light.shadow_bias = 0.035

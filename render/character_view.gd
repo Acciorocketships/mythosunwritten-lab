@@ -1,6 +1,25 @@
-extends Node3D
-## One character on screen: a model, the machinery that animates it, and one
-## rule that turns the simulation's state into a clip.
+extends "res://characters/character.gd"
+## One character on screen: the adopted base's own rigged character, wearing one
+## of this game's models, with one rule that turns the simulation's state into a
+## clip.
+##
+## **The scene is theirs.** `render/character.tscn` is an *inherited* scene whose
+## parent is `res://characters/character.tscn`, the character the adopted base
+## ships, and this script extends `res://characters/character.gd`. The body, its
+## collision capsule and ground ray, the `Body` mount a model hangs under, the
+## `AnimationPlayer` and `AnimationTree` above it, the two hand sockets and the
+## spine socket with its hitbox -- all of that is the base's, at the base's own
+## node paths, and this file wires into it rather than rebuilding it.
+##
+## **One thing of theirs is deliberately switched off, and this is the reason.**
+## Their `_physics_process` is a walk: it reads a `CharacterController`, applies
+## gravity, accelerates, turns, steps up ledges, swims, and calls
+## `move_and_slide`. In this game nothing on screen decides where a character
+## is. The simulation does -- that is the whole premise of the project, and the
+## render layer is forbidden from holding any of it -- so this view turns the
+## physics process off in `_ready` and is placed, tick by tick, at the position
+## the snapshot reports. What is kept from their body is everything that is
+## *about the character* rather than about who moves it.
 ##
 ## This is the render half of section 3.3's first tier. It holds no simulation
 ## state of any kind -- not a position it remembers, not a clip it was playing
@@ -36,9 +55,9 @@ extends Node3D
 ## frames; what a socket holds is read off the socket itself.
 class_name CharacterView
 
-## The scene this class is the script of. Whoever wants a character instantiates
-## this rather than building the nodes by hand, so there is exactly one place the
-## structure is written down.
+## The scene this class is the script of: the adopted character scene, inherited.
+## Whoever wants a character instantiates this rather than building the nodes by
+## hand, so there is exactly one place the structure is written down.
 const SCENE := "res://render/character.tscn"
 
 # --- The clips -----------------------------------------------------------
@@ -123,15 +142,20 @@ const BLEND_CHASE := 6.0
 ## How long a one-off clip takes to fade in and out over the locomotion under it.
 const SHOT_FADE := 0.15
 
-## The bones the two sockets follow. Part of the shared 23-bone rig, which is why
-## the same two names work on a knight and on a skeleton alike.
-const SOCKET_BONES := {"HandLeft": "handslot.l", "HandRight": "handslot.r"}
+## The bones the two sockets follow, by the node path the adopted character
+## scene hangs each socket at. Part of the shared 23-bone rig, which is why the
+## same two bone names work on a knight and on a skeleton alike -- and the paths
+## are `Hands/LeftHand` and `Hands/RightHand` because that is where the base's
+## own scene put them, not because this file chose the names.
+const SOCKET_BONES := {
+	"Hands/LeftHand": "handslot.l", "Hands/RightHand": "handslot.r",
+}
 
 ## The two sockets by the hand they are: a weapon goes in the right hand and a
 ## shield on the left arm, which is a fact about how people hold things and so
 ## about the picture, decided here and never in the simulation.
-const LEFT_HAND := "HandLeft"
-const RIGHT_HAND := "HandRight"
+const LEFT_HAND := "Hands/LeftHand"
+const RIGHT_HAND := "Hands/RightHand"
 
 ## The catalog names that are a shield rather than a weapon, and so hang on the
 ## left. One name today; a second shield model would be one more entry.
@@ -190,9 +214,11 @@ var _locomotion: AnimationNodeBlendSpace1D = null
 var _shot_clip: AnimationNodeAnimation = null
 var _death_clip: AnimationNodeAnimation = null
 
-# The model currently mounted, and the skeleton inside it the sockets follow.
+# The model currently mounted. The skeleton inside it the sockets follow is the
+# base's own `skeleton` member, set here rather than by their
+# `_cache_body_and_skeleton` -- same name, same meaning, filled in by whichever
+# of the two mounted the model.
 var _model: Node3D = null
-var _skeleton: Skeleton3D = null
 
 # What the view is showing, so that a one-off is fired on the tick it starts
 # rather than re-fired on every frame it is still running. This is a fact about
@@ -315,6 +341,11 @@ static func facing_for_heading(heading: float) -> Vector3:
 
 
 func _ready() -> void:
+	# Their walk, off. See the note at the top of this file: in this game the
+	# simulation says where every character is, so a body that also moved itself
+	# would be two answers to one question. Everything else their scene gives --
+	# the rig, the sockets, the capsule, the mixers -- is used as it stands.
+	set_physics_process(false)
 	_wire()
 
 
@@ -328,9 +359,16 @@ func _ready() -> void:
 func _wire() -> void:
 	if _tree != null:
 		return
-	_mount = get_node("Model") as Node3D
+	_mount = get_node("Body") as Node3D
 	_player = get_node("AnimationPlayer") as AnimationPlayer
 	_tree = get_node("AnimationTree") as AnimationTree
+	# Their scene mounts four adventurers under `Body` and shows one of them.
+	# This game chooses a model by tag out of the asset table -- which reaches
+	# further than their four, to the skeletons and the minions -- so the mount
+	# starts empty and `_mount_model` fills it.
+	for standing in _mount.get_children():
+		_mount.remove_child(standing)
+		standing.queue_free()
 	_build_tree()
 	_tree.active = true
 	# A model may have been asked for before this ran, in which case the mount
@@ -421,11 +459,6 @@ func shown_clip() -> String:
 ## The model currently mounted, or null. For a test that wants to look inside.
 func model() -> Node3D:
 	return _model
-
-
-## The skeleton the sockets are following, or null.
-func skeleton() -> Skeleton3D:
-	return _skeleton
 
 
 ## The catalog name mounted in a socket right now, or "" for an empty hand.
@@ -550,7 +583,7 @@ func _mount_model(tag: String) -> void:
 		_mount.remove_child(_model)
 		_model.queue_free()
 		_model = null
-		_skeleton = null
+		skeleton = null
 
 	var built := AssetLibrary.build(tag)
 	if built == null:
@@ -586,16 +619,16 @@ func _mount_model(tag: String) -> void:
 			if shared != null:
 				mixer.add_animation_library("", shared)
 
-	_skeleton = _find_skeleton(_model)
+	skeleton = _find_skeleton(_model)
 	for socket_name in SOCKET_BONES:
 		var socket := get_node_or_null(NodePath(socket_name)) as BoneAttachment3D
 		if socket == null:
 			continue
-		if _skeleton == null:
+		if skeleton == null:
 			socket.set_use_external_skeleton(false)
 			continue
 		socket.set_use_external_skeleton(true)
-		socket.set_external_skeleton(socket.get_path_to(_skeleton))
+		socket.set_external_skeleton(socket.get_path_to(skeleton))
 		socket.bone_name = SOCKET_BONES[socket_name]
 
 	# The tree is re-activated rather than rebuilt: its graph, its blend position

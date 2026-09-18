@@ -11,11 +11,13 @@ extends TestSuite
 ## that built the neighbourhood first, and from two separate runs of the headless
 ## command, and insists on one answer.
 ##
-## The second half is about the sheet the water is drawn as: that it is one
-## surface on a lattice fixed to the world rather than a tile per chunk, that
-## two overlapping windows onto it agree exactly where they overlap -- which is
-## the seamlessness, stated as arithmetic rather than as a look -- and that what
-## a viewer is handed is a copy it cannot edit the world through.
+## There used to be a second half, about the sheet this project drew the water
+## as. There is no such sheet any more: the water on the screen is the adopted
+## base's own, planned by `WaterPlan` and laid by `WaterSurfaceBuilder` inside
+## its streamer, and the base's suites (`tests/test_water_plan.gd`,
+## `tests/test_water_skin.gd` and their neighbours) answer for it. What this
+## suite keeps is the claim every layer above leans on, which was always about
+## the field and never about the surface drawn over it.
 class_name TestWater
 
 const SEED := 20250825
@@ -41,8 +43,6 @@ func run() -> void:
 	_the_carving_reaches_the_ground()
 	_banks_are_the_dry_edge_of_the_water()
 	_water_is_impassable_ground()
-	_the_sheet_is_one_world_lattice_not_a_tile_per_chunk()
-	_the_sheet_handed_to_a_viewer_cannot_reach_the_world()
 	_water_matches_across_processes()
 
 
@@ -103,11 +103,10 @@ func _being_water_is_a_pure_function_of_the_position() -> void:
 
 
 func _water_ignores_chunk_build_order() -> void:
-	# The point of the layer is that nothing about generation order reaches it.
-	# A mesher that has built the whole neighbourhood must answer exactly as one
-	# that has built nothing.
+	# The point of the layer is that nothing about how much has been asked for
+	# reaches it. A query that has been walked over the whole neighbourhood must
+	# answer exactly as one that has been asked nothing.
 	var busy := TerrainQuery.for_seed(RIVER_SEED)
-	var mesher := SimTerrainChunkMesher.new(busy)
 	var fresh := TerrainQuery.for_seed(RIVER_SEED)
 	var probes := _probe_positions()
 
@@ -117,12 +116,15 @@ func _water_ignores_chunk_build_order() -> void:
 
 	for chunk_x in range(-4, 5):
 		for chunk_z in range(4, -5, -1):
-			mesher.build(chunk_x, chunk_z)
+			var middle_x := (float(chunk_x) + 0.5) * ScatterPatch.PATCH_SIZE
+			var middle_z := (float(chunk_z) + 0.5) * ScatterPatch.PATCH_SIZE
+			busy.ground_at(middle_x, middle_z)
 
 	for index in probes.size():
 		var probe: Vector2 = probes[index]
 		equal(busy.water_depth_at(probe.x, probe.y), before[index],
-			"building forty chunks changed the water at (%f, %f)" % [probe.x, probe.y])
+			"asking about forty patches changed the water at (%f, %f)"
+			% [probe.x, probe.y])
 		equal(busy.water_depth_at(probe.x, probe.y), fresh.water_depth_at(probe.x, probe.y),
 			"a query that had built chunks disagreed with a fresh one at (%f, %f)"
 			% [probe.x, probe.y])
@@ -260,125 +262,6 @@ func _water_is_impassable_ground() -> void:
 			% [probe.x, probe.y])
 
 
-func _the_sheet_is_one_world_lattice_not_a_tile_per_chunk() -> void:
-	var terrain := TerrainQuery.for_seed(RIVER_SEED)
-	var builder := WaterSheetBuilder.new(terrain)
-
-	# One sheet spans many chunks. If the water were tiled per chunk this could
-	# not be true of a single build.
-	var sheet := builder.build(Vector2.ZERO)
-	var span_in_chunks := (sheet.max_x - sheet.min_x) / SimTerrainChunkMesher.CHUNK_SIZE
-	check(span_in_chunks >= 4.0,
-		"one sheet spans %f chunks, which is not enough to be a sheet" % span_in_chunks)
-	check(sheet.wet_cells > 0,
-		"expected water in the sheet at the origin of seed %d" % RIVER_SEED)
-
-	# Two windows that overlap agree exactly about every corner in the overlap.
-	# This is the seam: if the sheet's corners were placed relative to the
-	# window, or its heights derived from anything the window knows, a corner in
-	# both would land in two places, and where two such sheets met there would
-	# be a visible crease. They are placed on a lattice fixed to the world
-	# instead, so the same world position is the same vertex in both.
-	var moved := builder.build(Vector2(WaterSheetBuilder.WINDOW_STEP * 2.0, 0.0))
-	var shared := _shared_vertices(sheet, moved)
-	check(shared.size() > 200,
-		"the two windows only shared %d vertices, so the comparison is weak"
-		% shared.size())
-	for entry in shared:
-		equal(entry["b"], entry["a"],
-			"two windows placed the corner at %s at different heights"
-			% entry["at"])
-
-	# The corners sit on the world's lattice, not on a chunk's grid.
-	for vertex in sheet.vertices:
-		var on_lattice_x := absf(fmod(vertex.x, WaterSheetBuilder.CELL_SIZE)) < 0.0001
-		var on_lattice_z := absf(fmod(vertex.z, WaterSheetBuilder.CELL_SIZE)) < 0.0001
-		check(on_lattice_x and on_lattice_z,
-			"a sheet corner at (%f, %f) is off the world lattice" % [vertex.x, vertex.z])
-		break
-
-	# Rebuilding the same window is the same sheet, in either order.
-	equal(builder.build(Vector2.ZERO).digest(), sheet.digest(),
-		"rebuilding the sheet for the same window produced different water")
-	var other_builder := WaterSheetBuilder.new(TerrainQuery.for_seed(RIVER_SEED))
-	equal(other_builder.build(Vector2.ZERO).digest(), sheet.digest(),
-		"a fresh builder for the same seed produced different water")
-
-	# Every wet corner's height really is the water surface there, so the sheet
-	# is a picture of the field rather than a second opinion about it.
-	for i in mini(sheet.vertices.size(), 400):
-		var vertex := sheet.vertices[i]
-		var expected := maxf(
-			terrain.water_surface_at(vertex.x, vertex.z),
-			terrain.ground_height_at(vertex.x, vertex.z),
-		)
-		check(absf(vertex.y - expected) < 0.0005,
-			"a sheet corner at (%f, %f) sits at %f, not at the water's %f"
-			% [vertex.x, vertex.z, vertex.y, expected])
-
-
-func _the_sheet_handed_to_a_viewer_cannot_reach_the_world() -> void:
-	var world := SimWorld.new(RIVER_SEED)
-	var before := world.digest()
-	var live := world.live_water_sheet()
-	check(live != null, "a fresh world should have its water built")
-	if live == null:
-		return
-
-	# First: a write into the water the world is holding must show up in its
-	# fingerprint. Without this, the check that follows would pass for the wrong
-	# reason -- "the digest did not move" would be indistinguishable from "the
-	# digest never notices water at all".
-	check(live.vertices.size() > 0,
-		"expected water at the origin of seed %d for this check" % RIVER_SEED)
-	if live.vertices.size() == 0:
-		return
-	var original: Vector3 = live.vertices[0]
-	live.vertices[0] = original + Vector3(0.0, 0.001, 0.0)
-	not_equal(world.digest(), before,
-		"a write into the world's own water left its fingerprint unchanged")
-	live.vertices[0] = original
-	equal(world.digest(), before, "undoing the write did not restore the fingerprint")
-
-	# Then: what a viewer is handed is a copy, so the same write through it
-	# reaches nothing.
-	var handle := world.water_sheet()
-	equal(handle.digest(), live.digest(),
-		"the handed-out sheet is not the same water as the world's")
-	handle.vertices[0] = original + Vector3(0.0, 5.0, 0.0)
-	handle.colors[0] = Color(1.0, 0.0, 1.0, 1.0)
-	equal(world.digest(), before,
-		"writing into the handed-out water sheet changed the world")
-	equal(world.live_water_sheet().digest(), live.digest(),
-		"writing into the handed-out water sheet changed the world's own sheet")
-
-	# And the fingerprint reads the world's water rather than a copy of it,
-	# which is what the counter is for.
-	var handed_before := world.water_sheets_handed_out
-	world.digest()
-	equal(world.water_sheets_handed_out, handed_before,
-		"fingerprinting the world copied the water sheet")
-
-	# The sheet is rebuilt when the window moves and not before, so a viewer
-	# that watches the version number is not copying it every tick.
-	#
-	# The view is walked by hand rather than left to whichever way the world's
-	# own characters wander: this seed has a river across its origin, so a walker
-	# there spends its time being refused by the water, and what is being checked
-	# is the window and not anybody's choice of direction.
-	var version := world.water_sheet_version
-	var walked := Vector2(world.observer_x, world.observer_z)
-	walked.x += WALK_STEP
-	world.place_observer(walked.x, walked.y)
-	equal(world.water_sheet_version, version,
-		"one step of walking rebuilt the water sheet")
-	for i in 200:
-		walked.x += WALK_STEP
-		world.place_observer(walked.x, walked.y)
-	check(world.water_sheet_version > version,
-		"two hundred steps of walking never rebuilt the water sheet")
-
-
 func _water_matches_across_processes() -> void:
 	# The claim is about separate runs, so this really runs the headless command
 	# twice, in two fresh processes, and asks each for its water map.
@@ -426,22 +309,6 @@ func _probe_positions() -> Array[Vector2]:
 		Vector2(-1024.0, 512.0), Vector2(3.125, 3.125), Vector2(-0.5, -0.5),
 		Vector2(16.0, 16.0), Vector2(-33.0, 47.0), Vector2(101.75, -88.5),
 	]
-
-
-## Every vertex position two sheets both carry, with each sheet's height for it.
-func _shared_vertices(a: WaterSheet, b: WaterSheet) -> Array[Dictionary]:
-	var from_a := {}
-	for vertex in a.vertices:
-		from_a["%.3f,%.3f" % [vertex.x, vertex.z]] = vertex.y
-	var shared: Array[Dictionary] = []
-	var seen := {}
-	for vertex in b.vertices:
-		var at := "%.3f,%.3f" % [vertex.x, vertex.z]
-		if not from_a.has(at) or seen.has(at):
-			continue
-		seen[at] = true
-		shared.append({"at": at, "a": from_a[at], "b": vertex.y})
-	return shared
 
 
 func _run_headless_water(seed_value: int) -> Dictionary:

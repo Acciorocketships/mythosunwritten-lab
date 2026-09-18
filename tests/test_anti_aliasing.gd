@@ -32,7 +32,6 @@ func run() -> void:
 	_the_noise_number_falls_when_the_same_picture_is_resolved_more_finely()
 	_a_region_outside_the_picture_is_refused_rather_than_guessed()
 	_the_shell_draws_with_the_project_mode_and_with_the_one_a_capture_names()
-	_the_water_mirror_takes_the_filter_and_refuses_the_sampling()
 	_headless_loads_no_part_of_the_render_layer_including_this_setting()
 
 
@@ -162,32 +161,6 @@ func _the_shell_draws_with_the_project_mode_and_with_the_one_a_capture_names() -
 		"--aa off did not reach the viewport")
 	not_equal(project_mode, "off",
 		"the two runs above would not differ, so the check shows nothing")
-
-
-## The mirror under the water takes the screen-space filter and refuses the
-## multi-sampling, which is a measured split rather than a tidy one: priced on
-## the pond beat, FXAA inside the mirror is 17% of the reflection's noise for
-## 0.6% of the frame, and multi-sampling it as well is a further 5% for half a
-## frame again (reports/grass.md section 9.6). Both halves are pinned here so
-## that neither drifts into matching the main viewport by tidiness.
-func _the_water_mirror_takes_the_filter_and_refuses_the_sampling() -> void:
-	var host := Node.new()
-	var mirror := WaterReflection.new()
-	mirror.attach(host)
-	var viewport := host.get_node_or_null("water_reflection") as SubViewport
-	check(viewport != null, "the reflection did not hang a viewport on the shell")
-	if viewport != null:
-		equal(AntiAliasing.of(viewport), "fxaa",
-			"the water's mirror is not drawing with the filter alone; sampling " +
-			"a half-resolution image four times a pixel is spent on detail the " +
-			"ripples destroy, and it is a second whole view of the world")
-		equal(viewport.msaa_3d, Viewport.MSAA_DISABLED,
-			"the mirror is multi-sampling, which is the expensive half")
-		equal(viewport.use_debanding, false, "the mirror should not deband either")
-		not_equal(AntiAliasing.of(viewport), AntiAliasing.from_project_settings(),
-			"the mirror is drawing with exactly what the main viewport does, so " +
-			"nothing here is checking that it makes its own choice")
-	host.free()
 
 
 ## A headless process has no viewport to set any of this on, and never loads the

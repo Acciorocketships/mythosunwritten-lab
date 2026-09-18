@@ -12,6 +12,12 @@ extends Node
 @export var act_orbit_left := "camera_left"       # bind to E
 @export var act_orbit_right := "camera_right"     # bind to Q
 
+# How far above the target the camera aims. Zero looks straight at the body,
+# which is this camera's own default and right for a third-person action view.
+# The diorama shell lifts it so the horizon and the sky are in frame over the
+# character's head rather than cropped away above it.
+@export var aim_lift: float = 0.0
+
 # Follow behavior
 @export var ema_alpha: float = 0.1 # when strafe ratio is close to 0, increasing this makes it "snappier"
 @export var strafe_ratio: float = 0.8 	# if 0, camera moves behind direction of motion. if 1, camera moves to keep same angle
@@ -36,6 +42,18 @@ var _last_back_dir := Vector3.ZERO
 var _obstruction: CameraObstructionSolver
 var _pivot_height := -1.0
 var _boom_was_obstructed := false
+# Set by snap(): the next framing pass places the camera at the pose it is
+# easing towards instead of easing into it. A capture that holds one frame has
+# no later frames to converge over, so it asks for the settled pose directly.
+var _snap := false
+
+
+## Place the camera at its settled pose on the next framing pass, with no easing.
+func snap() -> void:
+	_snap = true
+	_have_prev = false
+	_v_ema = Vector3.ZERO
+	_pivot_height = -1.0
 
 func _ready() -> void:
 	if camera == null:
@@ -109,9 +127,11 @@ func _physics_process(delta: float) -> void:
 	var alpha := 1.0 - exp(-gain * delta)
 	if _boom_was_obstructed:
 		alpha = maxf(alpha, 1.0 - exp(-boom_release_speed * delta))
+	if _snap:
+		alpha = 1.0
 	var lerped := camera.global_position.lerp(desired, alpha)
 	var step := lerped - camera.global_position
-	var max_step := max_speed * delta
+	var max_step := INF if _snap else max_speed * delta
 	new_pos = camera.global_position + step.limit_length(max_step) if step.length() > max_step else lerped
 
 	# --- snap to circle (radius & height) ---
@@ -134,5 +154,7 @@ func _physics_process(delta: float) -> void:
 	_boom_was_obstructed = resolved.distance_squared_to(unconstrained) > 0.000001
 	camera.global_position = resolved
 
+	_snap = false
+
 	# --- always look at the target ---
-	camera.look_at(pos, Vector3.UP)
+	camera.look_at(pos + Vector3.UP * aim_lift, Vector3.UP)

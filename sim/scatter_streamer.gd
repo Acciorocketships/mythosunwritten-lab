@@ -2,13 +2,12 @@ extends RefCounted
 ## Keeps the dressing of the chunks near the observers built, and forgets the
 ## rest.
 ##
-## The same rule, on the same lattice and with the same two radii, as the ground
-## streamer next door: what is near somebody exists, what is far from everybody
-## does not, and the radii differ so walking back and forth across the boundary
-## does not rebuild anything. It is a streamer of its own rather than a field on
-## the terrain streamer because a chunk's ground and a chunk's dressing are
-## separate pieces of work -- the ground is meshed, the dressing is a list of
-## placed things -- and the render layer draws them through different machinery.
+## One rule: what is near somebody exists, what is far from everybody does not,
+## and the two radii differ so walking back and forth across the boundary does
+## not rebuild anything. The lattice and the radii are `ScatterPatch`'s -- they
+## used to be the retired ground streamer's, and they moved to the thing they
+## divide up when the ground on screen became the adopted base's, which streams
+## itself on a far coarser lattice of its own.
 ##
 ## Nothing here needs anything to be built in any particular order, because a
 ## patch is a pure function of its chunk coordinate and the seed. A patch dropped
@@ -16,11 +15,10 @@ extends RefCounted
 ## reload test asserts.
 class_name ScatterStreamer
 
-## Dressing is loaded and dropped with the ground it stands on, so both radii are
-## the ground streamer's. A chunk with grass but no ferns, or ferns hanging in
-## the air where the ground has been dropped, would both be visible mistakes.
-const LOAD_RADIUS := TerrainStreamer.LOAD_RADIUS
-const UNLOAD_RADIUS := TerrainStreamer.UNLOAD_RADIUS
+## The patch lattice's own radii, unchanged from the ones the dressing was
+## streamed by when it was loaded with the ground it stands on.
+const LOAD_RADIUS := ScatterPatch.LOAD_RADIUS
+const UNLOAD_RADIUS := ScatterPatch.UNLOAD_RADIUS
 
 ## Where the dressing comes from.
 var scatter: DecorationScatter = null
@@ -29,8 +27,7 @@ var scatter: DecorationScatter = null
 ## Diagnostic only -- nothing in the world's state depends on it.
 var patches_built: int = 0
 
-## How many detached copies have been handed out, the same diagnostic the ground
-## streamer keeps for chunks.
+## How many detached copies have been handed out. Diagnostic only.
 var handles_handed_out: int = 0
 
 # Vector2i chunk -> ScatterPatch.
@@ -97,14 +94,14 @@ func live_patch(key: Vector2i) -> ScatterPatch:
 
 
 func _load_around(observer: Vector2) -> void:
-	var reach := int(ceil(LOAD_RADIUS / SimTerrainChunkMesher.CHUNK_SIZE)) + 1
-	var here := SimTerrainChunkMesher.chunk_at(observer.x, observer.y)
+	var reach := int(ceil(LOAD_RADIUS / ScatterPatch.PATCH_SIZE)) + 1
+	var here := ScatterPatch.patch_at(observer.x, observer.y)
 	for offset_x in range(-reach, reach + 1):
 		for offset_z in range(-reach, reach + 1):
 			var key := Vector2i(here.x + offset_x, here.y + offset_z)
 			if _loaded.has(key):
 				continue
-			if SimTerrainChunkMesher.distance_to_chunk(key, observer.x, observer.y) > LOAD_RADIUS:
+			if ScatterPatch.distance_to_patch(key, observer.x, observer.y) > LOAD_RADIUS:
 				continue
 			_loaded[key] = scatter.build(key.x, key.y)
 			patches_built += 1
@@ -115,7 +112,7 @@ func _unload_far_from(observers: Array[Vector2]) -> void:
 	for key in _loaded:
 		var nearest := INF
 		for observer in observers:
-			nearest = minf(nearest, SimTerrainChunkMesher.distance_to_chunk(
+			nearest = minf(nearest, ScatterPatch.distance_to_patch(
 				key, observer.x, observer.y
 			))
 		if nearest > UNLOAD_RADIUS:

@@ -54,8 +54,8 @@ const WORLD_TICKS := 20
 ## separate is for neither to be able to reach the other.
 const WORLD_CLASSES := [
 	"SimWorld", "Simulation", "TerrainQuery", "AdoptedGround",
-	"TerrainStreamer", "SimTerrainChunkMesher", "TerrainChunkGeometry",
-	"BiomeCatalog", "SimBiomeProfile", "WaterSheet",
+	"IslandGeometry", "IslandWater",
+	"BiomeCatalog", "SimBiomeProfile",
 	"IslandField", "FloatingIsland", "IslandStreamer", "SettlementField",
 	"Settlement", "SettlementStreamer", "PathNetwork", "DecorationScatter",
 	"ScatterPatch", "ScatterStreamer", "ValueNoise",

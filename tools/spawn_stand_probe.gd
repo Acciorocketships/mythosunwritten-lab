@@ -87,7 +87,7 @@ func _initialize() -> void:
 		])
 	lines.append("observer at=(%.3f, %.3f) before" % [world.observer_x, world.observer_z])
 
-	var built_before: int = world.terrain_streamer.chunks_built
+	var built_before: int = world.scatter_streamer.patches_built
 	for i in ticks:
 		sim.step()
 
@@ -98,8 +98,8 @@ func _initialize() -> void:
 	for one in world.combat.members:
 		lines.append("ended #%d at=(%.3f, %.3f, %.3f)" % [one.id, one.x, one.y, one.z])
 	lines.append("chunks built %d -> %d, loaded %d" % [
-		built_before, world.terrain_streamer.chunks_built,
-		world.terrain_streamer.loaded_count(),
+		built_before, world.scatter_streamer.patches_built,
+		world.scatter_streamer.loaded_count(),
 	])
 
 	print("\n".join(lines))

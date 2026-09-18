@@ -65,19 +65,19 @@ func _two_routes_to_the_same_ground_agree() -> void:
 	var there := Vector2(-60.0, 50.0)
 
 	var one := SimWorld.new(SEED)
-	one.terrain_streamer.update([here, there])
+	one.scatter_streamer.update([here, there])
 
 	var other := SimWorld.new(SEED)
-	other.terrain_streamer.update([there, here])
+	other.scatter_streamer.update([there, here])
 
-	# The routes have to arrive at the same ground, or comparing the two
+	# The routes have to arrive at the same loaded set, or comparing the two
 	# fingerprints would prove nothing.
-	equal(other.terrain_streamer.loaded_keys(), one.terrain_streamer.loaded_keys(),
-		"the two orderings loaded different ground, so the digests below "
+	equal(other.scatter_streamer.loaded_keys(), one.scatter_streamer.loaded_keys(),
+		"the two orderings loaded different patches, so the digests below "
 		+ "would not be comparable")
-	check(one.terrain_streamer.loaded_count() > 20,
-		"expected a substantial loaded set, got %d chunk(s)"
-		% one.terrain_streamer.loaded_count())
+	check(one.scatter_streamer.loaded_count() > 20,
+		"expected a substantial loaded set, got %d patch(es)"
+		% one.scatter_streamer.loaded_count())
 
 	equal(other.digest(), one.digest(),
 		"the same loaded ground fingerprinted differently depending on the "

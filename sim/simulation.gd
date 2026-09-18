@@ -294,10 +294,10 @@ func run(ticks: int) -> PackedStringArray:
 		var is_last := i == ticks - 1
 		if is_last or world.tick % TRACE_EVERY == 0:
 			lines.append(_trace_line())
-	lines.append("done ticks=%d chunks=%d built=%d final=%s" % [
+	lines.append("done ticks=%d patches=%d built=%d final=%s" % [
 		world.tick,
-		world.terrain_streamer.loaded_count(),
-		world.terrain_streamer.chunks_built,
+		world.scatter_streamer.loaded_count(),
+		world.scatter_streamer.patches_built,
 		world.digest(),
 	])
 	return lines
@@ -316,20 +316,6 @@ func cast_report() -> PackedStringArray:
 		lines.append("  %-7s %s%s" % [
 			ActionScene.name_of(one), one.line(),
 			"  <- followed" if one.id == world.follow_id else "",
-		])
-	return lines
-
-
-## One line per loaded chunk: its coordinate and the fingerprint of the geometry
-## the mesher produced for it, in sorted coordinate order.
-##
-## This is how a run can be compared with another run chunk by chunk rather than
-## only world by world, which is what the mesher's determinism is really about.
-func chunk_report() -> PackedStringArray:
-	var lines := PackedStringArray()
-	for key in world.terrain_streamer.loaded_keys():
-		lines.append("chunk %d %d %s" % [
-			key.x, key.y, world.terrain_streamer.live_geometry(key).digest(),
 		])
 	return lines
 
@@ -713,7 +699,7 @@ func scatter_report(
 					item["size"], item["kind"], item["context"],
 				])
 	var chunks := (2 * reach + 1) * (2 * reach + 1)
-	var area := float(chunks) * SimTerrainChunkMesher.CHUNK_SIZE * SimTerrainChunkMesher.CHUNK_SIZE
+	var area := float(chunks) * ScatterPatch.PATCH_SIZE * ScatterPatch.PATCH_SIZE
 	lines.append("scatter-summary chunks=%d placed=%d per_chunk=%.2f per_1000=%.2f" % [
 		chunks, placed, float(placed) / float(chunks), 1000.0 * float(placed) / area,
 	])
@@ -743,8 +729,8 @@ func _scatter_survey(reach: int, step: int) -> PackedStringArray:
 			kinds["%s/%s" % [id, kind]] = 0
 	for chunk_x in range(-reach, reach + 1, step):
 		for chunk_z in range(-reach, reach + 1, step):
-			var middle_x := (float(chunk_x) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
-			var middle_z := (float(chunk_z) + 0.5) * SimTerrainChunkMesher.CHUNK_SIZE
+			var middle_x := (float(chunk_x) + 0.5) * ScatterPatch.PATCH_SIZE
+			var middle_z := (float(chunk_z) + 0.5) * ScatterPatch.PATCH_SIZE
 			var biome := world.terrain.biome_at(middle_x, middle_z)
 			chunks[biome] = int(chunks[biome]) + 1
 			for item in world.scatter_field.build(chunk_x, chunk_z).items:
@@ -807,14 +793,13 @@ func biome_report(span: int = 10, spacing: float = 24.0) -> PackedStringArray:
 	return lines
 
 
-## One traced line: where the world is, how much ground and how many islands are
-## currently built, and how much of the water sheet around it is wet.
+## One traced line: where the world is, how many patches of dressing and how
+## many islands are currently built, and whether the observer is in water.
 func _trace_line() -> String:
-	var sheet := world.live_water_sheet()
-	return ("tick %d chunks=%d islands=%d villages=%d roads=%d props=%d cover=%d "
+	return ("tick %d patches=%d islands=%d villages=%d roads=%d props=%d cover=%d "
 		+ "cast=%d biome=%s water=%d on_island=%d on_path=%.2f %s") % [
 		world.tick,
-		world.terrain_streamer.loaded_count(),
+		world.scatter_streamer.loaded_count(),
 		world.island_streamer.loaded_count(),
 		world.settlement_streamer.loaded_count(),
 		world.settlement_streamer.road_count(),
@@ -822,7 +807,7 @@ func _trace_line() -> String:
 		world.island_streamer.cover_count(),
 		world.combat.size(),
 		world.observer_biome(),
-		sheet.wet_cells if sheet != null else 0,
+		1 if world.observer_in_water() else 0,
 		1 if world.observer_on_island() else 0,
 		world.observer_on_path(),
 		world.digest(),
@@ -976,7 +961,7 @@ func snap_report(
 						continue
 					clear += 1
 			var open_ground := float(clear) / cells
-			var chunk_size := SimTerrainChunkMesher.CHUNK_SIZE
+			var chunk_size := ScatterPatch.PATCH_SIZE
 			var flora := world.scatter_field.build(
 				int(floorf(x / chunk_size)), int(floorf(z / chunk_size))
 			).count()

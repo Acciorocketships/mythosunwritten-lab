@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless entry point: run the simulation for a fixed number of ticks, print
 ## the report, exit 0. No window, no renderer, no main scene.
 ##
-## Run it with:  ./run_headless.sh --seed 1234 --ticks 100 [--chunks] [--biomes]
+## Run it with:  ./run_headless.sh --seed 1234 --ticks 100 [--biomes]
 ##
 ## An ordinary run reports the world and the handful of characters living in it,
 ## with everything they chose and everything the engine answered written into the
@@ -36,7 +36,7 @@ func _initialize() -> void:
 		printerr(
 			"usage: run_headless.sh [--seed N] [--ticks N] [--start X Z]"
 			+ " [--scenario NAME] [--frozen]"
-			+ " [--chunks] [--biomes] [--water] [--islands] [--settlements]"
+			+ " [--biomes] [--water] [--islands] [--settlements]"
 			+ " [--scatter] [--enemies] [--board] [--board-at X Z]"
 			+ " [--snap] [--board-sweep]"
 			+ " [--assets] [--digest]"
@@ -67,11 +67,6 @@ func _initialize() -> void:
 		sim.world.place_observer(options["start_x"], options["start_z"])
 	for line in sim.run(options["ticks"]):
 		print(line)
-	if options["chunks"]:
-		# Every chunk still loaded at the end, with the fingerprint of the
-		# geometry the mesher built for it.
-		for line in sim.chunk_report():
-			print(line)
 	if options["biomes"]:
 		# The biome map itself, on a fixed lattice around the origin, so two
 		# runs can be compared position by position.
@@ -218,7 +213,6 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 	var options := {
 		"seed": DEFAULT_SEED,
 		"ticks": DEFAULT_TICKS,
-		"chunks": false,
 		"biomes": false,
 		"water": false,
 		"islands": false,
@@ -251,9 +245,6 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 	while i < args.size():
 		var arg := args[i]
 		match arg:
-			"--chunks":
-				options["chunks"] = true
-				i += 1
 			"--biomes":
 				options["biomes"] = true
 				i += 1
