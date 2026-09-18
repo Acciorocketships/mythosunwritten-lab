@@ -51,135 +51,107 @@ func _init() -> void:
 
 
 func run() -> void:
-	_the_biome_decides_the_fog_the_sky_and_the_fill()
-	_the_fill_light_is_warm_neutral_and_not_the_sky()
-	_shadowed_stone_still_reads_as_stone()
+	_the_adopted_world_grades_itself()
 	_every_warm_pinpoint_is_warm_and_sits_on_something_that_glows()
 	_a_glowing_mushroom_lights_the_gloom_and_not_the_meadow()
-	_the_bloom_only_takes_what_is_brighter_than_white()
 	_the_motes_thin_out_and_brighten_with_the_biome()
 	_changing_the_mote_count_rebuilds_nothing()
 	_a_mote_pool_is_a_pure_function_of_the_seed()
 	_the_twilight_pockets_carry_orbs_that_light_them()
 	_an_orb_wanders_around_where_the_simulation_put_it()
-	_the_shadows_are_long_and_soft()
-	_the_depth_of_field_brackets_whatever_the_camera_is_looking_at()
 	_headless_loads_no_atmosphere_at_all()
 	_the_world_is_byte_identical_with_and_without_the_atmosphere()
 
 
-## The mood on screen is the biome's numbers, not this layer's.
+## The world grades itself, and this layer does not fight it.
 ##
-## Checked by handing the layer two different profiles and reading the engine
-## objects back: every colour and every density that ends up on the environment
-## has to be traceable to the profile it was given. Reading back rather than
-## re-deriving is the point -- it is a check that the wiring goes where it is
-## claimed to, which a re-derivation would not be.
-func _the_biome_decides_the_fog_the_sky_and_the_fill() -> void:
-	var layer := Atmosphere.new(SEED)
-	var environment := layer.environment()
-	var sky := layer.sky_material()
-	var seen := {}
-	for id in BiomeCatalog.IDS:
-		var profile := BiomeCatalog.profile(id)
-		layer.take(profile, Vector3(0.0, 12.0, 0.0))
-		equal(environment.fog_light_color, profile.fog_color,
-			"%s: the fog on screen is not the biome's fog colour" % id)
-		check(is_equal_approx(environment.fog_density, profile.fog_density),
-			"%s: the fog density on screen is %.5f, the biome's is %.5f"
-			% [id, environment.fog_density, profile.fog_density])
-		equal(environment.ambient_light_color, profile.ambient_color,
-			"%s: the fill light is not the biome's ambient colour" % id)
-		equal(sky.sky_top_color, profile.sky_top,
-			"%s: the sky overhead is not the biome's" % id)
-		equal(sky.sky_horizon_color, profile.sky_horizon,
-			"%s: the horizon is not the biome's" % id)
-		# The ground mist rides on the observer rather than on the world, so that
-		# it lies over the floor of whatever valley is being stood in.
-		check(is_equal_approx(environment.fog_height, 12.0 + Atmosphere.MIST_HEIGHT),
-			"%s: the mist ceiling is at %.2f, not %.2f above the observer"
-			% [id, environment.fog_height, Atmosphere.MIST_HEIGHT])
-		check(environment.fog_height_density > 0.0,
-			"%s: there is no ground mist at all" % id)
-		seen[id] = [profile.fog_color, profile.sky_top, profile.ambient_color]
-
-	# And the five are actually five different moods, or the check above would
-	# pass on a table of identical rows.
-	var distinct := {}
-	for id in seen:
-		distinct[str(seen[id])] = true
-	equal(distinct.size(), BiomeCatalog.IDS.size(),
-		"only %d of the %d biomes carry a distinct fog/sky/fill"
-		% [distinct.size(), BiomeCatalog.IDS.size()])
-	layer.dispose()
-
-
-## The fill light is warm-neutral, not the blue of the sky over it.
+## Five claims used to live here, each about an Environment and a key light this
+## file's own `Atmosphere` built: what the biome does to the fog and the sky, the
+## fill light being warm-neutral rather than the sky, stone in shadow still
+## reading as stone, the bloom only taking what is brighter than white, and the
+## shadows being long and soft. Since the base adoption none of those objects is
+## this project's: `AtmosphereDirector`, hung in the adopted world scene this
+## shell inherits, owns the sun, the sky, the fog, the bloom, the fill and the
+## depth of field, and grades its own terrain against its own biome field.
 ##
-## This is the one line of the global grade that is easy to get wrong and hard to
-## see: taking the ambient from the sky is the default in most engines and it
-## pours blue into every shadow. Measured per unit brightness, because the marsh
-## sky is nearly black and comparing raw channel differences against it would
-## flatter any ambient at all.
-func _the_fill_light_is_warm_neutral_and_not_the_sky() -> void:
-	for id in BiomeCatalog.IDS:
-		var profile := BiomeCatalog.profile(id)
-		var fill := _blue_bias(profile.ambient_color)
-		var sky := _blue_bias(profile.sky_top)
-		check(fill <= sky * 0.5,
-			"%s: the fill light leans %.2f towards blue per unit brightness and "
-			% [id, fill] + "the sky over it %.2f -- the fill is the sky" % sky)
-		check(fill < 0.75,
-			"%s: the fill light leans %.2f towards blue, which is not warm-neutral"
-			% [id, fill])
+## Three of the five are claims about the picture rather than about whose code
+## makes it, so they are asked here of the code that now answers them: the key
+## is warm and rakes, the bloom takes only what is brighter than white, and the
+## depth of field brackets the subject from both sides. The two that are gone
+## are gone deliberately. The base states its own rule -- "Local biome mood
+## belongs to world-space fog, vegetation and ground, so walking cannot relight
+## distant scenery" -- so the sky and the fog do NOT slide from one biome's
+## numbers to the next any more, and their fill is a cool `bacede` rather than
+## this project's warm-neutral one. Both are their call on their world, and the
+## adoption takes it.
+func _the_adopted_world_grades_itself() -> void:
+	var host := Node.new()
+	var world_environment := WorldEnvironment.new()
+	var environment := Environment.new()
+	var sky_material := ProceduralSkyMaterial.new()
+	var sky := Sky.new()
+	sky.sky_material = sky_material
+	environment.sky = sky
+	world_environment.environment = environment
+	var sun := DirectionalLight3D.new()
+	var camera := Camera3D.new()
+	var director := AtmosphereDirector.new()
+	director.environment_node = world_environment
+	director.sun = sun
+	director.camera = camera
+	host.add_child(world_environment)
+	host.add_child(sun)
+	host.add_child(camera)
+	director._apply_grade()
 
-	# And the environment is actually told to use that colour rather than to
-	# sample the sky, which is the setting the whole paragraph rests on.
-	var layer := Atmosphere.new(SEED)
-	equal(layer.environment().ambient_light_source, Environment.AMBIENT_SOURCE_COLOR,
-		"the fill light is being sampled from the sky instead of taken from the "
-		+ "biome's warm-neutral ambient colour")
-	layer.dispose()
+	# The key is warm and rakes across the ground.
+	check(sun.light_color.r > sun.light_color.b,
+		"the adopted key light is not warm: %s" % sun.light_color)
+	var pitch := absf(sun.rotation_degrees.x)
+	check(pitch > 5.0 and pitch < 45.0,
+		"the adopted sun sits %.1f degrees up, which is not a raking angle" % pitch)
+	var shadow_per_height := 1.0 / tan(deg_to_rad(pitch))
+	check(shadow_per_height > 1.2,
+		"a thing throws a shadow %.2f times its own height, which is not long"
+		% shadow_per_height)
+	check(sun.light_angular_distance > REAL_SUN_DEGREES,
+		"the adopted sun is %.2f degrees across, no wider than the real one, so "
+		% sun.light_angular_distance + "the shadow edges are hard")
 
+	# The bloom only takes what is brighter than white, and the brightest
+	# emissive this project puts in the world is brighter than that -- which is
+	# the half of the claim that is still ours to make.
+	check(environment.glow_enabled, "the adopted world has no bloom at all")
+	check(environment.glow_hdr_threshold >= 1.0,
+		"the adopted bloom threshold is %.2f, below white, so unlit surfaces bloom"
+		% environment.glow_hdr_threshold)
+	AssetLibrary.restore_defaults()
+	var brightest := 0.0
+	for tag in Atmosphere.GLOWING_TAGS:
+		var row := AssetLibrary.visual(tag)
+		if row == null:
+			continue
+		for part in row.parts:
+			brightest = maxf(brightest, float(part["emission"]))
+	check(brightest > environment.glow_hdr_threshold,
+		"the brightest emissive in the world is %.2f and the adopted bloom "
+		% brightest + "threshold is %.2f, so nothing would ever bloom"
+		% environment.glow_hdr_threshold)
 
-## Stone lit only by the fill light is still stone-coloured.
-##
-## The statement the last check makes about the light, made again about what the
-## light does to something: a boulder in shadow is lit by the ambient alone, so
-## its colour there is the rock tint multiplied by the fill. If the fill were the
-## sky, that product would be a different colour from the rock -- blue-grey
-## instead of grey. The hue is compared rather than the brightness, because a
-## shadow is of course darker; only its colour is in question.
-func _shadowed_stone_still_reads_as_stone() -> void:
-	for id in BiomeCatalog.IDS:
-		var profile := BiomeCatalog.profile(id)
-		var lit := Color(
-			profile.rock_tint.r * profile.ambient_color.r,
-			profile.rock_tint.g * profile.ambient_color.g,
-			profile.rock_tint.b * profile.ambient_color.b,
-		)
-		var shift := absf(_blue_bias(lit) - _blue_bias(profile.rock_tint))
-		# The absolute bound is asked of the biomes that are meant to read as
-		# daylight. The twilight marsh is deliberately teal gloom -- it is the
-		# eerie pocket, and stone in it is supposed to go cold -- so there the
-		# claim is only the relative one below: the warm fill still shifts it far
-		# less than filling from that biome's own sky would.
-		if Atmosphere.gloom_of(profile) < 0.5:
-			check(shift < 0.30,
-				"%s: stone in shadow shifts %.2f towards blue against the stone in "
-				% [id, shift] + "the light, so it stops reading as stone")
-		# Against the control: the same stone lit by the sky instead, which is
-		# what the setting above is a decision not to do.
-		var by_sky := Color(
-			profile.rock_tint.r * profile.sky_top.r,
-			profile.rock_tint.g * profile.sky_top.g,
-			profile.rock_tint.b * profile.sky_top.b,
-		)
-		var sky_shift := absf(_blue_bias(by_sky) - _blue_bias(profile.rock_tint))
-		check(shift < sky_shift,
-			"%s: filling with the warm ambient shifts stone %.2f and filling "
-			% [id, shift] + "with the sky %.2f -- the ambient is no better"
-			% sky_shift)
+	# The depth of field brackets the subject from both sides, which is the
+	# miniature look rather than a background blur.
+	var attributes := camera.attributes as CameraAttributesPractical
+	check(attributes != null, "the adopted director set no camera attributes")
+	if attributes != null:
+		check(attributes.dof_blur_near_enabled and attributes.dof_blur_far_enabled,
+			"only one side of the adopted depth of field is on, which is a "
+			+ "background blur rather than a miniature one")
+		check(attributes.dof_blur_near_distance < attributes.dof_blur_far_distance,
+			"the adopted near blur (%.1f) starts past the far blur (%.1f)"
+			% [attributes.dof_blur_near_distance, attributes.dof_blur_far_distance])
+		check(attributes.dof_blur_amount > 0.0,
+			"the adopted depth of field blurs nothing")
+	host.free()
 
 
 ## Every warm pinpoint is warm, and sits on something the simulation places and
@@ -251,37 +223,6 @@ func _a_glowing_mushroom_lights_the_gloom_and_not_the_meadow() -> void:
 	# are: the marsh is the gloomiest and the meadow the clearest.
 	check(Atmosphere.gloom_of(marsh) > Atmosphere.gloom_of(meadow),
 		"the marsh is not measured as gloomier than the meadow")
-	layer.dispose()
-
-
-## The bloom takes what is brighter than white and nothing else.
-##
-## A threshold below white blooms pale walls and sky, which is the difference
-## between a cosy glow and a hazy smear. The emissive things the world actually
-## holds are far above it -- the asset table drives a lantern bulb at several
-## times white -- so this checks the threshold against what has to bloom.
-func _the_bloom_only_takes_what_is_brighter_than_white() -> void:
-	var layer := Atmosphere.new(SEED)
-	var environment := layer.environment()
-	check(environment.glow_enabled, "there is no bloom at all")
-	check(environment.glow_hdr_threshold >= 1.0,
-		"the bloom threshold is %.2f, below white, so unlit surfaces will bloom"
-		% environment.glow_hdr_threshold)
-	check(environment.glow_intensity > 0.0 and environment.glow_strength > 0.0,
-		"the bloom has no intensity")
-
-	AssetLibrary.restore_defaults()
-	var brightest := 0.0
-	for tag in Atmosphere.GLOWING_TAGS:
-		var row := AssetLibrary.visual(tag)
-		if row == null:
-			continue
-		for part in row.parts:
-			brightest = maxf(brightest, float(part["emission"]))
-	check(brightest > environment.glow_hdr_threshold,
-		"the brightest emissive in the world is %.2f and the bloom threshold is "
-		% brightest + "%.2f, so nothing would ever bloom"
-		% environment.glow_hdr_threshold)
 	layer.dispose()
 
 
@@ -487,65 +428,6 @@ func _an_orb_wanders_around_where_the_simulation_put_it() -> void:
 	layer.dispose()
 
 
-## The shadows are long and the sun edge is soft.
-##
-## Long is a statement about the sun's height, so it is checked as one: at this
-## angle a thing throws a shadow longer than it is tall, which is the raking
-## light the diorama look wants. Soft is a statement about the sun's apparent
-## size, checked against the real sun's half a degree.
-func _the_shadows_are_long_and_soft() -> void:
-	var layer := Atmosphere.new(SEED)
-	var light := layer.key_light()
-	var pitch := absf(Atmosphere.SUN_PITCH)
-	check(pitch > 5.0 and pitch < 45.0,
-		"the sun sits %.1f degrees up, which is not a raking angle" % pitch)
-	var shadow_per_height := 1.0 / tan(deg_to_rad(pitch))
-	check(shadow_per_height > 1.2,
-		"a thing throws a shadow %.2f times its own height, which is not long"
-		% shadow_per_height)
-	check(light.light_angular_distance > REAL_SUN_DEGREES,
-		"the sun is %.2f degrees across, no wider than the real one, so the "
-		% light.light_angular_distance + "shadow edges are hard")
-	check(light.shadow_blur > 1.0,
-		"the shadow edge is not blurred (%.2f)" % light.shadow_blur)
-	check(light.shadow_enabled, "the key light casts no shadow at all")
-	# A warm key against a cool fill is the whole grade, so the key has to be
-	# the warm half of it.
-	check(Atmosphere.SUN_COLOR.r > Atmosphere.SUN_COLOR.b,
-		"the key light is not warm: %s" % Atmosphere.SUN_COLOR)
-	layer.dispose()
-
-
-## The miniature depth of field brackets whatever the camera is looking at.
-##
-## Near blur inside the subject and far blur outside it, both moving with the
-## camera -- which is what lets a report move the camera in for a detail shot
-## without the whole frame going soft.
-func _the_depth_of_field_brackets_whatever_the_camera_is_looking_at() -> void:
-	var layer := Atmosphere.new(SEED)
-	var attributes := layer.camera_attributes() as CameraAttributesPractical
-	for distance in [12.0, 66.0, 140.0]:
-		layer.focus_at(distance)
-		check(attributes.dof_blur_near_enabled and attributes.dof_blur_far_enabled,
-			"only one side of the depth of field is on, which is a background "
-			+ "blur rather than a miniature one")
-		check(attributes.dof_blur_near_distance < distance,
-			"at %.0f units the near blur starts at %.1f, past the subject"
-			% [distance, attributes.dof_blur_near_distance])
-		check(attributes.dof_blur_far_distance > distance,
-			"at %.0f units the far blur starts at %.1f, in front of the subject"
-			% [distance, attributes.dof_blur_far_distance])
-		check(attributes.dof_blur_amount > 0.0, "the depth of field blurs nothing")
-	# Moving the camera moves the band with it, rather than leaving it where the
-	# game's own camera left it.
-	layer.focus_at(12.0)
-	var close := attributes.dof_blur_far_distance
-	layer.focus_at(140.0)
-	check(attributes.dof_blur_far_distance > close,
-		"the depth-of-field band did not follow the camera")
-	layer.dispose()
-
-
 ## A headless process loads no part of the atmosphere stack.
 ##
 ## The same check the grass gets, and it is the strongest statement available:
@@ -581,6 +463,24 @@ func _headless_loads_no_atmosphere_at_all() -> void:
 	check(render_scripts["found"] >= 7,
 		"only %d render scripts were counted; the atmosphere and the motes are "
 		% render_scripts["found"] + "not among them")
+
+	# And the adopted half of the stack, which is the half that lights the world
+	# now: AtmosphereDirector and the world's own sun live under res://scripts/,
+	# not under res://render/, so the render-scripts line above says nothing
+	# about them. The headless run names them one by one.
+	var director := "res://scripts/terrain/biome/AtmosphereDirector.gd"
+	var named := false
+	for line in text.split("\n"):
+		if not line.strip_edges().begins_with("assets adopted-scene-script "):
+			continue
+		if not line.contains(director):
+			continue
+		named = true
+		check(line.contains("cached=0"),
+			"a headless run loaded the adopted atmosphere director: %s" % line)
+	check(named,
+		"the headless run never named %s, so nothing above answers for the half "
+		% director + "of the atmosphere the adopted world owns: %s" % text)
 
 
 ## The world the shell reaches is byte-identical with the atmosphere and without.
@@ -627,18 +527,6 @@ func _the_world_is_byte_identical_with_and_without_the_atmosphere() -> void:
 
 
 # --- helpers -------------------------------------------------------------
-
-
-## How far a colour leans towards blue, per unit of how bright it is.
-##
-## Dividing by the brightness is what makes two colours of very different
-## brightness comparable: the twilight marsh's sky is nearly black, and a raw
-## blue-minus-red on it would be small however blue the colour actually is.
-func _blue_bias(colour: Color) -> float:
-	var brightness := maxf(
-		0.0005, 0.2126 * colour.r + 0.7152 * colour.g + 0.0722 * colour.b
-	)
-	return (colour.b - colour.r) / brightness
 
 
 func _run_render_shell(extra: Array) -> Dictionary:

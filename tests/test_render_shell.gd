@@ -53,106 +53,109 @@ func run() -> void:
 
 ## The world's fingerprint has to cover the ground the world is holding.
 ##
-## live_geometry() is the simulation's own way in to a loaded chunk -- the way
-## the world's own fingerprint reads it. A write through it is a real change to
-## the world, and the fingerprint has to say so. If it did not, then no
-## comparison of fingerprints, including this suite's shell-versus-headless
-## comparison below, could ever notice that the ground had been edited, and the
+## live_patch() is the simulation's own way in to a loaded patch of dressing --
+## the way the world's own fingerprint reads it. A write through it is a real
+## change to the world, and the fingerprint has to say so. If it did not, then
+## no comparison of fingerprints, including this suite's shell-versus-headless
+## comparison below, could ever notice that the world had been edited, and the
 ## isolation check that follows would pass for the wrong reason.
+##
+## It used to be the ground's chunk geometry that made this point. The ground on
+## screen is the adopted base's now and the simulation hands none of it out; the
+## claim is about the handles that still exist, and the dressing is the one the
+## shell asks for most.
 func _a_write_into_the_live_ground_is_visible_to_the_world_digest() -> void:
 	var world := SimWorld.new(SEED)
-	var keys := world.terrain_streamer.loaded_keys()
-	check(keys.size() > 0, "a fresh world should have ground loaded around the observer")
+	var keys := world.scatter_streamer.loaded_keys()
+	check(keys.size() > 0, "a fresh world should have dressing around the observer")
 	if keys.is_empty():
 		return
 
 	var before := world.digest()
 	var key: Vector2i = keys[keys.size() / 2]
-	var geometry := world.terrain_streamer.live_geometry(key)
-	check(geometry != null, "chunk (%d, %d) is listed as loaded but has no geometry"
+	var patch := world.scatter_streamer.live_patch(key)
+	check(patch != null, "patch (%d, %d) is listed as loaded but holds nothing"
 		% [key.x, key.y])
-	if geometry == null:
+	if patch == null or patch.items.is_empty():
 		return
 
-	# Raise one corner of one triangle by a millimetre.
-	var original: Vector3 = geometry.vertices[0]
-	geometry.vertices[0] = original + Vector3(0.0, 0.001, 0.0)
+	# Move one scattered thing by a millimetre.
+	var original: float = float(patch.items[0]["x"])
+	patch.items[0]["x"] = original + 0.001
 	not_equal(world.digest(), before,
-		"a write through terrain_streamer.live_geometry(%d, %d) left the world digest "
+		"a write through scatter_streamer.live_patch(%d, %d) left the world digest "
 		% [key.x, key.y] + "unchanged: the simulation cannot detect being edited")
 
 	# Undoing it restores the fingerprint, so the check above is reacting to the
-	# contents of the ground rather than to the world having moved on.
-	geometry.vertices[0] = original
+	# contents of the world rather than to the world having moved on.
+	patch.items[0]["x"] = original
 	equal(world.digest(), before,
 		"undoing the write did not restore the world digest")
 
-	# And the fingerprint reads the ground itself, not a copy of it. Copying
+	# And the fingerprint reads the dressing itself, not a copy of it. Copying
 	# first would still see this write -- the copy would be taken after it -- so
 	# the write alone cannot tell the two apart; what tells them apart is that
 	# taking a copy is counted, and fingerprinting the world must count none.
-	var handles_before: int = world.terrain_streamer.handles_handed_out
+	var handles_before: int = world.scatter_streamer.handles_handed_out
 	world.digest()
-	equal(world.terrain_streamer.handles_handed_out, handles_before,
-		"fingerprinting the world copied %d chunk(s): the digest is answering for "
-		% (world.terrain_streamer.handles_handed_out - handles_before)
-		+ "copies of the ground rather than for the ground")
+	equal(world.scatter_streamer.handles_handed_out, handles_before,
+		"fingerprinting the world copied %d patch(es): the digest is answering for "
+		% (world.scatter_streamer.handles_handed_out - handles_before)
+		+ "copies of the world rather than for the world")
 
 
 ## The handle the shell is given is not a way in.
 ##
-## geometry() is the accessor render/main.gd calls, once per chunk, to get the
-## numbers it hands to the graphics card. The exact write the check above proved
-## is detectable is made here through that accessor instead, and this time
-## nothing about the world may move.
+## patch() is the accessor render/main.gd calls, once per patch, to get the list
+## of things it turns into drawables. The exact write the check above proved is
+## detectable is made here through that accessor instead, and this time nothing
+## about the world may move.
 func _a_write_through_the_render_handle_cannot_reach_the_world() -> void:
 	var world := SimWorld.new(SEED)
-	var keys := world.terrain_streamer.loaded_keys()
-	check(keys.size() > 0, "a fresh world should have ground loaded around the observer")
+	var keys := world.scatter_streamer.loaded_keys()
+	check(keys.size() > 0, "a fresh world should have dressing around the observer")
 	if keys.is_empty():
 		return
 
 	var before := world.digest()
 	var key: Vector2i = keys[keys.size() / 2]
-	var handle := world.terrain_streamer.geometry(key)
-	check(handle != null, "chunk (%d, %d) is listed as loaded but has no geometry"
+	var handle := world.scatter_streamer.patch(key)
+	check(handle != null, "patch (%d, %d) is listed as loaded but holds nothing"
 		% [key.x, key.y])
-	if handle == null:
+	if handle == null or handle.items.is_empty():
 		return
 
-	# It is the same ground: what the shell draws has to be what the world holds,
-	# or isolation would have been bought by handing over something else.
-	var live := world.terrain_streamer.live_geometry(key)
+	# It is the same dressing: what the shell draws has to be what the world
+	# holds, or isolation would have been bought by handing over something else.
+	var live := world.scatter_streamer.live_patch(key)
 	var live_before := live.digest()
 	equal(handle.digest(), live_before,
-		"the geometry handed to a viewer is not the geometry of chunk (%d, %d)"
+		"the dressing handed to a viewer is not the dressing of patch (%d, %d)"
 		% [key.x, key.y])
 	check(handle != live,
-		"terrain_streamer.geometry() handed back the loaded chunk itself")
+		"scatter_streamer.patch() handed back the loaded patch itself")
 
 	# Every part of it that gets drawn, written through as hard as a viewer could.
-	handle.vertices[0] = handle.vertices[0] + Vector3(0.0, 0.001, 0.0)
-	handle.normals[0] = -handle.normals[0]
-	handle.indices[0] = 7
-	handle.lowest = -999.0
-	handle.chunk_x = 12345
+	handle.items[0]["x"] = float(handle.items[0]["x"]) + 0.001
+	handle.items[0]["tag"] = "not-a-tag"
+	handle.chunk = Vector2i(12345, 12345)
 
 	equal(world.digest(), before,
-		"a write through terrain_streamer.geometry(%d, %d) changed the world: "
+		"a write through scatter_streamer.patch(%d, %d) changed the world: "
 		% [key.x, key.y] + "the render layer can edit the simulation it is drawing")
-	equal(world.terrain_streamer.live_geometry(key).digest(), live_before,
-		"the loaded chunk (%d, %d) changed when a viewer wrote into its copy"
+	equal(world.scatter_streamer.live_patch(key).digest(), live_before,
+		"the loaded patch (%d, %d) changed when a viewer wrote into its copy"
 		% [key.x, key.y])
 
 	# The writes did land -- on the copy. Without this, the checks above would
 	# pass for a handle that silently ignored writes, or for one that was empty.
-	not_equal(handle.vertices[0], live.vertices[0],
-		"writing into the handed-over vertices changed nothing at all, so the "
+	not_equal(handle.items[0]["x"], live.items[0]["x"],
+		"writing into the handed-over position changed nothing at all, so the "
 		+ "check that the world stayed put proves nothing")
-	not_equal(handle.normals[0], live.normals[0],
-		"writing into the handed-over normals changed nothing at all")
-	not_equal(handle.indices[0], live.indices[0],
-		"writing into the handed-over indices changed nothing at all")
+	not_equal(handle.items[0]["tag"], live.items[0]["tag"],
+		"writing into the handed-over tag changed nothing at all")
+	not_equal(handle.chunk, live.chunk,
+		"writing into the handed-over patch coordinate changed nothing at all")
 
 
 ## No handle shares anything with the world it describes.
@@ -177,13 +180,6 @@ func _no_handle_hands_out_anything_the_world_still_holds() -> void:
 	world.step()
 
 	var handles := {}
-	var chunk_keys := world.terrain_streamer.loaded_keys()
-	if not chunk_keys.is_empty():
-		var chunk_key: Vector2i = chunk_keys[0]
-		handles["chunk geometry"] = [
-			world.terrain_streamer.live_geometry(chunk_key),
-			world.terrain_streamer.geometry(chunk_key),
-		]
 	if island != null and world.island_streamer.is_loaded(island.key()):
 		var island_key := island.key()
 		handles["island"] = [
@@ -202,7 +198,6 @@ func _no_handle_hands_out_anything_the_world_still_holds() -> void:
 			world.island_streamer.live_water(island_key),
 			world.island_streamer.water_of(island_key),
 		]
-	handles["water sheet"] = [world._water_sheet, world.water_sheet()]
 	var scatter_keys := world.scatter_streamer.loaded_keys()
 	if not scatter_keys.is_empty():
 		var scatter_key: Vector2i = scatter_keys[0]
@@ -225,8 +220,8 @@ func _no_handle_hands_out_anything_the_world_still_holds() -> void:
 	# Every handle the render shell can reach is in here. If one goes missing --
 	# because nothing of that kind happened to be loaded -- the sweep would
 	# quietly stop covering it, so the count is checked too.
-	equal(handles.size(), 9,
-		"the handle sweep covered %d of the 9 handle kinds; something the world "
+	equal(handles.size(), 7,
+		"the handle sweep covered %d of the 7 handle kinds; something the world "
 		% handles.size() + "hands out was not loaded to test")
 	for label in handles:
 		var live: Object = handles[label][0]
@@ -338,15 +333,19 @@ func _the_shell_reaches_the_headless_world(shell: Dictionary) -> void:
 		% SEED + "reached different worlds at tick %d" % EXPECTED_TICKS)
 
 
-## Copying a chunk on the way out costs something, so it has to be paid once per
-## chunk and not once per frame.
+## Copying an island on the way out costs something, so it has to be paid once
+## per island and not once per frame.
 ##
-## The shell reports how many frames it drew, how many chunk views and how many
-## chunks of grass it built, and how many copies it asked the streamer for.
-## Running it twice over the same two seconds of simulated time --
-## once at 60 frames per second, once at 240 -- holds the world fixed and
-## multiplies the frames by four. If copying grew with frames on screen, the
-## second run would ask for four times as many.
+## This used to be about chunks of ground. The ground on screen is the adopted
+## base's now and the shell is handed none of it; what the shell still asks the
+## simulation to copy is the aerial layer -- an island, its geometry, what grows
+## on it and the pond in it -- and the claim is unchanged.
+##
+## The shell reports how many frames it drew, how many island views it built and
+## how many copies it asked the streamer for. Running it twice over the same two
+## seconds of simulated time -- once at 60 frames per second, once at 240 --
+## holds the world fixed and multiplies the frames by four. If copying grew with
+## frames on screen, the second run would ask for four times as many.
 func _copying_a_chunk_is_paid_per_chunk_not_per_frame(slow: Dictionary) -> void:
 	var fast := _run_render_shell(FIXED_FPS * 4, FRAMES * 4)
 	equal(slow["exit_code"], 0, "render shell should exit 0 (output: %s)" % slow["output"])
@@ -367,19 +366,19 @@ func _copying_a_chunk_is_paid_per_chunk_not_per_frame(slow: Dictionary) -> void:
 		"the two runs did not cover the same simulated time, so their copy counts "
 		+ "are not comparable")
 
-	# Two things ask the streamer for a chunk now -- the ground view, and the
-	# grass grown on it -- and each asks once, when it first needs that chunk. So
-	# the count is still one copy per thing built and not one per frame, which is
-	# the claim; it is just two things.
-	equal(slow_counts["handles"], slow_counts["views"] + slow_counts["patches"],
-		"the shell asked for %d copies to draw %d chunks and grow grass on %d of "
-		% [slow_counts["handles"], slow_counts["views"], slow_counts["patches"]]
-		+ "them: something is copying a chunk it already had")
+	# Four things are copied for each island the shell draws -- the island, its
+	# geometry, its cover and its pond -- and each is asked for once, when the
+	# island first appears. So the count is four per island view built, and not
+	# one per frame, which is the claim.
+	equal(slow_counts["handles"], slow_counts["views"] * 4,
+		"the shell asked for %d copies to draw %d islands, which is not the four "
+		% [slow_counts["handles"], slow_counts["views"]]
+		+ "an island costs: something is copying an island it already had")
 	equal(fast_counts["handles"], slow_counts["handles"],
 		"four times the frames over the same simulated time asked for a different "
-		+ "number of chunk copies: the cost grows with frames, not with chunks")
+		+ "number of island copies: the cost grows with frames, not with islands")
 	check(slow_counts["handles"] < slow_counts["frames"],
-		"the shell asked for at least one chunk copy per frame (%d copies over %d "
+		"the shell asked for at least one island copy per frame (%d copies over %d "
 		% [slow_counts["handles"], slow_counts["frames"]] + "frames)")
 
 	# Same world at the end of both, which is the same claim as the check above

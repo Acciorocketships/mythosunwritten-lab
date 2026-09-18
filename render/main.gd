@@ -795,6 +795,14 @@ func _ready() -> void:
 	_ground.startup_loading_completed.connect(_on_ground_ready, CONNECT_ONE_SHOT)
 	if _ground.startup_loading_complete():
 		_ground_ready = true
+	# ...unless nobody is looking. The wait is about the picture -- a character
+	# must not be drawn standing over ground that has not been built yet -- and
+	# a run with no display draws no picture for anyone to be wrong about. The
+	# shell is run that way on purpose, by tests/test_render_shell.gd, to ask
+	# whether drawing the world changes it; making that run sit through ten
+	# minutes of meshing would price the ground rather than answer the question.
+	if Helper.is_headless():
+		_ground_ready = true
 	if String(options["trace"]) != "":
 		_build_trace(String(options["trace"]))
 	# Built for a run that asked for the lattice and for one that asked to play.

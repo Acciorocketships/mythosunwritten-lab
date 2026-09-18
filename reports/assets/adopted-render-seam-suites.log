@@ -1,0 +1,106 @@
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "sky" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:81)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "light" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:498)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_PITCH" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:499)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:515)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:64)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "geometry" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:71)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:110)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "handle" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:117)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:125)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live_before" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:126)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "chunk_keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:180)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://bin/test_main.gd:0)
+ERROR: Failed to load script "res://bin/test_main.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+RUN   test_layering
+PASS  layering          0.3 s, 63 checks
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "sky" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:81)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "light" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:498)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_PITCH" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:499)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:515)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:64)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "geometry" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:71)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:110)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "handle" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:117)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:125)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live_before" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:126)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "chunk_keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:180)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://bin/test_main.gd:0)
+ERROR: Failed to load script "res://bin/test_main.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+RUN   test_terrain
+PASS  terrain           1.0 s, 53 checks
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "sky" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:81)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "light" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_atmosphere.gd:498)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_PITCH" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:499)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:514)
+SCRIPT ERROR: Parse Error: Cannot find member "SUN_COLOR" in base "Atmosphere".
+          at: GDScript::reload (res://tests/test_atmosphere.gd:515)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:64)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "geometry" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:71)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:110)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "handle" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:117)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:125)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "live_before" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:126)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "chunk_keys" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_render_shell.gd:180)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+          at: GDScript::reload (res://bin/test_main.gd:0)
+ERROR: Failed to load script "res://bin/test_main.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+RUN   test_water
+
+RUN   test_layering
+PASS  layering          0.3 s, 63 checks
+
+RUN   test_terrain
+PASS  terrain           0.9 s, 53 checks
+
+RUN   test_water
