@@ -1,0 +1,73 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234, 3 fresh positions of the scatter sweep's sequence
+
+position 1: (-1023, -139) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (27.3 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile walks 9 cells
+    cell (-5, -2) (476 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-5, -1) (314 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-5, 0) (326 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-4, -2) (377 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-4, -1) (120 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-4, 0) (148 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-3, -2) (440 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-3, -1) (256 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-3, 0) (270 units from the tile): ruled out by cell_could_reach, nothing built
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (1 places): 11 water contexts (16.7 s), 11 regions
+    sim/path_network.gd:820  edges_from l-8,-2: 3 water contexts (19.5 s), 3 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 14 water contexts (36.2 s), 14 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 15 water contexts (63.5 s), 15 regions
+
+position 2: (-46, 1722) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (40.7 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile walks 9 cells
+    cell (-1, 6) (261 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-1, 7) (238 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (-1, 8) (425 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (0, 6) (159 units from the tile) sim/settlement_field.gd:628 _build_inland: 3 water contexts (0.1 s), 3 regions
+    cell (0, 6) sim/settlement_field.gd:677 _build_shore: 3 water contexts (9.0 s), 3 regions
+    cell (0, 6) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (0, 7) (118 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (6.1 s), 2 regions
+    cell (0, 8) (371 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (1, 6) (343 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (1, 7) (326 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (1, 8) (480 units from the tile): ruled out by cell_could_reach, nothing built
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 8 water contexts (15.2 s), 8 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (5 places): 11 water contexts (20.6 s), 11 regions
+    sim/path_network.gd:820  edges_from s0,6: 3 water contexts (0.1 s), 3 regions
+    sim/path_network.gd:820  edges_from l-2,13: 5 water contexts (0.2 s), 5 regions
+    sim/path_network.gd:820  edges_from l-2,14: 2 water contexts (0.0 s), 2 regions
+    sim/path_network.gd:820  edges_from l0,13: 1 water contexts (0.0 s), 1 regions
+    sim/path_network.gd:820  edges_from l0,15: 3 water contexts (0.0 s), 3 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 25 water contexts (20.9 s), 25 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 34 water contexts (76.8 s), 34 regions
+
+position 3: (931, -417) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (24.8 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile walks 9 cells
+    cell (3, -3) (385 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (3, -2) (186 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (3, -1) (238 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (4, -3) (361 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (4, -2) (130 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (9.3 s), 2 regions
+    cell (4, -1) (197 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (5, -3) (498 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (5, -2) (367 units from the tile): ruled out by cell_could_reach, nothing built
+    cell (5, -1) (395 units from the tile): ruled out by cell_could_reach, nothing built
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 2 water contexts (9.3 s), 2 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (2 places): 8 water contexts (4.3 s), 8 regions
+    sim/path_network.gd:820  edges_from l6,-4: 6 water contexts (1.8 s), 6 regions
+    sim/path_network.gd:820  edges_from l8,-3: 10 water contexts (0.2 s), 10 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 25 water contexts (6.4 s), 25 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 28 water contexts (40.6 s), 28 regions

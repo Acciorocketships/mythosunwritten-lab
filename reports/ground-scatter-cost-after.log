@@ -1,0 +1,42 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+sweep: 900 positions over a 4000-unit square, touching 221 distinct 192-unit blocks
+cache: 16 blocks (AdoptedGround.FIELD_BLOCKS)
+cold build: 52.3 s
+  scattered (the check's own order): 10/60 positions, 128.4 s elapsed, 12.84 s each, worst 55.45 s, 10 blocks seen
+  scattered (the check's own order): 20/60 positions, 392.1 s elapsed, 19.61 s each, worst 60.77 s, 20 blocks seen
+  scattered (the check's own order): 30/60 positions, 571.1 s elapsed, 19.04 s each, worst 60.77 s, 30 blocks seen
+  scattered (the check's own order): 40/60 positions, 705.0 s elapsed, 17.62 s each, worst 60.77 s, 40 blocks seen
+  scattered (the check's own order): 50/60 positions, 847.2 s elapsed, 16.94 s each, worst 60.77 s, 50 blocks seen
+  scattered (the check's own order): 60/60 positions, 948.3 s elapsed, 15.81 s each, worst 60.77 s, 60 blocks seen
+scattered (the check's own order): 60 positions in 948.3 s, 15.806 s each, worst 60.77 s, 60 distinct blocks
+  block order (same positions): 10/60 positions, 29.0 s elapsed, 2.90 s each, worst 5.73 s, 10 blocks seen
+  block order (same positions): 20/60 positions, 55.7 s elapsed, 2.78 s each, worst 5.76 s, 20 blocks seen
+  block order (same positions): 30/60 positions, 74.7 s elapsed, 2.49 s each, worst 5.77 s, 30 blocks seen
+  block order (same positions): 40/60 positions, 91.4 s elapsed, 2.29 s each, worst 5.77 s, 40 blocks seen
+  block order (same positions): 50/60 positions, 109.1 s elapsed, 2.18 s each, worst 5.77 s, 50 blocks seen
+  block order (same positions): 60/60 positions, 145.8 s elapsed, 2.43 s each, worst 5.77 s, 60 blocks seen
+block order (same positions): 60 positions in 145.8 s, 2.429 s each, worst 5.77 s, 60 distinct blocks
+	Command being timed: "env -u DISPLAY -u WAYLAND_DISPLAY /home/ryko/proj/game/tools/godot/godot4 --headless --path . -s res://tools/ground_scatter_cost.gd -- --seed 1234 --span 2000 --count 900 --sample 60"
+	User time (seconds): 1147.38
+	System time (seconds): 2.86
+	Percent of CPU this job got: 100%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 19:10.16
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 9858112
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 2571272
+	Voluntary context switches: 12633
+	Involuntary context switches: 521
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 256
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,87 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+seed 1234, 3 fresh positions of the scatter sweep's sequence
+
+position 1: (-1023, -139) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (27.3 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile sweeps 9 cells
+    cell (-5, -2) (476 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (10.5 s), 2 regions
+    cell (-5, -2) sim/settlement_field.gd:677 _build_shore: 2 water contexts (5.8 s), 2 regions
+    cell (-5, -2) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (-5, -1) (314 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-5, 0) (326 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-4, -2) (377 units from the tile): no village, nothing built
+    cell (-4, -1) (120 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-4, 0) (148 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (-3, -2) (440 units from the tile) sim/settlement_field.gd:628 _build_inland: 3 water contexts (9.6 s), 3 regions
+    cell (-3, -1) (256 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (0.3 s), 2 regions
+    cell (-3, -1) sim/settlement_field.gd:677 _build_shore: 2 water contexts (0.0 s), 2 regions
+    cell (-3, -1) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (-3, 0) (270 units from the tile): no village, nothing built
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 11 water contexts (26.1 s), 11 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (1 places): 45 water contexts (24.4 s), 45 regions
+    sim/path_network.gd:820  edges_from l-8,-2: 4 water contexts (5.8 s), 4 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 49 water contexts (30.2 s), 49 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 61 water contexts (83.6 s), 61 regions
+
+position 2: (-46, 1722) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (40.4 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile sweeps 9 cells
+    cell (-1, 6) (261 units from the tile): no village, nothing built
+    cell (-1, 7) (238 units from the tile) sim/settlement_field.gd:628 _build_inland: 1 water contexts (0.0 s), 1 regions
+    cell (-1, 7) sim/settlement_field.gd:677 _build_shore: 4 water contexts (4.7 s), 4 regions
+    cell (-1, 7) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (-1, 8) (425 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (0, 6) (159 units from the tile) sim/settlement_field.gd:628 _build_inland: 3 water contexts (0.1 s), 3 regions
+    cell (0, 6) sim/settlement_field.gd:677 _build_shore: 2 water contexts (8.9 s), 2 regions
+    cell (0, 6) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (0, 7) (118 units from the tile) sim/settlement_field.gd:628 _build_inland: 1 water contexts (6.1 s), 1 regions
+    cell (0, 8) (371 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (1, 6) (343 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (0.1 s), 2 regions
+    cell (1, 6) sim/settlement_field.gd:677 _build_shore: 0 water contexts (0.0 s), 0 regions
+    cell (1, 6) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (1, 7) (326 units from the tile) sim/settlement_field.gd:628 _build_inland: 1 water contexts (0.0 s), 1 regions
+    cell (1, 8) (480 units from the tile) sim/settlement_field.gd:628 _build_inland: 1 water contexts (5.7 s), 1 regions
+    cell (1, 8) sim/settlement_field.gd:677 _build_shore: 4 water contexts (9.9 s), 4 regions
+    cell (1, 8) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 19 water contexts (35.5 s), 19 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (5 places): 44 water contexts (30.6 s), 44 regions
+    sim/path_network.gd:820  edges_from s0,6: 8 water contexts (16.7 s), 8 regions
+    sim/path_network.gd:820  edges_from l-2,13: 9 water contexts (4.1 s), 9 regions
+    sim/path_network.gd:820  edges_from l-2,14: 4 water contexts (0.0 s), 4 regions
+    sim/path_network.gd:820  edges_from l0,13: 1 water contexts (0.0 s), 1 regions
+    sim/path_network.gd:820  edges_from l0,15: 4 water contexts (0.1 s), 4 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 70 water contexts (51.5 s), 70 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 90 water contexts (127.4 s), 90 regions
+
+position 3: (931, -417) -- cold stack, nothing near it
+sim/terrain_query.gd:136  ground.water_column (the query's own): 1 water contexts (24.6 s), 1 regions
+  sim/settlement_field.gd:504  _build_pad_tile sweeps 9 cells
+    cell (3, -3) (385 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (3, -2) (186 units from the tile): no village, nothing built
+    cell (3, -1) (238 units from the tile): no village, nothing built
+    cell (4, -3) (361 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (4, -2) (130 units from the tile) sim/settlement_field.gd:628 _build_inland: 2 water contexts (9.3 s), 2 regions
+    cell (4, -1) (197 units from the tile) sim/settlement_field.gd:628 _build_inland: 1 water contexts (0.0 s), 1 regions
+    cell (4, -1) sim/settlement_field.gd:677 _build_shore: 5 water contexts (2.9 s), 5 regions
+    cell (4, -1) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+    cell (5, -3) (498 units from the tile): no village, nothing built
+    cell (5, -2) (367 units from the tile): no village, nothing built
+    cell (5, -1) (395 units from the tile) sim/settlement_field.gd:628 _build_inland: 0 water contexts (0.0 s), 0 regions
+    cell (5, -1) sim/settlement_field.gd:677 _build_shore: 4 water contexts (0.1 s), 4 regions
+    cell (5, -1) sim/settlement_field.gd:632 _lay_out: 0 water contexts (0.0 s), 0 regions
+  sim/settlement_field.gd:493  pads_near, cells already built: 0 water contexts (0.0 s), 0 regions
+sim/terrain_query.gd:139  settlement_field.ground_delta_at (total): 12 water contexts (12.3 s), 12 regions
+  sim/path_network.gd:558  ground.is_wet: 0 water contexts (0.0 s), 0 regions
+  sim/path_network.gd:818  _build_tile -> places_near (2 places): 46 water contexts (18.3 s), 46 regions
+    sim/path_network.gd:820  edges_from l6,-4: 11 water contexts (1.0 s), 11 regions
+    sim/path_network.gd:820  edges_from l8,-3: 13 water contexts (20.7 s), 13 regions
+sim/terrain_query.gd:140  path_network.ground_delta_at (total): 71 water contexts (40.0 s), 71 regions
+sim/terrain_query.gd:143  island_field.walkable_island_over: 0 water contexts (0.0 s), 0 regions
+== whole position: 84 water contexts (76.9 s), 84 regions

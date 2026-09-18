@@ -411,11 +411,6 @@ func _init(
 	islands = island_field if island_field != null else IslandField.new(ground)
 
 
-## The furthest anything belonging to a village can be from its cell position.
-static func site_reach() -> float:
-	return PAD_RADIUS_MAX + RING_STEP
-
-
 ## World units across one tile of the pad lookup lattice. Which villages reach a
 ## patch of world is asked once per terrain vertex, so it is worked out once per
 ## tile and remembered -- the same trick, and for the same reason, as the road
@@ -436,6 +431,44 @@ static func cell_at(x: float, z: float) -> Vector2i:
 ## Where the middle of a cell of the settlement lattice is.
 static func cell_centre(cell: Vector2i) -> Vector2:
 	return Vector2(float(cell.x) * SITE_CELL, float(cell.y) * SITE_CELL)
+
+
+## How far from the middle of its own cell a village in that cell can possibly
+## stand, in world units along each axis.
+##
+## Not a measurement of where villages happen to be: it is the placement rule's
+## own bound, read off the rule. An ordinary cell jitters every candidate into
+## the middle half of itself -- JITTER_LOW to JITTER_HIGH of the cell across --
+## and the shore rule drops any bearing that leaves that same band, so no
+## village of such a cell stands further than a quarter of a cell from its
+## middle in x or in z. The cell holding the world origin is the one exception:
+## its village is placed on a ring around the origin, which is that cell's own
+## middle, so its bound is the ring's outer radius instead.
+static func centre_reach(cell: Vector2i) -> float:
+	if cell == cell_at(0.0, 0.0):
+		return SPAWN_RING_MAX
+	return SITE_CELL * (JITTER_HIGH - 0.5)
+
+
+## Whether any village this cell could hold can come within `within` of a
+## position. Asked of the placement rule alone, so it reads no ground and builds
+## nothing.
+##
+## This is what keeps a scan of the lattice from paying for cells that could
+## never have answered. It is an *exact* refusal, not an approximate one:
+## centre_reach() above is an upper bound on how far from its cell's middle a
+## village stands, so a "no" here means there is provably no village in that cell
+## within `within`, and a "maybe" leaves the cell to be built and tested exactly
+## as it was before. Callers pass `within` already widened by PAD_RADIUS_MAX
+## where what they test is a distance to a pad rather than to a centre.
+static func cell_could_reach(
+	cell: Vector2i, x: float, z: float, within: float
+) -> bool:
+	var centre := cell_centre(cell)
+	var reach := centre_reach(cell)
+	var away_x := maxf(absf(x - centre.x) - reach, 0.0)
+	var away_z := maxf(absf(z - centre.y) - reach, 0.0)
+	return away_x * away_x + away_z * away_z <= within * within
 
 
 ## Which tile of the pad lookup lattice a world position falls in.
@@ -468,16 +501,22 @@ func settlement_in_cell(cell: Vector2i) -> Settlement:
 ## rather than discovery order, so what comes back does not depend on where the
 ## scan started.
 func settlements_near(x: float, z: float, distance: float) -> Array[Settlement]:
-	# A village stands inside its own cell, so a village covering a position
-	# within `distance` has its cell within that distance plus its own radius --
-	# no slack ring of cells is needed, and each one saved is a site the field
-	# never has to work out.
-	var reach := int(ceil((distance + PAD_RADIUS_MAX) / SITE_CELL))
+	# A pad within `distance` of a position has its centre within that distance
+	# plus its own radius, and no village's radius exceeds PAD_RADIUS_MAX. So
+	# this is how near a cell's village has to be able to come for that cell to
+	# be worth building at all -- no slack ring is needed, and every cell the
+	# square below walks that cannot come this near is a village the field never
+	# has to site.
+	var within := distance + PAD_RADIUS_MAX
+	var reach := int(ceil(within / SITE_CELL))
 	var centre := cell_at(x, z)
 	var found: Array[Settlement] = []
 	for offset_x in range(-reach, reach + 1):
 		for offset_z in range(-reach, reach + 1):
-			var site := settlement_in_cell(Vector2i(centre.x + offset_x, centre.y + offset_z))
+			var cell := Vector2i(centre.x + offset_x, centre.y + offset_z)
+			if not cell_could_reach(cell, x, z, within):
+				continue
+			var site := settlement_in_cell(cell)
 			if site == null:
 				continue
 			if site.distance_to(x, z) <= distance:
@@ -505,12 +544,21 @@ func _build_pad_tile(tile: Vector2i) -> Array[Settlement]:
 	var centre := Vector2(
 		(float(tile.x) + 0.5) * PAD_TILE, (float(tile.y) + 0.5) * PAD_TILE
 	)
-	var reach := int(ceil((PAD_TILE_MARGIN + PAD_RADIUS_MAX) / SITE_CELL))
+	var within := PAD_TILE_MARGIN + PAD_RADIUS_MAX
+	var reach := int(ceil(within / SITE_CELL))
 	var home := cell_at(centre.x, centre.y)
 	var found: Array[Settlement] = []
 	for offset_x in range(-reach, reach + 1):
 		for offset_z in range(-reach, reach + 1):
-			var site := settlement_in_cell(Vector2i(home.x + offset_x, home.y + offset_z))
+			var cell := Vector2i(home.x + offset_x, home.y + offset_z)
+			# A tile is thirty-two units across and a cell is two hundred and
+			# sixty, so the square above is nearly all cells whose village
+			# could not have reached this tile whatever the ground under it
+			# turned out to be. Ruling those out on arithmetic is what keeps one
+			# question about one patch of ground from siting nine villages.
+			if not cell_could_reach(cell, centre.x, centre.y, within):
+				continue
+			var site := settlement_in_cell(cell)
 			if site == null:
 				continue
 			if site.distance_to(centre.x, centre.y) <= PAD_TILE_MARGIN:

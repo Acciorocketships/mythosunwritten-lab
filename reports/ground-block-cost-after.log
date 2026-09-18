@@ -1,0 +1,29 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+cold seed build (plans only): 0.0 s
+96 units out: 6 positions in 62.9 s (10.49 s each) -- 46 region builds 9.6 s, 46 water builds 53.3 s, 30 evictions
+950 units out: 6 positions in 89.5 s (14.92 s each) -- 105 region builds 0.8 s, 105 water builds 88.5 s, 105 evictions
+2000 units out: 6 positions in 112.4 s (18.74 s each) -- 84 region builds 0.8 s, 84 water builds 111.2 s, 84 evictions
+	Command being timed: "env -u DISPLAY -u WAYLAND_DISPLAY /home/ryko/proj/game/tools/godot/godot4 --headless --path . -s res://tools/ground_block_cost.gd -- --seed 1234 --blocks 6"
+	User time (seconds): 265.66
+	System time (seconds): 2.47
+	Percent of CPU this job got: 100%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:28.11
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8192132
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 2074214
+	Voluntary context switches: 3145
+	Involuntary context switches: 204
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 72
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

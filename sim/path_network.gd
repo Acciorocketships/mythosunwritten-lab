@@ -194,7 +194,16 @@ static func tile_at(x: float, z: float) -> Vector2i:
 ## nothing about how the road to it is decided.
 func places_near(x: float, z: float, reach: float) -> Array[Dictionary]:
 	var found: Array[Dictionary] = []
-	for site in settlements.settlements_near(x, z, reach + SettlementField.site_reach()):
+	# A place is a village's *centre*, and the line below drops every village
+	# whose centre is further than `reach`. So the lattice only has to be asked
+	# for villages within `reach`, and settlements_near() -- which measures to a
+	# pad's edge rather than to its centre -- already returns every one of those
+	# when it is asked for `reach` itself. It used to be asked for `reach` plus
+	# the widest anything a village owns, which returned the same places after
+	# this line and cost a wider ring of cells to find them: on seed 1234 that
+	# ring was twenty-five cells against nine, and a road tile in fresh country
+	# built a village in every one of them.
+	for site in settlements.settlements_near(x, z, reach):
 		if Vector2(site.centre_x - x, site.centre_z - z).length() > reach:
 			continue
 		found.append({

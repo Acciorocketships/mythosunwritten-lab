@@ -1,0 +1,19 @@
+
+RUN   test_window_glow
+        window glow: 123 villages light ["house=1100", "cottage=1033", "tavern=244", "workshop=4", "tower=36"]
+  ..  window glow     1123 s, 13959 checks, 11.50 GiB: a second pass found a different number of villages
+        window glow: 334 distinct placements checked, worst gap 0.221 (workshop face +1 share -0.42)
+FAIL  window glow    2271.7 s, 20651 checks, 1 failed
+        - only 4 lit windows on any workshop in the whole sample
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.60 GiB     0.1 min  quiet up to     2 s
+   1  test_window_glow       peak  11.60 GiB    37.9 min  quiet up to  1122 s
+  peak of the whole run: 11.60 GiB, in suite 1 (test_window_glow)
+  longest quiet stretch: 1122 s, in suite 1 (test_window_glow)
+  wall time of the whole run: 38.0 min (0.63 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260918-133522.log
+
+1 of 1 suites failed (1 failed checks of 20651)

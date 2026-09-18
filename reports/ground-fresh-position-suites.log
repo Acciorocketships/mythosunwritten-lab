@@ -1,0 +1,123 @@
+
+RUN   test_mountains
+  ..  mountains         70 s, 3 checks, 5.10 GiB: the highest ground in the box is only 20.99 units up; there is no mou...
+  ..  mountains        247 s, 11 checks, 6.68 GiB: only 4614 steps of road were walked
+FAIL  mountains       248.4 s, 13 checks, 5 failed
+        - the highest ground in the box is only 20.99 units up; there is no mountain here
+        - the route to the top is only 12 steps long
+        - the route only climbed 21.29 units
+        - 42 steps of road are laid on land that climbs more than 3.0 in one cell; the worst is 9.169
+      expected: 0
+      actual:   42
+        - 42 of 4614 steps of finished roadway climb more than 3.0 in one cell, so the carving has put a wall in the middle of a road
+      expected: 0
+      actual:   42
+
+RUN   test_drops
+  ..  drops            149 s, 20 checks, 0.60 GiB: the documented command exits 0
+  ..  drops            206 s, 59 checks, 4.16 GiB: two worlds from one seed start out identical, or nothing below means ...
+FAIL  drops           208.2 s, 65 checks, 1 failed
+        - the same scan does find world generation where world generation lives
+
+RUN   test_terrain
+PASS  terrain           0.9 s, 53 checks
+
+RUN   test_window_glow
+        window glow: 123 villages light ["house=1100", "cottage=1033", "tavern=244", "workshop=4", "tower=36"]
+  ..  window glow     1128 s, 13959 checks, 11.51 GiB: a second pass found a different number of villages
+        window glow: 334 distinct placements checked, worst gap 0.221 (workshop face +1 share -0.42)
+FAIL  window glow    2274.5 s, 20651 checks, 1 failed
+        - only 4 lit windows on any workshop in the whole sample
+
+RUN   test_islands
+  ..  islands           40 s, 295 checks, 1.11 GiB: the outline reaches nowhere at angle 0.000 of island (-3.000000, 0.00...
+  ..  islands           78 s, 1159 checks, 1.68 GiB: the outline reaches nowhere at angle 0.000 of island (1.000000, -2.00...
+  ..  islands          112 s, 9553 checks, 1.68 GiB: island (-3.000000, 0.000000, 0.000000) reaches 20.651580 at angle 0.0...
+  ..  islands          150 s, 25387 checks, 1.68 GiB: island (1.000000, -2.000000, 0.000000) reaches 12.510661 at angle 0.0...
+  ..  islands          183 s, 34366 checks, 1.68 GiB: could_reach says nothing of band 0 is within 36.0 of (-350.0, -350.0)...
+  ..  islands          222 s, 34856 checks, 1.68 GiB: could_reach says nothing of band 0 is within 36.0 of (-350.0, -140.0)...
+        islands: candidate bound ruled out 515 of 968 asks, 46 had an island
+  ..  islands          257 s, 37794 checks, 1.72 GiB: the cell gate changed what covers (-250.0, -250.0) of band 0 on seed ...
+  ..  islands          297 s, 43194 checks, 1.72 GiB: the cell gate changed what covers (-250.0, -250.0) of band 0 on seed ...
+        islands: cell gate matched the ungated scan on 10800 asks, 1296 with an island, building 317 cells against 1984
+  ..  islands          333 s, 45907 checks, 1.72 GiB: islands (-4.000000, 3.000000, 0.000000) and (-3.000000, 0.000000, 0.0...
+  ..  islands          371 s, 45937 checks, 1.72 GiB: islands (-2.000000, -4.000000, 0.000000) and (1.000000, -2.000000, 0....
+  ..  islands          487 s, 59805 checks, 7.18 GiB: an island's underside reaches below what is beneath it: -1,4 band 2, ...
+  ..  islands          526 s, 59862 checks, 7.82 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          567 s, 59925 checks, 7.82 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          604 s, 59954 checks, 7.83 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          645 s, 59987 checks, 7.84 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          689 s, 60009 checks, 7.84 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          746 s, 60023 checks, 7.86 GiB: a far-sky island turned up in the list of walkable surfaces
+  ..  islands          818 s, 60044 checks, 11.04 GiB: seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+  ..  islands          972 s, 60046 checks, 11.03 GiB: seed 7 has no aerial island in cell (-4.000000, -2.000000)
+  ..  islands         1055 s, 60047 checks, 11.03 GiB: seed 99991 has no aerial island in cell (-4.000000, -1.000000)
+  ..  islands         1140 s, 60075 checks, 11.03 GiB: a fresh world loaded no islands at all around its observer
+  ..  islands         1666 s, 60179 checks, 11.02 GiB: the island report should exit 0 (stdout: Godot Engine v4.7.2.stable.o...
+  ..  islands         1731 s, 60184 checks, 11.02 GiB: the placed run should exit 0
+FAIL  islands        1751.3 s, 60185 checks, 10 failed
+        - only 16 islands were sampled for the ratio check
+        - only 11 islands were checked for the cell scan
+        - only 7 islands were checked for relief
+        - only 7 islands were checked for keel spurs
+        - found no water at all to check, so nothing was checked
+        - seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+        - seed 1234 has no aerial island in cell (-4.000000, -4.000000)
+        - seed 7 has no aerial island in cell (-4.000000, -2.000000)
+        - seed 99991 has no aerial island in cell (-4.000000, -1.000000)
+        - an observer placed on an island did not report standing on one:
+
+seed 1234
+cast 3 following #0
+  Pip     #1 commander band=1 at (0.000, 0.000, 0.000) hp=26/26 walking
+  Nettle  #2 commander band=1 at (-7.000, 0.000, 4.000) hp=26/26 walking
+  Corin   #3 commander band=1 at (6.000, 0.000, -5.000) hp=26/26 walking
+tick 0 patches=30 islands=11 villages=1 roads=2 props=622 cover=0 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 103356f9a10bde34
+  t=  1  Pip    began go_to(target=(17.566, 3.927)), 20 ticks
+  t=  1  Nettle began go_to(target=(-20.572, 15.824)), 20 ticks
+  t=  1  Corin  began go_to(target=(-2.873, -20.661)), 20 ticks
+tick 4 patches=30 islands=11 villages=1 roads=2 props=622 cover=0 cast=3 biome=deep_forest water=0 on_island=0 on_path=0.00 bd3c77656bf5bee1
+done ticks=4 patches=30 built=62 final=bd3c77656bf5bee1
+
+
+RUN   test_settlements
+  ..  settlements       83 s, 3 checks, 7.15 GiB: cell (3, 3) came out differently when asked from the other end
+  ..  settlements      295 s, 52 checks, 12.29 GiB: two different seeds produced exactly the same villages
+  ..  settlements      399 s, 399 checks, 12.69 GiB: the shore village at (-311.1, 727.7) has 4 standing-water probes besi...
+  ..  settlements      448 s, 590 checks, 12.99 GiB: the levelled ground of the shore village at (255.0, 1022.9) still ris...
+  ..  settlements      685 s, 1143 checks, 13.90 GiB: the shore village at (-299.0, -763.5) has 5 standing-water probes bes...
+  ..  settlements      771 s, 1310 checks, 13.93 GiB: the levelled ground of the shore village at (210.4, 725.7) still rise...
+  ..  settlements      821 s, 1596 checks, 13.93 GiB: the levelled ground of the shore village at (518.1, 720.1) still rise...
+  ..  settlements      857 s, 1736 checks, 13.93 GiB: the levelled ground of the shore village at (742.3, 719.9) still rise...
+./run_tests.sh: line 377: 1936217 Killed                  env -u DISPLAY -u WAYLAND_DISPLAY "$GODOT" --headless --path . --script "$SCRIPT" -- "$@" > "$FIFO" 2>&1 9>&-
+FAIL  test_settlements: the engine died (exit 137) before the suite returned
+
+RUN   test_scatter
+  ..  scatter          160 s, 115 checks, 6.20 GiB: 0 cells answered differently when asked in another order from a field...
+  ..  scatter          192 s, 286 checks, 7.07 GiB: the streamer had only 32 chunks dressed at spawn, too few to sweep
+  ..  scatter          230 s, 288 checks, 7.15 GiB: 0 chunks did not come back when the observer did: 
+  ..  scatter          396 s, 293 checks, 11.52 GiB: two seeds dressed the same chunks identically
+  ..  scatter          442 s, 333 checks, 11.52 GiB: only 44 yard props were found around 8 villages, which is too few to ...
+  ..  scatter         1419 s, 1467 checks, 11.52 GiB: the scatter report should exit 0 (stdout: Godot Engine v4.7.2.stable....
+  ..  scatter         1528 s, 1472 checks, 11.52 GiB: the headless run should exit 0
+FAIL  scatter        1528.4 s, 1478 checks, 2 failed
+        - expected ground of both biomes to measure, found 0 forest and 26 highland chunks
+        - only 0 pieces of waterside flora were found, which is too few to be evidence
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.29 GiB     0.0 min  quiet up to     0 s
+   1  test_mountains         peak   6.70 GiB     4.2 min  quiet up to   174 s
+   2  test_drops             peak   5.58 GiB     3.5 min  quiet up to   148 s
+   3  test_terrain           peak   0.60 GiB     0.1 min  quiet up to     2 s
+   4  test_window_glow       peak  11.59 GiB    38.0 min  quiet up to  1125 s
+   5  test_islands           peak  17.46 GiB    29.3 min  quiet up to   525 s
+   6  test_settlements       peak  18.82 GiB    47.7 min  quiet up to  1912 s
+   7  test_scatter           peak  17.92 GiB    25.6 min  quiet up to   974 s
+  peak of the whole run: 18.82 GiB, in suite 6 (test_settlements)
+  longest quiet stretch: 1912 s, in suite 6 (test_settlements)
+  wall time of the whole run: 148.7 min (2.48 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260918-100400.log
+
+6 of 7 suites failed (20 failed checks of 82445)
