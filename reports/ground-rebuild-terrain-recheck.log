@@ -1,0 +1,18 @@
+
+RUN   test_terrain
+  ..  terrain          213 s, 54 checks: building other chunks first changed chunk (3, -2)
+  ..  terrain          414 s, 69 checks: headless run should exit 0 (output: Godot Engine v4.7.2.stable.offici...
+  ..  terrain          492 s, 72 checks: rebuilding the chunks of seed 1234 in this process gave different geo...
+PASS  terrain         491.8 s, 72 checks
+
+what this run cost, by suite -- memory held by every engine on the machine,
+wall time, and the longest stretch in which the transcript did not grow:
+  --  (starting)             peak   0.30 GiB     0.0 min  quiet up to     0 s
+   1  test_terrain           peak  13.99 GiB     8.2 min  quiet up to   210 s
+  peak of the whole run: 13.99 GiB, in suite 1 (test_terrain)
+  longest quiet stretch: 210 s, in suite 1 (test_terrain)
+  wall time of the whole run: 8.3 min (0.14 h)
+  the silence budget this run ran under: 3600s
+  recorded in /home/ryko/proj/game/.testruns/memory.20260917-210230.log
+
+all 1 suites passed (72 checks)

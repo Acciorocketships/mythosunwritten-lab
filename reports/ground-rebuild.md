@@ -385,3 +385,42 @@ project's own scan rather than asserted:
     asset check: OK -- res://sim names asset tags and no asset
 
 and as a suite, `PASS  layering          0.3 s, 63 checks`.
+
+## 9. Re-checked, independently, at cycle 3880
+
+Everything above was written and measured in one run; this section is a second
+run repeating the parts whose evidence lives outside the repository, so that
+nothing here rests on a transcript that was never checked in.
+
+**The sweep and its determinism, re-run.** Four fresh engine processes, two per
+window, with the same commands quoted in §5:
+
+| Window | Process A | Process B | Differing lines |
+| --- | --- | --- | --- |
+| origin `(0, 0)` | `163a7495018510db` | `163a7495018510db` | 0 |
+| lakeside `(84.5, 294)` | `10c837b2c5152091` | `10c837b2c5152091` | 0 |
+
+`diff` over the full 576-line output is empty in both pairs, and the two digests
+are the same ones §5 records on both sides of the rebuild. The lakeside window
+again reads 152 water cells, all 152 holes in the board, and 29 banks.
+`tools/terrain_seam_probe.gd` itself was untouched by the rebuild commit
+(`git log -- tools/terrain_seam_probe.gd` names only `b80bf504`), so the before
+and after columns of §5 are the same tool asked the same question.
+
+**`test_terrain`, re-run on its own.** §7.1 quotes a verdict whose transcript
+was not checked in. It is now:
+
+    $ lab progress run ground-rebuild-terrain-recheck \
+        --log reports/ground-rebuild-terrain-recheck.log -- ./run_tests.sh test_terrain
+
+    PASS  terrain         491.8 s, 72 checks
+    all 1 suites passed (72 checks)
+
+[reports/ground-rebuild-terrain-recheck.log](ground-rebuild-terrain-recheck.log),
+8.3 min, peak 13.99 GiB, exit 0, and none of the three lines the runner's own
+transcript guard looks for (`missing or unreadable`, `No such file or
+directory`, `SCRIPT ERROR`). §7.1's `492.1 s, 72 checks` and this run's
+`491.8 s, 72 checks` are the same verdict.
+
+**The layer scan, re-derived.** The command in §8, run again at this cycle,
+prints the same four lines.
