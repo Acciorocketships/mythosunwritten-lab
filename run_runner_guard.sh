@@ -158,7 +158,7 @@ attempt "a suite says where it has got to while it is still working" \
 	timeout -s KILL "$WAIT" ./run_tests.sh test_rng
 [[ $status -eq 0 ]] || note "expected exit 0, got $status"
 has '^  \.\.  rng ' "a suite printed nothing between its RUN line and its PASS line"
-has '^  \.\.  rng .* checks: ' "a progress line does not say what the suite was checking"
+has '^  \.\.  rng .* checks, .* GiB: ' "a progress line does not say what the suite was checking, or what it cost"
 has '^PASS  rng .* checks$' "the pass line no longer ends in its check count"
 has '^all 1 suites passed' "progress lines broke the summary's arithmetic"
 

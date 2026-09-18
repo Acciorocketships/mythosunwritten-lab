@@ -12,9 +12,15 @@ extends RefCounted
 ## watched test_terrain_lod print nothing for two hours and could not tell which
 ## of the two it was looking at. Every PROGRESS_EVERY seconds of work, the check
 ## helpers below print the suite's name, how many checks it has completed, how
-## long it has been going and what it last checked -- so the transcript says what
-## a suite was doing when it went quiet, and a silence in the transcript now
-## means stuck rather than slow.
+## long it has been going, how much memory it is holding and what it last
+## checked -- so the transcript says what a suite was doing when it went quiet,
+## and a silence in the transcript now means stuck rather than slow.
+##
+## The memory is on the line because the runner's sampler records what a suite
+## cost without saying which of its checks was spending it: at cycle 3886
+## test_settlements was known to reach 24.29 GiB and be killed, and not known
+## where. With the two beside each other the growth was read off one run and
+## named -- see reports/settlements/memory.md.
 class_name TestSuite
 
 ## Seconds of work between progress lines. Low enough that the slowest suite
@@ -90,6 +96,25 @@ func _progress(message: String) -> void:
 	var where := message.split("\n")[0]
 	if where.length() > 72:
 		where = where.substr(0, 69) + "..."
-	print("  ..  %-14s %5.0f s, %d checks: %s" % [
-		suite_name, now - _first_check_at, checks, where,
+	print("  ..  %-14s %5.0f s, %d checks, %.2f GiB: %s" % [
+		suite_name, now - _first_check_at, checks, resident_gib(), where,
 	])
+
+
+## This process's resident memory, in gibibytes, or 0.0 where the kernel does
+## not publish it.
+##
+## The runner's sampler already records the resident memory of every engine
+## every two seconds, which says how much a suite cost but not which of its
+## checks was running when it cost it. Carrying the same number on the progress
+## line joins the two: a suite that grows says so beside the check it was in.
+## The number is the kernel's own -- field two of /proc/self/statm, in pages --
+## so it is the same quantity the sampler and the kernel's own killer read.
+static func resident_gib() -> float:
+	var statm := FileAccess.open("/proc/self/statm", FileAccess.READ)
+	if statm == null:
+		return 0.0
+	var fields := statm.get_line().split(" ", false)
+	if fields.size() < 2:
+		return 0.0
+	return float(fields[1].to_int()) * 4096.0 / float(1 << 30)

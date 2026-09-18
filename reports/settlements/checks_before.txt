@@ -1,0 +1,90 @@
+104	check(villages.size() >= 4,
+162	equal(_digests(again), _digests(villages),
+186	equal(found, ahead[cell],
+197	not_equal(_digests(other), _digests(villages),
+205	check(home != null, "the cell holding the world origin has no starting village")
+208	check(home.is_spawn, "the starting village does not know it is the starting village")
+210	check(away >= SettlementField.SPAWN_RING_MIN - 0.001
+216	check(away > home.radius,
+225	not_equal(site.biome, BiomeCatalog.TWILIGHT_MARSH,
+228	check(float(SettlementField.BIOME_SHARE.get(site.biome, 0.0)) > 0.0,
+236	check(not terrain.is_water_at(x, z),
+273	check(villages >= 100,
+280	check(share >= SHORE_SHARE_LOW and share <= SHORE_SHARE_HIGH,
+324	check(wet >= SettlementField.SHORE_WET_MIN,
+336	check(not terrain.is_water_at(float(building["x"]), float(building["z"])),
+340	check(not terrain.is_water_at(corner.x, corner.y),
+343	check(terrain.is_reserved_at(float(building["x"]), float(building["z"])),
+350	check(not terrain.is_water_at(
+355	check(_relief(site, terrain, false) < 0.35,
+358	check(absf(terrain.ground_height_at(site.centre_x, site.centre_z) - site.pad_height)
+363	check(terrain.island_field.islands_near(
+368	check(not site.is_spawn, "the starting village was sited by the shore rule")
+387	check(over.is_empty(),
+450	check(not settlements._clear_overhead(x, z, pad),
+455	check(uppers >= 10,
+457	check(gaps >= 2,
+484	check(pairs > 60,
+487	equal(overlapping, 0,
+502	equal(crowded, 0,
+517	check(away <= site.core_radius + 0.001,
+529	check(AssetTags.is_tag(tag), "'%s' is not a catalog tag" % tag)
+530	equal(AssetTags.category_of(tag), AssetTags.BUILDINGS,
+535	check(AssetTags.is_tag(tag), "'%s' is not a catalog tag" % tag)
+539	equal(AssetTags.category_of(String(bridge["tag"])), AssetTags.BRIDGES,
+543	check(AssetTags.is_tag(String(prop["tag"])),
+558	check(ahead.distance_to(middle) < here.distance_to(middle),
+572	check(after < 0.35,
+576	check(after < before,
+584	check(absf(middle - site.pad_height) < 0.02,
+587	check(flattened >= villages.size() / 2,
+601	check(absf(
+644	check(terrain.is_reserved_at(x, z),
+647	equal(terrain.building_at(x, z)["tag"], building["tag"],
+650	check(inside > 100, "only %d points inside buildings were checked" % inside)
+663	check(free > villages.size() * 4,
+668	check(not terrain.is_reserved_at(
+687	check(not straddling.is_empty(),
+710	equal(behind_first.digest(), ahead_first.digest(),
+714	equal(behind_second.digest(), ahead_second.digest(),
+720	equal(
+726	check(_village_reaches_chunk(site, first) and _village_reaches_chunk(site, second),
+764	equal(from_west.settlement_streamer.live_settlement(site.cell).digest(),
+768	equal(from_west.terrain.ground_height_at(site.centre_x, site.centre_z),
+778	check(site != null, "expected a starting village to stream")
+782	check(world.settlement_streamer.is_loaded(site.cell),
+788	check(not world.settlement_streamer.is_loaded(site.cell),
+791	equal(world.settlement_streamer.live_settlement(site.cell).digest(), loaded,
+798	equal(world.settlement_streamer.live_settlement(site.cell).digest(), loaded,
+809	check(again != null, "a village vanished when asked through a world")
+811	equal(again.digest(), site.digest(),
+838	check(roads.size() >= 6,
+855	equal(SettlementStreamer.road_digest(other),
+859	check(found, "the road %s is not there when looked for from its far end"
+861	check(float(road["length"]) <= PathNetwork.LINK_RADIUS + 0.001,
+874	equal(SettlementStreamer.road_digest(other),
+878	check(matched, "a fresh network for the same seed has no road %s" % road["id"])
+966	check(absf(left - right) < PathNetwork.PATH_DEPTH,
+989	check(absf(left - right) <= land + CONVERGING_SLACK,
+995	check(on_road > 40,
+998	check(shared * 10 > across_checked * 8,
+1002	check(_share(carved, beside_checked) > 0.9,
+1006	check(mean_drop > PathNetwork.PATH_DEPTH * 0.5
+1010	equal(browner, on_road,
+1015	check(across_checked > 30,
+1017	check(levelled < untouched * 0.35,
+1073	check(false,
+1079	check(steps > 3000, "only %d steps of roadway were walked" % steps)
+1080	equal(walls, 0,
+1153	check(terrain.is_water_at(
+1158	check(float(bridge["height"]) > terrain.water_surface_at(
+1162	equal(terrain.ground_height_at(
+1169	check(crossings > 0,
+1172	equal(bridged, crossings,
+1175	check(checked > 0, "no bridges were examined")
+1224	check(wet > 80, "only %d wet samples, which is too few to mean much" % wet)
+1225	check(dry > 1000, "only %d dry samples" % dry)
+1226	check(moved > 50,
+1244	equal(terrain.is_water_at(x, z), bare.is_wet(x, z),
+1250	equal(terrain.ground_height_at(x, z), bare.ground_height(x, z),
+1255	check(terrain.water_surface_at(x, z) <= terrain.ground_height_at(x, z),

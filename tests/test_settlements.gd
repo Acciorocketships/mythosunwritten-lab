@@ -261,15 +261,33 @@ const SHORE_SHARE_HIGH := 0.30
 ## The share is the point of the rule and the rules are the price of it: a
 ## village that got its pond by building in it, or by skipping the levelling, or
 ## by standing under a floating island, would not be a village.
+##
+## One world at a time, because eight of them do not fit this machine. The
+## survey used to carry each shore village's TerrainQuery along with it in a
+## list and ask its two questions after the loop had finished, which pinned
+## every seed's whole stack at once. Measured with
+## tools/settlements_memory_probe.gd at cycle 3886, one stack is 3.44 GiB of
+## engine allocation -- not a leak, all of it given back the moment the last
+## reference goes -- so eight of them are 27.5 GiB against a 27.4 GiB machine,
+## and the kernel took the engine here rather than let the suite reach a
+## verdict. Asking each shore village its two questions while its own world is
+## still the one in hand asks exactly the same questions of exactly the same
+## villages; what crosses the loop afterwards is Settlement data alone, which
+## holds no reference to any ground.
 func _a_share_of_villages_stand_on_a_shore() -> void:
 	var villages := 0
-	var shores: Array[Dictionary] = []
+	var shores: Array[Settlement] = []
 	for world_seed: int in SHORE_SEEDS:
 		var terrain := TerrainQuery.for_seed(world_seed)
+		var here: Array[Settlement] = []
 		for site in _villages(terrain.settlement_field, SHORE_CELL_REACH):
 			villages += 1
 			if site.is_shore:
-				shores.append({"site": site, "terrain": terrain})
+				here.append(site)
+				shores.append(site)
+		for site in here:
+			_the_shore_village_has_a_shore(site, terrain)
+			_the_shore_village_keeps_its_ground(site, terrain)
 	check(villages >= 100,
 		"expected a wide sample of villages to measure the shore share on, found %d"
 		% villages)
@@ -284,22 +302,14 @@ func _a_share_of_villages_stand_on_a_shore() -> void:
 	print("        settlements: %d of %d villages (%.1f%%) sited by the shore rule over %d seeds"
 		% [shores.size(), villages, share * 100.0, SHORE_SEEDS.size()])
 
-	for found in shores:
-		var site: Settlement = found["site"]
-		var terrain: TerrainQuery = found["terrain"]
-		_the_shore_village_has_a_shore(site, terrain)
-		_the_shore_village_keeps_its_ground(site, terrain)
 	# The rules the whole layer is held to, run over the shore villages on their
 	# own so that a failure names the shore rule rather than hiding in a sample
 	# that is nine parts inland village.
-	var only_shores: Array[Settlement] = []
-	for found in shores:
-		only_shores.append(found["site"])
-	if only_shores.is_empty():
+	if shores.is_empty():
 		return
-	_no_two_buildings_overlap(only_shores)
-	_every_building_stands_on_the_levelled_ground(only_shores)
-	_buildings_face_the_green(only_shores)
+	_no_two_buildings_overlap(shores)
+	_every_building_stands_on_the_levelled_ground(shores)
+	_buildings_face_the_green(shores)
 
 
 ## There really is standing water beside it: what the rule was for.
