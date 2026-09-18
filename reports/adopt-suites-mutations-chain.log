@@ -1,0 +1,9 @@
+== piece mutations start 2026-09-18T17:27:07-04:00
+== piece mutations exit=0 2026-09-18T17:45:00-04:00
+
+all 19 broken rules were caught
+== resolution mutations start 2026-09-18T17:45:00-04:00
+== resolution mutations exit=1 2026-09-18T17:46:45-04:00
+
+1 of 61 broken rules went unnoticed
+== both done 2026-09-18T17:46:45-04:00

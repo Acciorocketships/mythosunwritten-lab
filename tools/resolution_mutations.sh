@@ -165,7 +165,9 @@ MUTATIONS=(
 			\"shape\": [Vector2i(0, -1)] as Array[Vector2i],
 			\"cooldown\": 2,
 			\"damage\": 9,"
-"a shove pushes nobody|sim/weapon.gd|			Attack.PUSH: 1,|			Attack.PUSH: 0,"
+"a shove pushes nobody|sim/weapon.gd|			\"damage\": 0,
+			Attack.PUSH: 1,|			\"damage\": 0,
+			Attack.PUSH: 0,"
 "a point of budget is a point of reduction|sim/armour.gd|	return maxi(0, points) / POINTS_PER_DEFENCE|	return maxi(0, points)"
 "what is in a commander's hands does not defend it|sim/commander.gd|	if weapon != null and weapon.item != null:
 		points += weapon.item.defence_for(score_for(weapon.item))|	if false:

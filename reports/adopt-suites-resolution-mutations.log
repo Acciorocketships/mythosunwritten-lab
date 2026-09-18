@@ -1,0 +1,65 @@
+rule broken                                          file                         the suite
+---------------------------------------------------- ---------------------------- ---------
+the modifier is applied after defence, not before    sim/damage.gd                failed, as it must
+defence does nothing at all                          sim/damage.gd                failed, as it must
+a blow can be reduced to nothing                     sim/damage.gd                failed, as it must
+the die is applied to the result, not to the blow    sim/damage.gd                failed, as it must
+the die rounds a blow down rather than to the nearest point sim/damage.gd                failed, as it must
+a blow that missed its roll deals nothing -- the to-hit model sim/damage.gd                failed, as it must
+the die is wider than the positional ladder can carry sim/damage.gd                failed, as it must
+the die is one die and not two                       sim/damage.gd                failed, as it must
+the die does not read the fight's seed               sim/damage.gd                failed, as it must
+the die does not read what it is being thrown at     sim/damage.gd                failed, as it must
+a fight with no seed rolls anyway                    sim/damage.gd                failed, as it must
+a fight's seed does not depend on where it is        sim/damage.gd                failed, as it must
+one face of the die is favoured by the fold          sim/damage.gd                failed, as it must
+the die reaches the minion capture layer             sim/combat_resolution.gd     failed, as it must
+a transcript hides which die was in play             sim/combat_resolution.gd     failed, as it must
+a fight is played with no die at all                 sim/combat_match.gd          failed, as it must
+high ground and facing add instead of multiplying    sim/damage.gd                failed, as it must
+a backstab is worth no more than a flank             sim/damage.gd                failed, as it must
+high ground is worth nothing                         sim/damage.gd                failed, as it must
+a flank is worth nothing                             sim/damage.gd                failed, as it must
+behind and in front are the same place               sim/damage.gd                failed, as it must
+a target with no facing can still be backstabbed     sim/damage.gd                failed, as it must
+a minion's health does not scale with its level      sim/damage.gd                failed, as it must
+a minion's defence does not scale with its level     sim/damage.gd                failed, as it must
+a minion's blow does not scale with its level        sim/damage.gd                failed, as it must
+a commander's health does not scale with its level   sim/damage.gd                failed, as it must
+a capture costs the taker its health                 sim/combat_resolution.gd     failed, as it must
+a capture is decided by level                        sim/combat_resolution.gd     failed, as it must
+a capturing minion does not take the cell            sim/combat_resolution.gd     failed, as it must
+a minion reaching a commander captures it            sim/combat_resolution.gd     failed, as it must
+a minion takes the commander's cell when it strikes  sim/combat_resolution.gd     failed, as it must
+a shove ignores what is under the cell it pushes into sim/combat_resolution.gd     failed, as it must
+a shove off a cliff is only a step                   sim/combat_resolution.gd     failed, as it must
+a shove pushes towards its attacker                  sim/combat_resolution.gd     failed, as it must
+a shove reads only the cell it lands on              sim/combat_resolution.gd     failed, as it must
+a shove's distance is clamped to one cell            sim/attack.gd                failed, as it must
+a shove's distance is tripled                        sim/attack.gd                failed, as it must
+an attack with no damage still reaches the seam      sim/combat_resolution.gd     failed, as it must
+an attack ignores its own cooldown                   sim/combat_resolution.gd     failed, as it must
+an attack spares the pieces standing in it           sim/combat_resolution.gd     failed, as it must
+a round never advances                               sim/combat_match.gd          failed, as it must
+a turn never passes to the next commander            sim/combat_match.gd          failed, as it must
+a commander may move as often as it likes            sim/combat_match.gd          failed, as it must
+a commander may act as often as it likes             sim/combat_match.gd          failed, as it must
+a commander may march every minion it owns           sim/combat_match.gd          failed, as it must
+a commander may command anybody's minions            sim/combat_match.gd          failed, as it must
+a minion may be sent anywhere on the board           sim/combat_match.gd          failed, as it must
+a cooldown is always measured from the first turn    sim/combat_match.gd          failed, as it must
+the area attack is not a cheap one                   sim/weapon.gd                failed, as it must
+a shove deals damage as well                         sim/weapon.gd                failed, as it must
+a shove pushes nobody                                sim/weapon.gd                failed, as it must
+a point of budget is a point of reduction            sim/armour.gd                failed, as it must
+what is in a commander's hands does not defend it    sim/commander.gd             failed, as it must
+every wearer reads every item in full                sim/commander.gd             failed, as it must
+a weapon deals the catalogue's damage whatever it is worth sim/weapon.gd                failed, as it must
+a weapon with no damage to divide still deals its budget sim/weapon.gd                failed, as it must
+a cooldown is bought down by the point, not by the cell sim/weapon.gd                failed, as it must
+a second file calls the damage seam                  sim/combat_policy.gd         failed, as it must
+a random source reaches the file that plays a turn   sim/combat_policy.gd         failed, as it must
+a second file rolls the die                          sim/combat_policy.gd         failed, as it must
+the die is drawn from a stream rather than hashed from the blow sim/damage.gd                failed, as it must
+
+all 61 broken rules were caught

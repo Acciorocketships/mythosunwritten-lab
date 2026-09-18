@@ -24,9 +24,9 @@ trap 'restore; rm -rf "$BACKUP"' EXIT
 
 # name | file | the text to replace | what to replace it with
 MUTATIONS=(
-"a slide is not stopped by a piece|sim/legal_moves.gd|				if taking and standing.owner_id != piece.owner_id:
+"a slide is not stopped by a piece|sim/legal_moves.gd|				if taking and standing.opposes(piece):
 					cells.append(to)
-				break|				if taking and standing.owner_id != piece.owner_id:
+				break|				if taking and standing.opposes(piece):
 					cells.append(to)
 				from = to
 				continue"
@@ -40,7 +40,7 @@ MUTATIONS=(
 				cells.append_array(_landings(board, pieces, piece, grant, taking))|			MoveGrant.LAND:
 				cells.append_array(_rays(board, pieces, piece, grant, taking))"
 "a piece may take its own side|sim/legal_moves.gd|	if taking:
-		return standing != null and standing.owner_id != piece.owner_id|	if taking:
+		return standing != null and standing.opposes(piece)|	if taking:
 		return standing != null"
 "the Toadstool captures the way it moves|sim/minion.gd|	if of == TOADSTOOL:
 		return [MoveGrant.land(PieceGeometry.DIAGONALS, TOADSTOOL)]|	if of == TOADSTOOL:
