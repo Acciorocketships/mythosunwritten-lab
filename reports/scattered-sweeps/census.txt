@@ -1,0 +1,1097 @@
+# 112 position queries declared under sim and scripts/terrain
+# _base_top_at, _blended_tint, _carving_at, _clear_overhead, _ground_before_roads, _has_shore, _is_standing_water, _island_of_storey, _nearest_segment, _outer_is_dry, _pad_ground, _pad_scan, _reference_at, _segments_near, _shore_ground, _site_at, _storey_at, _storey_of, _tile_near, axes, base_height, base_height_at, base_top_height_at, biome, biome_at, board_around, bottom_height_at, build, build_on_ground, build_on_top, building_at, cell_at, cell_for, cell_of, covers, distance_to, distance_to_road, drop_from, edges_near, enemies_near, graded_height, ground_at, ground_delta_at, ground_height, ground_height_at, ground_tint, ground_tint_at, holds_water_at, in_spill_wedge, inner_corner_height, inner_corner_stacked_height, is_bank, is_bank_at, is_over_island_at, is_passable_at, is_reserved_at, is_void_at, is_water_at, is_wet, island_at, island_height_at, islands_at, keel_profile_at, landmark_cell_at, landmarks_near, level_strength_at, marsh_strength, moisture, normal_at, outer_corner_height, outer_corner_stacked_height, pad_tile_at, pad_weight, pads_near, patch_at, path_strength_at, place_observer, places_near, pond_depth_at, pond_surface_at, profile, profile_at, ratio_at, road_at, road_beside, road_distance_at, roads_over, rock_tint, sample, settlement_at, settlements_near, standing_level, strength_at, support_at, surface_height_at, surfaces_at, tile_at, top_height_at, unit_sample, wading_height_at, walkable_island_over, walkable_islands_over, water_column, water_column_at, water_depth, water_depth_at, water_depth_at_height, water_surface, water_surface_at, water_tint, water_tint_at, weights
+
+# 66 suite verdicts read from reports/adopted-base-full-suite.log
+
+# 70 of 225 test_*.gd files are suites a run enters (bin/test_main.gd); the rest are skipped
+
+tests/test_asset_tags.gd [450 s FAIL]: 1 position queries inside a loop (0 scattered, 0 local, 1 not readable from the source)
+  line 527  depth 2  profile_at  [unread: position read off the source, stride not stated]
+      loop 524: for ring in range(1, 20):
+      loop 525: for corner in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(0, -1)]:
+      call:   var other := terrain.profile_at(at.x, at.y)
+      where:  526: var at: Vector2 = corner * float(ring) * step
+      where:  526: var at: Vector2 = corner * float(ring) * step
+
+tests/test_biomes.gd [429 s FAIL]: 19 position queries inside a loop (0 scattered, 5 local, 14 not readable from the source)
+  line 52  depth 1  biome  [unread: position comes from the collection walked]
+      loop 51: for probe in probes:
+      call:   equal(again.biome(probe.x, probe.y), field.biome(probe.x, probe.y),
+  line 55  depth 1  profile  [unread: position comes from the collection walked]
+      loop 51: for probe in probes:
+      call:   equal(again.profile(probe.x, probe.y).digest(),
+  line 56  depth 1  profile  [unread: position comes from the collection walked]
+      loop 51: for probe in probes:
+      call:   field.profile(probe.x, probe.y).digest(),
+  line 65  depth 1  biome, profile  [unread: position comes from the collection walked]
+      loop 63: for probe in probes:
+      call:   field.biome(probe.x, probe.y), field.profile(probe.x, probe.y).digest(),
+  line 68  depth 1  profile  [unread: position comes from the collection walked]
+      loop 67: for i in 500:
+      call:   field.profile(float(i) * 7.3, float(i) * -3.1)
+  line 72  depth 1  biome  [unread: position read off the source, stride not stated]
+      loop 69: for index in range(probes.size() - 1, -1, -1):
+      call:   field.biome(probe.x, probe.y),
+      where:  70: var probe: Vector2 = probes[index]
+      where:  70: var probe: Vector2 = probes[index]
+  line 73  depth 1  profile  [unread: position read off the source, stride not stated]
+      loop 69: for index in range(probes.size() - 1, -1, -1):
+      call:   field.profile(probe.x, probe.y).digest(),
+      where:  70: var probe: Vector2 = probes[index]
+      where:  70: var probe: Vector2 = probes[index]
+  line 88  depth 2  weights  [local: position does not move with the innermost loop]
+      loop 85: for probe in probes:
+      loop 87: for id in BiomeCatalog.IDS:
+      call:   var weight := float(field.weights(probe.x, probe.y)[id])
+      where:  70: var probe: Vector2 = probes[index]
+      where:  70: var probe: Vector2 = probes[index]
+  line 104  depth 1  biome  [local: grid, stride 37 u]
+      loop 102: for i in 60:
+      call:   if field.biome(x, 12.0) != other.biome(x, 12.0):
+      where:  103: var x := float(i) * 37.0
+  line 159  depth 4  biome  [unread: position read off the source, stride not stated]
+      loop 152: for block_row in 6:
+      loop 153: for block_column in 6:
+      loop 155: for row in 12:
+      loop 156: for column in 12:
+      call:   if field.biome(x, z) == BiomeCatalog.TWILIGHT_MARSH:
+      where:  157: var x := float(block_column * 12 + column - 36) * 18.0
+      where:  158: var z := float(block_row * 12 + row - 36) * 18.0
+  line 234  depth 1  profile  [unread: position read off the source, stride not stated]
+      loop 231: for i in samples:
+      call:   blended.append(field.profile(point.x, point.y))
+      where:  233: var point := at + along * offset
+      where:  233: var point := at + along * offset
+  line 237  depth 1  biome  [unread: position read off the source, stride not stated]
+      loop 231: for i in samples:
+      call:   snapped.append(BiomeCatalog.profile(field.biome(point.x, point.y)))
+      where:  233: var point := at + along * offset
+      where:  233: var point := at + along * offset
+  line 335  depth 1  biome  [local: position does not move with the innermost loop]
+      loop 331: for line in lines:
+      call:   var id := field.biome(x, z)
+      where:  333: var x := float(parts[1])
+      where:  334: var z := float(parts[2])
+  line 338  depth 1  profile, weights  [local: position does not move with the innermost loop]
+      loop 331: for line in lines:
+      call:   x, z, id, float(field.weights(x, z)[id]), field.profile(x, z).digest(),
+      where:  333: var x := float(parts[1])
+      where:  334: var z := float(parts[2])
+  line 356  depth 2  biome  [unread: position read off the source, stride not stated]
+      loop 352: for row in range(-span, span + 1):
+      loop 353: for column in range(-span, span + 1):
+      call:   counts[field.biome(x, z)] += 1
+      where:  354: var x := centre.x + float(column) * spacing
+      where:  355: var z := centre.y + float(row) * spacing
+  line 366  depth 1  biome  [local: grid, stride 137 u]
+      loop 364: for line in 8:
+      call:   var previous := field.biome(-1200.0, z)
+      where:  365: var z := float(line) * 137.0
+  line 369  depth 2  biome  [unread: position read off the source, stride not stated]
+      loop 364: for line in 8:
+      loop 367: for i in range(1, 800):
+      call:   var here := field.biome(x, z)
+      where:  368: var x := -1200.0 + float(i) * step
+      where:  365: var z := float(line) * 137.0
+  line 375  depth 2  biome  [unread: position read off the source, stride not stated]
+      loop 364: for line in 8:
+      loop 367: for i in range(1, 800):
+      call:   var left := BiomeCatalog.profile(field.biome(x - 24.0, z))
+      where:  365: var z := float(line) * 137.0
+  line 376  depth 2  biome  [unread: position read off the source, stride not stated]
+      loop 364: for line in 8:
+      loop 367: for i in range(1, 800):
+      call:   var right := BiomeCatalog.profile(field.biome(x + 24.0, z))
+      where:  365: var z := float(line) * 137.0
+
+tests/test_board_overlay.gd [461 s PASS]: 2 position queries inside a loop (0 scattered, 0 local, 2 not readable from the source)
+  line 80  depth 4  support_at  [unread: position read off the source, stride not stated]
+      loop 65: for row in board.cells_deep:
+      loop 66: for column in board.cells_across:
+      loop 75: for down in wide:
+      loop 76: for across in wide:
+      call:   var wanted := terrain.support_at(x, z, board.height_at(cell))
+      where:  77: var x: float = middle.x - half + 2.0 * half * float(across) / float(cuts)
+      where:  78: var z: float = middle.y - half + 2.0 * half * float(down) / float(cuts)
+  line 179  depth 4  support_at  [unread: position read off the source, stride not stated]
+      loop 165: for row in board.cells_deep:
+      loop 166: for column in board.cells_across:
+      loop 175: for down in wide:
+      loop 176: for across in wide:
+      call:   var real := terrain.support_at(x, z, height)
+      where:  177: var x: float = middle.x - half + 2.0 * half * float(across) / float(cuts)
+      where:  178: var z: float = middle.y - half + 2.0 * half * float(down) / float(cuts)
+
+tests/test_combat_board.gd [1017 s FAIL]: 21 position queries inside a loop (0 scattered, 15 local, 6 not readable from the source)
+  line 115  depth 1  cell_of  [unread: position read off the source, stride not stated]
+      loop 110: for at in range(-40, 41):
+      call:   equal(CombatBoard.cell_of(centre.x, centre.y, size), cell,
+      where:  112: var centre := CombatBoard.centre_of(cell, size)
+      where:  112: var centre := CombatBoard.centre_of(cell, size)
+  line 122  depth 1  cell_of  [unread: position read off the source, stride not stated]
+      loop 110: for at in range(-40, 41):
+      call:   equal(CombatBoard.cell_of(low.x, low.y, size), cell,
+      where:  118: var low := Vector2(float(cell.x) * size + 0.001, float(cell.y) * size + 0.001)
+      where:  118: var low := Vector2(float(cell.x) * size + 0.001, float(cell.y) * size + 0.001)
+  line 124  depth 1  cell_of  [local: position does not move with the innermost loop]
+      loop 110: for at in range(-40, 41):
+      call:   equal(CombatBoard.cell_of(high.x, high.y, size), cell,
+      where:  119: var high := Vector2(
+      where:  119: var high := Vector2(
+  line 185  depth 1  build_on_ground  [unread: position read off the source, stride not stated]
+      loop 182: for case in cases:
+      call:   var first := builder.build_on_ground(here.x, here.y)
+      where:  183: var here: Vector2 = case[0]
+      where:  183: var here: Vector2 = case[0]
+  line 186  depth 1  build_on_ground  [unread: position read off the source, stride not stated]
+      loop 182: for case in cases:
+      call:   var second := builder.build_on_ground(there.x, there.y)
+      where:  184: var there: Vector2 = case[1]
+      where:  184: var there: Vector2 = case[1]
+  line 215  depth 1  build_on_ground  [local: grid, stride 137 u]
+      loop 213: for at in 12:
+      call:   builder.build_on_ground(away, -away, SMALL_SPAN)
+      where:  214: var away := float(at) * 137.0 - 800.0
+  line 216  depth 1  build_on_top  [local: grid, stride 137 u]
+      loop 213: for at in 12:
+      call:   builder.build_on_top(away * 0.5, away, SMALL_SPAN)
+      where:  214: var away := float(at) * 137.0 - 800.0
+  line 230  depth 1  build_on_top  [local: grid, stride 96 u]
+      loop 227: for at in 4:
+      call:   equal(elsewhere.build_on_top(x, z).digest(), builder.build_on_top(x, z).digest(),
+      where:  228: var x := float(at) * 96.0 - 240.0
+      where:  229: var z := 180.0 - float(at) * 71.0
+  line 300  depth 1  build_on_ground  [local: grid, stride 88 u]
+      loop 297: for at in 5:
+      call:   var board := builder.build_on_ground(x, z)
+      where:  298: var x := float(at) * 88.0 - 176.0
+      where:  299: var z := float(at) * -63.0 + 126.0
+  line 306  depth 3  is_passable_at  [local: position does not move with the innermost loop]
+      loop 297: for at in 5:
+      loop 301: for row in board.cells_deep:
+      loop 302: for column in board.cells_across:
+      call:   equal(board.is_hole(cell), not terrain.is_passable_at(centre.x, centre.y),
+      where:  304: var centre := board.centre(cell)
+      where:  304: var centre := board.centre(cell)
+  line 371  depth 2  is_reserved_at  [local: position does not move with the innermost loop]
+      loop 365: for row in board.cells_deep:
+      loop 366: for column in board.cells_across:
+      call:   if not terrain.is_reserved_at(centre.x, centre.y):
+      where:  370: var centre := board.centre(cell)
+      where:  370: var centre := board.centre(cell)
+  line 428  depth 1  build_on_ground  [unread: position comes from the collection walked]
+      loop 427: for place in places:
+      call:   var board := builder.build_on_ground(place.x, place.y)
+  line 454  depth 3  is_reserved_at  [local: position does not move with the innermost loop]
+      loop 427: for place in places:
+      loop 429: for row in board.cells_deep:
+      loop 430: for column in board.cells_across:
+      call:   check(board.is_hole(cell) or terrain.is_reserved_at(centre.x, centre.y),
+      where:  432: var centre := board.centre(cell)
+      where:  432: var centre := board.centre(cell)
+  line 512  depth 1  build_on_ground  [local: grid, stride 74 u]
+      loop 509: for at in 6:
+      call:   var board := builder.build_on_ground(x, z)
+      where:  510: var x := float(at) * 74.0 - 222.0
+      where:  511: var z := float(at) * 58.0 - 174.0
+  line 575  depth 2  ground_height_at  [local: position does not move with the innermost loop]
+      loop 567: for row in board.cells_deep:
+      loop 568: for column in board.cells_across:
+      call:   check(board.height_at(cell) > terrain.ground_height_at(centre.x, centre.y),
+      where:  572: var centre := board.centre(cell)
+      where:  572: var centre := board.centre(cell)
+  line 599  depth 2  covers  [local: position does not move with the innermost loop]
+      loop 595: for row in board.cells_deep:
+      loop 596: for column in board.cells_across:
+      call:   if island.covers(centre.x, centre.y):
+      where:  598: var centre := board.centre(cell)
+      where:  598: var centre := board.centre(cell)
+  line 605  depth 2  top_height_at  [local: position does not move with the innermost loop]
+      loop 595: for row in board.cells_deep:
+      loop 596: for column in board.cells_across:
+      call:   centre.x, centre.y, island.top_height_at(centre.x, centre.y)),
+      where:  598: var centre := board.centre(cell)
+      where:  598: var centre := board.centre(cell)
+  line 623  depth 2  holds_water_at  [local: position does not move with the innermost loop]
+      loop 619: for row in board.cells_deep:
+      loop 620: for column in board.cells_across:
+      call:   if not island.holds_water_at(centre.x, centre.y):
+      where:  622: var centre := board.centre(cell)
+      where:  622: var centre := board.centre(cell)
+  line 628  depth 2  is_water_at  [local: position does not move with the innermost loop]
+      loop 619: for row in board.cells_deep:
+      loop 620: for column in board.cells_across:
+      call:   check(terrain.is_water_at(centre.x, centre.y, top),
+      where:  622: var centre := board.centre(cell)
+      where:  622: var centre := board.centre(cell)
+  line 652  depth 2  islands_at  [local: position does not move with the innermost loop]
+      loop 648: for row in board.cells_deep:
+      loop 649: for column in board.cells_across:
+      call:   if terrain.islands_at(centre.x, centre.y).is_empty():
+      where:  651: var centre := board.centre(cell)
+      where:  651: var centre := board.centre(cell)
+  line 723  depth 3  holds_water_at  [unread: position read off the source, stride not stated]
+      loop 712: for band in FloatingIsland.WALKABLE_BANDS:
+      loop 715: for cell_x in range(-reach, reach + 1):
+      loop 716: for cell_z in range(-reach, reach + 1):
+      call:   and island.holds_water_at(island.centre_x, island.centre_z):
+      where:  717: var island := terrain.island_field.island_in_cell(band, Vector2i(cell_x, cell_z))
+      where:  717: var island := terrain.island_field.island_in_cell(band, Vector2i(cell_x, cell_z))
+
+tests/test_combat_snap.gd [1622 s FAIL]: 8 position queries inside a loop (1 scattered, 3 local, 4 not readable from the source)
+  line 87  depth 1  build_on_top  [unread: position comes from the collection walked]
+      loop 86: for at in [Vector2.ZERO, ScriptedEncounter.WHERE, Vector2(311.0, -74.0)]:
+      call:   var board := world.combat_board_builder.build_on_top(at.x, at.y)
+  line 116  depth 2  cell_for  [local: position does not move with the innermost loop]
+      loop 110: for row in board.cells_deep:
+      loop 111: for column in board.cells_across:
+      call:   if CombatSnap.cell_for(pushed.x, pushed.y, board.cell_size) != cell:
+      where:  115: var pushed := Vector2(middle.x + board.cell_size, middle.y)
+      where:  115: var pushed := Vector2(middle.x + board.cell_size, middle.y)
+  line 133  depth 2  cell_for  [local: grid, stride 2 u]
+      loop 130: for step_x in range(-9, 10):
+      loop 131: for step_z in range(-9, 10):
+      call:   var chosen := CombatSnap.cell_for(at.x, at.y, board.cell_size)
+      where:  132: var at := Vector2(here.x + float(step_x) * 1.7, here.y + float(step_z) * 1.7)
+      where:  132: var at := Vector2(here.x + float(step_x) * 1.7, here.y + float(step_z) * 1.7)
+  line 219  depth 1  cell_for  [unread: position read off the source, stride not stated]
+      loop 217: for one in fight.members:
+      call:   var home := CombatSnap.cell_for(stood.x, stood.y, board.cell_size)
+      where:  218: var stood: Vector2 = before[one.id]
+      where:  218: var stood: Vector2 = before[one.id]
+  line 293  depth 1  cell_for  [unread: position comes from the collection walked]
+      loop 285: for one in world.combat.members:
+      call:   equal(CombatSnap.cell_for(one.x, one.z, board.cell_size), cell,
+  line 370  depth 1  place_observer  [local: position does not move with the innermost loop]
+      loop 368: for _step in TICKS:
+      call:   world.place_observer(watching.x, watching.y)
+      where:  362: var watching := Vector2(world.observer_x, world.observer_z)
+      where:  362: var watching := Vector2(world.observer_x, world.observer_z)
+  line 425  depth 1  top_height_at  [unread: position comes from the collection walked]
+      loop 419: for one in fight.members:
+      call:   check(one.y > island.top_height_at(one.x, one.z) - 3.0,
+  line 506  depth 2  build_on_top  [SCATTERED: grid, stride 260 u]
+      loop 503: for row in range(-3, 4):
+      loop 504: for column in range(-3, 4):
+      call:   var board := builder.build_on_top(at.x, at.y)
+      where:  505: var at := Vector2(float(column) * 260.0, float(row) * 260.0)
+      where:  505: var at := Vector2(float(column) * 260.0, float(row) * 260.0)
+
+tests/test_enemies.gd [726 s PASS]: 1 position queries inside a loop (0 scattered, 0 local, 1 not readable from the source)
+  line 92  depth 2  cell_at  [unread: position comes from the collection walked]
+      loop 77: for cell_x in range(-4, 5):
+      loop 78: for cell_z in range(-4, 5):
+      call:   var owner := EnemyField.cell_at(float(row["x"]), float(row["z"]))
+
+tests/test_island_cover.gd [1727 s PASS]: 16 position queries inside a loop (0 scattered, 1 local, 15 not readable from the source)
+  line 156  depth 1  biome  [unread: position comes from the collection walked]
+      loop 153: for island in islands:
+      call:   equal(island.biome, ground.biome(island.centre_x, island.centre_z),
+  line 159  depth 1  ground_tint  [unread: position comes from the collection walked]
+      loop 153: for island in islands:
+      call:   ground.ground_tint(island.centre_x, island.centre_z)),
+  line 162  depth 1  rock_tint  [unread: position comes from the collection walked]
+      loop 153: for island in islands:
+      call:   ground.rock_tint(island.centre_x, island.centre_z)),
+  line 165  depth 1  water_tint  [unread: position comes from the collection walked]
+      loop 153: for island in islands:
+      call:   ground.water_tint(island.centre_x, island.centre_z)),
+  line 171  depth 1  profile  [unread: position comes from the collection walked]
+      loop 153: for island in islands:
+      call:   var profile := ground.profile(island.centre_x, island.centre_z)
+  line 243  depth 1  covers  [unread: position comes from the collection walked]
+      loop 240: for item in cover.build(island).items:
+      call:   if other.covers(float(item["x"]), float(item["z"])):
+  line 312  depth 3  top_height_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   if absf(float(item["y"]) - island.top_height_at(x, z)) > TOUCHING:
+      where:  310: var x := float(item["x"])
+      where:  311: var z := float(item["z"])
+  line 314  depth 3  ratio_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   if island.ratio_at(x, z) > IslandCover.EDGE_KEEP + 0.0001:
+      where:  310: var x := float(item["x"])
+      where:  311: var z := float(item["z"])
+  line 316  depth 3  holds_water_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   if island.holds_water_at(x, z):
+      where:  310: var x := float(item["x"])
+      where:  311: var z := float(item["z"])
+  line 318  depth 3  top_height_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   var here := island.top_height_at(x, z)
+      where:  310: var x := float(item["x"])
+      where:  311: var z := float(item["z"])
+  line 320  depth 3  top_height_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   absf(island.top_height_at(x + IslandCover.SLOPE_STEP, z) - here),
+      where:  311: var z := float(item["z"])
+  line 321  depth 3  top_height_at  [unread: position read off the source, stride not stated]
+      loop 302: for seed_value in SURVEY_SEEDS:
+      loop 305: for island in _walkable_islands(field):
+      loop 306: for item in cover.build(island).items:
+      call:   absf(island.top_height_at(x, z + IslandCover.SLOPE_STEP) - here),
+      where:  310: var x := float(item["x"])
+  line 355  depth 2  covers  [unread: position read off the source, stride not stated]
+      loop 346: for island in islands:
+      loop 350: for root in roots:
+      call:   check(island.covers(x, z),
+      where:  351: var x := float(root["x"])
+      where:  352: var z := float(root["z"])
+  line 358  depth 2  bottom_height_at  [unread: position read off the source, stride not stated]
+      loop 346: for island in islands:
+      loop 350: for root in roots:
+      call:   float(root["y"]) + float(root["size"]) - island.bottom_height_at(x, z)
+      where:  351: var x := float(root["x"])
+      where:  352: var z := float(root["z"])
+  line 402  depth 2  top_height_at  [unread: position comes from the collection walked]
+      loop 381: for seed_value in SURVEY_SEEDS:
+      loop 382: for island in _walkable_islands(_new_field(seed_value)):
+      call:   and island.top_height_at(island.centre_x, island.centre_z) \
+  line 610  depth 1  holds_water_at  [local: position does not move with the innermost loop]
+      loop 605: for step in 16:
+      call:   if not island.holds_water_at(x, z):
+      where:  608: var x := island.centre_x + cos(angle) * away
+      where:  609: var z := island.centre_z + sin(angle) * away
+
+tests/test_islands.gd [4442 s FAIL]: 28 position queries inside a loop (1 scattered, 18 local, 9 not readable from the source)
+  line 162  depth 1  walkable_islands_over  [SCATTERED: modular stride (deliberately scattered)]
+      loop 159: for i in 400:
+      call:   busy.walkable_islands_over(x, z)
+      where:  160: var x := float(i * 37 % 900) - 450.0
+      where:  161: var z := float(i * 53 % 900) - 450.0
+  line 242  depth 4  ratio_at  [local: position does not move with the innermost loop]
+      loop 224: for world_seed in RATIO_SEEDS:
+      loop 225: for island in _sample_islands(_new_field(world_seed), 3):
+      loop 227: for direction in 48:
+      loop 238: for step in RATIO_STEPS + 1:
+      call:   var ratio := island.ratio_at(x, z)
+      where:  240: var x := island.centre_x + cos(angle) * out
+      where:  241: var z := island.centre_z + sin(angle) * out
+  line 249  depth 4  covers  [local: position does not move with the innermost loop]
+      loop 224: for world_seed in RATIO_SEEDS:
+      loop 225: for island in _sample_islands(_new_field(world_seed), 3):
+      loop 227: for direction in 48:
+      loop 238: for step in RATIO_STEPS + 1:
+      call:   var now_inside := island.covers(x, z)
+      where:  240: var x := island.centre_x + cos(angle) * out
+      where:  241: var z := island.centre_z + sin(angle) * out
+  line 312  depth 1  walkable_islands_over  [unread: position comes from the collection walked]
+      loop 310: for island in _sample_islands(field, 5):
+      call:   var here := field.walkable_islands_over(island.centre_x, island.centre_z)
+  line 433  depth 3  covers  [unread: position comes from the collection walked]
+      loop 409: for world_seed in RATIO_SEEDS:
+      loop 424: for step_x in GATE_STEPS:
+      loop 425: for step_z in GATE_STEPS:
+      call:   ("the cell gate changed what covers (%.1f, %.1f) of band %d "
+  line 517  depth 2  top_height_at  [local: position does not move with the innermost loop]
+      loop 506: for island in _sample_islands(_new_field(SEED), 4):
+      loop 512: for direction in 24:
+      call:   check(absf(island.top_height_at(edge_x, edge_z) - island.rim_height) < 0.0001,
+      where:  515: var edge_x := island.centre_x + cos(angle) * reach
+      where:  516: var edge_z := island.centre_z + sin(angle) * reach
+  line 519  depth 2  top_height_at  [local: position does not move with the innermost loop]
+      loop 506: for island in _sample_islands(_new_field(SEED), 4):
+      loop 512: for direction in 24:
+      call:   % [island.key(), island.top_height_at(edge_x, edge_z) - island.rim_height])
+      where:  515: var edge_x := island.centre_x + cos(angle) * reach
+      where:  516: var edge_z := island.centre_z + sin(angle) * reach
+  line 529  depth 3  base_top_height_at  [local: position does not move with the innermost loop]
+      loop 506: for island in _sample_islands(_new_field(SEED), 4):
+      loop 512: for direction in 24:
+      loop 521: for step in 40:
+      call:   var top := island.base_top_height_at(x, z)
+      where:  523: var x := island.centre_x + cos(angle) * out
+      where:  524: var z := island.centre_z + sin(angle) * out
+  line 537  depth 1  base_top_height_at  [unread: position comes from the collection walked]
+      loop 506: for island in _sample_islands(_new_field(SEED), 4):
+      call:   if island.base_top_height_at(island.centre_x, island.centre_z) \
+  line 573  depth 2  bottom_height_at  [local: position does not move with the innermost loop]
+      loop 564: for island in _sample_islands(_new_field(SEED), 4):
+      loop 568: for direction in 32:
+      call:   check(absf(island.bottom_height_at(edge_x, edge_z)
+      where:  571: var edge_x := island.centre_x + cos(angle) * reach
+      where:  572: var edge_z := island.centre_z + sin(angle) * reach
+  line 580  depth 2  bottom_height_at  [local: position does not move with the innermost loop]
+      loop 564: for island in _sample_islands(_new_field(SEED), 4):
+      loop 568: for direction in 32:
+      call:   - island.bottom_height_at(x, z)
+      where:  577: var x := island.centre_x + cos(angle) * reach * 0.3
+      where:  578: var z := island.centre_z + sin(angle) * reach * 0.3
+  line 606  depth 3  covers  [unread: position read off the source, stride not stated]
+      loop 601: for island in islands:
+      loop 602: for grid_x in range(-11, 12):
+      loop 603: for grid_z in range(-11, 12):
+      call:   if not island.covers(x, z):
+      where:  604: var x := island.centre_x + float(grid_x) / 11.0 * island.max_reach()
+      where:  605: var z := island.centre_z + float(grid_z) / 11.0 * island.max_reach()
+  line 608  depth 3  bottom_height_at  [unread: position read off the source, stride not stated]
+      loop 601: for island in islands:
+      loop 602: for grid_x in range(-11, 12):
+      loop 603: for grid_z in range(-11, 12):
+      call:   var gap := island.bottom_height_at(x, z) \
+      where:  604: var x := island.centre_x + float(grid_x) / 11.0 * island.max_reach()
+      where:  605: var z := island.centre_z + float(grid_z) / 11.0 * island.max_reach()
+  line 642  depth 2  top_height_at  [local: position does not move with the innermost loop]
+      loop 631: for island in islands:
+      loop 633: for direction in 64:
+      call:   island.top_height_at(x, z) - _support_under(terrain, island, x, z),
+      where:  638: var x := island.centre_x + cos(angle) * reach
+      where:  639: var z := island.centre_z + sin(angle) * reach
+  line 662  depth 1  top_height_at  [unread: position comes from the collection walked]
+      loop 659: for other in terrain.islands_at(x, z):
+      call:   best = maxf(best, other.top_height_at(x, z))
+  line 726  depth 1  covers  [unread: position read off the source, stride not stated]
+      loop 723: for i in 12:
+      call:   if island.covers(world.observer_x, world.observer_z):
+      where:  706: var world := SimWorld.new(SEED)
+      where:  706: var world := SimWorld.new(SEED)
+  line 795  depth 1  is_over_island_at  [local: position does not move with the innermost loop]
+      loop 790: for direction in 32:
+      call:   if terrain.is_over_island_at(x, z):
+      where:  793: var x := island.centre_x + cos(angle) * reach
+      where:  794: var z := island.centre_z + sin(angle) * reach
+  line 797  depth 1  is_void_at  [local: position does not move with the innermost loop]
+      loop 790: for direction in 32:
+      call:   if terrain.is_void_at(x, z, height):
+      where:  793: var x := island.centre_x + cos(angle) * reach
+      where:  794: var z := island.centre_z + sin(angle) * reach
+  line 799  depth 1  drop_from  [local: position does not move with the innermost loop]
+      loop 790: for direction in 32:
+      call:   if terrain.drop_from(x, z, height) > TerrainQuery.HOP_HEIGHT:
+      where:  793: var x := island.centre_x + cos(angle) * reach
+      where:  794: var z := island.centre_z + sin(angle) * reach
+  line 818  depth 2  is_water_at  [local: grid, stride 4 u]
+      loop 814: for step_x in range(-40, 41):
+      loop 815: for step_z in range(-40, 41):
+      call:   if not terrain.is_water_at(x, z):
+      where:  816: var x := float(step_x) * 4.0
+      where:  817: var z := float(step_z) * 4.0
+  line 823  depth 2  ground_height_at, is_void_at  [local: grid, stride 4 u]
+      loop 814: for step_x in range(-40, 41):
+      loop 815: for step_z in range(-40, 41):
+      call:   check(terrain.is_void_at(x, z, terrain.ground_height_at(x, z)),
+      where:  816: var x := float(step_x) * 4.0
+      where:  817: var z := float(step_z) * 4.0
+  line 825  depth 2  is_passable_at  [local: grid, stride 4 u]
+      loop 814: for step_x in range(-40, 41):
+      loop 815: for step_z in range(-40, 41):
+      call:   check(not terrain.is_passable_at(x, z),
+      where:  816: var x := float(step_x) * 4.0
+      where:  817: var z := float(step_z) * 4.0
+  line 846  depth 2  is_over_island_at  [local: position does not move with the innermost loop]
+      loop 834: for cell_x in range(-3, 4):
+      loop 835: for cell_z in range(-3, 4):
+      call:   check(not terrain.is_over_island_at(x, z) \
+      where:  844: var x := island.centre_x
+      where:  845: var z := island.centre_z
+  line 847  depth 2  island_height_at  [local: position does not move with the innermost loop]
+      loop 834: for cell_x in range(-3, 4):
+      loop 835: for cell_z in range(-3, 4):
+      call:   or terrain.island_height_at(x, z) < island.rim_height,
+      where:  844: var x := island.centre_x
+      where:  845: var z := island.centre_z
+  line 850  depth 3  top_height_at  [local: position does not move with the innermost loop]
+      loop 834: for cell_x in range(-3, 4):
+      loop 835: for cell_z in range(-3, 4):
+      loop 849: for surface in terrain.surfaces_at(x, z):
+      call:   check(absf(surface - island.top_height_at(x, z)) > 0.001,
+      where:  844: var x := island.centre_x
+      where:  845: var z := island.centre_z
+  line 1064  depth 1  distance_to  [unread: position read off the source, stride not stated]
+      loop 1062: for key in streamer.loaded_keys():
+      call:   check(IslandField.distance_to(island, at.x, at.y)
+      where:  1063: var island := streamer.live_island(key)
+  line 1184  depth 1  holds_water_at  [local: position does not move with the innermost loop]
+      loop 1179: for step in 24:
+      call:   if not island.holds_water_at(x, z):
+      where:  1182: var x := island.centre_x + cos(angle) * away
+      where:  1183: var z := island.centre_z + sin(angle) * away
+  line 1194  depth 1  holds_water_at  [unread: position comes from the collection walked]
+      loop 1193: for island in islands:
+      call:   if island.holds_water_at(island.centre_x, island.centre_z):
+
+tests/test_live_world.gd [987 s PASS]: 1 position queries inside a loop (0 scattered, 0 local, 1 not readable from the source)
+  line 284  depth 1  is_passable_at  [unread: position comes from the collection walked]
+      loop 283: for one in world.combat.members:
+      call:   check(world.terrain.is_passable_at(one.x, one.z),
+
+tests/test_mountains.gd [477 s FAIL]: 8 position queries inside a loop (0 scattered, 2 local, 6 not readable from the source)
+  line 95  depth 2  base_height  [local: grid, stride 30 u]
+      loop 91: for row in 81:
+      loop 92: for column in 81:
+      call:   var height := query.ground.base_height(x, z)
+      where:  93: var x := -1200.0 + float(column) * 30.0
+      where:  94: var z := -1200.0 + float(row) * 30.0
+  line 96  depth 2  biome_at  [local: grid, stride 30 u]
+      loop 91: for row in 81:
+      loop 92: for column in 81:
+      call:   match query.biome_at(x, z):
+      where:  93: var x := -1200.0 + float(column) * 30.0
+      where:  94: var z := -1200.0 + float(row) * 30.0
+  line 134  depth 2  ground_height_at  [unread: position read off the source, stride not stated]
+      loop 129: for row in across:
+      loop 131: for column in across:
+      call:   heights[index] = query.ground_height_at(x, z)
+      where:  132: var x := CLIMB_CENTRE.x - CLIMB_REACH + float(column) * LATTICE
+      where:  130: var z := CLIMB_CENTRE.y - CLIMB_REACH + float(row) * LATTICE
+  line 135  depth 2  is_passable_at  [unread: position read off the source, stride not stated]
+      loop 129: for row in across:
+      loop 131: for column in across:
+      call:   solid[index] = 1 if query.is_passable_at(x, z) else 0
+      where:  132: var x := CLIMB_CENTRE.x - CLIMB_REACH + float(column) * LATTICE
+      where:  130: var z := CLIMB_CENTRE.y - CLIMB_REACH + float(row) * LATTICE
+  line 260  depth 2  ground_height  [unread: position comes from the collection walked]
+      loop 248: for place in network.places_near(0.0, 0.0, 900.0):
+      loop 249: for edge in network.edges_from(place):
+      call:   var last_bed := query.ground.ground_height(walked[0].x, walked[0].y)
+  line 261  depth 2  ground_height_at  [unread: position comes from the collection walked]
+      loop 248: for place in network.places_near(0.0, 0.0, 900.0):
+      loop 249: for edge in network.edges_from(place):
+      call:   var last_ground := query.ground_height_at(walked[0].x, walked[0].y)
+  line 263  depth 3  ground_height  [unread: position comes from the collection walked]
+      loop 248: for place in network.places_near(0.0, 0.0, 900.0):
+      loop 249: for edge in network.edges_from(place):
+      loop 262: for index in range(1, walked.size()):
+      call:   var bed := query.ground.ground_height(walked[index].x, walked[index].y)
+  line 264  depth 3  ground_height_at  [unread: position comes from the collection walked]
+      loop 248: for place in network.places_near(0.0, 0.0, 900.0):
+      loop 249: for edge in network.edges_from(place):
+      loop 262: for index in range(1, walked.size()):
+      call:   var ground := query.ground_height_at(walked[index].x, walked[index].y)
+
+tests/test_scatter.gd [3093 s FAIL]: 17 position queries inside a loop (0 scattered, 0 local, 17 not readable from the source)
+  line 138  depth 3  biome_at  [unread: position read off the source, stride not stated]
+      loop 131: for ring in range(0, SEARCH_REACH + 1):
+      loop 132: for chunk_x in range(-ring, ring + 1):
+      loop 133: for chunk_z in range(-ring, ring + 1):
+      call:   if terrain.biome_at(middle_x, middle_z) != biome:
+      where:  136: var middle_x := (float(chunk_x) + 0.5) * ScatterPatch.PATCH_SIZE
+      where:  137: var middle_z := (float(chunk_z) + 0.5) * ScatterPatch.PATCH_SIZE
+  line 187  depth 1  build  [unread: position comes from the collection walked]
+      loop 186: for key in chunks:
+      call:   out.append(scatter.build(key.x, key.y).digest())
+  line 374  depth 1  build  [unread: position comes from the collection walked]
+      loop 373: for key in chunks:
+      call:   one[key] = forwards.build(key.x, key.y).digest()
+  line 381  depth 1  build  [unread: position comes from the collection walked]
+      loop 380: for key in backwards_order:
+      call:   other[key] = backwards.build(key.x, key.y).digest()
+  line 393  depth 1  build  [unread: position comes from the collection walked]
+      loop 392: for key in chunks:
+      call:   if scatter.build(key.x, key.y).digest() != one[key]:
+  line 456  depth 1  build  [unread: position comes from the collection walked]
+      loop 455: for key in block:
+      call:   if fresh.build(key.x, key.y).digest() != before[key]:
+  line 586  depth 1  patch_at  [unread: position comes from the collection walked]
+      loop 585: for site in villages:
+      call:   var middle := ScatterPatch.patch_at(site.centre_x, site.centre_z)
+  line 600  depth 1  is_reserved_at  [unread: position read off the source, stride not stated]
+      loop 597: for item in items:
+      call:   if terrain.is_reserved_at(x, z):
+      where:  598: var x := float(item["x"])
+      where:  599: var z := float(item["z"])
+  line 602  depth 1  road_distance_at  [unread: position read off the source, stride not stated]
+      loop 597: for item in items:
+      call:   if terrain.road_distance_at(x, z) < DecorationScatter.TRACK_CLEAR:
+      where:  598: var x := float(item["x"])
+      where:  599: var z := float(item["z"])
+  line 640  depth 1  is_bank_at, is_water_at  [unread: position read off the source, stride not stated]
+      loop 634: for item in items:
+      call:   if not terrain.is_water_at(x, z) and not terrain.is_bank_at(x, z):
+      where:  637: var x := float(item["x"])
+      where:  638: var z := float(item["z"])
+  line 644  depth 1  is_water_at  [unread: position read off the source, stride not stated]
+      loop 634: for item in items:
+      call:   if not terrain.is_water_at(x, z):
+      where:  637: var x := float(item["x"])
+      where:  638: var z := float(item["z"])
+  line 660  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 657: for item in items:
+      call:   if terrain.is_water_at(float(item["x"]), float(item["z"])):
+  line 675  depth 1  road_distance_at  [unread: position comes from the collection walked]
+      loop 671: for item in items:
+      call:   var away := terrain.road_distance_at(float(item["x"]), float(item["z"]))
+  line 691  depth 1  patch_at  [unread: position comes from the collection walked]
+      loop 690: for site in villages:
+      call:   var middle := ScatterPatch.patch_at(site.centre_x, site.centre_z)
+  line 723  depth 1  road_distance_at  [unread: position read off the source, stride not stated]
+      loop 717: for item in _items_in(scatter, _square(10)):
+      call:   if terrain.road_distance_at(x, z) <= DecorationScatter.CLEARING_ROAD_CLEAR:
+      where:  721: var x := float(item["x"])
+      where:  722: var z := float(item["z"])
+  line 725  depth 1  settlement_at  [unread: position read off the source, stride not stated]
+      loop 717: for item in _items_in(scatter, _square(10)):
+      call:   elif terrain.settlement_at(x, z) != null:
+      where:  721: var x := float(item["x"])
+      where:  722: var z := float(item["z"])
+  line 727  depth 1  is_over_island_at  [unread: position read off the source, stride not stated]
+      loop 717: for item in _items_in(scatter, _square(10)):
+      call:   elif terrain.is_over_island_at(x, z):
+      where:  721: var x := float(item["x"])
+      where:  722: var z := float(item["z"])
+
+tests/test_settlements.gd [not in the transcript]: 46 position queries inside a loop (0 scattered, 27 local, 19 not readable from the source)
+  line 181  depth 1  settlement_at  [unread: position comes from the collection walked]
+      loop 180: for i in 300:
+      call:   backwards.settlement_at(float(i) * 13.7 - 900.0, float(i) * -9.1 + 400.0)
+  line 236  depth 2  is_water_at  [local: position does not move with the innermost loop]
+      loop 224: for site in villages:
+      loop 232: for direction in 16:
+      call:   check(not terrain.is_water_at(x, z),
+      where:  234: var x := site.centre_x + cos(angle) * site.core_radius
+      where:  235: var z := site.centre_z + sin(angle) * site.core_radius
+  line 327  depth 2  is_water_at  [local: position does not move with the innermost loop]
+      loop 319: for ring in SettlementField.SHORE_RINGS:
+      loop 323: for direction in SettlementField.SHORE_DIRECTIONS:
+      call:   if not terrain.is_water_at(x, z):
+      where:  325: var x := site.centre_x + cos(angle) * reach
+      where:  326: var z := site.centre_z + sin(angle) * reach
+  line 331  depth 2  water_surface  [local: position does not move with the innermost loop]
+      loop 319: for ring in SettlementField.SHORE_RINGS:
+      loop 323: for direction in SettlementField.SHORE_DIRECTIONS:
+      call:   if absf(terrain.ground.water_surface(x, z)
+      where:  325: var x := site.centre_x + cos(angle) * reach
+      where:  326: var z := site.centre_z + sin(angle) * reach
+  line 332  depth 2  standing_level  [local: position does not move with the innermost loop]
+      loop 319: for ring in SettlementField.SHORE_RINGS:
+      loop 323: for direction in SettlementField.SHORE_DIRECTIONS:
+      call:   - terrain.ground.standing_level(x, z)) < 0.0001:
+      where:  325: var x := site.centre_x + cos(angle) * reach
+      where:  326: var z := site.centre_z + sin(angle) * reach
+  line 346  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 345: for building in site.buildings:
+      call:   check(not terrain.is_water_at(float(building["x"]), float(building["z"])),
+  line 350  depth 2  is_water_at  [unread: position comes from the collection walked]
+      loop 345: for building in site.buildings:
+      loop 349: for corner in Settlement.footprint_corners(building):
+      call:   check(not terrain.is_water_at(corner.x, corner.y),
+  line 353  depth 1  is_reserved_at  [unread: position comes from the collection walked]
+      loop 345: for building in site.buildings:
+      call:   check(terrain.is_reserved_at(float(building["x"]), float(building["z"])),
+  line 460  depth 4  _clear_overhead  [local: position does not move with the innermost loop]
+      loop 423: for world_seed: int in OVERHANG_SEEDS:
+      loop 426: for cell_x in range(-OVERHANG_CELL_REACH, OVERHANG_CELL_REACH + 1):
+      loop 427: for cell_z in range(-OVERHANG_CELL_REACH, OVERHANG_CELL_REACH + 1):
+      loop 446: for step in OVERHANG_STEPS:
+      call:   check(not settlements._clear_overhead(x, z, pad),
+      where:  449: var x := up.centre_x + away.x * out
+      where:  450: var z := up.centre_z + away.y * out
+  line 593  depth 1  ground_height_at  [unread: position comes from the collection walked]
+      loop 579: for site in villages:
+      call:   var middle := terrain.ground_height_at(site.centre_x, site.centre_z)
+  line 609  depth 2  is_water_at, path_strength_at  [local: position does not move with the innermost loop]
+      loop 603: for site in villages:
+      loop 604: for direction in 8:
+      call:   if terrain.path_strength_at(x, z) > 0.0 or terrain.is_water_at(x, z):
+      where:  607: var x := site.centre_x + cos(angle) * out
+      where:  608: var z := site.centre_z + sin(angle) * out
+  line 612  depth 2  ground_height, ground_height_at  [local: position does not move with the innermost loop]
+      loop 603: for site in villages:
+      loop 604: for direction in 8:
+      call:   terrain.ground_height_at(x, z) - terrain.ground.ground_height(x, z)
+      where:  607: var x := site.centre_x + cos(angle) * out
+      where:  608: var z := site.centre_z + sin(angle) * out
+  line 629  depth 2  ground_height  [local: position does not move with the innermost loop]
+      loop 622: for ring in 4:
+      loop 625: for direction in directions:
+      call:   var height := terrain.ground.ground_height(x, z) if before \
+      where:  627: var x := site.centre_x + cos(angle) * site.core_radius * ratio
+      where:  628: var z := site.centre_z + sin(angle) * site.core_radius * ratio
+  line 630  depth 2  ground_height_at  [local: position does not move with the innermost loop]
+      loop 622: for ring in 4:
+      loop 625: for direction in directions:
+      call:   else terrain.ground_height_at(x, z)
+      where:  627: var x := site.centre_x + cos(angle) * site.core_radius * ratio
+      where:  628: var z := site.centre_z + sin(angle) * site.core_radius * ratio
+  line 654  depth 3  is_reserved_at  [unread: position read off the source, stride not stated]
+      loop 640: for site in villages:
+      loop 641: for building in site.buildings:
+      loop 644: for corner: Vector2 in [Vector2(0.6, 0.6), Vector2(-0.6, 0.6),
+      call:   check(terrain.is_reserved_at(x, z),
+      where:  651: var x := float(building["x"]) + across.x + along.x
+      where:  652: var z := float(building["z"]) + across.y + along.y
+  line 657  depth 3  building_at  [unread: position read off the source, stride not stated]
+      loop 640: for site in villages:
+      loop 641: for building in site.buildings:
+      loop 644: for corner: Vector2 in [Vector2(0.6, 0.6), Vector2(-0.6, 0.6),
+      call:   equal(terrain.building_at(x, z)["tag"], building["tag"],
+      where:  651: var x := float(building["x"]) + across.x + along.x
+      where:  652: var z := float(building["z"]) + across.y + along.y
+  line 670  depth 2  is_reserved_at  [local: position does not move with the innermost loop]
+      loop 665: for site in villages:
+      loop 666: for direction in 24:
+      call:   if terrain.is_reserved_at(x, z):
+      where:  668: var x := site.centre_x + cos(angle) * site.core_radius * 0.98
+      where:  669: var z := site.centre_z + sin(angle) * site.core_radius * 0.98
+  line 744  depth 1  patch_at  [unread: position comes from the collection walked]
+      loop 743: for site in villages:
+      call:   var here := ScatterPatch.patch_at(site.centre_x, site.centre_z)
+  line 860  depth 1  edges_near  [local: position does not move with the innermost loop]
+      loop 855: for road in roads:
+      call:   var from_far := network.edges_near(far.x, far.y, 2.0)
+      where:  859: var far := points[points.size() - 1]
+      where:  859: var far := points[points.size() - 1]
+  line 908  depth 2  is_water_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.is_water_at(point.x, point.y):
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 910  depth 2  settlement_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.settlement_at(point.x, point.y) != null:
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 912  depth 2  walkable_island_over  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.island_field.walkable_island_over(point.x, point.y) != null:
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 914  depth 2  path_strength_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var strength := terrain.path_strength_at(point.x, point.y)
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 921  depth 2  ground_tint_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var tint := terrain.ground_tint_at(point.x, point.y)
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 922  depth 2  ground_tint  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var plain := terrain.ground.ground_tint(point.x, point.y)
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 928  depth 2  ground_height_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var here := terrain.ground_height_at(point.x, point.y)
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 929  depth 2  _ground_before_roads  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var before := _ground_before_roads(terrain, point.x, point.y)
+      where:  907: var point := points[at]
+  line 943  depth 2  is_bank_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.is_bank_at(point.x, point.y):
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 949  depth 2  is_water_at  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.is_water_at(left_x, left_z) or terrain.is_water_at(right_x, right_z):
+      where:  945: var left_x := point.x + across.x
+      where:  946: var left_z := point.y + across.y
+  line 951  depth 2  walkable_island_over  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.island_field.walkable_island_over(left_x, left_z) != null \
+      where:  945: var left_x := point.x + across.x
+      where:  946: var left_z := point.y + across.y
+  line 952  depth 2  walkable_island_over  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   or terrain.island_field.walkable_island_over(right_x, right_z) != null:
+      where:  947: var right_x := point.x - across.x
+      where:  948: var right_z := point.y - across.y
+  line 959  depth 2  is_bank_at  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.is_bank_at(left_x, left_z) or terrain.is_bank_at(right_x, right_z):
+      where:  945: var left_x := point.x + across.x
+      where:  946: var left_z := point.y + across.y
+  line 961  depth 2  ground_height_at  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var left := terrain.ground_height_at(left_x, left_z)
+      where:  945: var left_x := point.x + across.x
+      where:  946: var left_z := point.y + across.y
+  line 962  depth 2  ground_height_at  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var right := terrain.ground_height_at(right_x, right_z)
+      where:  947: var right_x := point.x - across.x
+      where:  948: var right_z := point.y - across.y
+  line 963  depth 2  ground_height  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var bare_left := terrain.ground.ground_height(left_x, left_z)
+      where:  945: var left_x := point.x + across.x
+      where:  946: var left_z := point.y + across.y
+  line 964  depth 2  ground_height  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   var bare_right := terrain.ground.ground_height(right_x, right_z)
+      where:  947: var right_x := point.x - across.x
+      where:  948: var right_z := point.y - across.y
+  line 974  depth 2  level_strength_at  [unread: position read off the source, stride not stated]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   if terrain.path_network.level_strength_at(point.x, point.y) >= 0.999:
+      where:  907: var point := points[at]
+      where:  907: var point := points[at]
+  line 996  depth 2  _ground_before_roads  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   _ground_before_roads(terrain, left_x, left_z)
+      where:  945: var left_x := point.x + across.x
+  line 997  depth 2  _ground_before_roads  [local: position does not move with the innermost loop]
+      loop 904: for road in roads:
+      loop 906: for at in points.size():
+      call:   - _ground_before_roads(terrain, right_x, right_z)
+      where:  947: var right_x := point.x - across.x
+  line 1071  depth 2  ground_height_at  [unread: position comes from the collection walked]
+      loop 1054: for place in terrain.path_network.places_near(0.0, 0.0, WALL_REACH):
+      loop 1055: for road in terrain.path_network.edges_from(place):
+      call:   var last := terrain.ground_height_at(stepped[0].x, stepped[0].y)
+  line 1201  depth 2  is_water_at  [local: position does not move with the innermost loop]
+      loop 1193: for at in points.size() - 1:
+      loop 1198: for step in steps:
+      call:   if terrain.is_water_at(here.x, here.y):
+      where:  1200: var here := start.lerp(finish, share)
+      where:  1200: var here := start.lerp(finish, share)
+  line 1254  depth 2  is_water_at, is_wet  [local: grid, stride 6 u]
+      loop 1248: for row in 60:
+      loop 1249: for column in 60:
+      call:   equal(terrain.is_water_at(x, z), bare.is_wet(x, z),
+      where:  1250: var x := middle.x + float(column) * 6.0 - 180.0
+      where:  1251: var z := middle.y + float(row) * 6.0 - 180.0
+  line 1257  depth 2  is_wet  [local: grid, stride 6 u]
+      loop 1248: for row in 60:
+      loop 1249: for column in 60:
+      call:   if bare.is_wet(x, z):
+      where:  1250: var x := middle.x + float(column) * 6.0 - 180.0
+      where:  1251: var z := middle.y + float(row) * 6.0 - 180.0
+  line 1260  depth 2  ground_height, ground_height_at  [local: grid, stride 6 u]
+      loop 1248: for row in 60:
+      loop 1249: for column in 60:
+      call:   equal(terrain.ground_height_at(x, z), bare.ground_height(x, z),
+      where:  1250: var x := middle.x + float(column) * 6.0 - 180.0
+      where:  1251: var z := middle.y + float(row) * 6.0 - 180.0
+  line 1265  depth 2  ground_height_at, water_surface_at  [local: grid, stride 6 u]
+      loop 1248: for row in 60:
+      loop 1249: for column in 60:
+      call:   check(terrain.water_surface_at(x, z) <= terrain.ground_height_at(x, z),
+      where:  1250: var x := middle.x + float(column) * 6.0 - 180.0
+      where:  1251: var z := middle.y + float(row) * 6.0 - 180.0
+  line 1268  depth 2  ground_height, ground_height_at  [local: grid, stride 6 u]
+      loop 1248: for row in 60:
+      loop 1249: for column in 60:
+      call:   if absf(terrain.ground_height_at(x, z) - bare.ground_height(x, z)) > 0.001:
+      where:  1250: var x := middle.x + float(column) * 6.0 - 180.0
+      where:  1251: var z := middle.y + float(row) * 6.0 - 180.0
+
+tests/test_streaming.gd [902 s FAIL]: 2 position queries inside a loop (0 scattered, 0 local, 2 not readable from the source)
+  line 207  depth 1  patch_at  [unread: position comes from the collection walked]
+      loop 206: for observer in observers:
+      call:   var centre := ScatterPatch.patch_at(observer.x, observer.y)
+  line 239  depth 1  patch_at  [unread: position comes from the collection walked]
+      loop 238: for point in path:
+      call:   var centre := ScatterPatch.patch_at(point.x, point.y)
+
+tests/test_terrain.gd [485 s PASS]: 8 position queries inside a loop (0 scattered, 3 local, 5 not readable from the source)
+  line 52  depth 1  base_height  [unread: position comes from the collection walked]
+      loop 51: for probe in probes:
+      call:   equal(field.base_height(probe.x, probe.y), again.base_height(probe.x, probe.y),
+  line 60  depth 1  base_height  [unread: position comes from the collection walked]
+      loop 59: for probe in probes:
+      call:   first_pass.append(field.base_height(probe.x, probe.y))
+  line 62  depth 1  base_height  [unread: position comes from the collection walked]
+      loop 61: for i in 500:
+      call:   field.base_height(float(i) * 7.3, float(i) * -3.1)
+  line 65  depth 1  base_height  [unread: position read off the source, stride not stated]
+      loop 63: for index in range(probes.size() - 1, -1, -1):
+      call:   equal(field.base_height(probe.x, probe.y), first_pass[index],
+      where:  64: var probe: Vector2 = probes[index]
+      where:  64: var probe: Vector2 = probes[index]
+  line 79  depth 1  base_height  [unread: position comes from the collection walked]
+      loop 78: for i in 400:
+      call:   var height := field.base_height(float(i) * 5.0, float(i % 20) * 11.0)
+  line 114  depth 1  base_height  [local: position does not move with the innermost loop]
+      loop 110: for index in 20:
+      call:   equal(field.base_height(x, z), 0.0,
+      where:  112: var x := cos(angle) * SPAWN_CLEARING * 0.667
+      where:  113: var z := sin(angle) * SPAWN_CLEARING * 0.667
+  line 116  depth 1  base_height  [local: position does not move with the innermost loop]
+      loop 110: for index in 20:
+      call:   equal(other.base_height(x, z), field.base_height(x, z),
+      where:  112: var x := cos(angle) * SPAWN_CLEARING * 0.667
+      where:  113: var z := sin(angle) * SPAWN_CLEARING * 0.667
+  line 123  depth 1  base_height  [local: grid, stride 9 u]
+      loop 121: for i in 50:
+      call:   if absf(field.base_height(x, 4.0) - other.base_height(x, 4.0)) > 0.001:
+      where:  122: var x := SEED_LINE_START + float(i) * 9.0
+
+tests/test_ui_digits.gd [204 s PASS]: 1 position queries inside a loop (0 scattered, 0 local, 1 not readable from the source)
+  line 179  depth 1  build  [unread: position comes from the collection walked]
+      loop 178: for world in [_played_world(), _fighting_world()]:
+      call:   var layer := PixelUi.build(true, true, true, true, true, true)
+
+tests/test_water.gd [1920 s FAIL]: 33 position queries inside a loop (0 scattered, 12 local, 21 not readable from the source)
+  line 55  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 54: for probe in probes:
+      call:   equal(again.is_water_at(probe.x, probe.y), terrain.is_water_at(probe.x, probe.y),
+  line 58  depth 1  water_depth_at  [unread: position comes from the collection walked]
+      loop 54: for probe in probes:
+      call:   equal(again.water_depth_at(probe.x, probe.y), terrain.water_depth_at(probe.x, probe.y),
+  line 66  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 65: for probe in probes:
+      call:   first_pass.append(terrain.is_water_at(probe.x, probe.y))
+  line 68  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 67: for i in 400:
+      call:   terrain.is_water_at(float(i) * 6.7, float(i) * -4.3)
+  line 69  depth 1  ground_height_at  [unread: position comes from the collection walked]
+      loop 67: for i in 400:
+      call:   terrain.ground_height_at(float(i) * -2.1, float(i) * 9.9)
+  line 72  depth 1  is_water_at  [unread: position read off the source, stride not stated]
+      loop 70: for index in range(probes.size() - 1, -1, -1):
+      call:   equal(terrain.is_water_at(probe.x, probe.y), first_pass[index],
+      where:  71: var probe: Vector2 = probes[index]
+      where:  71: var probe: Vector2 = probes[index]
+  line 83  depth 2  is_water_at  [unread: position comes from the collection walked]
+      loop 80: for row in 60:
+      loop 81: for column in 60:
+      call:   if terrain.is_water_at(float(column) * 9.0 - 270.0, float(row) * 9.0 - 270.0):
+  line 98  depth 1  water_surface_at  [local: grid, stride 13 u]
+      loop 96: for i in 400:
+      call:   if terrain.water_surface_at(x, 21.0) != other.water_surface_at(x, 21.0):
+      where:  97: var x := float(i) * 13.0 - 2600.0
+  line 115  depth 1  water_depth_at  [unread: position comes from the collection walked]
+      loop 114: for probe in probes:
+      call:   before.append(busy.water_depth_at(probe.x, probe.y))
+  line 121  depth 2  ground_at  [unread: position read off the source, stride not stated]
+      loop 117: for chunk_x in range(-4, 5):
+      loop 118: for chunk_z in range(4, -5, -1):
+      call:   busy.ground_at(middle_x, middle_z)
+      where:  119: var middle_x := (float(chunk_x) + 0.5) * ScatterPatch.PATCH_SIZE
+      where:  120: var middle_z := (float(chunk_z) + 0.5) * ScatterPatch.PATCH_SIZE
+  line 125  depth 1  water_depth_at  [unread: position read off the source, stride not stated]
+      loop 123: for index in probes.size():
+      call:   equal(busy.water_depth_at(probe.x, probe.y), before[index],
+      where:  124: var probe: Vector2 = probes[index]
+      where:  124: var probe: Vector2 = probes[index]
+  line 128  depth 1  water_depth_at  [unread: position read off the source, stride not stated]
+      loop 123: for index in probes.size():
+      call:   equal(busy.water_depth_at(probe.x, probe.y), fresh.water_depth_at(probe.x, probe.y),
+      where:  124: var probe: Vector2 = probes[index]
+      where:  124: var probe: Vector2 = probes[index]
+  line 138  depth 1  is_water_at  [unread: position read off the source, stride not stated]
+      loop 137: for probe in probes:
+      call:   equal(world.terrain.is_water_at(probe.x, probe.y),
+      where:  124: var probe: Vector2 = probes[index]
+      where:  124: var probe: Vector2 = probes[index]
+  line 139  depth 1  is_water_at  [unread: position read off the source, stride not stated]
+      loop 137: for probe in probes:
+      call:   fresh.is_water_at(probe.x, probe.y),
+      where:  124: var probe: Vector2 = probes[index]
+      where:  124: var probe: Vector2 = probes[index]
+  line 155  depth 2  is_water_at  [local: grid, stride 3 u]
+      loop 151: for row in 90:
+      loop 152: for column in 90:
+      call:   if not terrain.is_water_at(x, z):
+      where:  153: var x := float(column) * 3.0 - 135.0
+      where:  154: var z := float(row) * 3.0 - 135.0
+  line 158  depth 2  base_height_at, ground_height_at  [local: grid, stride 3 u]
+      loop 151: for row in 90:
+      loop 152: for column in 90:
+      call:   if terrain.ground_height_at(x, z) < terrain.base_height_at(x, z) - 0.001:
+      where:  153: var x := float(column) * 3.0 - 135.0
+      where:  154: var z := float(row) * 3.0 - 135.0
+  line 169  depth 1  water_surface_at  [unread: position comes from the collection walked]
+      loop 167: for probe in _probe_positions():
+      call:   0.0, terrain.water_surface_at(probe.x, probe.y)
+  line 170  depth 1  ground_height_at  [unread: position comes from the collection walked]
+      loop 167: for probe in _probe_positions():
+      call:   - terrain.ground_height_at(probe.x, probe.y)
+  line 172  depth 1  water_depth_at  [unread: position comes from the collection walked]
+      loop 167: for probe in _probe_positions():
+      call:   equal(terrain.water_depth_at(probe.x, probe.y), expected,
+  line 182  depth 2  is_water_at  [local: grid, stride 7 u]
+      loop 178: for row in 40:
+      loop 179: for column in 40:
+      call:   if terrain.is_water_at(x, z):
+      where:  180: var x := float(column) * 7.0 - 140.0
+      where:  181: var z := float(row) * 7.0 - 140.0
+  line 185  depth 2  ground_height_at, water_surface_at  [local: grid, stride 7 u]
+      loop 178: for row in 40:
+      loop 179: for column in 40:
+      call:   check(terrain.water_surface_at(x, z) <= terrain.ground_height_at(x, z),
+      where:  180: var x := float(column) * 7.0 - 140.0
+      where:  181: var z := float(row) * 7.0 - 140.0
+  line 197  depth 2  is_bank_at  [local: grid, stride 3 u]
+      loop 193: for row in 90:
+      loop 194: for column in 90:
+      call:   if not terrain.is_bank_at(x, z):
+      where:  195: var x := float(column) * 3.0 - 135.0
+      where:  196: var z := float(row) * 3.0 - 135.0
+  line 201  depth 2  is_water_at  [local: grid, stride 3 u]
+      loop 193: for row in 90:
+      loop 194: for column in 90:
+      call:   check(not terrain.is_water_at(x, z),
+      where:  195: var x := float(column) * 3.0 - 135.0
+      where:  196: var z := float(row) * 3.0 - 135.0
+  line 225  depth 2  is_water_at  [local: grid, stride 3 u]
+      loop 221: for row in 90:
+      loop 222: for column in 90:
+      call:   if terrain.is_water_at(x, z):
+      where:  223: var x := float(column) * 3.0 - 135.0
+      where:  224: var z := float(row) * 3.0 - 135.0
+  line 228  depth 2  is_bank_at  [local: grid, stride 3 u]
+      loop 221: for row in 90:
+      loop 222: for column in 90:
+      call:   if terrain.is_bank_at(x, z):
+      where:  223: var x := float(column) * 3.0 - 135.0
+      where:  224: var z := float(row) * 3.0 - 135.0
+  line 243  depth 2  is_water_at  [local: grid, stride 4 u]
+      loop 239: for row in 60:
+      loop 240: for column in 60:
+      call:   var is_water := terrain.is_water_at(x, z)
+      where:  241: var x := float(column) * 4.0 - 120.0
+      where:  242: var z := float(row) * 4.0 - 120.0
+  line 246  depth 2  is_passable_at  [local: grid, stride 4 u]
+      loop 239: for row in 60:
+      loop 240: for column in 60:
+      call:   equal(terrain.is_passable_at(x, z), not is_water,
+      where:  241: var x := float(column) * 4.0 - 120.0
+      where:  242: var z := float(row) * 4.0 - 120.0
+  line 253  depth 1  ground_at  [unread: position comes from the collection walked]
+      loop 252: for probe in _probe_positions():
+      call:   var ground := terrain.ground_at(probe.x, probe.y)
+  line 254  depth 1  is_water_at  [unread: position comes from the collection walked]
+      loop 252: for probe in _probe_positions():
+      call:   equal(ground["water"], terrain.is_water_at(probe.x, probe.y),
+  line 256  depth 1  is_bank_at  [unread: position comes from the collection walked]
+      loop 252: for probe in _probe_positions():
+      call:   equal(ground["bank"], terrain.is_bank_at(probe.x, probe.y),
+  line 258  depth 1  is_passable_at  [unread: position comes from the collection walked]
+      loop 252: for probe in _probe_positions():
+      call:   equal(ground["passable"], terrain.is_passable_at(probe.x, probe.y),
+  line 260  depth 1  ground_height_at  [unread: position comes from the collection walked]
+      loop 252: for probe in _probe_positions():
+      call:   equal(ground["height"], terrain.ground_height_at(probe.x, probe.y),
+  line 288  depth 1  ground_at  [local: position does not move with the innermost loop]
+      loop 284: for line in lines:
+      call:   var ground := terrain.ground_at(x, z)
+      where:  286: var x := float(parts[1])
+      where:  287: var z := float(parts[2])
+
+# 16 of 70 suites ask the ground about a position inside a loop (212 call sites)

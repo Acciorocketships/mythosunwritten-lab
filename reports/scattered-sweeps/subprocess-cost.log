@@ -1,0 +1,16 @@
+# what one child engine costs, measured 2026-09-18T14:35:57-04:00
+# engine: /home/ryko/proj/game/tools/godot/godot4
+
+## tests/test_scatter.gd:875-877 -- _two_processes_dress_the_world_the_same_way
+## godot4 --headless --path . --script res://bin/headless_main.gd -- --seed <seed> --ticks 0 --scatter
+scatter headless, seed 1234 (same_a)                    183.1 s
+scatter headless, seed 1234 (same_b)                    188.0 s
+scatter headless, seed 4321 (different)                 157.2 s
+
+## tests/test_ui_panel.gd:550-554 -- _the_panel_changes_nothing_about_the_world
+## godot4 --headless --path . --fixed-fps 60 --quit-after 60 -- --seed 5 --no-grass --no-atmosphere [extra]
+render shell, seed 5, no panel                          217.3 s
+render shell, seed 5, --sheet --scenario encounter      190.1 s
+render shell, seed 5, --scenario encounter              173.2 s
+
+# done 2026-09-18T14:54:26-04:00
