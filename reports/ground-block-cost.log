@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+cold seed build (plans only): 0.0 s
+96 units out: 6 positions in 83.5 s (13.92 s each) -- 113 region builds 10.0 s, 113 water builds 73.2 s, 97 evictions
+950 units out: 6 positions in 157.4 s (26.24 s each) -- 164 region builds 1.4 s, 164 water builds 155.5 s, 164 evictions
+2000 units out: 6 positions in 213.0 s (35.51 s each) -- 193 region builds 1.8 s, 193 water builds 210.5 s, 193 evictions

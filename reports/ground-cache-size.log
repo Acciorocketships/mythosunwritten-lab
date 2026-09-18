@@ -1,0 +1,10 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+cache 16 blocks: 20 positions in 677.6 s (33.88 s each) -- 614 region builds, 614 water builds 653.6 s, 598 evictions, 16 entries held
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+cache 64 blocks: 20 positions in 637.2 s (31.86 s each) -- 450 region builds, 450 water builds 614.8 s, 386 evictions, 64 entries held
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+cache 192 blocks: 20 positions in 592.1 s (29.61 s each) -- 405 region builds, 405 water builds 570.4 s, 213 evictions, 192 entries held
+DONE

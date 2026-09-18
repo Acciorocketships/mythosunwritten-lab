@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+sweep: 900 positions over a 4000-unit square, touching 221 distinct 192-unit blocks
+cache: 16 blocks (AdoptedGround.FIELD_BLOCKS)
+cold build: 73.6 s
+  scattered (the check's own order): 10/60 positions, 248.7 s elapsed, 24.87 s each, worst 115.07 s, 10 blocks seen
+  scattered (the check's own order): 20/60 positions, 619.8 s elapsed, 30.99 s each, worst 115.07 s, 20 blocks seen
+  scattered (the check's own order): 30/60 positions, 823.8 s elapsed, 27.46 s each, worst 115.07 s, 30 blocks seen
+  scattered (the check's own order): 40/60 positions, 949.1 s elapsed, 23.73 s each, worst 115.07 s, 40 blocks seen
+  scattered (the check's own order): 50/60 positions, 1064.9 s elapsed, 21.30 s each, worst 115.07 s, 50 blocks seen
+  scattered (the check's own order): 60/60 positions, 1169.3 s elapsed, 19.49 s each, worst 115.07 s, 60 blocks seen
+scattered (the check's own order): 60 positions in 1169.3 s, 19.489 s each, worst 115.07 s, 60 distinct blocks
+  block order (same positions): 10/60 positions, 29.2 s elapsed, 2.92 s each, worst 5.80 s, 10 blocks seen
+  block order (same positions): 20/60 positions, 55.8 s elapsed, 2.79 s each, worst 5.80 s, 20 blocks seen
+  block order (same positions): 30/60 positions, 74.5 s elapsed, 2.48 s each, worst 5.80 s, 30 blocks seen
+  block order (same positions): 40/60 positions, 90.8 s elapsed, 2.27 s each, worst 5.80 s, 40 blocks seen
+  block order (same positions): 50/60 positions, 108.1 s elapsed, 2.16 s each, worst 5.80 s, 50 blocks seen
+  block order (same positions): 60/60 positions, 144.3 s elapsed, 2.40 s each, worst 5.80 s, 60 blocks seen
+block order (same positions): 60 positions in 144.3 s, 2.404 s each, worst 5.80 s, 60 distinct blocks
