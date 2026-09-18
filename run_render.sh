@@ -84,9 +84,10 @@
 #                    camera for its settled pose outright rather than easing
 #                    into one over frames it will never get.
 #   --focus N        where the miniature depth of field is focused. The band is
-#                    AtmosphereDirector's, built in its own _ready; this moves
-#                    that band rather than building a second one, keeping the
-#                    near/far ratio it was composed with.
+#                    AtmosphereDirector's, built in its own _ready; this scales
+#                    both of its distances by how much further away the named
+#                    subject is than the one the camera is framing, so the band
+#                    keeps the shape it was composed at.
 #   --no-grass       is now the adopted streamer's own GRASS_ENABLED, set
 #                    before its _ready runs: nothing baked, nothing instanced.
 #   --no-atmosphere  switches off THIS GAME'S half of the atmosphere -- the warm

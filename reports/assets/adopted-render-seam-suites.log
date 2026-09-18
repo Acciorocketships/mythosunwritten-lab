@@ -104,3 +104,13 @@ RUN   test_terrain
 PASS  terrain           0.9 s, 53 checks
 
 RUN   test_water
+  ..  water            274 s, 19 checks: the water changed its answer at (101.750000, -88.500000) after other ...
+  ..  water            387 s, 30 checks: two seeds produced nearly the same water: 387 of 400 samples differed
+  ..  water            584 s, 31 checks: asking about forty patches changed the water at (0.000000, 0.000000)
+  ..  water            695 s, 49 checks: a world thirty ticks in disagreed with a bare query at (0.000000, 0.0...
+  ..  water            748 s, 60 checks: depth at (0.000000, 0.000000) is not the surface above the bed
+  ..  water            792 s, 63 checks: depth at (-1024.000000, 512.000000) is not the surface above the bed
+  ..  water            826 s, 69 checks: dry ground at (-140.000000, -140.000000) has its water surface above it
+  ..  water            859 s, 869 checks: dry ground at (-140.000000, 0.000000) has its water surface above it
+  ..  water            957 s, 1672 checks: passability at (-120.000000, -120.000000) does not follow the water
+  ..  water           1015 s, 2752 checks: passability at (-120.000000, -48.000000) does not follow the water

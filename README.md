@@ -407,14 +407,18 @@ the place: a character can walk into a tree, shelter behind a boulder, cross a
 bridge. Grass is the first thing that fails that test — nothing collides with a
 blade of grass, nothing picks one up, no rule will ever read one, and the world
 is the same world whether or not a blade is drawn. So the grass is a property of
-the picture, it lives in `render/grass_layer.gd`, and that is what makes "a
-headless run creates no grass" true by construction rather than by a flag: a
-headless process never loads a single file under `render/`, so it does not have a
-grass layer switched off, it has no grass layer. A test runs the headless entry
-point as a subprocess and reads that off the engine's own resource cache, and a
-second one runs the same seed three ways — the shell with grass, the shell with
-`--no-grass`, and a simulation with no renderer at all — and requires one
-fingerprint from all three.
+the picture rather than of the place, and a headless run has no grass layer at
+all rather than one switched off.
+
+**Since the base adoption the grass on the screen is the adopted base's**
+(`scripts/terrain/grass/`, streamed inside its `FieldTerrainStreamer`), and this
+project's own `render/grass_layer.gd` is out of the tree — it was one of the four
+duplicate draw paths the render seam retired. What survives unchanged is the
+claim: `--no-grass` is now the adopted streamer's own `GRASS_ENABLED`, set before
+its `_ready` runs, and a headless run loads none of the adopted code that draws
+either. See [reports/adopted-render-seam.md](reports/adopted-render-seam.md).
+The pictures and numbers below were taken before that move and describe this
+project's retired layer.
 
 ![Grass over a meadow, from the camera the game is played from](reports/assets/grass-meadow.png)
 
@@ -2606,59 +2610,50 @@ xvfb-run -a ./run_render.sh --seed 1234 --scenario encounter --board \
 	--screenshot "$PWD/reports/assets/snap-during.png" --screenshot-tick 19
 ```
 
-`--no-distant-ground` draws only the ground the simulation streams — the
-forty-unit disc of chunks and nothing beyond it. `--lod-levels` washes each
-coarse ring in its own colour so a capture can show where the boundaries between
-them are, and `--lod-centre X Z` puts those rings somewhere other than under the
-observer, which is how the same ground gets photographed at two different levels
-from one place. All three change the picture and nothing about the world.
+**The capture dials, and the ones the render seam retired.** `run_render.sh`'s
+own header is the full list; the short version is that `--camera`, `--aim`,
+`--fov`, `--focus` and `--paused` all still work and mean what they meant, on
+the adopted world. `--camera` is handed to the adopted camera as its height and
+its distance; `--aim` needed one addition in the base's own idiom (`aim_lift` on
+`scripts/camera/camera.gd`, defaulting to the 0 they had); `--focus` scales the
+adopted director's depth-of-field band rather than building a second one; and
+`--paused` also asks that camera for its settled pose outright, because a held
+frame has no later frames to ease into place over.
 
-`--no-grass` draws the same world with no grass layer at all — nothing baked,
-nothing instanced, no shader — `--no-atmosphere` draws it with no lighting or
-atmosphere stack at all — no environment, no key light, no fog, no bloom, no
-depth of field, no warm point lights and no motes — and `--no-reflection` draws it
-with the water flat, no second viewport and no mirror camera. All three exist so
-that the grass, atmosphere and reflection suites can run the shell each way and
-show that the world's fingerprint does not depend on any of them, and
-`--no-distant-ground` is there for the same reason.
+`--no-grass` is now the adopted streamer's own `GRASS_ENABLED`, and
+`--no-atmosphere` switches off *this project's* half of the atmosphere — the warm
+point lights, the orbs, the motes and the ground mist — while the adopted world
+goes on lighting itself. Both exist so the suites can run the shell each way and
+show that the world's fingerprint does not depend on either.
 
-`--focus` and `--fov` are the two other capture dials, beside `--camera` and
-`--aim`. `--focus` says how far away the miniature depth of field is sharp,
-instead of "however far the camera is from the observer", which is what a shot
-whose subject is a reflection in the water in front of the observer wants.
-`--fov` narrows or widens the lens, which is how a shot gets a distant subject
-*and* its reflection at a readable size in one frame. Like the camera, both move
-the picture and nothing about the world.
+`--no-distant-ground`, `--lod-levels`, `--lod-centre`, `--no-reflection`,
+`--mirror-aa` and `--grass-give-way` are **gone**, with the layers they were
+dials on: there is no second coarser ground to switch off, no coarse rings to
+tint, no mirror under the retired water sheet, and the adopted grass's
+give-way equivalent is its own `TrampleField`.
 
 **What things cost, and moving pictures of them:**
 
 ```
 ./tools/measure_board.sh
-xvfb-run -a ./tools/measure_lod.sh --seed 1234
-xvfb-run -a ./tools/measure_grass.sh --seed 1234 --start 228 -60
 xvfb-run -a ./tools/measure_atmosphere.sh --seed 1234 --start -88.8 4.7 --camera 0 26 44 --aim 4
-xvfb-run -a ./tools/measure_reflection.sh --seed 1234 --start -10 -466 --camera 19 0.33 37.6
 ./tools/measure_shore.sh --seed 1234 --span 1100
-xvfb-run -a ./tools/grass_film.sh --out /tmp/walk --frames 36 --stride 2 --warm 60 \
-	--seed 1234 --start 228 -60 --camera 0 9 6 --aim 0
+./tools/layer_scan.sh
 ```
 
-`measure_lod.sh` prices the coarse distant ground: what a tile costs to build at
-each ring, how many tiles and triangles the whole view comes to, what the same
-reach would have cost meshed at the near cell, how much walking rebuilds, and
-then the render shell's frame time with the layer and without it. The next runs
-the render shell, holds the world still, and samples frames with
-the grass and again without it, so the two differ by exactly the grass; it then
-rebuilds every chunk of grass from scratch and times that against meshing the
-ground under it. The second does the same for the atmosphere, taking the stack
-apart one piece at a time and putting it back, so each row prices one piece of
-it. The third prices the water's mirror the same way, at five resolutions and
-against a frame with no mirror at all. The fourth needs no display: it enumerates
+The measurements that priced the coarse distant ground, this project's grass and
+the water's mirror (`measure_lod.sh`, `measure_grass.sh`, `measure_reflection.sh`,
+`grass_film.sh`, `survey_island_grass.sh` and their neighbours) went out of the
+tree with the layers they priced; see
+[reports/adopted-render-seam.md](reports/adopted-render-seam.md). `layer_scan.sh`
+is the layer check as a command: nothing under `sim/` may name a render type or a
+resource path. `measure_atmosphere.sh` takes the atmosphere stack
+apart one piece at a time and puts it back, so each row prices one piece of
+it. `measure_shore.sh` needs no display: it enumerates
 every village in a square of the world and walks outwards from each until it meets
 water, which is how "a stated share of villages stand on a shore" is a measurement
-rather than a claim. The last saves a numbered sequence of frames, because two of
-the things the grass does are motion and a screenshot cannot show motion. All of
-them pass everything after their own arguments straight through to the shell.
+rather than a claim. `measure_board.sh` prices the board overlay. All of them
+pass everything after their own arguments straight through to the shell.
 
 ## Seeds and determinism
 
